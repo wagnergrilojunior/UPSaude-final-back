@@ -20,7 +20,6 @@ public interface PapeisMapper extends EntityMapper<Papeis, PapeisDTO> {
     @Mapping(target = "id", source = "id", qualifiedByName = "longToUUID")
     PapeisDTO toDTO(Papeis entity);
 
-    @Mapping(target = "id", source = "id", qualifiedByName = "uuidToLong")
     Papeis fromRequest(PapeisRequest request);
 
     @Mapping(target = "id", source = "id", qualifiedByName = "longToUUID")

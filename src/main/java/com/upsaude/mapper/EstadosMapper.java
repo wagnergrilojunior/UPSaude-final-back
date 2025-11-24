@@ -20,7 +20,6 @@ public interface EstadosMapper extends EntityMapper<Estados, EstadosDTO> {
     @Mapping(target = "id", source = "id", qualifiedByName = "longToUUID")
     EstadosDTO toDTO(Estados entity);
 
-    @Mapping(target = "id", source = "id", qualifiedByName = "uuidToLong")
     Estados fromRequest(EstadosRequest request);
 
     @Mapping(target = "id", source = "id", qualifiedByName = "longToUUID")
