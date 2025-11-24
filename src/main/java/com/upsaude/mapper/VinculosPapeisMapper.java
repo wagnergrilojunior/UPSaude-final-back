@@ -1,5 +1,7 @@
 package com.upsaude.mapper;
 
+import com.upsaude.api.request.VinculosPapeisRequest;
+import com.upsaude.api.response.VinculosPapeisResponse;
 import com.upsaude.dto.VinculosPapeisDTO;
 import com.upsaude.entity.Departamentos;
 import com.upsaude.entity.Estabelecimentos;
@@ -26,6 +28,18 @@ public interface VinculosPapeisMapper extends EntityMapper<VinculosPapeis, Vincu
     @Mapping(target = "papelId", source = "papel.id")
     VinculosPapeisDTO toDTO(VinculosPapeis entity);
 
+    @Mapping(target = "tenant", ignore = true)
+    @Mapping(target = "active", ignore = true)
+    @Mapping(target = "estabelecimento", source = "estabelecimentoId", qualifiedByName = "estabelecimentoFromId")
+    @Mapping(target = "departamento", source = "departamentoId", qualifiedByName = "departamentoFromId")
+    @Mapping(target = "papel", source = "papelId", qualifiedByName = "papelFromId")
+    VinculosPapeis fromRequest(VinculosPapeisRequest request);
+
+    @Mapping(target = "estabelecimentoId", source = "estabelecimento.id")
+    @Mapping(target = "departamentoId", source = "departamento.id")
+    @Mapping(target = "papelId", source = "papel.id")
+    VinculosPapeisResponse toResponse(VinculosPapeis entity);
+
     @Named("estabelecimentoFromId")
     default Estabelecimentos estabelecimentoFromId(UUID id) {
         if (id == null) return null;
@@ -43,7 +57,7 @@ public interface VinculosPapeisMapper extends EntityMapper<VinculosPapeis, Vincu
     }
 
     @Named("papelFromId")
-    default Papeis papelFromId(Long id) {
+    default Papeis papelFromId(UUID id) {
         if (id == null) return null;
         Papeis p = new Papeis();
         p.setId(id);

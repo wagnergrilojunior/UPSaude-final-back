@@ -1,5 +1,7 @@
 package com.upsaude.mapper;
 
+import com.upsaude.api.request.VacinasRequest;
+import com.upsaude.api.response.VacinasResponse;
 import com.upsaude.dto.VacinasDTO;
 import com.upsaude.entity.Vacinas;
 import com.upsaude.mapper.config.MappingConfig;
@@ -13,5 +15,11 @@ public interface VacinasMapper extends EntityMapper<Vacinas, VacinasDTO> {
     Vacinas toEntity(VacinasDTO dto);
 
     VacinasDTO toDTO(Vacinas entity);
+
+    @Mapping(target = "tenant", ignore = true)
+    @Mapping(target = "active", ignore = true)
+    Vacinas fromRequest(VacinasRequest request);
+
+    VacinasResponse toResponse(Vacinas entity);
 }
 

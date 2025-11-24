@@ -2,21 +2,21 @@ package com.upsaude.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
+/**
+ * Entidade que representa um Estado.
+ * Não possui relação com Tenant por ser uma entidade de referência.
+ *
+ * @author UPSaúde
+ */
 @Entity
 @Table(name = "estados", schema = "public")
 @Data
-public class Estados  {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id")
-    private Long id;
+@EqualsAndHashCode(callSuper = true)
+public class Estados extends BaseEntityWithoutTenant {
 
     @Column(name = "sigla", length = 2, nullable = false)
     private String sigla;

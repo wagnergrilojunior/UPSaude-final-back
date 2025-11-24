@@ -1,5 +1,7 @@
 package com.upsaude.mapper;
 
+import com.upsaude.api.request.VisitasDomiciliaresRequest;
+import com.upsaude.api.response.VisitasDomiciliaresResponse;
 import com.upsaude.dto.VisitasDomiciliaresDTO;
 import com.upsaude.entity.Paciente;
 import com.upsaude.entity.VisitasDomiciliares;
@@ -19,6 +21,14 @@ public interface VisitasDomiciliaresMapper extends EntityMapper<VisitasDomicilia
 
     @Mapping(target = "pacienteId", source = "paciente.id")
     VisitasDomiciliaresDTO toDTO(VisitasDomiciliares entity);
+
+    @Mapping(target = "tenant", ignore = true)
+    @Mapping(target = "active", ignore = true)
+    @Mapping(target = "paciente", source = "pacienteId", qualifiedByName = "pacienteFromId")
+    VisitasDomiciliares fromRequest(VisitasDomiciliaresRequest request);
+
+    @Mapping(target = "pacienteId", source = "paciente.id")
+    VisitasDomiciliaresResponse toResponse(VisitasDomiciliares entity);
 
     @Named("pacienteFromId")
     default Paciente pacienteFromId(UUID id) {

@@ -1,5 +1,7 @@
 package com.upsaude.mapper;
 
+import com.upsaude.api.request.UsuariosSistemaRequest;
+import com.upsaude.api.response.UsuariosSistemaResponse;
 import com.upsaude.dto.UsuariosSistemaDTO;
 import com.upsaude.entity.Estabelecimentos;
 import com.upsaude.entity.Medicos;
@@ -28,6 +30,20 @@ public interface UsuariosSistemaMapper extends EntityMapper<UsuariosSistema, Usu
     @Mapping(target = "medicoId", source = "medico.id")
     @Mapping(target = "pacienteId", source = "paciente.id")
     UsuariosSistemaDTO toDTO(UsuariosSistema entity);
+
+    @Mapping(target = "tenant", ignore = true)
+    @Mapping(target = "active", ignore = true)
+    @Mapping(target = "estabelecimento", source = "estabelecimentoId", qualifiedByName = "estabelecimentoFromId")
+    @Mapping(target = "profissionalSaude", source = "profissionalSaudeId", qualifiedByName = "profissionalSaudeFromId")
+    @Mapping(target = "medico", source = "medicoId", qualifiedByName = "medicoFromId")
+    @Mapping(target = "paciente", source = "pacienteId", qualifiedByName = "pacienteFromId")
+    UsuariosSistema fromRequest(UsuariosSistemaRequest request);
+
+    @Mapping(target = "estabelecimentoId", source = "estabelecimento.id")
+    @Mapping(target = "profissionalSaudeId", source = "profissionalSaude.id")
+    @Mapping(target = "medicoId", source = "medico.id")
+    @Mapping(target = "pacienteId", source = "paciente.id")
+    UsuariosSistemaResponse toResponse(UsuariosSistema entity);
 
     @Named("estabelecimentoFromId")
     default Estabelecimentos estabelecimentoFromId(UUID id) {

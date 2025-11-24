@@ -21,8 +21,8 @@ public interface EnderecoMapper extends EntityMapper<Endereco, EnderecoDTO> {
     @Mapping(target = "cidadeRef", source = "cidadeId", qualifiedByName = "cidadeFromId")
     Endereco toEntity(EnderecoDTO dto);
 
-    @Mapping(target = "estadoId", source = "estadoRef.id", qualifiedByName = "longToUUID")
-    @Mapping(target = "cidadeId", source = "cidadeRef.id", qualifiedByName = "longToUUID")
+    @Mapping(target = "estadoId", source = "estadoRef.id")
+    @Mapping(target = "cidadeId", source = "cidadeRef.id")
     EnderecoDTO toDTO(Endereco entity);
 
     @Mapping(target = "tenant", ignore = true)
@@ -31,15 +31,15 @@ public interface EnderecoMapper extends EntityMapper<Endereco, EnderecoDTO> {
     @Mapping(target = "cidadeRef", source = "cidadeId", qualifiedByName = "cidadeFromId")
     Endereco fromRequest(EnderecoRequest request);
 
-    @Mapping(target = "estadoId", source = "estadoRef.id", qualifiedByName = "longToUUID")
-    @Mapping(target = "cidadeId", source = "cidadeRef.id", qualifiedByName = "longToUUID")
+    @Mapping(target = "estadoId", source = "estadoRef.id")
+    @Mapping(target = "cidadeId", source = "cidadeRef.id")
     EnderecoResponse toResponse(Endereco entity);
 
     @Named("estadoFromId")
     default Estados estadoFromId(UUID id) {
         if (id == null) return null;
         Estados e = new Estados();
-        e.setId(uuidToLong(id));
+        e.setId(id);
         return e;
     }
 
@@ -47,19 +47,8 @@ public interface EnderecoMapper extends EntityMapper<Endereco, EnderecoDTO> {
     default Cidades cidadeFromId(UUID id) {
         if (id == null) return null;
         Cidades c = new Cidades();
-        c.setId(uuidToLong(id));
+        c.setId(id);
         return c;
-    }
-
-    @Named("longToUUID")
-    default UUID longToUUID(Long id) {
-        if (id == null) return null;
-        return new UUID(0, id);
-    }
-
-    default Long uuidToLong(UUID id) {
-        if (id == null) return null;
-        return id.getLeastSignificantBits();
     }
 }
 
