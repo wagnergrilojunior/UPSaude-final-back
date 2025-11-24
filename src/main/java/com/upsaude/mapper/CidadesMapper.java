@@ -20,7 +20,6 @@ public interface CidadesMapper extends EntityMapper<Cidades, CidadesDTO> {
     @Mapping(target = "id", source = "id", qualifiedByName = "longToUUID")
     CidadesDTO toDTO(Cidades entity);
 
-    @Mapping(target = "id", source = "id", qualifiedByName = "uuidToLong")
     Cidades fromRequest(CidadesRequest request);
 
     @Mapping(target = "id", source = "id", qualifiedByName = "longToUUID")
