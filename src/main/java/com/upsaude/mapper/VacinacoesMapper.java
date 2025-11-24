@@ -1,5 +1,7 @@
 package com.upsaude.mapper;
 
+import com.upsaude.api.request.VacinacoesRequest;
+import com.upsaude.api.response.VacinacoesResponse;
 import com.upsaude.dto.VacinacoesDTO;
 import com.upsaude.entity.Estabelecimentos;
 import com.upsaude.entity.FabricantesVacina;
@@ -28,6 +30,20 @@ public interface VacinacoesMapper extends EntityMapper<Vacinacoes, VacinacoesDTO
     @Mapping(target = "vacinaId", source = "vacina.id")
     @Mapping(target = "fabricanteId", source = "fabricante.id")
     VacinacoesDTO toDTO(Vacinacoes entity);
+
+    @Mapping(target = "tenant", ignore = true)
+    @Mapping(target = "active", ignore = true)
+    @Mapping(target = "estabelecimento", source = "estabelecimentoId", qualifiedByName = "estabelecimentoFromId")
+    @Mapping(target = "paciente", source = "pacienteId", qualifiedByName = "pacienteFromId")
+    @Mapping(target = "vacina", source = "vacinaId", qualifiedByName = "vacinaFromId")
+    @Mapping(target = "fabricante", source = "fabricanteId", qualifiedByName = "fabricanteFromId")
+    Vacinacoes fromRequest(VacinacoesRequest request);
+
+    @Mapping(target = "estabelecimentoId", source = "estabelecimento.id")
+    @Mapping(target = "pacienteId", source = "paciente.id")
+    @Mapping(target = "vacinaId", source = "vacina.id")
+    @Mapping(target = "fabricanteId", source = "fabricante.id")
+    VacinacoesResponse toResponse(Vacinacoes entity);
 
     @Named("estabelecimentoFromId")
     default Estabelecimentos estabelecimentoFromId(UUID id) {

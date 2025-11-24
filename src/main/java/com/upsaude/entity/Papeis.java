@@ -6,15 +6,19 @@ import java.util.List;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
 import jakarta.persistence.Index;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
+/**
+ * Entidade que representa um Papel (Role) do sistema.
+ * Não possui relação com Tenant por ser uma entidade de referência global.
+ *
+ * @author UPSaúde
+ */
 @Entity
 @Table(name = "papeis", schema = "public",
        uniqueConstraints = {
@@ -25,12 +29,8 @@ import lombok.Data;
            @Index(name = "idx_papeis_nome", columnList = "nome")
        })
 @Data
-public class Papeis  {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id")
-    private Long id;
+@EqualsAndHashCode(callSuper = true)
+public class Papeis extends BaseEntityWithoutTenant {
 
     @Column(name = "nome", nullable = false, length = 100)
     private String nome;

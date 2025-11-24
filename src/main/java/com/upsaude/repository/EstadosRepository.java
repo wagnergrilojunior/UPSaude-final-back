@@ -1,7 +1,9 @@
 package com.upsaude.repository;
 
+import java.util.UUID;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import com.upsaude.entity.Estados;
 
-public interface EstadosRepository extends JpaRepository<Estados, Long> {}
+public interface EstadosRepository extends JpaRepository<Estados, UUID> {}

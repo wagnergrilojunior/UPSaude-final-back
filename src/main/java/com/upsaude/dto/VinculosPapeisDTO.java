@@ -11,7 +11,7 @@ public class VinculosPapeisDTO {
     private UUID id;
     private UUID estabelecimentoId;
     private UUID departamentoId;
-    private Long papelId;
+    private UUID papelId;
     private Boolean active;
 }
 

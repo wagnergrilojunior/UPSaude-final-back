@@ -3,28 +3,25 @@ package com.upsaude.entity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
-import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.PrimaryKeyJoinColumn;
 import jakarta.persistence.Table;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
+/**
+ * Entidade que representa o perfil de um usuário.
+ * Possui relação com Tenant.
+ *
+ * @author UPSaúde
+ */
 @Entity
 @Table(name = "perfis_usuarios", schema = "public")
 @Data
-public class PerfisUsuarios {
+@EqualsAndHashCode(callSuper = true)
+public class PerfisUsuarios extends BaseEntity {
 
-    @Id
-    @Column(name = "usuario_id", nullable = false)
+    @Column(name = "usuario_id", nullable = false, unique = true)
     private java.util.UUID usuarioId;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "tenant_id")
-    private Tenant tenant;
-
-    @Column(name = "criado_em", nullable = false)
-    private java.time.OffsetDateTime criadoEm;
-
-    @Column(name = "atualizado_em", nullable = false)
-    private java.time.OffsetDateTime atualizadoEm;
 }

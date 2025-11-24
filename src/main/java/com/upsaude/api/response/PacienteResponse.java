@@ -1,0 +1,48 @@
+package com.upsaude.api.response;
+
+import com.upsaude.enums.EstadoCivilEnum;
+import com.upsaude.enums.SexoEnum;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+import java.time.LocalDate;
+import java.time.OffsetDateTime;
+import java.util.List;
+import java.util.UUID;
+
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+public class PacienteResponse {
+    private UUID id;
+    private OffsetDateTime createdAt;
+    private OffsetDateTime updatedAt;
+    private Boolean active;
+    private String nomeCompleto;
+    private String cpf;
+    private String rg;
+    private String cns;
+    private LocalDate dataNascimento;
+    private SexoEnum sexo;
+    private EstadoCivilEnum estadoCivil;
+    private String telefone;
+    private String email;
+    private String nomeMae;
+    private String nomePai;
+    private String responsavelNome;
+    private String responsavelCpf;
+    private String responsavelTelefone;
+    private String enderecoJson;
+    private String contatoJson;
+    private String informacoesAdicionaisJson;
+    private UUID convenioId;
+    private String numeroCarteirinha;
+    private LocalDate dataValidadeCarteirinha;
+    private String observacoes;
+    private UUID estabelecimentoId;
+    private List<UUID> enderecosIds;
+}
+
