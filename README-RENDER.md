@@ -21,9 +21,20 @@ Arquivo Docker para construir e executar a aplicação:
 ### application-prod.properties
 Configurações específicas para o ambiente de produção, incluindo:
 - Porta do servidor (usa variável de ambiente PORT do Render)
+- URL do servidor para Swagger: `https://api.upsaude.wgbsolucoes.com.br`
 - Configurações do banco de dados
 - Configurações de logging
 - Configurações de segurança
+
+### application-dev.properties
+Configurações específicas para o ambiente de desenvolvimento, incluindo:
+- URL do servidor para Swagger: `https://api-dev.upsaude.wgbsolucoes.com.br`
+- Configurações do banco de dados de desenvolvimento
+
+### OpenApiConfig.java
+Classe de configuração do OpenAPI/Swagger que define automaticamente o servidor baseado no perfil ativo:
+- Ambiente de desenvolvimento: `https://api-dev.upsaude.wgbsolucoes.com.br`
+- Ambiente de produção: `https://api.upsaude.wgbsolucoes.com.br`
 
 ## Passos para Deploy
 
@@ -70,9 +81,15 @@ No painel do serviço web, configure as seguintes variáveis de ambiente:
 
 Após o deploy, você pode verificar:
 
-- **Health Check**: `https://seu-servico.onrender.com/api/actuator/health`
-- **Swagger UI**: `https://seu-servico.onrender.com/api/swagger-ui.html`
-- **API Docs**: `https://seu-servico.onrender.com/api/api-docs`
+**Ambiente de Produção:**
+- **Health Check**: `https://api.upsaude.wgbsolucoes.com.br/api/actuator/health`
+- **Swagger UI**: `https://api.upsaude.wgbsolucoes.com.br/api/swagger-ui.html`
+- **API Docs**: `https://api.upsaude.wgbsolucoes.com.br/api/api-docs`
+
+**Ambiente de Desenvolvimento:**
+- **Health Check**: `https://api-dev.upsaude.wgbsolucoes.com.br/api/actuator/health`
+- **Swagger UI**: `https://api-dev.upsaude.wgbsolucoes.com.br/api/swagger-ui.html`
+- **API Docs**: `https://api-dev.upsaude.wgbsolucoes.com.br/api/api-docs`
 
 ## Notas Importantes
 
@@ -80,6 +97,10 @@ Após o deploy, você pode verificar:
 - O contexto path da aplicação é `/api`, então todas as rotas devem ser acessadas com esse prefixo
 - O health check está configurado para `/api/actuator/health`
 - Certifique-se de que o banco de dados está acessível do serviço web (mesma região recomendada)
+- As URLs do Swagger são configuradas automaticamente baseadas no perfil ativo:
+  - **Dev**: `https://api-dev.upsaude.wgbsolucoes.com.br`
+  - **Prod**: `https://api.upsaude.wgbsolucoes.com.br`
+- Configure o domínio personalizado no Render para usar essas URLs
 
 ## Troubleshooting
 
