@@ -1,0 +1,26 @@
+package com.upsaude.service;
+
+import com.upsaude.api.request.LogsAuditoriaRequest;
+import com.upsaude.api.response.LogsAuditoriaResponse;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+
+import java.util.UUID;
+
+/**
+ * Interface de serviço para operações CRUD relacionadas a LogsAuditoria.
+ *
+ * @author UPSaúde
+ */
+public interface LogsAuditoriaService {
+
+    LogsAuditoriaResponse criar(LogsAuditoriaRequest request);
+
+    LogsAuditoriaResponse obterPorId(UUID id);
+
+    Page<LogsAuditoriaResponse> listar(Pageable pageable);
+
+    LogsAuditoriaResponse atualizar(UUID id, LogsAuditoriaRequest request);
+
+    void excluir(UUID id);
+}
