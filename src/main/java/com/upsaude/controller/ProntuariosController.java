@@ -26,7 +26,7 @@ import java.util.UUID;
  * @author UPSaúde
  */
 @RestController
-@RequestMapping("/api/v1/prontuarios")
+@RequestMapping("/v1/prontuarios")
 @Tag(name = "Prontuários", description = "API para gerenciamento de Prontuários")
 @RequiredArgsConstructor
 public class ProntuariosController {
