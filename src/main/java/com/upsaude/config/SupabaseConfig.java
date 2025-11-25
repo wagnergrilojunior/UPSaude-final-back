@@ -26,9 +26,13 @@ public class SupabaseConfig {
         return restTemplate;
     }
 
-    @Bean
+    @Bean(name = "supabaseObjectMapper")
     public ObjectMapper objectMapper() {
-        return new ObjectMapper();
+        ObjectMapper mapper = new ObjectMapper();
+        // Java 17 - JavaTimeModule já está disponível via jackson-datatype-jsr310 (incluído no spring-boot-starter-web)
+        mapper.findAndRegisterModules();
+        mapper.disable(com.fasterxml.jackson.databind.SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+        return mapper;
     }
 }
 
