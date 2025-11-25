@@ -26,7 +26,7 @@ import java.util.UUID;
  * @author UPSaúde
  */
 @RestController
-@RequestMapping("/api/v1/conselhos-profissionais")
+@RequestMapping("/v1/conselhos-profissionais")
 @Tag(name = "Conselhos Profissionais", description = "API para gerenciamento de Conselhos Profissionais")
 @RequiredArgsConstructor
 public class ConselhosProfissionaisController {

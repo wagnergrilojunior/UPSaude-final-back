@@ -26,7 +26,7 @@ import java.util.UUID;
  * @author UPSaúde
  */
 @RestController
-@RequestMapping("/api/v1/enderecos")
+@RequestMapping("/v1/enderecos")
 @Tag(name = "Endereços", description = "API para gerenciamento de Endereços")
 @RequiredArgsConstructor
 public class EnderecoController {

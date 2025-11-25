@@ -26,7 +26,7 @@ import java.util.UUID;
  * @author UPSaúde
  */
 @RestController
-@RequestMapping("/api/v1/vacinas")
+@RequestMapping("/v1/vacinas")
 @Tag(name = "Vacinas", description = "API para gerenciamento de Vacinas")
 @RequiredArgsConstructor
 public class VacinasController {

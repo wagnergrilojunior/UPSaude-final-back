@@ -26,7 +26,7 @@ import java.util.UUID;
  * @author UPSaúde
  */
 @RestController
-@RequestMapping("/api/v1/vinculos-papeis")
+@RequestMapping("/v1/vinculos-papeis")
 @Tag(name = "Vínculos de Papéis", description = "API para gerenciamento de Vínculos de Papéis")
 @RequiredArgsConstructor
 public class VinculosPapeisController {

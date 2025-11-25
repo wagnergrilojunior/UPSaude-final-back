@@ -26,7 +26,7 @@ import java.util.UUID;
  * @author UPSaúde
  */
 @RestController
-@RequestMapping("/api/v1/procedimentos-odontologicos")
+@RequestMapping("/v1/procedimentos-odontologicos")
 @Tag(name = "Procedimentos Odontológicos", description = "API para gerenciamento de Procedimentos Odontológicos")
 @RequiredArgsConstructor
 public class ProcedimentosOdontologicosController {
