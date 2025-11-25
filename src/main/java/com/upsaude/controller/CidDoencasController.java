@@ -26,7 +26,7 @@ import java.util.UUID;
  * @author UPSaúde
  */
 @RestController
-@RequestMapping("/api/v1/cid-doencas")
+@RequestMapping("/v1/cid-doencas")
 @Tag(name = "CID Doenças", description = "API para gerenciamento de CID Doenças")
 @RequiredArgsConstructor
 public class CidDoencasController {
