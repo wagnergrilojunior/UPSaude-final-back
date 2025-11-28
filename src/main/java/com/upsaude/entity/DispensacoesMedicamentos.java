@@ -23,7 +23,7 @@ public class DispensacoesMedicamentos extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "medicamento_id", nullable = false)
-    private Medicamentos medicamento;
+    private Medicacao medicacao;
 
     @Column(name = "quantidade")
     private Integer quantidade;
