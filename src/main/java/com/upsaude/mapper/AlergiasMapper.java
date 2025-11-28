@@ -22,4 +22,3 @@ public interface AlergiasMapper extends EntityMapper<Alergias, AlergiasDTO> {
 
     AlergiasResponse toResponse(Alergias entity);
 }
-

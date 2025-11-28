@@ -33,8 +33,8 @@ public interface MedicacaoPacienteMapper extends EntityMapper<MedicacaoPaciente,
 
     @Mapping(target = "pacienteId", source = "paciente.id")
     @Mapping(target = "medicacaoId", source = "medicacao.id")
-    @Mapping(target = "medicacaoNomeComercial", source = "medicacao.nomeComercial")
-    @Mapping(target = "medicacaoPrincipioAtivo", source = "medicacao.principioAtivo")
+    @Mapping(target = "medicacaoNomeComercial", source = "medicacao.identificacao.nomeComercial")
+    @Mapping(target = "medicacaoPrincipioAtivo", source = "medicacao.identificacao.principioAtivo")
     @Mapping(target = "cidRelacionadoId", source = "cidRelacionado.id")
     @Mapping(target = "cidRelacionadoCodigo", source = "cidRelacionado.codigo")
     MedicacaoPacienteResponse toResponse(MedicacaoPaciente entity);

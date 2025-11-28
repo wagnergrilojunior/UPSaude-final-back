@@ -108,10 +108,6 @@ public class Paciente extends BaseEntity {
     @Column(name = "observacoes", columnDefinition = "TEXT")
     private String observacoes;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "estabelecimento_id")
-    private Estabelecimentos estabelecimento;
-
     @OneToMany(fetch = FetchType.LAZY)
     @JoinTable(
         name = "pacientes_enderecos",

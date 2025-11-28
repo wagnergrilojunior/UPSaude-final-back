@@ -39,7 +39,9 @@ public interface MedicosMapper extends EntityMapper<Medicos, MedicosDTO> {
 
     @Mapping(target = "enderecosIds", source = "enderecos", qualifiedByName = "idsFromEnderecos")
     @Mapping(target = "estabelecimentoId", source = "estabelecimento.id")
+    @Mapping(target = "estabelecimentoNome", source = "estabelecimento.nome")
     @Mapping(target = "especialidadeId", source = "especialidade.id")
+    @Mapping(target = "especialidadeNome", source = "especialidade.nome")
     MedicosResponse toResponse(Medicos entity);
 
     @Named("estabelecimentoFromId")
@@ -80,4 +82,3 @@ public interface MedicosMapper extends EntityMapper<Medicos, MedicosDTO> {
         return ids;
     }
 }
-

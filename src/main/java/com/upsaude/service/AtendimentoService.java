@@ -57,6 +57,15 @@ public interface AtendimentoService {
     Page<AtendimentoResponse> listarPorProfissional(UUID profissionalId, Pageable pageable);
 
     /**
+     * Lista todos os atendimentos de um estabelecimento, ordenados por data/hora decrescente.
+     *
+     * @param estabelecimentoId ID do estabelecimento
+     * @param pageable Parâmetros de paginação
+     * @return Página com os atendimentos do estabelecimento
+     */
+    Page<AtendimentoResponse> listarPorEstabelecimento(UUID estabelecimentoId, Pageable pageable);
+
+    /**
      * Atualiza um atendimento existente.
      *
      * @param id ID do atendimento a ser atualizado

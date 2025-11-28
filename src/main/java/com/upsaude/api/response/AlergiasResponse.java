@@ -1,5 +1,8 @@
 package com.upsaude.api.response;
 
+import com.upsaude.entity.embeddable.ClassificacaoAlergia;
+import com.upsaude.entity.embeddable.PrevencaoTratamentoAlergia;
+import com.upsaude.entity.embeddable.ReacoesAlergia;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -17,5 +20,13 @@ public class AlergiasResponse {
     private OffsetDateTime createdAt;
     private OffsetDateTime updatedAt;
     private Boolean active;
+    private String nome;
+    private String nomeCientifico;
+    private String codigoInterno;
+    private ClassificacaoAlergia classificacao;
+    private ReacoesAlergia reacoes;
+    private PrevencaoTratamentoAlergia prevencaoTratamento;
+    private String descricao;
+    private String substanciasRelacionadas;
+    private String observacoes;
 }
-

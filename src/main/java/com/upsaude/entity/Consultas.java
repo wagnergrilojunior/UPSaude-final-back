@@ -1,52 +1,113 @@
 package com.upsaude.entity;
 
-import java.time.OffsetDateTime;
-
+import com.upsaude.entity.embeddable.AnamneseConsulta;
+import com.upsaude.entity.embeddable.AtestadoConsulta;
+import com.upsaude.entity.embeddable.DiagnosticoConsulta;
+import com.upsaude.entity.embeddable.EncaminhamentoConsulta;
+import com.upsaude.entity.embeddable.ExamesSolicitadosConsulta;
+import com.upsaude.entity.embeddable.InformacoesConsulta;
+import com.upsaude.entity.embeddable.PrescricaoConsulta;
 import jakarta.persistence.Column;
+import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
+import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import jakarta.validation.constraints.NotNull;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
+/**
+ * Entidade que representa uma consulta médica.
+ * Armazena informações completas sobre consultas para sistemas de gestão de saúde.
+ * Baseado em padrões de prontuário eletrônico e sistemas de saúde.
+ *
+ * @author UPSaúde
+ */
 @Entity
-@Table(name = "consultas", schema = "public")
+@Table(name = "consultas", schema = "public",
+       indexes = {
+           @Index(name = "idx_consulta_paciente", columnList = "paciente_id"),
+           @Index(name = "idx_consulta_medico", columnList = "medico_id"),
+           @Index(name = "idx_consulta_data", columnList = "data_consulta"),
+           @Index(name = "idx_consulta_status", columnList = "status_consulta"),
+           @Index(name = "idx_consulta_estabelecimento", columnList = "estabelecimento_id")
+       })
 @Data
+@EqualsAndHashCode(callSuper = true)
 public class Consultas extends BaseEntity {
 
-    
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "estabelecimento_id")
-    private Estabelecimentos estabelecimento;
+    // ========== RELACIONAMENTOS ==========
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "paciente_id", nullable = false)
+    @NotNull(message = "Paciente é obrigatório")
     private Paciente paciente;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "medico_id")
     private Medicos medico;
 
-    @Column(name = "data_consulta", nullable = false)
-    private OffsetDateTime dataConsulta;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "profissional_saude_id")
+    private ProfissionaisSaude profissionalSaude; // Profissional que realizou a consulta (pode ser diferente do médico)
 
-    @Column(name = "duracao_minutos")
-    private Integer duracaoMinutos;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "especialidade_id")
+    private EspecialidadesMedicas especialidade; // Especialidade da consulta
 
-    @Column(name = "tipo_consulta", length = 100)
-    private String tipoConsulta;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "convenio_id")
+    private Convenio convenio; // Convênio utilizado na consulta
 
-    @Column(name = "status", length = 50)
-    private String status;
+    // ========== INFORMAÇÕES BÁSICAS ==========
 
-    @Column(name = "motivo", columnDefinition = "TEXT")
-    private String motivo;
+    @Embedded
+    private InformacoesConsulta informacoes;
 
-    @Column(name = "diagnostico", columnDefinition = "TEXT")
-    private String diagnostico;
+    // ========== ANAMNESE ==========
+
+    @Embedded
+    private AnamneseConsulta anamnese;
+
+    // ========== DIAGNÓSTICO ==========
+
+    @Embedded
+    private DiagnosticoConsulta diagnostico;
+
+    // ========== PRESCRIÇÃO ==========
+
+    @Embedded
+    private PrescricaoConsulta prescricao;
+
+    // ========== EXAMES SOLICITADOS ==========
+
+    @Embedded
+    private ExamesSolicitadosConsulta examesSolicitados;
+
+    // ========== ENCAMINHAMENTO ==========
+
+    @Embedded
+    private EncaminhamentoConsulta encaminhamento;
+
+    // ========== ATESTADO ==========
+
+    @Embedded
+    private AtestadoConsulta atestado;
+
+    // ========== RELACIONAMENTO COM CID ==========
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "cid_principal_id")
+    private CidDoencas cidPrincipal; // CID principal da consulta
+
+    // ========== OBSERVAÇÕES ==========
 
     @Column(name = "observacoes", columnDefinition = "TEXT")
-    private String observacoes;
+    private String observacoes; // Observações gerais da consulta
+
+    @Column(name = "observacoes_internas", columnDefinition = "TEXT")
+    private String observacoesInternas; // Observações internas (não visíveis ao paciente)
 }

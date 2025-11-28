@@ -2,11 +2,15 @@ package com.upsaude.service.impl;
 
 import com.upsaude.api.request.ExamesRequest;
 import com.upsaude.api.response.ExamesResponse;
+import com.upsaude.entity.Estabelecimentos;
 import com.upsaude.entity.Exames;
+import com.upsaude.entity.Paciente;
 import com.upsaude.exception.BadRequestException;
 import com.upsaude.exception.NotFoundException;
 import com.upsaude.mapper.ExamesMapper;
+import com.upsaude.repository.EstabelecimentosRepository;
 import com.upsaude.repository.ExamesRepository;
+import com.upsaude.repository.PacienteRepository;
 import com.upsaude.service.ExamesService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -30,6 +34,8 @@ public class ExamesServiceImpl implements ExamesService {
 
     private final ExamesRepository examesRepository;
     private final ExamesMapper examesMapper;
+    private final EstabelecimentosRepository estabelecimentosRepository;
+    private final PacienteRepository pacienteRepository;
 
     @Override
     @Transactional
@@ -39,6 +45,17 @@ public class ExamesServiceImpl implements ExamesService {
         validarDadosBasicos(request);
 
         Exames exames = examesMapper.fromRequest(request);
+
+        // Carrega e define o estabelecimento
+        Estabelecimentos estabelecimento = estabelecimentosRepository.findById(request.getEstabelecimentoId())
+                .orElseThrow(() -> new NotFoundException("Estabelecimento não encontrado com ID: " + request.getEstabelecimentoId()));
+        exames.setEstabelecimento(estabelecimento);
+
+        // Carrega e define o paciente
+        Paciente paciente = pacienteRepository.findById(request.getPacienteId())
+                .orElseThrow(() -> new NotFoundException("Paciente não encontrado com ID: " + request.getPacienteId()));
+        exames.setPaciente(paciente);
+
         exames.setActive(true);
 
         Exames examesSalvo = examesRepository.save(exames);
@@ -68,6 +85,19 @@ public class ExamesServiceImpl implements ExamesService {
                 pageable.getPageNumber(), pageable.getPageSize());
 
         Page<Exames> exames = examesRepository.findAll(pageable);
+        return exames.map(examesMapper::toResponse);
+    }
+
+    @Override
+    public Page<ExamesResponse> listarPorEstabelecimento(UUID estabelecimentoId, Pageable pageable) {
+        log.debug("Listando exames do estabelecimento: {}. Página: {}, Tamanho: {}",
+                estabelecimentoId, pageable.getPageNumber(), pageable.getPageSize());
+
+        if (estabelecimentoId == null) {
+            throw new BadRequestException("ID do estabelecimento é obrigatório");
+        }
+
+        Page<Exames> exames = examesRepository.findByEstabelecimentoIdOrderByDataExameDesc(estabelecimentoId, pageable);
         return exames.map(examesMapper::toResponse);
     }
 
@@ -118,24 +148,38 @@ public class ExamesServiceImpl implements ExamesService {
         if (request == null) {
             throw new BadRequestException("Dados do exames são obrigatórios");
         }
+        if (request.getEstabelecimentoId() == null) {
+            throw new BadRequestException("ID do estabelecimento é obrigatório");
+        }
+        if (request.getPacienteId() == null) {
+            throw new BadRequestException("ID do paciente é obrigatório");
+        }
     }
 
         private void atualizarDadosExames(Exames exames, ExamesRequest request) {
-        Exames examesAtualizado = examesMapper.fromRequest(request);
-        
-        // Preserva campos de controle
-        java.util.UUID idOriginal = exames.getId();
-        com.upsaude.entity.Tenant tenantOriginal = exames.getTenant();
-        Boolean activeOriginal = exames.getActive();
-        java.time.OffsetDateTime createdAtOriginal = exames.getCreatedAt();
-        
-        // Copia todas as propriedades do objeto atualizado
-        BeanUtils.copyProperties(examesAtualizado, exames);
-        
-        // Restaura campos de controle
-        exames.setId(idOriginal);
-        exames.setTenant(tenantOriginal);
-        exames.setActive(activeOriginal);
-        exames.setCreatedAt(createdAtOriginal);
+        // Atualiza estabelecimento se fornecido
+        if (request.getEstabelecimentoId() != null) {
+            Estabelecimentos estabelecimento = estabelecimentosRepository.findById(request.getEstabelecimentoId())
+                    .orElseThrow(() -> new NotFoundException("Estabelecimento não encontrado com ID: " + request.getEstabelecimentoId()));
+            exames.setEstabelecimento(estabelecimento);
+        }
+
+        // Atualiza paciente se fornecido
+        if (request.getPacienteId() != null) {
+            Paciente paciente = pacienteRepository.findById(request.getPacienteId())
+                    .orElseThrow(() -> new NotFoundException("Paciente não encontrado com ID: " + request.getPacienteId()));
+            exames.setPaciente(paciente);
+        }
+
+        // Atualiza outros campos
+        if (request.getTipoExame() != null) {
+            exames.setTipoExame(request.getTipoExame());
+        }
+        if (request.getDataExame() != null) {
+            exames.setDataExame(request.getDataExame());
+        }
+        if (request.getResultados() != null) {
+            exames.setResultados(request.getResultados());
+        }
     }
 }

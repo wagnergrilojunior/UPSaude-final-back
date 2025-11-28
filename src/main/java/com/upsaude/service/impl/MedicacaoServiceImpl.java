@@ -118,20 +118,20 @@ public class MedicacaoServiceImpl implements MedicacaoService {
         if (request == null) {
             throw new BadRequestException("Dados da medicação são obrigatórios");
         }
-        if (request.getPrincipioAtivo() == null || request.getPrincipioAtivo().trim().isEmpty()) {
+        if (request.getIdentificacao() == null) {
+            throw new BadRequestException("Identificação da medicação é obrigatória");
+        }
+        if (request.getIdentificacao().getPrincipioAtivo() == null || request.getIdentificacao().getPrincipioAtivo().trim().isEmpty()) {
             throw new BadRequestException("Princípio ativo é obrigatório");
         }
-        if (request.getNomeComercial() == null || request.getNomeComercial().trim().isEmpty()) {
+        if (request.getIdentificacao().getNomeComercial() == null || request.getIdentificacao().getNomeComercial().trim().isEmpty()) {
             throw new BadRequestException("Nome comercial é obrigatório");
         }
-        if (request.getCatmatCodigo() == null || request.getCatmatCodigo().trim().isEmpty()) {
-            throw new BadRequestException("Código CATMAT é obrigatório");
+        if (request.getDosagemAdministracao() == null) {
+            throw new BadRequestException("Dosagem e administração são obrigatórias");
         }
-        if (request.getDosagem() == null || request.getDosagem().trim().isEmpty()) {
+        if (request.getDosagemAdministracao().getDosagem() == null || request.getDosagemAdministracao().getDosagem().trim().isEmpty()) {
             throw new BadRequestException("Dosagem é obrigatória");
-        }
-        if (request.getFabricante() == null || request.getFabricante().trim().isEmpty()) {
-            throw new BadRequestException("Fabricante é obrigatório");
         }
     }
 
