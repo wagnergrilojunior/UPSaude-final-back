@@ -215,9 +215,6 @@ public class PacienteServiceImpl implements PacienteService {
         paciente.setResponsavelNome(pacienteAtualizado.getResponsavelNome());
         paciente.setResponsavelCpf(pacienteAtualizado.getResponsavelCpf());
         paciente.setResponsavelTelefone(pacienteAtualizado.getResponsavelTelefone());
-        paciente.setEnderecoJson(pacienteAtualizado.getEnderecoJson());
-        paciente.setContatoJson(pacienteAtualizado.getContatoJson());
-        paciente.setInformacoesAdicionaisJson(pacienteAtualizado.getInformacoesAdicionaisJson());
         paciente.setConvenio(pacienteAtualizado.getConvenio());
         paciente.setNumeroCarteirinha(pacienteAtualizado.getNumeroCarteirinha());
         paciente.setDataValidadeCarteirinha(pacienteAtualizado.getDataValidadeCarteirinha());

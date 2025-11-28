@@ -17,22 +17,22 @@ import java.util.UUID;
 public interface EnderecoMapper extends EntityMapper<Endereco, EnderecoDTO> {
 
     @Mapping(target = "tenant", ignore = true)
-    @Mapping(target = "estadoRef", source = "estadoId", qualifiedByName = "estadoFromId")
-    @Mapping(target = "cidadeRef", source = "cidadeId", qualifiedByName = "cidadeFromId")
+    @Mapping(target = "estado", source = "estadoId", qualifiedByName = "estadoFromId")
+    @Mapping(target = "cidade", source = "cidadeId", qualifiedByName = "cidadeFromId")
     Endereco toEntity(EnderecoDTO dto);
 
-    @Mapping(target = "estadoId", source = "estadoRef.id")
-    @Mapping(target = "cidadeId", source = "cidadeRef.id")
+    @Mapping(target = "estadoId", source = "estado.id")
+    @Mapping(target = "cidadeId", source = "cidade.id")
     EnderecoDTO toDTO(Endereco entity);
 
     @Mapping(target = "tenant", ignore = true)
     @Mapping(target = "active", ignore = true)
-    @Mapping(target = "estadoRef", source = "estadoId", qualifiedByName = "estadoFromId")
-    @Mapping(target = "cidadeRef", source = "cidadeId", qualifiedByName = "cidadeFromId")
+    @Mapping(target = "estado", source = "estadoId", qualifiedByName = "estadoFromId")
+    @Mapping(target = "cidade", source = "cidadeId", qualifiedByName = "cidadeFromId")
     Endereco fromRequest(EnderecoRequest request);
 
-    @Mapping(target = "estadoId", source = "estadoRef.id")
-    @Mapping(target = "cidadeId", source = "cidadeRef.id")
+    @Mapping(target = "estadoId", source = "estado.id")
+    @Mapping(target = "cidadeId", source = "cidade.id")
     EnderecoResponse toResponse(Endereco entity);
 
     @Named("estadoFromId")
