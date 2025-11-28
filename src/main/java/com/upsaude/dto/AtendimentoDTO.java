@@ -1,11 +1,15 @@
 package com.upsaude.dto;
 
+import com.upsaude.entity.embeddable.AnamneseAtendimento;
+import com.upsaude.entity.embeddable.ClassificacaoRiscoAtendimento;
+import com.upsaude.entity.embeddable.DiagnosticoAtendimento;
+import com.upsaude.entity.embeddable.InformacoesAtendimento;
+import com.upsaude.entity.embeddable.ProcedimentosRealizadosAtendimento;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.time.OffsetDateTime;
 import java.util.UUID;
 
 /**
@@ -19,13 +23,21 @@ import java.util.UUID;
 @AllArgsConstructor
 public class AtendimentoDTO {
     private UUID id;
+    private UUID estabelecimentoId;
     private UUID pacienteId;
     private UUID profissionalId;
-    private OffsetDateTime dataHora;
-    private String tipoAtendimento;
-    private String motivo;
+    private UUID especialidadeId;
+    private UUID equipeSaudeId;
+    private UUID convenioId;
     private UUID cidPrincipalId;
+    
+    private InformacoesAtendimento informacoes;
+    private AnamneseAtendimento anamnese;
+    private DiagnosticoAtendimento diagnostico;
+    private ProcedimentosRealizadosAtendimento procedimentosRealizados;
+    private ClassificacaoRiscoAtendimento classificacaoRisco;
+    
     private String anotacoes;
+    private String observacoesInternas;
     private Boolean active;
 }
-

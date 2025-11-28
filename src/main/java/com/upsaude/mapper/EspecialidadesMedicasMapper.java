@@ -22,4 +22,3 @@ public interface EspecialidadesMedicasMapper extends EntityMapper<Especialidades
 
     EspecialidadesMedicasResponse toResponse(EspecialidadesMedicas entity);
 }
-

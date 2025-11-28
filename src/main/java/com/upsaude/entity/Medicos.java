@@ -1,68 +1,89 @@
 package com.upsaude.entity;
 
+import com.upsaude.entity.embeddable.ContatoMedico;
+import com.upsaude.entity.embeddable.DadosPessoaisMedico;
+import com.upsaude.entity.embeddable.FormacaoMedico;
+import com.upsaude.entity.embeddable.RegistroProfissionalMedico;
 import jakarta.persistence.Column;
+import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
+import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
-import jakarta.persistence.Index;
-import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
+
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Entidade que representa um médico.
+ * Armazena informações completas sobre médicos para sistemas de gestão de saúde.
+ * Baseado em padrões do Conselho Federal de Medicina (CFM).
+ *
+ * @author UPSaúde
+ */
 @Entity
 @Table(name = "medicos", schema = "public",
        uniqueConstraints = {
            @UniqueConstraint(name = "uk_medicos_crm_uf_tenant", columnNames = {"crm", "crm_uf", "tenant_id"})
        },
        indexes = {
-           @Index(name = "idx_medicos_crm", columnList = "crm")
+           @Index(name = "idx_medicos_crm", columnList = "crm"),
+           @Index(name = "idx_medicos_crm_uf", columnList = "crm_uf"),
+           @Index(name = "idx_medicos_nome", columnList = "nome_completo"),
+           @Index(name = "idx_medicos_especialidade", columnList = "especialidade_id"),
+           @Index(name = "idx_medicos_estabelecimento", columnList = "estabelecimento_id")
        })
 @Data
+@EqualsAndHashCode(callSuper = true)
 public class Medicos extends BaseEntity {
 
-    
+    // ========== RELACIONAMENTOS ==========
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "estabelecimento_id")
     private Estabelecimentos estabelecimento;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "especialidade_id")
+    private EspecialidadesMedicas especialidade;
+
+    // ========== IDENTIFICAÇÃO BÁSICA ==========
 
     @NotBlank(message = "Nome completo é obrigatório")
     @Size(max = 255, message = "Nome completo deve ter no máximo 255 caracteres")
     @Column(name = "nome_completo", nullable = false, length = 255)
     private String nomeCompleto;
 
-    @NotBlank(message = "CRM é obrigatório")
-    @Pattern(regexp = "^\\d{4,10}$", message = "CRM deve ter entre 4 e 10 dígitos")
-    @Column(name = "crm", nullable = false, length = 20)
-    private String crm;
+    // ========== DADOS PESSOAIS ==========
 
-    @Pattern(regexp = "^[A-Z]{2}$", message = "UF do CRM deve ter 2 letras maiúsculas")
-    @Column(name = "crm_uf", length = 2)
-    private String crmUf;
+    @Embedded
+    private DadosPessoaisMedico dadosPessoais;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "especialidade_id")
-    private EspecialidadesMedicas especialidade;
+    // ========== REGISTRO PROFISSIONAL (CRM) ==========
 
-    @Pattern(regexp = "^\\d{10,11}$", message = "Telefone deve ter 10 ou 11 dígitos")
-    @Column(name = "telefone", length = 20)
-    private String telefone;
+    @Embedded
+    private RegistroProfissionalMedico registroProfissional;
 
-    @Email(message = "Email inválido")
-    @Size(max = 255, message = "Email deve ter no máximo 255 caracteres")
-    @Column(name = "email", length = 255)
-    private String email;
+    // ========== FORMAÇÃO ==========
 
-    
+    @Embedded
+    private FormacaoMedico formacao;
+
+    // ========== CONTATO ==========
+
+    @Embedded
+    private ContatoMedico contato;
+
+    // ========== ENDEREÇOS ==========
 
     @OneToMany(fetch = FetchType.LAZY)
     @JoinTable(
@@ -72,4 +93,9 @@ public class Medicos extends BaseEntity {
         inverseJoinColumns = @JoinColumn(name = "endereco_id")
     )
     private List<Endereco> enderecos = new ArrayList<>();
+
+    // ========== OBSERVAÇÕES ==========
+
+    @Column(name = "observacoes", columnDefinition = "TEXT")
+    private String observacoes; // Observações gerais sobre o médico
 }

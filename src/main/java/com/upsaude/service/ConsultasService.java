@@ -20,6 +20,15 @@ public interface ConsultasService {
 
     Page<ConsultasResponse> listar(Pageable pageable);
 
+    /**
+     * Lista todas as consultas de um estabelecimento, ordenadas por data decrescente.
+     *
+     * @param estabelecimentoId ID do estabelecimento
+     * @param pageable Parâmetros de paginação
+     * @return Página com as consultas do estabelecimento
+     */
+    Page<ConsultasResponse> listarPorEstabelecimento(UUID estabelecimentoId, Pageable pageable);
+
     ConsultasResponse atualizar(UUID id, ConsultasRequest request);
 
     void excluir(UUID id);

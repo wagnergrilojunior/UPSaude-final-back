@@ -1,109 +1,87 @@
 package com.upsaude.entity;
 
-import com.upsaude.enums.ClasseTerapeuticaEnum;
-import com.upsaude.enums.FormaFarmaceuticaEnum;
-import com.upsaude.enums.UnidadeMedidaEnum;
-import com.upsaude.util.converter.ClasseTerapeuticaEnumConverter;
-import com.upsaude.util.converter.FormaFarmaceuticaEnumConverter;
-import com.upsaude.util.converter.UnidadeMedidaEnumConverter;
+import com.upsaude.entity.embeddable.ClassificacaoMedicamento;
+import com.upsaude.entity.embeddable.ConservacaoArmazenamentoMedicamento;
+import com.upsaude.entity.embeddable.ContraindicacoesPrecaucoesMedicamento;
+import com.upsaude.entity.embeddable.DosagemAdministracaoMedicamento;
+import com.upsaude.entity.embeddable.IdentificacaoMedicamento;
+import com.upsaude.entity.embeddable.RegistroControleMedicamento;
 import jakarta.persistence.Column;
-import jakarta.persistence.Convert;
+import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.Index;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Size;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 /**
  * Entidade que representa um catálogo de medicamentos conforme padrão SUS/SIGTAP.
  * Armazena informações completas sobre medicamentos para sistemas de prontuário eletrônico.
+ * Baseado em padrões da ANVISA, SUS e sistemas de saúde.
  *
  * @author UPSaúde
  */
 @Entity
-@Table(name = "medicacoes", schema = "public")
+@Table(name = "medicacoes", schema = "public",
+       indexes = {
+           @Index(name = "idx_medicacao_principio_ativo", columnList = "principio_ativo"),
+           @Index(name = "idx_medicacao_nome_comercial", columnList = "nome_comercial"),
+           @Index(name = "idx_medicacao_catmat", columnList = "catmat_codigo"),
+           @Index(name = "idx_medicacao_anvisa", columnList = "codigo_anvisa"),
+           @Index(name = "idx_medicacao_classe_terapeutica", columnList = "classe_terapeutica"),
+           @Index(name = "idx_medicacao_controlado", columnList = "controlado")
+       })
 @Data
+@EqualsAndHashCode(callSuper = true)
 public class Medicacao extends BaseEntity {
 
-    @NotBlank(message = "Princípio ativo é obrigatório")
-    @Size(max = 255, message = "Princípio ativo deve ter no máximo 255 caracteres")
-    @Column(name = "principio_ativo", nullable = false, length = 255)
-    private String principioAtivo;
+    // ========== RELACIONAMENTOS ==========
 
-    @NotBlank(message = "Nome comercial é obrigatório")
-    @Size(max = 255, message = "Nome comercial deve ter no máximo 255 caracteres")
-    @Column(name = "nome_comercial", nullable = false, length = 255)
-    private String nomeComercial;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "fabricante_id")
+    private FabricantesMedicamento fabricanteEntity; // Relacionamento com entidade FabricantesMedicamento
 
-    @Size(max = 100, message = "Via de administração deve ter no máximo 100 caracteres")
-    @Column(name = "via_administracao", length = 100)
-    private String viaAdministracao;
+    // ========== IDENTIFICAÇÃO ==========
 
-    @Size(max = 1000, message = "Descrição deve ter no máximo 1000 caracteres")
+    @Embedded
+    private IdentificacaoMedicamento identificacao;
+
+    // ========== DOSAGEM E ADMINISTRAÇÃO ==========
+
+    @Embedded
+    private DosagemAdministracaoMedicamento dosagemAdministracao;
+
+    // ========== CLASSIFICAÇÃO ==========
+
+    @Embedded
+    private ClassificacaoMedicamento classificacao;
+
+    // ========== REGISTRO E CONTROLE ==========
+
+    @Embedded
+    private RegistroControleMedicamento registroControle;
+
+    // ========== CONTRAINDICAÇÕES E PRECAUÇÕES ==========
+
+    @Embedded
+    private ContraindicacoesPrecaucoesMedicamento contraindicacoesPrecaucoes;
+
+    // ========== CONSERVAÇÃO E ARMAZENAMENTO ==========
+
+    @Embedded
+    private ConservacaoArmazenamentoMedicamento conservacaoArmazenamento;
+
+    // ========== DESCRIÇÃO E OBSERVAÇÕES ==========
+
     @Column(name = "descricao", columnDefinition = "TEXT")
-    private String descricao;
+    private String descricao; // Descrição geral do medicamento
 
-    /**
-     * Código CATMAT (Catálogo de Materiais) do Ministério da Saúde.
-     */
-    @NotBlank(message = "Código CATMAT é obrigatório")
-    @Size(max = 20, message = "Código CATMAT deve ter no máximo 20 caracteres")
-    @Column(name = "catmat_codigo", nullable = false, length = 20)
-    private String catmatCodigo;
+    @Column(name = "indicacoes", columnDefinition = "TEXT")
+    private String indicacoes; // Indicações de uso
 
-    /**
-     * Classe terapêutica do medicamento conforme classificação SUS/SIGTAP.
-     */
-    @Convert(converter = ClasseTerapeuticaEnumConverter.class)
-    @Column(name = "classe_terapeutica")
-    private ClasseTerapeuticaEnum classeTerapeutica;
-
-    /**
-     * Forma farmacêutica do medicamento conforme Farmacopeia Brasileira/ANVISA.
-     */
-    @Convert(converter = FormaFarmaceuticaEnumConverter.class)
-    @Column(name = "forma_farmaceutica")
-    private FormaFarmaceuticaEnum formaFarmaceutica;
-
-    /**
-     * Dosagem do medicamento.
-     */
-    @NotBlank(message = "Dosagem é obrigatória")
-    @Size(max = 50, message = "Dosagem deve ter no máximo 50 caracteres")
-    @Column(name = "dosagem", nullable = false, length = 50)
-    private String dosagem;
-
-    /**
-     * Unidade de medida do medicamento.
-     */
-    @Convert(converter = UnidadeMedidaEnumConverter.class)
-    @Column(name = "unidade_medida")
-    private UnidadeMedidaEnum unidadeMedida;
-
-    /**
-     * Fabricante do medicamento.
-     */
-    @NotBlank(message = "Fabricante é obrigatório")
-    @Size(max = 255, message = "Fabricante deve ter no máximo 255 caracteres")
-    @Column(name = "fabricante", nullable = false, length = 255)
-    private String fabricante;
-
-    /**
-     * Indica se o medicamento é de uso contínuo.
-     */
-    @Column(name = "uso_continuo", nullable = false)
-    private Boolean usoContinuo = false;
-
-    /**
-     * Indica se o medicamento requer receita obrigatória.
-     */
-    @Column(name = "receita_obrigatoria", nullable = false)
-    private Boolean receitaObrigatoria = false;
-
-    /**
-     * Indica se o medicamento é controlado (portaria especial).
-     */
-    @Column(name = "controlado", nullable = false)
-    private Boolean controlado = false;
+    @Column(name = "observacoes", columnDefinition = "TEXT")
+    private String observacoes; // Observações gerais
 }
-

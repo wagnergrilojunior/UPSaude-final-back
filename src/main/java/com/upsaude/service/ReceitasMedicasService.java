@@ -20,6 +20,15 @@ public interface ReceitasMedicasService {
 
     Page<ReceitasMedicasResponse> listar(Pageable pageable);
 
+    /**
+     * Lista todas as receitas de um estabelecimento, ordenadas por data de prescrição decrescente.
+     *
+     * @param estabelecimentoId ID do estabelecimento
+     * @param pageable Parâmetros de paginação
+     * @return Página com as receitas do estabelecimento
+     */
+    Page<ReceitasMedicasResponse> listarPorEstabelecimento(UUID estabelecimentoId, Pageable pageable);
+
     ReceitasMedicasResponse atualizar(UUID id, ReceitasMedicasRequest request);
 
     void excluir(UUID id);

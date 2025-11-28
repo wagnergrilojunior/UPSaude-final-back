@@ -32,10 +32,6 @@ public class UsuariosSistema extends BaseEntity {
     private UUID userId;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "estabelecimento_id")
-    private Estabelecimentos estabelecimento;
-
-    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "profissional_saude_id")
     private ProfissionaisSaude profissionalSaude;
 

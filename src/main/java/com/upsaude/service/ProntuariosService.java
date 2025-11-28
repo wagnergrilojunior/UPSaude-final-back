@@ -20,6 +20,15 @@ public interface ProntuariosService {
 
     Page<ProntuariosResponse> listar(Pageable pageable);
 
+    /**
+     * Lista todos os prontuários de um estabelecimento.
+     *
+     * @param estabelecimentoId ID do estabelecimento
+     * @param pageable Parâmetros de paginação
+     * @return Página com os prontuários do estabelecimento
+     */
+    Page<ProntuariosResponse> listarPorEstabelecimento(UUID estabelecimentoId, Pageable pageable);
+
     ProntuariosResponse atualizar(UUID id, ProntuariosRequest request);
 
     void excluir(UUID id);

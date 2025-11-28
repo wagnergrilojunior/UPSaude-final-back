@@ -1,0 +1,97 @@
+package com.upsaude.entity;
+
+import com.upsaude.enums.StatusAtivoEnum;
+import com.upsaude.enums.TipoVinculoProfissionalEnum;
+import com.upsaude.util.converter.StatusAtivoEnumConverter;
+import com.upsaude.util.converter.TipoVinculoProfissionalEnumConverter;
+import jakarta.persistence.Column;
+import jakarta.persistence.Convert;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.Index;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+
+import java.math.BigDecimal;
+import java.time.OffsetDateTime;
+
+/**
+ * Entidade que representa o vínculo entre um profissional de saúde e uma equipe de saúde.
+ * Permite associar um profissional a múltiplas equipes com datas de início e fim,
+ * tipo de vínculo, função na equipe e demais informações importantes.
+ * Mantém histórico completo de vínculos para rastreabilidade.
+ *
+ * @author UPSaúde
+ */
+@Entity
+@Table(name = "vinculos_profissional_equipe", schema = "public",
+       uniqueConstraints = {
+           @UniqueConstraint(name = "uk_profissional_equipe", columnNames = {"profissional_id", "equipe_id"})
+       },
+       indexes = {
+           @Index(name = "idx_vinculo_profissional_equipe_profissional", columnList = "profissional_id"),
+           @Index(name = "idx_vinculo_profissional_equipe_equipe", columnList = "equipe_id"),
+           @Index(name = "idx_vinculo_profissional_equipe_tipo_vinculo", columnList = "tipo_vinculo"),
+           @Index(name = "idx_vinculo_profissional_equipe_status", columnList = "status"),
+           @Index(name = "idx_vinculo_profissional_equipe_data_inicio", columnList = "data_inicio")
+       })
+@Data
+@EqualsAndHashCode(callSuper = true)
+public class VinculoProfissionalEquipe extends BaseEntity {
+
+    // ========== RELACIONAMENTOS ==========
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "profissional_id", nullable = false)
+    @NotNull(message = "Profissional é obrigatório")
+    private ProfissionaisSaude profissional;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "equipe_id", nullable = false)
+    @NotNull(message = "Equipe é obrigatória")
+    private EquipeSaude equipe;
+
+    // ========== DATAS DO VÍNCULO ==========
+
+    @Column(name = "data_inicio", nullable = false)
+    @NotNull(message = "Data de início do vínculo é obrigatória")
+    private OffsetDateTime dataInicio;
+
+    @Column(name = "data_fim")
+    private OffsetDateTime dataFim;
+
+    // ========== TIPO DE VÍNCULO ==========
+
+    @Convert(converter = TipoVinculoProfissionalEnumConverter.class)
+    @Column(name = "tipo_vinculo", nullable = false)
+    @NotNull(message = "Tipo de vínculo é obrigatório")
+    private TipoVinculoProfissionalEnum tipoVinculo;
+
+    // ========== FUNÇÃO E CARGA HORÁRIA ==========
+
+    @Column(name = "funcao_equipe", length = 255)
+    @Size(max = 255, message = "Função na equipe deve ter no máximo 255 caracteres")
+    private String funcaoEquipe; // Função específica do profissional na equipe
+
+    @Column(name = "carga_horaria_semanal")
+    private Integer cargaHorariaSemanal; // em horas
+
+    // ========== STATUS ==========
+
+    @Convert(converter = StatusAtivoEnumConverter.class)
+    @Column(name = "status", nullable = false)
+    @NotNull(message = "Status é obrigatório")
+    private StatusAtivoEnum status;
+
+    // ========== INFORMAÇÕES COMPLEMENTARES ==========
+
+    @Column(name = "observacoes", columnDefinition = "TEXT")
+    private String observacoes;
+}
+

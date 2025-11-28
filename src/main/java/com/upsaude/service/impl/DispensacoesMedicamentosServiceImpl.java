@@ -3,10 +3,16 @@ package com.upsaude.service.impl;
 import com.upsaude.api.request.DispensacoesMedicamentosRequest;
 import com.upsaude.api.response.DispensacoesMedicamentosResponse;
 import com.upsaude.entity.DispensacoesMedicamentos;
+import com.upsaude.entity.Estabelecimentos;
+import com.upsaude.entity.Medicacao;
+import com.upsaude.entity.Paciente;
 import com.upsaude.exception.BadRequestException;
 import com.upsaude.exception.NotFoundException;
 import com.upsaude.mapper.DispensacoesMedicamentosMapper;
 import com.upsaude.repository.DispensacoesMedicamentosRepository;
+import com.upsaude.repository.EstabelecimentosRepository;
+import com.upsaude.repository.MedicacaoRepository;
+import com.upsaude.repository.PacienteRepository;
 import com.upsaude.service.DispensacoesMedicamentosService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -30,6 +36,9 @@ public class DispensacoesMedicamentosServiceImpl implements DispensacoesMedicame
 
     private final DispensacoesMedicamentosRepository dispensacoesMedicamentosRepository;
     private final DispensacoesMedicamentosMapper dispensacoesMedicamentosMapper;
+    private final EstabelecimentosRepository estabelecimentosRepository;
+    private final PacienteRepository pacienteRepository;
+    private final MedicacaoRepository medicacaoRepository;
 
     @Override
     @Transactional
@@ -39,6 +48,22 @@ public class DispensacoesMedicamentosServiceImpl implements DispensacoesMedicame
         validarDadosBasicos(request);
 
         DispensacoesMedicamentos dispensacoesMedicamentos = dispensacoesMedicamentosMapper.fromRequest(request);
+
+        // Carrega e define o estabelecimento
+        Estabelecimentos estabelecimento = estabelecimentosRepository.findById(request.getEstabelecimentoId())
+                .orElseThrow(() -> new NotFoundException("Estabelecimento não encontrado com ID: " + request.getEstabelecimentoId()));
+        dispensacoesMedicamentos.setEstabelecimento(estabelecimento);
+
+        // Carrega e define o paciente
+        Paciente paciente = pacienteRepository.findById(request.getPacienteId())
+                .orElseThrow(() -> new NotFoundException("Paciente não encontrado com ID: " + request.getPacienteId()));
+        dispensacoesMedicamentos.setPaciente(paciente);
+
+        // Carrega e define o medicamento
+        Medicacao medicacao = medicacaoRepository.findById(request.getMedicamentoId())
+                .orElseThrow(() -> new NotFoundException("Medicamento não encontrado com ID: " + request.getMedicamentoId()));
+        dispensacoesMedicamentos.setMedicacao(medicacao);
+
         dispensacoesMedicamentos.setActive(true);
 
         DispensacoesMedicamentos dispensacoesMedicamentosSalvo = dispensacoesMedicamentosRepository.save(dispensacoesMedicamentos);
@@ -69,6 +94,19 @@ public class DispensacoesMedicamentosServiceImpl implements DispensacoesMedicame
 
         Page<DispensacoesMedicamentos> dispensacoesMedicamentos = dispensacoesMedicamentosRepository.findAll(pageable);
         return dispensacoesMedicamentos.map(dispensacoesMedicamentosMapper::toResponse);
+    }
+
+    @Override
+    public Page<DispensacoesMedicamentosResponse> listarPorEstabelecimento(UUID estabelecimentoId, Pageable pageable) {
+        log.debug("Listando dispensações do estabelecimento: {}. Página: {}, Tamanho: {}",
+                estabelecimentoId, pageable.getPageNumber(), pageable.getPageSize());
+
+        if (estabelecimentoId == null) {
+            throw new BadRequestException("ID do estabelecimento é obrigatório");
+        }
+
+        Page<DispensacoesMedicamentos> dispensacoes = dispensacoesMedicamentosRepository.findByEstabelecimentoIdOrderByDataDispensacaoDesc(estabelecimentoId, pageable);
+        return dispensacoes.map(dispensacoesMedicamentosMapper::toResponse);
     }
 
     @Override
@@ -118,24 +156,48 @@ public class DispensacoesMedicamentosServiceImpl implements DispensacoesMedicame
         if (request == null) {
             throw new BadRequestException("Dados do dispensacoesmedicamentos são obrigatórios");
         }
+        if (request.getEstabelecimentoId() == null) {
+            throw new BadRequestException("ID do estabelecimento é obrigatório");
+        }
+        if (request.getPacienteId() == null) {
+            throw new BadRequestException("ID do paciente é obrigatório");
+        }
+        if (request.getMedicamentoId() == null) {
+            throw new BadRequestException("ID do medicamento é obrigatório");
+        }
     }
 
         private void atualizarDadosDispensacoesMedicamentos(DispensacoesMedicamentos dispensacoesMedicamentos, DispensacoesMedicamentosRequest request) {
-        DispensacoesMedicamentos dispensacoesMedicamentosAtualizado = dispensacoesMedicamentosMapper.fromRequest(request);
-        
-        // Preserva campos de controle
-        java.util.UUID idOriginal = dispensacoesMedicamentos.getId();
-        com.upsaude.entity.Tenant tenantOriginal = dispensacoesMedicamentos.getTenant();
-        Boolean activeOriginal = dispensacoesMedicamentos.getActive();
-        java.time.OffsetDateTime createdAtOriginal = dispensacoesMedicamentos.getCreatedAt();
-        
-        // Copia todas as propriedades do objeto atualizado
-        BeanUtils.copyProperties(dispensacoesMedicamentosAtualizado, dispensacoesMedicamentos);
-        
-        // Restaura campos de controle
-        dispensacoesMedicamentos.setId(idOriginal);
-        dispensacoesMedicamentos.setTenant(tenantOriginal);
-        dispensacoesMedicamentos.setActive(activeOriginal);
-        dispensacoesMedicamentos.setCreatedAt(createdAtOriginal);
+        // Atualiza estabelecimento se fornecido
+        if (request.getEstabelecimentoId() != null) {
+            Estabelecimentos estabelecimento = estabelecimentosRepository.findById(request.getEstabelecimentoId())
+                    .orElseThrow(() -> new NotFoundException("Estabelecimento não encontrado com ID: " + request.getEstabelecimentoId()));
+            dispensacoesMedicamentos.setEstabelecimento(estabelecimento);
+        }
+
+        // Atualiza paciente se fornecido
+        if (request.getPacienteId() != null) {
+            Paciente paciente = pacienteRepository.findById(request.getPacienteId())
+                    .orElseThrow(() -> new NotFoundException("Paciente não encontrado com ID: " + request.getPacienteId()));
+            dispensacoesMedicamentos.setPaciente(paciente);
+        }
+
+        // Atualiza medicamento se fornecido
+        if (request.getMedicamentoId() != null) {
+            Medicacao medicacao = medicacaoRepository.findById(request.getMedicamentoId())
+                    .orElseThrow(() -> new NotFoundException("Medicamento não encontrado com ID: " + request.getMedicamentoId()));
+            dispensacoesMedicamentos.setMedicacao(medicacao);
+        }
+
+        // Atualiza outros campos
+        if (request.getQuantidade() != null) {
+            dispensacoesMedicamentos.setQuantidade(request.getQuantidade());
+        }
+        if (request.getDataDispensacao() != null) {
+            dispensacoesMedicamentos.setDataDispensacao(request.getDataDispensacao());
+        }
+        if (request.getObservacoes() != null) {
+            dispensacoesMedicamentos.setObservacoes(request.getObservacoes());
+        }
     }
 }

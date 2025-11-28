@@ -1,5 +1,9 @@
 package com.upsaude.api.response;
 
+import com.upsaude.entity.embeddable.ContatoMedico;
+import com.upsaude.entity.embeddable.DadosPessoaisMedico;
+import com.upsaude.entity.embeddable.FormacaoMedico;
+import com.upsaude.entity.embeddable.RegistroProfissionalMedico;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -19,12 +23,14 @@ public class MedicosResponse {
     private OffsetDateTime updatedAt;
     private Boolean active;
     private UUID estabelecimentoId;
-    private String nomeCompleto;
-    private String crm;
-    private String crmUf;
+    private String estabelecimentoNome;
     private UUID especialidadeId;
-    private String telefone;
-    private String email;
+    private String especialidadeNome;
+    private String nomeCompleto;
+    private DadosPessoaisMedico dadosPessoais;
+    private RegistroProfissionalMedico registroProfissional;
+    private FormacaoMedico formacao;
+    private ContatoMedico contato;
     private List<UUID> enderecosIds;
+    private String observacoes;
 }
-

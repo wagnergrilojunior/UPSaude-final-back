@@ -1,5 +1,9 @@
 package com.upsaude.dto;
 
+import com.upsaude.entity.embeddable.ContatoMedico;
+import com.upsaude.entity.embeddable.DadosPessoaisMedico;
+import com.upsaude.entity.embeddable.FormacaoMedico;
+import com.upsaude.entity.embeddable.RegistroProfissionalMedico;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -15,13 +19,13 @@ import java.util.UUID;
 public class MedicosDTO {
     private UUID id;
     private UUID estabelecimentoId;
-    private String nomeCompleto;
-    private String crm;
-    private String crmUf;
     private UUID especialidadeId;
-    private String telefone;
-    private String email;
+    private String nomeCompleto;
+    private DadosPessoaisMedico dadosPessoais;
+    private RegistroProfissionalMedico registroProfissional;
+    private FormacaoMedico formacao;
+    private ContatoMedico contato;
     private List<UUID> enderecosIds;
+    private String observacoes;
     private Boolean active;
 }
-

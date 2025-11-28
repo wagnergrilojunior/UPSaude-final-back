@@ -3,16 +3,24 @@ package com.upsaude.service.impl;
 import com.upsaude.api.request.AtendimentoRequest;
 import com.upsaude.api.response.AtendimentoResponse;
 import com.upsaude.entity.Atendimento;
+import com.upsaude.entity.Estabelecimentos;
 import com.upsaude.entity.Paciente;
 import com.upsaude.entity.ProfissionaisSaude;
 import com.upsaude.entity.CidDoencas;
+import com.upsaude.entity.EspecialidadesMedicas;
+import com.upsaude.entity.EquipeSaude;
+import com.upsaude.entity.Convenio;
 import com.upsaude.exception.BadRequestException;
 import com.upsaude.exception.NotFoundException;
 import com.upsaude.mapper.AtendimentoMapper;
 import com.upsaude.repository.AtendimentoRepository;
+import com.upsaude.repository.EstabelecimentosRepository;
 import com.upsaude.repository.PacienteRepository;
 import com.upsaude.repository.ProfissionaisSaudeRepository;
 import com.upsaude.repository.CidDoencasRepository;
+import com.upsaude.repository.EspecialidadesMedicasRepository;
+import com.upsaude.repository.EquipeSaudeRepository;
+import com.upsaude.repository.ConvenioRepository;
 import com.upsaude.service.AtendimentoService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -35,9 +43,13 @@ public class AtendimentoServiceImpl implements AtendimentoService {
 
     private final AtendimentoRepository atendimentoRepository;
     private final AtendimentoMapper atendimentoMapper;
+    private final EstabelecimentosRepository estabelecimentosRepository;
     private final PacienteRepository pacienteRepository;
     private final ProfissionaisSaudeRepository profissionaisSaudeRepository;
     private final CidDoencasRepository cidDoencasRepository;
+    private final EspecialidadesMedicasRepository especialidadesMedicasRepository;
+    private final EquipeSaudeRepository equipeSaudeRepository;
+    private final ConvenioRepository convenioRepository;
 
     @Override
     @Transactional
@@ -48,6 +60,11 @@ public class AtendimentoServiceImpl implements AtendimentoService {
 
         Atendimento atendimento = atendimentoMapper.fromRequest(request);
 
+        // Carrega e define o estabelecimento
+        Estabelecimentos estabelecimento = estabelecimentosRepository.findById(request.getEstabelecimentoId())
+                .orElseThrow(() -> new NotFoundException("Estabelecimento não encontrado com ID: " + request.getEstabelecimentoId()));
+        atendimento.setEstabelecimento(estabelecimento);
+
         // Carrega e define o paciente
         Paciente paciente = pacienteRepository.findById(request.getPacienteId())
                 .orElseThrow(() -> new NotFoundException("Paciente não encontrado com ID: " + request.getPacienteId()));
@@ -57,6 +74,27 @@ public class AtendimentoServiceImpl implements AtendimentoService {
         ProfissionaisSaude profissional = profissionaisSaudeRepository.findById(request.getProfissionalId())
                 .orElseThrow(() -> new NotFoundException("Profissional de saúde não encontrado com ID: " + request.getProfissionalId()));
         atendimento.setProfissional(profissional);
+
+        // Especialidade é opcional
+        if (request.getEspecialidadeId() != null) {
+            EspecialidadesMedicas especialidade = especialidadesMedicasRepository.findById(request.getEspecialidadeId())
+                    .orElseThrow(() -> new NotFoundException("Especialidade não encontrada com ID: " + request.getEspecialidadeId()));
+            atendimento.setEspecialidade(especialidade);
+        }
+
+        // Equipe de saúde é opcional
+        if (request.getEquipeSaudeId() != null) {
+            EquipeSaude equipeSaude = equipeSaudeRepository.findById(request.getEquipeSaudeId())
+                    .orElseThrow(() -> new NotFoundException("Equipe de saúde não encontrada com ID: " + request.getEquipeSaudeId()));
+            atendimento.setEquipeSaude(equipeSaude);
+        }
+
+        // Convênio é opcional
+        if (request.getConvenioId() != null) {
+            Convenio convenio = convenioRepository.findById(request.getConvenioId())
+                    .orElseThrow(() -> new NotFoundException("Convênio não encontrado com ID: " + request.getConvenioId()));
+            atendimento.setConvenio(convenio);
+        }
 
         // CID principal é opcional
         if (request.getCidPrincipalId() != null) {
@@ -106,7 +144,7 @@ public class AtendimentoServiceImpl implements AtendimentoService {
             throw new BadRequestException("ID do paciente é obrigatório");
         }
 
-        Page<Atendimento> atendimentos = atendimentoRepository.findByPacienteIdOrderByDataHoraDesc(pacienteId, pageable);
+        Page<Atendimento> atendimentos = atendimentoRepository.findByPacienteIdOrderByInformacoesDataHoraDesc(pacienteId, pageable);
         return atendimentos.map(atendimentoMapper::toResponse);
     }
 
@@ -119,7 +157,20 @@ public class AtendimentoServiceImpl implements AtendimentoService {
             throw new BadRequestException("ID do profissional é obrigatório");
         }
 
-        Page<Atendimento> atendimentos = atendimentoRepository.findByProfissionalIdOrderByDataHoraDesc(profissionalId, pageable);
+        Page<Atendimento> atendimentos = atendimentoRepository.findByProfissionalIdOrderByInformacoesDataHoraDesc(profissionalId, pageable);
+        return atendimentos.map(atendimentoMapper::toResponse);
+    }
+
+    @Override
+    public Page<AtendimentoResponse> listarPorEstabelecimento(UUID estabelecimentoId, Pageable pageable) {
+        log.debug("Listando atendimentos do estabelecimento: {}. Página: {}, Tamanho: {}",
+                estabelecimentoId, pageable.getPageNumber(), pageable.getPageSize());
+
+        if (estabelecimentoId == null) {
+            throw new BadRequestException("ID do estabelecimento é obrigatório");
+        }
+
+        Page<Atendimento> atendimentos = atendimentoRepository.findByEstabelecimentoIdOrderByInformacoesDataHoraDesc(estabelecimentoId, pageable);
         return atendimentos.map(atendimentoMapper::toResponse);
     }
 
@@ -170,35 +221,63 @@ public class AtendimentoServiceImpl implements AtendimentoService {
         if (request == null) {
             throw new BadRequestException("Dados do atendimento são obrigatórios");
         }
+        if (request.getEstabelecimentoId() == null) {
+            throw new BadRequestException("ID do estabelecimento é obrigatório");
+        }
         if (request.getPacienteId() == null) {
             throw new BadRequestException("ID do paciente é obrigatório");
         }
         if (request.getProfissionalId() == null) {
             throw new BadRequestException("ID do profissional de saúde é obrigatório");
         }
-        if (request.getDataHora() == null) {
+        if (request.getInformacoes() == null || request.getInformacoes().getDataHora() == null) {
             throw new BadRequestException("Data e hora do atendimento são obrigatórias");
         }
     }
 
     private void atualizarDadosAtendimento(Atendimento atendimento, AtendimentoRequest request) {
-        // Atualiza data/hora
-        if (request.getDataHora() != null) {
-            atendimento.setDataHora(request.getDataHora());
+        // Atualiza informações básicas
+        if (request.getInformacoes() != null) {
+            atendimento.setInformacoes(request.getInformacoes());
         }
 
-        // Atualiza campos de texto
-        if (request.getTipoAtendimento() != null) {
-            atendimento.setTipoAtendimento(request.getTipoAtendimento());
+        // Atualiza anamnese
+        if (request.getAnamnese() != null) {
+            atendimento.setAnamnese(request.getAnamnese());
         }
-        if (request.getMotivo() != null) {
-            atendimento.setMotivo(request.getMotivo());
+
+        // Atualiza diagnóstico
+        if (request.getDiagnostico() != null) {
+            atendimento.setDiagnostico(request.getDiagnostico());
         }
+
+        // Atualiza procedimentos realizados
+        if (request.getProcedimentosRealizados() != null) {
+            atendimento.setProcedimentosRealizados(request.getProcedimentosRealizados());
+        }
+
+        // Atualiza classificação de risco
+        if (request.getClassificacaoRisco() != null) {
+            atendimento.setClassificacaoRisco(request.getClassificacaoRisco());
+        }
+
+        // Atualiza anotações
         if (request.getAnotacoes() != null) {
             atendimento.setAnotacoes(request.getAnotacoes());
         }
 
+        // Atualiza observações internas
+        if (request.getObservacoesInternas() != null) {
+            atendimento.setObservacoesInternas(request.getObservacoesInternas());
+        }
+
         // Atualiza relacionamentos se fornecidos
+        if (request.getEstabelecimentoId() != null) {
+            Estabelecimentos estabelecimento = estabelecimentosRepository.findById(request.getEstabelecimentoId())
+                    .orElseThrow(() -> new NotFoundException("Estabelecimento não encontrado com ID: " + request.getEstabelecimentoId()));
+            atendimento.setEstabelecimento(estabelecimento);
+        }
+
         if (request.getPacienteId() != null) {
             Paciente paciente = pacienteRepository.findById(request.getPacienteId())
                     .orElseThrow(() -> new NotFoundException("Paciente não encontrado com ID: " + request.getPacienteId()));
@@ -211,15 +290,40 @@ public class AtendimentoServiceImpl implements AtendimentoService {
             atendimento.setProfissional(profissional);
         }
 
+        // Especialidade é opcional
+        if (request.getEspecialidadeId() != null) {
+            EspecialidadesMedicas especialidade = especialidadesMedicasRepository.findById(request.getEspecialidadeId())
+                    .orElseThrow(() -> new NotFoundException("Especialidade não encontrada com ID: " + request.getEspecialidadeId()));
+            atendimento.setEspecialidade(especialidade);
+        } else {
+            atendimento.setEspecialidade(null);
+        }
+
+        // Equipe de saúde é opcional
+        if (request.getEquipeSaudeId() != null) {
+            EquipeSaude equipeSaude = equipeSaudeRepository.findById(request.getEquipeSaudeId())
+                    .orElseThrow(() -> new NotFoundException("Equipe de saúde não encontrada com ID: " + request.getEquipeSaudeId()));
+            atendimento.setEquipeSaude(equipeSaude);
+        } else {
+            atendimento.setEquipeSaude(null);
+        }
+
+        // Convênio é opcional
+        if (request.getConvenioId() != null) {
+            Convenio convenio = convenioRepository.findById(request.getConvenioId())
+                    .orElseThrow(() -> new NotFoundException("Convênio não encontrado com ID: " + request.getConvenioId()));
+            atendimento.setConvenio(convenio);
+        } else {
+            atendimento.setConvenio(null);
+        }
+
         // CID principal é opcional
         if (request.getCidPrincipalId() != null) {
             CidDoencas cidPrincipal = cidDoencasRepository.findById(request.getCidPrincipalId())
                     .orElseThrow(() -> new NotFoundException("CID não encontrado com ID: " + request.getCidPrincipalId()));
             atendimento.setCidPrincipal(cidPrincipal);
         } else {
-            // Se não fornecido, remove a relação
             atendimento.setCidPrincipal(null);
         }
     }
 }
-
