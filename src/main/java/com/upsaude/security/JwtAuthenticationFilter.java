@@ -35,7 +35,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     ) throws ServletException, IOException {
         
         String path = request.getRequestURI();
-        log.info("Processando requisição para: {} - Método: {}", path, request.getMethod());
+        String method = request.getMethod();
+        log.info("Processando requisição para: {} - Método: {}", path, method);
         
         // Ignora endpoints públicos (não processa autenticação)
         if (isPublicEndpoint(path)) {
@@ -47,8 +48,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         String token = extractTokenFromRequest(request);
         
         if (token == null || token.isEmpty()) {
-            log.warn("Token não fornecido para endpoint protegido: {}", path);
-            // Continua o filter chain - o Spring Security vai retornar 403
+            log.warn("Token não fornecido para endpoint protegido: {} - Método: {}", path, method);
+            // Continua o filter chain - o Spring Security vai retornar 403 ou 401
             filterChain.doFilter(request, response);
             return;
         }
