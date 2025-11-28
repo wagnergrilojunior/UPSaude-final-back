@@ -44,8 +44,8 @@ public class TratamentosOdontologicos extends BaseEntity {
     @Column(name = "data_fim")
     private OffsetDateTime dataFim;
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "status", length = 30)
+    @Enumerated(EnumType.ORDINAL)
+    @Column(name = "status")
     private StatusTratamento status;
 
     @Column(name = "observacoes", columnDefinition = "TEXT")

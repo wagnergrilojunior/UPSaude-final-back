@@ -1,7 +1,25 @@
 package com.upsaude.entity;
 
 import com.upsaude.enums.EstadoCivilEnum;
+import com.upsaude.enums.EscolaridadeEnum;
+import com.upsaude.enums.IdentidadeGeneroEnum;
+import com.upsaude.enums.NacionalidadeEnum;
+import com.upsaude.enums.OrientacaoSexualEnum;
+import com.upsaude.enums.RacaCorEnum;
 import com.upsaude.enums.SexoEnum;
+import com.upsaude.enums.StatusPacienteEnum;
+import com.upsaude.enums.TipoAtendimentoPreferencialEnum;
+import com.upsaude.enums.TipoCnsEnum;
+import com.upsaude.util.converter.EscolaridadeEnumConverter;
+import com.upsaude.util.converter.EstadoCivilEnumConverter;
+import com.upsaude.util.converter.IdentidadeGeneroEnumConverter;
+import com.upsaude.util.converter.NacionalidadeEnumConverter;
+import com.upsaude.util.converter.OrientacaoSexualEnumConverter;
+import com.upsaude.util.converter.RacaCorEnumConverter;
+import com.upsaude.util.converter.SexoEnumConverter;
+import com.upsaude.util.converter.StatusPacienteEnumConverter;
+import com.upsaude.util.converter.TipoAtendimentoPreferencialEnumConverter;
+import com.upsaude.util.converter.TipoCnsEnumConverter;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
@@ -10,14 +28,15 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
 @Entity
 @Table(name = "pacientes", schema = "public",
        uniqueConstraints = {
-           @UniqueConstraint(name = "uk_pacientes_cpf", columnNames = {"cpf", "tenant_id"})
+           @UniqueConstraint(name = "uk_pacientes_cpf", columnNames = {"cpf", "tenant_id"}),
+           @UniqueConstraint(name = "uk_pacientes_cns", columnNames = {"cns", "tenant_id"}),
+           @UniqueConstraint(name = "uk_pacientes_email", columnNames = {"email", "tenant_id"})
        },
        indexes = {
            @Index(name = "idx_pacientes_cpf", columnList = "cpf")
@@ -32,25 +51,25 @@ public class Paciente extends BaseEntity {
     private String nomeCompleto;
 
     @Pattern(regexp = "^\\d{11}$", message = "CPF deve ter 11 dígitos")
-    @Column(name = "cpf", length = 14)
+    @Column(name = "cpf", length = 11)
     private String cpf;
 
     @Column(name = "rg", length = 20)
     private String rg;
 
     @Pattern(regexp = "^\\d{15}$", message = "CNS deve ter 15 dígitos")
-    @Column(name = "cns", length = 20)
+    @Column(name = "cns", length = 15)
     private String cns;
 
     @Column(name = "data_nascimento")
     private LocalDate dataNascimento;
 
+    @Convert(converter = SexoEnumConverter.class)
     @Column(name = "sexo")
-    @Enumerated(EnumType.STRING)
     private SexoEnum sexo;
 
-    @Column(name = "estado_civil", length = 50)
-    @Enumerated(EnumType.STRING)
+    @Convert(converter = EstadoCivilEnumConverter.class)
+    @Column(name = "estado_civil")
     private EstadoCivilEnum estadoCivil;
 
     @Column(name = "telefone", length = 20)
@@ -69,21 +88,12 @@ public class Paciente extends BaseEntity {
     private String responsavelNome;
 
     @Pattern(regexp = "^\\d{11}$", message = "CPF do responsável deve ter 11 dígitos")
-    @Column(name = "responsavel_cpf", length = 14)
+    @Column(name = "responsavel_cpf", length = 11)
     private String responsavelCpf;
 
     @Pattern(regexp = "^\\d{10,11}$", message = "Telefone do responsável deve ter 10 ou 11 dígitos")
     @Column(name = "responsavel_telefone", length = 20)
     private String responsavelTelefone;
-
-    @Column(name = "endereco_json", columnDefinition = "jsonb")
-    private String enderecoJson;
-
-    @Column(name = "contato_json", columnDefinition = "jsonb")
-    private String contatoJson;
-
-    @Column(name = "informacoes_adicionais_json", columnDefinition = "jsonb")
-    private String informacoesAdicionaisJson;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "convenio_id")
@@ -110,5 +120,125 @@ public class Paciente extends BaseEntity {
         inverseJoinColumns = @JoinColumn(name = "endereco_id")
     )
     private List<Endereco> enderecos = new ArrayList<>();
+    
+    /** Raça/Cor conforme classificação IBGE */
+    @Convert(converter = RacaCorEnumConverter.class)
+    @Column(name = "raca_cor")
+    private RacaCorEnum racaCor;
+
+    /** Nacionalidade do paciente */
+    @Convert(converter = NacionalidadeEnumConverter.class)
+    @Column(name = "nacionalidade")
+    private NacionalidadeEnum nacionalidade;
+
+    /** País de nascimento */
+    @Size(max = 100, message = "País de nascimento deve ter no máximo 100 caracteres")
+    @Column(name = "pais_nascimento", length = 100)
+    private String paisNascimento;
+
+    /** Naturalidade (cidade de nascimento) */
+    @Size(max = 100, message = "Naturalidade deve ter no máximo 100 caracteres")
+    @Column(name = "naturalidade", length = 100)
+    private String naturalidade;
+
+    /** Código IBGE do município de nascimento */
+    @Size(max = 7, message = "Código IBGE do município deve ter no máximo 7 caracteres")
+    @Column(name = "municipio_nascimento_ibge", length = 7)
+    private String municipioNascimentoIbge;
+
+    /** Escolaridade do paciente */
+    @Convert(converter = EscolaridadeEnumConverter.class)
+    @Column(name = "escolaridade")
+    private EscolaridadeEnum escolaridade;
+
+    /** Ocupação/Profissão do paciente */
+    @Size(max = 150, message = "Ocupação/Profissão deve ter no máximo 150 caracteres")
+    @Column(name = "ocupacao_profissao", length = 150)
+    private String ocupacaoProfissao;
+
+    /** Indica se paciente está em situação de rua */
+    @Column(name = "situacao_rua", nullable = false)
+    private Boolean situacaoRua = false;
+
+    /** Status do paciente no sistema de saúde */
+    @Convert(converter = StatusPacienteEnumConverter.class)
+    @Column(name = "status_paciente", nullable = false)
+    private StatusPacienteEnum statusPaciente = StatusPacienteEnum.ATIVO;
+
+    /** Data do óbito (quando statusPaciente = OBITO) */
+    @Column(name = "data_obito")
+    private LocalDate dataObito;
+
+    /** CID-10 da causa do óbito */
+    @Size(max = 10, message = "CID-10 da causa do óbito deve ter no máximo 10 caracteres")
+    @Column(name = "causa_obito_cid10", length = 10)
+    private String causaObitoCid10;
+
+    /** Indica se CNS está ativo */
+    @Column(name = "cartao_sus_ativo", nullable = false)
+    private Boolean cartaoSusAtivo = true;
+
+    /** Data da última atualização do CNS */
+    @Column(name = "data_atualizacao_cns")
+    private LocalDate dataAtualizacaoCns;
+
+    /** Tipo de atendimento preferencial */
+    @Convert(converter = TipoAtendimentoPreferencialEnumConverter.class)
+    @Column(name = "tipo_atendimento_preferencial")
+    private TipoAtendimentoPreferencialEnum tipoAtendimentoPreferencial;
+
+    /** Origem do cadastro (e-SUS, SISAB, etc.) */
+    @Size(max = 30, message = "Origem do cadastro deve ter no máximo 30 caracteres")
+    @Column(name = "origem_cadastro", length = 30)
+    private String origemCadastro;
+
+    @Size(max = 255, message = "Nome social deve ter no máximo 255 caracteres")
+    @Column(name = "nome_social", length = 255)
+    private String nomeSocial;
+
+    @Convert(converter = IdentidadeGeneroEnumConverter.class)
+    @Column(name = "identidade_genero")
+    private IdentidadeGeneroEnum identidadeGenero;
+
+    @Convert(converter = OrientacaoSexualEnumConverter.class)
+    @Column(name = "orientacao_sexual")
+    private OrientacaoSexualEnum orientacaoSexual;
+
+    @Column(name = "possui_deficiencia", nullable = false)
+    private Boolean possuiDeficiencia = false;
+
+    @Size(max = 255, message = "Tipo de deficiência deve ter no máximo 255 caracteres")
+    @Column(name = "tipo_deficiencia", length = 255)
+    private String tipoDeficiencia;
+
+    @Column(name = "cns_validado", nullable = false)
+    private Boolean cnsValidado = false;
+
+    @Convert(converter = TipoCnsEnumConverter.class)
+    @Column(name = "tipo_cns")
+    private TipoCnsEnum tipoCns;
+
+    @Column(name = "acompanhado_por_equipe_esf", nullable = false)
+    private Boolean acompanhadoPorEquipeEsf = false;
+
+    /** Dados sociodemográficos do paciente */
+    @OneToOne(mappedBy = "paciente", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private DadosSociodemograficos dadosSociodemograficos;
+
+    /** Dados clínicos básicos do paciente */
+    @OneToOne(mappedBy = "paciente", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private DadosClinicosBasicos dadosClinicosBasicos;
+
+    /** Responsável legal do paciente */
+    @OneToOne(mappedBy = "paciente", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private ResponsavelLegal responsavelLegal;
+
+    /** Consentimentos LGPD do paciente */
+    @OneToOne(mappedBy = "paciente", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private LGPDConsentimento lgpdConsentimento;
+
+    /** Informações de integração com sistemas governamentais */
+    @OneToOne(mappedBy = "paciente", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private IntegracaoGov integracaoGov;
 
 }

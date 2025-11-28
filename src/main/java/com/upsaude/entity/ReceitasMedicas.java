@@ -55,8 +55,8 @@ public class ReceitasMedicas extends BaseEntity {
     @Size(max = 1000, message = "Observações devem ter no máximo 1000 caracteres")
     private String observacoes;
 
-    @Column(name = "status", nullable = false, length = 20)
-    @Enumerated(EnumType.STRING)
+    @Enumerated(EnumType.ORDINAL)
+    @Column(name = "status", nullable = false)
     @NotNull(message = "Status é obrigatório")
     private StatusReceita status;
 

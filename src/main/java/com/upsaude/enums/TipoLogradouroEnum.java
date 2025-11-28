@@ -4,27 +4,27 @@ import java.util.Arrays;
 import java.util.Locale;
 
 public enum TipoLogradouroEnum {
-    RUA("RUA", "Rua"),
-    AVENIDA("AV", "Avenida"),
-    TRAVESSA("TRAV", "Travessa"),
-    ALAMEDA("AL", "Alameda"),
-    PRACA("PRACA", "Praça"),
-    ESTRADA("EST", "Estrada"),
-    RODOVIA("ROD", "Rodovia"),
-    VIA("VIA", "Via"),
-    VIELA("VIELA", "Viela"),
-    CONDOMINIO("COND", "Condomínio"),
-    LOTEAMENTO("LOT", "Loteamento");
+    RUA(1, "Rua"),
+    AVENIDA(2, "Avenida"),
+    TRAVESSA(3, "Travessa"),
+    ALAMEDA(4, "Alameda"),
+    PRACA(5, "Praça"),
+    ESTRADA(6, "Estrada"),
+    RODOVIA(7, "Rodovia"),
+    VIA(8, "Via"),
+    VIELA(9, "Viela"),
+    CONDOMINIO(10, "Condomínio"),
+    LOTEAMENTO(11, "Loteamento");
 
-    private final String codigo;
+    private final Integer codigo;
     private final String descricao;
 
-    TipoLogradouroEnum(String codigo, String descricao) {
+    TipoLogradouroEnum(Integer codigo, String descricao) {
         this.codigo = codigo;
         this.descricao = descricao;
     }
 
-    public String getCodigo() {
+    public Integer getCodigo() {
         return codigo;
     }
 
@@ -32,11 +32,10 @@ public enum TipoLogradouroEnum {
         return descricao;
     }
 
-    public static TipoLogradouroEnum fromCodigo(String codigo) {
+    public static TipoLogradouroEnum fromCodigo(Integer codigo) {
         if (codigo == null) return null;
-        String c = codigo.trim().toUpperCase(Locale.ROOT);
         return Arrays.stream(values())
-            .filter(v -> v.codigo.equals(c))
+            .filter(v -> v.codigo.equals(codigo))
             .findFirst()
             .orElse(null);
     }

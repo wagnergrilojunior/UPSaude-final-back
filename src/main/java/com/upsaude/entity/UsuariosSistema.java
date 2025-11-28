@@ -47,8 +47,8 @@ public class UsuariosSistema extends BaseEntity {
     @JoinColumn(name = "paciente_id")
     private Paciente paciente;
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "tipo_usuario", nullable = false, length = 50)
+    @Enumerated(EnumType.ORDINAL)
+    @Column(name = "tipo_usuario", nullable = false)
     @NotNull(message = "Tipo de usuário é obrigatório")
     private TipoUsuarioSistemaEnum tipoUsuario;
 

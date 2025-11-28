@@ -18,11 +18,8 @@ public class EnderecoRequest {
     private String numero;
     private String complemento;
     private String bairro;
-    private String cidade;
-    private String estado;
     private String cep;
     private String pais;
-    private String codigoIbge;
     private Double latitude;
     private Double longitude;
     private UUID estadoId;
