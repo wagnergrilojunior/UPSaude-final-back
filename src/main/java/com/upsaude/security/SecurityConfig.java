@@ -24,6 +24,7 @@ import java.util.List;
 public class SecurityConfig {
 
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
+    private final CustomAuthenticationEntryPoint customAuthenticationEntryPoint;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -35,9 +36,11 @@ public class SecurityConfig {
             .cors(cors -> cors.configurationSource(corsConfigurationSource()))
             
             // Configura autorização de endpoints
-            // Nota: O context-path é /api, então os caminhos já incluem /api automaticamente
+            // Nota: O context-path é /api, então os caminhos devem ser relativos ao context-path
+            // Spring Security automaticamente considera o context-path
             .authorizeHttpRequests(auth -> auth
                 // Endpoints públicos - apenas login é público
+                // Paths relativos ao context-path (/api)
                 .requestMatchers("/v1/auth/login").permitAll()
                 .requestMatchers("/actuator/health").permitAll()
                 .requestMatchers("/actuator/info").permitAll()
@@ -56,6 +59,12 @@ public class SecurityConfig {
                 session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
             )
             
+            // Configura tratamento de exceções de autenticação
+            // Garante que retorna 401 em vez de 404 quando não autenticado
+            .exceptionHandling(exceptions -> exceptions
+                .authenticationEntryPoint(customAuthenticationEntryPoint)
+            )
+            
             // Adiciona o filtro JWT antes do filtro de autenticação padrão
             .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
@@ -65,14 +74,17 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(List.of("*")); // Configure conforme necessário
+        // Permite todas as origens (em produção, configure apenas os domínios permitidos)
+        configuration.setAllowedOrigins(List.of("*"));
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
         configuration.setAllowedHeaders(List.of("*"));
-        configuration.setExposedHeaders(List.of("Authorization"));
+        configuration.setExposedHeaders(Arrays.asList("Authorization", "Content-Type"));
+        // Quando allowCredentials é true, não pode usar "*" em allowedOrigins
         configuration.setAllowCredentials(false);
         configuration.setMaxAge(3600L);
         
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        // Registra CORS para todos os paths (incluindo o context-path /api)
         source.registerCorsConfiguration("/**", configuration);
         return source;
     }

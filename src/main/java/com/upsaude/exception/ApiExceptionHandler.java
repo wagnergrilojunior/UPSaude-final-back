@@ -3,6 +3,10 @@ package com.upsaude.exception;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.authentication.AuthenticationCredentialsNotFoundException;
+import org.springframework.security.authentication.InsufficientAuthenticationException;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -171,6 +175,42 @@ public class ApiExceptionHandler {
         resposta.put("path", request.getRequestURI());
 
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(resposta);
+    }
+
+    /**
+     * Trata exceções de autenticação do Spring Security (401).
+     *
+     * @param ex exceção lançada
+     * @param request requisição HTTP
+     * @return resposta JSON com detalhes do erro
+     */
+    @ExceptionHandler({AuthenticationException.class, InsufficientAuthenticationException.class, AuthenticationCredentialsNotFoundException.class})
+    public ResponseEntity<Map<String, Object>> handleAuthenticationException(
+            Exception ex, HttpServletRequest request) {
+        return buildErrorResponse(
+                HttpStatus.UNAUTHORIZED,
+                "Não Autorizado",
+                "Token de autenticação inválido ou não fornecido",
+                request.getRequestURI()
+        );
+    }
+
+    /**
+     * Trata exceções de acesso negado do Spring Security (403).
+     *
+     * @param ex exceção lançada
+     * @param request requisição HTTP
+     * @return resposta JSON com detalhes do erro
+     */
+    @ExceptionHandler(AccessDeniedException.class)
+    public ResponseEntity<Map<String, Object>> handleAccessDeniedException(
+            AccessDeniedException ex, HttpServletRequest request) {
+        return buildErrorResponse(
+                HttpStatus.FORBIDDEN,
+                "Acesso Proibido",
+                "Você não tem permissão para acessar este recurso",
+                request.getRequestURI()
+        );
     }
 
     /**
