@@ -1,0 +1,54 @@
+package com.upsaude.entity;
+
+import java.time.OffsetDateTime;
+import java.util.UUID;
+
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.EntityListeners;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.MappedSuperclass;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+
+/**
+ * Classe base para entidades que precisam de tenant mas não precisam de estabelecimento.
+ * Usado para catálogos globais, configurações e outras entidades que não são específicas de uma unidade.
+ * 
+ * @author UPSaúde
+ */
+@MappedSuperclass
+@Data
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
+@EntityListeners(AuditingEntityListener.class)
+public abstract class BaseEntityWithoutEstabelecimento {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.UUID)
+    @EqualsAndHashCode.Include
+    private UUID id;
+
+    @CreatedDate
+    @Column(name = "criado_em", nullable = false, updatable = false)
+    private OffsetDateTime createdAt;
+
+    @LastModifiedDate
+    @Column(name = "atualizado_em")
+    private OffsetDateTime updatedAt;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "tenant_id", nullable = false)
+    private Tenant tenant;
+
+    @Column(name = "ativo", nullable = false)
+    private Boolean active;
+}
+

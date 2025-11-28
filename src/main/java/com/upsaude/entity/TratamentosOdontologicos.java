@@ -28,10 +28,6 @@ public class TratamentosOdontologicos extends BaseEntity {
     @JoinColumn(name = "profissional_id")
     private ProfissionaisSaude profissional;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "estabelecimento_id")
-    private Estabelecimentos estabelecimento;
-
     @Column(name = "titulo", nullable = false, length = 255)
     private String titulo;
 

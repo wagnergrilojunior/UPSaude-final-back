@@ -3,10 +3,12 @@ package com.upsaude.service.impl;
 import com.upsaude.api.request.ConsultasRequest;
 import com.upsaude.api.response.ConsultasResponse;
 import com.upsaude.entity.Consultas;
+import com.upsaude.entity.Estabelecimentos;
 import com.upsaude.exception.BadRequestException;
 import com.upsaude.exception.NotFoundException;
 import com.upsaude.mapper.ConsultasMapper;
 import com.upsaude.repository.ConsultasRepository;
+import com.upsaude.repository.EstabelecimentosRepository;
 import com.upsaude.service.ConsultasService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -29,6 +31,7 @@ public class ConsultasServiceImpl implements ConsultasService {
 
     private final ConsultasRepository consultasRepository;
     private final ConsultasMapper consultasMapper;
+    private final EstabelecimentosRepository estabelecimentosRepository;
 
     @Override
     @Transactional
@@ -67,6 +70,19 @@ public class ConsultasServiceImpl implements ConsultasService {
                 pageable.getPageNumber(), pageable.getPageSize());
 
         Page<Consultas> consultas = consultasRepository.findAll(pageable);
+        return consultas.map(consultasMapper::toResponse);
+    }
+
+    @Override
+    public Page<ConsultasResponse> listarPorEstabelecimento(UUID estabelecimentoId, Pageable pageable) {
+        log.debug("Listando consultas do estabelecimento: {}. Página: {}, Tamanho: {}",
+                estabelecimentoId, pageable.getPageNumber(), pageable.getPageSize());
+
+        if (estabelecimentoId == null) {
+            throw new BadRequestException("ID do estabelecimento é obrigatório");
+        }
+
+        Page<Consultas> consultas = consultasRepository.findByEstabelecimentoIdOrderByInformacoesDataConsultaDesc(estabelecimentoId, pageable);
         return consultas.map(consultasMapper::toResponse);
     }
 
@@ -117,6 +133,15 @@ public class ConsultasServiceImpl implements ConsultasService {
         if (request == null) {
             throw new BadRequestException("Dados da consulta são obrigatórios");
         }
+        if (request.getPacienteId() == null) {
+            throw new BadRequestException("ID do paciente é obrigatório");
+        }
+        if (request.getInformacoes() == null) {
+            throw new BadRequestException("Informações da consulta são obrigatórias");
+        }
+        if (request.getInformacoes().getDataConsulta() == null) {
+            throw new BadRequestException("Data da consulta é obrigatória");
+        }
     }
 
     private void atualizarDadosConsulta(Consultas consulta, ConsultasRequest request) {
@@ -124,14 +149,19 @@ public class ConsultasServiceImpl implements ConsultasService {
 
         consulta.setPaciente(consultaAtualizada.getPaciente());
         consulta.setMedico(consultaAtualizada.getMedico());
-        consulta.setEstabelecimento(consultaAtualizada.getEstabelecimento());
-        consulta.setDataConsulta(consultaAtualizada.getDataConsulta());
-        consulta.setDuracaoMinutos(consultaAtualizada.getDuracaoMinutos());
-        consulta.setTipoConsulta(consultaAtualizada.getTipoConsulta());
-        consulta.setStatus(consultaAtualizada.getStatus());
-        consulta.setMotivo(consultaAtualizada.getMotivo());
+        consulta.setProfissionalSaude(consultaAtualizada.getProfissionalSaude());
+        consulta.setEspecialidade(consultaAtualizada.getEspecialidade());
+        consulta.setConvenio(consultaAtualizada.getConvenio());
+        consulta.setCidPrincipal(consultaAtualizada.getCidPrincipal());
+        consulta.setInformacoes(consultaAtualizada.getInformacoes());
+        consulta.setAnamnese(consultaAtualizada.getAnamnese());
         consulta.setDiagnostico(consultaAtualizada.getDiagnostico());
+        consulta.setPrescricao(consultaAtualizada.getPrescricao());
+        consulta.setExamesSolicitados(consultaAtualizada.getExamesSolicitados());
+        consulta.setEncaminhamento(consultaAtualizada.getEncaminhamento());
+        consulta.setAtestado(consultaAtualizada.getAtestado());
         consulta.setObservacoes(consultaAtualizada.getObservacoes());
+        consulta.setObservacoesInternas(consultaAtualizada.getObservacoesInternas());
     }
 }
 

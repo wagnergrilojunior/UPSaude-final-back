@@ -2,10 +2,12 @@ package com.upsaude.service.impl;
 
 import com.upsaude.api.request.ProfissionaisSaudeRequest;
 import com.upsaude.api.response.ProfissionaisSaudeResponse;
+import com.upsaude.entity.EspecialidadesMedicas;
 import com.upsaude.entity.ProfissionaisSaude;
 import com.upsaude.exception.BadRequestException;
 import com.upsaude.exception.NotFoundException;
 import com.upsaude.mapper.ProfissionaisSaudeMapper;
+import com.upsaude.repository.EspecialidadesMedicasRepository;
 import com.upsaude.repository.ProfissionaisSaudeRepository;
 import com.upsaude.service.ProfissionaisSaudeService;
 import jakarta.transaction.Transactional;
@@ -15,6 +17,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 import org.springframework.util.StringUtils;
 
@@ -30,6 +34,7 @@ public class ProfissionaisSaudeServiceImpl implements ProfissionaisSaudeService 
 
     private final ProfissionaisSaudeRepository profissionaisSaudeRepository;
     private final ProfissionaisSaudeMapper profissionaisSaudeMapper;
+    private final EspecialidadesMedicasRepository especialidadesMedicasRepository;
 
     @Override
     @Transactional
@@ -37,9 +42,16 @@ public class ProfissionaisSaudeServiceImpl implements ProfissionaisSaudeService 
         log.debug("Criando novo profissional de saúde");
 
         validarDadosBasicos(request);
+        validarUnicidade(request);
 
         ProfissionaisSaude profissional = profissionaisSaudeMapper.fromRequest(request);
         profissional.setActive(true);
+
+        // Carregar especialidades do banco de dados
+        if (request.getEspecialidadesIds() != null && !request.getEspecialidadesIds().isEmpty()) {
+            List<EspecialidadesMedicas> especialidades = especialidadesMedicasRepository.findAllById(request.getEspecialidadesIds());
+            profissional.setEspecialidades(especialidades);
+        }
 
         ProfissionaisSaude profissionalSalvo = profissionaisSaudeRepository.save(profissional);
         log.info("Profissional de saúde criado com sucesso. ID: {}", profissionalSalvo.getId());
@@ -118,6 +130,37 @@ public class ProfissionaisSaudeServiceImpl implements ProfissionaisSaudeService 
         if (request == null) {
             throw new BadRequestException("Dados do profissional de saúde são obrigatórios");
         }
+
+        // Validar dados regulatórios
+        if (request.getDataValidadeRegistro() != null && request.getDataEmissaoRegistro() != null) {
+            if (request.getDataValidadeRegistro().isBefore(request.getDataEmissaoRegistro())) {
+                throw new BadRequestException("Data de validade do registro não pode ser anterior à data de emissão");
+            }
+        }
+
+        // Validar que profissional com registro suspenso ou inativo não pode ser vinculado
+        if (request.getStatusRegistro() != null && 
+            (request.getStatusRegistro() == com.upsaude.enums.StatusAtivoEnum.SUSPENSO || 
+             request.getStatusRegistro() == com.upsaude.enums.StatusAtivoEnum.INATIVO)) {
+            log.warn("Profissional sendo cadastrado com status de registro: {}", request.getStatusRegistro());
+        }
+    }
+
+    private void validarUnicidade(ProfissionaisSaudeRequest request) {
+        // Validar unicidade de CPF
+        if (request.getCpf() != null && !request.getCpf().trim().isEmpty()) {
+            if (profissionaisSaudeRepository.existsByCpf(request.getCpf())) {
+                throw new BadRequestException("Já existe um profissional cadastrado com o CPF informado");
+            }
+        }
+
+        // Validar unicidade de registro profissional (registro + conselho + UF)
+        if (request.getRegistroProfissional() != null && request.getConselhoId() != null && request.getUfRegistro() != null) {
+            if (profissionaisSaudeRepository.existsByRegistroProfissionalAndConselhoIdAndUfRegistro(
+                    request.getRegistroProfissional(), request.getConselhoId(), request.getUfRegistro())) {
+                throw new BadRequestException("Já existe um profissional cadastrado com o registro profissional, conselho e UF informados");
+            }
+        }
     }
 
     private void atualizarDadosProfissional(ProfissionaisSaude profissional, ProfissionaisSaudeRequest request) {
@@ -125,11 +168,47 @@ public class ProfissionaisSaudeServiceImpl implements ProfissionaisSaudeService 
 
         profissional.setNomeCompleto(profissionalAtualizado.getNomeCompleto());
         profissional.setCpf(profissionalAtualizado.getCpf());
+        profissional.setDataNascimento(profissionalAtualizado.getDataNascimento());
+        profissional.setSexo(profissionalAtualizado.getSexo());
+        profissional.setEstadoCivil(profissionalAtualizado.getEstadoCivil());
+        profissional.setEscolaridade(profissionalAtualizado.getEscolaridade());
+        profissional.setIdentidadeGenero(profissionalAtualizado.getIdentidadeGenero());
+        profissional.setRacaCor(profissionalAtualizado.getRacaCor());
+        profissional.setTemDeficiencia(profissionalAtualizado.getTemDeficiencia() != null ? profissionalAtualizado.getTemDeficiencia() : false);
+        profissional.setTipoDeficiencia(profissionalAtualizado.getTipoDeficiencia());
+        profissional.setRg(profissionalAtualizado.getRg());
+        profissional.setOrgaoEmissorRg(profissionalAtualizado.getOrgaoEmissorRg());
+        profissional.setUfEmissaoRg(profissionalAtualizado.getUfEmissaoRg());
+        profissional.setDataEmissaoRg(profissionalAtualizado.getDataEmissaoRg());
+        profissional.setNacionalidade(profissionalAtualizado.getNacionalidade());
+        profissional.setNaturalidade(profissionalAtualizado.getNaturalidade());
         profissional.setRegistroProfissional(profissionalAtualizado.getRegistroProfissional());
         profissional.setConselho(profissionalAtualizado.getConselho());
         profissional.setUfRegistro(profissionalAtualizado.getUfRegistro());
+        profissional.setDataEmissaoRegistro(profissionalAtualizado.getDataEmissaoRegistro());
+        profissional.setDataValidadeRegistro(profissionalAtualizado.getDataValidadeRegistro());
+        profissional.setStatusRegistro(profissionalAtualizado.getStatusRegistro());
+        profissional.setTipoProfissional(profissionalAtualizado.getTipoProfissional());
+        profissional.setCns(profissionalAtualizado.getCns());
+        profissional.setCodigoCbo(profissionalAtualizado.getCodigoCbo());
+        profissional.setDescricaoCbo(profissionalAtualizado.getDescricaoCbo());
+        profissional.setCodigoOcupacional(profissionalAtualizado.getCodigoOcupacional());
         profissional.setTelefone(profissionalAtualizado.getTelefone());
         profissional.setEmail(profissionalAtualizado.getEmail());
+        profissional.setTelefoneInstitucional(profissionalAtualizado.getTelefoneInstitucional());
+        profissional.setEmailInstitucional(profissionalAtualizado.getEmailInstitucional());
+        profissional.setEnderecoProfissional(profissionalAtualizado.getEnderecoProfissional());
+        profissional.setObservacoes(profissionalAtualizado.getObservacoes());
+
+        // Atualizar especialidades
+        if (request.getEspecialidadesIds() != null) {
+            if (request.getEspecialidadesIds().isEmpty()) {
+                profissional.setEspecialidades(new ArrayList<>());
+            } else {
+                List<EspecialidadesMedicas> especialidades = especialidadesMedicasRepository.findAllById(request.getEspecialidadesIds());
+                profissional.setEspecialidades(especialidades);
+            }
+        }
     }
 }
 

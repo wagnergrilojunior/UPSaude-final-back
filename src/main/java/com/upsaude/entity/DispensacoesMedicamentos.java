@@ -15,8 +15,6 @@ import lombok.Data;
 @Data
 public class DispensacoesMedicamentos extends BaseEntity {
 
-    
-
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "paciente_id", nullable = false)
     private Paciente paciente;

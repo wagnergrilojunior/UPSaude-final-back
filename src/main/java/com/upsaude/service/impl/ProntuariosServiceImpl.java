@@ -2,10 +2,14 @@ package com.upsaude.service.impl;
 
 import com.upsaude.api.request.ProntuariosRequest;
 import com.upsaude.api.response.ProntuariosResponse;
+import com.upsaude.entity.Estabelecimentos;
+import com.upsaude.entity.Paciente;
 import com.upsaude.entity.Prontuarios;
 import com.upsaude.exception.BadRequestException;
 import com.upsaude.exception.NotFoundException;
 import com.upsaude.mapper.ProntuariosMapper;
+import com.upsaude.repository.EstabelecimentosRepository;
+import com.upsaude.repository.PacienteRepository;
 import com.upsaude.repository.ProntuariosRepository;
 import com.upsaude.service.ProntuariosService;
 import jakarta.transaction.Transactional;
@@ -30,6 +34,8 @@ public class ProntuariosServiceImpl implements ProntuariosService {
 
     private final ProntuariosRepository prontuariosRepository;
     private final ProntuariosMapper prontuariosMapper;
+    private final EstabelecimentosRepository estabelecimentosRepository;
+    private final PacienteRepository pacienteRepository;
 
     @Override
     @Transactional
@@ -39,6 +45,17 @@ public class ProntuariosServiceImpl implements ProntuariosService {
         validarDadosBasicos(request);
 
         Prontuarios prontuarios = prontuariosMapper.fromRequest(request);
+
+        // Carrega e define o estabelecimento
+        Estabelecimentos estabelecimento = estabelecimentosRepository.findById(request.getEstabelecimentoId())
+                .orElseThrow(() -> new NotFoundException("Estabelecimento não encontrado com ID: " + request.getEstabelecimentoId()));
+        prontuarios.setEstabelecimento(estabelecimento);
+
+        // Carrega e define o paciente
+        Paciente paciente = pacienteRepository.findById(request.getPacienteId())
+                .orElseThrow(() -> new NotFoundException("Paciente não encontrado com ID: " + request.getPacienteId()));
+        prontuarios.setPaciente(paciente);
+
         prontuarios.setActive(true);
 
         Prontuarios prontuariosSalvo = prontuariosRepository.save(prontuarios);
@@ -68,6 +85,19 @@ public class ProntuariosServiceImpl implements ProntuariosService {
                 pageable.getPageNumber(), pageable.getPageSize());
 
         Page<Prontuarios> prontuarios = prontuariosRepository.findAll(pageable);
+        return prontuarios.map(prontuariosMapper::toResponse);
+    }
+
+    @Override
+    public Page<ProntuariosResponse> listarPorEstabelecimento(UUID estabelecimentoId, Pageable pageable) {
+        log.debug("Listando prontuários do estabelecimento: {}. Página: {}, Tamanho: {}",
+                estabelecimentoId, pageable.getPageNumber(), pageable.getPageSize());
+
+        if (estabelecimentoId == null) {
+            throw new BadRequestException("ID do estabelecimento é obrigatório");
+        }
+
+        Page<Prontuarios> prontuarios = prontuariosRepository.findByEstabelecimentoId(estabelecimentoId, pageable);
         return prontuarios.map(prontuariosMapper::toResponse);
     }
 
@@ -118,24 +148,38 @@ public class ProntuariosServiceImpl implements ProntuariosService {
         if (request == null) {
             throw new BadRequestException("Dados do prontuarios são obrigatórios");
         }
+        if (request.getEstabelecimentoId() == null) {
+            throw new BadRequestException("ID do estabelecimento é obrigatório");
+        }
+        if (request.getPacienteId() == null) {
+            throw new BadRequestException("ID do paciente é obrigatório");
+        }
     }
 
         private void atualizarDadosProntuarios(Prontuarios prontuarios, ProntuariosRequest request) {
-        Prontuarios prontuariosAtualizado = prontuariosMapper.fromRequest(request);
-        
-        // Preserva campos de controle
-        java.util.UUID idOriginal = prontuarios.getId();
-        com.upsaude.entity.Tenant tenantOriginal = prontuarios.getTenant();
-        Boolean activeOriginal = prontuarios.getActive();
-        java.time.OffsetDateTime createdAtOriginal = prontuarios.getCreatedAt();
-        
-        // Copia todas as propriedades do objeto atualizado
-        BeanUtils.copyProperties(prontuariosAtualizado, prontuarios);
-        
-        // Restaura campos de controle
-        prontuarios.setId(idOriginal);
-        prontuarios.setTenant(tenantOriginal);
-        prontuarios.setActive(activeOriginal);
-        prontuarios.setCreatedAt(createdAtOriginal);
+        // Atualiza estabelecimento se fornecido
+        if (request.getEstabelecimentoId() != null) {
+            Estabelecimentos estabelecimento = estabelecimentosRepository.findById(request.getEstabelecimentoId())
+                    .orElseThrow(() -> new NotFoundException("Estabelecimento não encontrado com ID: " + request.getEstabelecimentoId()));
+            prontuarios.setEstabelecimento(estabelecimento);
+        }
+
+        // Atualiza paciente se fornecido
+        if (request.getPacienteId() != null) {
+            Paciente paciente = pacienteRepository.findById(request.getPacienteId())
+                    .orElseThrow(() -> new NotFoundException("Paciente não encontrado com ID: " + request.getPacienteId()));
+            prontuarios.setPaciente(paciente);
+        }
+
+        // Atualiza outros campos
+        if (request.getTipoRegistro() != null) {
+            prontuarios.setTipoRegistro(request.getTipoRegistro());
+        }
+        if (request.getConteudo() != null) {
+            prontuarios.setConteudo(request.getConteudo());
+        }
+        if (request.getCriadoPor() != null) {
+            prontuarios.setCriadoPor(request.getCriadoPor());
+        }
     }
 }

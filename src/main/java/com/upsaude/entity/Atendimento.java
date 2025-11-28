@@ -1,85 +1,103 @@
 package com.upsaude.entity;
 
+import com.upsaude.entity.embeddable.AnamneseAtendimento;
+import com.upsaude.entity.embeddable.ClassificacaoRiscoAtendimento;
+import com.upsaude.entity.embeddable.DiagnosticoAtendimento;
+import com.upsaude.entity.embeddable.InformacoesAtendimento;
+import com.upsaude.entity.embeddable.ProcedimentosRealizadosAtendimento;
 import jakarta.persistence.Column;
+import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
+import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Size;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
-import java.time.OffsetDateTime;
-
 /**
  * Entidade que representa um atendimento realizado por um profissional de saúde a um paciente.
- * Armazena informações sobre consultas, atendimentos domiciliares, emergências, etc.
+ * Armazena informações completas sobre atendimentos para sistemas de gestão de saúde.
+ * Baseado em padrões de prontuário eletrônico e sistemas de saúde.
  *
  * @author UPSaúde
  */
 @Entity
-@Table(name = "atendimentos", schema = "public")
+@Table(name = "atendimentos", schema = "public",
+       indexes = {
+           @Index(name = "idx_atendimento_paciente", columnList = "paciente_id"),
+           @Index(name = "idx_atendimento_profissional", columnList = "profissional_id"),
+           @Index(name = "idx_atendimento_data_hora", columnList = "data_hora"),
+           @Index(name = "idx_atendimento_tipo", columnList = "tipo_atendimento"),
+           @Index(name = "idx_atendimento_status", columnList = "status_atendimento"),
+           @Index(name = "idx_atendimento_estabelecimento", columnList = "estabelecimento_id")
+       })
 @Data
 @EqualsAndHashCode(callSuper = true)
 public class Atendimento extends BaseEntity {
 
-    /**
-     * Relacionamento ManyToOne com Paciente.
-     * O paciente que recebeu o atendimento.
-     */
+    // ========== RELACIONAMENTOS ==========
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "paciente_id", nullable = false)
     @NotNull(message = "Paciente é obrigatório")
     private Paciente paciente;
 
-    /**
-     * Relacionamento ManyToOne com ProfissionaisSaude.
-     * O profissional de saúde que realizou o atendimento.
-     */
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "profissional_id", nullable = false)
     @NotNull(message = "Profissional de saúde é obrigatório")
     private ProfissionaisSaude profissional;
 
-    /**
-     * Data e hora do atendimento.
-     * Registra quando o atendimento foi realizado.
-     */
-    @Column(name = "data_hora", nullable = false)
-    @NotNull(message = "Data e hora do atendimento são obrigatórias")
-    private OffsetDateTime dataHora;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "especialidade_id")
+    private EspecialidadesMedicas especialidade; // Especialidade do atendimento
 
-    /**
-     * Tipo de atendimento.
-     * Exemplos: "consulta", "domiciliar", "emergencia".
-     */
-    @Column(name = "tipo_atendimento", length = 50)
-    @Size(max = 50, message = "Tipo de atendimento deve ter no máximo 50 caracteres")
-    private String tipoAtendimento;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "equipe_saude_id")
+    private EquipeSaude equipeSaude; // Equipe de saúde que realizou o atendimento
 
-    /**
-     * Motivo da consulta ou atendimento.
-     * Descrição do motivo que levou o paciente a buscar o atendimento.
-     */
-    @Column(name = "motivo", length = 255)
-    @Size(max = 255, message = "Motivo deve ter no máximo 255 caracteres")
-    private String motivo;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "convenio_id")
+    private Convenio convenio; // Convênio utilizado no atendimento
 
-    /**
-     * Relacionamento ManyToOne com CidDoencas.
-     * CID-10 do diagnóstico principal do atendimento.
-     */
+    // ========== INFORMAÇÕES BÁSICAS ==========
+
+    @Embedded
+    private InformacoesAtendimento informacoes;
+
+    // ========== ANAMNESE ==========
+
+    @Embedded
+    private AnamneseAtendimento anamnese;
+
+    // ========== DIAGNÓSTICO ==========
+
+    @Embedded
+    private DiagnosticoAtendimento diagnostico;
+
+    // ========== PROCEDIMENTOS REALIZADOS ==========
+
+    @Embedded
+    private ProcedimentosRealizadosAtendimento procedimentosRealizados;
+
+    // ========== CLASSIFICAÇÃO DE RISCO ==========
+
+    @Embedded
+    private ClassificacaoRiscoAtendimento classificacaoRisco;
+
+    // ========== RELACIONAMENTO COM CID ==========
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "cid_principal_id")
-    private CidDoencas cidPrincipal;
+    private CidDoencas cidPrincipal; // CID principal do atendimento
 
-    /**
-     * Anotações ou observações da consulta.
-     * Campo de texto livre para anotações adicionais sobre o atendimento.
-     */
+    // ========== OBSERVAÇÕES ==========
+
     @Column(name = "anotacoes", columnDefinition = "TEXT")
-    private String anotacoes;
-}
+    private String anotacoes; // Anotações gerais do atendimento
 
+    @Column(name = "observacoes_internas", columnDefinition = "TEXT")
+    private String observacoesInternas; // Observações internas (não visíveis ao paciente)
+}

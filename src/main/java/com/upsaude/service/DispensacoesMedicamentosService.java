@@ -20,6 +20,15 @@ public interface DispensacoesMedicamentosService {
 
     Page<DispensacoesMedicamentosResponse> listar(Pageable pageable);
 
+    /**
+     * Lista todas as dispensações de um estabelecimento, ordenadas por data decrescente.
+     *
+     * @param estabelecimentoId ID do estabelecimento
+     * @param pageable Parâmetros de paginação
+     * @return Página com as dispensações do estabelecimento
+     */
+    Page<DispensacoesMedicamentosResponse> listarPorEstabelecimento(UUID estabelecimentoId, Pageable pageable);
+
     DispensacoesMedicamentosResponse atualizar(UUID id, DispensacoesMedicamentosRequest request);
 
     void excluir(UUID id);

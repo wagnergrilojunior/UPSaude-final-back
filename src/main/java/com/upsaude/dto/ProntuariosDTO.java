@@ -9,6 +9,11 @@ import java.util.UUID;
 @AllArgsConstructor
 public class ProntuariosDTO {
     private UUID id;
+    private UUID estabelecimentoId;
+    private UUID pacienteId;
+    private String tipoRegistro;
+    private String conteudo;
+    private UUID criadoPor;
     private Boolean active;
 }
 
