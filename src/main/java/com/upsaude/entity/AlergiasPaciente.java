@@ -1,6 +1,9 @@
 package com.upsaude.entity;
 
+import com.upsaude.enums.SeveridadeAlergiaEnum;
+import com.upsaude.util.converter.SeveridadeAlergiaEnumConverter;
 import jakarta.persistence.Column;
+import jakarta.persistence.Convert;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
@@ -21,8 +24,9 @@ public class AlergiasPaciente extends BaseEntity {
     @JoinColumn(name = "alergia_id", nullable = false)
     private Alergias alergia;
 
-    @Column(name = "severidade", length = 50)
-    private String severidade;
+    @Convert(converter = SeveridadeAlergiaEnumConverter.class)
+    @Column(name = "severidade")
+    private SeveridadeAlergiaEnum severidade;
 
     @Column(name = "observacoes", columnDefinition = "TEXT")
     private String observacoes;

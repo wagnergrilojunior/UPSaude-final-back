@@ -1,18 +1,19 @@
 package com.upsaude.entity;
 
+import com.upsaude.enums.StatusReceitaEnum;
+import com.upsaude.util.converter.StatusReceitaEnumConverter;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
 import jakarta.persistence.Column;
+import jakarta.persistence.Convert;
 import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinTable;
+import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -55,34 +56,25 @@ public class ReceitasMedicas extends BaseEntity {
     @Size(max = 1000, message = "Observações devem ter no máximo 1000 caracteres")
     private String observacoes;
 
-    @Enumerated(EnumType.ORDINAL)
+    @Convert(converter = StatusReceitaEnumConverter.class)
     @Column(name = "status", nullable = false)
     @NotNull(message = "Status é obrigatório")
-    private StatusReceita status;
+    private StatusReceitaEnum status;
 
-    @OneToMany(fetch = FetchType.LAZY)
+    @Column(name = "origem_receita", length = 50)
+    @Size(max = 50, message = "Origem da receita deve ter no máximo 50 caracteres")
+    private String origemReceita;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "cid_principal_id")
+    private CidDoencas cidPrincipal;
+
+    @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
-        name = "receitas_medicamentos",
+        name = "receitas_medicacoes",
         schema = "public",
         joinColumns = @JoinColumn(name = "receita_id"),
-        inverseJoinColumns = @JoinColumn(name = "medicamento_id")
+        inverseJoinColumns = @JoinColumn(name = "medicacao_id")
     )
-    private List<Medicamentos> medicamentos = new ArrayList<>();
-
-    public enum StatusReceita {
-        ATIVA("Ativa"),
-        UTILIZADA("Utilizada"),
-        CANCELADA("Cancelada"),
-        VENCIDA("Vencida");
-
-        private final String descricao;
-
-        StatusReceita(String descricao) {
-            this.descricao = descricao;
-        }
-
-        public String getDescricao() {
-            return descricao;
-        }
-    }
+    private List<Medicacao> medicacoes = new ArrayList<>();
 }
