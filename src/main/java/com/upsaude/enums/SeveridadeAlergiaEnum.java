@@ -1,0 +1,48 @@
+package com.upsaude.enums;
+
+import java.util.Arrays;
+import java.util.Locale;
+
+/**
+ * Enum para classificação de severidade de alergia conforme padrão médico.
+ */
+public enum SeveridadeAlergiaEnum {
+    LEVE(1, "Leve"),
+    MODERADA(2, "Moderada"),
+    GRAVE(3, "Grave"),
+    ANAFLAXIA(4, "Anafilaxia");
+
+    private final Integer codigo;
+    private final String descricao;
+
+    SeveridadeAlergiaEnum(Integer codigo, String descricao) {
+        this.codigo = codigo;
+        this.descricao = descricao;
+    }
+
+    public Integer getCodigo() {
+        return codigo;
+    }
+
+    public String getDescricao() {
+        return descricao;
+    }
+
+    public static SeveridadeAlergiaEnum fromCodigo(Integer codigo) {
+        if (codigo == null) return null;
+        return Arrays.stream(values())
+                .filter(v -> v.codigo.equals(codigo))
+                .findFirst()
+                .orElse(null);
+    }
+
+    public static SeveridadeAlergiaEnum fromDescricao(String descricao) {
+        if (descricao == null) return null;
+        String d = descricao.trim().toLowerCase(Locale.ROOT);
+        return Arrays.stream(values())
+                .filter(v -> v.descricao.toLowerCase(Locale.ROOT).equals(d))
+                .findFirst()
+                .orElse(null);
+    }
+}
+
