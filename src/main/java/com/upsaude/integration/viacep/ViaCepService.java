@@ -21,9 +21,7 @@ public class ViaCepService {
         e.setLogradouro(response.getLogradouro());
         e.setComplemento(response.getComplemento());
         e.setBairro(response.getBairro());
-        e.setCidade(response.getLocalidade());
-        e.setEstado(response.getUf());
-        e.setCodigoIbge(response.getIbge());
+        e.setCodigoIbgeMunicipio(response.getIbge());
         e.setTipoLogradouro(TipoLogradouroEnum.fromLogradouro(response.getLogradouro()));
         e.setPais("Brasil");
         return e;

@@ -4,25 +4,24 @@ import java.util.Arrays;
 import java.util.Locale;
 
 public enum SexoEnum {
-    MASCULINO("M", "Masculino"),
-    FEMININO("F", "Feminino"),
-    OUTRO("O", "Outro");
+    MASCULINO(1, "Masculino"),
+    FEMININO(2, "Feminino"),
+    OUTRO(3, "Outro");
 
-    private final String codigo;
+    private final Integer codigo;
     private final String descricao;
 
-    SexoEnum(String codigo, String descricao) {
+    SexoEnum(Integer codigo, String descricao) {
         this.codigo = codigo;
         this.descricao = descricao;
     }
 
-    public String getCodigo() { return codigo; }
+    public Integer getCodigo() { return codigo; }
     public String getDescricao() { return descricao; }
 
-    public static SexoEnum fromCodigo(String codigo) {
+    public static SexoEnum fromCodigo(Integer codigo) {
         if (codigo == null) return null;
-        String c = codigo.trim().toUpperCase(Locale.ROOT);
-        return Arrays.stream(values()).filter(v -> v.codigo.equals(c)).findFirst().orElse(null);
+        return Arrays.stream(values()).filter(v -> v.codigo.equals(codigo)).findFirst().orElse(null);
     }
 
     public static SexoEnum fromDescricao(String descricao) {
