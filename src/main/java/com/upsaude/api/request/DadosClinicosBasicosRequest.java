@@ -14,15 +14,9 @@ import java.util.UUID;
 public class DadosClinicosBasicosRequest {
     private UUID pacienteId;
     private Boolean gestante;
-    private String alergiasJson;
-    private String doencasCronicasJson;
-    private String deficienciasJson;
-    private String medicacoesContinuasJson;
     private Boolean fumante;
     private Boolean alcoolista;
     private Boolean usuarioDrogas;
-    private Double peso;
-    private Double altura;
     private Boolean historicoViolencia;
     private Boolean acompanhamentoPsicossocial;
 }

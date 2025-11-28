@@ -138,15 +138,9 @@ public class DadosClinicosBasicosServiceImpl implements DadosClinicosBasicosServ
         DadosClinicosBasicos updated = mapper.fromRequest(request);
         
         entity.setGestante(updated.getGestante());
-        entity.setAlergiasJson(updated.getAlergiasJson());
-        entity.setDoencasCronicasJson(updated.getDoencasCronicasJson());
-        entity.setDeficienciasJson(updated.getDeficienciasJson());
-        entity.setMedicacoesContinuasJson(updated.getMedicacoesContinuasJson());
         entity.setFumante(updated.getFumante());
         entity.setAlcoolista(updated.getAlcoolista());
         entity.setUsuarioDrogas(updated.getUsuarioDrogas());
-        entity.setPeso(updated.getPeso());
-        entity.setAltura(updated.getAltura());
         entity.setHistoricoViolencia(updated.getHistoricoViolencia());
         entity.setAcompanhamentoPsicossocial(updated.getAcompanhamentoPsicossocial());
     }

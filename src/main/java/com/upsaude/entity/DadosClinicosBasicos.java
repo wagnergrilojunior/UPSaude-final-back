@@ -6,13 +6,22 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
-import java.math.BigDecimal;
-import java.math.RoundingMode;
-
 /**
- * Entidade para armazenar dados clínicos básicos do paciente.
+ * Entidade para armazenar dados clínicos básicos do paciente relacionados a risco social e vulnerabilidade.
  * Relacionamento 1:1 com Paciente.
- * Utilizada para registro de informações clínicas iniciais e acompanhamento básico.
+ * Utilizada para registro de informações sobre fatores de risco social, uso de substâncias e vulnerabilidades.
+ *
+ * Nota: Dados estruturados como alergias, doenças crônicas, deficiências e medicações
+ * são gerenciados através das entidades relacionadas ao Paciente:
+ * - AlergiasPaciente (relacionamento ManyToOne com Paciente)
+ * - DoencasCronicasPaciente (relacionamento ManyToOne com Paciente)
+ * - DeficienciasPaciente (relacionamento ManyToOne com Paciente)
+ * - MedicacaoPaciente (relacionamento ManyToOne com Paciente)
+ *
+ * Medições clínicas (peso, altura, IMC, sinais vitais) são registradas na entidade MedicaoClinica,
+ * permitindo histórico temporal de medições.
+ *
+ * Isso garante integridade referencial, interoperabilidade e consistência dos dados.
  */
 @Entity
 @Table(name = "dados_clinicos_basicos", schema = "public",
@@ -25,10 +34,6 @@ import java.math.RoundingMode;
 @AllArgsConstructor
 public class DadosClinicosBasicos extends BaseEntity {
 
-    /**
-     * Relacionamento 1:1 com Paciente.
-     * O paciente possui um único registro de dados clínicos básicos.
-     */
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "paciente_id", nullable = false, unique = true)
     private Paciente paciente;
@@ -39,34 +44,6 @@ public class DadosClinicosBasicos extends BaseEntity {
      */
     @Column(name = "gestante", nullable = false)
     private Boolean gestante = false;
-
-    /**
-     * Lista de alergias do paciente em formato JSON.
-     * Armazena informações sobre alergias (substâncias, reações, etc.).
-     */
-    @Column(name = "alergias_json", columnDefinition = "jsonb")
-    private String alergiasJson;
-
-    /**
-     * Lista de doenças crônicas do paciente em formato JSON.
-     * Armazena informações sobre condições crônicas (diabetes, hipertensão, etc.).
-     */
-    @Column(name = "doencas_cronicas_json", columnDefinition = "jsonb")
-    private String doencasCronicasJson;
-
-    /**
-     * Lista de deficiências do paciente em formato JSON.
-     * Armazena informações sobre deficiências físicas, sensoriais, intelectuais, etc.
-     */
-    @Column(name = "deficiencias_json", columnDefinition = "jsonb")
-    private String deficienciasJson;
-
-    /**
-     * Lista de medicações contínuas do paciente em formato JSON.
-     * Armazena informações sobre medicamentos de uso contínuo.
-     */
-    @Column(name = "medicacoes_continuas_json", columnDefinition = "jsonb")
-    private String medicacoesContinuasJson;
 
     /**
      * Indica se o paciente é fumante.
@@ -90,28 +67,6 @@ public class DadosClinicosBasicos extends BaseEntity {
     private Boolean usuarioDrogas = false;
 
     /**
-     * Peso do paciente em quilogramas (kg).
-     * Utilizado para cálculo do IMC e acompanhamento nutricional.
-     */
-    @Column(name = "peso")
-    private Double peso;
-
-    /**
-     * Altura do paciente em metros (m).
-     * Utilizado para cálculo do IMC.
-     */
-    @Column(name = "altura")
-    private Double altura;
-
-    /**
-     * Índice de Massa Corporal (IMC).
-     * Calculado automaticamente: peso / (altura * altura).
-     * Classificação: <18.5 (abaixo), 18.5-24.9 (normal), 25-29.9 (sobrepeso), ≥30 (obesidade).
-     */
-    @Column(name = "imc")
-    private Double imc;
-
-    /**
      * Indica se o paciente possui histórico de violência.
      * Importante para identificação de situações de risco e planejamento de cuidados.
      */
@@ -124,24 +79,5 @@ public class DadosClinicosBasicos extends BaseEntity {
      */
     @Column(name = "acompanhamento_psicossocial", nullable = false)
     private Boolean acompanhamentoPsicossocial = false;
-
-    /**
-     * Método auxiliar para calcular o IMC baseado no peso e altura.
-     * Deve ser chamado quando peso ou altura forem atualizados.
-     */
-    @PostLoad
-    @PostUpdate
-    @PostPersist
-    private void calcularImc() {
-        if (peso != null && altura != null && altura > 0) {
-            BigDecimal pesoBD = BigDecimal.valueOf(peso);
-            BigDecimal alturaBD = BigDecimal.valueOf(altura);
-            BigDecimal alturaQuadrado = alturaBD.multiply(alturaBD);
-            BigDecimal imcCalculado = pesoBD.divide(alturaQuadrado, 2, RoundingMode.HALF_UP);
-            this.imc = imcCalculado.doubleValue();
-        } else {
-            this.imc = null;
-        }
-    }
 }
 
