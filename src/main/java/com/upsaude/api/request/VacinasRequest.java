@@ -12,7 +12,7 @@ import com.upsaude.entity.embeddable.ReacoesAdversasVacina;
 import com.upsaude.enums.StatusAtivoEnum;
 import com.upsaude.enums.TipoVacinaEnum;
 import com.upsaude.enums.UnidadeMedidaEnum;
-import com.upsaude.enums.ViaAdministracaoVacinaEnum;
+import com.upsaude.enums.ViaAdministracaoEnum;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -62,7 +62,7 @@ public class VacinasRequest {
     private String lotePadrao;
 
     @NotNull(message = "Via de administração é obrigatória")
-    private ViaAdministracaoVacinaEnum viaAdministracao;
+    private ViaAdministracaoEnum viaAdministracao;
 
     private UnidadeMedidaEnum unidadeMedida;
 

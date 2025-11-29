@@ -1,8 +1,6 @@
 package com.upsaude.repository;
 
-import com.upsaude.entity.Estabelecimentos;
 import com.upsaude.entity.ProfissionalEstabelecimento;
-import com.upsaude.entity.ProfissionaisSaude;
 import com.upsaude.entity.Tenant;
 import com.upsaude.enums.TipoVinculoProfissionalEnum;
 import org.springframework.data.domain.Page;

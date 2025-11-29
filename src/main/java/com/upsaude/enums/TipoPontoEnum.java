@@ -4,26 +4,27 @@ import java.util.Arrays;
 import java.util.Locale;
 
 /**
- * Enum para via de administração de vacinas.
- * Baseado em padrões do PNI e ANVISA.
+ * Enum para classificação de tipos de registro de ponto.
+ * Baseado em padrões de sistemas de controle de ponto.
  *
- * @deprecated Use {@link ViaAdministracaoEnum} unificado. Este enum será removido em versão futura.
  * @author UPSaúde
  */
-@Deprecated
-public enum ViaAdministracaoVacinaEnum {
-    INTRAMUSCULAR(1, "Intramuscular"),
-    SUBCUTANEA(2, "Subcutânea"),
-    INTRADERMICA(3, "Intradérmica"),
-    ORAL(4, "Oral"),
-    NASAL(5, "Nasal"),
-    INTRADERMICA_MULTIPUNCAO(6, "Intradérmica (Múltipla punção)"),
-    SUBCUTANEA_PROFUNDA(7, "Subcutânea Profunda");
+public enum TipoPontoEnum {
+    ENTRADA(1, "Entrada"),
+    SAIDA(2, "Saída"),
+    ENTRADA_INTERVALO(3, "Entrada Intervalo"),
+    SAIDA_INTERVALO(4, "Saída Intervalo"),
+    ENTRADA_ALMOCO(5, "Entrada Almoço"),
+    SAIDA_ALMOCO(6, "Saída Almoço"),
+    ENTRADA_PLANTAO(7, "Entrada Plantão"),
+    SAIDA_PLANTAO(8, "Saída Plantão"),
+    ENTRADA_HORA_EXTRA(9, "Entrada Hora Extra"),
+    SAIDA_HORA_EXTRA(10, "Saída Hora Extra");
 
     private final Integer codigo;
     private final String descricao;
 
-    ViaAdministracaoVacinaEnum(Integer codigo, String descricao) {
+    TipoPontoEnum(Integer codigo, String descricao) {
         this.codigo = codigo;
         this.descricao = descricao;
     }
@@ -36,7 +37,7 @@ public enum ViaAdministracaoVacinaEnum {
         return descricao;
     }
 
-    public static ViaAdministracaoVacinaEnum fromCodigo(Integer codigo) {
+    public static TipoPontoEnum fromCodigo(Integer codigo) {
         if (codigo == null) return null;
         return Arrays.stream(values())
                 .filter(v -> v.codigo.equals(codigo))
@@ -44,7 +45,7 @@ public enum ViaAdministracaoVacinaEnum {
                 .orElse(null);
     }
 
-    public static ViaAdministracaoVacinaEnum fromDescricao(String descricao) {
+    public static TipoPontoEnum fromDescricao(String descricao) {
         if (descricao == null) return null;
         String d = descricao.trim().toLowerCase(Locale.ROOT);
         return Arrays.stream(values())

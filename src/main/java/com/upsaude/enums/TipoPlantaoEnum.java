@@ -4,26 +4,28 @@ import java.util.Arrays;
 import java.util.Locale;
 
 /**
- * Enum para via de administração de vacinas.
- * Baseado em padrões do PNI e ANVISA.
+ * Enum para classificação de tipos de plantão.
+ * Baseado em padrões de sistemas de gestão de plantões em saúde.
  *
- * @deprecated Use {@link ViaAdministracaoEnum} unificado. Este enum será removido em versão futura.
  * @author UPSaúde
  */
-@Deprecated
-public enum ViaAdministracaoVacinaEnum {
-    INTRAMUSCULAR(1, "Intramuscular"),
-    SUBCUTANEA(2, "Subcutânea"),
-    INTRADERMICA(3, "Intradérmica"),
-    ORAL(4, "Oral"),
-    NASAL(5, "Nasal"),
-    INTRADERMICA_MULTIPUNCAO(6, "Intradérmica (Múltipla punção)"),
-    SUBCUTANEA_PROFUNDA(7, "Subcutânea Profunda");
+public enum TipoPlantaoEnum {
+    PLANTAO_DIURNO(1, "Plantão Diurno"),
+    PLANTAO_NOTURNO(2, "Plantão Noturno"),
+    PLANTAO_12H_36H(3, "Plantão 12x36"),
+    PLANTAO_24H_72H(4, "Plantão 24x72"),
+    PLANTAO_EXTRA(5, "Plantão Extra"),
+    PLANTAO_FERIADO(6, "Plantão Feriado"),
+    PLANTAO_FINAL_SEMANA(7, "Plantão Final de Semana"),
+    PLANTAO_DIURNO_NOTURNO(8, "Plantão Diurno e Noturno"),
+    PLANTAO_SOBREAVISO(9, "Plantão Sobreaviso"),
+    PLANTAO_ON_CALL(10, "Plantão On-Call"),
+    OUTRO(99, "Outro");
 
     private final Integer codigo;
     private final String descricao;
 
-    ViaAdministracaoVacinaEnum(Integer codigo, String descricao) {
+    TipoPlantaoEnum(Integer codigo, String descricao) {
         this.codigo = codigo;
         this.descricao = descricao;
     }
@@ -36,7 +38,7 @@ public enum ViaAdministracaoVacinaEnum {
         return descricao;
     }
 
-    public static ViaAdministracaoVacinaEnum fromCodigo(Integer codigo) {
+    public static TipoPlantaoEnum fromCodigo(Integer codigo) {
         if (codigo == null) return null;
         return Arrays.stream(values())
                 .filter(v -> v.codigo.equals(codigo))
@@ -44,7 +46,7 @@ public enum ViaAdministracaoVacinaEnum {
                 .orElse(null);
     }
 
-    public static ViaAdministracaoVacinaEnum fromDescricao(String descricao) {
+    public static TipoPlantaoEnum fromDescricao(String descricao) {
         if (descricao == null) return null;
         String d = descricao.trim().toLowerCase(Locale.ROOT);
         return Arrays.stream(values())

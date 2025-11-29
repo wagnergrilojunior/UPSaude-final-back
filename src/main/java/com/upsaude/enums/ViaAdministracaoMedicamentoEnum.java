@@ -7,8 +7,10 @@ import java.util.Locale;
  * Enum para vias de administração de medicamentos.
  * Baseado em padrões médicos e farmacêuticos.
  *
+ * @deprecated Use {@link ViaAdministracaoEnum} unificado. Este enum será removido em versão futura.
  * @author UPSaúde
  */
+@Deprecated
 public enum ViaAdministracaoMedicamentoEnum {
     ORAL(1, "Oral"),
     SUBLINGUAL(2, "Sublingual"),
