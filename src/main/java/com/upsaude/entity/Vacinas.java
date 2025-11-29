@@ -12,11 +12,11 @@ import com.upsaude.entity.embeddable.ReacoesAdversasVacina;
 import com.upsaude.enums.StatusAtivoEnum;
 import com.upsaude.enums.TipoVacinaEnum;
 import com.upsaude.enums.UnidadeMedidaEnum;
-import com.upsaude.enums.ViaAdministracaoVacinaEnum;
+import com.upsaude.enums.ViaAdministracaoEnum;
 import com.upsaude.util.converter.StatusAtivoEnumConverter;
 import com.upsaude.util.converter.TipoVacinaEnumConverter;
 import com.upsaude.util.converter.UnidadeMedidaEnumConverter;
-import com.upsaude.util.converter.ViaAdministracaoVacinaEnumConverter;
+import com.upsaude.util.converter.ViaAdministracaoEnumConverter;
 import jakarta.persistence.Column;
 import jakarta.persistence.Convert;
 import jakarta.persistence.Embedded;
@@ -112,10 +112,10 @@ public class Vacinas extends BaseEntity {
 
     // ========== ADMINISTRAÇÃO ==========
 
-    @Convert(converter = ViaAdministracaoVacinaEnumConverter.class)
+    @Convert(converter = ViaAdministracaoEnumConverter.class)
     @Column(name = "via_administracao", nullable = false)
     @NotNull(message = "Via de administração é obrigatória")
-    private ViaAdministracaoVacinaEnum viaAdministracao;
+    private ViaAdministracaoEnum viaAdministracao;
 
     @Convert(converter = UnidadeMedidaEnumConverter.class)
     @Column(name = "unidade_medida")

@@ -12,7 +12,7 @@ import com.upsaude.entity.embeddable.ReacoesAdversasVacina;
 import com.upsaude.enums.StatusAtivoEnum;
 import com.upsaude.enums.TipoVacinaEnum;
 import com.upsaude.enums.UnidadeMedidaEnum;
-import com.upsaude.enums.ViaAdministracaoVacinaEnum;
+import com.upsaude.enums.ViaAdministracaoEnum;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -38,7 +38,7 @@ public class VacinasDTO {
     private String grupoAlvo;
     private UUID fabricanteId;
     private String lotePadrao;
-    private ViaAdministracaoVacinaEnum viaAdministracao;
+    private ViaAdministracaoEnum viaAdministracao;
     private UnidadeMedidaEnum unidadeMedida;
     private EsquemaVacinal esquemaVacinal;
     private IdadeAplicacaoVacina idadeAplicacao;

@@ -1,9 +1,9 @@
 package com.upsaude.entity.embeddable;
 
 import com.upsaude.enums.UnidadeMedidaEnum;
-import com.upsaude.enums.ViaAdministracaoMedicamentoEnum;
+import com.upsaude.enums.ViaAdministracaoEnum;
 import com.upsaude.util.converter.UnidadeMedidaEnumConverter;
-import com.upsaude.util.converter.ViaAdministracaoMedicamentoEnumConverter;
+import com.upsaude.util.converter.ViaAdministracaoEnumConverter;
 import jakarta.persistence.Column;
 import jakarta.persistence.Convert;
 import jakarta.persistence.Embeddable;
@@ -37,9 +37,9 @@ public class DosagemAdministracaoMedicamento {
     @Column(name = "unidade_medida")
     private UnidadeMedidaEnum unidadeMedida;
 
-    @Convert(converter = ViaAdministracaoMedicamentoEnumConverter.class)
+    @Convert(converter = ViaAdministracaoEnumConverter.class)
     @Column(name = "via_administracao")
-    private ViaAdministracaoMedicamentoEnum viaAdministracao;
+    private ViaAdministracaoEnum viaAdministracao;
 
     @Column(name = "concentracao", precision = 10, scale = 2)
     private BigDecimal concentracao; // Concentração do princípio ativo
