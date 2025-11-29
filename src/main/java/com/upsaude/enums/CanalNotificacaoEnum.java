@@ -4,26 +4,24 @@ import java.util.Arrays;
 import java.util.Locale;
 
 /**
- * Enum para via de administração de vacinas.
- * Baseado em padrões do PNI e ANVISA.
+ * Enum para classificação de canais de notificação.
+ * Baseado em padrões de sistemas de gestão de notificações.
  *
- * @deprecated Use {@link ViaAdministracaoEnum} unificado. Este enum será removido em versão futura.
  * @author UPSaúde
  */
-@Deprecated
-public enum ViaAdministracaoVacinaEnum {
-    INTRAMUSCULAR(1, "Intramuscular"),
-    SUBCUTANEA(2, "Subcutânea"),
-    INTRADERMICA(3, "Intradérmica"),
-    ORAL(4, "Oral"),
-    NASAL(5, "Nasal"),
-    INTRADERMICA_MULTIPUNCAO(6, "Intradérmica (Múltipla punção)"),
-    SUBCUTANEA_PROFUNDA(7, "Subcutânea Profunda");
+public enum CanalNotificacaoEnum {
+    EMAIL(1, "E-mail"),
+    SMS(2, "SMS"),
+    WHATSAPP(3, "WhatsApp"),
+    MENSAGEM_INTERNA(4, "Mensagem Interna"),
+    PUSH_NOTIFICATION(5, "Push Notification"),
+    TELEFONE(6, "Telefone"),
+    OUTRO(99, "Outro");
 
     private final Integer codigo;
     private final String descricao;
 
-    ViaAdministracaoVacinaEnum(Integer codigo, String descricao) {
+    CanalNotificacaoEnum(Integer codigo, String descricao) {
         this.codigo = codigo;
         this.descricao = descricao;
     }
@@ -36,7 +34,7 @@ public enum ViaAdministracaoVacinaEnum {
         return descricao;
     }
 
-    public static ViaAdministracaoVacinaEnum fromCodigo(Integer codigo) {
+    public static CanalNotificacaoEnum fromCodigo(Integer codigo) {
         if (codigo == null) return null;
         return Arrays.stream(values())
                 .filter(v -> v.codigo.equals(codigo))
@@ -44,7 +42,7 @@ public enum ViaAdministracaoVacinaEnum {
                 .orElse(null);
     }
 
-    public static ViaAdministracaoVacinaEnum fromDescricao(String descricao) {
+    public static CanalNotificacaoEnum fromDescricao(String descricao) {
         if (descricao == null) return null;
         String d = descricao.trim().toLowerCase(Locale.ROOT);
         return Arrays.stream(values())

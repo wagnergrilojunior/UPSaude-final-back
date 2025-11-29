@@ -1,0 +1,69 @@
+package com.upsaude.api.response;
+
+import com.upsaude.enums.PrioridadeAtendimentoEnum;
+import com.upsaude.enums.StatusAgendamentoEnum;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+import java.time.OffsetDateTime;
+import java.util.UUID;
+
+/**
+ * Classe de resposta para Agendamento.
+ *
+ * @author UPSaúde
+ */
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+public class AgendamentoResponse {
+    private UUID id;
+    private UUID pacienteId;
+    private String pacienteNome;
+    private UUID profissionalId;
+    private String profissionalNome;
+    private UUID medicoId;
+    private String medicoNome;
+    private UUID especialidadeId;
+    private String especialidadeNome;
+    private UUID convenioId;
+    private String convenioNome;
+    private UUID atendimentoId;
+    private UUID agendamentoOriginalId;
+    private OffsetDateTime dataHora;
+    private OffsetDateTime dataHoraFim;
+    private Integer duracaoPrevistaMinutos;
+    private StatusAgendamentoEnum status;
+    private String statusDescricao;
+    private PrioridadeAtendimentoEnum prioridade;
+    private String prioridadeDescricao;
+    private Boolean ehEncaixe;
+    private Boolean ehRetorno;
+    private String motivoConsulta;
+    private String observacoesAgendamento;
+    private String observacoesInternas;
+    private Boolean temConflitoHorario;
+    private Boolean sobreposicaoPermitida;
+    private String justificativaConflito;
+    private OffsetDateTime dataCancelamento;
+    private UUID canceladoPor;
+    private String motivoCancelamento;
+    private OffsetDateTime dataReagendamento;
+    private UUID reagendadoPor;
+    private String motivoReagendamento;
+    private UUID agendadoPor;
+    private UUID confirmadoPor;
+    private OffsetDateTime dataConfirmacao;
+    private OffsetDateTime dataUltimaAlteracao;
+    private UUID alteradoPor;
+    private Boolean notificacaoEnviada24h;
+    private Boolean notificacaoEnviada1h;
+    private Boolean confirmacaoEnviada;
+    private OffsetDateTime createdAt;
+    private OffsetDateTime updatedAt;
+    private Boolean active;
+}
+
