@@ -11,12 +11,10 @@ import org.mapstruct.Mapping;
 @Mapper(config = MappingConfig.class)
 public interface CidDoencasMapper extends EntityMapper<CidDoencas, CidDoencasDTO> {
 
-    @Mapping(target = "tenant", ignore = true)
     CidDoencas toEntity(CidDoencasDTO dto);
 
     CidDoencasDTO toDTO(CidDoencas entity);
 
-    @Mapping(target = "tenant", ignore = true)
     @Mapping(target = "active", ignore = true)
     CidDoencas fromRequest(CidDoencasRequest request);
 

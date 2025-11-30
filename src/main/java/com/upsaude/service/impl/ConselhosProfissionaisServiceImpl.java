@@ -120,12 +120,11 @@ public class ConselhosProfissionaisServiceImpl implements ConselhosProfissionais
         }
     }
 
-        private void atualizarDadosConselhosProfissionais(ConselhosProfissionais conselhosProfissionais, ConselhosProfissionaisRequest request) {
+    private void atualizarDadosConselhosProfissionais(ConselhosProfissionais conselhosProfissionais, ConselhosProfissionaisRequest request) {
         ConselhosProfissionais conselhosProfissionaisAtualizado = conselhosProfissionaisMapper.fromRequest(request);
         
         // Preserva campos de controle
         java.util.UUID idOriginal = conselhosProfissionais.getId();
-        com.upsaude.entity.Tenant tenantOriginal = conselhosProfissionais.getTenant();
         Boolean activeOriginal = conselhosProfissionais.getActive();
         java.time.OffsetDateTime createdAtOriginal = conselhosProfissionais.getCreatedAt();
         
@@ -134,7 +133,6 @@ public class ConselhosProfissionaisServiceImpl implements ConselhosProfissionais
         
         // Restaura campos de controle
         conselhosProfissionais.setId(idOriginal);
-        conselhosProfissionais.setTenant(tenantOriginal);
         conselhosProfissionais.setActive(activeOriginal);
         conselhosProfissionais.setCreatedAt(createdAtOriginal);
     }

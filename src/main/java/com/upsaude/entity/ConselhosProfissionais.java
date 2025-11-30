@@ -6,11 +6,13 @@ import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 @Entity
 @Table(name = "conselhos_profissionais", schema = "public")
 @Data
-public class ConselhosProfissionais extends BaseEntity {
+@EqualsAndHashCode(callSuper = true)
+public class ConselhosProfissionais extends BaseEntityWithoutTenant {
 
     @Column(name = "sigla", nullable = false, length = 10, unique = true)
     @NotBlank(message = "Sigla do conselho é obrigatória")

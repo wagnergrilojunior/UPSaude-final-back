@@ -7,11 +7,13 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 @Entity
 @Table(name = "cid_doencas", schema = "public")
 @Data
-public class CidDoencas extends BaseEntity {
+@EqualsAndHashCode(callSuper = true)
+public class CidDoencas extends BaseEntityWithoutTenant {
 
     @Column(name = "codigo", nullable = false, length = 10, unique = true)
     @NotBlank(message = "Código CID é obrigatório")

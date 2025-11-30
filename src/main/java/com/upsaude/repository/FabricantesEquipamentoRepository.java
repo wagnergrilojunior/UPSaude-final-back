@@ -1,7 +1,6 @@
 package com.upsaude.repository;
 
 import com.upsaude.entity.FabricantesEquipamento;
-import com.upsaude.entity.Tenant;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -12,6 +11,7 @@ import java.util.UUID;
 
 /**
  * Repositório para operações de banco de dados relacionadas a FabricantesEquipamento.
+ * Esta entidade é de escopo global e não possui relacionamento com Tenant ou Estabelecimento.
  *
  * @author UPSaúde
  */
@@ -32,10 +32,5 @@ public interface FabricantesEquipamentoRepository extends JpaRepository<Fabrican
      * Busca todos os fabricantes, ordenados por nome.
      */
     Page<FabricantesEquipamento> findAllByOrderByNomeAsc(Pageable pageable);
-
-    /**
-     * Busca todos os fabricantes de um tenant, ordenados por nome.
-     */
-    Page<FabricantesEquipamento> findByTenantOrderByNomeAsc(Tenant tenant, Pageable pageable);
 }
 

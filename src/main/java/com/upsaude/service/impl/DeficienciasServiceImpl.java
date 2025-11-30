@@ -134,7 +134,6 @@ public class DeficienciasServiceImpl implements DeficienciasService {
         
         // Preserva campos de controle
         UUID idOriginal = deficiencias.getId();
-        com.upsaude.entity.Tenant tenantOriginal = deficiencias.getTenant();
         Boolean activeOriginal = deficiencias.getActive();
         java.time.OffsetDateTime createdAtOriginal = deficiencias.getCreatedAt();
         
@@ -143,7 +142,6 @@ public class DeficienciasServiceImpl implements DeficienciasService {
         
         // Restaura campos de controle
         deficiencias.setId(idOriginal);
-        deficiencias.setTenant(tenantOriginal);
         deficiencias.setActive(activeOriginal);
         deficiencias.setCreatedAt(createdAtOriginal);
     }

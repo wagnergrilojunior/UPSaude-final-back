@@ -120,12 +120,11 @@ public class FabricantesVacinaServiceImpl implements FabricantesVacinaService {
         }
     }
 
-        private void atualizarDadosFabricantesVacina(FabricantesVacina fabricantesVacina, FabricantesVacinaRequest request) {
+    private void atualizarDadosFabricantesVacina(FabricantesVacina fabricantesVacina, FabricantesVacinaRequest request) {
         FabricantesVacina fabricantesVacinaAtualizado = fabricantesVacinaMapper.fromRequest(request);
         
         // Preserva campos de controle
         java.util.UUID idOriginal = fabricantesVacina.getId();
-        com.upsaude.entity.Tenant tenantOriginal = fabricantesVacina.getTenant();
         Boolean activeOriginal = fabricantesVacina.getActive();
         java.time.OffsetDateTime createdAtOriginal = fabricantesVacina.getCreatedAt();
         
@@ -134,7 +133,6 @@ public class FabricantesVacinaServiceImpl implements FabricantesVacinaService {
         
         // Restaura campos de controle
         fabricantesVacina.setId(idOriginal);
-        fabricantesVacina.setTenant(tenantOriginal);
         fabricantesVacina.setActive(activeOriginal);
         fabricantesVacina.setCreatedAt(createdAtOriginal);
     }

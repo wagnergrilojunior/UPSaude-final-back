@@ -56,7 +56,7 @@ import lombok.EqualsAndHashCode;
        })
 @Data
 @EqualsAndHashCode(callSuper = true)
-public class Vacinas extends BaseEntity {
+public class Vacinas extends BaseEntityWithoutTenant {
 
     // ========== IDENTIFICAÇÃO BÁSICA ==========
 
