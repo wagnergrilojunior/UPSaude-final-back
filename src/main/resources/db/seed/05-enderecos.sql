@@ -41,7 +41,7 @@ endereco_tenant AS (
         t.id,
         NULL,
         true,
-        'RUA',
+        1,
         'Rua Monsenhor José Paulino',
         '123',
         'Centro',
@@ -53,8 +53,8 @@ endereco_tenant AS (
         false,
         -22.2511,
         -45.7056,
-        'COMERCIAL',
-        'URBANA',
+        2,
+        1,
         '3543204',
         c.id
     FROM tenant_id t, cidade_id c
@@ -103,7 +103,7 @@ SELECT
     t.id,
     e.id,
     true,
-    'RUA',
+    1,
     'Rua Barão do Rio Branco',
     '456',
     NULL,
@@ -114,8 +114,8 @@ SELECT
     false,
     -22.2520,
     -45.7060,
-    'COMERCIAL',
-    'URBANA',
+    2,
+    1,
     '3543204',
     c.id
 FROM public.tenants t, public.estabelecimentos e, public.cidades c
@@ -123,8 +123,8 @@ WHERE t.slug = 'prefeitura-santa-rita-do-sapucai'
   AND e.nome = 'UBS Centro - Santa Rita do Sapucaí'
   AND c.codigo_ibge = '3543204'
   AND NOT EXISTS (
-    SELECT 1 FROM public.enderecos end 
-    WHERE end.estabelecimento_id = e.id
+    SELECT 1 FROM public.enderecos endereco_alias 
+    WHERE endereco_alias.estabelecimento_id = e.id
   );
 
 -- Atualizar endereço principal do estabelecimento
@@ -168,7 +168,7 @@ SELECT
     t.id,
     e.id,
     true,
-    'AVENIDA',
+        2,
     'Avenida Doutor Antônio de Paula',
     '789',
     NULL,
@@ -179,8 +179,8 @@ SELECT
     false,
     -22.2600,
     -45.7100,
-    'COMERCIAL',
-    'URBANA',
+    2,
+    1,
     '3543204',
     c.id
 FROM public.tenants t, public.estabelecimentos e, public.cidades c
@@ -188,8 +188,8 @@ WHERE t.slug = 'prefeitura-santa-rita-do-sapucai'
   AND e.nome = 'UPA 24 Horas - Santa Rita do Sapucaí'
   AND c.codigo_ibge = '3543204'
   AND NOT EXISTS (
-    SELECT 1 FROM public.enderecos end 
-    WHERE end.estabelecimento_id = e.id
+    SELECT 1 FROM public.enderecos endereco_alias 
+    WHERE endereco_alias.estabelecimento_id = e.id
   );
 
 UPDATE public.estabelecimentos
@@ -232,7 +232,7 @@ SELECT
     t.id,
     e.id,
     true,
-    'RUA',
+    1,
     'Rua João Pinheiro',
     '321',
     NULL,
@@ -243,8 +243,8 @@ SELECT
     false,
     -22.2400,
     -45.7000,
-    'COMERCIAL',
-    'URBANA',
+    2,
+    1,
     '3543204',
     c.id
 FROM public.tenants t, public.estabelecimentos e, public.cidades c
@@ -252,8 +252,8 @@ WHERE t.slug = 'prefeitura-santa-rita-do-sapucai'
   AND e.nome = 'Posto de Saúde São Cristóvão'
   AND c.codigo_ibge = '3543204'
   AND NOT EXISTS (
-    SELECT 1 FROM public.enderecos end 
-    WHERE end.estabelecimento_id = e.id
+    SELECT 1 FROM public.enderecos endereco_alias 
+    WHERE endereco_alias.estabelecimento_id = e.id
   );
 
 UPDATE public.estabelecimentos
@@ -296,7 +296,7 @@ SELECT
     t.id,
     e.id,
     true,
-    'AVENIDA',
+        2,
     'Avenida Doutor João XXIII',
     '1000',
     NULL,
@@ -307,8 +307,8 @@ SELECT
     false,
     -22.2550,
     -45.7080,
-    'COMERCIAL',
-    'URBANA',
+    2,
+    1,
     '3543204',
     c.id
 FROM public.tenants t, public.estabelecimentos e, public.cidades c
@@ -316,8 +316,8 @@ WHERE t.slug = 'prefeitura-santa-rita-do-sapucai'
   AND e.nome = 'Hospital Municipal de Santa Rita do Sapucaí'
   AND c.codigo_ibge = '3543204'
   AND NOT EXISTS (
-    SELECT 1 FROM public.enderecos end 
-    WHERE end.estabelecimento_id = e.id
+    SELECT 1 FROM public.enderecos endereco_alias 
+    WHERE endereco_alias.estabelecimento_id = e.id
   );
 
 UPDATE public.estabelecimentos
@@ -360,7 +360,7 @@ SELECT
     t.id,
     e.id,
     true,
-    'RUA',
+    1,
     'Rua das Flores',
     '250',
     NULL,
@@ -371,8 +371,8 @@ SELECT
     false,
     -22.2300,
     -45.6950,
-    'COMERCIAL',
-    'URBANA',
+    2,
+    1,
     '3543204',
     c.id
 FROM public.tenants t, public.estabelecimentos e, public.cidades c
@@ -380,8 +380,8 @@ WHERE t.slug = 'prefeitura-santa-rita-do-sapucai'
   AND e.nome = 'UBS Novo Horizonte'
   AND c.codigo_ibge = '3543204'
   AND NOT EXISTS (
-    SELECT 1 FROM public.enderecos end 
-    WHERE end.estabelecimento_id = e.id
+    SELECT 1 FROM public.enderecos endereco_alias 
+    WHERE endereco_alias.estabelecimento_id = e.id
   );
 
 UPDATE public.estabelecimentos
@@ -424,7 +424,7 @@ SELECT
     t.id,
     e.id,
     true,
-    'RUA',
+    1,
     'Rua Primavera',
     '180',
     NULL,
@@ -435,8 +435,8 @@ SELECT
     false,
     -22.2650,
     -45.7150,
-    'COMERCIAL',
-    'URBANA',
+    2,
+    1,
     '3543204',
     c.id
 FROM public.tenants t, public.estabelecimentos e, public.cidades c
@@ -444,8 +444,8 @@ WHERE t.slug = 'prefeitura-santa-rita-do-sapucai'
   AND e.nome = 'UBS Jardim Primavera'
   AND c.codigo_ibge = '3543204'
   AND NOT EXISTS (
-    SELECT 1 FROM public.enderecos end 
-    WHERE end.estabelecimento_id = e.id
+    SELECT 1 FROM public.enderecos endereco_alias 
+    WHERE endereco_alias.estabelecimento_id = e.id
   );
 
 UPDATE public.estabelecimentos

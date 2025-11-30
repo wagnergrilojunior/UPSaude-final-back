@@ -8,16 +8,32 @@ Os scripts são executados automaticamente na inicialização da aplicação qua
 
 ### Scripts Criados
 
+#### Entidades com Tenant (Dados Específicos do Município)
 1. **01-tenant.sql** - Cria o Tenant (Prefeitura Municipal de Santa Rita do Sapucaí)
 2. **02-estabelecimentos.sql** - Cria 6 estabelecimentos de saúde
-3. **03-conselhos-profissionais.sql** - Cria 8 conselhos profissionais
-4. **04-estados-cidades.sql** - Cria dados de referência geográfica (MG e Santa Rita do Sapucaí)
-5. **05-enderecos.sql** - Cria endereços para tenant e estabelecimentos
-6. **06-profissionais-saude.sql** - Cria profissionais de saúde (a criar)
-7. **07-pacientes.sql** - Cria pacientes (a criar)
-8. **08-equipes-saude.sql** - Cria equipes de saúde (a criar)
-9. **09-profissional-estabelecimento.sql** - Cria vínculos profissional-estabelecimento (a criar)
-10. **10-vinculo-profissional-equipe.sql** - Cria vínculos profissional-equipe (a criar)
+3. **05-enderecos.sql** - Cria endereços para tenant e estabelecimentos
+
+#### Entidades de Escopo Global (Sem Tenant - Dados de Referência)
+4. **03-conselhos-profissionais.sql** - Cria 8 conselhos profissionais (CRM, COREN, CRF, CRP, CRO, CREFITO, CRN, CRFA)
+5. **04-estados-cidades.sql** - Cria dados de referência geográfica (MG e Santa Rita do Sapucaí)
+6. **06-especialidades-medicas.sql** - Cria especialidades médicas conforme CFM (10 especialidades principais)
+7. **07-cid-doencas.sql** - Cria códigos CID-10 mais comuns (10 códigos principais)
+8. **08-alergias.sql** - Cria catálogo de alergias comuns (8 alergias principais)
+9. **09-deficiencias.sql** - Cria deficiências conforme SUS/e-SUS/CIF (12 tipos de deficiências)
+10. **10-doencas.sql** - Cria catálogo de doenças comuns (5 doenças principais) - Escopo Global
+11. **11-papeis.sql** - Cria papéis/perfis do sistema (10 papéis: Admin, Médico, Enfermeiro, etc)
+12. **12-fabricantes-vacina.sql** - Cria fabricantes de vacinas reais (7 fabricantes: Butantan, Fiocruz, Pfizer, etc)
+13. **13-fabricantes-medicamento.sql** - Cria fabricantes de medicamentos reais (8 fabricantes: EMS, Aché, Eurofarma, etc)
+14. **14-fabricantes-equipamento.sql** - Cria fabricantes de equipamentos médicos reais (6 fabricantes: GE, Philips, Mindray, etc)
+15. **15-vacinas.sql** - Cria vacinas do PNI/Calendário Nacional (10 vacinas principais)
+16. **16-medicacoes-continuas.sql** - Cria medicações de uso contínuo comuns (10 medicações principais)
+
+#### Entidades com Tenant (Dados Específicos do Município) - Continuação
+17. **17-profissionais-saude.sql** - Cria profissionais de saúde (7 profissionais)
+18. **18-pacientes.sql** - Cria pacientes (5 pacientes de diferentes faixas etárias)
+19. **19-equipes-saude.sql** - Cria equipes de saúde (6 equipes: ESF, UPA, NASF)
+20. **20-profissional-estabelecimento.sql** - Cria vínculos profissional-estabelecimento (7 vínculos)
+21. **21-vinculo-profissional-equipe.sql** - Cria vínculos profissional-equipe (7 vínculos)
 
 ## Dados Reais
 
@@ -68,12 +84,43 @@ app.seed.enabled=false
 
 ## Ordem de Dependências
 
-1. Estados e Cidades (referências geográficas)
-2. Tenant
-3. Conselhos Profissionais
-4. Estabelecimentos
-5. Endereços
-6. Profissionais de Saúde
-7. Pacientes
-8. Equipes de Saúde
-9. Vínculos
+### Entidades Globais (Sem Tenant) - Podem ser executadas em paralelo após Estados/Cidades
+1. **Estados e Cidades** (referências geográficas - base para endereços)
+2. **Conselhos Profissionais** (referência para profissionais)
+3. **Especialidades Médicas** (referência para médicos)
+4. **CID-10** (referência para diagnósticos)
+5. **Alergias** (catálogo global)
+6. **Deficiências** (catálogo global conforme SUS/e-SUS)
+7. **Papeis** (perfis do sistema)
+8. **Fabricantes** (Vacinas, Medicamentos, Equipamentos - referência para produtos)
+9. **Vacinas** (depende de FabricantesVacina - catálogo PNI)
+10. **Medicações Contínuas** (catálogo global)
+
+### Entidades com Tenant (Dados Específicos do Município)
+11. **Tenant** (Prefeitura Municipal)
+12. **Estabelecimentos** (depende de Tenant)
+13. **Endereços** (depende de Tenant, Estabelecimentos, Estados e Cidades)
+14. **Profissionais de Saúde** (depende de Tenant, Estabelecimentos, Conselhos Profissionais, Especialidades)
+15. **Pacientes** (depende de Tenant, Estabelecimentos, Endereços)
+16. **Equipes de Saúde** (depende de Tenant, Estabelecimentos)
+17. **Vínculos** (depende de Profissionais, Estabelecimentos, Equipes)
+
+## Entidades de Escopo Global
+
+As entidades de escopo global (sem relacionamento com Tenant) são compartilhadas entre todos os municípios/tenants e representam dados de referência padronizados para integração com sistemas governamentais:
+
+- **Conselhos Profissionais**: Conselhos nacionais (CRM, COREN, etc)
+- **Especialidades Médicas**: Catálogo CFM de especialidades
+- **CID-10**: Classificação Internacional de Doenças (OMS)
+- **Alergias**: Catálogo de alergias comuns
+- **Deficiências**: Classificação conforme SUS/e-SUS/CIF
+- **Vacinas**: Catálogo do PNI (Programa Nacional de Imunizações)
+- **Fabricantes**: Fabricantes reais de vacinas, medicamentos e equipamentos
+- **Papeis**: Perfis de acesso do sistema
+
+Esses dados são essenciais para integração com:
+- Sistema de Informação do PNI (SIPNI)
+- e-SUS Atenção Básica
+- CNES (Cadastro Nacional de Estabelecimentos de Saúde)
+- Sistemas de notificação (SINAN)
+- Integração com outros sistemas do SUS
