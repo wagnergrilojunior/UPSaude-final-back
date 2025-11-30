@@ -22,8 +22,6 @@ public interface DoencasService {
 
     Page<DoencasResponse> listarPorNome(String nome, Pageable pageable);
 
-    Page<DoencasResponse> listarPorEstabelecimento(UUID estabelecimentoId, Pageable pageable);
-
     Page<DoencasResponse> listarPorCodigoCid(String codigoCid, Pageable pageable);
 
     DoencasResponse atualizar(UUID id, DoencasRequest request);

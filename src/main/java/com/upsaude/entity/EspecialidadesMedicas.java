@@ -27,7 +27,7 @@ import lombok.EqualsAndHashCode;
        })
 @Data
 @EqualsAndHashCode(callSuper = true)
-public class EspecialidadesMedicas extends BaseEntity {
+public class EspecialidadesMedicas extends BaseEntityWithoutTenant {
 
     // ========== IDENTIFICAÇÃO BÁSICA ==========
 

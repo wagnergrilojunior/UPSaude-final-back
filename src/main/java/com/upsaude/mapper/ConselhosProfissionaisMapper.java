@@ -11,12 +11,10 @@ import org.mapstruct.Mapping;
 @Mapper(config = MappingConfig.class)
 public interface ConselhosProfissionaisMapper extends EntityMapper<ConselhosProfissionais, ConselhosProfissionaisDTO> {
 
-    @Mapping(target = "tenant", ignore = true)
     ConselhosProfissionais toEntity(ConselhosProfissionaisDTO dto);
 
     ConselhosProfissionaisDTO toDTO(ConselhosProfissionais entity);
 
-    @Mapping(target = "tenant", ignore = true)
     @Mapping(target = "active", ignore = true)
     ConselhosProfissionais fromRequest(ConselhosProfissionaisRequest request);
 

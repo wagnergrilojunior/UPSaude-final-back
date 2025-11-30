@@ -95,19 +95,6 @@ public class DoencasServiceImpl implements DoencasService {
     }
 
     @Override
-    public Page<DoencasResponse> listarPorEstabelecimento(UUID estabelecimentoId, Pageable pageable) {
-        log.debug("Listando doenças do estabelecimento: {}. Página: {}, Tamanho: {}",
-                estabelecimentoId, pageable.getPageNumber(), pageable.getPageSize());
-
-        if (estabelecimentoId == null) {
-            throw new BadRequestException("ID do estabelecimento é obrigatório");
-        }
-
-        Page<Doencas> doencas = doencasRepository.findByEstabelecimentoId(estabelecimentoId, pageable);
-        return doencas.map(doencasMapper::toResponse);
-    }
-
-    @Override
     public Page<DoencasResponse> listarPorCodigoCid(String codigoCid, Pageable pageable) {
         log.debug("Listando doenças por código CID: {}. Página: {}, Tamanho: {}",
                 codigoCid, pageable.getPageNumber(), pageable.getPageSize());

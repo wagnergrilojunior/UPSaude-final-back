@@ -11,12 +11,10 @@ import org.mapstruct.Mapping;
 @Mapper(config = MappingConfig.class)
 public interface FabricantesVacinaMapper extends EntityMapper<FabricantesVacina, FabricantesVacinaDTO> {
 
-    @Mapping(target = "tenant", ignore = true)
     FabricantesVacina toEntity(FabricantesVacinaDTO dto);
 
     FabricantesVacinaDTO toDTO(FabricantesVacina entity);
 
-    @Mapping(target = "tenant", ignore = true)
     @Mapping(target = "active", ignore = true)
     FabricantesVacina fromRequest(FabricantesVacinaRequest request);
 

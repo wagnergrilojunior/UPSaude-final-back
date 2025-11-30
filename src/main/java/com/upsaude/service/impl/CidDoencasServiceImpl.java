@@ -120,12 +120,11 @@ public class CidDoencasServiceImpl implements CidDoencasService {
         }
     }
 
-        private void atualizarDadosCidDoencas(CidDoencas cidDoencas, CidDoencasRequest request) {
+    private void atualizarDadosCidDoencas(CidDoencas cidDoencas, CidDoencasRequest request) {
         CidDoencas cidDoencasAtualizado = cidDoencasMapper.fromRequest(request);
         
         // Preserva campos de controle
         java.util.UUID idOriginal = cidDoencas.getId();
-        com.upsaude.entity.Tenant tenantOriginal = cidDoencas.getTenant();
         Boolean activeOriginal = cidDoencas.getActive();
         java.time.OffsetDateTime createdAtOriginal = cidDoencas.getCreatedAt();
         
@@ -134,7 +133,6 @@ public class CidDoencasServiceImpl implements CidDoencasService {
         
         // Restaura campos de controle
         cidDoencas.setId(idOriginal);
-        cidDoencas.setTenant(tenantOriginal);
         cidDoencas.setActive(activeOriginal);
         cidDoencas.setCreatedAt(createdAtOriginal);
     }

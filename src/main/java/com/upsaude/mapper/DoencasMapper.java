@@ -15,14 +15,12 @@ import java.util.UUID;
 @Mapper(config = MappingConfig.class)
 public interface DoencasMapper extends EntityMapper<Doencas, DoencasDTO> {
 
-    @Mapping(target = "tenant", ignore = true)
     @Mapping(target = "cidPrincipal", source = "cidPrincipalId", qualifiedByName = "cidFromId")
     Doencas toEntity(DoencasDTO dto);
 
     @Mapping(target = "cidPrincipalId", source = "cidPrincipal.id")
     DoencasDTO toDTO(Doencas entity);
 
-    @Mapping(target = "tenant", ignore = true)
     @Mapping(target = "active", ignore = true)
     @Mapping(target = "cidPrincipal", source = "cidPrincipalId", qualifiedByName = "cidFromId")
     Doencas fromRequest(DoencasRequest request);

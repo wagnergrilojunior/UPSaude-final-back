@@ -120,12 +120,11 @@ public class EspecialidadesMedicasServiceImpl implements EspecialidadesMedicasSe
         }
     }
 
-        private void atualizarDadosEspecialidadesMedicas(EspecialidadesMedicas especialidadesMedicas, EspecialidadesMedicasRequest request) {
+    private void atualizarDadosEspecialidadesMedicas(EspecialidadesMedicas especialidadesMedicas, EspecialidadesMedicasRequest request) {
         EspecialidadesMedicas especialidadesMedicasAtualizado = especialidadesMedicasMapper.fromRequest(request);
         
         // Preserva campos de controle
         java.util.UUID idOriginal = especialidadesMedicas.getId();
-        com.upsaude.entity.Tenant tenantOriginal = especialidadesMedicas.getTenant();
         Boolean activeOriginal = especialidadesMedicas.getActive();
         java.time.OffsetDateTime createdAtOriginal = especialidadesMedicas.getCreatedAt();
         
@@ -134,7 +133,6 @@ public class EspecialidadesMedicasServiceImpl implements EspecialidadesMedicasSe
         
         // Restaura campos de controle
         especialidadesMedicas.setId(idOriginal);
-        especialidadesMedicas.setTenant(tenantOriginal);
         especialidadesMedicas.setActive(activeOriginal);
         especialidadesMedicas.setCreatedAt(createdAtOriginal);
     }

@@ -11,12 +11,10 @@ import org.mapstruct.Mapping;
 @Mapper(config = MappingConfig.class)
 public interface EspecialidadesMedicasMapper extends EntityMapper<EspecialidadesMedicas, EspecialidadesMedicasDTO> {
 
-    @Mapping(target = "tenant", ignore = true)
     EspecialidadesMedicas toEntity(EspecialidadesMedicasDTO dto);
 
     EspecialidadesMedicasDTO toDTO(EspecialidadesMedicas entity);
 
-    @Mapping(target = "tenant", ignore = true)
     @Mapping(target = "active", ignore = true)
     EspecialidadesMedicas fromRequest(EspecialidadesMedicasRequest request);
 

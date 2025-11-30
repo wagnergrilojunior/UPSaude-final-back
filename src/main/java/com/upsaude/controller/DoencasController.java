@@ -75,22 +75,6 @@ public class DoencasController {
         return ResponseEntity.ok(response);
     }
 
-    @GetMapping("/estabelecimento/{estabelecimentoId}")
-    @Operation(summary = "Listar doenças por estabelecimento", description = "Retorna uma lista paginada de doenças de um estabelecimento específico")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Lista de doenças do estabelecimento retornada com sucesso"),
-            @ApiResponse(responseCode = "400", description = "ID do estabelecimento inválido"),
-            @ApiResponse(responseCode = "403", description = "Acesso negado")
-    })
-    public ResponseEntity<Page<DoencasResponse>> listarPorEstabelecimento(
-            @Parameter(description = "ID do estabelecimento", required = true)
-            @PathVariable UUID estabelecimentoId,
-            @Parameter(description = "Parâmetros de paginação (page, size, sort)")
-            Pageable pageable) {
-        Page<DoencasResponse> response = doencasService.listarPorEstabelecimento(estabelecimentoId, pageable);
-        return ResponseEntity.ok(response);
-    }
-
     @GetMapping("/cid/{codigoCid}")
     @Operation(summary = "Listar doenças por código CID", description = "Retorna uma lista paginada de doenças relacionadas a um código CID específico")
     @ApiResponses(value = {

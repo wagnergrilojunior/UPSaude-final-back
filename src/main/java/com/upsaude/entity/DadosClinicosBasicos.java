@@ -11,10 +11,10 @@ import lombok.NoArgsConstructor;
  * Relacionamento 1:1 com Paciente.
  * Utilizada para registro de informações sobre fatores de risco social, uso de substâncias e vulnerabilidades.
  *
- * Nota: Dados estruturados como alergias, doenças crônicas, deficiências e medicações
+ * Nota: Dados estruturados como alergias, doenças, deficiências e medicações
  * são gerenciados através das entidades relacionadas ao Paciente:
  * - AlergiasPaciente (relacionamento ManyToOne com Paciente)
- * - DoencasCronicasPaciente (relacionamento ManyToOne com Paciente)
+ * - DoencasPaciente (relacionamento ManyToOne com Paciente)
  * - DeficienciasPaciente (relacionamento ManyToOne com Paciente)
  * - MedicacaoPaciente (relacionamento ManyToOne com Paciente)
  *

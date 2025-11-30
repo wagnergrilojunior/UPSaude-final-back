@@ -120,12 +120,11 @@ public class AlergiasServiceImpl implements AlergiasService {
         }
     }
 
-        private void atualizarDadosAlergias(Alergias alergias, AlergiasRequest request) {
+    private void atualizarDadosAlergias(Alergias alergias, AlergiasRequest request) {
         Alergias alergiasAtualizado = alergiasMapper.fromRequest(request);
         
         // Preserva campos de controle
         java.util.UUID idOriginal = alergias.getId();
-        com.upsaude.entity.Tenant tenantOriginal = alergias.getTenant();
         Boolean activeOriginal = alergias.getActive();
         java.time.OffsetDateTime createdAtOriginal = alergias.getCreatedAt();
         
@@ -134,7 +133,6 @@ public class AlergiasServiceImpl implements AlergiasService {
         
         // Restaura campos de controle
         alergias.setId(idOriginal);
-        alergias.setTenant(tenantOriginal);
         alergias.setActive(activeOriginal);
         alergias.setCreatedAt(createdAtOriginal);
     }

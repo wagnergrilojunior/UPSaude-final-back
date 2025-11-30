@@ -120,12 +120,11 @@ public class FabricantesMedicamentoServiceImpl implements FabricantesMedicamento
         }
     }
 
-        private void atualizarDadosFabricantesMedicamento(FabricantesMedicamento fabricantesMedicamento, FabricantesMedicamentoRequest request) {
+    private void atualizarDadosFabricantesMedicamento(FabricantesMedicamento fabricantesMedicamento, FabricantesMedicamentoRequest request) {
         FabricantesMedicamento fabricantesMedicamentoAtualizado = fabricantesMedicamentoMapper.fromRequest(request);
         
         // Preserva campos de controle
         java.util.UUID idOriginal = fabricantesMedicamento.getId();
-        com.upsaude.entity.Tenant tenantOriginal = fabricantesMedicamento.getTenant();
         Boolean activeOriginal = fabricantesMedicamento.getActive();
         java.time.OffsetDateTime createdAtOriginal = fabricantesMedicamento.getCreatedAt();
         
@@ -134,7 +133,6 @@ public class FabricantesMedicamentoServiceImpl implements FabricantesMedicamento
         
         // Restaura campos de controle
         fabricantesMedicamento.setId(idOriginal);
-        fabricantesMedicamento.setTenant(tenantOriginal);
         fabricantesMedicamento.setActive(activeOriginal);
         fabricantesMedicamento.setCreatedAt(createdAtOriginal);
     }

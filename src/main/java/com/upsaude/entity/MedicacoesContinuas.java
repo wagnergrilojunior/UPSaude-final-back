@@ -4,11 +4,13 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 @Entity
 @Table(name = "medicacoes_continuas", schema = "public")
 @Data
-public class MedicacoesContinuas extends BaseEntity {
+@EqualsAndHashCode(callSuper = true)
+public class MedicacoesContinuas extends BaseEntityWithoutTenant {
 
     @Column(name = "nome", nullable = false, length = 255)
     private String nome;

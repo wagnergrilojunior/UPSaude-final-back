@@ -11,6 +11,7 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 /**
  * Entidade que representa um catálogo de deficiências conforme padrão SUS/e-SUS/APS.
@@ -21,7 +22,8 @@ import lombok.Data;
 @Entity
 @Table(name = "deficiencias", schema = "public")
 @Data
-public class Deficiencias extends BaseEntity {
+@EqualsAndHashCode(callSuper = true)
+public class Deficiencias extends BaseEntityWithoutTenant {
 
     @NotBlank(message = "Nome da deficiência é obrigatório")
     @Size(max = 100, message = "Nome da deficiência deve ter no máximo 100 caracteres")
