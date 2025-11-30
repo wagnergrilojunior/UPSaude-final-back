@@ -120,12 +120,11 @@ public class VacinasServiceImpl implements VacinasService {
         }
     }
 
-        private void atualizarDadosVacinas(Vacinas vacinas, VacinasRequest request) {
+    private void atualizarDadosVacinas(Vacinas vacinas, VacinasRequest request) {
         Vacinas vacinasAtualizado = vacinasMapper.fromRequest(request);
         
         // Preserva campos de controle
         java.util.UUID idOriginal = vacinas.getId();
-        com.upsaude.entity.Tenant tenantOriginal = vacinas.getTenant();
         Boolean activeOriginal = vacinas.getActive();
         java.time.OffsetDateTime createdAtOriginal = vacinas.getCreatedAt();
         
@@ -134,7 +133,6 @@ public class VacinasServiceImpl implements VacinasService {
         
         // Restaura campos de controle
         vacinas.setId(idOriginal);
-        vacinas.setTenant(tenantOriginal);
         vacinas.setActive(activeOriginal);
         vacinas.setCreatedAt(createdAtOriginal);
     }

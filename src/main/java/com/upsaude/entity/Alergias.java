@@ -29,7 +29,7 @@ import lombok.EqualsAndHashCode;
        })
 @Data
 @EqualsAndHashCode(callSuper = true)
-public class Alergias extends BaseEntity {
+public class Alergias extends BaseEntityWithoutTenant {
 
     // ========== IDENTIFICAÇÃO BÁSICA ==========
 

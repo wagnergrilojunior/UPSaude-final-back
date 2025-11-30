@@ -16,12 +16,10 @@ import org.mapstruct.Mapping;
 @Mapper(config = MappingConfig.class)
 public interface DeficienciasMapper extends EntityMapper<Deficiencias, DeficienciasDTO> {
 
-    @Mapping(target = "tenant", ignore = true)
     Deficiencias toEntity(DeficienciasDTO dto);
 
     DeficienciasDTO toDTO(Deficiencias entity);
 
-    @Mapping(target = "tenant", ignore = true)
     @Mapping(target = "active", ignore = true)
     Deficiencias fromRequest(DeficienciasRequest request);
 

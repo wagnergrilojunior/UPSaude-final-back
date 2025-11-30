@@ -23,7 +23,7 @@ import lombok.EqualsAndHashCode;
        })
 @Data
 @EqualsAndHashCode(callSuper = true)
-public class FabricantesEquipamento extends BaseEntity {
+public class FabricantesEquipamento extends BaseEntityWithoutTenant {
 
     @NotBlank(message = "Nome do fabricante é obrigatório")
     @Size(max = 255, message = "Nome do fabricante deve ter no máximo 255 caracteres")

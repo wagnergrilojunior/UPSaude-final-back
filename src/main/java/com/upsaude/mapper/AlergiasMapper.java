@@ -11,12 +11,10 @@ import org.mapstruct.Mapping;
 @Mapper(config = MappingConfig.class)
 public interface AlergiasMapper extends EntityMapper<Alergias, AlergiasDTO> {
 
-    @Mapping(target = "tenant", ignore = true)
     Alergias toEntity(AlergiasDTO dto);
 
     AlergiasDTO toDTO(Alergias entity);
 
-    @Mapping(target = "tenant", ignore = true)
     @Mapping(target = "active", ignore = true)
     Alergias fromRequest(AlergiasRequest request);
 

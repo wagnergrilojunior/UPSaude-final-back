@@ -28,11 +28,12 @@ import lombok.EqualsAndHashCode;
 @Table(name = "doencas", schema = "public",
        indexes = {
            @Index(name = "idx_doenca_nome", columnList = "nome"),
-           @Index(name = "idx_doenca_codigo_cid", columnList = "codigo_cid_principal")
+           @Index(name = "idx_doenca_codigo_cid", columnList = "codigo_cid_principal"),
+           @Index(name = "idx_doenca_cronica", columnList = "cronica")
        })
 @Data
 @EqualsAndHashCode(callSuper = true)
-public class Doencas extends BaseEntity {
+public class Doencas extends BaseEntityWithoutTenant {
 
     // ========== IDENTIFICAÇÃO BÁSICA ==========
 
@@ -53,6 +54,9 @@ public class Doencas extends BaseEntity {
 
     @Embedded
     private ClassificacaoDoenca classificacao;
+
+    @Column(name = "cronica", nullable = false)
+    private Boolean cronica = false; // Indica se a doença é crônica
 
     // ========== RELACIONAMENTO COM CID ==========
 

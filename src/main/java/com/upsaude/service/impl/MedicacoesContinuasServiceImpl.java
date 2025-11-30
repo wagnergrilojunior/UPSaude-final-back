@@ -120,12 +120,11 @@ public class MedicacoesContinuasServiceImpl implements MedicacoesContinuasServic
         }
     }
 
-        private void atualizarDadosMedicacoesContinuas(MedicacoesContinuas medicacoesContinuas, MedicacoesContinuasRequest request) {
+    private void atualizarDadosMedicacoesContinuas(MedicacoesContinuas medicacoesContinuas, MedicacoesContinuasRequest request) {
         MedicacoesContinuas medicacoesContinuasAtualizado = medicacoesContinuasMapper.fromRequest(request);
         
         // Preserva campos de controle
         java.util.UUID idOriginal = medicacoesContinuas.getId();
-        com.upsaude.entity.Tenant tenantOriginal = medicacoesContinuas.getTenant();
         Boolean activeOriginal = medicacoesContinuas.getActive();
         java.time.OffsetDateTime createdAtOriginal = medicacoesContinuas.getCreatedAt();
         
@@ -134,7 +133,6 @@ public class MedicacoesContinuasServiceImpl implements MedicacoesContinuasServic
         
         // Restaura campos de controle
         medicacoesContinuas.setId(idOriginal);
-        medicacoesContinuas.setTenant(tenantOriginal);
         medicacoesContinuas.setActive(activeOriginal);
         medicacoesContinuas.setCreatedAt(createdAtOriginal);
     }

@@ -2,40 +2,13 @@ package com.upsaude.repository;
 
 import java.util.UUID;
 
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import com.upsaude.entity.Alergias;
-import com.upsaude.entity.Tenant;
 
+/**
+ * Repositório para a entidade Alergias.
+ * Esta entidade é de escopo global e não possui relacionamento com Tenant ou Estabelecimento.
+ */
 public interface AlergiasRepository extends JpaRepository<Alergias, UUID> {
-    
-    /**
-     * Busca todas as alergias de um estabelecimento.
-     *
-     * @param estabelecimentoId ID do estabelecimento
-     * @param pageable informações de paginação
-     * @return página de alergias do estabelecimento
-     */
-    Page<Alergias> findByEstabelecimentoId(UUID estabelecimentoId, Pageable pageable);
-
-    /**
-     * Busca todas as alergias de um tenant.
-     *
-     * @param tenant tenant
-     * @param pageable informações de paginação
-     * @return página de alergias do tenant
-     */
-    Page<Alergias> findByTenant(Tenant tenant, Pageable pageable);
-
-    /**
-     * Busca todas as alergias de um estabelecimento e tenant.
-     *
-     * @param estabelecimentoId ID do estabelecimento
-     * @param tenant tenant
-     * @param pageable informações de paginação
-     * @return página de alergias
-     */
-    Page<Alergias> findByEstabelecimentoIdAndTenant(UUID estabelecimentoId, Tenant tenant, Pageable pageable);
 }
