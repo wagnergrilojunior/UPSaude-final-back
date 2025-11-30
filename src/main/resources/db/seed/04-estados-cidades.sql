@@ -7,7 +7,7 @@ INSERT INTO public.estados (
     id,
     criado_em,
     atualizado_em,
-    active,
+    ativo,
     sigla,
     nome,
     codigo_ibge
@@ -29,7 +29,7 @@ INSERT INTO public.cidades (
     id,
     criado_em,
     atualizado_em,
-    active,
+    ativo,
     nome,
     codigo_ibge,
     latitude,
