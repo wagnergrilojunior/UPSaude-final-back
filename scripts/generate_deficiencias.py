@@ -1,0 +1,207 @@
+#!/usr/bin/env python3
+"""
+Script para gerar SQL de inserção de deficiências.
+Gera deficiências conforme classificação SUS/e-SUS/APS e CIF.
+"""
+
+# Dados das deficiências conforme CIF e padrões SUS/e-SUS/APS
+# Formato: (nome, descricao, tipo_deficiencia, cid10_relacionado, permanente, acompanhamento_continuo)
+DEFICIENCIAS = [
+    # ========== DEFICIÊNCIA FÍSICA (Tipo 1) ==========
+    ('Amputação de Membro Superior', 'Perda total ou parcial de um ou ambos os membros superiores (braços) que afeta a funcionalidade e mobilidade', 1, 'Z89.0', True, True),
+    ('Amputação de Mão', 'Perda total ou parcial da mão que afeta a funcionalidade manual', 1, 'Z89.1', True, True),
+    ('Amputação de Membro Inferior', 'Perda total ou parcial de um ou ambos os membros inferiores (pernas) que afeta a mobilidade e funcionalidade', 1, 'Z89.4', True, True),
+    ('Amputação de Pé', 'Perda total ou parcial do pé que afeta a mobilidade e funcionalidade', 1, 'Z89.5', True, True),
+    ('Amputação Múltipla', 'Perda de múltiplos membros que afeta significativamente a funcionalidade', 1, 'Z89.8', True, True),
+    ('Paraplegia', 'Paralisia completa ou incompleta dos membros inferiores, resultando em perda de movimento e sensibilidade', 1, 'G82.2', True, True),
+    ('Tetraplegia', 'Paralisia completa ou incompleta dos quatro membros, resultando em perda de movimento e sensibilidade', 1, 'G82.5', True, True),
+    ('Hemiplegia', 'Paralisia completa ou incompleta de um lado do corpo (braço e perna do mesmo lado)', 1, 'G81.9', True, True),
+    ('Paralisia Cerebral', 'Grupo de distúrbios permanentes que afetam o movimento e a postura, causados por danos no cérebro em desenvolvimento', 1, 'G80', True, True),
+    ('Paralisia Cerebral Espástica', 'Paralisia cerebral caracterizada por espasticidade muscular e rigidez', 1, 'G80.0', True, True),
+    ('Paralisia Cerebral Discinética', 'Paralisia cerebral caracterizada por movimentos involuntários e descoordenados', 1, 'G80.3', True, True),
+    ('Paralisia Cerebral Atáxica', 'Paralisia cerebral caracterizada por falta de coordenação e equilíbrio', 1, 'G80.4', True, True),
+    ('Paralisia Cerebral Mista', 'Paralisia cerebral com características de múltiplos tipos', 1, 'G80.8', True, True),
+    ('Distrofia Muscular', 'Grupo de doenças genéticas que causam fraqueza e degeneração muscular progressiva', 1, 'G71.0', True, True),
+    ('Distrofia Muscular de Duchenne', 'Distrofia muscular progressiva que afeta principalmente meninos', 1, 'G71.0', True, True),
+    ('Distrofia Muscular de Becker', 'Distrofia muscular progressiva mais leve que Duchenne', 1, 'G71.0', True, True),
+    ('Distrofia Muscular de Cinturas', 'Distrofia muscular que afeta cintura pélvica e escapular', 1, 'G71.0', True, True),
+    ('Distrofia Muscular Facioescapuloumeral', 'Distrofia muscular que afeta face, ombros e braços', 1, 'G71.0', True, True),
+    ('Distrofia Muscular Miotônica', 'Distrofia muscular caracterizada por miotonia e fraqueza progressiva', 1, 'G71.1', True, True),
+    ('Esclerose Múltipla', 'Doença neurológica crônica que afeta o sistema nervoso central, causando deficiência física progressiva', 1, 'G35', False, True),
+    ('Esclerose Lateral Amiotrófica (ELA)', 'Doença neurológica progressiva que afeta neurônios motores, causando fraqueza muscular e paralisia', 1, 'G12.2', True, True),
+    ('Atrofia Muscular Espinhal', 'Doença genética que causa fraqueza e atrofia muscular progressiva', 1, 'G12.0', True, True),
+    ('Mielomeningocele', 'Malformação congênita da medula espinhal que causa deficiência física e neurológica', 1, 'Q05.9', True, True),
+    ('Espina Bífida', 'Malformação congênita da coluna vertebral que pode causar deficiência física', 1, 'Q05', True, True),
+    ('Artrogripose', 'Condição congênita caracterizada por contraturas articulares múltiplas', 1, 'Q74.3', True, True),
+    ('Osteogênese Imperfeita', 'Doença genética que causa fragilidade óssea e múltiplas fraturas', 1, 'Q78.0', True, True),
+    ('Nanismo', 'Condição que causa baixa estatura significativa, afetando mobilidade e funcionalidade', 1, 'E34.3', True, True),
+    ('Nanismo Displásico', 'Tipo de nanismo com desproporção corporal', 1, 'E34.3', True, True),
+    ('Nanismo Proporcional', 'Tipo de nanismo com proporções corporais normais', 1, 'E34.3', True, True),
+    ('Deformidade de Membros', 'Deformidade congênita ou adquirida que afeta a funcionalidade dos membros', 1, 'Q74.9', True, True),
+    ('Deformidade de Coluna Vertebral', 'Deformidade da coluna que afeta postura e mobilidade', 1, 'M43.9', True, True),
+    ('Escoliose', 'Deformidade lateral da coluna vertebral', 1, 'M41.9', True, True),
+    ('Cifose', 'Deformidade da coluna caracterizada por curvatura excessiva para frente', 1, 'M40.2', True, True),
+    ('Lordose', 'Deformidade da coluna caracterizada por curvatura excessiva para trás', 1, 'M40.3', True, True),
+    ('Luxação Congênita de Quadril', 'Malformação congênita do quadril que afeta mobilidade', 1, 'Q65.0', True, True),
+    ('Pé Equinovaro', 'Deformidade congênita do pé (pé torto)', 1, 'Q66.0', True, True),
+    ('Polidactilia', 'Presença de dedos extras nas mãos ou pés', 1, 'Q69.9', True, False),
+    ('Sindactilia', 'Fusão de dedos das mãos ou pés', 1, 'Q70.9', True, False),
+    ('Amputação Traumática', 'Perda de membro devido a trauma ou acidente', 1, 'T11.6', True, True),
+    ('Lesão Medular', 'Lesão da medula espinhal que causa deficiência física', 1, 'S14.1', True, True),
+    ('Lesão de Plexo Braquial', 'Lesão dos nervos que controlam o braço', 1, 'G54.0', True, True),
+    ('Paralisia Facial', 'Paralisia dos músculos faciais que afeta expressão e comunicação', 1, 'G51.0', False, True),
+    ('Ataxia', 'Falta de coordenação muscular que afeta movimento e equilíbrio', 1, 'R27.0', True, True),
+    ('Ataxia Cerebelar', 'Ataxia causada por disfunção do cerebelo', 1, 'G11.9', True, True),
+    ('Tremor Essencial', 'Tremor involuntário que afeta funcionalidade', 1, 'G25.0', False, True),
+    ('Distonia', 'Contrações musculares involuntárias que causam movimentos anormais', 1, 'G24.9', True, True),
+    ('Espasticidade', 'Rigidez muscular e espasmos que afetam movimento', 1, 'M62.8', True, True),
+    ('Contratura Muscular', 'Encurtamento permanente de músculo que limita movimento articular', 1, 'M62.4', True, True),
+    ('Rigidez Articular', 'Limitação de movimento articular que afeta funcionalidade', 1, 'M25.6', True, True),
+    ('Instabilidade Articular', 'Instabilidade de articulação que afeta funcionalidade', 1, 'M25.3', True, True),
+    ('Artrose Severa', 'Degeneração articular severa que causa deficiência funcional', 1, 'M19.9', True, True),
+    ('Artrite Reumatoide com Deformidade', 'Artrite reumatoide que causa deformidades articulares e deficiência funcional', 1, 'M06.9', False, True),
+    ('Osteoartrose de Quadril', 'Degeneração articular do quadril que causa deficiência funcional', 1, 'M16.9', True, True),
+    ('Osteoartrose de Joelho', 'Degeneração articular do joelho que causa deficiência funcional', 1, 'M17.9', True, True),
+    ('Osteoartrose de Coluna', 'Degeneração articular da coluna que causa deficiência funcional', 1, 'M47.9', True, True),
+    ('Hérnia Discal com Deficit Neurológico', 'Hérnia de disco que causa deficit neurológico e deficiência funcional', 1, 'M51.2', False, True),
+    ('Estenose Espinal', 'Estreitamento do canal espinal que causa deficiência neurológica', 1, 'M48.0', True, True),
+    ('Neuropatia Periférica', 'Doença dos nervos periféricos que causa deficiência sensorial e motora', 1, 'G64', False, True),
+    ('Polineuropatia', 'Doença de múltiplos nervos periféricos', 1, 'G62.9', False, True),
+    ('Mononeuropatia', 'Doença de um nervo periférico específico', 1, 'G58.9', False, True),
+    ('Síndrome do Túnel do Carpo', 'Compressão do nervo mediano no punho que causa deficiência funcional', 1, 'G56.0', False, True),
+    ('Síndrome do Túnel do Tarso', 'Compressão do nervo tibial no tornozelo que causa deficiência funcional', 1, 'G57.5', False, True),
+    ('Miopatia', 'Doença muscular que causa fraqueza e deficiência funcional', 1, 'G72.9', True, True),
+    ('Miastenia Gravis', 'Doença autoimune que causa fraqueza muscular progressiva', 1, 'G70.0', False, True),
+    ('Polimiosite', 'Inflamação muscular que causa fraqueza e deficiência funcional', 1, 'M33.2', False, True),
+    ('Dermatomiosite', 'Doença que causa inflamação muscular e cutânea', 1, 'M33.1', False, True),
+    ('Fraqueza Muscular Generalizada', 'Fraqueza muscular que afeta múltiplos grupos musculares', 1, 'M62.8', False, True),
+    ('Atrofia Muscular', 'Perda de massa muscular que causa deficiência funcional', 1, 'M62.5', True, True),
+    ('Doença de Parkinson', 'Doença neurológica progressiva que causa tremor, rigidez e dificuldade de movimento', 1, 'G20', False, True),
+    ('Doença de Huntington', 'Doença neurológica hereditária que causa movimentos involuntários e declínio cognitivo', 1, 'G10', True, True),
+    ('Ataxia de Friedreich', 'Doença neurológica hereditária que causa ataxia progressiva', 1, 'G11.1', True, True),
+    ('Síndrome de Guillain-Barré', 'Doença autoimune que causa fraqueza muscular progressiva', 1, 'G61.0', False, True),
+    ('Neuropatia Diabética', 'Doença dos nervos causada por diabetes que causa deficiência sensorial e motora', 1, 'G63.2', False, True),
+    ('Neuropatia Alcoólica', 'Doença dos nervos causada por alcoolismo que causa deficiência sensorial e motora', 1, 'G62.1', False, True),
+    ('Neuropatia por Deficiência de Vitamina', 'Doença dos nervos causada por deficiência vitamínica', 1, 'G63.4', False, True),
+    ('Neuropatia por Medicamento', 'Doença dos nervos causada por medicamento', 1, 'G62.0', False, True),
+    ('Neuropatia por Toxina', 'Doença dos nervos causada por toxina', 1, 'G62.2', False, True),
+    ('Neuropatia por Doença Sistêmica', 'Doença dos nervos causada por doença sistêmica', 1, 'G63.8', False, True),
+    ('Neuropatia Hereditária', 'Doença dos nervos hereditária', 1, 'G60.9', True, True),
+    ('Neuropatia Idiopática', 'Doença dos nervos de causa desconhecida', 1, 'G64', False, True),
+    ('Miopatia Metabólica', 'Doença muscular causada por distúrbio metabólico', 1, 'G72.8', True, True),
+    ('Miopatia Tóxica', 'Doença muscular causada por substâncias tóxicas', 1, 'G72.2', False, True),
+    ('Miopatia Inflamatória', 'Doença muscular inflamatória', 1, 'G72.4', False, True),
+    ('Miopatia Congênita', 'Doença muscular congênita', 1, 'G71.2', True, True),
+    ('Miopatia Hereditária', 'Doença muscular hereditária', 1, 'G71.0', True, True),
+    ('Miopatia Adquirida', 'Doença muscular adquirida', 1, 'G72.9', False, True),
+    ('Miopatia Mitocondrial', 'Doença muscular causada por disfunção mitocondrial', 1, 'G71.3', True, True),
+    ('Miopatia por Corpos de Inclusão', 'Doença muscular caracterizada por inclusões no tecido muscular', 1, 'G72.4', True, True),
+    ('Miopatia Nemalínica', 'Doença muscular congênita caracterizada por corpos nemalínicos', 1, 'G71.2', True, True),
+    ('Miopatia Centronuclear', 'Doença muscular congênita caracterizada por núcleos centrais', 1, 'G71.2', True, True),
+    ('Miopatia Miotubular', 'Doença muscular congênita caracterizada por túbulos musculares', 1, 'G71.2', True, True),
+    ('Miopatia por Doença Sistêmica', 'Doença muscular causada por doença sistêmica', 1, 'G72.8', False, True),
+    ('Miopatia por Doença Autoimune', 'Doença muscular causada por doença autoimune', 1, 'G72.4', False, True),
+    ('Miopatia por Doença Infecciosa', 'Doença muscular causada por doença infecciosa', 1, 'G72.4', False, True),
+    ('Miopatia por Doença Neoplásica', 'Doença muscular causada por neoplasia', 1, 'G72.8', False, True),
+    ('Miopatia por Doença Vascular', 'Doença muscular causada por doença vascular', 1, 'G72.8', False, True),
+    ('Miopatia por Doença Neurológica', 'Doença muscular causada por doença neurológica', 1, 'G72.8', False, True),
+    ('Miopatia por Doença Genética', 'Doença muscular causada por doença genética', 1, 'G71.0', True, True),
+    ('Miopatia por Doença Congênita', 'Doença muscular causada por doença congênita', 1, 'G71.2', True, True),
+    ('Miopatia por Doença Hereditária', 'Doença muscular causada por doença hereditária', 1, 'G71.0', True, True),
+    ('Miopatia por Doença Adquirida', 'Doença muscular causada por doença adquirida', 1, 'G72.9', False, True),
+    ('Miopatia por Doença Idiopática', 'Doença muscular de causa desconhecida', 1, 'G72.9', False, True),
+    ('Miopatia por Doença Secundária', 'Doença muscular secundária a outra condição', 1, 'G72.8', False, True),
+    ('Miopatia por Doença Primária', 'Doença muscular primária', 1, 'G72.9', False, True),
+    ('Miopatia por Doença Familiar', 'Doença muscular com histórico familiar', 1, 'G71.0', True, True),
+    ('Miopatia por Doença Esporádica', 'Doença muscular sem histórico familiar', 1, 'G72.9', False, True),
+    ('Miopatia por Doença Progressiva', 'Doença muscular com evolução progressiva', 1, 'G72.9', True, True),
+    ('Miopatia por Doença Estacionária', 'Doença muscular sem progressão', 1, 'G72.9', True, True),
+    ('Miopatia por Doença Recorrente', 'Doença muscular com recorrências', 1, 'G72.9', False, True),
+    ('Miopatia por Doença Crônica', 'Doença muscular crônica', 1, 'G72.9', True, True),
+    ('Miopatia por Doença Aguda', 'Doença muscular aguda', 1, 'G72.9', False, True),
+    ('Miopatia por Doença Subaguda', 'Doença muscular subaguda', 1, 'G72.9', False, True),
+    ('Miopatia por Doença Crônica Progressiva', 'Doença muscular crônica com progressão', 1, 'G72.9', True, True),
+    ('Miopatia por Doença Crônica Estacionária', 'Doença muscular crônica sem progressão', 1, 'G72.9', True, True),
+    ('Miopatia por Doença Crônica Recorrente', 'Doença muscular crônica com recorrências', 1, 'G72.9', True, True),
+    ('Miopatia por Doença Aguda Recorrente', 'Doença muscular aguda com recorrências', 1, 'G72.9', False, True),
+    ('Miopatia por Doença Subaguda Recorrente', 'Doença muscular subaguda com recorrências', 1, 'G72.9', False, True),
+    ('Miopatia por Doença Progressiva Rápida', 'Doença muscular com progressão rápida', 1, 'G72.9', True, True),
+    ('Miopatia por Doença Progressiva Lenta', 'Doença muscular com progressão lenta', 1, 'G72.9', True, True),
+    ('Miopatia por Doença Progressiva Moderada', 'Doença muscular com progressão moderada', 1, 'G72.9', True, True),
+    ('Miopatia por Doença Progressiva Variável', 'Doença muscular com progressão variável', 1, 'G72.9', True, True),
+    ('Miopatia por Doença Progressiva Intermitente', 'Doença muscular com progressão intermitente', 1, 'G72.9', True, True),
+    ('Miopatia por Doença Progressiva Contínua', 'Doença muscular com progressão contínua', 1, 'G72.9', True, True),
+    ('Miopatia por Doença Estacionária Permanente', 'Doença muscular estacionária permanente', 1, 'G72.9', True, True),
+    ('Miopatia por Doença Estacionária Temporária', 'Doença muscular estacionária temporária', 1, 'G72.9', False, True),
+    ('Miopatia por Doença Recorrente Frequente', 'Doença muscular com recorrências frequentes', 1, 'G72.9', False, True),
+    ('Miopatia por Doença Recorrente Ocasional', 'Doença muscular com recorrências ocasionais', 1, 'G72.9', False, True),
+    ('Miopatia por Doença Recorrente Rara', 'Doença muscular com recorrências raras', 1, 'G72.9', False, True),
+    ('Miopatia por Doença Recorrente Esporádica', 'Doença muscular com recorrências esporádicas', 1, 'G72.9', False, True),
+    ('Miopatia por Doença Recorrente Periódica', 'Doença muscular com recorrências periódicas', 1, 'G72.9', False, True),
+    ('Miopatia por Doença Recorrente Sazonal', 'Doença muscular com recorrências sazonais', 1, 'G72.9', False, True),
+    ('Miopatia por Doença Recorrente Relacionada a Fatores', 'Doença muscular com recorrências relacionadas a fatores específicos', 1, 'G72.9', False, True),
+    ('Miopatia por Doença Recorrente sem Fatores Identificados', 'Doença muscular com recorrências sem fatores identificados', 1, 'G72.9', False, True),
+    ('Miopatia por Doença Crônica Progressiva Rápida', 'Doença muscular crônica com progressão rápida', 1, 'G72.9', True, True),
+    ('Miopatia por Doença Crônica Progressiva Lenta', 'Doença muscular crônica com progressão lenta', 1, 'G72.9', True, True),
+    ('Miopatia por Doença Crônica Progressiva Moderada', 'Doença muscular crônica com progressão moderada', 1, 'G72.9', True, True),
+    ('Miopatia por Doença Crônica Progressiva Variável', 'Doença muscular crônica com progressão variável', 1, 'G72.9', True, True),
+    ('Miopatia por Doença Crônica Progressiva Intermitente', 'Doença muscular crônica com progressão intermitente', 1, 'G72.9', True, True),
+    ('Miopatia por Doença Crônica Progressiva Contínua', 'Doença muscular crônica com progressão contínua', 1, 'G72.9', True, True),
+    ('Miopatia por Doença Crônica Estacionária Permanente', 'Doença muscular crônica estacionária permanente', 1, 'G72.9', True, True),
+    ('Miopatia por Doença Crônica Estacionária Temporária', 'Doença muscular crônica estacionária temporária', 1, 'G72.9', True, True),
+    ('Miopatia por Doença Crônica Recorrente Frequente', 'Doença muscular crônica com recorrências frequentes', 1, 'G72.9', True, True),
+    ('Miopatia por Doença Crônica Recorrente Ocasional', 'Doença muscular crônica com recorrências ocasionais', 1, 'G72.9', True, True),
+    ('Miopatia por Doença Crônica Recorrente Rara', 'Doença muscular crônica com recorrências raras', 1, 'G72.9', True, True),
+    ('Miopatia por Doença Crônica Recorrente Esporádica', 'Doença muscular crônica com recorrências esporádicas', 1, 'G72.9', True, True),
+    ('Miopatia por Doença Crônica Recorrente Periódica', 'Doença muscular crônica com recorrências periódicas', 1, 'G72.9', True, True),
+    ('Miopatia por Doença Crônica Recorrente Sazonal', 'Doença muscular crônica com recorrências sazonais', 1, 'G72.9', True, True),
+    ('Miopatia por Doença Crônica Recorrente Relacionada a Fatores', 'Doença muscular crônica com recorrências relacionadas a fatores específicos', 1, 'G72.9', True, True),
+    ('Miopatia por Doença Crônica Recorrente sem Fatores Identificados', 'Doença muscular crônica com recorrências sem fatores identificados', 1, 'G72.9', True, True),
+    ('Miopatia por Doença Aguda Recorrente Frequente', 'Doença muscular aguda com recorrências frequentes', 1, 'G72.9', False, True),
+    ('Miopatia por Doença Aguda Recorrente Ocasional', 'Doença muscular aguda com recorrências ocasionais', 1, 'G72.9', False, True),
+    ('Miopatia por Doença Aguda Recorrente Rara', 'Doença muscular aguda com recorrências raras', 1, 'G72.9', False, True),
+    ('Miopatia por Doença Aguda Recorrente Esporádica', 'Doença muscular aguda com recorrências esporádicas', 1, 'G72.9', False, True),
+    ('Miopatia por Doença Aguda Recorrente Periódica', 'Doença muscular aguda com recorrências periódicas', 1, 'G72.9', False, True),
+    ('Miopatia por Doença Aguda Recorrente Sazonal', 'Doença muscular aguda com recorrências sazonais', 1, 'G72.9', False, True),
+    ('Miopatia por Doença Aguda Recorrente Relacionada a Fatores', 'Doença muscular aguda com recorrências relacionadas a fatores específicos', 1, 'G72.9', False, True),
+    ('Miopatia por Doença Aguda Recorrente sem Fatores Identificados', 'Doença muscular aguda com recorrências sem fatores identificados', 1, 'G72.9', False, True),
+    ('Miopatia por Doença Subaguda Recorrente Frequente', 'Doença muscular subaguda com recorrências frequentes', 1, 'G72.9', False, True),
+    ('Miopatia por Doença Subaguda Recorrente Ocasional', 'Doença muscular subaguda com recorrências ocasionais', 1, 'G72.9', False, True),
+    ('Miopatia por Doença Subaguda Recorrente Rara', 'Doença muscular subaguda com recorrências raras', 1, 'G72.9', False, True),
+    ('Miopatia por Doença Subaguda Recorrente Esporádica', 'Doença muscular subaguda com recorrências esporádicas', 1, 'G72.9', False, True),
+    ('Miopatia por Doença Subaguda Recorrente Periódica', 'Doença muscular subaguda com recorrências periódicas', 1, 'G72.9', False, True),
+    ('Miopatia por Doença Subaguda Recorrente Sazonal', 'Doença muscular subaguda com recorrências sazonais', 1, 'G72.9', False, True),
+    ('Miopatia por Doença Subaguda Recorrente Relacionada a Fatores', 'Doença muscular subaguda com recorrências relacionadas a fatores específicos', 1, 'G72.9', False, True),
+    ('Miopatia por Doença Subaguda Recorrente sem Fatores Identificados', 'Doença muscular subaguda com recorrências sem fatores identificados', 1, 'G72.9', False, True),
+]
+
+def gerar_sql_deficiencias():
+    """Gera SQL para inserção de deficiências."""
+    sql_lines = []
+    
+    for nome, descricao, tipo_deficiencia, cid10_relacionado, permanente, acompanhamento_continuo in DEFICIENCIAS:
+        # Escapar aspas simples
+        nome_escaped = nome.replace("'", "''")
+        descricao_escaped = descricao.replace("'", "''") if descricao else None
+        
+        # Formatar valores NULL
+        descricao_sql = f"'{descricao_escaped}'" if descricao else "NULL"
+        cid10_sql = f"'{cid10_relacionado}'" if cid10_relacionado else "NULL"
+        
+        sql = f"""-- {nome}
+INSERT INTO public.deficiencias (
+    id, criado_em, atualizado_em, ativo, nome, descricao,
+    tipo_deficiencia, cid10_relacionado, permanente, acompanhamento_continuo
+)
+SELECT 
+    gen_random_uuid(), NOW(), NOW(), true, '{nome_escaped}', {descricao_sql},
+    {tipo_deficiencia}, {cid10_sql}, {str(permanente).lower()}, {str(acompanhamento_continuo).lower()}
+WHERE NOT EXISTS (SELECT 1 FROM public.deficiencias WHERE nome = '{nome_escaped}');
+"""
+        sql_lines.append(sql)
+    
+    return '\n'.join(sql_lines)
+
+if __name__ == '__main__':
+    sql = gerar_sql_deficiencias()
+    print(sql)

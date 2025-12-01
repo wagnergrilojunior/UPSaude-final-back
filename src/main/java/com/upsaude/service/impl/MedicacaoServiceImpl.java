@@ -140,7 +140,6 @@ public class MedicacaoServiceImpl implements MedicacaoService {
         
         // Preserva campos de controle
         UUID idOriginal = medicacao.getId();
-        com.upsaude.entity.Tenant tenantOriginal = medicacao.getTenant();
         Boolean activeOriginal = medicacao.getActive();
         java.time.OffsetDateTime createdAtOriginal = medicacao.getCreatedAt();
         
@@ -149,7 +148,6 @@ public class MedicacaoServiceImpl implements MedicacaoService {
         
         // Restaura campos de controle
         medicacao.setId(idOriginal);
-        medicacao.setTenant(tenantOriginal);
         medicacao.setActive(activeOriginal);
         medicacao.setCreatedAt(createdAtOriginal);
     }
