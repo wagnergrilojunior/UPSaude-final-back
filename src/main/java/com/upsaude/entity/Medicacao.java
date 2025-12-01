@@ -21,6 +21,7 @@ import lombok.EqualsAndHashCode;
  * Entidade que representa um catálogo de medicamentos conforme padrão SUS/SIGTAP.
  * Armazena informações completas sobre medicamentos para sistemas de prontuário eletrônico.
  * Baseado em padrões da ANVISA, SUS e sistemas de saúde.
+ * Não possui relação com Tenant por ser uma entidade de referência global.
  *
  * @author UPSaúde
  */
@@ -36,7 +37,7 @@ import lombok.EqualsAndHashCode;
        })
 @Data
 @EqualsAndHashCode(callSuper = true)
-public class Medicacao extends BaseEntity {
+public class Medicacao extends BaseEntityWithoutTenant {
 
     // ========== RELACIONAMENTOS ==========
 

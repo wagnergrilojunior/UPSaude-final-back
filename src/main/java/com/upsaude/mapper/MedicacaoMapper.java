@@ -20,14 +20,12 @@ import java.util.UUID;
 @Mapper(config = MappingConfig.class)
 public interface MedicacaoMapper extends EntityMapper<Medicacao, MedicacaoDTO> {
 
-    @Mapping(target = "tenant", ignore = true)
     @Mapping(target = "fabricanteEntity", source = "fabricanteId", qualifiedByName = "fabricanteFromId")
     Medicacao toEntity(MedicacaoDTO dto);
 
     @Mapping(target = "fabricanteId", source = "fabricanteEntity.id")
     MedicacaoDTO toDTO(Medicacao entity);
 
-    @Mapping(target = "tenant", ignore = true)
     @Mapping(target = "active", ignore = true)
     @Mapping(target = "fabricanteEntity", source = "fabricanteId", qualifiedByName = "fabricanteFromId")
     Medicacao fromRequest(MedicacaoRequest request);
