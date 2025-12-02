@@ -13,6 +13,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.data.domain.Page;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
@@ -33,6 +35,7 @@ public class MedicacoesContinuasPacienteServiceImpl implements MedicacoesContinu
 
     @Override
     @Transactional
+    @CacheEvict(value = "medicacoescontinuaspaciente", allEntries = true)
     public MedicacoesContinuasPacienteResponse criar(MedicacoesContinuasPacienteRequest request) {
         log.debug("Criando novo medicacoescontinuaspaciente");
 
@@ -49,9 +52,9 @@ public class MedicacoesContinuasPacienteServiceImpl implements MedicacoesContinu
 
     @Override
     @Transactional
+    @Cacheable(value = "medicacoescontinuaspaciente", key = "#id")
     public MedicacoesContinuasPacienteResponse obterPorId(UUID id) {
-        log.debug("Buscando medicacoescontinuaspaciente por ID: {}", id);
-
+        log.debug("Buscando medicacoescontinuaspaciente por ID: {} (cache miss)", id);
         if (id == null) {
             throw new BadRequestException("ID do medicacoescontinuaspaciente é obrigatório");
         }
@@ -73,6 +76,7 @@ public class MedicacoesContinuasPacienteServiceImpl implements MedicacoesContinu
 
     @Override
     @Transactional
+    @CacheEvict(value = "medicacoescontinuaspaciente", key = "#id")
     public MedicacoesContinuasPacienteResponse atualizar(UUID id, MedicacoesContinuasPacienteRequest request) {
         log.debug("Atualizando medicacoescontinuaspaciente. ID: {}", id);
 
@@ -95,6 +99,7 @@ public class MedicacoesContinuasPacienteServiceImpl implements MedicacoesContinu
 
     @Override
     @Transactional
+    @CacheEvict(value = "medicacoescontinuaspaciente", key = "#id")
     public void excluir(UUID id) {
         log.debug("Excluindo medicacoescontinuaspaciente. ID: {}", id);
 

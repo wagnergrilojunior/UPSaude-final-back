@@ -17,6 +17,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.data.domain.Page;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
@@ -39,6 +41,7 @@ public class ExamesServiceImpl implements ExamesService {
 
     @Override
     @Transactional
+    @CacheEvict(value = "exames", allEntries = true)
     public ExamesResponse criar(ExamesRequest request) {
         log.debug("Criando novo exames");
 
@@ -66,9 +69,9 @@ public class ExamesServiceImpl implements ExamesService {
 
     @Override
     @Transactional
+    @Cacheable(value = "exames", key = "#id")
     public ExamesResponse obterPorId(UUID id) {
-        log.debug("Buscando exames por ID: {}", id);
-
+        log.debug("Buscando exames por ID: {} (cache miss)", id);
         if (id == null) {
             throw new BadRequestException("ID do exames é obrigatório");
         }
@@ -103,6 +106,7 @@ public class ExamesServiceImpl implements ExamesService {
 
     @Override
     @Transactional
+    @CacheEvict(value = "exames", key = "#id")
     public ExamesResponse atualizar(UUID id, ExamesRequest request) {
         log.debug("Atualizando exames. ID: {}", id);
 
@@ -125,6 +129,7 @@ public class ExamesServiceImpl implements ExamesService {
 
     @Override
     @Transactional
+    @CacheEvict(value = "exames", key = "#id")
     public void excluir(UUID id) {
         log.debug("Excluindo exames. ID: {}", id);
 

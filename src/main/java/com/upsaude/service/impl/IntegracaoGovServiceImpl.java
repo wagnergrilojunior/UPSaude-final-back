@@ -13,6 +13,8 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
@@ -28,6 +30,7 @@ public class IntegracaoGovServiceImpl implements IntegracaoGovService {
 
     @Override
     @Transactional
+    @CacheEvict(value = "integracaogov", allEntries = true)
     public IntegracaoGovResponse criar(IntegracaoGovRequest request) {
         log.debug("Criando integração gov para paciente: {}", request.getPacienteId());
 
@@ -87,6 +90,7 @@ public class IntegracaoGovServiceImpl implements IntegracaoGovService {
 
     @Override
     @Transactional
+    @CacheEvict(value = "integracaogov", key = "#id")
     public IntegracaoGovResponse atualizar(UUID id, IntegracaoGovRequest request) {
         log.debug("Atualizando integração gov. ID: {}", id);
 
@@ -115,6 +119,7 @@ public class IntegracaoGovServiceImpl implements IntegracaoGovService {
 
     @Override
     @Transactional
+    @CacheEvict(value = "integracaogov", key = "#id")
     public void excluir(UUID id) {
         log.debug("Excluindo integração gov. ID: {}", id);
 

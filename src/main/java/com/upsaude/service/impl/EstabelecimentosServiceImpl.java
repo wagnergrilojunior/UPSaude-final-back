@@ -16,6 +16,8 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
@@ -38,6 +40,7 @@ public class EstabelecimentosServiceImpl implements EstabelecimentosService {
 
     @Override
     @Transactional
+    @CacheEvict(value = "estabelecimentos", allEntries = true)
     public EstabelecimentosResponse criar(EstabelecimentosRequest request) {
         log.debug("Criando novo estabelecimento");
 
@@ -76,9 +79,9 @@ public class EstabelecimentosServiceImpl implements EstabelecimentosService {
 
     @Override
     @Transactional
+    @Cacheable(value = "estabelecimentos", key = "#id")
     public EstabelecimentosResponse obterPorId(UUID id) {
-        log.debug("Buscando estabelecimento por ID: {}", id);
-
+        log.debug("Buscando estabelecimento por ID: {} (cache miss)", id);
         if (id == null) {
             throw new BadRequestException("ID do estabelecimento é obrigatório");
         }
@@ -100,6 +103,7 @@ public class EstabelecimentosServiceImpl implements EstabelecimentosService {
 
     @Override
     @Transactional
+    @CacheEvict(value = "estabelecimentos", key = "#id")
     public EstabelecimentosResponse atualizar(UUID id, EstabelecimentosRequest request) {
         log.debug("Atualizando estabelecimento. ID: {}", id);
 
@@ -122,6 +126,7 @@ public class EstabelecimentosServiceImpl implements EstabelecimentosService {
 
     @Override
     @Transactional
+    @CacheEvict(value = "estabelecimentos", key = "#id")
     public void excluir(UUID id) {
         log.debug("Excluindo estabelecimento. ID: {}", id);
 

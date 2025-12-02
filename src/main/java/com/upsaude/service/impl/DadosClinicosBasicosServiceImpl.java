@@ -13,6 +13,8 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
@@ -28,6 +30,7 @@ public class DadosClinicosBasicosServiceImpl implements DadosClinicosBasicosServ
 
     @Override
     @Transactional
+    @CacheEvict(value = "dadosclinicosbasicos", allEntries = true)
     public DadosClinicosBasicosResponse criar(DadosClinicosBasicosRequest request) {
         log.debug("Criando dados clínicos básicos para paciente: {}", request.getPacienteId());
 
@@ -87,6 +90,7 @@ public class DadosClinicosBasicosServiceImpl implements DadosClinicosBasicosServ
 
     @Override
     @Transactional
+    @CacheEvict(value = "dadosclinicosbasicos", key = "#id")
     public DadosClinicosBasicosResponse atualizar(UUID id, DadosClinicosBasicosRequest request) {
         log.debug("Atualizando dados clínicos básicos. ID: {}", id);
 
@@ -115,6 +119,7 @@ public class DadosClinicosBasicosServiceImpl implements DadosClinicosBasicosServ
 
     @Override
     @Transactional
+    @CacheEvict(value = "dadosclinicosbasicos", key = "#id")
     public void excluir(UUID id) {
         log.debug("Excluindo dados clínicos básicos. ID: {}", id);
 

@@ -13,6 +13,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.data.domain.Page;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
@@ -33,6 +35,7 @@ public class UsuariosSistemaServiceImpl implements UsuariosSistemaService {
 
     @Override
     @Transactional
+    @CacheEvict(value = "usuariossistema", allEntries = true)
     public UsuariosSistemaResponse criar(UsuariosSistemaRequest request) {
         log.debug("Criando novo usuariossistema");
 
@@ -49,9 +52,9 @@ public class UsuariosSistemaServiceImpl implements UsuariosSistemaService {
 
     @Override
     @Transactional
+    @Cacheable(value = "usuariossistema", key = "#id")
     public UsuariosSistemaResponse obterPorId(UUID id) {
-        log.debug("Buscando usuariossistema por ID: {}", id);
-
+        log.debug("Buscando usuariossistema por ID: {} (cache miss)", id);
         if (id == null) {
             throw new BadRequestException("ID do usuariossistema é obrigatório");
         }
@@ -73,6 +76,7 @@ public class UsuariosSistemaServiceImpl implements UsuariosSistemaService {
 
     @Override
     @Transactional
+    @CacheEvict(value = "usuariossistema", key = "#id")
     public UsuariosSistemaResponse atualizar(UUID id, UsuariosSistemaRequest request) {
         log.debug("Atualizando usuariossistema. ID: {}", id);
 
@@ -95,6 +99,7 @@ public class UsuariosSistemaServiceImpl implements UsuariosSistemaService {
 
     @Override
     @Transactional
+    @CacheEvict(value = "usuariossistema", key = "#id")
     public void excluir(UUID id) {
         log.debug("Excluindo usuariossistema. ID: {}", id);
 

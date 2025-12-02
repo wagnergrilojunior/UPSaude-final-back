@@ -12,6 +12,8 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -33,6 +35,7 @@ public class CidadesServiceImpl implements CidadesService {
 
     @Override
     @Transactional
+    @CacheEvict(value = "cidades", allEntries = true)
     public CidadesResponse criar(CidadesRequest request) {
         log.debug("Criando novo cidades");
 
@@ -49,8 +52,9 @@ public class CidadesServiceImpl implements CidadesService {
 
     @Override
     @Transactional
+    @Cacheable(value = "cidades", key = "#id")
     public CidadesResponse obterPorId(UUID id) {
-        log.debug("Buscando cidades por ID: {}", id);
+        log.debug("Buscando cidades por ID: {} (cache miss)", id);
 
         if (id == null) {
             throw new BadRequestException("ID do cidades é obrigatório");
@@ -73,6 +77,7 @@ public class CidadesServiceImpl implements CidadesService {
 
     @Override
     @Transactional
+    @CacheEvict(value = "cidades", key = "#id")
     public CidadesResponse atualizar(UUID id, CidadesRequest request) {
         log.debug("Atualizando cidades. ID: {}", id);
 
@@ -95,6 +100,7 @@ public class CidadesServiceImpl implements CidadesService {
 
     @Override
     @Transactional
+    @CacheEvict(value = "cidades", key = "#id")
     public void excluir(UUID id) {
         log.debug("Excluindo cidades. ID: {}", id);
 

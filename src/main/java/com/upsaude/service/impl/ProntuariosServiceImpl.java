@@ -17,6 +17,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.data.domain.Page;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
@@ -39,6 +41,7 @@ public class ProntuariosServiceImpl implements ProntuariosService {
 
     @Override
     @Transactional
+    @CacheEvict(value = "prontuarios", allEntries = true)
     public ProntuariosResponse criar(ProntuariosRequest request) {
         log.debug("Criando novo prontuarios");
 
@@ -66,9 +69,9 @@ public class ProntuariosServiceImpl implements ProntuariosService {
 
     @Override
     @Transactional
+    @Cacheable(value = "prontuarios", key = "#id")
     public ProntuariosResponse obterPorId(UUID id) {
-        log.debug("Buscando prontuarios por ID: {}", id);
-
+        log.debug("Buscando prontuarios por ID: {} (cache miss)", id);
         if (id == null) {
             throw new BadRequestException("ID do prontuarios é obrigatório");
         }
@@ -103,6 +106,7 @@ public class ProntuariosServiceImpl implements ProntuariosService {
 
     @Override
     @Transactional
+    @CacheEvict(value = "prontuarios", key = "#id")
     public ProntuariosResponse atualizar(UUID id, ProntuariosRequest request) {
         log.debug("Atualizando prontuarios. ID: {}", id);
 
@@ -125,6 +129,7 @@ public class ProntuariosServiceImpl implements ProntuariosService {
 
     @Override
     @Transactional
+    @CacheEvict(value = "prontuarios", key = "#id")
     public void excluir(UUID id) {
         log.debug("Excluindo prontuarios. ID: {}", id);
 

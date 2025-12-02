@@ -19,6 +19,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.data.domain.Page;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
@@ -42,6 +44,7 @@ public class DispensacoesMedicamentosServiceImpl implements DispensacoesMedicame
 
     @Override
     @Transactional
+    @CacheEvict(value = "dispensacoesmedicamentos", allEntries = true)
     public DispensacoesMedicamentosResponse criar(DispensacoesMedicamentosRequest request) {
         log.debug("Criando novo dispensacoesmedicamentos");
 
@@ -74,9 +77,9 @@ public class DispensacoesMedicamentosServiceImpl implements DispensacoesMedicame
 
     @Override
     @Transactional
+    @Cacheable(value = "dispensacoesmedicamentos", key = "#id")
     public DispensacoesMedicamentosResponse obterPorId(UUID id) {
-        log.debug("Buscando dispensacoesmedicamentos por ID: {}", id);
-
+        log.debug("Buscando dispensacoesmedicamentos por ID: {} (cache miss)", id);
         if (id == null) {
             throw new BadRequestException("ID do dispensacoesmedicamentos é obrigatório");
         }
@@ -111,6 +114,7 @@ public class DispensacoesMedicamentosServiceImpl implements DispensacoesMedicame
 
     @Override
     @Transactional
+    @CacheEvict(value = "dispensacoesmedicamentos", key = "#id")
     public DispensacoesMedicamentosResponse atualizar(UUID id, DispensacoesMedicamentosRequest request) {
         log.debug("Atualizando dispensacoesmedicamentos. ID: {}", id);
 
@@ -133,6 +137,7 @@ public class DispensacoesMedicamentosServiceImpl implements DispensacoesMedicame
 
     @Override
     @Transactional
+    @CacheEvict(value = "dispensacoesmedicamentos", key = "#id")
     public void excluir(UUID id) {
         log.debug("Excluindo dispensacoesmedicamentos. ID: {}", id);
 

@@ -12,6 +12,8 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -33,6 +35,7 @@ public class DeficienciasServiceImpl implements DeficienciasService {
 
     @Override
     @Transactional
+    @CacheEvict(value = "deficiencias", allEntries = true)
     public DeficienciasResponse criar(DeficienciasRequest request) {
         log.debug("Criando nova deficiência");
 
@@ -49,8 +52,9 @@ public class DeficienciasServiceImpl implements DeficienciasService {
 
     @Override
     @Transactional
+    @Cacheable(value = "deficiencias", key = "#id")
     public DeficienciasResponse obterPorId(UUID id) {
-        log.debug("Buscando deficiência por ID: {}", id);
+        log.debug("Buscando deficiência por ID: {} (cache miss)", id);
 
         if (id == null) {
             throw new BadRequestException("ID da deficiência é obrigatório");
@@ -73,6 +77,7 @@ public class DeficienciasServiceImpl implements DeficienciasService {
 
     @Override
     @Transactional
+    @CacheEvict(value = "deficiencias", key = "#id")
     public DeficienciasResponse atualizar(UUID id, DeficienciasRequest request) {
         log.debug("Atualizando deficiência. ID: {}", id);
 
@@ -95,6 +100,7 @@ public class DeficienciasServiceImpl implements DeficienciasService {
 
     @Override
     @Transactional
+    @CacheEvict(value = "deficiencias", key = "#id")
     public void excluir(UUID id) {
         log.debug("Excluindo deficiência. ID: {}", id);
 

@@ -13,6 +13,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.data.domain.Page;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
@@ -33,6 +35,7 @@ public class LogsAuditoriaServiceImpl implements LogsAuditoriaService {
 
     @Override
     @Transactional
+    @CacheEvict(value = "logsauditoria", allEntries = true)
     public LogsAuditoriaResponse criar(LogsAuditoriaRequest request) {
         log.debug("Criando novo logsauditoria");
 
@@ -49,9 +52,9 @@ public class LogsAuditoriaServiceImpl implements LogsAuditoriaService {
 
     @Override
     @Transactional
+    @Cacheable(value = "logsauditoria", key = "#id")
     public LogsAuditoriaResponse obterPorId(UUID id) {
-        log.debug("Buscando logsauditoria por ID: {}", id);
-
+        log.debug("Buscando logsauditoria por ID: {} (cache miss)", id);
         if (id == null) {
             throw new BadRequestException("ID do logsauditoria é obrigatório");
         }
@@ -73,6 +76,7 @@ public class LogsAuditoriaServiceImpl implements LogsAuditoriaService {
 
     @Override
     @Transactional
+    @CacheEvict(value = "logsauditoria", key = "#id")
     public LogsAuditoriaResponse atualizar(UUID id, LogsAuditoriaRequest request) {
         log.debug("Atualizando logsauditoria. ID: {}", id);
 
@@ -95,6 +99,7 @@ public class LogsAuditoriaServiceImpl implements LogsAuditoriaService {
 
     @Override
     @Transactional
+    @CacheEvict(value = "logsauditoria", key = "#id")
     public void excluir(UUID id) {
         log.debug("Excluindo logsauditoria. ID: {}", id);
 

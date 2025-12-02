@@ -14,6 +14,8 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
@@ -38,6 +40,7 @@ public class ProfissionaisSaudeServiceImpl implements ProfissionaisSaudeService 
 
     @Override
     @Transactional
+    @CacheEvict(value = "profissionaissaude", allEntries = true)
     public ProfissionaisSaudeResponse criar(ProfissionaisSaudeRequest request) {
         log.debug("Criando novo profissional de saúde");
 
@@ -61,9 +64,9 @@ public class ProfissionaisSaudeServiceImpl implements ProfissionaisSaudeService 
 
     @Override
     @Transactional
+    @Cacheable(value = "profissionaissaude", key = "#id")
     public ProfissionaisSaudeResponse obterPorId(UUID id) {
-        log.debug("Buscando profissional de saúde por ID: {}", id);
-
+        log.debug("Buscando profissional de saúde por ID: {} (cache miss)", id);
         if (id == null) {
             throw new BadRequestException("ID do profissional de saúde é obrigatório");
         }
@@ -85,6 +88,7 @@ public class ProfissionaisSaudeServiceImpl implements ProfissionaisSaudeService 
 
     @Override
     @Transactional
+    @CacheEvict(value = "profissionaissaude", key = "#id")
     public ProfissionaisSaudeResponse atualizar(UUID id, ProfissionaisSaudeRequest request) {
         log.debug("Atualizando profissional de saúde. ID: {}", id);
 
@@ -107,6 +111,7 @@ public class ProfissionaisSaudeServiceImpl implements ProfissionaisSaudeService 
 
     @Override
     @Transactional
+    @CacheEvict(value = "profissionaissaude", key = "#id")
     public void excluir(UUID id) {
         log.debug("Excluindo profissional de saúde. ID: {}", id);
 

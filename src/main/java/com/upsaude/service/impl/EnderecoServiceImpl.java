@@ -13,6 +13,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.data.domain.Page;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
@@ -33,6 +35,7 @@ public class EnderecoServiceImpl implements EnderecoService {
 
     @Override
     @Transactional
+    @CacheEvict(value = "endereco", allEntries = true)
     public EnderecoResponse criar(EnderecoRequest request) {
         log.debug("Criando novo endereco");
 
@@ -49,9 +52,9 @@ public class EnderecoServiceImpl implements EnderecoService {
 
     @Override
     @Transactional
+    @Cacheable(value = "endereco", key = "#id")
     public EnderecoResponse obterPorId(UUID id) {
-        log.debug("Buscando endereco por ID: {}", id);
-
+        log.debug("Buscando endereco por ID: {} (cache miss)", id);
         if (id == null) {
             throw new BadRequestException("ID do endereco é obrigatório");
         }
@@ -73,6 +76,7 @@ public class EnderecoServiceImpl implements EnderecoService {
 
     @Override
     @Transactional
+    @CacheEvict(value = "endereco", key = "#id")
     public EnderecoResponse atualizar(UUID id, EnderecoRequest request) {
         log.debug("Atualizando endereco. ID: {}", id);
 
@@ -95,6 +99,7 @@ public class EnderecoServiceImpl implements EnderecoService {
 
     @Override
     @Transactional
+    @CacheEvict(value = "endereco", key = "#id")
     public void excluir(UUID id) {
         log.debug("Excluindo endereco. ID: {}", id);
 

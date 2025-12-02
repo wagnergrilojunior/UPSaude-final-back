@@ -12,6 +12,8 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -33,6 +35,7 @@ public class CidDoencasServiceImpl implements CidDoencasService {
 
     @Override
     @Transactional
+    @CacheEvict(value = "ciddoencas", allEntries = true)
     public CidDoencasResponse criar(CidDoencasRequest request) {
         log.debug("Criando novo ciddoencas");
 
@@ -49,8 +52,9 @@ public class CidDoencasServiceImpl implements CidDoencasService {
 
     @Override
     @Transactional
+    @Cacheable(value = "ciddoencas", key = "#id")
     public CidDoencasResponse obterPorId(UUID id) {
-        log.debug("Buscando ciddoencas por ID: {}", id);
+        log.debug("Buscando ciddoencas por ID: {} (cache miss)", id);
 
         if (id == null) {
             throw new BadRequestException("ID do ciddoencas é obrigatório");
@@ -73,6 +77,7 @@ public class CidDoencasServiceImpl implements CidDoencasService {
 
     @Override
     @Transactional
+    @CacheEvict(value = "ciddoencas", key = "#id")
     public CidDoencasResponse atualizar(UUID id, CidDoencasRequest request) {
         log.debug("Atualizando ciddoencas. ID: {}", id);
 
@@ -95,6 +100,7 @@ public class CidDoencasServiceImpl implements CidDoencasService {
 
     @Override
     @Transactional
+    @CacheEvict(value = "ciddoencas", key = "#id")
     public void excluir(UUID id) {
         log.debug("Excluindo ciddoencas. ID: {}", id);
 

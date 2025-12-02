@@ -13,6 +13,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.data.domain.Page;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
@@ -33,6 +35,7 @@ public class TratamentosOdontologicosServiceImpl implements TratamentosOdontolog
 
     @Override
     @Transactional
+    @CacheEvict(value = "tratamentosodontologicos", allEntries = true)
     public TratamentosOdontologicosResponse criar(TratamentosOdontologicosRequest request) {
         log.debug("Criando novo tratamentosodontologicos");
 
@@ -49,9 +52,9 @@ public class TratamentosOdontologicosServiceImpl implements TratamentosOdontolog
 
     @Override
     @Transactional
+    @Cacheable(value = "tratamentosodontologicos", key = "#id")
     public TratamentosOdontologicosResponse obterPorId(UUID id) {
-        log.debug("Buscando tratamentosodontologicos por ID: {}", id);
-
+        log.debug("Buscando tratamentosodontologicos por ID: {} (cache miss)", id);
         if (id == null) {
             throw new BadRequestException("ID do tratamentosodontologicos é obrigatório");
         }
@@ -73,6 +76,7 @@ public class TratamentosOdontologicosServiceImpl implements TratamentosOdontolog
 
     @Override
     @Transactional
+    @CacheEvict(value = "tratamentosodontologicos", key = "#id")
     public TratamentosOdontologicosResponse atualizar(UUID id, TratamentosOdontologicosRequest request) {
         log.debug("Atualizando tratamentosodontologicos. ID: {}", id);
 
@@ -95,6 +99,7 @@ public class TratamentosOdontologicosServiceImpl implements TratamentosOdontolog
 
     @Override
     @Transactional
+    @CacheEvict(value = "tratamentosodontologicos", key = "#id")
     public void excluir(UUID id) {
         log.debug("Excluindo tratamentosodontologicos. ID: {}", id);
 

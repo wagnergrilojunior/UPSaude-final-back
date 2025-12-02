@@ -13,6 +13,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.data.domain.Page;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
@@ -33,6 +35,7 @@ public class PerfisUsuariosServiceImpl implements PerfisUsuariosService {
 
     @Override
     @Transactional
+    @CacheEvict(value = "perfisusuarios", allEntries = true)
     public PerfisUsuariosResponse criar(PerfisUsuariosRequest request) {
         log.debug("Criando novo perfisusuarios");
 
@@ -49,9 +52,9 @@ public class PerfisUsuariosServiceImpl implements PerfisUsuariosService {
 
     @Override
     @Transactional
+    @Cacheable(value = "perfisusuarios", key = "#id")
     public PerfisUsuariosResponse obterPorId(UUID id) {
-        log.debug("Buscando perfisusuarios por ID: {}", id);
-
+        log.debug("Buscando perfisusuarios por ID: {} (cache miss)", id);
         if (id == null) {
             throw new BadRequestException("ID do perfisusuarios é obrigatório");
         }
@@ -73,6 +76,7 @@ public class PerfisUsuariosServiceImpl implements PerfisUsuariosService {
 
     @Override
     @Transactional
+    @CacheEvict(value = "perfisusuarios", key = "#id")
     public PerfisUsuariosResponse atualizar(UUID id, PerfisUsuariosRequest request) {
         log.debug("Atualizando perfisusuarios. ID: {}", id);
 
@@ -95,6 +99,7 @@ public class PerfisUsuariosServiceImpl implements PerfisUsuariosService {
 
     @Override
     @Transactional
+    @CacheEvict(value = "perfisusuarios", key = "#id")
     public void excluir(UUID id) {
         log.debug("Excluindo perfisusuarios. ID: {}", id);
 

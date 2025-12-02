@@ -13,6 +13,8 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
@@ -29,6 +31,7 @@ public class ResponsavelLegalServiceImpl implements ResponsavelLegalService {
 
     @Override
     @Transactional
+    @CacheEvict(value = "responsavellegal", allEntries = true)
     public ResponsavelLegalResponse criar(ResponsavelLegalRequest request) {
         log.debug("Criando responsável legal para paciente: {}", request.getPacienteId());
 
@@ -96,6 +99,7 @@ public class ResponsavelLegalServiceImpl implements ResponsavelLegalService {
 
     @Override
     @Transactional
+    @CacheEvict(value = "responsavellegal", key = "#id")
     public ResponsavelLegalResponse atualizar(UUID id, ResponsavelLegalRequest request) {
         log.debug("Atualizando responsável legal. ID: {}", id);
 
@@ -132,6 +136,7 @@ public class ResponsavelLegalServiceImpl implements ResponsavelLegalService {
 
     @Override
     @Transactional
+    @CacheEvict(value = "responsavellegal", key = "#id")
     public void excluir(UUID id) {
         log.debug("Excluindo responsável legal. ID: {}", id);
 
