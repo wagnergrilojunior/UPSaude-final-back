@@ -223,6 +223,15 @@ public class ApiExceptionHandler {
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Map<String, Object>> handleGenericException(
             Exception ex, HttpServletRequest request) {
+        // Log detalhado do erro para facilitar diagnóstico
+        System.err.println("=== ERRO NÃO TRATADO ===");
+        System.err.println("Path: " + request.getRequestURI());
+        System.err.println("Method: " + request.getMethod());
+        System.err.println("Exception: " + ex.getClass().getName());
+        System.err.println("Message: " + ex.getMessage());
+        ex.printStackTrace();
+        System.err.println("========================");
+        
         return buildErrorResponse(
                 HttpStatus.INTERNAL_SERVER_ERROR,
                 "Erro Interno do Servidor",
