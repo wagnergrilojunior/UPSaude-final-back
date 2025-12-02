@@ -13,6 +13,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.data.domain.Page;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
@@ -33,6 +35,7 @@ public class VisitasDomiciliaresServiceImpl implements VisitasDomiciliaresServic
 
     @Override
     @Transactional
+    @CacheEvict(value = "visitasdomiciliares", allEntries = true)
     public VisitasDomiciliaresResponse criar(VisitasDomiciliaresRequest request) {
         log.debug("Criando novo visitasdomiciliares");
 
@@ -49,9 +52,9 @@ public class VisitasDomiciliaresServiceImpl implements VisitasDomiciliaresServic
 
     @Override
     @Transactional
+    @Cacheable(value = "visitasdomiciliares", key = "#id")
     public VisitasDomiciliaresResponse obterPorId(UUID id) {
-        log.debug("Buscando visitasdomiciliares por ID: {}", id);
-
+        log.debug("Buscando visitasdomiciliares por ID: {} (cache miss)", id);
         if (id == null) {
             throw new BadRequestException("ID do visitasdomiciliares é obrigatório");
         }
@@ -73,6 +76,7 @@ public class VisitasDomiciliaresServiceImpl implements VisitasDomiciliaresServic
 
     @Override
     @Transactional
+    @CacheEvict(value = "visitasdomiciliares", key = "#id")
     public VisitasDomiciliaresResponse atualizar(UUID id, VisitasDomiciliaresRequest request) {
         log.debug("Atualizando visitasdomiciliares. ID: {}", id);
 
@@ -95,6 +99,7 @@ public class VisitasDomiciliaresServiceImpl implements VisitasDomiciliaresServic
 
     @Override
     @Transactional
+    @CacheEvict(value = "visitasdomiciliares", key = "#id")
     public void excluir(UUID id) {
         log.debug("Excluindo visitasdomiciliares. ID: {}", id);
 

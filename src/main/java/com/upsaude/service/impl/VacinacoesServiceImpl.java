@@ -13,6 +13,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.data.domain.Page;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
@@ -33,6 +35,7 @@ public class VacinacoesServiceImpl implements VacinacoesService {
 
     @Override
     @Transactional
+    @CacheEvict(value = "vacinacoes", allEntries = true)
     public VacinacoesResponse criar(VacinacoesRequest request) {
         log.debug("Criando novo vacinacoes");
 
@@ -49,9 +52,9 @@ public class VacinacoesServiceImpl implements VacinacoesService {
 
     @Override
     @Transactional
+    @Cacheable(value = "vacinacoes", key = "#id")
     public VacinacoesResponse obterPorId(UUID id) {
-        log.debug("Buscando vacinacoes por ID: {}", id);
-
+        log.debug("Buscando vacinacoes por ID: {} (cache miss)", id);
         if (id == null) {
             throw new BadRequestException("ID do vacinacoes é obrigatório");
         }
@@ -73,6 +76,7 @@ public class VacinacoesServiceImpl implements VacinacoesService {
 
     @Override
     @Transactional
+    @CacheEvict(value = "vacinacoes", key = "#id")
     public VacinacoesResponse atualizar(UUID id, VacinacoesRequest request) {
         log.debug("Atualizando vacinacoes. ID: {}", id);
 
@@ -95,6 +99,7 @@ public class VacinacoesServiceImpl implements VacinacoesService {
 
     @Override
     @Transactional
+    @CacheEvict(value = "vacinacoes", key = "#id")
     public void excluir(UUID id) {
         log.debug("Excluindo vacinacoes. ID: {}", id);
 

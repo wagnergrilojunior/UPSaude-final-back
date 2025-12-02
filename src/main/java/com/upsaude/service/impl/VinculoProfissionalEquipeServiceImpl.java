@@ -18,6 +18,8 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
@@ -41,6 +43,7 @@ public class VinculoProfissionalEquipeServiceImpl implements VinculoProfissional
 
     @Override
     @Transactional
+    @CacheEvict(value = "vinculoprofissionalequipe", allEntries = true)
     public VinculoProfissionalEquipeResponse criar(VinculoProfissionalEquipeRequest request) {
         log.debug("Criando novo vínculo de profissional com equipe");
 
@@ -82,9 +85,9 @@ public class VinculoProfissionalEquipeServiceImpl implements VinculoProfissional
 
     @Override
     @Transactional
+    @Cacheable(value = "vinculoprofissionalequipe", key = "#id")
     public VinculoProfissionalEquipeResponse obterPorId(UUID id) {
-        log.debug("Buscando vínculo de profissional com equipe por ID: {}", id);
-
+        log.debug("Buscando vínculo de profissional com equipe por ID: {} (cache miss)", id);
         if (id == null) {
             throw new BadRequestException("ID do vínculo é obrigatório");
         }
@@ -152,6 +155,7 @@ public class VinculoProfissionalEquipeServiceImpl implements VinculoProfissional
 
     @Override
     @Transactional
+    @CacheEvict(value = "vinculoprofissionalequipe", key = "#id")
     public VinculoProfissionalEquipeResponse atualizar(UUID id, VinculoProfissionalEquipeRequest request) {
         log.debug("Atualizando vínculo de profissional com equipe. ID: {}", id);
 
@@ -191,6 +195,7 @@ public class VinculoProfissionalEquipeServiceImpl implements VinculoProfissional
 
     @Override
     @Transactional
+    @CacheEvict(value = "vinculoprofissionalequipe", key = "#id")
     public void excluir(UUID id) {
         log.debug("Excluindo vínculo de profissional com equipe. ID: {}", id);
 

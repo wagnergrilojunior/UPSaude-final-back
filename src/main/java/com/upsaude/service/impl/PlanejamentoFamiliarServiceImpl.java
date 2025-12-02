@@ -13,6 +13,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.data.domain.Page;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
@@ -35,6 +37,7 @@ public class PlanejamentoFamiliarServiceImpl implements PlanejamentoFamiliarServ
 
     @Override
     @Transactional
+    @CacheEvict(value = "planejamentofamiliar", allEntries = true)
     public PlanejamentoFamiliarResponse criar(PlanejamentoFamiliarRequest request) {
         log.debug("Criando novo planejamento familiar");
 
@@ -55,9 +58,9 @@ public class PlanejamentoFamiliarServiceImpl implements PlanejamentoFamiliarServ
 
     @Override
     @Transactional
+    @Cacheable(value = "planejamentofamiliar", key = "#id")
     public PlanejamentoFamiliarResponse obterPorId(UUID id) {
-        log.debug("Buscando planejamento familiar por ID: {}", id);
-
+        log.debug("Buscando planejamento familiar por ID: {} (cache miss)", id);
         if (id == null) {
             throw new BadRequestException("ID do planejamento familiar é obrigatório");
         }
@@ -102,6 +105,7 @@ public class PlanejamentoFamiliarServiceImpl implements PlanejamentoFamiliarServ
 
     @Override
     @Transactional
+    @CacheEvict(value = "planejamentofamiliar", key = "#id")
     public PlanejamentoFamiliarResponse atualizar(UUID id, PlanejamentoFamiliarRequest request) {
         log.debug("Atualizando planejamento familiar. ID: {}", id);
 
@@ -124,6 +128,7 @@ public class PlanejamentoFamiliarServiceImpl implements PlanejamentoFamiliarServ
 
     @Override
     @Transactional
+    @CacheEvict(value = "planejamentofamiliar", key = "#id")
     public void excluir(UUID id) {
         log.debug("Excluindo planejamento familiar. ID: {}", id);
 

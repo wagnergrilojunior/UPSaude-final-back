@@ -15,6 +15,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.data.domain.Page;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
@@ -36,6 +38,7 @@ public class CatalogoExamesServiceImpl implements CatalogoExamesService {
 
     @Override
     @Transactional
+    @CacheEvict(value = "catalogoexames", allEntries = true)
     public CatalogoExamesResponse criar(CatalogoExamesRequest request) {
         log.debug("Criando novo exame no catálogo");
 
@@ -59,9 +62,9 @@ public class CatalogoExamesServiceImpl implements CatalogoExamesService {
 
     @Override
     @Transactional
+    @Cacheable(value = "catalogoexames", key = "#id")
     public CatalogoExamesResponse obterPorId(UUID id) {
-        log.debug("Buscando exame no catálogo por ID: {}", id);
-
+        log.debug("Buscando exame no catálogo por ID: {} (cache miss)", id);
         if (id == null) {
             throw new BadRequestException("ID do exame é obrigatório");
         }
@@ -83,6 +86,7 @@ public class CatalogoExamesServiceImpl implements CatalogoExamesService {
 
     @Override
     @Transactional
+    @CacheEvict(value = "catalogoexames", key = "#id")
     public CatalogoExamesResponse atualizar(UUID id, CatalogoExamesRequest request) {
         log.debug("Atualizando exame no catálogo. ID: {}", id);
 
@@ -105,6 +109,7 @@ public class CatalogoExamesServiceImpl implements CatalogoExamesService {
 
     @Override
     @Transactional
+    @CacheEvict(value = "catalogoexames", key = "#id")
     public void excluir(UUID id) {
         log.debug("Excluindo exame do catálogo. ID: {}", id);
 

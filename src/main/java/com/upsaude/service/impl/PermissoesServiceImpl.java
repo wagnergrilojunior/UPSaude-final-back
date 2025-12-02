@@ -13,6 +13,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.data.domain.Page;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
@@ -33,6 +35,7 @@ public class PermissoesServiceImpl implements PermissoesService {
 
     @Override
     @Transactional
+    @CacheEvict(value = "permissoes", allEntries = true)
     public PermissoesResponse criar(PermissoesRequest request) {
         log.debug("Criando novo permissoes");
 
@@ -49,9 +52,9 @@ public class PermissoesServiceImpl implements PermissoesService {
 
     @Override
     @Transactional
+    @Cacheable(value = "permissoes", key = "#id")
     public PermissoesResponse obterPorId(UUID id) {
-        log.debug("Buscando permissoes por ID: {}", id);
-
+        log.debug("Buscando permissoes por ID: {} (cache miss)", id);
         if (id == null) {
             throw new BadRequestException("ID do permissoes é obrigatório");
         }
@@ -73,6 +76,7 @@ public class PermissoesServiceImpl implements PermissoesService {
 
     @Override
     @Transactional
+    @CacheEvict(value = "permissoes", key = "#id")
     public PermissoesResponse atualizar(UUID id, PermissoesRequest request) {
         log.debug("Atualizando permissoes. ID: {}", id);
 
@@ -95,6 +99,7 @@ public class PermissoesServiceImpl implements PermissoesService {
 
     @Override
     @Transactional
+    @CacheEvict(value = "permissoes", key = "#id")
     public void excluir(UUID id) {
         log.debug("Excluindo permissoes. ID: {}", id);
 

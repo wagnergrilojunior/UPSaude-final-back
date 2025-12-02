@@ -13,6 +13,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.data.domain.Page;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
@@ -33,6 +35,7 @@ public class AlergiasPacienteServiceImpl implements AlergiasPacienteService {
 
     @Override
     @Transactional
+    @CacheEvict(value = "alergiaspaciente", allEntries = true)
     public AlergiasPacienteResponse criar(AlergiasPacienteRequest request) {
         log.debug("Criando novo alergiaspaciente");
 
@@ -49,9 +52,9 @@ public class AlergiasPacienteServiceImpl implements AlergiasPacienteService {
 
     @Override
     @Transactional
+    @Cacheable(value = "alergiaspaciente", key = "#id")
     public AlergiasPacienteResponse obterPorId(UUID id) {
-        log.debug("Buscando alergiaspaciente por ID: {}", id);
-
+        log.debug("Buscando alergiaspaciente por ID: {} (cache miss)", id);
         if (id == null) {
             throw new BadRequestException("ID do alergiaspaciente é obrigatório");
         }
@@ -73,6 +76,7 @@ public class AlergiasPacienteServiceImpl implements AlergiasPacienteService {
 
     @Override
     @Transactional
+    @CacheEvict(value = "alergiaspaciente", key = "#id")
     public AlergiasPacienteResponse atualizar(UUID id, AlergiasPacienteRequest request) {
         log.debug("Atualizando alergiaspaciente. ID: {}", id);
 
@@ -95,6 +99,7 @@ public class AlergiasPacienteServiceImpl implements AlergiasPacienteService {
 
     @Override
     @Transactional
+    @CacheEvict(value = "alergiaspaciente", key = "#id")
     public void excluir(UUID id) {
         log.debug("Excluindo alergiaspaciente. ID: {}", id);
 

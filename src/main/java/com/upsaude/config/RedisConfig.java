@@ -1,0 +1,122 @@
+package com.upsaude.config;
+
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.PropertyAccessor;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.CacheManager;
+import org.springframework.cache.annotation.EnableCaching;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.data.redis.cache.RedisCacheConfiguration;
+import org.springframework.data.redis.cache.RedisCacheManager;
+import org.springframework.data.redis.connection.RedisConnectionFactory;
+import org.springframework.data.redis.connection.RedisStandaloneConfiguration;
+import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
+import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer;
+import org.springframework.data.redis.serializer.RedisSerializationContext;
+import org.springframework.data.redis.serializer.StringRedisSerializer;
+
+import java.time.Duration;
+
+/**
+ * Configuração do Redis para cache da aplicação.
+ * 
+ * Esta configuração utiliza Lettuce como cliente Redis e configura:
+ * - TTL padrão de 5 minutos
+ * - Serialização JSON para valores
+ * - Prefixo de chave "upsaude::"
+ * - Suporte a tipos Java modernos (LocalDateTime, OffsetDateTime, etc.)
+ * 
+ * @author UPSaúde
+ */
+@Configuration
+@EnableCaching
+public class RedisConfig {
+
+    @Value("${spring.redis.host:localhost}")
+    private String redisHost;
+
+    @Value("${spring.redis.port:6379}")
+    private int redisPort;
+
+    @Value("${spring.redis.password:}")
+    private String redisPassword;
+
+    @Value("${spring.redis.database:0}")
+    private int redisDatabase;
+
+    @Value("${spring.cache.redis.time-to-live:300000}")
+    private long cacheTtl;
+
+    @Value("${spring.cache.redis.key-prefix:upsaude::}")
+    private String keyPrefix;
+
+    /**
+     * Configura a conexão com o Redis usando Lettuce.
+     * 
+     * @return RedisConnectionFactory configurado
+     */
+    @Bean
+    public RedisConnectionFactory redisConnectionFactory() {
+        RedisStandaloneConfiguration config = new RedisStandaloneConfiguration();
+        config.setHostName(redisHost);
+        config.setPort(redisPort);
+        config.setDatabase(redisDatabase);
+        
+        if (redisPassword != null && !redisPassword.isEmpty()) {
+            config.setPassword(redisPassword);
+        }
+
+        return new LettuceConnectionFactory(config);
+    }
+
+    /**
+     * Configura o ObjectMapper para serialização JSON com suporte a tipos Java modernos.
+     * 
+     * @return ObjectMapper configurado
+     */
+    @Bean
+    public ObjectMapper objectMapper() {
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.setVisibility(PropertyAccessor.ALL, JsonAutoDetect.Visibility.ANY);
+        mapper.registerModule(new JavaTimeModule());
+        mapper.activateDefaultTyping(
+            mapper.getPolymorphicTypeValidator(),
+            ObjectMapper.DefaultTyping.NON_FINAL
+        );
+        return mapper;
+    }
+
+    /**
+     * Configura o CacheManager global com TTL padrão e serialização JSON.
+     * 
+     * @param connectionFactory Factory de conexão Redis
+     * @param objectMapper ObjectMapper para serialização JSON
+     * @return CacheManager configurado
+     */
+    @Bean
+    public CacheManager cacheManager(RedisConnectionFactory connectionFactory, ObjectMapper objectMapper) {
+        GenericJackson2JsonRedisSerializer jsonSerializer = new GenericJackson2JsonRedisSerializer(objectMapper);
+        
+        RedisCacheConfiguration cacheConfig = RedisCacheConfiguration.defaultCacheConfig()
+            .entryTtl(Duration.ofMillis(cacheTtl))
+            .prefixCacheNameWith(keyPrefix)
+            .serializeKeysWith(
+                RedisSerializationContext.SerializationPair.fromSerializer(
+                    new StringRedisSerializer()
+                )
+            )
+            .serializeValuesWith(
+                RedisSerializationContext.SerializationPair.fromSerializer(jsonSerializer)
+            )
+            .disableCachingNullValues();
+
+        return RedisCacheManager.builder(connectionFactory)
+            .cacheDefaults(cacheConfig)
+            .transactionAware()
+            .build();
+    }
+}
+

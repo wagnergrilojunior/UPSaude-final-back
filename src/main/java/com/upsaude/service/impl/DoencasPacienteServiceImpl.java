@@ -18,6 +18,8 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
@@ -41,6 +43,7 @@ public class DoencasPacienteServiceImpl implements DoencasPacienteService {
 
     @Override
     @Transactional
+    @CacheEvict(value = "doencaspaciente", allEntries = true)
     public DoencasPacienteResponse criar(DoencasPacienteRequest request) {
         log.debug("Criando novo registro de doença do paciente");
 
@@ -82,9 +85,9 @@ public class DoencasPacienteServiceImpl implements DoencasPacienteService {
 
     @Override
     @Transactional
+    @Cacheable(value = "doencaspaciente", key = "#id")
     public DoencasPacienteResponse obterPorId(UUID id) {
-        log.debug("Buscando registro de doença do paciente por ID: {}", id);
-
+        log.debug("Buscando registro de doença do paciente por ID: {} (cache miss)", id);
         if (id == null) {
             throw new BadRequestException("ID do registro é obrigatório");
         }
@@ -132,6 +135,7 @@ public class DoencasPacienteServiceImpl implements DoencasPacienteService {
 
     @Override
     @Transactional
+    @CacheEvict(value = "doencaspaciente", key = "#id")
     public DoencasPacienteResponse atualizar(UUID id, DoencasPacienteRequest request) {
         log.debug("Atualizando registro de doença do paciente. ID: {}", id);
 
@@ -154,6 +158,7 @@ public class DoencasPacienteServiceImpl implements DoencasPacienteService {
 
     @Override
     @Transactional
+    @CacheEvict(value = "doencaspaciente", key = "#id")
     public void excluir(UUID id) {
         log.debug("Excluindo registro de doença do paciente. ID: {}", id);
 

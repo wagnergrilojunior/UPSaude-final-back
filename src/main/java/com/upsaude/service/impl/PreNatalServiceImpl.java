@@ -14,6 +14,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.data.domain.Page;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
@@ -36,6 +38,7 @@ public class PreNatalServiceImpl implements PreNatalService {
 
     @Override
     @Transactional
+    @CacheEvict(value = "prenatal", allEntries = true)
     public PreNatalResponse criar(PreNatalRequest request) {
         log.debug("Criando novo pré-natal");
 
@@ -56,9 +59,9 @@ public class PreNatalServiceImpl implements PreNatalService {
 
     @Override
     @Transactional
+    @Cacheable(value = "prenatal", key = "#id")
     public PreNatalResponse obterPorId(UUID id) {
-        log.debug("Buscando pré-natal por ID: {}", id);
-
+        log.debug("Buscando pré-natal por ID: {} (cache miss)", id);
         if (id == null) {
             throw new BadRequestException("ID do pré-natal é obrigatório");
         }
@@ -104,6 +107,7 @@ public class PreNatalServiceImpl implements PreNatalService {
 
     @Override
     @Transactional
+    @CacheEvict(value = "prenatal", key = "#id")
     public PreNatalResponse atualizar(UUID id, PreNatalRequest request) {
         log.debug("Atualizando pré-natal. ID: {}", id);
 
@@ -126,6 +130,7 @@ public class PreNatalServiceImpl implements PreNatalService {
 
     @Override
     @Transactional
+    @CacheEvict(value = "prenatal", key = "#id")
     public void excluir(UUID id) {
         log.debug("Excluindo pré-natal. ID: {}", id);
 

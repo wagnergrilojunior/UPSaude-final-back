@@ -13,6 +13,8 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
@@ -28,6 +30,7 @@ public class DadosSociodemograficosServiceImpl implements DadosSociodemograficos
 
     @Override
     @Transactional
+    @CacheEvict(value = "dadossociodemograficos", allEntries = true)
     public DadosSociodemograficosResponse criar(DadosSociodemograficosRequest request) {
         log.debug("Criando dados sociodemográficos para paciente: {}", request.getPacienteId());
 
@@ -87,6 +90,7 @@ public class DadosSociodemograficosServiceImpl implements DadosSociodemograficos
 
     @Override
     @Transactional
+    @CacheEvict(value = "dadossociodemograficos", key = "#id")
     public DadosSociodemograficosResponse atualizar(UUID id, DadosSociodemograficosRequest request) {
         log.debug("Atualizando dados sociodemográficos. ID: {}", id);
 
@@ -115,6 +119,7 @@ public class DadosSociodemograficosServiceImpl implements DadosSociodemograficos
 
     @Override
     @Transactional
+    @CacheEvict(value = "dadossociodemograficos", key = "#id")
     public void excluir(UUID id) {
         log.debug("Excluindo dados sociodemográficos. ID: {}", id);
 

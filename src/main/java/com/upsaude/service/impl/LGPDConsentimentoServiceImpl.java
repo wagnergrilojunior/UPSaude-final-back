@@ -13,6 +13,8 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
@@ -28,6 +30,7 @@ public class LGPDConsentimentoServiceImpl implements LGPDConsentimentoService {
 
     @Override
     @Transactional
+    @CacheEvict(value = "lgpdconsentimento", allEntries = true)
     public LGPDConsentimentoResponse criar(LGPDConsentimentoRequest request) {
         log.debug("Criando consentimento LGPD para paciente: {}", request.getPacienteId());
 
@@ -87,6 +90,7 @@ public class LGPDConsentimentoServiceImpl implements LGPDConsentimentoService {
 
     @Override
     @Transactional
+    @CacheEvict(value = "lgpdconsentimento", key = "#id")
     public LGPDConsentimentoResponse atualizar(UUID id, LGPDConsentimentoRequest request) {
         log.debug("Atualizando consentimento LGPD. ID: {}", id);
 
@@ -115,6 +119,7 @@ public class LGPDConsentimentoServiceImpl implements LGPDConsentimentoService {
 
     @Override
     @Transactional
+    @CacheEvict(value = "lgpdconsentimento", key = "#id")
     public void excluir(UUID id) {
         log.debug("Excluindo consentimento LGPD. ID: {}", id);
 

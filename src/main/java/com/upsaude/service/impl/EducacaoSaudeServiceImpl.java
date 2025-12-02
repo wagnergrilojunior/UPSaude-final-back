@@ -13,6 +13,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.data.domain.Page;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
@@ -33,6 +35,7 @@ public class EducacaoSaudeServiceImpl implements EducacaoSaudeService {
 
     @Override
     @Transactional
+    @CacheEvict(value = "educacaosaude", allEntries = true)
     public EducacaoSaudeResponse criar(EducacaoSaudeRequest request) {
         log.debug("Criando nova ação de educação em saúde");
 
@@ -53,9 +56,9 @@ public class EducacaoSaudeServiceImpl implements EducacaoSaudeService {
 
     @Override
     @Transactional
+    @Cacheable(value = "educacaosaude", key = "#id")
     public EducacaoSaudeResponse obterPorId(UUID id) {
-        log.debug("Buscando educação em saúde por ID: {}", id);
-
+        log.debug("Buscando educação em saúde por ID: {} (cache miss)", id);
         if (id == null) {
             throw new BadRequestException("ID da educação em saúde é obrigatório");
         }
@@ -100,6 +103,7 @@ public class EducacaoSaudeServiceImpl implements EducacaoSaudeService {
 
     @Override
     @Transactional
+    @CacheEvict(value = "educacaosaude", key = "#id")
     public EducacaoSaudeResponse atualizar(UUID id, EducacaoSaudeRequest request) {
         log.debug("Atualizando educação em saúde. ID: {}", id);
 
@@ -122,6 +126,7 @@ public class EducacaoSaudeServiceImpl implements EducacaoSaudeService {
 
     @Override
     @Transactional
+    @CacheEvict(value = "educacaosaude", key = "#id")
     public void excluir(UUID id) {
         log.debug("Excluindo educação em saúde. ID: {}", id);
 

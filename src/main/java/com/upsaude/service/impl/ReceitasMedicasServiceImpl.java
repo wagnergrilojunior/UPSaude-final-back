@@ -23,6 +23,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.data.domain.Page;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
@@ -48,6 +50,7 @@ public class ReceitasMedicasServiceImpl implements ReceitasMedicasService {
 
     @Override
     @Transactional
+    @CacheEvict(value = "receitasmedicas", allEntries = true)
     public ReceitasMedicasResponse criar(ReceitasMedicasRequest request) {
         log.debug("Criando novo receitasmedicas");
 
@@ -96,9 +99,9 @@ public class ReceitasMedicasServiceImpl implements ReceitasMedicasService {
 
     @Override
     @Transactional
+    @Cacheable(value = "receitasmedicas", key = "#id")
     public ReceitasMedicasResponse obterPorId(UUID id) {
-        log.debug("Buscando receitasmedicas por ID: {}", id);
-
+        log.debug("Buscando receitasmedicas por ID: {} (cache miss)", id);
         if (id == null) {
             throw new BadRequestException("ID do receitasmedicas é obrigatório");
         }
@@ -133,6 +136,7 @@ public class ReceitasMedicasServiceImpl implements ReceitasMedicasService {
 
     @Override
     @Transactional
+    @CacheEvict(value = "receitasmedicas", key = "#id")
     public ReceitasMedicasResponse atualizar(UUID id, ReceitasMedicasRequest request) {
         log.debug("Atualizando receitasmedicas. ID: {}", id);
 
@@ -155,6 +159,7 @@ public class ReceitasMedicasServiceImpl implements ReceitasMedicasService {
 
     @Override
     @Transactional
+    @CacheEvict(value = "receitasmedicas", key = "#id")
     public void excluir(UUID id) {
         log.debug("Excluindo receitasmedicas. ID: {}", id);
 

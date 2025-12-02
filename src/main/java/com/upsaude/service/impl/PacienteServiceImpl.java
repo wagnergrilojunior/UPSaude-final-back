@@ -13,6 +13,8 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
@@ -39,6 +41,7 @@ public class PacienteServiceImpl implements PacienteService {
      */
     @Override
     @Transactional
+    @CacheEvict(value = "paciente", allEntries = true)
     public PacienteResponse criar(PacienteRequest request) {
         log.debug("Criando novo paciente: {}", request.getNomeCompleto());
 
@@ -59,9 +62,9 @@ public class PacienteServiceImpl implements PacienteService {
      */
     @Override
     @Transactional
+    @Cacheable(value = "paciente", key = "#id")
     public PacienteResponse obterPorId(UUID id) {
-        log.debug("Buscando paciente por ID: {}", id);
-
+        log.debug("Buscando paciente por ID: {} (cache miss)", id);
         if (id == null) {
             throw new BadRequestException("ID do paciente é obrigatório");
         }
@@ -89,6 +92,7 @@ public class PacienteServiceImpl implements PacienteService {
      */
     @Override
     @Transactional
+    @CacheEvict(value = "paciente", key = "#id")
     public PacienteResponse atualizar(UUID id, PacienteRequest request) {
         log.debug("Atualizando paciente. ID: {}", id);
 
@@ -116,6 +120,7 @@ public class PacienteServiceImpl implements PacienteService {
      */
     @Override
     @Transactional
+    @CacheEvict(value = "paciente", key = "#id")
     public void excluir(UUID id) {
         log.debug("Excluindo paciente. ID: {}", id);
 

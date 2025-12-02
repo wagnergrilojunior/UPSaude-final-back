@@ -13,6 +13,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.data.domain.Page;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
@@ -33,6 +35,7 @@ public class CuidadosEnfermagemServiceImpl implements CuidadosEnfermagemService 
 
     @Override
     @Transactional
+    @CacheEvict(value = "cuidadosenfermagem", allEntries = true)
     public CuidadosEnfermagemResponse criar(CuidadosEnfermagemRequest request) {
         log.debug("Criando novo cuidado de enfermagem");
 
@@ -49,9 +52,9 @@ public class CuidadosEnfermagemServiceImpl implements CuidadosEnfermagemService 
 
     @Override
     @Transactional
+    @Cacheable(value = "cuidadosenfermagem", key = "#id")
     public CuidadosEnfermagemResponse obterPorId(UUID id) {
-        log.debug("Buscando cuidado de enfermagem por ID: {}", id);
-
+        log.debug("Buscando cuidado de enfermagem por ID: {} (cache miss)", id);
         if (id == null) {
             throw new BadRequestException("ID do cuidado de enfermagem é obrigatório");
         }
@@ -96,6 +99,7 @@ public class CuidadosEnfermagemServiceImpl implements CuidadosEnfermagemService 
 
     @Override
     @Transactional
+    @CacheEvict(value = "cuidadosenfermagem", key = "#id")
     public CuidadosEnfermagemResponse atualizar(UUID id, CuidadosEnfermagemRequest request) {
         log.debug("Atualizando cuidado de enfermagem. ID: {}", id);
 
@@ -118,6 +122,7 @@ public class CuidadosEnfermagemServiceImpl implements CuidadosEnfermagemService 
 
     @Override
     @Transactional
+    @CacheEvict(value = "cuidadosenfermagem", key = "#id")
     public void excluir(UUID id) {
         log.debug("Excluindo cuidado de enfermagem. ID: {}", id);
 

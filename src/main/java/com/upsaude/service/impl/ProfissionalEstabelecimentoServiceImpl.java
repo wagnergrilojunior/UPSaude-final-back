@@ -17,6 +17,8 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
@@ -39,6 +41,7 @@ public class ProfissionalEstabelecimentoServiceImpl implements ProfissionalEstab
 
     @Override
     @Transactional
+    @CacheEvict(value = "profissionalestabelecimento", allEntries = true)
     public ProfissionalEstabelecimentoResponse criar(ProfissionalEstabelecimentoRequest request) {
         log.debug("Criando novo vínculo de profissional com estabelecimento");
 
@@ -84,9 +87,9 @@ public class ProfissionalEstabelecimentoServiceImpl implements ProfissionalEstab
 
     @Override
     @Transactional
+    @Cacheable(value = "profissionalestabelecimento", key = "#id")
     public ProfissionalEstabelecimentoResponse obterPorId(UUID id) {
-        log.debug("Buscando vínculo por ID: {}", id);
-
+        log.debug("Buscando vínculo por ID: {} (cache miss)", id);
         if (id == null) {
             throw new BadRequestException("ID do vínculo é obrigatório");
         }
@@ -149,6 +152,7 @@ public class ProfissionalEstabelecimentoServiceImpl implements ProfissionalEstab
 
     @Override
     @Transactional
+    @CacheEvict(value = "profissionalestabelecimento", key = "#id")
     public ProfissionalEstabelecimentoResponse atualizar(UUID id, ProfissionalEstabelecimentoRequest request) {
         log.debug("Atualizando vínculo. ID: {}", id);
 
@@ -171,6 +175,7 @@ public class ProfissionalEstabelecimentoServiceImpl implements ProfissionalEstab
 
     @Override
     @Transactional
+    @CacheEvict(value = "profissionalestabelecimento", key = "#id")
     public void excluir(UUID id) {
         log.debug("Excluindo vínculo. ID: {}", id);
 
