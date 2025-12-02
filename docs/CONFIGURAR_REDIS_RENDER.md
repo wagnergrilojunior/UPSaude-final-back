@@ -1,6 +1,8 @@
-# Passo a Passo: Configurar Redis no Render
+# Passo a Passo: Configurar Redis/Valkey no Render
 
-Este guia detalha exatamente como configurar o Redis no Render para que o cache funcione em produção.
+Este guia detalha exatamente como configurar o Redis/Valkey no Render para que o cache funcione em produção.
+
+> **Nota**: O Render agora usa **Valkey** (fork do Redis) nas novas instâncias Key-Value. Valkey é 100% compatível com Redis e funciona com a mesma configuração. Este guia se aplica tanto para Redis quanto para Valkey.
 
 ## 📋 Pré-requisitos
 
@@ -16,11 +18,12 @@ Este guia detalha exatamente como configurar o Redis no Render para que o cache 
    - Vá para: https://dashboard.render.com
    - Faça login na sua conta
 
-2. **Criar Nova Instância Redis**
+2. **Criar Nova Instância Key-Value (Valkey)**
    - Clique no botão **"New +"** no canto superior direito
-   - Selecione **"Redis"** no menu
+   - Selecione **"Key-Value"** no menu (isso criará uma instância Valkey)
+   - ⚠️ **Nota**: O Render agora usa Valkey nas novas instâncias. Valkey é compatível com Redis.
 
-3. **Configurar a Instância Redis**
+3. **Configurar a Instância Key-Value (Valkey)**
    
    Preencha os campos:
    
@@ -34,15 +37,16 @@ Este guia detalha exatamente como configurar o Redis no Render para que o cache 
    ⚠️ **IMPORTANTE**: Escolha a mesma região da sua aplicação para reduzir latência!
 
 4. **Criar a Instância**
-   - Clique em **"Create Redis"**
-   - Aguarde alguns minutos enquanto o Redis é provisionado
+   - Clique em **"Create Key-Value"** (ou "Create Redis" se ainda aparecer)
+   - Aguarde alguns minutos enquanto a instância é provisionada
    - Status mudará de "Creating" para "Available"
+   - ⚠️ **Nota**: A instância será Valkey, mas funciona exatamente como Redis
 
-### Passo 2: Obter Credenciais do Redis
+### Passo 2: Obter Credenciais do Redis/Valkey
 
 Após a instância estar disponível:
 
-1. **Acesse a Instância Redis**
+1. **Acesse a Instância Key-Value**
    - Clique na instância `upsaude-redis` que você acabou de criar
 
 2. **Anotar as Credenciais**

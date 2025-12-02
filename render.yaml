@@ -27,8 +27,9 @@ services:
         sync: false
       - key: JWT_EXPIRATION
         value: 86400000
-      # Variáveis de ambiente do Redis para Cache
-      # Configure estas variáveis no painel do Render após criar a instância Redis
+      # Variáveis de ambiente do Redis/Valkey para Cache
+      # Configure estas variáveis no painel do Render após criar a instância Key-Value (Valkey)
+      # Nota: O Render agora usa Valkey nas novas instâncias, mas é 100% compatível com Redis
       - key: REDIS_HOST
         sync: false
       - key: REDIS_PORT
