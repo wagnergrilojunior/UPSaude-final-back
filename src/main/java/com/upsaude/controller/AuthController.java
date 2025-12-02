@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 /**
  * Controlador REST para operações de autenticação.
@@ -44,6 +45,52 @@ public class AuthController {
     })
     public ResponseEntity<LoginResponse> login(@Valid @RequestBody LoginRequest request) {
         LoginResponse response = authService.login(request);
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/verificar-acesso")
+    @Operation(
+            summary = "Verificar se usuário tem acesso ao sistema",
+            description = "Verifica se um usuário autenticado tem acesso ao sistema (se existe UsuariosSistema criado). " +
+                         "Este endpoint requer autenticação e é usado pelo frontend para verificar se precisa criar o registro.",
+            security = @SecurityRequirement(name = "bearerAuth")
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Verificação realizada com sucesso"),
+            @ApiResponse(responseCode = "401", description = "Token inválido ou não fornecido")
+    })
+    public ResponseEntity<Map<String, Object>> verificarAcesso() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        
+        if (authentication == null || !authentication.isAuthenticated()) {
+            return ResponseEntity.status(401).build();
+        }
+
+        Map<String, Object> response = new HashMap<>();
+        
+        // Obtém o userId do token JWT
+        UUID userId = null;
+        Object details = authentication.getDetails();
+        if (details instanceof SupabaseAuthResponse.User) {
+            SupabaseAuthResponse.User user = (SupabaseAuthResponse.User) details;
+            userId = user.getId();
+        } else if (authentication.getPrincipal() instanceof String) {
+            try {
+                userId = UUID.fromString(authentication.getPrincipal().toString());
+            } catch (IllegalArgumentException e) {
+                // Ignora se não for um UUID válido
+            }
+        }
+        
+        if (userId != null) {
+            boolean temAcesso = authService.verificarAcessoAoSistema(userId);
+            response.put("temAcesso", temAcesso);
+            response.put("userId", userId);
+        } else {
+            response.put("temAcesso", false);
+            response.put("erro", "Não foi possível identificar o usuário");
+        }
+        
         return ResponseEntity.ok(response);
     }
 

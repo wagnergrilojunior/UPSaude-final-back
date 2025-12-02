@@ -22,8 +22,8 @@ public class MedicosResponse {
     private OffsetDateTime createdAt;
     private OffsetDateTime updatedAt;
     private Boolean active;
-    private UUID estabelecimentoId;
-    private String estabelecimentoNome;
+    private List<UUID> estabelecimentosIds;
+    private List<String> estabelecimentosNomes;
     private UUID especialidadeId;
     private String especialidadeNome;
     private String nomeCompleto;

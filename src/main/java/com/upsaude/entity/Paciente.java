@@ -34,16 +34,16 @@ import java.util.List;
 @Entity
 @Table(name = "pacientes", schema = "public",
        uniqueConstraints = {
-           @UniqueConstraint(name = "uk_pacientes_cpf", columnNames = {"cpf", "tenant_id"}),
-           @UniqueConstraint(name = "uk_pacientes_cns", columnNames = {"cns", "tenant_id"}),
-           @UniqueConstraint(name = "uk_pacientes_email", columnNames = {"email", "tenant_id"})
+           @UniqueConstraint(name = "uk_pacientes_cpf", columnNames = {"cpf"}),
+           @UniqueConstraint(name = "uk_pacientes_cns", columnNames = {"cns"}),
+           @UniqueConstraint(name = "uk_pacientes_email", columnNames = {"email"})
        },
        indexes = {
            @Index(name = "idx_pacientes_cpf", columnList = "cpf")
        })
 @Data
 @EqualsAndHashCode(callSuper = true)
-public class Paciente extends BaseEntity {
+public class Paciente extends BaseEntityWithoutTenant {
 
     @NotBlank(message = "Nome completo é obrigatório")
     @Size(max = 255, message = "Nome completo deve ter no máximo 255 caracteres")
