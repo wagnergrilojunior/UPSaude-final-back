@@ -27,6 +27,7 @@ public class SupabaseConfig {
     }
 
     @Bean(name = "supabaseObjectMapper")
+    @org.springframework.context.annotation.Primary
     public ObjectMapper objectMapper() {
         ObjectMapper mapper = new ObjectMapper();
         // Java 17 - JavaTimeModule já está disponível via jackson-datatype-jsr310 (incluído no spring-boot-starter-web)

@@ -137,6 +137,7 @@
           </annotationProcessorPaths>
           <compilerArgs>
             <arg>-Amapstruct.defaultComponentModel=spring</arg>
+            <arg>-parameters</arg>
           </compilerArgs>
         </configuration>
       </plugin>
