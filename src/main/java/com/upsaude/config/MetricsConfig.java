@@ -7,6 +7,7 @@ import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.Gauge;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.actuate.autoconfigure.metrics.MeterRegistryCustomizer;
 import org.springframework.cache.CacheManager;
 import org.springframework.context.ApplicationListener;
@@ -46,6 +47,9 @@ public class MetricsConfig implements ApplicationListener<ContextRefreshedEvent>
     
     @Autowired(required = false)
     private RedisConnectionFactory redisConnectionFactory;
+    
+    @Value("${spring.profiles.active:default}")
+    private String activeProfile;
 
     /**
      * Construtor com @Lazy para evitar dependência circular.
@@ -57,12 +61,14 @@ public class MetricsConfig implements ApplicationListener<ContextRefreshedEvent>
 
     /**
      * Customiza o registro de métricas com tags globais.
+     * Inclui a tag 'environment' para permitir separação de métricas por ambiente no Grafana.
      */
     @Bean
     public MeterRegistryCustomizer<MeterRegistry> metricsCommonTags() {
         return registry -> registry.config()
             .commonTags("application", "UPSaude")
-            .commonTags("version", "1.0.0");
+            .commonTags("version", "1.0.0")
+            .commonTags("environment", activeProfile);
     }
 
     /**
