@@ -224,7 +224,6 @@ public class PacienteServiceImpl implements PacienteService {
         paciente.setNumeroCarteirinha(pacienteAtualizado.getNumeroCarteirinha());
         paciente.setDataValidadeCarteirinha(pacienteAtualizado.getDataValidadeCarteirinha());
         paciente.setObservacoes(pacienteAtualizado.getObservacoes());
-        paciente.setEstabelecimento(pacienteAtualizado.getEstabelecimento());
         paciente.setEnderecos(pacienteAtualizado.getEnderecos());
     }
 }

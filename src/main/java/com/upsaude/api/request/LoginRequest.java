@@ -1,6 +1,5 @@
 package com.upsaude.api.request;
 
-import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -11,9 +10,12 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class LoginRequest {
     
-    @NotBlank(message = "Email é obrigatório")
-    @Email(message = "Email deve ter um formato válido")
-    private String email;
+    /**
+     * Email ou username (campo 'user') do usuário.
+     * O sistema tentará primeiro fazer login com email, depois com username.
+     */
+    @NotBlank(message = "Email ou usuário é obrigatório")
+    private String email; // Mantém nome 'email' para compatibilidade, mas aceita email OU user
     
     @NotBlank(message = "Senha é obrigatória")
     private String password;

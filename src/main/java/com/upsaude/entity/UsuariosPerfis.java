@@ -6,16 +6,19 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
-import jakarta.persistence.UniqueConstraint;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 @Entity
-@Table(name = "usuarios_perfis", schema = "public",
-       uniqueConstraints = {
-           @UniqueConstraint(name = "uk_usuario_perfil", columnNames = {"usuario_id", "papel_id", "tenant_id"})
-       })
+@Table(name = "usuarios_perfis", schema = "public")
 @Data
+@EqualsAndHashCode(callSuper = true)
 public class UsuariosPerfis extends BaseEntity {
+    // NOTA: As constraints únicas são gerenciadas via índices parciais no banco de dados:
+    // - uk_usuario_perfil_estabelecimento: garante unicidade de (usuario_id, papel_id, tenant_id, estabelecimento_id) 
+    //   quando estabelecimento_id IS NOT NULL (permite perfis diferentes por estabelecimento)
+    // - uk_usuario_perfil_global: garante unicidade de (usuario_id, papel_id, tenant_id) 
+    //   quando estabelecimento_id IS NULL (perfis globais)
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "usuario_id", nullable = false)

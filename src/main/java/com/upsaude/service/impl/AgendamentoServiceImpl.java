@@ -69,16 +69,12 @@ public class AgendamentoServiceImpl implements AgendamentoService {
                 .orElseThrow(() -> new NotFoundException("Profissional não encontrado com ID: " + request.getProfissionalId()));
         agendamento.setProfissional(profissional);
 
-        // Define estabelecimento do paciente (prioridade) ou profissional
-        if (paciente.getEstabelecimento() != null) {
-            agendamento.setEstabelecimento(paciente.getEstabelecimento());
-        } else if (profissional.getEstabelecimento() != null) {
+        // Define estabelecimento do profissional (paciente não tem estabelecimento)
+        if (profissional.getEstabelecimento() != null) {
             agendamento.setEstabelecimento(profissional.getEstabelecimento());
         }
-        // Define tenant do estabelecimento ou do paciente
-        if (paciente.getTenant() != null) {
-            agendamento.setTenant(paciente.getTenant());
-        } else if (profissional.getTenant() != null) {
+        // Define tenant do profissional (paciente não tem tenant)
+        if (profissional.getTenant() != null) {
             agendamento.setTenant(profissional.getTenant());
         }
 

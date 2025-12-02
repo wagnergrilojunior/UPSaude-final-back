@@ -2,14 +2,18 @@ package com.upsaude.security;
 
 import com.upsaude.integration.supabase.SupabaseAuthService;
 import com.upsaude.integration.supabase.SupabaseAuthResponse;
+import com.upsaude.repository.UsuariosSistemaRepository;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.lang.NonNull;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
@@ -17,7 +21,9 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Slf4j
 @Component
@@ -25,13 +31,15 @@ import java.util.List;
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final SupabaseAuthService supabaseAuthService;
+    private final UserRoleService userRoleService;
+    private final UsuariosSistemaRepository usuariosSistemaRepository;
     private static final String BEARER_PREFIX = "Bearer ";
 
     @Override
     protected void doFilterInternal(
-            HttpServletRequest request,
-            HttpServletResponse response,
-            FilterChain filterChain
+            @NonNull HttpServletRequest request,
+            @NonNull HttpServletResponse response,
+            @NonNull FilterChain filterChain
     ) throws ServletException, IOException {
         
         String path = request.getRequestURI();
@@ -64,18 +72,39 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             if (user != null) {
                 log.info("Token válido! Usuário: {}", user.getEmail());
                 
-                // Cria authorities baseado no role do usuário
-                List<SimpleGrantedAuthority> authorities = new ArrayList<>();
-                if (user.getRole() != null) {
-                    authorities.add(new SimpleGrantedAuthority("ROLE_" + user.getRole()));
+                // 1. Adiciona role do Supabase (RBAC do Supabase)
+                Set<String> authoritiesSet = new HashSet<>();
+                if (user.getRole() != null && !user.getRole().isEmpty()) {
+                    String supabaseRole = "ROLE_" + user.getRole().toUpperCase();
+                    authoritiesSet.add(supabaseRole);
+                    log.debug("Role do Supabase adicionada: {}", supabaseRole);
                 }
                 
-                // Adiciona role padrão authenticated se não houver role específica
-                if (authorities.isEmpty()) {
-                    authorities.add(new SimpleGrantedAuthority("ROLE_AUTHENTICATED"));
+                // 2. Busca papéis do sistema (tabela papeis) através do UserRoleService
+                try {
+                    List<GrantedAuthority> systemRoles = userRoleService.getUserAuthorities(user.getId());
+                    for (GrantedAuthority authority : systemRoles) {
+                        authoritiesSet.add(authority.getAuthority());
+                        log.debug("Papel do sistema adicionado: {}", authority.getAuthority());
+                    }
+                } catch (Exception e) {
+                    log.warn("Erro ao buscar papéis do sistema para usuário {}: {}", user.getId(), e.getMessage());
+                    // Continua mesmo se houver erro ao buscar papéis do sistema
                 }
                 
-                // Cria o authentication object
+                // 3. Adiciona role padrão authenticated se não houver nenhuma role
+                if (authoritiesSet.isEmpty()) {
+                    authoritiesSet.add("ROLE_AUTHENTICATED");
+                    log.debug("Nenhuma role encontrada, adicionando role padrão: ROLE_AUTHENTICATED");
+                }
+                
+                // 4. Converte para lista de GrantedAuthority
+                List<GrantedAuthority> authorities = new ArrayList<>();
+                for (String authority : authoritiesSet) {
+                    authorities.add(new SimpleGrantedAuthority(authority));
+                }
+                
+                // 5. Cria o authentication object
                 UsernamePasswordAuthenticationToken authentication = 
                         new UsernamePasswordAuthenticationToken(
                                 user.getId().toString(),
@@ -83,14 +112,30 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                                 authorities
                         );
                 
-                // Adiciona detalhes do usuário
+                // 6. Adiciona detalhes do usuário
                 authentication.setDetails(user);
                 
-                // Define o authentication no contexto de segurança
+                // 7. Valida se o usuário tem acesso ao sistema (UsuariosSistema criado)
+                // Exceto para o endpoint de verificar acesso, que precisa ser acessível mesmo sem UsuariosSistema
+                if (!isVerificarAcessoEndpoint(path)) {
+                    boolean temAcesso = usuariosSistemaRepository.findByUserId(user.getId())
+                            .map(usuario -> usuario.getActive() != null && usuario.getActive())
+                            .orElse(false);
+                    
+                    if (!temAcesso) {
+                        log.warn("Usuário {} não tem acesso ao sistema (UsuariosSistema não encontrado ou inativo)", user.getId());
+                        response.setStatus(HttpStatus.FORBIDDEN.value());
+                        response.setContentType("application/json");
+                        response.getWriter().write("{\"erro\": \"Usuário não tem acesso ao sistema. É necessário criar um registro em UsuariosSistema.\"}");
+                        return;
+                    }
+                }
+                
+                // 8. Define o authentication no contexto de segurança
                 SecurityContextHolder.getContext().setAuthentication(authentication);
                 
-                log.info("Usuário autenticado com sucesso no Spring Security: {} (ID: {}) - Authorities: {}", 
-                        user.getEmail(), user.getId(), authorities);
+                log.info("Usuário autenticado com sucesso no Spring Security: {} (ID: {}) - Total de Authorities: {} - Roles: {}", 
+                        user.getEmail(), user.getId(), authorities.size(), authorities);
             } else {
                 log.warn("Token válido mas usuário não encontrado");
                 SecurityContextHolder.clearContext();
@@ -125,6 +170,18 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                path.contains("/actuator/info") ||
                path.contains("/api-docs") ||
                path.contains("/swagger-ui");
+    }
+    
+    /**
+     * Verifica se o endpoint é o de verificar acesso.
+     * Este endpoint precisa ser acessível mesmo sem UsuariosSistema criado,
+     * pois é usado pelo frontend para verificar se precisa criar o registro.
+     */
+    private boolean isVerificarAcessoEndpoint(String path) {
+        if (path == null) {
+            return false;
+        }
+        return path.contains("/v1/auth/verificar-acesso");
     }
 
     private String extractTokenFromRequest(HttpServletRequest request) {

@@ -18,7 +18,7 @@ import java.util.UUID;
 @AllArgsConstructor
 public class MedicosDTO {
     private UUID id;
-    private UUID estabelecimentoId;
+    private List<UUID> estabelecimentosIds;
     private UUID especialidadeId;
     private String nomeCompleto;
     private DadosPessoaisMedico dadosPessoais;

@@ -39,9 +39,10 @@ public class SecurityConfig {
             // Nota: O context-path é /api, então os caminhos devem ser relativos ao context-path
             // Spring Security automaticamente considera o context-path
             .authorizeHttpRequests(auth -> auth
-                // Endpoints públicos - apenas login é público
+                // Endpoints públicos - login e verificação de acesso
                 // Paths relativos ao context-path (/api)
                 .requestMatchers("/v1/auth/login").permitAll()
+                .requestMatchers("/v1/auth/verificar-acesso").permitAll()
                 
                 // Endpoints do Actuator - públicos para monitoramento
                 // IMPORTANTE: Em produção, considere proteger estes endpoints com autenticação básica
