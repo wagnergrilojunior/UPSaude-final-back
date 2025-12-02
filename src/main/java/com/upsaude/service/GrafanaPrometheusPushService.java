@@ -3,6 +3,7 @@ package com.upsaude.service;
 import com.upsaude.config.GrafanaPrometheusConfig;
 import io.micrometer.core.instrument.MeterRegistry;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -20,7 +21,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * para o Grafana Cloud usando o endpoint de remote_write.
  * 
  * Este serviço:
- * - Coleta métricas do MeterRegistry (Prometheus)
+ * - Coleta métricas do MeterRegistry (Prometheus) ou via endpoint HTTP do Actuator
  * - Envia as métricas em formato Prometheus para o Grafana Cloud
  * - Executa periodicamente conforme configurado
  * - Usa autenticação básica com username e token
@@ -40,12 +41,16 @@ public class GrafanaPrometheusPushService {
     private final GrafanaPrometheusConfig config;
     private final MeterRegistry meterRegistry;
     private final RestClient grafanaClient;
+    private final RestClient actuatorClient;
     private final AtomicBoolean isRunning = new AtomicBoolean(false);
     private Method scrapeMethod;
+    private boolean useHttpEndpoint = false;
 
     public GrafanaPrometheusPushService(
             GrafanaPrometheusConfig config,
-            MeterRegistry meterRegistry) {
+            MeterRegistry meterRegistry,
+            @Value("${server.port:8080}") int serverPort,
+            @Value("${server.servlet.context-path:/api}") String contextPath) {
         this.config = config;
         this.meterRegistry = meterRegistry;
         
@@ -58,7 +63,12 @@ public class GrafanaPrometheusPushService {
         this.grafanaClient = RestClient.builder()
             .baseUrl(config.getUrl())
             .defaultHeader(HttpHeaders.AUTHORIZATION, "Basic " + auth)
-            .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.TEXT_PLAIN_VALUE)
+            .build();
+        
+        // Cria o RestClient para obter métricas do Actuator (fallback)
+        String actuatorUrl = String.format("http://localhost:%d%s", serverPort, contextPath);
+        this.actuatorClient = RestClient.builder()
+            .baseUrl(actuatorUrl)
             .build();
         
         // Tenta encontrar o método scrape() do PrometheusMeterRegistry usando reflection
@@ -66,14 +76,22 @@ public class GrafanaPrometheusPushService {
             Class<?> prometheusClass = Class.forName("io.micrometer.prometheus.PrometheusMeterRegistry");
             if (prometheusClass.isInstance(meterRegistry)) {
                 this.scrapeMethod = prometheusClass.getMethod("scrape");
-                log.info("Método scrape() do PrometheusMeterRegistry encontrado via reflection");
+                log.info("✅ Método scrape() do PrometheusMeterRegistry encontrado via reflection");
+            } else {
+                log.warn("MeterRegistry não é uma instância de PrometheusMeterRegistry. Usando endpoint HTTP do Actuator.");
+                this.useHttpEndpoint = true;
             }
+        } catch (ClassNotFoundException e) {
+            log.warn("PrometheusMeterRegistry não encontrado no classpath. Usando endpoint HTTP do Actuator.");
+            this.useHttpEndpoint = true;
         } catch (Exception e) {
-            log.warn("Não foi possível encontrar PrometheusMeterRegistry via reflection: {}", e.getMessage());
+            log.warn("Erro ao configurar reflection: {}. Usando endpoint HTTP do Actuator.", e.getMessage());
+            this.useHttpEndpoint = true;
         }
         
         log.info("GrafanaPrometheusPushService inicializado. Push habilitado para: {}", config.getUrl());
         log.info("Intervalo de push: {} segundos", config.getPushInterval());
+        log.info("Método de coleta: {}", useHttpEndpoint ? "HTTP Actuator Endpoint" : "Reflection (scrape())");
     }
 
     /**
@@ -89,39 +107,78 @@ public class GrafanaPrometheusPushService {
         }
 
         try {
-            // Obtém as métricas em formato Prometheus
             String prometheusMetrics = null;
             
             // Tenta usar o método scrape() se disponível via reflection
-            if (scrapeMethod != null) {
+            if (!useHttpEndpoint && scrapeMethod != null) {
                 try {
                     prometheusMetrics = (String) scrapeMethod.invoke(meterRegistry);
+                    log.debug("Métricas obtidas via reflection. Tamanho: {} bytes", 
+                        prometheusMetrics != null ? prometheusMetrics.length() : 0);
                 } catch (Exception e) {
-                    log.warn("Erro ao chamar método scrape() via reflection: {}", e.getMessage());
+                    log.warn("Erro ao chamar método scrape() via reflection: {}. Tentando endpoint HTTP.", e.getMessage());
+                    useHttpEndpoint = true; // Fallback para HTTP
                 }
             }
             
-            // Se não conseguiu obter via reflection, retorna sem enviar
-            // (em produção, você pode configurar um endpoint HTTP alternativo)
+            // Se não conseguiu via reflection, usa o endpoint HTTP do Actuator
+            if (useHttpEndpoint || prometheusMetrics == null || prometheusMetrics.trim().isEmpty()) {
+                try {
+                    log.debug("Obtendo métricas via endpoint HTTP do Actuator...");
+                    prometheusMetrics = actuatorClient.get()
+                        .uri("/actuator/prometheus")
+                        .retrieve()
+                        .body(String.class);
+                    
+                    if (prometheusMetrics != null && !prometheusMetrics.trim().isEmpty()) {
+                        log.debug("Métricas obtidas via HTTP. Tamanho: {} bytes", prometheusMetrics.length());
+                    }
+                } catch (Exception e) {
+                    log.error("Erro ao obter métricas via endpoint HTTP do Actuator: {}", e.getMessage());
+                    return;
+                }
+            }
+            
             if (prometheusMetrics == null || prometheusMetrics.trim().isEmpty()) {
                 log.warn("Nenhuma métrica disponível para enviar");
                 return;
             }
             
-            // Garante que não é null para evitar warnings
             final String metricsToSend = prometheusMetrics;
 
             // Envia as métricas para o Grafana Cloud
-            grafanaClient.post()
-                .body(metricsToSend)
-                .retrieve()
-                .toBodilessEntity();
+            // O endpoint /api/prom/push aceita texto plano no formato Prometheus exposition
+            log.debug("Enviando métricas para Grafana Cloud... Tamanho: {} bytes", metricsToSend.length());
+            
+            try {
+                grafanaClient.post()
+                    .header(HttpHeaders.CONTENT_TYPE, "text/plain")
+                    .body(metricsToSend)
+                    .retrieve()
+                    .toBodilessEntity();
+                
+                log.info("✅ Métricas enviadas com sucesso para Grafana Cloud. Tamanho: {} bytes", 
+                    metricsToSend.length());
+            } catch (Exception httpError) {
+                // Se falhar com text/plain, tenta sem Content-Type específico
+                log.warn("Tentativa com text/plain falhou: {}. Tentando sem Content-Type...", httpError.getMessage());
+                grafanaClient.post()
+                    .body(metricsToSend)
+                    .retrieve()
+                    .toBodilessEntity();
+                
+                log.info("✅ Métricas enviadas com sucesso (sem Content-Type). Tamanho: {} bytes", 
+                    metricsToSend.length());
+            }
 
-            log.debug("Métricas enviadas com sucesso para Grafana Cloud. Tamanho: {} bytes", 
+            log.info("✅ Métricas enviadas com sucesso para Grafana Cloud. Tamanho: {} bytes", 
                 metricsToSend.length());
                 
         } catch (Exception e) {
-            log.error("Erro ao enviar métricas para Grafana Cloud: {}", e.getMessage(), e);
+            log.error("❌ Erro ao enviar métricas para Grafana Cloud: {}", e.getMessage(), e);
+            if (e.getCause() != null) {
+                log.error("Causa: {}", e.getCause().getMessage());
+            }
         } finally {
             isRunning.set(false);
         }
