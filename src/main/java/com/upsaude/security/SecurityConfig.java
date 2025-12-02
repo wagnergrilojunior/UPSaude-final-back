@@ -46,6 +46,7 @@ public class SecurityConfig {
                 // Endpoints do Actuator - públicos para monitoramento
                 // IMPORTANTE: Em produção, considere proteger estes endpoints com autenticação básica
                 .requestMatchers("/actuator/health").permitAll()
+                .requestMatchers("/actuator/health/**").permitAll() // Permite liveness, readiness, etc.
                 .requestMatchers("/actuator/info").permitAll()
                 .requestMatchers("/actuator/metrics").permitAll()
                 .requestMatchers("/actuator/metrics/**").permitAll()
