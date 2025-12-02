@@ -4,6 +4,9 @@ import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import io.lettuce.core.ClientOptions;
+import io.lettuce.core.SocketOptions;
+import io.lettuce.core.TimeoutOptions;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.EnableCaching;
@@ -13,6 +16,7 @@ import org.springframework.data.redis.cache.RedisCacheConfiguration;
 import org.springframework.data.redis.cache.RedisCacheManager;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.connection.RedisStandaloneConfiguration;
+import org.springframework.data.redis.connection.lettuce.LettuceClientConfiguration;
 import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
 import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.RedisSerializationContext;
@@ -55,6 +59,7 @@ public class RedisConfig {
 
     /**
      * Configura a conexão com o Redis usando Lettuce.
+     * Configurado para não bloquear a inicialização da aplicação.
      * 
      * @return RedisConnectionFactory configurado
      */
@@ -69,7 +74,32 @@ public class RedisConfig {
             config.setPassword(redisPassword);
         }
 
-        return new LettuceConnectionFactory(config);
+        // Configuração do cliente Lettuce para não bloquear startup
+        SocketOptions socketOptions = SocketOptions.builder()
+            .connectTimeout(Duration.ofSeconds(2)) // Timeout curto para não travar
+            .build();
+
+        TimeoutOptions timeoutOptions = TimeoutOptions.builder()
+            .fixedTimeout(Duration.ofSeconds(2))
+            .build();
+
+        ClientOptions clientOptions = ClientOptions.builder()
+            .socketOptions(socketOptions)
+            .timeoutOptions(timeoutOptions)
+            .autoReconnect(true) // Reconecta automaticamente
+            .build();
+
+        LettuceClientConfiguration clientConfig = LettuceClientConfiguration.builder()
+            .clientOptions(clientOptions)
+            .commandTimeout(Duration.ofSeconds(2))
+            .shutdownTimeout(Duration.ofSeconds(1))
+            .build();
+
+        LettuceConnectionFactory factory = new LettuceConnectionFactory(config, clientConfig);
+        factory.setValidateConnection(false); // Não valida conexão no startup
+        factory.afterPropertiesSet();
+        
+        return factory;
     }
 
     /**
