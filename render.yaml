@@ -46,4 +46,9 @@ services:
         sync: false
       - key: SUPABASE_SERVICE_ROLE_KEY
         sync: false
+      # Variável de ambiente do Grafana Cloud Prometheus
+      # Configure esta variável no painel do Render com o token do Grafana Cloud
+      # Token: glc_eyJvIjoiMTYwNjE0MyIsIm4iOiJzdGFjay0xNDU2NzY1LWhtLXdyaXRlLXVwc2F1ZGUiLCJrIjoiVWNOc0w1MzFzNnZ4bzExMDRMRVVJejkwIiwibSI6eyJyIjoicHJvZC11cy13ZXN0LTAifX0=
+      - key: GRAFANA_PROMETHEUS_TOKEN
+        sync: false
 
