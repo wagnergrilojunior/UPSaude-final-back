@@ -13,6 +13,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.data.domain.Page;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
@@ -33,6 +35,7 @@ public class MovimentacoesEstoqueServiceImpl implements MovimentacoesEstoqueServ
 
     @Override
     @Transactional
+    @CacheEvict(value = "movimentacoesestoque", allEntries = true)
     public MovimentacoesEstoqueResponse criar(MovimentacoesEstoqueRequest request) {
         log.debug("Criando novo movimentacoesestoque");
 
@@ -49,9 +52,9 @@ public class MovimentacoesEstoqueServiceImpl implements MovimentacoesEstoqueServ
 
     @Override
     @Transactional
+    @Cacheable(value = "movimentacoesestoque", key = "#id")
     public MovimentacoesEstoqueResponse obterPorId(UUID id) {
-        log.debug("Buscando movimentacoesestoque por ID: {}", id);
-
+        log.debug("Buscando movimentacoesestoque por ID: {} (cache miss)", id);
         if (id == null) {
             throw new BadRequestException("ID do movimentacoesestoque é obrigatório");
         }
@@ -73,6 +76,7 @@ public class MovimentacoesEstoqueServiceImpl implements MovimentacoesEstoqueServ
 
     @Override
     @Transactional
+    @CacheEvict(value = "movimentacoesestoque", key = "#id")
     public MovimentacoesEstoqueResponse atualizar(UUID id, MovimentacoesEstoqueRequest request) {
         log.debug("Atualizando movimentacoesestoque. ID: {}", id);
 
@@ -95,6 +99,7 @@ public class MovimentacoesEstoqueServiceImpl implements MovimentacoesEstoqueServ
 
     @Override
     @Transactional
+    @CacheEvict(value = "movimentacoesestoque", key = "#id")
     public void excluir(UUID id) {
         log.debug("Excluindo movimentacoesestoque. ID: {}", id);
 

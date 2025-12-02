@@ -13,6 +13,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.data.domain.Page;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
@@ -33,6 +35,7 @@ public class MedicosServiceImpl implements MedicosService {
 
     @Override
     @Transactional
+    @CacheEvict(value = "medicos", allEntries = true)
     public MedicosResponse criar(MedicosRequest request) {
         log.debug("Criando novo medicos");
 
@@ -49,8 +52,9 @@ public class MedicosServiceImpl implements MedicosService {
 
     @Override
     @Transactional
+    @Cacheable(value = "medicos", key = "#id")
     public MedicosResponse obterPorId(UUID id) {
-        log.debug("Buscando medicos por ID: {}", id);
+        log.debug("Buscando medicos por ID: {} (cache miss)", id);
 
         if (id == null) {
             throw new BadRequestException("ID do medicos é obrigatório");
@@ -73,6 +77,7 @@ public class MedicosServiceImpl implements MedicosService {
 
     @Override
     @Transactional
+    @CacheEvict(value = "medicos", key = "#id")
     public MedicosResponse atualizar(UUID id, MedicosRequest request) {
         log.debug("Atualizando medicos. ID: {}", id);
 
@@ -95,6 +100,7 @@ public class MedicosServiceImpl implements MedicosService {
 
     @Override
     @Transactional
+    @CacheEvict(value = "medicos", key = "#id")
     public void excluir(UUID id) {
         log.debug("Excluindo medicos. ID: {}", id);
 

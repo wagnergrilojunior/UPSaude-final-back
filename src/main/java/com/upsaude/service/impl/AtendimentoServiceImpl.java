@@ -26,6 +26,8 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
@@ -53,6 +55,7 @@ public class AtendimentoServiceImpl implements AtendimentoService {
 
     @Override
     @Transactional
+    @CacheEvict(value = "atendimento", allEntries = true)
     public AtendimentoResponse criar(AtendimentoRequest request) {
         log.debug("Criando novo atendimento para paciente: {}", request.getPacienteId());
 
@@ -113,9 +116,9 @@ public class AtendimentoServiceImpl implements AtendimentoService {
 
     @Override
     @Transactional
+    @Cacheable(value = "atendimento", key = "#id")
     public AtendimentoResponse obterPorId(UUID id) {
-        log.debug("Buscando atendimento por ID: {}", id);
-
+        log.debug("Buscando atendimento por ID: {} (cache miss)", id);
         if (id == null) {
             throw new BadRequestException("ID do atendimento é obrigatório");
         }
@@ -176,6 +179,7 @@ public class AtendimentoServiceImpl implements AtendimentoService {
 
     @Override
     @Transactional
+    @CacheEvict(value = "atendimento", key = "#id")
     public AtendimentoResponse atualizar(UUID id, AtendimentoRequest request) {
         log.debug("Atualizando atendimento. ID: {}", id);
 
@@ -198,6 +202,7 @@ public class AtendimentoServiceImpl implements AtendimentoService {
 
     @Override
     @Transactional
+    @CacheEvict(value = "atendimento", key = "#id")
     public void excluir(UUID id) {
         log.debug("Excluindo atendimento. ID: {}", id);
 

@@ -12,6 +12,8 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -33,6 +35,7 @@ public class EspecialidadesMedicasServiceImpl implements EspecialidadesMedicasSe
 
     @Override
     @Transactional
+    @CacheEvict(value = "especialidadesmedicas", allEntries = true)
     public EspecialidadesMedicasResponse criar(EspecialidadesMedicasRequest request) {
         log.debug("Criando novo especialidadesmedicas");
 
@@ -49,8 +52,9 @@ public class EspecialidadesMedicasServiceImpl implements EspecialidadesMedicasSe
 
     @Override
     @Transactional
+    @Cacheable(value = "especialidadesmedicas", key = "#id")
     public EspecialidadesMedicasResponse obterPorId(UUID id) {
-        log.debug("Buscando especialidadesmedicas por ID: {}", id);
+        log.debug("Buscando especialidadesmedicas por ID: {} (cache miss)", id);
 
         if (id == null) {
             throw new BadRequestException("ID do especialidadesmedicas é obrigatório");
@@ -73,6 +77,7 @@ public class EspecialidadesMedicasServiceImpl implements EspecialidadesMedicasSe
 
     @Override
     @Transactional
+    @CacheEvict(value = "especialidadesmedicas", key = "#id")
     public EspecialidadesMedicasResponse atualizar(UUID id, EspecialidadesMedicasRequest request) {
         log.debug("Atualizando especialidadesmedicas. ID: {}", id);
 
@@ -95,6 +100,7 @@ public class EspecialidadesMedicasServiceImpl implements EspecialidadesMedicasSe
 
     @Override
     @Transactional
+    @CacheEvict(value = "especialidadesmedicas", key = "#id")
     public void excluir(UUID id) {
         log.debug("Excluindo especialidadesmedicas. ID: {}", id);
 

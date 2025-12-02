@@ -13,6 +13,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.data.domain.Page;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
@@ -33,6 +35,7 @@ public class PapeisServiceImpl implements PapeisService {
 
     @Override
     @Transactional
+    @CacheEvict(value = "papeis", allEntries = true)
     public PapeisResponse criar(PapeisRequest request) {
         log.debug("Criando novo papeis");
 
@@ -49,9 +52,9 @@ public class PapeisServiceImpl implements PapeisService {
 
     @Override
     @Transactional
+    @Cacheable(value = "papeis", key = "#id")
     public PapeisResponse obterPorId(UUID id) {
-        log.debug("Buscando papeis por ID: {}", id);
-
+        log.debug("Buscando papeis por ID: {} (cache miss)", id);
         if (id == null) {
             throw new BadRequestException("ID do papeis é obrigatório");
         }
@@ -73,6 +76,7 @@ public class PapeisServiceImpl implements PapeisService {
 
     @Override
     @Transactional
+    @CacheEvict(value = "papeis", key = "#id")
     public PapeisResponse atualizar(UUID id, PapeisRequest request) {
         log.debug("Atualizando papeis. ID: {}", id);
 
@@ -95,6 +99,7 @@ public class PapeisServiceImpl implements PapeisService {
 
     @Override
     @Transactional
+    @CacheEvict(value = "papeis", key = "#id")
     public void excluir(UUID id) {
         log.debug("Excluindo papeis. ID: {}", id);
 

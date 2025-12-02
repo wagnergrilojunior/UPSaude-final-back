@@ -13,6 +13,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.data.domain.Page;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
@@ -35,6 +37,7 @@ public class PuericulturaServiceImpl implements PuericulturaService {
 
     @Override
     @Transactional
+    @CacheEvict(value = "puericultura", allEntries = true)
     public PuericulturaResponse criar(PuericulturaRequest request) {
         log.debug("Criando nova puericultura");
 
@@ -55,9 +58,9 @@ public class PuericulturaServiceImpl implements PuericulturaService {
 
     @Override
     @Transactional
+    @Cacheable(value = "puericultura", key = "#id")
     public PuericulturaResponse obterPorId(UUID id) {
-        log.debug("Buscando puericultura por ID: {}", id);
-
+        log.debug("Buscando puericultura por ID: {} (cache miss)", id);
         if (id == null) {
             throw new BadRequestException("ID da puericultura é obrigatório");
         }
@@ -102,6 +105,7 @@ public class PuericulturaServiceImpl implements PuericulturaService {
 
     @Override
     @Transactional
+    @CacheEvict(value = "puericultura", key = "#id")
     public PuericulturaResponse atualizar(UUID id, PuericulturaRequest request) {
         log.debug("Atualizando puericultura. ID: {}", id);
 
@@ -124,6 +128,7 @@ public class PuericulturaServiceImpl implements PuericulturaService {
 
     @Override
     @Transactional
+    @CacheEvict(value = "puericultura", key = "#id")
     public void excluir(UUID id) {
         log.debug("Excluindo puericultura. ID: {}", id);
 

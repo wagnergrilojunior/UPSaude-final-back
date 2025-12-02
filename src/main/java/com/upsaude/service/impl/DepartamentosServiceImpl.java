@@ -13,6 +13,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.data.domain.Page;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
@@ -33,6 +35,7 @@ public class DepartamentosServiceImpl implements DepartamentosService {
 
     @Override
     @Transactional
+    @CacheEvict(value = "departamentos", allEntries = true)
     public DepartamentosResponse criar(DepartamentosRequest request) {
         log.debug("Criando novo departamentos");
 
@@ -49,9 +52,9 @@ public class DepartamentosServiceImpl implements DepartamentosService {
 
     @Override
     @Transactional
+    @Cacheable(value = "departamentos", key = "#id")
     public DepartamentosResponse obterPorId(UUID id) {
-        log.debug("Buscando departamentos por ID: {}", id);
-
+        log.debug("Buscando departamentos por ID: {} (cache miss)", id);
         if (id == null) {
             throw new BadRequestException("ID do departamentos é obrigatório");
         }
@@ -73,6 +76,7 @@ public class DepartamentosServiceImpl implements DepartamentosService {
 
     @Override
     @Transactional
+    @CacheEvict(value = "departamentos", key = "#id")
     public DepartamentosResponse atualizar(UUID id, DepartamentosRequest request) {
         log.debug("Atualizando departamentos. ID: {}", id);
 
@@ -95,6 +99,7 @@ public class DepartamentosServiceImpl implements DepartamentosService {
 
     @Override
     @Transactional
+    @CacheEvict(value = "departamentos", key = "#id")
     public void excluir(UUID id) {
         log.debug("Excluindo departamentos. ID: {}", id);
 

@@ -13,6 +13,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.data.domain.Page;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
@@ -33,6 +35,7 @@ public class AcaoPromocaoPrevencaoServiceImpl implements AcaoPromocaoPrevencaoSe
 
     @Override
     @Transactional
+    @CacheEvict(value = "acaopromocaoprevencao", allEntries = true)
     public AcaoPromocaoPrevencaoResponse criar(AcaoPromocaoPrevencaoRequest request) {
         log.debug("Criando nova ação de promoção e prevenção");
 
@@ -57,9 +60,9 @@ public class AcaoPromocaoPrevencaoServiceImpl implements AcaoPromocaoPrevencaoSe
 
     @Override
     @Transactional
+    @Cacheable(value = "acaopromocaoprevencao", key = "#id")
     public AcaoPromocaoPrevencaoResponse obterPorId(UUID id) {
-        log.debug("Buscando ação de promoção e prevenção por ID: {}", id);
-
+        log.debug("Buscando ação de promoção e prevenção por ID: {} (cache miss)", id);
         if (id == null) {
             throw new BadRequestException("ID da ação de promoção e prevenção é obrigatório");
         }
@@ -112,6 +115,7 @@ public class AcaoPromocaoPrevencaoServiceImpl implements AcaoPromocaoPrevencaoSe
 
     @Override
     @Transactional
+    @CacheEvict(value = "acaopromocaoprevencao", key = "#id")
     public AcaoPromocaoPrevencaoResponse atualizar(UUID id, AcaoPromocaoPrevencaoRequest request) {
         log.debug("Atualizando ação de promoção e prevenção. ID: {}", id);
 
@@ -134,6 +138,7 @@ public class AcaoPromocaoPrevencaoServiceImpl implements AcaoPromocaoPrevencaoSe
 
     @Override
     @Transactional
+    @CacheEvict(value = "acaopromocaoprevencao", key = "#id")
     public void excluir(UUID id) {
         log.debug("Excluindo ação de promoção e prevenção. ID: {}", id);
 

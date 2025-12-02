@@ -12,6 +12,8 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -33,6 +35,7 @@ public class TenantServiceImpl implements TenantService {
 
     @Override
     @Transactional
+    @CacheEvict(value = "tenants", allEntries = true)
     public TenantResponse criar(TenantRequest request) {
         log.debug("Criando novo tenant");
 
@@ -49,8 +52,9 @@ public class TenantServiceImpl implements TenantService {
 
     @Override
     @Transactional
+    @Cacheable(value = "tenants", key = "#id")
     public TenantResponse obterPorId(UUID id) {
-        log.debug("Buscando tenant por ID: {}", id);
+        log.debug("Buscando tenant por ID: {} (cache miss)", id);
 
         if (id == null) {
             throw new BadRequestException("ID do tenant é obrigatório");
@@ -73,6 +77,7 @@ public class TenantServiceImpl implements TenantService {
 
     @Override
     @Transactional
+    @CacheEvict(value = "tenants", key = "#id")
     public TenantResponse atualizar(UUID id, TenantRequest request) {
         log.debug("Atualizando tenant. ID: {}", id);
 
@@ -95,6 +100,7 @@ public class TenantServiceImpl implements TenantService {
 
     @Override
     @Transactional
+    @CacheEvict(value = "tenants", key = "#id")
     public void excluir(UUID id) {
         log.debug("Excluindo tenant. ID: {}", id);
 

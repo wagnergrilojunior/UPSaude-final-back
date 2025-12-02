@@ -13,6 +13,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.data.domain.Page;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
@@ -33,6 +35,7 @@ public class ConvenioServiceImpl implements ConvenioService {
 
     @Override
     @Transactional
+    @CacheEvict(value = "convenio", allEntries = true)
     public ConvenioResponse criar(ConvenioRequest request) {
         log.debug("Criando novo convenio");
 
@@ -49,9 +52,9 @@ public class ConvenioServiceImpl implements ConvenioService {
 
     @Override
     @Transactional
+    @Cacheable(value = "convenio", key = "#id")
     public ConvenioResponse obterPorId(UUID id) {
-        log.debug("Buscando convenio por ID: {}", id);
-
+        log.debug("Buscando convenio por ID: {} (cache miss)", id);
         if (id == null) {
             throw new BadRequestException("ID do convenio é obrigatório");
         }
@@ -73,6 +76,7 @@ public class ConvenioServiceImpl implements ConvenioService {
 
     @Override
     @Transactional
+    @CacheEvict(value = "convenio", key = "#id")
     public ConvenioResponse atualizar(UUID id, ConvenioRequest request) {
         log.debug("Atualizando convenio. ID: {}", id);
 
@@ -95,6 +99,7 @@ public class ConvenioServiceImpl implements ConvenioService {
 
     @Override
     @Transactional
+    @CacheEvict(value = "convenio", key = "#id")
     public void excluir(UUID id) {
         log.debug("Excluindo convenio. ID: {}", id);
 

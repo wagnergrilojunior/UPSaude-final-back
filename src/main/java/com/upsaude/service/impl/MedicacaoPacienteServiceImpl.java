@@ -18,6 +18,8 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
@@ -41,6 +43,7 @@ public class MedicacaoPacienteServiceImpl implements MedicacaoPacienteService {
 
     @Override
     @Transactional
+    @CacheEvict(value = "medicacaopaciente", allEntries = true)
     public MedicacaoPacienteResponse criar(MedicacaoPacienteRequest request) {
         log.debug("Criando nova ligação paciente-medicação");
 
@@ -80,9 +83,9 @@ public class MedicacaoPacienteServiceImpl implements MedicacaoPacienteService {
 
     @Override
     @Transactional
+    @Cacheable(value = "medicacaopaciente", key = "#id")
     public MedicacaoPacienteResponse obterPorId(UUID id) {
-        log.debug("Buscando ligação paciente-medicação por ID: {}", id);
-
+        log.debug("Buscando ligação paciente-medicação por ID: {} (cache miss)", id);
         if (id == null) {
             throw new BadRequestException("ID da ligação paciente-medicação é obrigatório");
         }
@@ -104,6 +107,7 @@ public class MedicacaoPacienteServiceImpl implements MedicacaoPacienteService {
 
     @Override
     @Transactional
+    @CacheEvict(value = "medicacaopaciente", key = "#id")
     public MedicacaoPacienteResponse atualizar(UUID id, MedicacaoPacienteRequest request) {
         log.debug("Atualizando ligação paciente-medicação. ID: {}", id);
 
@@ -126,6 +130,7 @@ public class MedicacaoPacienteServiceImpl implements MedicacaoPacienteService {
 
     @Override
     @Transactional
+    @CacheEvict(value = "medicacaopaciente", key = "#id")
     public void excluir(UUID id) {
         log.debug("Excluindo ligação paciente-medicação. ID: {}", id);
 

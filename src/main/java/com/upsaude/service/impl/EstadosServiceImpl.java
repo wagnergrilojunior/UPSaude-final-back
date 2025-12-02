@@ -12,6 +12,8 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -33,6 +35,7 @@ public class EstadosServiceImpl implements EstadosService {
 
     @Override
     @Transactional
+    @CacheEvict(value = "estados", allEntries = true)
     public EstadosResponse criar(EstadosRequest request) {
         log.debug("Criando novo estados");
 
@@ -49,8 +52,9 @@ public class EstadosServiceImpl implements EstadosService {
 
     @Override
     @Transactional
+    @Cacheable(value = "estados", key = "#id")
     public EstadosResponse obterPorId(UUID id) {
-        log.debug("Buscando estados por ID: {}", id);
+        log.debug("Buscando estados por ID: {} (cache miss)", id);
 
         if (id == null) {
             throw new BadRequestException("ID do estados é obrigatório");
@@ -73,6 +77,7 @@ public class EstadosServiceImpl implements EstadosService {
 
     @Override
     @Transactional
+    @CacheEvict(value = "estados", key = "#id")
     public EstadosResponse atualizar(UUID id, EstadosRequest request) {
         log.debug("Atualizando estados. ID: {}", id);
 
@@ -95,6 +100,7 @@ public class EstadosServiceImpl implements EstadosService {
 
     @Override
     @Transactional
+    @CacheEvict(value = "estados", key = "#id")
     public void excluir(UUID id) {
         log.debug("Excluindo estados. ID: {}", id);
 

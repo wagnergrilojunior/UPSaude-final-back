@@ -12,6 +12,8 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -33,6 +35,7 @@ public class ConselhosProfissionaisServiceImpl implements ConselhosProfissionais
 
     @Override
     @Transactional
+    @CacheEvict(value = "conselhosprofissionais", allEntries = true)
     public ConselhosProfissionaisResponse criar(ConselhosProfissionaisRequest request) {
         log.debug("Criando novo conselhosprofissionais");
 
@@ -49,8 +52,9 @@ public class ConselhosProfissionaisServiceImpl implements ConselhosProfissionais
 
     @Override
     @Transactional
+    @Cacheable(value = "conselhosprofissionais", key = "#id")
     public ConselhosProfissionaisResponse obterPorId(UUID id) {
-        log.debug("Buscando conselhosprofissionais por ID: {}", id);
+        log.debug("Buscando conselhosprofissionais por ID: {} (cache miss)", id);
 
         if (id == null) {
             throw new BadRequestException("ID do conselhosprofissionais é obrigatório");
@@ -73,6 +77,7 @@ public class ConselhosProfissionaisServiceImpl implements ConselhosProfissionais
 
     @Override
     @Transactional
+    @CacheEvict(value = "conselhosprofissionais", key = "#id")
     public ConselhosProfissionaisResponse atualizar(UUID id, ConselhosProfissionaisRequest request) {
         log.debug("Atualizando conselhosprofissionais. ID: {}", id);
 
@@ -95,6 +100,7 @@ public class ConselhosProfissionaisServiceImpl implements ConselhosProfissionais
 
     @Override
     @Transactional
+    @CacheEvict(value = "conselhosprofissionais", key = "#id")
     public void excluir(UUID id) {
         log.debug("Excluindo conselhosprofissionais. ID: {}", id);
 

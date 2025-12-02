@@ -18,6 +18,8 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
@@ -42,6 +44,7 @@ public class ControlePontoServiceImpl implements ControlePontoService {
 
     @Override
     @Transactional
+    @CacheEvict(value = "controleponto", allEntries = true)
     public ControlePontoResponse criar(ControlePontoRequest request) {
         log.debug("Criando novo registro de ponto");
 
@@ -78,9 +81,9 @@ public class ControlePontoServiceImpl implements ControlePontoService {
 
     @Override
     @Transactional
+    @Cacheable(value = "controleponto", key = "#id")
     public ControlePontoResponse obterPorId(UUID id) {
-        log.debug("Buscando registro de ponto por ID: {}", id);
-
+        log.debug("Buscando registro de ponto por ID: {} (cache miss)", id);
         if (id == null) {
             throw new BadRequestException("ID do registro de ponto é obrigatório");
         }
@@ -173,6 +176,7 @@ public class ControlePontoServiceImpl implements ControlePontoService {
 
     @Override
     @Transactional
+    @CacheEvict(value = "controleponto", key = "#id")
     public ControlePontoResponse atualizar(UUID id, ControlePontoRequest request) {
         log.debug("Atualizando registro de ponto. ID: {}", id);
 
@@ -195,6 +199,7 @@ public class ControlePontoServiceImpl implements ControlePontoService {
 
     @Override
     @Transactional
+    @CacheEvict(value = "controleponto", key = "#id")
     public void excluir(UUID id) {
         log.debug("Excluindo registro de ponto. ID: {}", id);
 

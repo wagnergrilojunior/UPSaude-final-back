@@ -14,6 +14,8 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
@@ -37,6 +39,7 @@ public class MedicaoClinicaServiceImpl implements MedicaoClinicaService {
 
     @Override
     @Transactional
+    @CacheEvict(value = "medicaoclinica", allEntries = true)
     public MedicaoClinicaResponse criar(MedicaoClinicaRequest request) {
         log.debug("Criando nova medição clínica para paciente: {}", request.getPacienteId());
 
@@ -62,9 +65,9 @@ public class MedicaoClinicaServiceImpl implements MedicaoClinicaService {
 
     @Override
     @Transactional
+    @Cacheable(value = "medicaoclinica", key = "#id")
     public MedicaoClinicaResponse obterPorId(UUID id) {
-        log.debug("Buscando medição clínica por ID: {}", id);
-
+        log.debug("Buscando medição clínica por ID: {} (cache miss)", id);
         if (id == null) {
             throw new BadRequestException("ID da medição clínica é obrigatório");
         }
@@ -99,6 +102,7 @@ public class MedicaoClinicaServiceImpl implements MedicaoClinicaService {
 
     @Override
     @Transactional
+    @CacheEvict(value = "medicaoclinica", key = "#id")
     public MedicaoClinicaResponse atualizar(UUID id, MedicaoClinicaRequest request) {
         log.debug("Atualizando medição clínica. ID: {}", id);
 
@@ -124,6 +128,7 @@ public class MedicaoClinicaServiceImpl implements MedicaoClinicaService {
 
     @Override
     @Transactional
+    @CacheEvict(value = "medicaoclinica", key = "#id")
     public void excluir(UUID id) {
         log.debug("Excluindo medição clínica. ID: {}", id);
 

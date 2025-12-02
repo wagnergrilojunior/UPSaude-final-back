@@ -19,6 +19,8 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
@@ -43,6 +45,7 @@ public class EquipeSaudeServiceImpl implements EquipeSaudeService {
 
     @Override
     @Transactional
+    @CacheEvict(value = "equipesaude", allEntries = true)
     public EquipeSaudeResponse criar(EquipeSaudeRequest request) {
         log.debug("Criando nova equipe de saúde");
 
@@ -74,9 +77,9 @@ public class EquipeSaudeServiceImpl implements EquipeSaudeService {
 
     @Override
     @Transactional
+    @Cacheable(value = "equipesaude", key = "#id")
     public EquipeSaudeResponse obterPorId(UUID id) {
-        log.debug("Buscando equipe de saúde por ID: {}", id);
-
+        log.debug("Buscando equipe de saúde por ID: {} (cache miss)", id);
         if (id == null) {
             throw new BadRequestException("ID da equipe é obrigatório");
         }
@@ -126,6 +129,7 @@ public class EquipeSaudeServiceImpl implements EquipeSaudeService {
 
     @Override
     @Transactional
+    @CacheEvict(value = "equipesaude", key = "#id")
     public EquipeSaudeResponse atualizar(UUID id, EquipeSaudeRequest request) {
         log.debug("Atualizando equipe de saúde. ID: {}", id);
 
@@ -155,6 +159,7 @@ public class EquipeSaudeServiceImpl implements EquipeSaudeService {
 
     @Override
     @Transactional
+    @CacheEvict(value = "equipesaude", key = "#id")
     public void excluir(UUID id) {
         log.debug("Excluindo equipe de saúde. ID: {}", id);
 

@@ -25,4 +25,14 @@ services:
         sync: false
       - key: JWT_EXPIRATION
         value: 86400000
+      # Variáveis de ambiente do Redis para Cache
+      # Configure estas variáveis no painel do Render após criar a instância Redis
+      - key: REDIS_HOST
+        sync: false
+      - key: REDIS_PORT
+        value: 6379
+      - key: REDIS_PASSWORD
+        sync: false
+      - key: REDIS_DATABASE
+        value: 0
 

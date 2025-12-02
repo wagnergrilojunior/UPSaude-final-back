@@ -13,6 +13,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.data.domain.Page;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
@@ -33,6 +35,7 @@ public class FabricantesVacinaServiceImpl implements FabricantesVacinaService {
 
     @Override
     @Transactional
+    @CacheEvict(value = "fabricantesvacina", allEntries = true)
     public FabricantesVacinaResponse criar(FabricantesVacinaRequest request) {
         log.debug("Criando novo fabricantesvacina");
 
@@ -49,9 +52,9 @@ public class FabricantesVacinaServiceImpl implements FabricantesVacinaService {
 
     @Override
     @Transactional
+    @Cacheable(value = "fabricantesvacina", key = "#id")
     public FabricantesVacinaResponse obterPorId(UUID id) {
-        log.debug("Buscando fabricantesvacina por ID: {}", id);
-
+        log.debug("Buscando fabricantesvacina por ID: {} (cache miss)", id);
         if (id == null) {
             throw new BadRequestException("ID do fabricantesvacina é obrigatório");
         }
@@ -73,6 +76,7 @@ public class FabricantesVacinaServiceImpl implements FabricantesVacinaService {
 
     @Override
     @Transactional
+    @CacheEvict(value = "fabricantesvacina", key = "#id")
     public FabricantesVacinaResponse atualizar(UUID id, FabricantesVacinaRequest request) {
         log.debug("Atualizando fabricantesvacina. ID: {}", id);
 
@@ -95,6 +99,7 @@ public class FabricantesVacinaServiceImpl implements FabricantesVacinaService {
 
     @Override
     @Transactional
+    @CacheEvict(value = "fabricantesvacina", key = "#id")
     public void excluir(UUID id) {
         log.debug("Excluindo fabricantesvacina. ID: {}", id);
 

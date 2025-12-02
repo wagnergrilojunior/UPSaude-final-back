@@ -13,6 +13,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.data.domain.Page;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
@@ -33,6 +35,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
+    @CacheEvict(value = "user", allEntries = true)
     public UserResponse criar(UserRequest request) {
         log.debug("Criando novo user");
 
@@ -48,9 +51,9 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
+    @Cacheable(value = "user", key = "#id")
     public UserResponse obterPorId(UUID id) {
-        log.debug("Buscando user por ID: {}", id);
-
+        log.debug("Buscando user por ID: {} (cache miss)", id);
         if (id == null) {
             throw new BadRequestException("ID do user é obrigatório");
         }
@@ -72,6 +75,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
+    @CacheEvict(value = "user", key = "#id")
     public UserResponse atualizar(UUID id, UserRequest request) {
         log.debug("Atualizando user. ID: {}", id);
 
@@ -94,6 +98,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
+    @CacheEvict(value = "user", key = "#id")
     public void excluir(UUID id) {
         log.debug("Excluindo user. ID: {}", id);
 

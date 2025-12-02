@@ -13,6 +13,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.data.domain.Page;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
@@ -33,6 +35,7 @@ public class VinculosPapeisServiceImpl implements VinculosPapeisService {
 
     @Override
     @Transactional
+    @CacheEvict(value = "vinculospapeis", allEntries = true)
     public VinculosPapeisResponse criar(VinculosPapeisRequest request) {
         log.debug("Criando novo vinculospapeis");
 
@@ -49,9 +52,9 @@ public class VinculosPapeisServiceImpl implements VinculosPapeisService {
 
     @Override
     @Transactional
+    @Cacheable(value = "vinculospapeis", key = "#id")
     public VinculosPapeisResponse obterPorId(UUID id) {
-        log.debug("Buscando vinculospapeis por ID: {}", id);
-
+        log.debug("Buscando vinculospapeis por ID: {} (cache miss)", id);
         if (id == null) {
             throw new BadRequestException("ID do vinculospapeis é obrigatório");
         }
@@ -73,6 +76,7 @@ public class VinculosPapeisServiceImpl implements VinculosPapeisService {
 
     @Override
     @Transactional
+    @CacheEvict(value = "vinculospapeis", key = "#id")
     public VinculosPapeisResponse atualizar(UUID id, VinculosPapeisRequest request) {
         log.debug("Atualizando vinculospapeis. ID: {}", id);
 
@@ -95,6 +99,7 @@ public class VinculosPapeisServiceImpl implements VinculosPapeisService {
 
     @Override
     @Transactional
+    @CacheEvict(value = "vinculospapeis", key = "#id")
     public void excluir(UUID id) {
         log.debug("Excluindo vinculospapeis. ID: {}", id);
 

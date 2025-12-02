@@ -16,6 +16,8 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
@@ -38,6 +40,7 @@ public class DeficienciasPacienteServiceImpl implements DeficienciasPacienteServ
 
     @Override
     @Transactional
+    @CacheEvict(value = "deficienciaspaciente", allEntries = true)
     public DeficienciasPacienteResponse criar(DeficienciasPacienteRequest request) {
         log.debug("Criando nova ligação paciente-deficiência");
 
@@ -70,9 +73,9 @@ public class DeficienciasPacienteServiceImpl implements DeficienciasPacienteServ
 
     @Override
     @Transactional
+    @Cacheable(value = "deficienciaspaciente", key = "#id")
     public DeficienciasPacienteResponse obterPorId(UUID id) {
-        log.debug("Buscando ligação paciente-deficiência por ID: {}", id);
-
+        log.debug("Buscando ligação paciente-deficiência por ID: {} (cache miss)", id);
         if (id == null) {
             throw new BadRequestException("ID da ligação paciente-deficiência é obrigatório");
         }
@@ -94,6 +97,7 @@ public class DeficienciasPacienteServiceImpl implements DeficienciasPacienteServ
 
     @Override
     @Transactional
+    @CacheEvict(value = "deficienciaspaciente", key = "#id")
     public DeficienciasPacienteResponse atualizar(UUID id, DeficienciasPacienteRequest request) {
         log.debug("Atualizando ligação paciente-deficiência. ID: {}", id);
 
@@ -116,6 +120,7 @@ public class DeficienciasPacienteServiceImpl implements DeficienciasPacienteServ
 
     @Override
     @Transactional
+    @CacheEvict(value = "deficienciaspaciente", key = "#id")
     public void excluir(UUID id) {
         log.debug("Excluindo ligação paciente-deficiência. ID: {}", id);
 

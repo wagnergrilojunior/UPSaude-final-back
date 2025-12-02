@@ -14,6 +14,8 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
@@ -35,6 +37,7 @@ public class ConsultasServiceImpl implements ConsultasService {
 
     @Override
     @Transactional
+    @CacheEvict(value = "consultas", allEntries = true)
     public ConsultasResponse criar(ConsultasRequest request) {
         log.debug("Criando nova consulta");
 
@@ -51,9 +54,9 @@ public class ConsultasServiceImpl implements ConsultasService {
 
     @Override
     @Transactional
+    @Cacheable(value = "consultas", key = "#id")
     public ConsultasResponse obterPorId(UUID id) {
-        log.debug("Buscando consulta por ID: {}", id);
-
+        log.debug("Buscando consulta por ID: {} (cache miss)", id);
         if (id == null) {
             throw new BadRequestException("ID da consulta é obrigatório");
         }
@@ -88,6 +91,7 @@ public class ConsultasServiceImpl implements ConsultasService {
 
     @Override
     @Transactional
+    @CacheEvict(value = "consultas", key = "#id")
     public ConsultasResponse atualizar(UUID id, ConsultasRequest request) {
         log.debug("Atualizando consulta. ID: {}", id);
 
@@ -110,6 +114,7 @@ public class ConsultasServiceImpl implements ConsultasService {
 
     @Override
     @Transactional
+    @CacheEvict(value = "consultas", key = "#id")
     public void excluir(UUID id) {
         log.debug("Excluindo consulta. ID: {}", id);
 
