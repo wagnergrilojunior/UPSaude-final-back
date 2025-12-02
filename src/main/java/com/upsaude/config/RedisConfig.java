@@ -109,32 +109,27 @@ public class RedisConfig {
     }
 
     /**
-     * Configura o ObjectMapper para serialização JSON com suporte a tipos Java modernos.
-     * 
-     * @return ObjectMapper configurado
-     */
-    @Bean
-    public ObjectMapper objectMapper() {
-        ObjectMapper mapper = new ObjectMapper();
-        mapper.setVisibility(PropertyAccessor.ALL, JsonAutoDetect.Visibility.ANY);
-        mapper.registerModule(new JavaTimeModule());
-        mapper.activateDefaultTyping(
-            mapper.getPolymorphicTypeValidator(),
-            ObjectMapper.DefaultTyping.NON_FINAL
-        );
-        return mapper;
-    }
-
-    /**
      * Configura o CacheManager global com TTL padrão e serialização JSON.
      * 
+     * IMPORTANTE: Cria um ObjectMapper específico para Redis diretamente aqui,
+     * sem criar um bean separado, para evitar conflitos com o ObjectMapper padrão
+     * usado pelo Spring Boot para requisições HTTP.
+     * 
      * @param connectionFactory Factory de conexão Redis
-     * @param objectMapper ObjectMapper para serialização JSON
      * @return CacheManager configurado
      */
     @Bean
-    public CacheManager cacheManager(RedisConnectionFactory connectionFactory, ObjectMapper objectMapper) {
-        GenericJackson2JsonRedisSerializer jsonSerializer = new GenericJackson2JsonRedisSerializer(objectMapper);
+    public CacheManager cacheManager(RedisConnectionFactory connectionFactory) {
+        // Cria ObjectMapper específico para Redis (não é um bean para evitar conflitos)
+        ObjectMapper redisObjectMapper = new ObjectMapper();
+        redisObjectMapper.setVisibility(PropertyAccessor.ALL, JsonAutoDetect.Visibility.ANY);
+        redisObjectMapper.registerModule(new JavaTimeModule());
+        redisObjectMapper.activateDefaultTyping(
+            redisObjectMapper.getPolymorphicTypeValidator(),
+            ObjectMapper.DefaultTyping.NON_FINAL
+        );
+        
+        GenericJackson2JsonRedisSerializer jsonSerializer = new GenericJackson2JsonRedisSerializer(redisObjectMapper);
         
         RedisCacheConfiguration cacheConfig = RedisCacheConfiguration.defaultCacheConfig()
             .entryTtl(Duration.ofMillis(cacheTtl))

@@ -5,6 +5,7 @@ import com.upsaude.config.SupabaseConfig;
 import com.upsaude.exception.UnauthorizedException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
@@ -19,10 +20,8 @@ import java.util.Map;
 public class SupabaseAuthService {
 
     private final SupabaseConfig supabaseConfig;
-    
     private final RestTemplate restTemplate;
-    
-    private final ObjectMapper objectMapper;
+    private final ObjectMapper objectMapper; // Usa @Primary do supabaseObjectMapper
 
     /**
      * Autentica um usuário usando email e senha através do Supabase Auth
