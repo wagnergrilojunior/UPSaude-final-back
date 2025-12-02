@@ -42,8 +42,19 @@ public class SecurityConfig {
                 // Endpoints públicos - apenas login é público
                 // Paths relativos ao context-path (/api)
                 .requestMatchers("/v1/auth/login").permitAll()
+                
+                // Endpoints do Actuator - públicos para monitoramento
+                // IMPORTANTE: Em produção, considere proteger estes endpoints com autenticação básica
                 .requestMatchers("/actuator/health").permitAll()
                 .requestMatchers("/actuator/info").permitAll()
+                .requestMatchers("/actuator/metrics").permitAll()
+                .requestMatchers("/actuator/metrics/**").permitAll()
+                .requestMatchers("/actuator/prometheus").permitAll()
+                .requestMatchers("/actuator/loggers").permitAll()
+                .requestMatchers("/actuator/loggers/**").permitAll()
+                .requestMatchers("/actuator/threaddump").permitAll()
+                .requestMatchers("/actuator/httpexchanges").permitAll()
+                .requestMatchers("/actuator/httpexchanges/**").permitAll()
                 
                 // Swagger/OpenAPI - público para desenvolvimento
                 .requestMatchers("/api-docs/**").permitAll()
