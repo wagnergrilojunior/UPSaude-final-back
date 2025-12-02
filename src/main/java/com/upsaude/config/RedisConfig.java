@@ -25,13 +25,17 @@ import org.springframework.data.redis.serializer.StringRedisSerializer;
 import java.time.Duration;
 
 /**
- * Configuração do Redis para cache da aplicação.
+ * Configuração do Redis/Valkey para cache da aplicação.
  * 
- * Esta configuração utiliza Lettuce como cliente Redis e configura:
+ * Compatível com Redis e Valkey (fork do Redis usado pelo Render).
+ * Esta configuração utiliza Lettuce como cliente e configura:
  * - TTL padrão de 5 minutos
  * - Serialização JSON para valores
  * - Prefixo de chave "upsaude::"
  * - Suporte a tipos Java modernos (LocalDateTime, OffsetDateTime, etc.)
+ * 
+ * Nota: Valkey é 100% compatível com Redis e funciona com a mesma configuração.
+ * O Render usa Valkey nas novas instâncias Key-Value.
  * 
  * @author UPSaúde
  */
@@ -58,8 +62,10 @@ public class RedisConfig {
     private String keyPrefix;
 
     /**
-     * Configura a conexão com o Redis usando Lettuce.
+     * Configura a conexão com o Redis/Valkey usando Lettuce.
      * Configurado para não bloquear a inicialização da aplicação.
+     * 
+     * Compatível com Redis e Valkey (protocolo RESP).
      * 
      * @return RedisConnectionFactory configurado
      */
