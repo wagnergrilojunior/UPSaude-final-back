@@ -60,13 +60,8 @@ public class DoencasPacienteServiceImpl implements DoencasPacienteService {
                 .orElseThrow(() -> new NotFoundException("Doença não encontrada com ID: " + request.getDoencaId()));
         doencasPaciente.setDoenca(doenca);
 
-        // Define estabelecimento e tenant do paciente
-        if (paciente.getEstabelecimento() != null) {
-            doencasPaciente.setEstabelecimento(paciente.getEstabelecimento());
-        }
-        if (paciente.getTenant() != null) {
-            doencasPaciente.setTenant(paciente.getTenant());
-        }
+        // Paciente não possui estabelecimento nem tenant
+        // O estabelecimento e tenant devem ser definidos de outra forma se necessário
 
         // Carrega CID principal se fornecido
         if (request.getCidPrincipalId() != null) {

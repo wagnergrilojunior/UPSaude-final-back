@@ -22,5 +22,8 @@ public class LoginResponse {
     private Map<String, Object> userMetadata;
     private Map<String, Object> appMetadata;
     private String role;
+    
+    // Informações completas do usuário no sistema
+    private UsuarioSistemaInfoResponse usuarioSistema;
 }
 

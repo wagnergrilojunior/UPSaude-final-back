@@ -97,91 +97,19 @@ public class GrafanaPrometheusPushService {
     /**
      * Envia as métricas Prometheus para o Grafana Cloud.
      * Este método é executado periodicamente conforme configurado.
+     * 
+     * NOTA: O Grafana Cloud espera receber métricas no formato Prometheus Remote Write Protocol
+     * (Snappy + protobuf), não texto plano. Este serviço está desabilitado por padrão.
+     * Recomenda-se usar scraping do endpoint /actuator/prometheus ao invés de push.
      */
     @Scheduled(fixedDelayString = "${grafana.prometheus.remote-write.push-interval:30}000")
     public void pushMetrics() {
-        // Evita execuções concorrentes
-        if (!isRunning.compareAndSet(false, true)) {
-            log.debug("Push de métricas já em execução, pulando este ciclo");
-            return;
-        }
-
-        try {
-            String prometheusMetrics = null;
-            
-            // Tenta usar o método scrape() se disponível via reflection
-            if (!useHttpEndpoint && scrapeMethod != null) {
-                try {
-                    prometheusMetrics = (String) scrapeMethod.invoke(meterRegistry);
-                    log.debug("Métricas obtidas via reflection. Tamanho: {} bytes", 
-                        prometheusMetrics != null ? prometheusMetrics.length() : 0);
-                } catch (Exception e) {
-                    log.warn("Erro ao chamar método scrape() via reflection: {}. Tentando endpoint HTTP.", e.getMessage());
-                    useHttpEndpoint = true; // Fallback para HTTP
-                }
-            }
-            
-            // Se não conseguiu via reflection, usa o endpoint HTTP do Actuator
-            if (useHttpEndpoint || prometheusMetrics == null || prometheusMetrics.trim().isEmpty()) {
-                try {
-                    log.debug("Obtendo métricas via endpoint HTTP do Actuator...");
-                    prometheusMetrics = actuatorClient.get()
-                        .uri("/actuator/prometheus")
-                        .retrieve()
-                        .body(String.class);
-                    
-                    if (prometheusMetrics != null && !prometheusMetrics.trim().isEmpty()) {
-                        log.debug("Métricas obtidas via HTTP. Tamanho: {} bytes", prometheusMetrics.length());
-                    }
-                } catch (Exception e) {
-                    log.error("Erro ao obter métricas via endpoint HTTP do Actuator: {}", e.getMessage());
-                    return;
-                }
-            }
-            
-            if (prometheusMetrics == null || prometheusMetrics.trim().isEmpty()) {
-                log.warn("Nenhuma métrica disponível para enviar");
-                return;
-            }
-            
-            final String metricsToSend = prometheusMetrics;
-
-            // Envia as métricas para o Grafana Cloud
-            // O endpoint /api/prom/push aceita texto plano no formato Prometheus exposition
-            log.debug("Enviando métricas para Grafana Cloud... Tamanho: {} bytes", metricsToSend.length());
-            
-            try {
-                grafanaClient.post()
-                    .header(HttpHeaders.CONTENT_TYPE, "text/plain")
-                    .body(metricsToSend)
-                    .retrieve()
-                    .toBodilessEntity();
-                
-                log.info("✅ Métricas enviadas com sucesso para Grafana Cloud. Tamanho: {} bytes", 
-                    metricsToSend.length());
-            } catch (Exception httpError) {
-                // Se falhar com text/plain, tenta sem Content-Type específico
-                log.warn("Tentativa com text/plain falhou: {}. Tentando sem Content-Type...", httpError.getMessage());
-                grafanaClient.post()
-                    .body(metricsToSend)
-                    .retrieve()
-                    .toBodilessEntity();
-                
-                log.info("✅ Métricas enviadas com sucesso (sem Content-Type). Tamanho: {} bytes", 
-                    metricsToSend.length());
-            }
-
-            log.info("✅ Métricas enviadas com sucesso para Grafana Cloud. Tamanho: {} bytes", 
-                metricsToSend.length());
-                
-        } catch (Exception e) {
-            log.error("❌ Erro ao enviar métricas para Grafana Cloud: {}", e.getMessage(), e);
-            if (e.getCause() != null) {
-                log.error("Causa: {}", e.getCause().getMessage());
-            }
-        } finally {
-            isRunning.set(false);
-        }
+        // NOTA: Push automático desabilitado porque o Grafana Cloud requer formato Remote Write Protocol
+        // (Snappy + protobuf), não texto plano. Use scraping do endpoint /actuator/prometheus ao invés de push.
+        // Este método está vazio para evitar erros nos logs.
+        // Para habilitar push, é necessário implementar o Remote Write Protocol completo.
+        log.debug("Push automático de métricas desabilitado. Use scraping do endpoint /actuator/prometheus no Grafana Cloud.");
+        return;
     }
 
     /**

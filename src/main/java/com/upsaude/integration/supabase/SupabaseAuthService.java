@@ -196,5 +196,52 @@ public class SupabaseAuthService {
     public SupabaseAuthResponse.User getUser(String token) {
         return verifyToken(token);
     }
+
+    /**
+     * Busca um usuário no Supabase Auth pelo ID usando service_role key.
+     * Útil para buscar email quando temos apenas o userId.
+     *
+     * @param userId ID do usuário no Supabase Auth
+     * @return Informações do usuário ou null se não encontrado
+     */
+    public SupabaseAuthResponse.User getUserById(java.util.UUID userId) {
+        String url = supabaseConfig.getUrl() + "/auth/v1/admin/users/" + userId;
+        
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("apikey", supabaseConfig.getServiceRoleKey());
+        headers.set("Authorization", "Bearer " + supabaseConfig.getServiceRoleKey());
+        
+        HttpEntity<Void> request = new HttpEntity<>(headers);
+        
+        try {
+            log.debug("Buscando usuário no Supabase Auth por ID: {}", userId);
+            ResponseEntity<SupabaseAuthResponse.User> response = restTemplate.exchange(
+                    url,
+                    HttpMethod.GET,
+                    request,
+                    SupabaseAuthResponse.User.class
+            );
+            
+            if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
+                log.debug("Usuário encontrado: {}", response.getBody().getEmail());
+                return response.getBody();
+            }
+            
+            log.warn("Usuário não encontrado - Status: {}", response.getStatusCode());
+            return null;
+            
+        } catch (HttpClientErrorException e) {
+            if (e.getStatusCode() == org.springframework.http.HttpStatus.NOT_FOUND) {
+                log.warn("Usuário não encontrado no Supabase Auth: {}", userId);
+                return null;
+            }
+            log.error("Erro HTTP ao buscar usuário - Status: {}, Body: {}", 
+                    e.getStatusCode(), e.getResponseBodyAsString());
+            return null;
+        } catch (Exception e) {
+            log.error("Erro ao buscar usuário por ID", e);
+            return null;
+        }
+    }
 }
 

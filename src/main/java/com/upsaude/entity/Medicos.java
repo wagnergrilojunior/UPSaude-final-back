@@ -21,7 +21,9 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Entidade que representa um médico.
@@ -39,8 +41,7 @@ import java.util.List;
            @Index(name = "idx_medicos_crm", columnList = "crm"),
            @Index(name = "idx_medicos_crm_uf", columnList = "crm_uf"),
            @Index(name = "idx_medicos_nome", columnList = "nome_completo"),
-           @Index(name = "idx_medicos_especialidade", columnList = "especialidade_id"),
-           @Index(name = "idx_medicos_estabelecimento", columnList = "estabelecimento_id")
+           @Index(name = "idx_medicos_especialidade", columnList = "especialidade_id")
        })
 @Data
 @EqualsAndHashCode(callSuper = true)
@@ -49,12 +50,13 @@ public class Medicos extends BaseEntity {
     // ========== RELACIONAMENTOS ==========
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "estabelecimento_id")
-    private Estabelecimentos estabelecimento;
-
-    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "especialidade_id")
     private EspecialidadesMedicas especialidade;
+
+    // ========== VÍNCULOS COM ESTABELECIMENTOS ==========
+
+    @OneToMany(mappedBy = "medico", fetch = FetchType.LAZY)
+    private Set<MedicoEstabelecimento> vinculosEstabelecimentos = new HashSet<>();
 
     // ========== IDENTIFICAÇÃO BÁSICA ==========
 

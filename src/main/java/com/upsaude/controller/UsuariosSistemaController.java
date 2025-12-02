@@ -9,6 +9,7 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -17,7 +18,10 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
 
 /**
@@ -102,6 +106,68 @@ public class UsuariosSistemaController {
             @Parameter(description = "ID do usuário do sistema", required = true)
             @PathVariable UUID id) {
         usuariosSistemaService.excluir(id);
+        return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/{id}/foto")
+    @Operation(
+            summary = "Upload de foto do usuário",
+            description = "Faz upload da foto do usuário para o Supabase Storage",
+            security = @SecurityRequirement(name = "bearerAuth")
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Foto enviada com sucesso"),
+            @ApiResponse(responseCode = "400", description = "Arquivo inválido"),
+            @ApiResponse(responseCode = "404", description = "Usuário não encontrado"),
+            @ApiResponse(responseCode = "403", description = "Acesso negado")
+    })
+    public ResponseEntity<Map<String, String>> uploadFoto(
+            @Parameter(description = "ID do usuário do sistema", required = true)
+            @PathVariable UUID id,
+            @Parameter(description = "Arquivo de imagem (JPEG, PNG, WEBP ou GIF, máximo 5MB)", required = true)
+            @RequestParam("file") MultipartFile file) {
+        String fotoUrl = usuariosSistemaService.uploadFoto(id, file);
+        Map<String, String> response = new HashMap<>();
+        response.put("fotoUrl", fotoUrl);
+        response.put("message", "Foto enviada com sucesso");
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/{id}/foto")
+    @Operation(
+            summary = "Obter URL da foto do usuário",
+            description = "Retorna a URL pública da foto do usuário no Supabase Storage",
+            security = @SecurityRequirement(name = "bearerAuth")
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "URL da foto retornada com sucesso"),
+            @ApiResponse(responseCode = "404", description = "Usuário não encontrado ou foto não disponível"),
+            @ApiResponse(responseCode = "403", description = "Acesso negado")
+    })
+    public ResponseEntity<Map<String, String>> obterFoto(
+            @Parameter(description = "ID do usuário do sistema", required = true)
+            @PathVariable UUID id) {
+        String fotoUrl = usuariosSistemaService.obterFotoUrl(id);
+        Map<String, String> response = new HashMap<>();
+        response.put("fotoUrl", fotoUrl);
+        return ResponseEntity.ok(response);
+    }
+
+    @DeleteMapping("/{id}/foto")
+    @Operation(
+            summary = "Deletar foto do usuário",
+            description = "Remove a foto do usuário do Supabase Storage",
+            security = @SecurityRequirement(name = "bearerAuth")
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "204", description = "Foto deletada com sucesso"),
+            @ApiResponse(responseCode = "404", description = "Usuário não encontrado"),
+            @ApiResponse(responseCode = "403", description = "Acesso negado")
+    })
+    public ResponseEntity<Void> deletarFoto(
+            @Parameter(description = "ID do usuário do sistema", required = true)
+            @PathVariable UUID id) {
+        usuariosSistemaService.deletarFoto(id);
         return ResponseEntity.noContent().build();
     }
 }

@@ -37,7 +37,6 @@ public class PacienteRequest {
     private String numeroCarteirinha;
     private LocalDate dataValidadeCarteirinha;
     private String observacoes;
-    private UUID estabelecimentoId;
     private List<UUID> enderecosIds;
 }
 

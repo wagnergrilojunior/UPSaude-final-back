@@ -19,7 +19,7 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 public class MedicosRequest {
-    private UUID estabelecimentoId;
+    private List<UUID> estabelecimentosIds;
     
     @NotBlank(message = "Nome completo é obrigatório")
     @Size(max = 255, message = "Nome completo deve ter no máximo 255 caracteres")
