@@ -5,7 +5,9 @@ services:
     region: oregon
     plan: starter
     dockerfilePath: ./Dockerfile
-    healthCheckPath: /api/actuator/health
+    # Usa o endpoint de liveness (mais leve, apenas ping) para health check rápido
+    # Alternativamente, pode usar /api/actuator/health/liveness
+    healthCheckPath: /api/actuator/health/liveness
     envVars:
       - key: SPRING_PROFILES_ACTIVE
         value: prod
