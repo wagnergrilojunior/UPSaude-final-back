@@ -137,12 +137,14 @@ public class UsuariosSistemaServiceImpl implements UsuariosSistemaService {
         if (request == null) {
             throw new BadRequestException("Dados do usuariossistema são obrigatórios");
         }
-        if (request.getUser() == null) {
+        if (request.getUserId() == null) {
             throw new BadRequestException("ID do usuário Supabase é obrigatório");
         }
-        if (request.getTipoUsuario() == null) {
-            throw new BadRequestException("Tipo de usuário é obrigatório");
+        if (request.getAdminTenant() == null) {
+            throw new BadRequestException("Campo adminTenant é obrigatório");
         }
+        // Se não for admin do tenant, deve ter pelo menos um vínculo com estabelecimento
+        // (validação será feita no controller ao criar vínculos)
     }
 
     private void atualizarDadosUsuariosSistema(UsuariosSistema usuariosSistema, UsuariosSistemaRequest request) {
