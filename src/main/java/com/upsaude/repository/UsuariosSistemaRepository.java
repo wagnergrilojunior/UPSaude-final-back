@@ -60,11 +60,11 @@ public interface UsuariosSistemaRepository extends JpaRepository<UsuariosSistema
     java.util.Optional<UsuariosSistema> findByUserId(@Param("userId") UUID userId);
 
     /**
-     * Busca um usuário do sistema pelo campo 'user' (username).
+     * Busca um usuário do sistema pelo campo 'username'.
      *
-     * @param user Username do usuário
+     * @param username Username do usuário
      * @return usuário do sistema encontrado
      */
-    @Query("SELECT u FROM UsuariosSistema u WHERE u.user = :user AND u.active = true")
-    java.util.Optional<UsuariosSistema> findByUser(@Param("user") String user);
+    @Query("SELECT u FROM UsuariosSistema u WHERE u.username = :username AND u.active = true")
+    java.util.Optional<UsuariosSistema> findByUsername(@Param("username") String username);
 }

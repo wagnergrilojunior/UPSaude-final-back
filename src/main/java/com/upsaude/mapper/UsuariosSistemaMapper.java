@@ -16,8 +16,9 @@ import org.mapstruct.MappingTarget;
 /**
  * Mapper para conversões de UsuariosSistema.
  * Entity ↔ DTO ↔ Request/Response
+ * Relacionamentos são ignorados para evitar dependências circulares
  */
-@Mapper(config = MappingConfig.class, uses = {MedicosMapper.class, PacienteMapper.class, ProfissionaisSaudeMapper.class, TenantMapper.class})
+@Mapper(config = MappingConfig.class)
 public interface UsuariosSistemaMapper extends EntityMapper<UsuariosSistema, UsuariosSistemaDTO> {
 
     /**
@@ -45,6 +46,7 @@ public interface UsuariosSistemaMapper extends EntityMapper<UsuariosSistema, Usu
     @Mapping(target = "paciente", ignore = true)
     @Mapping(target = "profissionalSaude", ignore = true)
     @Mapping(target = "tenant", ignore = true)
+    @Mapping(target = "estabelecimentosVinculados", ignore = true)
     UsuariosSistema fromRequest(UsuariosSistemaRequest request);
 
     /**
@@ -60,10 +62,20 @@ public interface UsuariosSistemaMapper extends EntityMapper<UsuariosSistema, Usu
     @Mapping(target = "paciente", ignore = true)
     @Mapping(target = "profissionalSaude", ignore = true)
     @Mapping(target = "tenant", ignore = true)
+    @Mapping(target = "estabelecimentosVinculados", ignore = true)
     void updateFromRequest(UsuariosSistemaRequest request, @MappingTarget UsuariosSistema entity);
 
     /**
      * Converte Entity para Response.
+     * Relacionamentos complexos são ignorados para evitar carregamento lazy.
      */
+    @Mapping(target = "medico", ignore = true)
+    @Mapping(target = "paciente", ignore = true)
+    @Mapping(target = "profissionalSaude", ignore = true)
+    @Mapping(target = "tenantId", ignore = true)
+    @Mapping(target = "tenantNome", ignore = true)
+    @Mapping(target = "tenantSlug", ignore = true)
+    @Mapping(target = "tipoUsuario", ignore = true)
+    @Mapping(target = "email", ignore = true)
     UsuariosSistemaResponse toResponse(UsuariosSistema entity);
 }

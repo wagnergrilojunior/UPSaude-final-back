@@ -15,7 +15,7 @@ import org.mapstruct.MappingTarget;
  * Mapper para conversões de UsuarioEstabelecimento.
  * Entity ↔ DTO ↔ Request/Response
  */
-@Mapper(config = MappingConfig.class, uses = {EstabelecimentosMapper.class, UsuariosSistemaMapper.class})
+@Mapper(config = MappingConfig.class)
 public interface UsuarioEstabelecimentoMapper extends EntityMapper<UsuarioEstabelecimento, UsuarioEstabelecimentoDTO> {
 
     /**

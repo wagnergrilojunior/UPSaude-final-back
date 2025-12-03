@@ -1,9 +1,18 @@
 package com.upsaude.repository;
 
+import com.upsaude.entity.User;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+
 import java.util.UUID;
 
-import org.springframework.data.jpa.repository.JpaRepository;
+/**
+ * Repositório para User (tabela auth.users do Supabase).
+ *
+ * @author UPSaúde
+ */
+@Repository
+public interface UserRepository extends JpaRepository<User, UUID> {
+    
+}
 
-import com.upsaude.entity.User;
-
-public interface UserRepository extends JpaRepository<User, UUID> {}

@@ -2,143 +2,114 @@ package com.upsaude.service.impl;
 
 import com.upsaude.api.request.UserRequest;
 import com.upsaude.api.response.UserResponse;
+import com.upsaude.dto.UserDTO;
 import com.upsaude.entity.User;
-import com.upsaude.exception.BadRequestException;
-import com.upsaude.exception.NotFoundException;
+import com.upsaude.integration.supabase.SupabaseAuthResponse;
+import com.upsaude.integration.supabase.SupabaseAuthService;
 import com.upsaude.mapper.UserMapper;
 import com.upsaude.repository.UserRepository;
 import com.upsaude.service.UserService;
-import jakarta.transaction.Transactional;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.BeanUtils;
-import org.springframework.data.domain.Page;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.UUID;
 
 /**
- * Implementação do serviço de gerenciamento de User.
+ * Implementação do serviço para operações CRUD de User.
  *
  * @author UPSaúde
  */
-@Slf4j
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
     private final UserMapper userMapper;
+    private final SupabaseAuthService supabaseAuthService;
 
     @Override
     @Transactional
-    @CacheEvict(value = "user", allEntries = true)
     public UserResponse criar(UserRequest request) {
-        log.debug("Criando novo user");
-
-        validarDadosBasicos(request);
-
-        User user = userMapper.fromRequest(request);
-
-        User userSalvo = userRepository.save(user);
-        log.info("User criado com sucesso. ID: {}", userSalvo.getId());
-
-        return userMapper.toResponse(userSalvo);
+        log.info("Criando novo usuário no Supabase Auth via service_role key");
+        
+        // Senha padrão temporária (deve ser alterada pelo usuário no primeiro login)
+        String senhaTemporaria = "Temp@123456";
+        
+        // Criar usuário no Supabase Auth via API Admin
+        SupabaseAuthResponse.User supabaseUser = supabaseAuthService.signUp(
+                request.getEmail(), 
+                senhaTemporaria
+        );
+        
+        log.info("Usuário criado no Supabase Auth com ID: {}", supabaseUser.getId());
+        
+        // Montar response com os dados do Supabase
+        UserResponse response = UserResponse.builder()
+                .id(supabaseUser.getId())
+                .email(supabaseUser.getEmail())
+                .role(supabaseUser.getRole())
+                .build();
+        
+        return response;
     }
 
     @Override
-    @Transactional
-    @Cacheable(value = "user", key = "#id")
+    @Transactional(readOnly = true)
     public UserResponse obterPorId(UUID id) {
-        log.debug("Buscando user por ID: {} (cache miss)", id);
-        if (id == null) {
-            throw new BadRequestException("ID do user é obrigatório");
-        }
-
+        log.info("Buscando user por ID: {}", id);
+        
         User user = userRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("User não encontrado com ID: " + id));
-
+                .orElseThrow(() -> new EntityNotFoundException("User não encontrado com ID: " + id));
+        
         return userMapper.toResponse(user);
     }
 
     @Override
+    @Transactional(readOnly = true)
     public Page<UserResponse> listar(Pageable pageable) {
-        log.debug("Listando Users paginados. Página: {}, Tamanho: {}",
-                pageable.getPageNumber(), pageable.getPageSize());
-
+        log.info("Listando users - página: {}, tamanho: {}", pageable.getPageNumber(), pageable.getPageSize());
+        
         Page<User> users = userRepository.findAll(pageable);
         return users.map(userMapper::toResponse);
     }
 
     @Override
     @Transactional
-    @CacheEvict(value = "user", key = "#id")
     public UserResponse atualizar(UUID id, UserRequest request) {
-        log.debug("Atualizando user. ID: {}", id);
-
-        if (id == null) {
-            throw new BadRequestException("ID do user é obrigatório");
-        }
-
-        validarDadosBasicos(request);
-
-        User userExistente = userRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("User não encontrado com ID: " + id));
-
-        atualizarDadosUser(userExistente, request);
-
-        User userAtualizado = userRepository.save(userExistente);
-        log.info("User atualizado com sucesso. ID: {}", userAtualizado.getId());
-
-        return userMapper.toResponse(userAtualizado);
+        log.info("Atualizando usuário no Supabase Auth via API: {}", id);
+        
+        // Atualizar usuário via API do Supabase Auth (service_role)
+        SupabaseAuthResponse.User supabaseUser = supabaseAuthService.updateUser(id, request.getEmail());
+        
+        log.info("Usuário atualizado no Supabase Auth com sucesso: {}", id);
+        
+        // Montar response com os dados atualizados
+        UserResponse response = UserResponse.builder()
+                .id(supabaseUser.getId())
+                .email(supabaseUser.getEmail())
+                .role(supabaseUser.getRole())
+                .build();
+        
+        return response;
     }
 
     @Override
     @Transactional
-    @CacheEvict(value = "user", key = "#id")
     public void excluir(UUID id) {
-        log.debug("Excluindo user. ID: {}", id);
-
-        if (id == null) {
-            throw new BadRequestException("ID do user é obrigatório");
-        }
-
-        User user = userRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("User não encontrado com ID: " + id));
-
-        // User é uma entidade de autenticação, usa soft delete via deletedAt
-        if (user.getDeletedAt() != null) {
-            throw new BadRequestException("User já está deletado");
-        }
-
-        user.setDeletedAt(java.time.OffsetDateTime.now());
-        userRepository.save(user);
-        log.info("User excluído (soft delete) com sucesso. ID: {}", id);
-    }
-
-    private void validarDadosBasicos(UserRequest request) {
-        if (request == null) {
-            throw new BadRequestException("Dados do user são obrigatórios");
-        }
-    }
-
-    private void atualizarDadosUser(User user, UserRequest request) {
-        User userAtualizado = userMapper.fromRequest(request);
+        log.info("Excluindo usuário no Supabase Auth via API: {}", id);
         
-        // Preserva campos de controle
-        java.util.UUID idOriginal = user.getId();
-        java.time.OffsetDateTime createdAtOriginal = user.getCreatedAt();
-        java.time.OffsetDateTime deletedAtOriginal = user.getDeletedAt();
+        // Deletar usuário via API do Supabase Auth (service_role)
+        supabaseAuthService.deleteUser(id);
         
-        // Copia todas as propriedades do objeto atualizado
-        BeanUtils.copyProperties(userAtualizado, user);
-        
-        // Restaura campos de controle
-        user.setId(idOriginal);
-        user.setCreatedAt(createdAtOriginal);
-        user.setDeletedAt(deletedAtOriginal);
+        log.info("Usuário deletado do Supabase Auth com sucesso: {}", id);
     }
 }
+
