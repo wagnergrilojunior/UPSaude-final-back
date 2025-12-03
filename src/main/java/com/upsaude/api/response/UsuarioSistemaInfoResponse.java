@@ -13,7 +13,7 @@ import java.util.UUID;
 
 /**
  * Informações completas do usuário do sistema para incluir no LoginResponse.
- * Inclui dados de usuarios_sistema, estabelecimentos vinculados e perfis por estabelecimento.
+ * Inclui dados de usuarios_sistema e estabelecimentos vinculados com seus tipos de acesso.
  */
 @Data
 @Builder
@@ -31,33 +31,23 @@ public class UsuarioSistemaInfoResponse {
     private UUID profissionalSaudeId;
     private UUID medicoId;
     private UUID pacienteId;
-    private TipoUsuarioSistemaEnum tipoUsuario;
+    private Boolean adminTenant; // Se true, tem acesso total ao tenant
     private String nomeExibicao;
     private String user; // Username para login alternativo
     private String fotoUrl; // URL da foto no Supabase Storage
     
-    // Lista de estabelecimentos vinculados com seus perfis
-    private List<EstabelecimentoComPerfisResponse> estabelecimentos = new ArrayList<>();
+    // Lista de estabelecimentos vinculados (vazio se adminTenant=true)
+    @lombok.Builder.Default
+    private List<EstabelecimentoVinculoResponse> estabelecimentos = new ArrayList<>();
     
     @Data
     @Builder
     @NoArgsConstructor
     @AllArgsConstructor
-    public static class EstabelecimentoComPerfisResponse {
+    public static class EstabelecimentoVinculoResponse {
         private UUID estabelecimentoId;
         private String estabelecimentoNome;
-        private List<PerfilResponse> perfis = new ArrayList<>();
-    }
-    
-    @Data
-    @Builder
-    @NoArgsConstructor
-    @AllArgsConstructor
-    public static class PerfilResponse {
-        private UUID papelId;
-        private String papelNome;
-        private String papelSlug;
-        private String escopo;
+        private TipoUsuarioSistemaEnum tipoUsuario; // Tipo de acesso neste estabelecimento
     }
 }
 

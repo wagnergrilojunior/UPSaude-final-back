@@ -5,13 +5,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-import com.upsaude.enums.TipoUsuarioSistemaEnum;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EntityListeners;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -81,10 +78,14 @@ public class UsuariosSistema {
     @JoinColumn(name = "paciente_id")
     private Paciente paciente;
 
-    @Enumerated(EnumType.ORDINAL)
-    @Column(name = "tipo_usuario", nullable = false)
-    @NotNull(message = "Tipo de usuário é obrigatório")
-    private TipoUsuarioSistemaEnum tipoUsuario;
+    /**
+     * Indica se o usuário é administrador do tenant.
+     * Se true: tem acesso total ao tenant e todos os estabelecimentos, não precisa de vínculos.
+     * Se false: precisa ter vínculos com estabelecimentos específicos.
+     */
+    @Column(name = "admin_tenant", nullable = false)
+    @NotNull(message = "Admin tenant é obrigatório")
+    private Boolean adminTenant = false;
 
     @Column(name = "nome_exibicao", length = 255)
     private String nomeExibicao;

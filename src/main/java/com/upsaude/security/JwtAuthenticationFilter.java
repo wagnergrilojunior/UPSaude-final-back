@@ -31,7 +31,6 @@ import java.util.Set;
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final SupabaseAuthService supabaseAuthService;
-    private final UserRoleService userRoleService;
     private final UsuariosSistemaRepository usuariosSistemaRepository;
     private static final String BEARER_PREFIX = "Bearer ";
 
@@ -72,28 +71,18 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                     authoritiesSet.add(supabaseRole);
                 }
                 
-                // 2. Busca papéis do sistema (tabela papeis) através do UserRoleService
-                try {
-                    List<GrantedAuthority> systemRoles = userRoleService.getUserAuthorities(user.getId());
-                    for (GrantedAuthority authority : systemRoles) {
-                        authoritiesSet.add(authority.getAuthority());
-                    }
-                } catch (Exception e) {
-                    // Continua mesmo se houver erro ao buscar papéis do sistema
-                }
-                
-                // 3. Adiciona role padrão authenticated se não houver nenhuma role
+                // 2. Adiciona role padrão authenticated se não houver nenhuma role
                 if (authoritiesSet.isEmpty()) {
                     authoritiesSet.add("ROLE_AUTHENTICATED");
                 }
                 
-                // 4. Converte para lista de GrantedAuthority
+                // 3. Converte para lista de GrantedAuthority
                 List<GrantedAuthority> authorities = new ArrayList<>();
                 for (String authority : authoritiesSet) {
                     authorities.add(new SimpleGrantedAuthority(authority));
                 }
                 
-                // 5. Cria o authentication object
+                // 4. Cria o authentication object
                 UsernamePasswordAuthenticationToken authentication = 
                         new UsernamePasswordAuthenticationToken(
                                 user.getId().toString(),
@@ -101,10 +90,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                                 authorities
                         );
                 
-                // 6. Adiciona detalhes do usuário
+                // 5. Adiciona detalhes do usuário
                 authentication.setDetails(user);
                 
-                // 7. Valida se o usuário tem acesso ao sistema (UsuariosSistema criado)
+                // 6. Valida se o usuário tem acesso ao sistema (UsuariosSistema criado)
                 // Exceto para o endpoint de verificar acesso, que precisa ser acessível mesmo sem UsuariosSistema
                 if (!isVerificarAcessoEndpoint(path)) {
                     boolean temAcesso = usuariosSistemaRepository.findByUserId(user.getId())
@@ -119,7 +108,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                     }
                 }
                 
-                // 8. Define o authentication no contexto de segurança
+                // 7. Define o authentication no contexto de segurança
                 SecurityContextHolder.getContext().setAuthentication(authentication);
             } else {
                 SecurityContextHolder.clearContext();
