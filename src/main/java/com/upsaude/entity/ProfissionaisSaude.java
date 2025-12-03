@@ -234,24 +234,6 @@ public class ProfissionaisSaude extends BaseEntity {
     @JoinColumn(name = "endereco_profissional_id")
     private Endereco enderecoProfissional;
 
-    // ========== VÍNCULOS COM ESTABELECIMENTOS ==========
-
-    /**
-     * Vínculos do profissional com estabelecimentos de saúde.
-     * OneToMany bidirecional com cascade completo - JPA gerencia automaticamente.
-     */
-    @OneToMany(mappedBy = "profissional", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<ProfissionalEstabelecimento> vinculosEstabelecimentos = new HashSet<>();
-
-    // ========== VÍNCULOS COM EQUIPES ==========
-
-    /**
-     * Vínculos do profissional com equipes de saúde.
-     * OneToMany bidirecional com cascade completo - JPA gerencia automaticamente.
-     */
-    @OneToMany(mappedBy = "profissional", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<VinculoProfissionalEquipe> vinculosEquipes = new HashSet<>();
-
     // ========== HISTÓRICO DE HABILITAÇÃO ==========
 
     /**

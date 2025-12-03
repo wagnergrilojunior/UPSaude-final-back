@@ -22,9 +22,7 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 /**
  * Entidade que representa um médico.
@@ -57,16 +55,6 @@ public class Medicos extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "especialidade_id")
     private EspecialidadesMedicas especialidade;
-
-    // ========== VÍNCULOS COM ESTABELECIMENTOS ==========
-
-    /**
-     * Vínculos do médico com estabelecimentos de saúde.
-     * Relacionamento OneToMany bidirecional com cascade completo.
-     * O JPA gerencia automaticamente os vínculos quando o médico é salvo/removido.
-     */
-    @OneToMany(mappedBy = "medico", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<MedicoEstabelecimento> vinculosEstabelecimentos = new HashSet<>();
 
     // ========== IDENTIFICAÇÃO BÁSICA ==========
 
