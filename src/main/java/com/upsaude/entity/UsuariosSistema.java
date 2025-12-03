@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.UUID;
 
 import com.upsaude.enums.TipoUsuarioSistemaEnum;
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EntityListeners;
@@ -96,6 +97,10 @@ public class UsuariosSistema {
 
     // ========== RELACIONAMENTOS ==========
     
-    @OneToMany(mappedBy = "usuario", fetch = FetchType.LAZY)
+    /**
+     * Estabelecimentos vinculados ao usuário.
+     * OneToMany bidirecional com cascade completo - JPA gerencia automaticamente.
+     */
+    @OneToMany(mappedBy = "usuario", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     private List<UsuarioEstabelecimento> estabelecimentosVinculados = new ArrayList<>();
 }

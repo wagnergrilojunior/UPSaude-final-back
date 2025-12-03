@@ -2,12 +2,12 @@ package com.upsaude.service.impl;
 
 import com.upsaude.api.request.PacienteRequest;
 import com.upsaude.api.response.PacienteResponse;
-import com.upsaude.entity.Paciente;
+import com.upsaude.entity.*;
 import com.upsaude.exception.BadRequestException;
 import com.upsaude.exception.ConflictException;
 import com.upsaude.exception.NotFoundException;
 import com.upsaude.mapper.PacienteMapper;
-import com.upsaude.repository.PacienteRepository;
+import com.upsaude.repository.*;
 import com.upsaude.service.PacienteService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -35,6 +35,14 @@ public class PacienteServiceImpl implements PacienteService {
 
     private final PacienteRepository pacienteRepository;
     private final PacienteMapper pacienteMapper;
+    
+    // Repositories para entidades relacionadas
+    private final ConvenioRepository convenioRepository;
+    private final DadosSociodemograficosRepository dadosSociodemograficosRepository;
+    private final DadosClinicosBasicosRepository dadosClinicosBasicosRepository;
+    private final ResponsavelLegalRepository responsavelLegalRepository;
+    private final LGPDConsentimentoRepository lgpdConsentimentoRepository;
+    private final IntegracaoGovRepository integracaoGovRepository;
 
     /**
      * {@inheritDoc}
@@ -50,6 +58,9 @@ public class PacienteServiceImpl implements PacienteService {
 
         Paciente paciente = pacienteMapper.fromRequest(request);
         paciente.setActive(true);
+
+        // Processar relacionamentos na ordem correta ANTES de salvar o paciente
+        processarRelacionamentos(paciente, request);
 
         Paciente pacienteSalvo = pacienteRepository.save(paciente);
         log.info("Paciente criado com sucesso. ID: {}", pacienteSalvo.getId());
@@ -108,6 +119,9 @@ public class PacienteServiceImpl implements PacienteService {
         validarCPFUnico(id, request.getCpf());
 
         atualizarDadosPaciente(pacienteExistente, request);
+        
+        // Processar relacionamentos na ordem correta ANTES de salvar o paciente
+        processarRelacionamentos(pacienteExistente, request);
 
         Paciente pacienteAtualizado = pacienteRepository.save(pacienteExistente);
         log.info("Paciente atualizado com sucesso. ID: {}", pacienteAtualizado.getId());
@@ -220,11 +234,112 @@ public class PacienteServiceImpl implements PacienteService {
         paciente.setResponsavelNome(pacienteAtualizado.getResponsavelNome());
         paciente.setResponsavelCpf(pacienteAtualizado.getResponsavelCpf());
         paciente.setResponsavelTelefone(pacienteAtualizado.getResponsavelTelefone());
-        paciente.setConvenio(pacienteAtualizado.getConvenio());
         paciente.setNumeroCarteirinha(pacienteAtualizado.getNumeroCarteirinha());
         paciente.setDataValidadeCarteirinha(pacienteAtualizado.getDataValidadeCarteirinha());
         paciente.setObservacoes(pacienteAtualizado.getObservacoes());
-        paciente.setEnderecos(pacienteAtualizado.getEnderecos());
+        // Relacionamentos serão tratados no método processarRelacionamentos
+    }
+
+    /**
+     * Processa relacionamentos do paciente de forma simplificada.
+     * Com as anotações corretas do JPA (cascade, orphanRemoval), o Hibernate 
+     * gerencia automaticamente a ordem de salvamento e integridade referencial.
+     *
+     * Responsabilidades deste método:
+     * 1. Buscar entidades relacionadas existentes (apenas validação)
+     * 2. Sincronizar relacionamentos bidirecionais
+     * 3. O JPA/Hibernate cuida do resto (ordem, persistência, cascade)
+     *
+     * @param paciente entidade Paciente a ser processada
+     * @param request dados do request com os UUIDs dos relacionamentos
+     */
+    private void processarRelacionamentos(Paciente paciente, PacienteRequest request) {
+        log.debug("Processando relacionamentos do paciente");
+
+        // CONVÊNIO (ManyToOne) - Buscar entidade existente
+        if (request.getConvenio() != null) {
+            Convenio convenio = convenioRepository.findById(request.getConvenio())
+                    .orElseThrow(() -> new NotFoundException("Convênio não encontrado com ID: " + request.getConvenio()));
+            paciente.setConvenio(convenio);
+        }
+
+        // RELACIONAMENTOS OneToOne - Sincronização bidirecional
+        // O JPA com cascade=ALL e orphanRemoval=true gerencia tudo automaticamente
+        
+        processarRelacionamentoOneToOne(
+            request.getDadosSociodemograficos(),
+            dadosSociodemograficosRepository,
+            dados -> {
+                dados.setPaciente(paciente);
+                paciente.setDadosSociodemograficos(dados);
+            },
+            "Dados sociodemográficos"
+        );
+
+        processarRelacionamentoOneToOne(
+            request.getDadosClinicosBasicos(),
+            dadosClinicosBasicosRepository,
+            dados -> {
+                dados.setPaciente(paciente);
+                paciente.setDadosClinicosBasicos(dados);
+            },
+            "Dados clínicos básicos"
+        );
+
+        processarRelacionamentoOneToOne(
+            request.getResponsavelLegal(),
+            responsavelLegalRepository,
+            responsavel -> {
+                responsavel.setPaciente(paciente);
+                paciente.setResponsavelLegal(responsavel);
+            },
+            "Responsável legal"
+        );
+
+        processarRelacionamentoOneToOne(
+            request.getLgpdConsentimento(),
+            lgpdConsentimentoRepository,
+            consentimento -> {
+                consentimento.setPaciente(paciente);
+                paciente.setLgpdConsentimento(consentimento);
+            },
+            "Consentimento LGPD"
+        );
+
+        processarRelacionamentoOneToOne(
+            request.getIntegracaoGov(),
+            integracaoGovRepository,
+            integracao -> {
+                integracao.setPaciente(paciente);
+                paciente.setIntegracaoGov(integracao);
+            },
+            "Integração governamental"
+        );
+
+        log.debug("Relacionamentos processados. JPA gerenciará persistência automaticamente.");
+    }
+
+    /**
+     * Método genérico para processar relacionamentos OneToOne.
+     * Reduz duplicação de código e centraliza a lógica de sincronização.
+     *
+     * @param uuid ID da entidade relacionada
+     * @param repository repository da entidade
+     * @param sincronizador função que sincroniza o relacionamento bidirecional
+     * @param nomeEntidade nome da entidade para mensagens de erro
+     * @param <T> tipo da entidade
+     */
+    private <T> void processarRelacionamentoOneToOne(
+            UUID uuid,
+            org.springframework.data.jpa.repository.JpaRepository<T, UUID> repository,
+            java.util.function.Consumer<T> sincronizador,
+            String nomeEntidade) {
+        
+        if (uuid != null) {
+            T entidade = repository.findById(uuid)
+                    .orElseThrow(() -> new NotFoundException(nomeEntidade + " não encontrado com ID: " + uuid));
+            sincronizador.accept(entidade);
+        }
     }
 }
 

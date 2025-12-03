@@ -3,6 +3,7 @@ package com.upsaude.entity;
 import java.util.ArrayList;
 import java.util.List;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -47,6 +48,10 @@ public class Papeis extends BaseEntityWithoutTenant {
     @Column(name = "papel_do_sistema")
     private Boolean papelDoSistema;
 
-    @OneToMany(mappedBy = "papel", fetch = FetchType.LAZY)
+    /**
+     * Atribuições deste papel a usuários.
+     * OneToMany bidirecional com cascade completo - JPA gerencia automaticamente.
+     */
+    @OneToMany(mappedBy = "papel", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     private List<UsuariosPerfis> atribuicoes = new ArrayList<>();
 }

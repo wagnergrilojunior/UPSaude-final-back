@@ -4,6 +4,7 @@ import com.upsaude.entity.embeddable.ContatoMedico;
 import com.upsaude.entity.embeddable.DadosPessoaisMedico;
 import com.upsaude.entity.embeddable.FormacaoMedico;
 import com.upsaude.entity.embeddable.RegistroProfissionalMedico;
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
@@ -49,13 +50,22 @@ public class Medicos extends BaseEntity {
 
     // ========== RELACIONAMENTOS ==========
 
+    /**
+     * Especialidade médica principal do médico.
+     * Relacionamento ManyToOne - não usa cascade pois especialidades são entidades independentes.
+     */
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "especialidade_id")
     private EspecialidadesMedicas especialidade;
 
     // ========== VÍNCULOS COM ESTABELECIMENTOS ==========
 
-    @OneToMany(mappedBy = "medico", fetch = FetchType.LAZY)
+    /**
+     * Vínculos do médico com estabelecimentos de saúde.
+     * Relacionamento OneToMany bidirecional com cascade completo.
+     * O JPA gerencia automaticamente os vínculos quando o médico é salvo/removido.
+     */
+    @OneToMany(mappedBy = "medico", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<MedicoEstabelecimento> vinculosEstabelecimentos = new HashSet<>();
 
     // ========== IDENTIFICAÇÃO BÁSICA ==========
@@ -87,7 +97,13 @@ public class Medicos extends BaseEntity {
 
     // ========== ENDEREÇOS ==========
 
-    @OneToMany(fetch = FetchType.LAZY)
+    /**
+     * Endereços do médico (consultório, residência, etc).
+     * Relacionamento OneToMany usando JoinTable.
+     * Usa cascade PERSIST e MERGE para gerenciar endereços associados,
+     * mas não remove endereços que podem ser compartilhados.
+     */
+    @OneToMany(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinTable(
         name = "medicos_enderecos",
         schema = "public",
