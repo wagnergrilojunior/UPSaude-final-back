@@ -5,50 +5,30 @@ import com.upsaude.entity.embeddable.ClassificacaoRiscoAtendimento;
 import com.upsaude.entity.embeddable.DiagnosticoAtendimento;
 import com.upsaude.entity.embeddable.InformacoesAtendimento;
 import com.upsaude.entity.embeddable.ProcedimentosRealizadosAtendimento;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-
 import java.time.OffsetDateTime;
 import java.util.UUID;
+import lombok.*;
 
-/**
- * Classe de resposta para Atendimento.
- *
- * @author UPSaúde
- */
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class AtendimentoResponse {
     private UUID id;
-    private UUID estabelecimentoId;
-    private String estabelecimentoNome;
-    private UUID pacienteId;
-    private String pacienteNome;
-    private UUID profissionalId;
-    private String profissionalNome;
-    private UUID especialidadeId;
-    private String especialidadeNome;
-    private UUID equipeSaudeId;
-    private String equipeSaudeNome;
-    private UUID convenioId;
-    private String convenioNome;
-    private UUID cidPrincipalId;
-    private String cidPrincipalCodigo;
-    private String cidPrincipalDescricao;
-    
+    private OffsetDateTime createdAt;
+    private OffsetDateTime updatedAt;
+    private Boolean active;
+    private PacienteResponse paciente;
+    private ProfissionaisSaudeResponse profissional;
+    private EspecialidadesMedicasResponse especialidade;
+    private EquipeSaudeResponse equipeSaude;
+    private ConvenioResponse convenio;
     private InformacoesAtendimento informacoes;
     private AnamneseAtendimento anamnese;
     private DiagnosticoAtendimento diagnostico;
     private ProcedimentosRealizadosAtendimento procedimentosRealizados;
     private ClassificacaoRiscoAtendimento classificacaoRisco;
-    
+    private CidDoencasResponse cidPrincipal;
     private String anotacoes;
     private String observacoesInternas;
-    private OffsetDateTime createdAt;
-    private OffsetDateTime updatedAt;
-    private Boolean active;
 }

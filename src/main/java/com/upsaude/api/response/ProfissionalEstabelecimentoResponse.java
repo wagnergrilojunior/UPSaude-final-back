@@ -1,14 +1,10 @@
 package com.upsaude.api.response;
 
 import com.upsaude.enums.TipoVinculoProfissionalEnum;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 import java.util.UUID;
+import lombok.*;
 
 @Data
 @Builder
@@ -19,10 +15,8 @@ public class ProfissionalEstabelecimentoResponse {
     private OffsetDateTime createdAt;
     private OffsetDateTime updatedAt;
     private Boolean active;
-    private UUID profissionalId;
-    private String profissionalNome;
-    private UUID estabelecimentoId;
-    private String estabelecimentoNome;
+    private ProfissionaisSaudeResponse profissional;
+    private EstabelecimentosResponse estabelecimento;
     private OffsetDateTime dataInicio;
     private OffsetDateTime dataFim;
     private TipoVinculoProfissionalEnum tipoVinculo;
@@ -33,4 +27,3 @@ public class ProfissionalEstabelecimentoResponse {
     private String cargoFuncao;
     private String observacoes;
 }
-

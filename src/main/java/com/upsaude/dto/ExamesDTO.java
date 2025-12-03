@@ -1,8 +1,8 @@
 package com.upsaude.dto;
 
-import lombok.*;
 import java.time.OffsetDateTime;
 import java.util.UUID;
+import lombok.*;
 
 @Data
 @Builder
@@ -10,11 +10,25 @@ import java.util.UUID;
 @AllArgsConstructor
 public class ExamesDTO {
     private UUID id;
-    private UUID estabelecimentoId;
-    private UUID pacienteId;
-    private String tipoExame;
-    private OffsetDateTime dataExame;
-    private String resultados;
+    private OffsetDateTime createdAt;
+    private OffsetDateTime updatedAt;
     private Boolean active;
+    private PacienteDTO paciente;
+    private CatalogoExamesDTO catalogoExame;
+    private AtendimentoDTO atendimento;
+    private ConsultasDTO consulta;
+    private ProfissionaisSaudeDTO profissionalSolicitante;
+    private MedicosDTO medicoSolicitante;
+    private String tipoExame;
+    private String nomeExame;
+    private OffsetDateTime dataSolicitacao;
+    private OffsetDateTime dataExame;
+    private OffsetDateTime dataResultado;
+    private String unidadeLaboratorio;
+    private EstabelecimentosDTO estabelecimentoRealizador;
+    private ProfissionaisSaudeDTO profissionalResponsavel;
+    private MedicosDTO medicoResponsavel;
+    private String resultados;
+    private String laudo;
+    private String observacoes;
 }
-

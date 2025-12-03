@@ -2,13 +2,9 @@ package com.upsaude.api.response;
 
 import com.upsaude.enums.StatusAtivoEnum;
 import com.upsaude.enums.TipoEquipeEnum;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-
 import java.time.OffsetDateTime;
 import java.util.UUID;
+import lombok.*;
 
 @Data
 @Builder
@@ -22,11 +18,9 @@ public class EquipeSaudeResponse {
     private String ine;
     private String nomeReferencia;
     private TipoEquipeEnum tipoEquipe;
-    private UUID estabelecimentoId;
-    private String estabelecimentoNome;
+    private EstabelecimentosResponse estabelecimento;
     private OffsetDateTime dataAtivacao;
     private OffsetDateTime dataInativacao;
     private StatusAtivoEnum status;
     private String observacoes;
 }
-

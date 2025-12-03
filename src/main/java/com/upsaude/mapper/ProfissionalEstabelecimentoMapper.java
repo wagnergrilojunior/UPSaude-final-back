@@ -3,54 +3,61 @@ package com.upsaude.mapper;
 import com.upsaude.api.request.ProfissionalEstabelecimentoRequest;
 import com.upsaude.api.response.ProfissionalEstabelecimentoResponse;
 import com.upsaude.dto.ProfissionalEstabelecimentoDTO;
-import com.upsaude.entity.Estabelecimentos;
 import com.upsaude.entity.ProfissionalEstabelecimento;
+import com.upsaude.entity.Estabelecimentos;
 import com.upsaude.entity.ProfissionaisSaude;
 import com.upsaude.mapper.config.MappingConfig;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
-import org.mapstruct.Named;
+import org.mapstruct.MappingTarget;
 
-import java.util.UUID;
-
-@Mapper(config = MappingConfig.class)
+/**
+ * Mapper para conversões de ProfissionalEstabelecimento.
+ * Entity ↔ DTO ↔ Request/Response
+ */
+@Mapper(config = MappingConfig.class, uses = {EstabelecimentosMapper.class, ProfissionaisSaudeMapper.class})
 public interface ProfissionalEstabelecimentoMapper extends EntityMapper<ProfissionalEstabelecimento, ProfissionalEstabelecimentoDTO> {
 
-    @Mapping(target = "tenant", ignore = true)
-    @Mapping(target = "profissional", source = "profissionalId", qualifiedByName = "profissionalFromId")
-    @Mapping(target = "estabelecimento", source = "estabelecimentoId", qualifiedByName = "estabelecimentoFromId")
+    /**
+     * Converte DTO para Entity.
+     * O campo 'active' é ignorado (gerenciado pelo sistema).
+     */
+    @Mapping(target = "active", ignore = true)
     ProfissionalEstabelecimento toEntity(ProfissionalEstabelecimentoDTO dto);
 
-    @Mapping(target = "profissionalId", source = "profissional.id")
-    @Mapping(target = "estabelecimentoId", source = "estabelecimento.id")
+    /**
+     * Converte Entity para DTO.
+     */
     ProfissionalEstabelecimentoDTO toDTO(ProfissionalEstabelecimento entity);
 
-    @Mapping(target = "tenant", ignore = true)
+    /**
+     * Converte Request para Entity.
+     * Os campos 'id', 'createdAt', 'updatedAt', 'active' são ignorados.
+     * Relacionamentos (UUID) devem ser tratados manualmente no Service.
+     */
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "createdAt", ignore = true)
+    @Mapping(target = "updatedAt", ignore = true)
     @Mapping(target = "active", ignore = true)
-    @Mapping(target = "profissional", source = "profissionalId", qualifiedByName = "profissionalFromId")
-    @Mapping(target = "estabelecimento", source = "estabelecimentoId", qualifiedByName = "estabelecimentoFromId")
+    @Mapping(target = "estabelecimento", ignore = true)
+    @Mapping(target = "profissional", ignore = true)
     ProfissionalEstabelecimento fromRequest(ProfissionalEstabelecimentoRequest request);
 
-    @Mapping(target = "profissionalId", source = "profissional.id")
-    @Mapping(target = "profissionalNome", source = "profissional.nomeCompleto")
-    @Mapping(target = "estabelecimentoId", source = "estabelecimento.id")
-    @Mapping(target = "estabelecimentoNome", source = "estabelecimento.nome")
+    /**
+     * Atualiza Entity existente com dados do Request.
+     * Os campos 'id', 'createdAt', 'updatedAt', 'active' são ignorados.
+     * Relacionamentos (UUID) devem ser tratados manualmente no Service.
+     */
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "createdAt", ignore = true)
+    @Mapping(target = "updatedAt", ignore = true)
+    @Mapping(target = "active", ignore = true)
+    @Mapping(target = "estabelecimento", ignore = true)
+    @Mapping(target = "profissional", ignore = true)
+    void updateFromRequest(ProfissionalEstabelecimentoRequest request, @MappingTarget ProfissionalEstabelecimento entity);
+
+    /**
+     * Converte Entity para Response.
+     */
     ProfissionalEstabelecimentoResponse toResponse(ProfissionalEstabelecimento entity);
-
-    @Named("profissionalFromId")
-    default ProfissionaisSaude profissionalFromId(UUID id) {
-        if (id == null) return null;
-        ProfissionaisSaude p = new ProfissionaisSaude();
-        p.setId(id);
-        return p;
-    }
-
-    @Named("estabelecimentoFromId")
-    default Estabelecimentos estabelecimentoFromId(UUID id) {
-        if (id == null) return null;
-        Estabelecimentos e = new Estabelecimentos();
-        e.setId(id);
-        return e;
-    }
 }
-

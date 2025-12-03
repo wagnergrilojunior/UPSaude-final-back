@@ -154,7 +154,7 @@ public class PreNatalServiceImpl implements PreNatalService {
         if (request == null) {
             throw new BadRequestException("Dados do pré-natal são obrigatórios");
         }
-        if (request.getPacienteId() == null) {
+        if (request.getPaciente() == null) {
             throw new BadRequestException("Paciente é obrigatório");
         }
     }

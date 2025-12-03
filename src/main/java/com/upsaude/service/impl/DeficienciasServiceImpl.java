@@ -127,12 +127,7 @@ public class DeficienciasServiceImpl implements DeficienciasService {
         if (request.getNome() == null || request.getNome().trim().isEmpty()) {
             throw new BadRequestException("Nome da deficiência é obrigatório");
         }
-        if (request.getPermanente() == null) {
-            throw new BadRequestException("Campo permanente é obrigatório");
-        }
-        if (request.getAcompanhamentoContinuo() == null) {
-            throw new BadRequestException("Campo acompanhamentoContinuo é obrigatório");
-        }
+        // permanente e acompanhamentoContinuo não fazem parte do Request
     }
 
     private void atualizarDadosDeficiencias(Deficiencias deficiencias, DeficienciasRequest request) {

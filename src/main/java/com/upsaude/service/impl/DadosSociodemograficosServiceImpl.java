@@ -32,13 +32,13 @@ public class DadosSociodemograficosServiceImpl implements DadosSociodemograficos
     @Transactional
     @CacheEvict(value = "dadossociodemograficos", allEntries = true)
     public DadosSociodemograficosResponse criar(DadosSociodemograficosRequest request) {
-        log.debug("Criando dados sociodemográficos para paciente: {}", request.getPacienteId());
+        log.debug("Criando dados sociodemográficos para paciente: {}", request.getPaciente());
 
-        if (request.getPacienteId() == null) {
+        if (request.getPaciente() == null) {
             throw new BadRequestException("ID do paciente é obrigatório");
         }
 
-        repository.findByPacienteId(request.getPacienteId())
+        repository.findByPacienteId(request.getPaciente())
                 .ifPresent(d -> {
                     throw new ConflictException("Dados sociodemográficos já existem para este paciente");
                 });
@@ -101,8 +101,8 @@ public class DadosSociodemograficosServiceImpl implements DadosSociodemograficos
         DadosSociodemograficos entity = repository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Dados sociodemográficos não encontrados com ID: " + id));
 
-        if (request.getPacienteId() != null && !request.getPacienteId().equals(entity.getPaciente().getId())) {
-            repository.findByPacienteId(request.getPacienteId())
+        if (request.getPaciente() != null && !request.getPaciente().equals(entity.getPaciente().getId())) {
+            repository.findByPacienteId(request.getPaciente())
                     .ifPresent(d -> {
                         if (!d.getId().equals(id)) {
                             throw new ConflictException("Dados sociodemográficos já existem para este paciente");

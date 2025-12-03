@@ -33,9 +33,9 @@ public class ResponsavelLegalServiceImpl implements ResponsavelLegalService {
     @Transactional
     @CacheEvict(value = "responsavellegal", allEntries = true)
     public ResponsavelLegalResponse criar(ResponsavelLegalRequest request) {
-        log.debug("Criando responsável legal para paciente: {}", request.getPacienteId());
+        log.debug("Criando responsável legal para paciente: {}", request.getPaciente());
 
-        if (request.getPacienteId() == null) {
+        if (request.getPaciente() == null) {
             throw new BadRequestException("ID do paciente é obrigatório");
         }
 
@@ -43,7 +43,7 @@ public class ResponsavelLegalServiceImpl implements ResponsavelLegalService {
             throw new BadRequestException("Nome do responsável legal é obrigatório");
         }
 
-        repository.findByPacienteId(request.getPacienteId())
+        repository.findByPacienteId(request.getPaciente())
                 .ifPresent(d -> {
                     throw new ConflictException("Responsável legal já existe para este paciente");
                 });
@@ -114,8 +114,8 @@ public class ResponsavelLegalServiceImpl implements ResponsavelLegalService {
         ResponsavelLegal entity = repository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Responsável legal não encontrado com ID: " + id));
 
-        if (request.getPacienteId() != null && !request.getPacienteId().equals(entity.getPaciente().getId())) {
-            repository.findByPacienteId(request.getPacienteId())
+        if (request.getPaciente() != null && !request.getPaciente().equals(entity.getPaciente().getId())) {
+            repository.findByPacienteId(request.getPaciente())
                     .ifPresent(d -> {
                         if (!d.getId().equals(id)) {
                             throw new ConflictException("Responsável legal já existe para este paciente");

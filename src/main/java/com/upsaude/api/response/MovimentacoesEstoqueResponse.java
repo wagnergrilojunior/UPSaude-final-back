@@ -1,8 +1,8 @@
 package com.upsaude.api.response;
 
-import lombok.*;
 import java.time.OffsetDateTime;
 import java.util.UUID;
+import lombok.*;
 
 @Data
 @Builder
@@ -13,5 +13,10 @@ public class MovimentacoesEstoqueResponse {
     private OffsetDateTime createdAt;
     private OffsetDateTime updatedAt;
     private Boolean active;
+    private EstoquesVacinaResponse estoqueVacina;
+    private String tipoMovimento;
+    private Integer quantidade;
+    private String motivo;
+    private UUID responsavel;
+    private OffsetDateTime dataMovimento;
 }
-

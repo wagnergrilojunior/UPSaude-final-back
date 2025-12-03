@@ -49,23 +49,23 @@ public class EstabelecimentosServiceImpl implements EstabelecimentosService {
         Estabelecimentos estabelecimento = estabelecimentosMapper.fromRequest(request);
         
         // Carrega e valida endereço principal
-        if (request.getEnderecoPrincipalId() != null) {
-            Endereco enderecoPrincipal = enderecoRepository.findById(request.getEnderecoPrincipalId())
-                    .orElseThrow(() -> new NotFoundException("Endereço principal não encontrado com ID: " + request.getEnderecoPrincipalId()));
+        if (request.getEnderecoPrincipal() != null) {
+            Endereco enderecoPrincipal = enderecoRepository.findById(request.getEnderecoPrincipal())
+                    .orElseThrow(() -> new NotFoundException("Endereço principal não encontrado com ID: " + request.getEnderecoPrincipal()));
             estabelecimento.setEnderecoPrincipal(enderecoPrincipal);
         }
 
         // Carrega e valida responsável técnico
-        if (request.getResponsavelTecnicoId() != null) {
-            ProfissionaisSaude responsavelTecnico = profissionaisSaudeRepository.findById(request.getResponsavelTecnicoId())
-                    .orElseThrow(() -> new NotFoundException("Responsável técnico não encontrado com ID: " + request.getResponsavelTecnicoId()));
+        if (request.getResponsavelTecnico() != null) {
+            ProfissionaisSaude responsavelTecnico = profissionaisSaudeRepository.findById(request.getResponsavelTecnico())
+                    .orElseThrow(() -> new NotFoundException("Responsável técnico não encontrado com ID: " + request.getResponsavelTecnico()));
             estabelecimento.setResponsavelTecnico(responsavelTecnico);
         }
 
         // Carrega e valida responsável administrativo
-        if (request.getResponsavelAdministrativoId() != null) {
-            ProfissionaisSaude responsavelAdmin = profissionaisSaudeRepository.findById(request.getResponsavelAdministrativoId())
-                    .orElseThrow(() -> new NotFoundException("Responsável administrativo não encontrado com ID: " + request.getResponsavelAdministrativoId()));
+        if (request.getResponsavelAdministrativo() != null) {
+            ProfissionaisSaude responsavelAdmin = profissionaisSaudeRepository.findById(request.getResponsavelAdministrativo())
+                    .orElseThrow(() -> new NotFoundException("Responsável administrativo não encontrado com ID: " + request.getResponsavelAdministrativo()));
             estabelecimento.setResponsavelAdministrativo(responsavelAdmin);
         }
 
@@ -171,9 +171,9 @@ public class EstabelecimentosServiceImpl implements EstabelecimentosService {
         estabelecimento.setRegistroOficial(request.getRegistroOficial());
 
         // Endereço principal
-        if (request.getEnderecoPrincipalId() != null) {
-            Endereco enderecoPrincipal = enderecoRepository.findById(request.getEnderecoPrincipalId())
-                    .orElseThrow(() -> new NotFoundException("Endereço principal não encontrado com ID: " + request.getEnderecoPrincipalId()));
+        if (request.getEnderecoPrincipal() != null) {
+            Endereco enderecoPrincipal = enderecoRepository.findById(request.getEnderecoPrincipal())
+                    .orElseThrow(() -> new NotFoundException("Endereço principal não encontrado com ID: " + request.getEnderecoPrincipal()));
             estabelecimento.setEnderecoPrincipal(enderecoPrincipal);
         } else {
             estabelecimento.setEnderecoPrincipal(null);
@@ -187,17 +187,17 @@ public class EstabelecimentosServiceImpl implements EstabelecimentosService {
         estabelecimento.setSite(request.getSite());
 
         // Responsáveis
-        if (request.getResponsavelTecnicoId() != null) {
-            ProfissionaisSaude responsavelTecnico = profissionaisSaudeRepository.findById(request.getResponsavelTecnicoId())
-                    .orElseThrow(() -> new NotFoundException("Responsável técnico não encontrado com ID: " + request.getResponsavelTecnicoId()));
+        if (request.getResponsavelTecnico() != null) {
+            ProfissionaisSaude responsavelTecnico = profissionaisSaudeRepository.findById(request.getResponsavelTecnico())
+                    .orElseThrow(() -> new NotFoundException("Responsável técnico não encontrado com ID: " + request.getResponsavelTecnico()));
             estabelecimento.setResponsavelTecnico(responsavelTecnico);
         } else {
             estabelecimento.setResponsavelTecnico(null);
         }
 
-        if (request.getResponsavelAdministrativoId() != null) {
-            ProfissionaisSaude responsavelAdmin = profissionaisSaudeRepository.findById(request.getResponsavelAdministrativoId())
-                    .orElseThrow(() -> new NotFoundException("Responsável administrativo não encontrado com ID: " + request.getResponsavelAdministrativoId()));
+        if (request.getResponsavelAdministrativo() != null) {
+            ProfissionaisSaude responsavelAdmin = profissionaisSaudeRepository.findById(request.getResponsavelAdministrativo())
+                    .orElseThrow(() -> new NotFoundException("Responsável administrativo não encontrado com ID: " + request.getResponsavelAdministrativo()));
             estabelecimento.setResponsavelAdministrativo(responsavelAdmin);
         } else {
             estabelecimento.setResponsavelAdministrativo(null);

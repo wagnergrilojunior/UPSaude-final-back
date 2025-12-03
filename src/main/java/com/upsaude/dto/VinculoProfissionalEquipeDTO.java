@@ -2,13 +2,9 @@ package com.upsaude.dto;
 
 import com.upsaude.enums.StatusAtivoEnum;
 import com.upsaude.enums.TipoVinculoProfissionalEnum;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-
 import java.time.OffsetDateTime;
 import java.util.UUID;
+import lombok.*;
 
 @Data
 @Builder
@@ -16,8 +12,11 @@ import java.util.UUID;
 @AllArgsConstructor
 public class VinculoProfissionalEquipeDTO {
     private UUID id;
-    private UUID profissionalId;
-    private UUID equipeId;
+    private OffsetDateTime createdAt;
+    private OffsetDateTime updatedAt;
+    private Boolean active;
+    private ProfissionaisSaudeDTO profissional;
+    private EquipeSaudeDTO equipe;
     private OffsetDateTime dataInicio;
     private OffsetDateTime dataFim;
     private TipoVinculoProfissionalEnum tipoVinculo;
@@ -25,6 +24,4 @@ public class VinculoProfissionalEquipeDTO {
     private Integer cargaHorariaSemanal;
     private StatusAtivoEnum status;
     private String observacoes;
-    private Boolean active;
 }
-

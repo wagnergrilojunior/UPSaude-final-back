@@ -146,10 +146,10 @@ public class CuidadosEnfermagemServiceImpl implements CuidadosEnfermagemService 
         if (request == null) {
             throw new BadRequestException("Dados do cuidado de enfermagem são obrigatórios");
         }
-        if (request.getPacienteId() == null) {
+        if (request.getPaciente() == null) {
             throw new BadRequestException("Paciente é obrigatório");
         }
-        if (request.getProfissionalId() == null) {
+        if (request.getProfissional() == null) {
             throw new BadRequestException("Profissional é obrigatório");
         }
         if (request.getTipoCuidado() == null) {

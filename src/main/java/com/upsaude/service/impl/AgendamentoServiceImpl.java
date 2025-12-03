@@ -61,12 +61,12 @@ public class AgendamentoServiceImpl implements AgendamentoService {
         Agendamento agendamento = agendamentoMapper.fromRequest(request);
 
         // Carrega e define relacionamentos obrigatórios
-        Paciente paciente = pacienteRepository.findById(request.getPacienteId())
-                .orElseThrow(() -> new NotFoundException("Paciente não encontrado com ID: " + request.getPacienteId()));
+        Paciente paciente = pacienteRepository.findById(request.getPaciente())
+                .orElseThrow(() -> new NotFoundException("Paciente não encontrado com ID: " + request.getPaciente()));
         agendamento.setPaciente(paciente);
 
-        ProfissionaisSaude profissional = profissionaisSaudeRepository.findById(request.getProfissionalId())
-                .orElseThrow(() -> new NotFoundException("Profissional não encontrado com ID: " + request.getProfissionalId()));
+        ProfissionaisSaude profissional = profissionaisSaudeRepository.findById(request.getProfissional())
+                .orElseThrow(() -> new NotFoundException("Profissional não encontrado com ID: " + request.getProfissional()));
         agendamento.setProfissional(profissional);
 
         // Define estabelecimento do profissional (paciente não tem estabelecimento)
@@ -79,27 +79,27 @@ public class AgendamentoServiceImpl implements AgendamentoService {
         }
 
         // Carrega relacionamentos opcionais
-        if (request.getMedicoId() != null) {
-            Medicos medico = medicosRepository.findById(request.getMedicoId())
-                    .orElseThrow(() -> new NotFoundException("Médico não encontrado com ID: " + request.getMedicoId()));
+        if (request.getMedico() != null) {
+            Medicos medico = medicosRepository.findById(request.getMedico())
+                    .orElseThrow(() -> new NotFoundException("Médico não encontrado com ID: " + request.getMedico()));
             agendamento.setMedico(medico);
         }
 
-        if (request.getEspecialidadeId() != null) {
-            EspecialidadesMedicas especialidade = especialidadesMedicasRepository.findById(request.getEspecialidadeId())
-                    .orElseThrow(() -> new NotFoundException("Especialidade não encontrada com ID: " + request.getEspecialidadeId()));
+        if (request.getEspecialidade() != null) {
+            EspecialidadesMedicas especialidade = especialidadesMedicasRepository.findById(request.getEspecialidade())
+                    .orElseThrow(() -> new NotFoundException("Especialidade não encontrada com ID: " + request.getEspecialidade()));
             agendamento.setEspecialidade(especialidade);
         }
 
-        if (request.getConvenioId() != null) {
-            Convenio convenio = convenioRepository.findById(request.getConvenioId())
-                    .orElseThrow(() -> new NotFoundException("Convênio não encontrado com ID: " + request.getConvenioId()));
+        if (request.getConvenio() != null) {
+            Convenio convenio = convenioRepository.findById(request.getConvenio())
+                    .orElseThrow(() -> new NotFoundException("Convênio não encontrado com ID: " + request.getConvenio()));
             agendamento.setConvenio(convenio);
         }
 
-        if (request.getAgendamentoOriginalId() != null) {
-            Agendamento agendamentoOriginal = agendamentoRepository.findById(request.getAgendamentoOriginalId())
-                    .orElseThrow(() -> new NotFoundException("Agendamento original não encontrado com ID: " + request.getAgendamentoOriginalId()));
+        if (request.getAgendamentoOriginal() != null) {
+            Agendamento agendamentoOriginal = agendamentoRepository.findById(request.getAgendamentoOriginal())
+                    .orElseThrow(() -> new NotFoundException("Agendamento original não encontrado com ID: " + request.getAgendamentoOriginal()));
             agendamento.setAgendamentoOriginal(agendamentoOriginal);
         }
 
@@ -345,7 +345,7 @@ public class AgendamentoServiceImpl implements AgendamentoService {
         agendamentoRepository.save(agendamentoOriginal);
 
         // Cria novo agendamento
-        novoAgendamentoRequest.setAgendamentoOriginalId(id);
+        novoAgendamentoRequest.setAgendamentoOriginal(id);
         novoAgendamentoRequest.setStatus(StatusAgendamentoEnum.AGENDADO);
         AgendamentoResponse novoAgendamento = criar(novoAgendamentoRequest);
 
@@ -380,10 +380,10 @@ public class AgendamentoServiceImpl implements AgendamentoService {
         if (request == null) {
             throw new BadRequestException("Dados do agendamento são obrigatórios");
         }
-        if (request.getPacienteId() == null) {
+        if (request.getPaciente() == null) {
             throw new BadRequestException("ID do paciente é obrigatório");
         }
-        if (request.getProfissionalId() == null) {
+        if (request.getProfissional() == null) {
             throw new BadRequestException("ID do profissional é obrigatório");
         }
         if (request.getDataHora() == null) {
@@ -395,13 +395,13 @@ public class AgendamentoServiceImpl implements AgendamentoService {
     }
 
     private void verificarConflitosHorario(AgendamentoRequest request) {
-        if (request.getProfissionalId() != null && request.getDataHora() != null && request.getDataHoraFim() != null) {
+        if (request.getProfissional() != null && request.getDataHora() != null && request.getDataHoraFim() != null) {
             // Verifica se há conflito de horário
             java.util.List<Agendamento> conflitos = agendamentoRepository.findByProfissionalIdAndDataHoraBetween(
-                    request.getProfissionalId(), request.getDataHora(), request.getDataHoraFim());
+                    request.getProfissional(), request.getDataHora(), request.getDataHoraFim());
 
             if (!conflitos.isEmpty()) {
-                log.warn("Conflito de horário detectado para o profissional: {}", request.getProfissionalId());
+                log.warn("Conflito de horário detectado para o profissional: {}", request.getProfissional());
                 // Apenas registra o conflito - a lógica de permitir ou não pode ser feita em outra camada
             }
         }
@@ -440,21 +440,21 @@ public class AgendamentoServiceImpl implements AgendamentoService {
         }
 
         // Atualiza relacionamentos se fornecidos
-        if (request.getMedicoId() != null) {
-            Medicos medico = medicosRepository.findById(request.getMedicoId())
-                    .orElseThrow(() -> new NotFoundException("Médico não encontrado com ID: " + request.getMedicoId()));
+        if (request.getMedico() != null) {
+            Medicos medico = medicosRepository.findById(request.getMedico())
+                    .orElseThrow(() -> new NotFoundException("Médico não encontrado com ID: " + request.getMedico()));
             agendamento.setMedico(medico);
         }
 
-        if (request.getEspecialidadeId() != null) {
-            EspecialidadesMedicas especialidade = especialidadesMedicasRepository.findById(request.getEspecialidadeId())
-                    .orElseThrow(() -> new NotFoundException("Especialidade não encontrada com ID: " + request.getEspecialidadeId()));
+        if (request.getEspecialidade() != null) {
+            EspecialidadesMedicas especialidade = especialidadesMedicasRepository.findById(request.getEspecialidade())
+                    .orElseThrow(() -> new NotFoundException("Especialidade não encontrada com ID: " + request.getEspecialidade()));
             agendamento.setEspecialidade(especialidade);
         }
 
-        if (request.getConvenioId() != null) {
-            Convenio convenio = convenioRepository.findById(request.getConvenioId())
-                    .orElseThrow(() -> new NotFoundException("Convênio não encontrado com ID: " + request.getConvenioId()));
+        if (request.getConvenio() != null) {
+            Convenio convenio = convenioRepository.findById(request.getConvenio())
+                    .orElseThrow(() -> new NotFoundException("Convênio não encontrado com ID: " + request.getConvenio()));
             agendamento.setConvenio(convenio);
         }
 

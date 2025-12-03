@@ -1,8 +1,8 @@
 package com.upsaude.api.response;
 
-import lombok.*;
 import java.time.OffsetDateTime;
 import java.util.UUID;
+import lombok.*;
 
 @Data
 @Builder
@@ -17,4 +17,3 @@ public class EstadosResponse {
     private String nome;
     private String codigoIbge;
 }
-

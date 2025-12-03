@@ -46,9 +46,9 @@ public class DoencasServiceImpl implements DoencasService {
         Doencas doenca = doencasMapper.fromRequest(request);
 
         // Carrega e define CID principal se fornecido
-        if (request.getCidPrincipalId() != null) {
-            CidDoencas cidPrincipal = cidDoencasRepository.findById(request.getCidPrincipalId())
-                    .orElseThrow(() -> new NotFoundException("CID não encontrado com ID: " + request.getCidPrincipalId()));
+        if (request.getCidPrincipal() != null) {
+            CidDoencas cidPrincipal = cidDoencasRepository.findById(request.getCidPrincipal())
+                    .orElseThrow(() -> new NotFoundException("CID não encontrado com ID: " + request.getCidPrincipal()));
             doenca.setCidPrincipal(cidPrincipal);
         }
 
@@ -204,9 +204,9 @@ public class DoencasServiceImpl implements DoencasService {
         }
 
         // Atualiza CID principal se fornecido
-        if (request.getCidPrincipalId() != null) {
-            CidDoencas cidPrincipal = cidDoencasRepository.findById(request.getCidPrincipalId())
-                    .orElseThrow(() -> new NotFoundException("CID não encontrado com ID: " + request.getCidPrincipalId()));
+        if (request.getCidPrincipal() != null) {
+            CidDoencas cidPrincipal = cidDoencasRepository.findById(request.getCidPrincipal())
+                    .orElseThrow(() -> new NotFoundException("CID não encontrado com ID: " + request.getCidPrincipal()));
             doenca.setCidPrincipal(cidPrincipal);
         }
     }

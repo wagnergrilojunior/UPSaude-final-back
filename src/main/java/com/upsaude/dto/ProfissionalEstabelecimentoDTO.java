@@ -1,14 +1,10 @@
 package com.upsaude.dto;
 
 import com.upsaude.enums.TipoVinculoProfissionalEnum;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 import java.util.UUID;
+import lombok.*;
 
 @Data
 @Builder
@@ -16,8 +12,11 @@ import java.util.UUID;
 @AllArgsConstructor
 public class ProfissionalEstabelecimentoDTO {
     private UUID id;
-    private UUID profissionalId;
-    private UUID estabelecimentoId;
+    private OffsetDateTime createdAt;
+    private OffsetDateTime updatedAt;
+    private Boolean active;
+    private ProfissionaisSaudeDTO profissional;
+    private EstabelecimentosDTO estabelecimento;
     private OffsetDateTime dataInicio;
     private OffsetDateTime dataFim;
     private TipoVinculoProfissionalEnum tipoVinculo;
@@ -27,6 +26,4 @@ public class ProfissionalEstabelecimentoDTO {
     private String setorDepartamento;
     private String cargoFuncao;
     private String observacoes;
-    private Boolean active;
 }
-

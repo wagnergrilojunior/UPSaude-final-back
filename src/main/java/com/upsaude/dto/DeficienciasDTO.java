@@ -1,19 +1,21 @@
 package com.upsaude.dto;
 
-import lombok.*;
+import com.upsaude.enums.TipoDeficienciaEnum;
+import java.time.OffsetDateTime;
 import java.util.UUID;
+import lombok.*;
 
-/**
- * DTO (Data Transfer Object) para Deficiências.
- *
- * @author UPSaúde
- */
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class DeficienciasDTO {
     private UUID id;
+    private OffsetDateTime createdAt;
+    private OffsetDateTime updatedAt;
     private Boolean active;
+    private String nome;
+    private String descricao;
+    private TipoDeficienciaEnum tipoDeficiencia;
+    private String cid10Relacionado;
 }
-

@@ -47,13 +47,6 @@ public class CatalogoExamesServiceImpl implements CatalogoExamesService {
         CatalogoExames exame = catalogoExamesMapper.fromRequest(request);
         exame.setActive(true);
 
-        // Carrega e define o estabelecimento se fornecido
-        if (request.getEstabelecimentoId() != null) {
-            Estabelecimentos estabelecimento = estabelecimentosRepository.findById(request.getEstabelecimentoId())
-                    .orElseThrow(() -> new NotFoundException("Estabelecimento não encontrado com ID: " + request.getEstabelecimentoId()));
-            exame.setEstabelecimento(estabelecimento);
-        }
-
         CatalogoExames exameSalvo = catalogoExamesRepository.save(exame);
         log.info("Exame criado no catálogo com sucesso. ID: {}", exameSalvo.getId());
 
@@ -154,13 +147,7 @@ public class CatalogoExamesServiceImpl implements CatalogoExamesService {
         exame.setEstabelecimento(estabelecimentoOriginal);
         exame.setActive(activeOriginal);
         exame.setCreatedAt(createdAtOriginal);
-
-        // Atualiza estabelecimento se fornecido
-        if (request.getEstabelecimentoId() != null) {
-            Estabelecimentos estabelecimento = estabelecimentosRepository.findById(request.getEstabelecimentoId())
-                    .orElseThrow(() -> new NotFoundException("Estabelecimento não encontrado com ID: " + request.getEstabelecimentoId()));
-            exame.setEstabelecimento(estabelecimento);
-        }
+        // Estabelecimento não faz parte do Request
     }
 }
 

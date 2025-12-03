@@ -1,22 +1,17 @@
 package com.upsaude.api.request;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-
 import java.time.OffsetDateTime;
 import java.util.UUID;
+import lombok.*;
 
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class VacinacoesRequest {
-    private UUID estabelecimentoId;
-    private UUID pacienteId;
-    private UUID vacinaId;
-    private UUID fabricanteId;
+    private UUID paciente;
+    private UUID vacina;
+    private UUID fabricante;
     private String lote;
     private Integer numeroDose;
     private OffsetDateTime dataAplicacao;
@@ -25,4 +20,3 @@ public class VacinacoesRequest {
     private String reacaoAdversa;
     private String observacoes;
 }
-

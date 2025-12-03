@@ -52,21 +52,21 @@ public class DoencasPacienteServiceImpl implements DoencasPacienteService {
         DoencasPaciente doencasPaciente = doencasPacienteMapper.fromRequest(request);
 
         // Carrega e define relacionamentos obrigatórios
-        Paciente paciente = pacienteRepository.findById(request.getPacienteId())
-                .orElseThrow(() -> new NotFoundException("Paciente não encontrado com ID: " + request.getPacienteId()));
+        Paciente paciente = pacienteRepository.findById(request.getPaciente())
+                .orElseThrow(() -> new NotFoundException("Paciente não encontrado com ID: " + request.getPaciente()));
         doencasPaciente.setPaciente(paciente);
 
-        Doencas doenca = doencasRepository.findById(request.getDoencaId())
-                .orElseThrow(() -> new NotFoundException("Doença não encontrada com ID: " + request.getDoencaId()));
+        Doencas doenca = doencasRepository.findById(request.getDoenca())
+                .orElseThrow(() -> new NotFoundException("Doença não encontrada com ID: " + request.getDoenca()));
         doencasPaciente.setDoenca(doenca);
 
         // Paciente não possui estabelecimento nem tenant
         // O estabelecimento e tenant devem ser definidos de outra forma se necessário
 
         // Carrega CID principal se fornecido
-        if (request.getCidPrincipalId() != null) {
-            CidDoencas cidPrincipal = cidDoencasRepository.findById(request.getCidPrincipalId())
-                    .orElseThrow(() -> new NotFoundException("CID não encontrado com ID: " + request.getCidPrincipalId()));
+        if (request.getCidPrincipal() != null) {
+            CidDoencas cidPrincipal = cidDoencasRepository.findById(request.getCidPrincipal())
+                    .orElseThrow(() -> new NotFoundException("CID não encontrado com ID: " + request.getCidPrincipal()));
             doencasPaciente.setCidPrincipal(cidPrincipal);
         }
 
@@ -177,10 +177,10 @@ public class DoencasPacienteServiceImpl implements DoencasPacienteService {
         if (request == null) {
             throw new BadRequestException("Dados do registro são obrigatórios");
         }
-        if (request.getPacienteId() == null) {
+        if (request.getPaciente() == null) {
             throw new BadRequestException("ID do paciente é obrigatório");
         }
-        if (request.getDoencaId() == null) {
+        if (request.getDoenca() == null) {
             throw new BadRequestException("ID da doença é obrigatório");
         }
     }
@@ -200,9 +200,9 @@ public class DoencasPacienteServiceImpl implements DoencasPacienteService {
         }
 
         // Atualiza relacionamentos se fornecidos
-        if (request.getCidPrincipalId() != null) {
-            CidDoencas cidPrincipal = cidDoencasRepository.findById(request.getCidPrincipalId())
-                    .orElseThrow(() -> new NotFoundException("CID não encontrado com ID: " + request.getCidPrincipalId()));
+        if (request.getCidPrincipal() != null) {
+            CidDoencas cidPrincipal = cidDoencasRepository.findById(request.getCidPrincipal())
+                    .orElseThrow(() -> new NotFoundException("CID não encontrado com ID: " + request.getCidPrincipal()));
             doencasPaciente.setCidPrincipal(cidPrincipal);
         }
     }

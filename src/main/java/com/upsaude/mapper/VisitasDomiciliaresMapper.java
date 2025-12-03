@@ -3,39 +3,64 @@ package com.upsaude.mapper;
 import com.upsaude.api.request.VisitasDomiciliaresRequest;
 import com.upsaude.api.response.VisitasDomiciliaresResponse;
 import com.upsaude.dto.VisitasDomiciliaresDTO;
-import com.upsaude.entity.Paciente;
 import com.upsaude.entity.VisitasDomiciliares;
+import com.upsaude.entity.EquipeSaude;
+import com.upsaude.entity.Paciente;
+import com.upsaude.entity.ProfissionaisSaude;
 import com.upsaude.mapper.config.MappingConfig;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
-import org.mapstruct.Named;
+import org.mapstruct.MappingTarget;
 
-import java.util.UUID;
-
-@Mapper(config = MappingConfig.class)
+/**
+ * Mapper para conversões de VisitasDomiciliares.
+ * Entity ↔ DTO ↔ Request/Response
+ */
+@Mapper(config = MappingConfig.class, uses = {EquipeSaudeMapper.class, PacienteMapper.class, ProfissionaisSaudeMapper.class})
 public interface VisitasDomiciliaresMapper extends EntityMapper<VisitasDomiciliares, VisitasDomiciliaresDTO> {
 
-    @Mapping(target = "tenant", ignore = true)
-    @Mapping(target = "paciente", source = "pacienteId", qualifiedByName = "pacienteFromId")
+    /**
+     * Converte DTO para Entity.
+     * O campo 'active' é ignorado (gerenciado pelo sistema).
+     */
+    @Mapping(target = "active", ignore = true)
     VisitasDomiciliares toEntity(VisitasDomiciliaresDTO dto);
 
-    @Mapping(target = "pacienteId", source = "paciente.id")
+    /**
+     * Converte Entity para DTO.
+     */
     VisitasDomiciliaresDTO toDTO(VisitasDomiciliares entity);
 
-    @Mapping(target = "tenant", ignore = true)
+    /**
+     * Converte Request para Entity.
+     * Os campos 'id', 'createdAt', 'updatedAt', 'active' são ignorados.
+     * Relacionamentos (UUID) devem ser tratados manualmente no Service.
+     */
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "createdAt", ignore = true)
+    @Mapping(target = "updatedAt", ignore = true)
     @Mapping(target = "active", ignore = true)
-    @Mapping(target = "paciente", source = "pacienteId", qualifiedByName = "pacienteFromId")
+    @Mapping(target = "equipeSaude", ignore = true)
+    @Mapping(target = "paciente", ignore = true)
+    @Mapping(target = "profissional", ignore = true)
     VisitasDomiciliares fromRequest(VisitasDomiciliaresRequest request);
 
-    @Mapping(target = "pacienteId", source = "paciente.id")
+    /**
+     * Atualiza Entity existente com dados do Request.
+     * Os campos 'id', 'createdAt', 'updatedAt', 'active' são ignorados.
+     * Relacionamentos (UUID) devem ser tratados manualmente no Service.
+     */
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "createdAt", ignore = true)
+    @Mapping(target = "updatedAt", ignore = true)
+    @Mapping(target = "active", ignore = true)
+    @Mapping(target = "equipeSaude", ignore = true)
+    @Mapping(target = "paciente", ignore = true)
+    @Mapping(target = "profissional", ignore = true)
+    void updateFromRequest(VisitasDomiciliaresRequest request, @MappingTarget VisitasDomiciliares entity);
+
+    /**
+     * Converte Entity para Response.
+     */
     VisitasDomiciliaresResponse toResponse(VisitasDomiciliares entity);
-
-    @Named("pacienteFromId")
-    default Paciente pacienteFromId(UUID id) {
-        if (id == null) return null;
-        Paciente p = new Paciente();
-        p.setId(id);
-        return p;
-    }
 }
-

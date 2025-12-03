@@ -1,20 +1,11 @@
 package com.upsaude.api.response;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.UUID;
+import lombok.*;
 
-/**
- * Response para dados de Puericultura.
- *
- * @author UPSaúde
- */
 @Data
 @Builder
 @NoArgsConstructor
@@ -24,13 +15,9 @@ public class PuericulturaResponse {
     private OffsetDateTime createdAt;
     private OffsetDateTime updatedAt;
     private Boolean active;
-    
-    private UUID estabelecimentoId;
-    private UUID pacienteId;
-    private UUID profissionalResponsavelId;
-    private UUID equipeSaudeId;
-    
-    // Dados do nascimento
+    private PacienteResponse paciente;
+    private ProfissionaisSaudeResponse profissionalResponsavel;
+    private EquipeSaudeResponse equipeSaude;
     private LocalDate dataNascimento;
     private BigDecimal pesoNascimento;
     private BigDecimal comprimentoNascimento;
@@ -40,20 +27,14 @@ public class PuericulturaResponse {
     private String tipoParto;
     private Integer idadeGestacionalNascimento;
     private Boolean prematuro;
-    
-    // Dados da mãe
     private String nomeMae;
     private String tipoSanguineoMae;
     private Integer numeroConsultasPreNatal;
     private String intercorrenciasGestacao;
-    
-    // Aleitamento
     private Boolean aleitamentoMaternoExclusivo;
     private LocalDate dataInicioAlimentacaoComplementar;
     private LocalDate dataDesmame;
     private String tipoAleitamentoAtual;
-    
-    // Triagem neonatal
     private Boolean testePezinhoRealizado;
     private LocalDate dataTestePezinho;
     private String resultadoTestePezinho;
@@ -69,17 +50,11 @@ public class PuericulturaResponse {
     private Boolean testeLinguinhaRealizado;
     private LocalDate dataTesteLinguinha;
     private String resultadoTesteLinguinha;
-    
-    // Status
     private LocalDate dataInicioAcompanhamento;
-    private Boolean acompanhamentoAtivo;
     private LocalDate dataEncerramento;
     private String motivoEncerramento;
-    
-    // Informações adicionais
     private String antecedentesFamiliares;
     private String alergiasConhecidas;
     private String doencasCronicas;
     private String observacoes;
 }
-

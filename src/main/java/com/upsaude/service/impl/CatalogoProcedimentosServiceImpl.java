@@ -47,13 +47,6 @@ public class CatalogoProcedimentosServiceImpl implements CatalogoProcedimentosSe
         CatalogoProcedimentos procedimento = catalogoProcedimentosMapper.fromRequest(request);
         procedimento.setActive(true);
 
-        // Carrega e define o estabelecimento se fornecido
-        if (request.getEstabelecimentoId() != null) {
-            Estabelecimentos estabelecimento = estabelecimentosRepository.findById(request.getEstabelecimentoId())
-                    .orElseThrow(() -> new NotFoundException("Estabelecimento não encontrado com ID: " + request.getEstabelecimentoId()));
-            procedimento.setEstabelecimento(estabelecimento);
-        }
-
         CatalogoProcedimentos procedimentoSalvo = catalogoProcedimentosRepository.save(procedimento);
         log.info("Procedimento criado no catálogo com sucesso. ID: {}", procedimentoSalvo.getId());
 
@@ -154,13 +147,7 @@ public class CatalogoProcedimentosServiceImpl implements CatalogoProcedimentosSe
         procedimento.setEstabelecimento(estabelecimentoOriginal);
         procedimento.setActive(activeOriginal);
         procedimento.setCreatedAt(createdAtOriginal);
-
-        // Atualiza estabelecimento se fornecido
-        if (request.getEstabelecimentoId() != null) {
-            Estabelecimentos estabelecimento = estabelecimentosRepository.findById(request.getEstabelecimentoId())
-                    .orElseThrow(() -> new NotFoundException("Estabelecimento não encontrado com ID: " + request.getEstabelecimentoId()));
-            procedimento.setEstabelecimento(estabelecimento);
-        }
+        // Estabelecimento não faz parte do Request
     }
 }
 

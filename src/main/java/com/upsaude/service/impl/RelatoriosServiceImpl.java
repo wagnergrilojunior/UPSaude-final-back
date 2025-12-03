@@ -90,12 +90,7 @@ public class RelatoriosServiceImpl implements RelatoriosService {
     }
 
     private long contarAtendimentos(RelatorioEstatisticasRequest request, OffsetDateTime inicio, OffsetDateTime fim) {
-        Pageable pageable = PageRequest.of(0, Integer.MAX_VALUE);
-        if (request.getEstabelecimentoId() != null) {
-            return atendimentoRepository.findByEstabelecimentoIdOrderByInformacoesDataHoraDesc(
-                    request.getEstabelecimentoId(), pageable).getTotalElements();
-        }
-        // Contagem aproximada - buscar todos e filtrar por data
+        // estabelecimento não faz parte do Request - buscar todos e filtrar por data
         return atendimentoRepository.findAll().stream()
                 .filter(a -> a.getInformacoes() != null && 
                            a.getInformacoes().getDataHora() != null &&
@@ -105,20 +100,7 @@ public class RelatoriosServiceImpl implements RelatoriosService {
     }
 
     private long contarConsultas(RelatorioEstatisticasRequest request, OffsetDateTime inicio, OffsetDateTime fim) {
-        // Contagem simplificada - pode ser melhorada com queries customizadas
-        Pageable pageable = PageRequest.of(0, Integer.MAX_VALUE);
-        if (request.getEstabelecimentoId() != null) {
-            return consultasRepository.findByEstabelecimentoIdOrderByInformacoesDataConsultaDesc(
-                    request.getEstabelecimentoId(), pageable).getContent().stream()
-                    .filter(c -> {
-                        if (c.getInformacoes() != null && c.getInformacoes().getDataConsulta() != null) {
-                            OffsetDateTime dataConsulta = c.getInformacoes().getDataConsulta();
-                            return !dataConsulta.isBefore(inicio) && !dataConsulta.isAfter(fim);
-                        }
-                        return false;
-                    })
-                    .count();
-        }
+        // estabelecimento não faz parte do Request - buscar todas e filtrar por data
         return consultasRepository.findAll().stream()
                 .filter(c -> {
                     if (c.getInformacoes() != null && c.getInformacoes().getDataConsulta() != null) {
@@ -134,11 +116,7 @@ public class RelatoriosServiceImpl implements RelatoriosService {
     }
 
     private long contarExames(RelatorioEstatisticasRequest request, OffsetDateTime inicio, OffsetDateTime fim) {
-        if (request.getEstabelecimentoId() != null) {
-            Pageable pageable = PageRequest.of(0, Integer.MAX_VALUE);
-            return examesRepository.findByEstabelecimentoIdOrderByDataExameDesc(
-                    request.getEstabelecimentoId(), pageable).getTotalElements();
-        }
+        // estabelecimento não faz parte do Request - buscar todos e filtrar por data
         return examesRepository.findAll().stream()
                 .filter(e -> e.getDataExame() != null &&
                            !e.getDataExame().isBefore(inicio) &&
@@ -147,12 +125,7 @@ public class RelatoriosServiceImpl implements RelatoriosService {
     }
 
     private long contarAgendamentos(RelatorioEstatisticasRequest request, OffsetDateTime inicio, OffsetDateTime fim) {
-        if (request.getEstabelecimentoId() != null) {
-            Pageable pageable = PageRequest.of(0, Integer.MAX_VALUE);
-            List<Agendamento> agendamentos = agendamentoRepository.findByEstabelecimentoIdAndDataHoraBetweenOrderByDataHoraAsc(
-                    request.getEstabelecimentoId(), inicio, fim, pageable).getContent();
-            return agendamentos.size();
-        }
+        // estabelecimento não faz parte do Request - buscar todos por data
         List<Agendamento> agendamentos = agendamentoRepository.findByDataHoraBetweenOrderByDataHoraAsc(
                 inicio, fim, PageRequest.of(0, Integer.MAX_VALUE)).getContent();
         return agendamentos.size();

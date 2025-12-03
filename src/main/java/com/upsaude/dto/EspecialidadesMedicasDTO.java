@@ -1,12 +1,9 @@
 package com.upsaude.dto;
 
 import com.upsaude.entity.embeddable.ClassificacaoEspecialidadeMedica;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-
+import java.time.OffsetDateTime;
 import java.util.UUID;
+import lombok.*;
 
 @Data
 @Builder
@@ -14,6 +11,9 @@ import java.util.UUID;
 @AllArgsConstructor
 public class EspecialidadesMedicasDTO {
     private UUID id;
+    private OffsetDateTime createdAt;
+    private OffsetDateTime updatedAt;
+    private Boolean active;
     private String nome;
     private String codigo;
     private String nomeCientifico;
@@ -22,5 +22,4 @@ public class EspecialidadesMedicasDTO {
     private String areaAtuacaoDescricao;
     private String requisitosFormacao;
     private String observacoes;
-    private Boolean active;
 }

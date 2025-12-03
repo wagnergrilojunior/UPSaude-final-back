@@ -1,9 +1,9 @@
 package com.upsaude.api.response;
 
 import com.upsaude.enums.TipoExameEnum;
-import lombok.*;
 import java.time.OffsetDateTime;
 import java.util.UUID;
+import lombok.*;
 
 @Data
 @Builder
@@ -18,9 +18,7 @@ public class CatalogoExamesResponse {
     private String nome;
     private String codigo;
     private String descricao;
-    private Boolean requerPreparacao;
     private String instrucoesPreparacao;
     private Integer prazoResultadoDias;
     private String observacoes;
 }
-

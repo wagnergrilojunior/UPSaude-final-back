@@ -4,13 +4,9 @@ import com.upsaude.entity.embeddable.ContatoMedico;
 import com.upsaude.entity.embeddable.DadosPessoaisMedico;
 import com.upsaude.entity.embeddable.FormacaoMedico;
 import com.upsaude.entity.embeddable.RegistroProfissionalMedico;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-
-import java.util.List;
+import java.time.OffsetDateTime;
 import java.util.UUID;
+import lombok.*;
 
 @Data
 @Builder
@@ -18,14 +14,14 @@ import java.util.UUID;
 @AllArgsConstructor
 public class MedicosDTO {
     private UUID id;
-    private List<UUID> estabelecimentosIds;
-    private UUID especialidadeId;
+    private OffsetDateTime createdAt;
+    private OffsetDateTime updatedAt;
+    private Boolean active;
+    private EspecialidadesMedicasDTO especialidade;
     private String nomeCompleto;
     private DadosPessoaisMedico dadosPessoais;
     private RegistroProfissionalMedico registroProfissional;
     private FormacaoMedico formacao;
     private ContatoMedico contato;
-    private List<UUID> enderecosIds;
     private String observacoes;
-    private Boolean active;
 }

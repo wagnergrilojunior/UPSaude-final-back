@@ -1,30 +1,24 @@
 package com.upsaude.dto;
 
 import com.upsaude.enums.TipoPontoEnum;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-
+import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.UUID;
+import lombok.*;
 
-/**
- * DTO (Data Transfer Object) para ControlePonto.
- *
- * @author UPSaúde
- */
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class ControlePontoDTO {
     private UUID id;
-    private UUID estabelecimentoId;
-    private UUID profissionalId;
-    private UUID medicoId;
+    private OffsetDateTime createdAt;
+    private OffsetDateTime updatedAt;
+    private Boolean active;
+    private ProfissionaisSaudeDTO profissional;
+    private MedicosDTO medico;
     private OffsetDateTime dataHora;
-    private java.time.LocalDate dataPonto;
+    private LocalDate dataPonto;
     private TipoPontoEnum tipoPonto;
     private Double latitude;
     private Double longitude;
@@ -34,6 +28,4 @@ public class ControlePontoDTO {
     private Boolean aprovado;
     private UUID aprovadoPor;
     private OffsetDateTime dataAprovacao;
-    private Boolean active;
 }
-

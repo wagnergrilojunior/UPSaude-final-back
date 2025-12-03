@@ -52,19 +52,14 @@ public class DispensacoesMedicamentosServiceImpl implements DispensacoesMedicame
 
         DispensacoesMedicamentos dispensacoesMedicamentos = dispensacoesMedicamentosMapper.fromRequest(request);
 
-        // Carrega e define o estabelecimento
-        Estabelecimentos estabelecimento = estabelecimentosRepository.findById(request.getEstabelecimentoId())
-                .orElseThrow(() -> new NotFoundException("Estabelecimento não encontrado com ID: " + request.getEstabelecimentoId()));
-        dispensacoesMedicamentos.setEstabelecimento(estabelecimento);
-
         // Carrega e define o paciente
-        Paciente paciente = pacienteRepository.findById(request.getPacienteId())
-                .orElseThrow(() -> new NotFoundException("Paciente não encontrado com ID: " + request.getPacienteId()));
+        Paciente paciente = pacienteRepository.findById(request.getPaciente())
+                .orElseThrow(() -> new NotFoundException("Paciente não encontrado com ID: " + request.getPaciente()));
         dispensacoesMedicamentos.setPaciente(paciente);
 
         // Carrega e define o medicamento
-        Medicacao medicacao = medicacaoRepository.findById(request.getMedicamentoId())
-                .orElseThrow(() -> new NotFoundException("Medicamento não encontrado com ID: " + request.getMedicamentoId()));
+        Medicacao medicacao = medicacaoRepository.findById(request.getMedicacao())
+                .orElseThrow(() -> new NotFoundException("Medicamento não encontrado com ID: " + request.getMedicacao()));
         dispensacoesMedicamentos.setMedicacao(medicacao);
 
         dispensacoesMedicamentos.setActive(true);
@@ -161,36 +156,26 @@ public class DispensacoesMedicamentosServiceImpl implements DispensacoesMedicame
         if (request == null) {
             throw new BadRequestException("Dados do dispensacoesmedicamentos são obrigatórios");
         }
-        if (request.getEstabelecimentoId() == null) {
-            throw new BadRequestException("ID do estabelecimento é obrigatório");
-        }
-        if (request.getPacienteId() == null) {
+        if (request.getPaciente() == null) {
             throw new BadRequestException("ID do paciente é obrigatório");
         }
-        if (request.getMedicamentoId() == null) {
+        if (request.getMedicacao() == null) {
             throw new BadRequestException("ID do medicamento é obrigatório");
         }
     }
 
-        private void atualizarDadosDispensacoesMedicamentos(DispensacoesMedicamentos dispensacoesMedicamentos, DispensacoesMedicamentosRequest request) {
-        // Atualiza estabelecimento se fornecido
-        if (request.getEstabelecimentoId() != null) {
-            Estabelecimentos estabelecimento = estabelecimentosRepository.findById(request.getEstabelecimentoId())
-                    .orElseThrow(() -> new NotFoundException("Estabelecimento não encontrado com ID: " + request.getEstabelecimentoId()));
-            dispensacoesMedicamentos.setEstabelecimento(estabelecimento);
-        }
-
+    private void atualizarDadosDispensacoesMedicamentos(DispensacoesMedicamentos dispensacoesMedicamentos, DispensacoesMedicamentosRequest request) {
         // Atualiza paciente se fornecido
-        if (request.getPacienteId() != null) {
-            Paciente paciente = pacienteRepository.findById(request.getPacienteId())
-                    .orElseThrow(() -> new NotFoundException("Paciente não encontrado com ID: " + request.getPacienteId()));
+        if (request.getPaciente() != null) {
+            Paciente paciente = pacienteRepository.findById(request.getPaciente())
+                    .orElseThrow(() -> new NotFoundException("Paciente não encontrado com ID: " + request.getPaciente()));
             dispensacoesMedicamentos.setPaciente(paciente);
         }
 
         // Atualiza medicamento se fornecido
-        if (request.getMedicamentoId() != null) {
-            Medicacao medicacao = medicacaoRepository.findById(request.getMedicamentoId())
-                    .orElseThrow(() -> new NotFoundException("Medicamento não encontrado com ID: " + request.getMedicamentoId()));
+        if (request.getMedicacao() != null) {
+            Medicacao medicacao = medicacaoRepository.findById(request.getMedicacao())
+                    .orElseThrow(() -> new NotFoundException("Medicamento não encontrado com ID: " + request.getMedicacao()));
             dispensacoesMedicamentos.setMedicacao(medicacao);
         }
 

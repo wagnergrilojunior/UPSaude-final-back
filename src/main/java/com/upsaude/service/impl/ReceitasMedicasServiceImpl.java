@@ -58,36 +58,24 @@ public class ReceitasMedicasServiceImpl implements ReceitasMedicasService {
 
         ReceitasMedicas receitasMedicas = receitasMedicasMapper.fromRequest(request);
 
-        // Carrega e define o estabelecimento
-        Estabelecimentos estabelecimento = estabelecimentosRepository.findById(request.getEstabelecimentoId())
-                .orElseThrow(() -> new NotFoundException("Estabelecimento não encontrado com ID: " + request.getEstabelecimentoId()));
-        receitasMedicas.setEstabelecimento(estabelecimento);
-
         // Carrega e define o médico
-        Medicos medico = medicosRepository.findById(request.getMedicoId())
-                .orElseThrow(() -> new NotFoundException("Médico não encontrado com ID: " + request.getMedicoId()));
+        Medicos medico = medicosRepository.findById(request.getMedico())
+                .orElseThrow(() -> new NotFoundException("Médico não encontrado com ID: " + request.getMedico()));
         receitasMedicas.setMedico(medico);
 
         // Carrega e define o paciente
-        Paciente paciente = pacienteRepository.findById(request.getPacienteId())
-                .orElseThrow(() -> new NotFoundException("Paciente não encontrado com ID: " + request.getPacienteId()));
+        Paciente paciente = pacienteRepository.findById(request.getPaciente())
+                .orElseThrow(() -> new NotFoundException("Paciente não encontrado com ID: " + request.getPaciente()));
         receitasMedicas.setPaciente(paciente);
 
         // CID principal é opcional
-        if (request.getCidPrincipalId() != null) {
-            CidDoencas cidPrincipal = cidDoencasRepository.findById(request.getCidPrincipalId())
-                    .orElseThrow(() -> new NotFoundException("CID não encontrado com ID: " + request.getCidPrincipalId()));
+        if (request.getCidPrincipal() != null) {
+            CidDoencas cidPrincipal = cidDoencasRepository.findById(request.getCidPrincipal())
+                    .orElseThrow(() -> new NotFoundException("CID não encontrado com ID: " + request.getCidPrincipal()));
             receitasMedicas.setCidPrincipal(cidPrincipal);
         }
 
-        // Medicamentos são opcionais
-        if (request.getMedicacoesIds() != null && !request.getMedicacoesIds().isEmpty()) {
-            for (UUID medicacaoId : request.getMedicacoesIds()) {
-                Medicacao medicacao = medicacaoRepository.findById(medicacaoId)
-                        .orElseThrow(() -> new NotFoundException("Medicamento não encontrado com ID: " + medicacaoId));
-                receitasMedicas.getMedicacoes().add(medicacao);
-            }
-        }
+        // Medicações são gerenciadas por relacionamento separado
 
         receitasMedicas.setActive(true);
 
@@ -183,13 +171,11 @@ public class ReceitasMedicasServiceImpl implements ReceitasMedicasService {
         if (request == null) {
             throw new BadRequestException("Dados do receitasmedicas são obrigatórios");
         }
-        if (request.getEstabelecimentoId() == null) {
-            throw new BadRequestException("ID do estabelecimento é obrigatório");
-        }
-        if (request.getMedicoId() == null) {
+        // estabelecimento não faz parte do Request
+        if (request.getMedico() == null) {
             throw new BadRequestException("ID do médico é obrigatório");
         }
-        if (request.getPacienteId() == null) {
+        if (request.getPaciente() == null) {
             throw new BadRequestException("ID do paciente é obrigatório");
         }
         if (request.getNumeroReceita() == null || request.getNumeroReceita().trim().isEmpty()) {
@@ -209,46 +195,31 @@ public class ReceitasMedicasServiceImpl implements ReceitasMedicasService {
         }
     }
 
-        private void atualizarDadosReceitasMedicas(ReceitasMedicas receitasMedicas, ReceitasMedicasRequest request) {
-        // Atualiza estabelecimento se fornecido
-        if (request.getEstabelecimentoId() != null) {
-            Estabelecimentos estabelecimento = estabelecimentosRepository.findById(request.getEstabelecimentoId())
-                    .orElseThrow(() -> new NotFoundException("Estabelecimento não encontrado com ID: " + request.getEstabelecimentoId()));
-            receitasMedicas.setEstabelecimento(estabelecimento);
-        }
-
+    private void atualizarDadosReceitasMedicas(ReceitasMedicas receitasMedicas, ReceitasMedicasRequest request) {
         // Atualiza médico se fornecido
-        if (request.getMedicoId() != null) {
-            Medicos medico = medicosRepository.findById(request.getMedicoId())
-                    .orElseThrow(() -> new NotFoundException("Médico não encontrado com ID: " + request.getMedicoId()));
+        if (request.getMedico() != null) {
+            Medicos medico = medicosRepository.findById(request.getMedico())
+                    .orElseThrow(() -> new NotFoundException("Médico não encontrado com ID: " + request.getMedico()));
             receitasMedicas.setMedico(medico);
         }
 
         // Atualiza paciente se fornecido
-        if (request.getPacienteId() != null) {
-            Paciente paciente = pacienteRepository.findById(request.getPacienteId())
-                    .orElseThrow(() -> new NotFoundException("Paciente não encontrado com ID: " + request.getPacienteId()));
+        if (request.getPaciente() != null) {
+            Paciente paciente = pacienteRepository.findById(request.getPaciente())
+                    .orElseThrow(() -> new NotFoundException("Paciente não encontrado com ID: " + request.getPaciente()));
             receitasMedicas.setPaciente(paciente);
         }
 
         // Atualiza CID principal se fornecido
-        if (request.getCidPrincipalId() != null) {
-            CidDoencas cidPrincipal = cidDoencasRepository.findById(request.getCidPrincipalId())
-                    .orElseThrow(() -> new NotFoundException("CID não encontrado com ID: " + request.getCidPrincipalId()));
+        if (request.getCidPrincipal() != null) {
+            CidDoencas cidPrincipal = cidDoencasRepository.findById(request.getCidPrincipal())
+                    .orElseThrow(() -> new NotFoundException("CID não encontrado com ID: " + request.getCidPrincipal()));
             receitasMedicas.setCidPrincipal(cidPrincipal);
         } else {
             receitasMedicas.setCidPrincipal(null);
         }
 
-        // Atualiza medicamentos se fornecido
-        if (request.getMedicacoesIds() != null) {
-            receitasMedicas.getMedicacoes().clear();
-            for (UUID medicacaoId : request.getMedicacoesIds()) {
-                Medicacao medicacao = medicacaoRepository.findById(medicacaoId)
-                        .orElseThrow(() -> new NotFoundException("Medicamento não encontrado com ID: " + medicacaoId));
-                receitasMedicas.getMedicacoes().add(medicacao);
-            }
-        }
+        // Medicações são gerenciadas por relacionamento separado
 
         // Atualiza outros campos
         if (request.getNumeroReceita() != null) {

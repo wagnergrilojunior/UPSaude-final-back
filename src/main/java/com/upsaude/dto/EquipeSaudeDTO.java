@@ -2,13 +2,9 @@ package com.upsaude.dto;
 
 import com.upsaude.enums.StatusAtivoEnum;
 import com.upsaude.enums.TipoEquipeEnum;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-
 import java.time.OffsetDateTime;
 import java.util.UUID;
+import lombok.*;
 
 @Data
 @Builder
@@ -16,14 +12,15 @@ import java.util.UUID;
 @AllArgsConstructor
 public class EquipeSaudeDTO {
     private UUID id;
+    private OffsetDateTime createdAt;
+    private OffsetDateTime updatedAt;
+    private Boolean active;
     private String ine;
     private String nomeReferencia;
     private TipoEquipeEnum tipoEquipe;
-    private UUID estabelecimentoId;
+    private EstabelecimentosDTO estabelecimento;
     private OffsetDateTime dataAtivacao;
     private OffsetDateTime dataInativacao;
     private StatusAtivoEnum status;
     private String observacoes;
-    private Boolean active;
 }
-

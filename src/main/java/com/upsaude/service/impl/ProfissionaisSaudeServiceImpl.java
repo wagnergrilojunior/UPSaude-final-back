@@ -50,12 +50,6 @@ public class ProfissionaisSaudeServiceImpl implements ProfissionaisSaudeService 
         ProfissionaisSaude profissional = profissionaisSaudeMapper.fromRequest(request);
         profissional.setActive(true);
 
-        // Carregar especialidades do banco de dados
-        if (request.getEspecialidadesIds() != null && !request.getEspecialidadesIds().isEmpty()) {
-            List<EspecialidadesMedicas> especialidades = especialidadesMedicasRepository.findAllById(request.getEspecialidadesIds());
-            profissional.setEspecialidades(especialidades);
-        }
-
         ProfissionaisSaude profissionalSalvo = profissionaisSaudeRepository.save(profissional);
         log.info("Profissional de saúde criado com sucesso. ID: {}", profissionalSalvo.getId());
 
@@ -160,9 +154,9 @@ public class ProfissionaisSaudeServiceImpl implements ProfissionaisSaudeService 
         }
 
         // Validar unicidade de registro profissional (registro + conselho + UF)
-        if (request.getRegistroProfissional() != null && request.getConselhoId() != null && request.getUfRegistro() != null) {
+        if (request.getRegistroProfissional() != null && request.getConselho() != null && request.getUfRegistro() != null) {
             if (profissionaisSaudeRepository.existsByRegistroProfissionalAndConselhoIdAndUfRegistro(
-                    request.getRegistroProfissional(), request.getConselhoId(), request.getUfRegistro())) {
+                    request.getRegistroProfissional(), request.getConselho(), request.getUfRegistro())) {
                 throw new BadRequestException("Já existe um profissional cadastrado com o registro profissional, conselho e UF informados");
             }
         }
@@ -206,14 +200,7 @@ public class ProfissionaisSaudeServiceImpl implements ProfissionaisSaudeService 
         profissional.setObservacoes(profissionalAtualizado.getObservacoes());
 
         // Atualizar especialidades
-        if (request.getEspecialidadesIds() != null) {
-            if (request.getEspecialidadesIds().isEmpty()) {
-                profissional.setEspecialidades(new ArrayList<>());
-            } else {
-                List<EspecialidadesMedicas> especialidades = especialidadesMedicasRepository.findAllById(request.getEspecialidadesIds());
-                profissional.setEspecialidades(especialidades);
-            }
-        }
+        // Especialidades são gerenciadas por relacionamento separado
     }
 }
 

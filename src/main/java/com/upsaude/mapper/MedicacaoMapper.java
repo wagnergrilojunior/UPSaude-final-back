@@ -3,48 +3,58 @@ package com.upsaude.mapper;
 import com.upsaude.api.request.MedicacaoRequest;
 import com.upsaude.api.response.MedicacaoResponse;
 import com.upsaude.dto.MedicacaoDTO;
-import com.upsaude.entity.FabricantesMedicamento;
 import com.upsaude.entity.Medicacao;
+import com.upsaude.entity.FabricantesMedicamento;
 import com.upsaude.mapper.config.MappingConfig;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
-import org.mapstruct.Named;
-
-import java.util.UUID;
+import org.mapstruct.MappingTarget;
 
 /**
- * Mapper para conversão entre entidades, DTOs, Requests e Responses de Medicações.
- *
- * @author UPSaúde
+ * Mapper para conversões de Medicacao.
+ * Entity ↔ DTO ↔ Request/Response
  */
-@Mapper(config = MappingConfig.class)
+@Mapper(config = MappingConfig.class, uses = {FabricantesMedicamentoMapper.class})
 public interface MedicacaoMapper extends EntityMapper<Medicacao, MedicacaoDTO> {
 
-    @Mapping(target = "fabricanteEntity", source = "fabricanteId", qualifiedByName = "fabricanteFromId")
+    /**
+     * Converte DTO para Entity.
+     * O campo 'active' é ignorado (gerenciado pelo sistema).
+     */
+    @Mapping(target = "active", ignore = true)
     Medicacao toEntity(MedicacaoDTO dto);
 
-    @Mapping(target = "fabricanteId", source = "fabricanteEntity.id")
+    /**
+     * Converte Entity para DTO.
+     */
     MedicacaoDTO toDTO(Medicacao entity);
 
+    /**
+     * Converte Request para Entity.
+     * Os campos 'id', 'createdAt', 'updatedAt', 'active' são ignorados.
+     * Relacionamentos (UUID) devem ser tratados manualmente no Service.
+     */
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "createdAt", ignore = true)
+    @Mapping(target = "updatedAt", ignore = true)
     @Mapping(target = "active", ignore = true)
-    @Mapping(target = "fabricanteEntity", source = "fabricanteId", qualifiedByName = "fabricanteFromId")
+    @Mapping(target = "fabricanteEntity", ignore = true)
     Medicacao fromRequest(MedicacaoRequest request);
 
-    @Mapping(target = "fabricanteId", source = "fabricanteEntity.id")
-    @Mapping(target = "fabricanteNome", source = "fabricanteEntity", qualifiedByName = "fabricanteNome")
+    /**
+     * Atualiza Entity existente com dados do Request.
+     * Os campos 'id', 'createdAt', 'updatedAt', 'active' são ignorados.
+     * Relacionamentos (UUID) devem ser tratados manualmente no Service.
+     */
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "createdAt", ignore = true)
+    @Mapping(target = "updatedAt", ignore = true)
+    @Mapping(target = "active", ignore = true)
+    @Mapping(target = "fabricanteEntity", ignore = true)
+    void updateFromRequest(MedicacaoRequest request, @MappingTarget Medicacao entity);
+
+    /**
+     * Converte Entity para Response.
+     */
     MedicacaoResponse toResponse(Medicacao entity);
-
-    @Named("fabricanteFromId")
-    default FabricantesMedicamento fabricanteFromId(UUID id) {
-        if (id == null) return null;
-        FabricantesMedicamento f = new FabricantesMedicamento();
-        f.setId(id);
-        return f;
-    }
-
-    @Named("fabricanteNome")
-    default String fabricanteNome(FabricantesMedicamento fabricante) {
-        if (fabricante == null) return null;
-        return fabricante.getNome();
-    }
 }

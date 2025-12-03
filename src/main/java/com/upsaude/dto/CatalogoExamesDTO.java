@@ -1,8 +1,9 @@
 package com.upsaude.dto;
 
 import com.upsaude.enums.TipoExameEnum;
-import lombok.*;
+import java.time.OffsetDateTime;
 import java.util.UUID;
+import lombok.*;
 
 @Data
 @Builder
@@ -10,14 +11,14 @@ import java.util.UUID;
 @AllArgsConstructor
 public class CatalogoExamesDTO {
     private UUID id;
+    private OffsetDateTime createdAt;
+    private OffsetDateTime updatedAt;
+    private Boolean active;
     private TipoExameEnum tipoExame;
     private String nome;
     private String codigo;
     private String descricao;
-    private Boolean requerPreparacao;
     private String instrucoesPreparacao;
     private Integer prazoResultadoDias;
     private String observacoes;
-    private Boolean active;
 }
-

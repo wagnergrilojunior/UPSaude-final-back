@@ -3,86 +3,64 @@ package com.upsaude.mapper;
 import com.upsaude.api.request.PuericulturaRequest;
 import com.upsaude.api.response.PuericulturaResponse;
 import com.upsaude.dto.PuericulturaDTO;
-import com.upsaude.entity.Estabelecimentos;
+import com.upsaude.entity.Puericultura;
 import com.upsaude.entity.EquipeSaude;
 import com.upsaude.entity.Paciente;
 import com.upsaude.entity.ProfissionaisSaude;
-import com.upsaude.entity.Puericultura;
 import com.upsaude.mapper.config.MappingConfig;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
-import org.mapstruct.Named;
-
-import java.util.UUID;
+import org.mapstruct.MappingTarget;
 
 /**
- * Mapper para conversão entre Puericultura entity, DTO, Request e Response.
- *
- * @author UPSaúde
+ * Mapper para conversões de Puericultura.
+ * Entity ↔ DTO ↔ Request/Response
  */
-@Mapper(config = MappingConfig.class)
+@Mapper(config = MappingConfig.class, uses = {EquipeSaudeMapper.class, PacienteMapper.class, ProfissionaisSaudeMapper.class})
 public interface PuericulturaMapper extends EntityMapper<Puericultura, PuericulturaDTO> {
 
-    @Mapping(target = "tenant", ignore = true)
-    @Mapping(target = "estabelecimento", source = "estabelecimentoId", qualifiedByName = "estabelecimentoFromId")
-    @Mapping(target = "paciente", source = "pacienteId", qualifiedByName = "pacienteFromId")
-    @Mapping(target = "profissionalResponsavel", source = "profissionalResponsavelId", qualifiedByName = "profissionalFromId")
-    @Mapping(target = "equipeSaude", source = "equipeSaudeId", qualifiedByName = "equipeFromId")
+    /**
+     * Converte DTO para Entity.
+     * O campo 'active' é ignorado (gerenciado pelo sistema).
+     */
+    @Mapping(target = "active", ignore = true)
     Puericultura toEntity(PuericulturaDTO dto);
 
-    @Mapping(target = "estabelecimentoId", source = "estabelecimento.id")
-    @Mapping(target = "pacienteId", source = "paciente.id")
-    @Mapping(target = "profissionalResponsavelId", source = "profissionalResponsavel.id")
-    @Mapping(target = "equipeSaudeId", source = "equipeSaude.id")
+    /**
+     * Converte Entity para DTO.
+     */
     PuericulturaDTO toDTO(Puericultura entity);
 
+    /**
+     * Converte Request para Entity.
+     * Os campos 'id', 'createdAt', 'updatedAt', 'active' são ignorados.
+     * Relacionamentos (UUID) devem ser tratados manualmente no Service.
+     */
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
-    @Mapping(target = "tenant", ignore = true)
     @Mapping(target = "active", ignore = true)
-    @Mapping(target = "estabelecimento", source = "estabelecimentoId", qualifiedByName = "estabelecimentoFromId")
-    @Mapping(target = "paciente", source = "pacienteId", qualifiedByName = "pacienteFromId")
-    @Mapping(target = "profissionalResponsavel", source = "profissionalResponsavelId", qualifiedByName = "profissionalFromId")
-    @Mapping(target = "equipeSaude", source = "equipeSaudeId", qualifiedByName = "equipeFromId")
+    @Mapping(target = "equipeSaude", ignore = true)
+    @Mapping(target = "paciente", ignore = true)
+    @Mapping(target = "profissionalResponsavel", ignore = true)
     Puericultura fromRequest(PuericulturaRequest request);
 
-    @Mapping(target = "estabelecimentoId", source = "estabelecimento.id")
-    @Mapping(target = "pacienteId", source = "paciente.id")
-    @Mapping(target = "profissionalResponsavelId", source = "profissionalResponsavel.id")
-    @Mapping(target = "equipeSaudeId", source = "equipeSaude.id")
+    /**
+     * Atualiza Entity existente com dados do Request.
+     * Os campos 'id', 'createdAt', 'updatedAt', 'active' são ignorados.
+     * Relacionamentos (UUID) devem ser tratados manualmente no Service.
+     */
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "createdAt", ignore = true)
+    @Mapping(target = "updatedAt", ignore = true)
+    @Mapping(target = "active", ignore = true)
+    @Mapping(target = "equipeSaude", ignore = true)
+    @Mapping(target = "paciente", ignore = true)
+    @Mapping(target = "profissionalResponsavel", ignore = true)
+    void updateFromRequest(PuericulturaRequest request, @MappingTarget Puericultura entity);
+
+    /**
+     * Converte Entity para Response.
+     */
     PuericulturaResponse toResponse(Puericultura entity);
-
-    @Named("estabelecimentoFromId")
-    default Estabelecimentos estabelecimentoFromId(UUID id) {
-        if (id == null) return null;
-        Estabelecimentos e = new Estabelecimentos();
-        e.setId(id);
-        return e;
-    }
-
-    @Named("pacienteFromId")
-    default Paciente pacienteFromId(UUID id) {
-        if (id == null) return null;
-        Paciente p = new Paciente();
-        p.setId(id);
-        return p;
-    }
-
-    @Named("profissionalFromId")
-    default ProfissionaisSaude profissionalFromId(UUID id) {
-        if (id == null) return null;
-        ProfissionaisSaude p = new ProfissionaisSaude();
-        p.setId(id);
-        return p;
-    }
-
-    @Named("equipeFromId")
-    default EquipeSaude equipeFromId(UUID id) {
-        if (id == null) return null;
-        EquipeSaude e = new EquipeSaude();
-        e.setId(id);
-        return e;
-    }
 }
-
