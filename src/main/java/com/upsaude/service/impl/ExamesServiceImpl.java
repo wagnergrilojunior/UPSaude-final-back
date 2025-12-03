@@ -50,13 +50,15 @@ public class ExamesServiceImpl implements ExamesService {
         Exames exames = examesMapper.fromRequest(request);
 
         // Carrega e define o estabelecimento
-        Estabelecimentos estabelecimento = estabelecimentosRepository.findById(request.getEstabelecimentoId())
-                .orElseThrow(() -> new NotFoundException("Estabelecimento não encontrado com ID: " + request.getEstabelecimentoId()));
-        exames.setEstabelecimento(estabelecimento);
+        if (request.getEstabelecimentoRealizador() != null) {
+            Estabelecimentos estabelecimento = estabelecimentosRepository.findById(request.getEstabelecimentoRealizador())
+                    .orElseThrow(() -> new NotFoundException("Estabelecimento não encontrado com ID: " + request.getEstabelecimentoRealizador()));
+            exames.setEstabelecimentoRealizador(estabelecimento);
+        }
 
         // Carrega e define o paciente
-        Paciente paciente = pacienteRepository.findById(request.getPacienteId())
-                .orElseThrow(() -> new NotFoundException("Paciente não encontrado com ID: " + request.getPacienteId()));
+        Paciente paciente = pacienteRepository.findById(request.getPaciente())
+                .orElseThrow(() -> new NotFoundException("Paciente não encontrado com ID: " + request.getPaciente()));
         exames.setPaciente(paciente);
 
         exames.setActive(true);
@@ -153,26 +155,26 @@ public class ExamesServiceImpl implements ExamesService {
         if (request == null) {
             throw new BadRequestException("Dados do exames são obrigatórios");
         }
-        if (request.getEstabelecimentoId() == null) {
+        if (request.getEstabelecimentoRealizador() == null) {
             throw new BadRequestException("ID do estabelecimento é obrigatório");
         }
-        if (request.getPacienteId() == null) {
+        if (request.getPaciente() == null) {
             throw new BadRequestException("ID do paciente é obrigatório");
         }
     }
 
         private void atualizarDadosExames(Exames exames, ExamesRequest request) {
         // Atualiza estabelecimento se fornecido
-        if (request.getEstabelecimentoId() != null) {
-            Estabelecimentos estabelecimento = estabelecimentosRepository.findById(request.getEstabelecimentoId())
-                    .orElseThrow(() -> new NotFoundException("Estabelecimento não encontrado com ID: " + request.getEstabelecimentoId()));
+        if (request.getEstabelecimentoRealizador() != null) {
+            Estabelecimentos estabelecimento = estabelecimentosRepository.findById(request.getEstabelecimentoRealizador())
+                    .orElseThrow(() -> new NotFoundException("Estabelecimento não encontrado com ID: " + request.getEstabelecimentoRealizador()));
             exames.setEstabelecimento(estabelecimento);
         }
 
         // Atualiza paciente se fornecido
-        if (request.getPacienteId() != null) {
-            Paciente paciente = pacienteRepository.findById(request.getPacienteId())
-                    .orElseThrow(() -> new NotFoundException("Paciente não encontrado com ID: " + request.getPacienteId()));
+        if (request.getPaciente() != null) {
+            Paciente paciente = pacienteRepository.findById(request.getPaciente())
+                    .orElseThrow(() -> new NotFoundException("Paciente não encontrado com ID: " + request.getPaciente()));
             exames.setPaciente(paciente);
         }
 

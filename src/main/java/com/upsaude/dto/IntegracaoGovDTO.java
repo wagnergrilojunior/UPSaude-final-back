@@ -1,12 +1,10 @@
 package com.upsaude.dto;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.util.UUID;
+import lombok.*;
 
 @Data
 @Builder
@@ -14,7 +12,10 @@ import java.util.UUID;
 @AllArgsConstructor
 public class IntegracaoGovDTO {
     private UUID id;
-    private UUID pacienteId;
+    private OffsetDateTime createdAt;
+    private OffsetDateTime updatedAt;
+    private Boolean active;
+    private PacienteDTO paciente;
     private UUID uuidRnds;
     private String idIntegracaoGov;
     private LocalDateTime dataSincronizacaoGov;
@@ -22,6 +23,4 @@ public class IntegracaoGovDTO {
     private String microarea;
     private String cnesEstabelecimentoOrigem;
     private String origemCadastro;
-    private Boolean active;
 }
-

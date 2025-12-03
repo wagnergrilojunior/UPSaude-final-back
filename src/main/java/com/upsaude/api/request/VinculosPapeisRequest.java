@@ -1,19 +1,15 @@
 package com.upsaude.api.request;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-
+import java.time.OffsetDateTime;
 import java.util.UUID;
+import lombok.*;
 
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class VinculosPapeisRequest {
-    private UUID estabelecimentoId;
-    private UUID departamentoId;
-    private UUID papelId;
+    private UUID estabelecimento;
+    private UUID departamento;
+    private UUID papel;
 }
-

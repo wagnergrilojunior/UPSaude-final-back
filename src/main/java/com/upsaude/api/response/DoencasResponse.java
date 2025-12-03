@@ -4,13 +4,9 @@ import com.upsaude.entity.embeddable.ClassificacaoDoenca;
 import com.upsaude.entity.embeddable.EpidemiologiaDoenca;
 import com.upsaude.entity.embeddable.SintomasDoenca;
 import com.upsaude.entity.embeddable.TratamentoPadraoDoenca;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-
 import java.time.OffsetDateTime;
 import java.util.UUID;
+import lombok.*;
 
 @Data
 @Builder
@@ -25,9 +21,7 @@ public class DoencasResponse {
     private String nomeCientifico;
     private String codigoInterno;
     private ClassificacaoDoenca classificacao;
-    private UUID cidPrincipalId;
-    private String cidPrincipalCodigo;
-    private String cidPrincipalDescricao;
+    private CidDoencasResponse cidPrincipal;
     private SintomasDoenca sintomas;
     private TratamentoPadraoDoenca tratamentoPadrao;
     private EpidemiologiaDoenca epidemiologia;
@@ -37,4 +31,3 @@ public class DoencasResponse {
     private String prognostico;
     private String observacoes;
 }
-

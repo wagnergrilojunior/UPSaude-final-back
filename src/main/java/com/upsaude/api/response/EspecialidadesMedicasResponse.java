@@ -1,13 +1,9 @@
 package com.upsaude.api.response;
 
 import com.upsaude.entity.embeddable.ClassificacaoEspecialidadeMedica;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-
 import java.time.OffsetDateTime;
 import java.util.UUID;
+import lombok.*;
 
 @Data
 @Builder

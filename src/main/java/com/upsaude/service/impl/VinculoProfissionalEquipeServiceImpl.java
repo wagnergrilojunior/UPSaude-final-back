@@ -50,11 +50,11 @@ public class VinculoProfissionalEquipeServiceImpl implements VinculoProfissional
         validarDadosBasicos(request);
         validarIntegridade(request, null);
 
-        ProfissionaisSaude profissional = profissionaisSaudeRepository.findById(request.getProfissionalId())
-                .orElseThrow(() -> new NotFoundException("Profissional não encontrado com ID: " + request.getProfissionalId()));
+        ProfissionaisSaude profissional = profissionaisSaudeRepository.findById(request.getProfissional())
+                .orElseThrow(() -> new NotFoundException("Profissional não encontrado com ID: " + request.getProfissional()));
 
-        EquipeSaude equipe = equipeSaudeRepository.findById(request.getEquipeId())
-                .orElseThrow(() -> new NotFoundException("Equipe não encontrada com ID: " + request.getEquipeId()));
+        EquipeSaude equipe = equipeSaudeRepository.findById(request.getEquipe())
+                .orElseThrow(() -> new NotFoundException("Equipe não encontrada com ID: " + request.getEquipe()));
 
         // Valida se o profissional está ativo e habilitado
         if (profissional.getStatusRegistro() == null || profissional.getStatusRegistro().isSuspenso() || profissional.getStatusRegistro().isInativo()) {
@@ -169,11 +169,11 @@ public class VinculoProfissionalEquipeServiceImpl implements VinculoProfissional
         VinculoProfissionalEquipe vinculoExistente = vinculoRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Vínculo não encontrado com ID: " + id));
 
-        ProfissionaisSaude profissional = profissionaisSaudeRepository.findById(request.getProfissionalId())
-                .orElseThrow(() -> new NotFoundException("Profissional não encontrado com ID: " + request.getProfissionalId()));
+        ProfissionaisSaude profissional = profissionaisSaudeRepository.findById(request.getProfissional())
+                .orElseThrow(() -> new NotFoundException("Profissional não encontrado com ID: " + request.getProfissional()));
 
-        EquipeSaude equipe = equipeSaudeRepository.findById(request.getEquipeId())
-                .orElseThrow(() -> new NotFoundException("Equipe não encontrada com ID: " + request.getEquipeId()));
+        EquipeSaude equipe = equipeSaudeRepository.findById(request.getEquipe())
+                .orElseThrow(() -> new NotFoundException("Equipe não encontrada com ID: " + request.getEquipe()));
 
         // Valida se o profissional está ativo e habilitado
         if (profissional.getStatusRegistro() == null || profissional.getStatusRegistro().isSuspenso() || profissional.getStatusRegistro().isInativo()) {
@@ -227,7 +227,7 @@ public class VinculoProfissionalEquipeServiceImpl implements VinculoProfissional
     private void validarIntegridade(VinculoProfissionalEquipeRequest request, UUID currentId) {
         // Valida se já existe vínculo ativo entre o profissional e a equipe
         Optional<VinculoProfissionalEquipe> existingVinculo = vinculoRepository
-                .findByProfissionalIdAndEquipeId(request.getProfissionalId(), request.getEquipeId());
+                .findByProfissionalIdAndEquipeId(request.getProfissional(), request.getEquipe());
 
         if (existingVinculo.isPresent() && (currentId == null || !existingVinculo.get().getId().equals(currentId))) {
             throw new BadRequestException("Já existe um vínculo ativo entre este profissional e esta equipe.");

@@ -1,10 +1,9 @@
 package com.upsaude.dto;
 
 import com.upsaude.enums.StatusReceitaEnum;
-import lombok.*;
 import java.time.OffsetDateTime;
-import java.util.List;
 import java.util.UUID;
+import lombok.*;
 
 @Data
 @Builder
@@ -12,9 +11,11 @@ import java.util.UUID;
 @AllArgsConstructor
 public class ReceitasMedicasDTO {
     private UUID id;
-    private UUID estabelecimentoId;
-    private UUID medicoId;
-    private UUID pacienteId;
+    private OffsetDateTime createdAt;
+    private OffsetDateTime updatedAt;
+    private Boolean active;
+    private MedicosDTO medico;
+    private PacienteDTO paciente;
     private String numeroReceita;
     private OffsetDateTime dataPrescricao;
     private OffsetDateTime dataValidade;
@@ -22,8 +23,5 @@ public class ReceitasMedicasDTO {
     private String observacoes;
     private StatusReceitaEnum status;
     private String origemReceita;
-    private UUID cidPrincipalId;
-    private List<UUID> medicacoesIds;
-    private Boolean active;
+    private CidDoencasDTO cidPrincipal;
 }
-

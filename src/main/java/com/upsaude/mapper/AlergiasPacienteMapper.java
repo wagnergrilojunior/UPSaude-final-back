@@ -3,59 +3,61 @@ package com.upsaude.mapper;
 import com.upsaude.api.request.AlergiasPacienteRequest;
 import com.upsaude.api.response.AlergiasPacienteResponse;
 import com.upsaude.dto.AlergiasPacienteDTO;
-import com.upsaude.entity.Alergias;
 import com.upsaude.entity.AlergiasPaciente;
+import com.upsaude.entity.Alergias;
 import com.upsaude.entity.Paciente;
 import com.upsaude.mapper.config.MappingConfig;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
-import org.mapstruct.Named;
+import org.mapstruct.MappingTarget;
 
-import java.util.UUID;
-
-@Mapper(config = MappingConfig.class)
+/**
+ * Mapper para conversões de AlergiasPaciente.
+ * Entity ↔ DTO ↔ Request/Response
+ */
+@Mapper(config = MappingConfig.class, uses = {AlergiasMapper.class, PacienteMapper.class})
 public interface AlergiasPacienteMapper extends EntityMapper<AlergiasPaciente, AlergiasPacienteDTO> {
 
-    @Mapping(target = "tenant", ignore = true)
-    @Mapping(target = "paciente", source = "pacienteId", qualifiedByName = "pacienteFromId")
-    @Mapping(target = "alergia", source = "alergiaId", qualifiedByName = "alergiaFromId")
+    /**
+     * Converte DTO para Entity.
+     * O campo 'active' é ignorado (gerenciado pelo sistema).
+     */
+    @Mapping(target = "active", ignore = true)
     AlergiasPaciente toEntity(AlergiasPacienteDTO dto);
 
-    @Mapping(target = "pacienteId", source = "paciente.id")
-    @Mapping(target = "alergiaId", source = "alergia.id")
+    /**
+     * Converte Entity para DTO.
+     */
     AlergiasPacienteDTO toDTO(AlergiasPaciente entity);
 
-    @Mapping(target = "tenant", ignore = true)
+    /**
+     * Converte Request para Entity.
+     * Os campos 'id', 'createdAt', 'updatedAt', 'active' são ignorados.
+     * Relacionamentos (UUID) devem ser tratados manualmente no Service.
+     */
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "createdAt", ignore = true)
+    @Mapping(target = "updatedAt", ignore = true)
     @Mapping(target = "active", ignore = true)
-    @Mapping(target = "paciente", source = "pacienteId", qualifiedByName = "pacienteFromId")
-    @Mapping(target = "alergia", source = "alergiaId", qualifiedByName = "alergiaFromId")
+    @Mapping(target = "alergia", ignore = true)
+    @Mapping(target = "paciente", ignore = true)
     AlergiasPaciente fromRequest(AlergiasPacienteRequest request);
 
-    @Mapping(target = "pacienteId", source = "paciente.id")
-    @Mapping(target = "pacienteNome", source = "paciente", qualifiedByName = "pacienteNome")
-    @Mapping(target = "alergiaId", source = "alergia.id")
-    @Mapping(target = "alergiaNome", source = "alergia.nome")
+    /**
+     * Atualiza Entity existente com dados do Request.
+     * Os campos 'id', 'createdAt', 'updatedAt', 'active' são ignorados.
+     * Relacionamentos (UUID) devem ser tratados manualmente no Service.
+     */
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "createdAt", ignore = true)
+    @Mapping(target = "updatedAt", ignore = true)
+    @Mapping(target = "active", ignore = true)
+    @Mapping(target = "alergia", ignore = true)
+    @Mapping(target = "paciente", ignore = true)
+    void updateFromRequest(AlergiasPacienteRequest request, @MappingTarget AlergiasPaciente entity);
+
+    /**
+     * Converte Entity para Response.
+     */
     AlergiasPacienteResponse toResponse(AlergiasPaciente entity);
-
-    @Named("pacienteFromId")
-    default Paciente pacienteFromId(UUID id) {
-        if (id == null) return null;
-        Paciente p = new Paciente();
-        p.setId(id);
-        return p;
-    }
-
-    @Named("alergiaFromId")
-    default Alergias alergiaFromId(UUID id) {
-        if (id == null) return null;
-        Alergias a = new Alergias();
-        a.setId(id);
-        return a;
-    }
-
-    @Named("pacienteNome")
-    default String pacienteNome(Paciente paciente) {
-        if (paciente == null) return null;
-        return paciente.getNomeCompleto();
-    }
 }

@@ -57,52 +57,47 @@ public class AtendimentoServiceImpl implements AtendimentoService {
     @Transactional
     @CacheEvict(value = "atendimento", allEntries = true)
     public AtendimentoResponse criar(AtendimentoRequest request) {
-        log.debug("Criando novo atendimento para paciente: {}", request.getPacienteId());
+        log.debug("Criando novo atendimento para paciente: {}", request.getPaciente());
 
         validarDadosBasicos(request);
 
         Atendimento atendimento = atendimentoMapper.fromRequest(request);
 
-        // Carrega e define o estabelecimento
-        Estabelecimentos estabelecimento = estabelecimentosRepository.findById(request.getEstabelecimentoId())
-                .orElseThrow(() -> new NotFoundException("Estabelecimento não encontrado com ID: " + request.getEstabelecimentoId()));
-        atendimento.setEstabelecimento(estabelecimento);
-
         // Carrega e define o paciente
-        Paciente paciente = pacienteRepository.findById(request.getPacienteId())
-                .orElseThrow(() -> new NotFoundException("Paciente não encontrado com ID: " + request.getPacienteId()));
+        Paciente paciente = pacienteRepository.findById(request.getPaciente())
+                .orElseThrow(() -> new NotFoundException("Paciente não encontrado com ID: " + request.getPaciente()));
         atendimento.setPaciente(paciente);
 
         // Carrega e define o profissional
-        ProfissionaisSaude profissional = profissionaisSaudeRepository.findById(request.getProfissionalId())
-                .orElseThrow(() -> new NotFoundException("Profissional de saúde não encontrado com ID: " + request.getProfissionalId()));
+        ProfissionaisSaude profissional = profissionaisSaudeRepository.findById(request.getProfissional())
+                .orElseThrow(() -> new NotFoundException("Profissional de saúde não encontrado com ID: " + request.getProfissional()));
         atendimento.setProfissional(profissional);
 
         // Especialidade é opcional
-        if (request.getEspecialidadeId() != null) {
-            EspecialidadesMedicas especialidade = especialidadesMedicasRepository.findById(request.getEspecialidadeId())
-                    .orElseThrow(() -> new NotFoundException("Especialidade não encontrada com ID: " + request.getEspecialidadeId()));
+        if (request.getEspecialidade() != null) {
+            EspecialidadesMedicas especialidade = especialidadesMedicasRepository.findById(request.getEspecialidade())
+                    .orElseThrow(() -> new NotFoundException("Especialidade não encontrada com ID: " + request.getEspecialidade()));
             atendimento.setEspecialidade(especialidade);
         }
 
         // Equipe de saúde é opcional
-        if (request.getEquipeSaudeId() != null) {
-            EquipeSaude equipeSaude = equipeSaudeRepository.findById(request.getEquipeSaudeId())
-                    .orElseThrow(() -> new NotFoundException("Equipe de saúde não encontrada com ID: " + request.getEquipeSaudeId()));
+        if (request.getEquipeSaude() != null) {
+            EquipeSaude equipeSaude = equipeSaudeRepository.findById(request.getEquipeSaude())
+                    .orElseThrow(() -> new NotFoundException("Equipe de saúde não encontrada com ID: " + request.getEquipeSaude()));
             atendimento.setEquipeSaude(equipeSaude);
         }
 
         // Convênio é opcional
-        if (request.getConvenioId() != null) {
-            Convenio convenio = convenioRepository.findById(request.getConvenioId())
-                    .orElseThrow(() -> new NotFoundException("Convênio não encontrado com ID: " + request.getConvenioId()));
+        if (request.getConvenio() != null) {
+            Convenio convenio = convenioRepository.findById(request.getConvenio())
+                    .orElseThrow(() -> new NotFoundException("Convênio não encontrado com ID: " + request.getConvenio()));
             atendimento.setConvenio(convenio);
         }
 
         // CID principal é opcional
-        if (request.getCidPrincipalId() != null) {
-            CidDoencas cidPrincipal = cidDoencasRepository.findById(request.getCidPrincipalId())
-                    .orElseThrow(() -> new NotFoundException("CID não encontrado com ID: " + request.getCidPrincipalId()));
+        if (request.getCidPrincipal() != null) {
+            CidDoencas cidPrincipal = cidDoencasRepository.findById(request.getCidPrincipal())
+                    .orElseThrow(() -> new NotFoundException("CID não encontrado com ID: " + request.getCidPrincipal()));
             atendimento.setCidPrincipal(cidPrincipal);
         }
 
@@ -226,13 +221,10 @@ public class AtendimentoServiceImpl implements AtendimentoService {
         if (request == null) {
             throw new BadRequestException("Dados do atendimento são obrigatórios");
         }
-        if (request.getEstabelecimentoId() == null) {
-            throw new BadRequestException("ID do estabelecimento é obrigatório");
-        }
-        if (request.getPacienteId() == null) {
+        if (request.getPaciente() == null) {
             throw new BadRequestException("ID do paciente é obrigatório");
         }
-        if (request.getProfissionalId() == null) {
+        if (request.getProfissional() == null) {
             throw new BadRequestException("ID do profissional de saúde é obrigatório");
         }
         if (request.getInformacoes() == null || request.getInformacoes().getDataHora() == null) {
@@ -277,55 +269,49 @@ public class AtendimentoServiceImpl implements AtendimentoService {
         }
 
         // Atualiza relacionamentos se fornecidos
-        if (request.getEstabelecimentoId() != null) {
-            Estabelecimentos estabelecimento = estabelecimentosRepository.findById(request.getEstabelecimentoId())
-                    .orElseThrow(() -> new NotFoundException("Estabelecimento não encontrado com ID: " + request.getEstabelecimentoId()));
-            atendimento.setEstabelecimento(estabelecimento);
-        }
-
-        if (request.getPacienteId() != null) {
-            Paciente paciente = pacienteRepository.findById(request.getPacienteId())
-                    .orElseThrow(() -> new NotFoundException("Paciente não encontrado com ID: " + request.getPacienteId()));
+        if (request.getPaciente() != null) {
+            Paciente paciente = pacienteRepository.findById(request.getPaciente())
+                    .orElseThrow(() -> new NotFoundException("Paciente não encontrado com ID: " + request.getPaciente()));
             atendimento.setPaciente(paciente);
         }
 
-        if (request.getProfissionalId() != null) {
-            ProfissionaisSaude profissional = profissionaisSaudeRepository.findById(request.getProfissionalId())
-                    .orElseThrow(() -> new NotFoundException("Profissional de saúde não encontrado com ID: " + request.getProfissionalId()));
+        if (request.getProfissional() != null) {
+            ProfissionaisSaude profissional = profissionaisSaudeRepository.findById(request.getProfissional())
+                    .orElseThrow(() -> new NotFoundException("Profissional de saúde não encontrado com ID: " + request.getProfissional()));
             atendimento.setProfissional(profissional);
         }
 
         // Especialidade é opcional
-        if (request.getEspecialidadeId() != null) {
-            EspecialidadesMedicas especialidade = especialidadesMedicasRepository.findById(request.getEspecialidadeId())
-                    .orElseThrow(() -> new NotFoundException("Especialidade não encontrada com ID: " + request.getEspecialidadeId()));
+        if (request.getEspecialidade() != null) {
+            EspecialidadesMedicas especialidade = especialidadesMedicasRepository.findById(request.getEspecialidade())
+                    .orElseThrow(() -> new NotFoundException("Especialidade não encontrada com ID: " + request.getEspecialidade()));
             atendimento.setEspecialidade(especialidade);
         } else {
             atendimento.setEspecialidade(null);
         }
 
         // Equipe de saúde é opcional
-        if (request.getEquipeSaudeId() != null) {
-            EquipeSaude equipeSaude = equipeSaudeRepository.findById(request.getEquipeSaudeId())
-                    .orElseThrow(() -> new NotFoundException("Equipe de saúde não encontrada com ID: " + request.getEquipeSaudeId()));
+        if (request.getEquipeSaude() != null) {
+            EquipeSaude equipeSaude = equipeSaudeRepository.findById(request.getEquipeSaude())
+                    .orElseThrow(() -> new NotFoundException("Equipe de saúde não encontrada com ID: " + request.getEquipeSaude()));
             atendimento.setEquipeSaude(equipeSaude);
         } else {
             atendimento.setEquipeSaude(null);
         }
 
         // Convênio é opcional
-        if (request.getConvenioId() != null) {
-            Convenio convenio = convenioRepository.findById(request.getConvenioId())
-                    .orElseThrow(() -> new NotFoundException("Convênio não encontrado com ID: " + request.getConvenioId()));
+        if (request.getConvenio() != null) {
+            Convenio convenio = convenioRepository.findById(request.getConvenio())
+                    .orElseThrow(() -> new NotFoundException("Convênio não encontrado com ID: " + request.getConvenio()));
             atendimento.setConvenio(convenio);
         } else {
             atendimento.setConvenio(null);
         }
 
         // CID principal é opcional
-        if (request.getCidPrincipalId() != null) {
-            CidDoencas cidPrincipal = cidDoencasRepository.findById(request.getCidPrincipalId())
-                    .orElseThrow(() -> new NotFoundException("CID não encontrado com ID: " + request.getCidPrincipalId()));
+        if (request.getCidPrincipal() != null) {
+            CidDoencas cidPrincipal = cidDoencasRepository.findById(request.getCidPrincipal())
+                    .orElseThrow(() -> new NotFoundException("CID não encontrado com ID: " + request.getCidPrincipal()));
             atendimento.setCidPrincipal(cidPrincipal);
         } else {
             atendimento.setCidPrincipal(null);

@@ -8,37 +8,53 @@ import com.upsaude.entity.Paciente;
 import com.upsaude.mapper.config.MappingConfig;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
-import org.mapstruct.Named;
+import org.mapstruct.MappingTarget;
 
-import java.util.UUID;
-
-@Mapper(config = MappingConfig.class)
+/**
+ * Mapper para conversões de LGPDConsentimento.
+ * Entity ↔ DTO ↔ Request/Response
+ */
+@Mapper(config = MappingConfig.class, uses = {PacienteMapper.class})
 public interface LGPDConsentimentoMapper extends EntityMapper<LGPDConsentimento, LGPDConsentimentoDTO> {
 
-    @Mapping(target = "tenant", ignore = true)
-    @Mapping(target = "paciente", source = "pacienteId", qualifiedByName = "pacienteFromId")
+    /**
+     * Converte DTO para Entity.
+     * O campo 'active' é ignorado (gerenciado pelo sistema).
+     */
+    @Mapping(target = "active", ignore = true)
     LGPDConsentimento toEntity(LGPDConsentimentoDTO dto);
 
-    @Mapping(target = "pacienteId", source = "paciente.id")
+    /**
+     * Converte Entity para DTO.
+     */
     LGPDConsentimentoDTO toDTO(LGPDConsentimento entity);
 
-    @Mapping(target = "tenant", ignore = true)
+    /**
+     * Converte Request para Entity.
+     * Os campos 'id', 'createdAt', 'updatedAt', 'active' são ignorados.
+     * Relacionamentos (UUID) devem ser tratados manualmente no Service.
+     */
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "createdAt", ignore = true)
+    @Mapping(target = "updatedAt", ignore = true)
     @Mapping(target = "active", ignore = true)
-    @Mapping(target = "paciente", source = "pacienteId", qualifiedByName = "pacienteFromId")
+    @Mapping(target = "paciente", ignore = true)
     LGPDConsentimento fromRequest(LGPDConsentimentoRequest request);
 
-    @Mapping(target = "createdAt", source = "createdAt")
-    @Mapping(target = "updatedAt", source = "updatedAt")
-    @Mapping(target = "active", source = "active")
-    @Mapping(target = "pacienteId", source = "paciente.id")
+    /**
+     * Atualiza Entity existente com dados do Request.
+     * Os campos 'id', 'createdAt', 'updatedAt', 'active' são ignorados.
+     * Relacionamentos (UUID) devem ser tratados manualmente no Service.
+     */
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "createdAt", ignore = true)
+    @Mapping(target = "updatedAt", ignore = true)
+    @Mapping(target = "active", ignore = true)
+    @Mapping(target = "paciente", ignore = true)
+    void updateFromRequest(LGPDConsentimentoRequest request, @MappingTarget LGPDConsentimento entity);
+
+    /**
+     * Converte Entity para Response.
+     */
     LGPDConsentimentoResponse toResponse(LGPDConsentimento entity);
-
-    @Named("pacienteFromId")
-    default Paciente pacienteFromId(UUID id) {
-        if (id == null) return null;
-        Paciente p = new Paciente();
-        p.setId(id);
-        return p;
-    }
 }
-

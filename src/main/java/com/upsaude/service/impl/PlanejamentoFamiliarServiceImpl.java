@@ -152,7 +152,7 @@ public class PlanejamentoFamiliarServiceImpl implements PlanejamentoFamiliarServ
         if (request == null) {
             throw new BadRequestException("Dados do planejamento familiar são obrigatórios");
         }
-        if (request.getPacienteId() == null) {
+        if (request.getPaciente() == null) {
             throw new BadRequestException("Paciente é obrigatório");
         }
     }

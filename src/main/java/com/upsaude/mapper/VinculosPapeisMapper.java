@@ -3,65 +3,64 @@ package com.upsaude.mapper;
 import com.upsaude.api.request.VinculosPapeisRequest;
 import com.upsaude.api.response.VinculosPapeisResponse;
 import com.upsaude.dto.VinculosPapeisDTO;
+import com.upsaude.entity.VinculosPapeis;
 import com.upsaude.entity.Departamentos;
 import com.upsaude.entity.Estabelecimentos;
 import com.upsaude.entity.Papeis;
-import com.upsaude.entity.VinculosPapeis;
 import com.upsaude.mapper.config.MappingConfig;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
-import org.mapstruct.Named;
+import org.mapstruct.MappingTarget;
 
-import java.util.UUID;
-
-@Mapper(config = MappingConfig.class)
+/**
+ * Mapper para conversões de VinculosPapeis.
+ * Entity ↔ DTO ↔ Request/Response
+ */
+@Mapper(config = MappingConfig.class, uses = {DepartamentosMapper.class, EstabelecimentosMapper.class, PapeisMapper.class})
 public interface VinculosPapeisMapper extends EntityMapper<VinculosPapeis, VinculosPapeisDTO> {
 
-    @Mapping(target = "tenant", ignore = true)
-    @Mapping(target = "estabelecimento", source = "estabelecimentoId", qualifiedByName = "estabelecimentoFromId")
-    @Mapping(target = "departamento", source = "departamentoId", qualifiedByName = "departamentoFromId")
-    @Mapping(target = "papel", source = "papelId", qualifiedByName = "papelFromId")
+    /**
+     * Converte DTO para Entity.
+     * O campo 'active' é ignorado (gerenciado pelo sistema).
+     */
+    @Mapping(target = "active", ignore = true)
     VinculosPapeis toEntity(VinculosPapeisDTO dto);
 
-    @Mapping(target = "estabelecimentoId", source = "estabelecimento.id")
-    @Mapping(target = "departamentoId", source = "departamento.id")
-    @Mapping(target = "papelId", source = "papel.id")
+    /**
+     * Converte Entity para DTO.
+     */
     VinculosPapeisDTO toDTO(VinculosPapeis entity);
 
-    @Mapping(target = "tenant", ignore = true)
+    /**
+     * Converte Request para Entity.
+     * Os campos 'id', 'createdAt', 'updatedAt', 'active' são ignorados.
+     * Relacionamentos (UUID) devem ser tratados manualmente no Service.
+     */
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "createdAt", ignore = true)
+    @Mapping(target = "updatedAt", ignore = true)
     @Mapping(target = "active", ignore = true)
-    @Mapping(target = "estabelecimento", source = "estabelecimentoId", qualifiedByName = "estabelecimentoFromId")
-    @Mapping(target = "departamento", source = "departamentoId", qualifiedByName = "departamentoFromId")
-    @Mapping(target = "papel", source = "papelId", qualifiedByName = "papelFromId")
+    @Mapping(target = "departamento", ignore = true)
+    @Mapping(target = "estabelecimento", ignore = true)
+    @Mapping(target = "papel", ignore = true)
     VinculosPapeis fromRequest(VinculosPapeisRequest request);
 
-    @Mapping(target = "estabelecimentoId", source = "estabelecimento.id")
-    @Mapping(target = "departamentoId", source = "departamento.id")
-    @Mapping(target = "papelId", source = "papel.id")
+    /**
+     * Atualiza Entity existente com dados do Request.
+     * Os campos 'id', 'createdAt', 'updatedAt', 'active' são ignorados.
+     * Relacionamentos (UUID) devem ser tratados manualmente no Service.
+     */
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "createdAt", ignore = true)
+    @Mapping(target = "updatedAt", ignore = true)
+    @Mapping(target = "active", ignore = true)
+    @Mapping(target = "departamento", ignore = true)
+    @Mapping(target = "estabelecimento", ignore = true)
+    @Mapping(target = "papel", ignore = true)
+    void updateFromRequest(VinculosPapeisRequest request, @MappingTarget VinculosPapeis entity);
+
+    /**
+     * Converte Entity para Response.
+     */
     VinculosPapeisResponse toResponse(VinculosPapeis entity);
-
-    @Named("estabelecimentoFromId")
-    default Estabelecimentos estabelecimentoFromId(UUID id) {
-        if (id == null) return null;
-        Estabelecimentos e = new Estabelecimentos();
-        e.setId(id);
-        return e;
-    }
-
-    @Named("departamentoFromId")
-    default Departamentos departamentoFromId(UUID id) {
-        if (id == null) return null;
-        Departamentos d = new Departamentos();
-        d.setId(id);
-        return d;
-    }
-
-    @Named("papelFromId")
-    default Papeis papelFromId(UUID id) {
-        if (id == null) return null;
-        Papeis p = new Papeis();
-        p.setId(id);
-        return p;
-    }
 }
-

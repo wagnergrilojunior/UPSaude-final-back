@@ -49,14 +49,9 @@ public class ProntuariosServiceImpl implements ProntuariosService {
 
         Prontuarios prontuarios = prontuariosMapper.fromRequest(request);
 
-        // Carrega e define o estabelecimento
-        Estabelecimentos estabelecimento = estabelecimentosRepository.findById(request.getEstabelecimentoId())
-                .orElseThrow(() -> new NotFoundException("Estabelecimento não encontrado com ID: " + request.getEstabelecimentoId()));
-        prontuarios.setEstabelecimento(estabelecimento);
-
         // Carrega e define o paciente
-        Paciente paciente = pacienteRepository.findById(request.getPacienteId())
-                .orElseThrow(() -> new NotFoundException("Paciente não encontrado com ID: " + request.getPacienteId()));
+        Paciente paciente = pacienteRepository.findById(request.getPaciente())
+                .orElseThrow(() -> new NotFoundException("Paciente não encontrado com ID: " + request.getPaciente()));
         prontuarios.setPaciente(paciente);
 
         prontuarios.setActive(true);
@@ -153,26 +148,19 @@ public class ProntuariosServiceImpl implements ProntuariosService {
         if (request == null) {
             throw new BadRequestException("Dados do prontuarios são obrigatórios");
         }
-        if (request.getEstabelecimentoId() == null) {
-            throw new BadRequestException("ID do estabelecimento é obrigatório");
-        }
-        if (request.getPacienteId() == null) {
+        // estabelecimento não faz parte do Request
+        if (request.getPaciente() == null) {
             throw new BadRequestException("ID do paciente é obrigatório");
         }
     }
 
-        private void atualizarDadosProntuarios(Prontuarios prontuarios, ProntuariosRequest request) {
-        // Atualiza estabelecimento se fornecido
-        if (request.getEstabelecimentoId() != null) {
-            Estabelecimentos estabelecimento = estabelecimentosRepository.findById(request.getEstabelecimentoId())
-                    .orElseThrow(() -> new NotFoundException("Estabelecimento não encontrado com ID: " + request.getEstabelecimentoId()));
-            prontuarios.setEstabelecimento(estabelecimento);
-        }
+    private void atualizarDadosProntuarios(Prontuarios prontuarios, ProntuariosRequest request) {
+        // estabelecimento não faz parte do Request
 
         // Atualiza paciente se fornecido
-        if (request.getPacienteId() != null) {
-            Paciente paciente = pacienteRepository.findById(request.getPacienteId())
-                    .orElseThrow(() -> new NotFoundException("Paciente não encontrado com ID: " + request.getPacienteId()));
+        if (request.getPaciente() != null) {
+            Paciente paciente = pacienteRepository.findById(request.getPaciente())
+                    .orElseThrow(() -> new NotFoundException("Paciente não encontrado com ID: " + request.getPaciente()));
             prontuarios.setPaciente(paciente);
         }
 

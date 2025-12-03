@@ -2,46 +2,26 @@ package com.upsaude.api.request;
 
 import com.upsaude.enums.PrioridadeAtendimentoEnum;
 import com.upsaude.enums.StatusAgendamentoEnum;
-import jakarta.validation.constraints.NotNull;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-
 import java.time.OffsetDateTime;
 import java.util.UUID;
+import lombok.*;
 
-/**
- * Classe de requisição para criação e atualização de Agendamento.
- *
- * @author UPSaúde
- */
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class AgendamentoRequest {
-
-    @NotNull(message = "ID do paciente é obrigatório")
-    private UUID pacienteId;
-
-    @NotNull(message = "ID do profissional é obrigatório")
-    private UUID profissionalId;
-
-    private UUID medicoId;
-    private UUID especialidadeId;
-    private UUID convenioId;
-    private UUID agendamentoOriginalId;
-
-    @NotNull(message = "Data e hora do agendamento são obrigatórias")
+    private UUID paciente;
+    private UUID profissional;
+    private UUID medico;
+    private UUID especialidade;
+    private UUID convenio;
+    private UUID atendimento;
+    private UUID agendamentoOriginal;
     private OffsetDateTime dataHora;
-
     private OffsetDateTime dataHoraFim;
     private Integer duracaoPrevistaMinutos;
-
-    @NotNull(message = "Status do agendamento é obrigatório")
     private StatusAgendamentoEnum status;
-
     private PrioridadeAtendimentoEnum prioridade;
     private Boolean ehEncaixe;
     private Boolean ehRetorno;
@@ -51,10 +31,18 @@ public class AgendamentoRequest {
     private Boolean temConflitoHorario;
     private Boolean sobreposicaoPermitida;
     private String justificativaConflito;
+    private OffsetDateTime dataCancelamento;
+    private UUID canceladoPor;
     private String motivoCancelamento;
+    private OffsetDateTime dataReagendamento;
+    private UUID reagendadoPor;
     private String motivoReagendamento;
+    private UUID agendadoPor;
+    private UUID confirmadoPor;
+    private OffsetDateTime dataConfirmacao;
+    private OffsetDateTime dataUltimaAlteracao;
+    private UUID alteradoPor;
     private Boolean notificacaoEnviada24h;
     private Boolean notificacaoEnviada1h;
     private Boolean confirmacaoEnviada;
 }
-

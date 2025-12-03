@@ -44,11 +44,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         
         String path = request.getRequestURI();
         String method = request.getMethod();
-        log.info("Processando requisição para: {} - Método: {}", path, method);
         
         // Ignora endpoints públicos (não processa autenticação)
         if (isPublicEndpoint(path)) {
-            log.debug("Endpoint público detectado: {}", path);
             filterChain.doFilter(request, response);
             return;
         }
@@ -56,13 +54,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         String token = extractTokenFromRequest(request);
         
         if (token == null || token.isEmpty()) {
-            log.warn("Token não fornecido para endpoint protegido: {} - Método: {}", path, method);
             // Continua o filter chain - o Spring Security vai retornar 403 ou 401
             filterChain.doFilter(request, response);
             return;
         }
-        
-        log.info("Token encontrado ({} caracteres), validando com Supabase...", token.length());
         
         // Valida o token mesmo se já existe autenticação (para refresh se necessário)
         try {
@@ -70,14 +65,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             SupabaseAuthResponse.User user = supabaseAuthService.verifyToken(token);
             
             if (user != null) {
-                log.info("Token válido! Usuário: {}", user.getEmail());
-                
                 // 1. Adiciona role do Supabase (RBAC do Supabase)
                 Set<String> authoritiesSet = new HashSet<>();
                 if (user.getRole() != null && !user.getRole().isEmpty()) {
                     String supabaseRole = "ROLE_" + user.getRole().toUpperCase();
                     authoritiesSet.add(supabaseRole);
-                    log.debug("Role do Supabase adicionada: {}", supabaseRole);
                 }
                 
                 // 2. Busca papéis do sistema (tabela papeis) através do UserRoleService
@@ -85,17 +77,14 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                     List<GrantedAuthority> systemRoles = userRoleService.getUserAuthorities(user.getId());
                     for (GrantedAuthority authority : systemRoles) {
                         authoritiesSet.add(authority.getAuthority());
-                        log.debug("Papel do sistema adicionado: {}", authority.getAuthority());
                     }
                 } catch (Exception e) {
-                    log.warn("Erro ao buscar papéis do sistema para usuário {}: {}", user.getId(), e.getMessage());
                     // Continua mesmo se houver erro ao buscar papéis do sistema
                 }
                 
                 // 3. Adiciona role padrão authenticated se não houver nenhuma role
                 if (authoritiesSet.isEmpty()) {
                     authoritiesSet.add("ROLE_AUTHENTICATED");
-                    log.debug("Nenhuma role encontrada, adicionando role padrão: ROLE_AUTHENTICATED");
                 }
                 
                 // 4. Converte para lista de GrantedAuthority
@@ -123,7 +112,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                             .orElse(false);
                     
                     if (!temAcesso) {
-                        log.warn("Usuário {} não tem acesso ao sistema (UsuariosSistema não encontrado ou inativo)", user.getId());
                         response.setStatus(HttpStatus.FORBIDDEN.value());
                         response.setContentType("application/json");
                         response.getWriter().write("{\"erro\": \"Usuário não tem acesso ao sistema. É necessário criar um registro em UsuariosSistema.\"}");
@@ -133,26 +121,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 
                 // 8. Define o authentication no contexto de segurança
                 SecurityContextHolder.getContext().setAuthentication(authentication);
-                
-                log.info("Usuário autenticado com sucesso no Spring Security: {} (ID: {}) - Total de Authorities: {} - Roles: {}", 
-                        user.getEmail(), user.getId(), authorities.size(), authorities);
             } else {
-                log.warn("Token válido mas usuário não encontrado");
                 SecurityContextHolder.clearContext();
             }
         } catch (Exception e) {
-            log.error("ERRO ao validar token JWT para path {}: {} - Mensagem: {}", 
-                    path, e.getClass().getSimpleName(), e.getMessage(), e);
             SecurityContextHolder.clearContext();
             // Continua o filter chain - o Spring Security vai retornar 403
-        }
-        
-        // Verifica se há autenticação no contexto antes de continuar
-        if (SecurityContextHolder.getContext().getAuthentication() == null) {
-            log.warn("AUTENTICAÇÃO NÃO CONFIGURADA no SecurityContext após processamento do token para: {}", path);
-        } else {
-            log.info("Autenticação presente no SecurityContext: {}", 
-                    SecurityContextHolder.getContext().getAuthentication().getName());
         }
         
         filterChain.doFilter(request, response);

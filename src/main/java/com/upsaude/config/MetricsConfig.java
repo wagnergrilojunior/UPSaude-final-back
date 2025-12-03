@@ -161,10 +161,17 @@ public class MetricsConfig implements ApplicationListener<ContextRefreshedEvent>
      */
     @Bean
     public Counter totalRequestsCounter() {
-        return Counter.builder("upsaude.http.requests.total")
-            .description("Total de requisições HTTP recebidas")
-            .tag("type", "total")
-            .register(meterRegistry);
+        try {
+            return Counter.builder("upsaude.http.requests.total")
+                .description("Total de requisições HTTP recebidas")
+                .tag("type", "total")
+                .register(meterRegistry);
+        } catch (Exception e) {
+            // Fallback se meterRegistry não estiver pronto
+            return Counter.builder("upsaude.http.requests.total.fallback")
+                .description("Total de requisições HTTP (fallback)")
+                .register(new io.micrometer.core.instrument.simple.SimpleMeterRegistry());
+        }
     }
 
     /**
@@ -172,10 +179,17 @@ public class MetricsConfig implements ApplicationListener<ContextRefreshedEvent>
      */
     @Bean
     public Counter failedRequestCounter() {
-        return Counter.builder("upsaude.http.requests.failed")
-            .description("Total de requisições HTTP que falharam")
-            .tag("type", "failed")
-            .register(meterRegistry);
+        try {
+            return Counter.builder("upsaude.http.requests.failed")
+                .description("Total de requisições HTTP que falharam")
+                .tag("type", "failed")
+                .register(meterRegistry);
+        } catch (Exception e) {
+            // Fallback se meterRegistry não estiver pronto
+            return Counter.builder("upsaude.http.requests.failed.fallback")
+                .description("Total de requisições falhadas (fallback)")
+                .register(new io.micrometer.core.instrument.simple.SimpleMeterRegistry());
+        }
     }
 
     /**
@@ -183,9 +197,16 @@ public class MetricsConfig implements ApplicationListener<ContextRefreshedEvent>
      */
     @Bean
     public Timer requestLatencyTimer() {
-        return Timer.builder("upsaude.http.requests.latency")
-            .description("Latência das requisições HTTP")
-            .register(meterRegistry);
+        try {
+            return Timer.builder("upsaude.http.requests.latency")
+                .description("Latência das requisições HTTP")
+                .register(meterRegistry);
+        } catch (Exception e) {
+            // Fallback se meterRegistry não estiver pronto
+            return Timer.builder("upsaude.http.requests.latency.fallback")
+                .description("Latência das requisições HTTP (fallback)")
+                .register(new io.micrometer.core.instrument.simple.SimpleMeterRegistry());
+        }
     }
 }
 

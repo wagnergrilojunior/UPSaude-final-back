@@ -9,15 +9,10 @@ import com.upsaude.enums.SexoEnum;
 import com.upsaude.enums.StatusAtivoEnum;
 import com.upsaude.enums.TipoDeficienciaEnum;
 import com.upsaude.enums.TipoProfissionalEnum;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
-import java.util.List;
 import java.util.UUID;
+import lombok.*;
 
 @Data
 @Builder
@@ -25,6 +20,9 @@ import java.util.UUID;
 @AllArgsConstructor
 public class ProfissionaisSaudeDTO {
     private UUID id;
+    private OffsetDateTime createdAt;
+    private OffsetDateTime updatedAt;
+    private Boolean active;
     private String nomeCompleto;
     private String cpf;
     private LocalDate dataNascimento;
@@ -33,7 +31,6 @@ public class ProfissionaisSaudeDTO {
     private EscolaridadeEnum escolaridade;
     private IdentidadeGeneroEnum identidadeGenero;
     private RacaCorEnum racaCor;
-    private Boolean temDeficiencia;
     private TipoDeficienciaEnum tipoDeficiencia;
     private String rg;
     private String orgaoEmissorRg;
@@ -42,13 +39,12 @@ public class ProfissionaisSaudeDTO {
     private NacionalidadeEnum nacionalidade;
     private String naturalidade;
     private String registroProfissional;
-    private UUID conselhoId;
+    private ConselhosProfissionaisDTO conselho;
     private String ufRegistro;
     private OffsetDateTime dataEmissaoRegistro;
     private OffsetDateTime dataValidadeRegistro;
     private StatusAtivoEnum statusRegistro;
     private TipoProfissionalEnum tipoProfissional;
-    private List<UUID> especialidadesIds;
     private String cns;
     private String codigoCbo;
     private String descricaoCbo;
@@ -57,9 +53,6 @@ public class ProfissionaisSaudeDTO {
     private String email;
     private String telefoneInstitucional;
     private String emailInstitucional;
-    private UUID enderecoProfissionalId;
-    private List<UUID> estabelecimentosIds;
+    private EnderecoDTO enderecoProfissional;
     private String observacoes;
-    private Boolean active;
 }
-

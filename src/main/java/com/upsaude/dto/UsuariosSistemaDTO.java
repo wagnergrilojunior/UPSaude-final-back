@@ -1,9 +1,9 @@
 package com.upsaude.dto;
 
 import com.upsaude.enums.TipoUsuarioSistemaEnum;
-import lombok.*;
-import java.util.List;
+import java.time.OffsetDateTime;
 import java.util.UUID;
+import lombok.*;
 
 @Data
 @Builder
@@ -11,16 +11,15 @@ import java.util.UUID;
 @AllArgsConstructor
 public class UsuariosSistemaDTO {
     private UUID id;
+    private OffsetDateTime createdAt;
+    private OffsetDateTime updatedAt;
+    private Boolean active;
     private UUID userId;
-    private UUID tenantId; // Tenant agora é campo direto
-    private List<UUID> estabelecimentosIds; // Alterado para lista de estabelecimentos
-    private UUID profissionalSaudeId;
-    private UUID medicoId;
-    private UUID pacienteId;
+    private ProfissionaisSaudeDTO profissionalSaude;
+    private MedicosDTO medico;
+    private PacienteDTO paciente;
     private TipoUsuarioSistemaEnum tipoUsuario;
     private String nomeExibicao;
-    private String user; // Username para login alternativo
-    private String fotoUrl; // URL da foto no Supabase Storage
-    private Boolean active;
+    private String user;
+    private String fotoUrl;
 }
-

@@ -3,97 +3,64 @@ package com.upsaude.mapper;
 import com.upsaude.api.request.CuidadosEnfermagemRequest;
 import com.upsaude.api.response.CuidadosEnfermagemResponse;
 import com.upsaude.dto.CuidadosEnfermagemDTO;
-import com.upsaude.entity.Atendimento;
 import com.upsaude.entity.CuidadosEnfermagem;
-import com.upsaude.entity.Estabelecimentos;
+import com.upsaude.entity.Atendimento;
 import com.upsaude.entity.Paciente;
 import com.upsaude.entity.ProfissionaisSaude;
-import com.upsaude.enums.TipoCuidadoEnfermagemEnum;
 import com.upsaude.mapper.config.MappingConfig;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
-import org.mapstruct.Named;
-
-import java.util.UUID;
+import org.mapstruct.MappingTarget;
 
 /**
- * Mapper para conversão entre CuidadosEnfermagem entity, DTO, Request e Response.
- *
- * @author UPSaúde
+ * Mapper para conversões de CuidadosEnfermagem.
+ * Entity ↔ DTO ↔ Request/Response
  */
-@Mapper(config = MappingConfig.class)
+@Mapper(config = MappingConfig.class, uses = {AtendimentoMapper.class, PacienteMapper.class, ProfissionaisSaudeMapper.class})
 public interface CuidadosEnfermagemMapper extends EntityMapper<CuidadosEnfermagem, CuidadosEnfermagemDTO> {
 
-    @Mapping(target = "tenant", ignore = true)
-    @Mapping(target = "estabelecimento", source = "estabelecimentoId", qualifiedByName = "estabelecimentoFromId")
-    @Mapping(target = "paciente", source = "pacienteId", qualifiedByName = "pacienteFromId")
-    @Mapping(target = "profissional", source = "profissionalId", qualifiedByName = "profissionalFromId")
-    @Mapping(target = "atendimento", source = "atendimentoId", qualifiedByName = "atendimentoFromId")
-    @Mapping(target = "tipoCuidado", source = "tipoCuidado", qualifiedByName = "tipoCuidadoFromCodigo")
+    /**
+     * Converte DTO para Entity.
+     * O campo 'active' é ignorado (gerenciado pelo sistema).
+     */
+    @Mapping(target = "active", ignore = true)
     CuidadosEnfermagem toEntity(CuidadosEnfermagemDTO dto);
 
-    @Mapping(target = "estabelecimentoId", source = "estabelecimento.id")
-    @Mapping(target = "pacienteId", source = "paciente.id")
-    @Mapping(target = "profissionalId", source = "profissional.id")
-    @Mapping(target = "atendimentoId", source = "atendimento.id")
-    @Mapping(target = "tipoCuidado", source = "tipoCuidado.codigo")
+    /**
+     * Converte Entity para DTO.
+     */
     CuidadosEnfermagemDTO toDTO(CuidadosEnfermagem entity);
 
+    /**
+     * Converte Request para Entity.
+     * Os campos 'id', 'createdAt', 'updatedAt', 'active' são ignorados.
+     * Relacionamentos (UUID) devem ser tratados manualmente no Service.
+     */
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
-    @Mapping(target = "tenant", ignore = true)
     @Mapping(target = "active", ignore = true)
-    @Mapping(target = "estabelecimento", source = "estabelecimentoId", qualifiedByName = "estabelecimentoFromId")
-    @Mapping(target = "paciente", source = "pacienteId", qualifiedByName = "pacienteFromId")
-    @Mapping(target = "profissional", source = "profissionalId", qualifiedByName = "profissionalFromId")
-    @Mapping(target = "atendimento", source = "atendimentoId", qualifiedByName = "atendimentoFromId")
-    @Mapping(target = "tipoCuidado", source = "tipoCuidado", qualifiedByName = "tipoCuidadoFromCodigo")
+    @Mapping(target = "atendimento", ignore = true)
+    @Mapping(target = "paciente", ignore = true)
+    @Mapping(target = "profissional", ignore = true)
     CuidadosEnfermagem fromRequest(CuidadosEnfermagemRequest request);
 
-    @Mapping(target = "estabelecimentoId", source = "estabelecimento.id")
-    @Mapping(target = "pacienteId", source = "paciente.id")
-    @Mapping(target = "profissionalId", source = "profissional.id")
-    @Mapping(target = "atendimentoId", source = "atendimento.id")
-    @Mapping(target = "tipoCuidado", source = "tipoCuidado.codigo")
-    @Mapping(target = "tipoCuidadoDescricao", source = "tipoCuidado.descricao")
+    /**
+     * Atualiza Entity existente com dados do Request.
+     * Os campos 'id', 'createdAt', 'updatedAt', 'active' são ignorados.
+     * Relacionamentos (UUID) devem ser tratados manualmente no Service.
+     */
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "createdAt", ignore = true)
+    @Mapping(target = "updatedAt", ignore = true)
+    @Mapping(target = "active", ignore = true)
+    @Mapping(target = "atendimento", ignore = true)
+    @Mapping(target = "paciente", ignore = true)
+    @Mapping(target = "profissional", ignore = true)
+    void updateFromRequest(CuidadosEnfermagemRequest request, @MappingTarget CuidadosEnfermagem entity);
+
+    /**
+     * Converte Entity para Response.
+     */
     CuidadosEnfermagemResponse toResponse(CuidadosEnfermagem entity);
-
-    @Named("estabelecimentoFromId")
-    default Estabelecimentos estabelecimentoFromId(UUID id) {
-        if (id == null) return null;
-        Estabelecimentos e = new Estabelecimentos();
-        e.setId(id);
-        return e;
-    }
-
-    @Named("pacienteFromId")
-    default Paciente pacienteFromId(UUID id) {
-        if (id == null) return null;
-        Paciente p = new Paciente();
-        p.setId(id);
-        return p;
-    }
-
-    @Named("profissionalFromId")
-    default ProfissionaisSaude profissionalFromId(UUID id) {
-        if (id == null) return null;
-        ProfissionaisSaude p = new ProfissionaisSaude();
-        p.setId(id);
-        return p;
-    }
-
-    @Named("atendimentoFromId")
-    default Atendimento atendimentoFromId(UUID id) {
-        if (id == null) return null;
-        Atendimento a = new Atendimento();
-        a.setId(id);
-        return a;
-    }
-
-    @Named("tipoCuidadoFromCodigo")
-    default TipoCuidadoEnfermagemEnum tipoCuidadoFromCodigo(Integer codigo) {
-        return TipoCuidadoEnfermagemEnum.fromCodigo(codigo);
-    }
 }
-

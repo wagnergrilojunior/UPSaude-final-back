@@ -5,13 +5,9 @@ import com.upsaude.enums.EscolaridadeEnum;
 import com.upsaude.enums.NacionalidadeEnum;
 import com.upsaude.enums.RacaCorEnum;
 import com.upsaude.enums.SituacaoFamiliarEnum;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-
 import java.time.OffsetDateTime;
 import java.util.UUID;
+import lombok.*;
 
 @Data
 @Builder
@@ -22,7 +18,7 @@ public class DadosSociodemograficosResponse {
     private OffsetDateTime createdAt;
     private OffsetDateTime updatedAt;
     private Boolean active;
-    private UUID pacienteId;
+    private PacienteResponse paciente;
     private RacaCorEnum racaCor;
     private NacionalidadeEnum nacionalidade;
     private String paisNascimento;
@@ -30,9 +26,7 @@ public class DadosSociodemograficosResponse {
     private String municipioNascimentoIbge;
     private EscolaridadeEnum escolaridade;
     private String ocupacaoProfissao;
-    private Boolean situacaoRua;
     private Integer tempoSituacaoRua;
     private CondicaoMoradiaEnum condicaoMoradia;
     private SituacaoFamiliarEnum situacaoFamiliar;
 }
-

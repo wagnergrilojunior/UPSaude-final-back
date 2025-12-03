@@ -55,21 +55,11 @@ public class UsuariosSistemaServiceImpl implements UsuariosSistemaService {
 
         validarDadosBasicos(request);
 
-        // Buscar tenant
-        Tenant tenant = tenantRepository.findById(request.getTenantId())
-                .orElseThrow(() -> new NotFoundException("Tenant não encontrado com ID: " + request.getTenantId()));
-
         UsuariosSistema usuariosSistema = usuariosSistemaMapper.fromRequest(request);
-        usuariosSistema.setTenant(tenant);
         usuariosSistema.setActive(true);
 
         UsuariosSistema usuariosSistemaSalvo = usuariosSistemaRepository.save(usuariosSistema);
         log.info("UsuariosSistema criado com sucesso. ID: {}", usuariosSistemaSalvo.getId());
-
-        // Criar vínculos com estabelecimentos
-        if (request.getEstabelecimentosIds() != null && !request.getEstabelecimentosIds().isEmpty()) {
-            criarVinculosEstabelecimentos(usuariosSistemaSalvo, request.getEstabelecimentosIds());
-        }
 
         return usuariosSistemaMapper.toResponse(usuariosSistemaSalvo);
     }
@@ -118,11 +108,6 @@ public class UsuariosSistemaServiceImpl implements UsuariosSistemaService {
         UsuariosSistema usuariosSistemaAtualizado = usuariosSistemaRepository.save(usuariosSistemaExistente);
         log.info("UsuariosSistema atualizado com sucesso. ID: {}", usuariosSistemaAtualizado.getId());
 
-        // Atualizar vínculos com estabelecimentos
-        if (request.getEstabelecimentosIds() != null) {
-            atualizarVinculosEstabelecimentos(usuariosSistemaAtualizado, request.getEstabelecimentosIds());
-        }
-
         return usuariosSistemaMapper.toResponse(usuariosSistemaAtualizado);
     }
 
@@ -152,28 +137,15 @@ public class UsuariosSistemaServiceImpl implements UsuariosSistemaService {
         if (request == null) {
             throw new BadRequestException("Dados do usuariossistema são obrigatórios");
         }
-        if (request.getUserId() == null) {
+        if (request.getUser() == null) {
             throw new BadRequestException("ID do usuário Supabase é obrigatório");
-        }
-        if (request.getTenantId() == null) {
-            throw new BadRequestException("ID do tenant é obrigatório");
         }
         if (request.getTipoUsuario() == null) {
             throw new BadRequestException("Tipo de usuário é obrigatório");
         }
-        if (request.getEstabelecimentosIds() == null || request.getEstabelecimentosIds().isEmpty()) {
-            throw new BadRequestException("É necessário vincular o usuário a pelo menos um estabelecimento.");
-        }
     }
 
-        private void atualizarDadosUsuariosSistema(UsuariosSistema usuariosSistema, UsuariosSistemaRequest request) {
-        // Buscar tenant se foi informado
-        if (request.getTenantId() != null) {
-            Tenant tenant = tenantRepository.findById(request.getTenantId())
-                    .orElseThrow(() -> new NotFoundException("Tenant não encontrado com ID: " + request.getTenantId()));
-            usuariosSistema.setTenant(tenant);
-        }
-        
+    private void atualizarDadosUsuariosSistema(UsuariosSistema usuariosSistema, UsuariosSistemaRequest request) {
         UsuariosSistema usuariosSistemaAtualizado = usuariosSistemaMapper.fromRequest(request);
         
         // Preserva campos de controle

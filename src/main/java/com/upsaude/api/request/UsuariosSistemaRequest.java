@@ -1,13 +1,9 @@
 package com.upsaude.api.request;
 
 import com.upsaude.enums.TipoUsuarioSistemaEnum;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-
-import java.util.List;
+import java.time.OffsetDateTime;
 import java.util.UUID;
+import lombok.*;
 
 @Data
 @Builder
@@ -15,13 +11,11 @@ import java.util.UUID;
 @AllArgsConstructor
 public class UsuariosSistemaRequest {
     private UUID userId;
-    private UUID tenantId; // Tenant agora é campo direto
-    private List<UUID> estabelecimentosIds; // Alterado para lista de estabelecimentos
-    private UUID profissionalSaudeId;
-    private UUID medicoId;
-    private UUID pacienteId;
+    private UUID profissionalSaude;
+    private UUID medico;
+    private UUID paciente;
     private TipoUsuarioSistemaEnum tipoUsuario;
     private String nomeExibicao;
-    private String user; // Username para login alternativo
+    private String user;
+    private String fotoUrl;
 }
-

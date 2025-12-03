@@ -52,26 +52,23 @@ public class MedicacaoPacienteServiceImpl implements MedicacaoPacienteService {
         MedicacaoPaciente medicacaoPaciente = medicacaoPacienteMapper.fromRequest(request);
         
         // Carrega e define as entidades relacionadas
-        Paciente paciente = pacienteRepository.findById(request.getPacienteId())
-                .orElseThrow(() -> new NotFoundException("Paciente não encontrado com ID: " + request.getPacienteId()));
+        Paciente paciente = pacienteRepository.findById(request.getPaciente())
+                .orElseThrow(() -> new NotFoundException("Paciente não encontrado com ID: " + request.getPaciente()));
         medicacaoPaciente.setPaciente(paciente);
 
-        Medicacao medicacao = medicacaoRepository.findById(request.getMedicacaoId())
-                .orElseThrow(() -> new NotFoundException("Medicação não encontrada com ID: " + request.getMedicacaoId()));
+        Medicacao medicacao = medicacaoRepository.findById(request.getMedicacao())
+                .orElseThrow(() -> new NotFoundException("Medicação não encontrada com ID: " + request.getMedicacao()));
         medicacaoPaciente.setMedicacao(medicacao);
 
         // CID relacionado é opcional
-        if (request.getCidRelacionadoId() != null) {
-            CidDoencas cidRelacionado = cidDoencasRepository.findById(request.getCidRelacionadoId())
-                    .orElseThrow(() -> new NotFoundException("CID não encontrado com ID: " + request.getCidRelacionadoId()));
+        if (request.getCidRelacionado() != null) {
+            CidDoencas cidRelacionado = cidDoencasRepository.findById(request.getCidRelacionado())
+                    .orElseThrow(() -> new NotFoundException("CID não encontrado com ID: " + request.getCidRelacionado()));
             medicacaoPaciente.setCidRelacionado(cidRelacionado);
         }
 
-        if (request.getMedicacaoAtiva() != null) {
-            medicacaoPaciente.setMedicacaoAtiva(request.getMedicacaoAtiva());
-        } else {
-            medicacaoPaciente.setMedicacaoAtiva(true);
-        }
+        // medicacaoAtiva não faz parte do Request - definido como true por padrão
+        medicacaoPaciente.setMedicacaoAtiva(true);
 
         medicacaoPaciente.setActive(true);
 
@@ -154,10 +151,10 @@ public class MedicacaoPacienteServiceImpl implements MedicacaoPacienteService {
         if (request == null) {
             throw new BadRequestException("Dados da ligação paciente-medicação são obrigatórios");
         }
-        if (request.getPacienteId() == null) {
+        if (request.getPaciente() == null) {
             throw new BadRequestException("ID do paciente é obrigatório");
         }
-        if (request.getMedicacaoId() == null) {
+        if (request.getMedicacao() == null) {
             throw new BadRequestException("ID da medicação é obrigatório");
         }
     }
@@ -179,30 +176,28 @@ public class MedicacaoPacienteServiceImpl implements MedicacaoPacienteService {
         if (request.getDataFim() != null) {
             medicacaoPaciente.setDataFim(request.getDataFim());
         }
-        if (request.getMedicacaoAtiva() != null) {
-            medicacaoPaciente.setMedicacaoAtiva(request.getMedicacaoAtiva());
-        }
+        // medicacaoAtiva não faz parte do Request
         if (request.getObservacoes() != null) {
             medicacaoPaciente.setObservacoes(request.getObservacoes());
         }
 
         // Atualiza relacionamentos se fornecidos
-        if (request.getPacienteId() != null) {
-            Paciente paciente = pacienteRepository.findById(request.getPacienteId())
-                    .orElseThrow(() -> new NotFoundException("Paciente não encontrado com ID: " + request.getPacienteId()));
+        if (request.getPaciente() != null) {
+            Paciente paciente = pacienteRepository.findById(request.getPaciente())
+                    .orElseThrow(() -> new NotFoundException("Paciente não encontrado com ID: " + request.getPaciente()));
             medicacaoPaciente.setPaciente(paciente);
         }
 
-        if (request.getMedicacaoId() != null) {
-            Medicacao medicacao = medicacaoRepository.findById(request.getMedicacaoId())
-                    .orElseThrow(() -> new NotFoundException("Medicação não encontrada com ID: " + request.getMedicacaoId()));
+        if (request.getMedicacao() != null) {
+            Medicacao medicacao = medicacaoRepository.findById(request.getMedicacao())
+                    .orElseThrow(() -> new NotFoundException("Medicação não encontrada com ID: " + request.getMedicacao()));
             medicacaoPaciente.setMedicacao(medicacao);
         }
 
         // CID relacionado é opcional
-        if (request.getCidRelacionadoId() != null) {
-            CidDoencas cidRelacionado = cidDoencasRepository.findById(request.getCidRelacionadoId())
-                    .orElseThrow(() -> new NotFoundException("CID não encontrado com ID: " + request.getCidRelacionadoId()));
+        if (request.getCidRelacionado() != null) {
+            CidDoencas cidRelacionado = cidDoencasRepository.findById(request.getCidRelacionado())
+                    .orElseThrow(() -> new NotFoundException("CID não encontrado com ID: " + request.getCidRelacionado()));
             medicacaoPaciente.setCidRelacionado(cidRelacionado);
         } else {
             // Se não fornecido, remove a relação

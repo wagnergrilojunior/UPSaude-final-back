@@ -1,12 +1,10 @@
 package com.upsaude.dto;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.util.UUID;
+import lombok.*;
 
 @Data
 @Builder
@@ -14,11 +12,9 @@ import java.util.UUID;
 @AllArgsConstructor
 public class LGPDConsentimentoDTO {
     private UUID id;
-    private UUID pacienteId;
-    private Boolean autorizacaoUsoDados;
-    private Boolean autorizacaoContatoWhatsApp;
-    private Boolean autorizacaoContatoEmail;
-    private LocalDateTime dataConsentimento;
+    private OffsetDateTime createdAt;
+    private OffsetDateTime updatedAt;
     private Boolean active;
+    private PacienteDTO paciente;
+    private LocalDateTime dataConsentimento;
 }
-

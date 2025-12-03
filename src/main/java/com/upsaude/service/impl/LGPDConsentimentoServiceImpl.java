@@ -32,13 +32,13 @@ public class LGPDConsentimentoServiceImpl implements LGPDConsentimentoService {
     @Transactional
     @CacheEvict(value = "lgpdconsentimento", allEntries = true)
     public LGPDConsentimentoResponse criar(LGPDConsentimentoRequest request) {
-        log.debug("Criando consentimento LGPD para paciente: {}", request.getPacienteId());
+        log.debug("Criando consentimento LGPD para paciente: {}", request.getPaciente());
 
-        if (request.getPacienteId() == null) {
+        if (request.getPaciente() == null) {
             throw new BadRequestException("ID do paciente é obrigatório");
         }
 
-        repository.findByPacienteId(request.getPacienteId())
+        repository.findByPacienteId(request.getPaciente())
                 .ifPresent(d -> {
                     throw new ConflictException("Consentimento LGPD já existe para este paciente");
                 });
@@ -101,8 +101,8 @@ public class LGPDConsentimentoServiceImpl implements LGPDConsentimentoService {
         LGPDConsentimento entity = repository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Consentimento LGPD não encontrado com ID: " + id));
 
-        if (request.getPacienteId() != null && !request.getPacienteId().equals(entity.getPaciente().getId())) {
-            repository.findByPacienteId(request.getPacienteId())
+        if (request.getPaciente() != null && !request.getPaciente().equals(entity.getPaciente().getId())) {
+            repository.findByPacienteId(request.getPaciente())
                     .ifPresent(d -> {
                         if (!d.getId().equals(id)) {
                             throw new ConflictException("Consentimento LGPD já existe para este paciente");

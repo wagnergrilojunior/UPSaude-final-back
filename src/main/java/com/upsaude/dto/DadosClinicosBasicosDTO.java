@@ -1,11 +1,8 @@
 package com.upsaude.dto;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-
+import java.time.OffsetDateTime;
 import java.util.UUID;
+import lombok.*;
 
 @Data
 @Builder
@@ -13,13 +10,8 @@ import java.util.UUID;
 @AllArgsConstructor
 public class DadosClinicosBasicosDTO {
     private UUID id;
-    private UUID pacienteId;
-    private Boolean gestante;
-    private Boolean fumante;
-    private Boolean alcoolista;
-    private Boolean usuarioDrogas;
-    private Boolean historicoViolencia;
-    private Boolean acompanhamentoPsicossocial;
+    private OffsetDateTime createdAt;
+    private OffsetDateTime updatedAt;
     private Boolean active;
+    private PacienteDTO paciente;
 }
-

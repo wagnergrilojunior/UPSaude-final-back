@@ -150,7 +150,7 @@ public class EducacaoSaudeServiceImpl implements EducacaoSaudeService {
         if (request == null) {
             throw new BadRequestException("Dados da educação em saúde são obrigatórios");
         }
-        if (request.getProfissionalResponsavelId() == null) {
+        if (request.getProfissionalResponsavel() == null) {
             throw new BadRequestException("Profissional responsável é obrigatório");
         }
         if (request.getTipoAtividade() == null) {

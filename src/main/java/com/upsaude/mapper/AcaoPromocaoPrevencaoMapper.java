@@ -4,106 +4,60 @@ import com.upsaude.api.request.AcaoPromocaoPrevencaoRequest;
 import com.upsaude.api.response.AcaoPromocaoPrevencaoResponse;
 import com.upsaude.dto.AcaoPromocaoPrevencaoDTO;
 import com.upsaude.entity.AcaoPromocaoPrevencao;
-import com.upsaude.entity.Estabelecimentos;
 import com.upsaude.entity.EquipeSaude;
 import com.upsaude.entity.ProfissionaisSaude;
-import com.upsaude.enums.TipoAcaoPromocaoSaudeEnum;
 import com.upsaude.mapper.config.MappingConfig;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
-import org.mapstruct.Named;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
-import java.util.stream.Collectors;
+import org.mapstruct.MappingTarget;
 
 /**
- * Mapper para conversão entre AcaoPromocaoPrevencao entity, DTO, Request e Response.
- *
- * @author UPSaúde
+ * Mapper para conversões de AcaoPromocaoPrevencao.
+ * Entity ↔ DTO ↔ Request/Response
  */
-@Mapper(config = MappingConfig.class)
+@Mapper(config = MappingConfig.class, uses = {EquipeSaudeMapper.class, ProfissionaisSaudeMapper.class})
 public interface AcaoPromocaoPrevencaoMapper extends EntityMapper<AcaoPromocaoPrevencao, AcaoPromocaoPrevencaoDTO> {
 
-    @Mapping(target = "tenant", ignore = true)
-    @Mapping(target = "estabelecimento", source = "estabelecimentoId", qualifiedByName = "estabelecimentoFromId")
-    @Mapping(target = "profissionalResponsavel", source = "profissionalResponsavelId", qualifiedByName = "profissionalFromId")
-    @Mapping(target = "equipeSaude", source = "equipeSaudeId", qualifiedByName = "equipeFromId")
-    @Mapping(target = "tipoAcao", source = "tipoAcao", qualifiedByName = "tipoAcaoFromCodigo")
-    @Mapping(target = "profissionaisParticipantes", source = "profissionaisParticipantesIds", qualifiedByName = "profissionaisFromIds")
+    /**
+     * Converte DTO para Entity.
+     * O campo 'active' é ignorado (gerenciado pelo sistema).
+     */
+    @Mapping(target = "active", ignore = true)
     AcaoPromocaoPrevencao toEntity(AcaoPromocaoPrevencaoDTO dto);
 
-    @Mapping(target = "estabelecimentoId", source = "estabelecimento.id")
-    @Mapping(target = "profissionalResponsavelId", source = "profissionalResponsavel.id")
-    @Mapping(target = "equipeSaudeId", source = "equipeSaude.id")
-    @Mapping(target = "tipoAcao", source = "tipoAcao.codigo")
-    @Mapping(target = "profissionaisParticipantesIds", source = "profissionaisParticipantes", qualifiedByName = "profissionaisToIds")
+    /**
+     * Converte Entity para DTO.
+     */
     AcaoPromocaoPrevencaoDTO toDTO(AcaoPromocaoPrevencao entity);
 
+    /**
+     * Converte Request para Entity.
+     * Os campos 'id', 'createdAt', 'updatedAt', 'active' são ignorados.
+     * Relacionamentos (UUID) devem ser tratados manualmente no Service.
+     */
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
-    @Mapping(target = "tenant", ignore = true)
     @Mapping(target = "active", ignore = true)
-    @Mapping(target = "estabelecimento", source = "estabelecimentoId", qualifiedByName = "estabelecimentoFromId")
-    @Mapping(target = "profissionalResponsavel", source = "profissionalResponsavelId", qualifiedByName = "profissionalFromId")
-    @Mapping(target = "equipeSaude", source = "equipeSaudeId", qualifiedByName = "equipeFromId")
-    @Mapping(target = "tipoAcao", source = "tipoAcao", qualifiedByName = "tipoAcaoFromCodigo")
-    @Mapping(target = "profissionaisParticipantes", source = "profissionaisParticipantesIds", qualifiedByName = "profissionaisFromIds")
+    @Mapping(target = "equipeSaude", ignore = true)
+    @Mapping(target = "profissionalResponsavel", ignore = true)
     AcaoPromocaoPrevencao fromRequest(AcaoPromocaoPrevencaoRequest request);
 
-    @Mapping(target = "estabelecimentoId", source = "estabelecimento.id")
-    @Mapping(target = "profissionalResponsavelId", source = "profissionalResponsavel.id")
-    @Mapping(target = "equipeSaudeId", source = "equipeSaude.id")
-    @Mapping(target = "tipoAcao", source = "tipoAcao.codigo")
-    @Mapping(target = "tipoAcaoDescricao", source = "tipoAcao.descricao")
-    @Mapping(target = "profissionaisParticipantesIds", source = "profissionaisParticipantes", qualifiedByName = "profissionaisToIds")
+    /**
+     * Atualiza Entity existente com dados do Request.
+     * Os campos 'id', 'createdAt', 'updatedAt', 'active' são ignorados.
+     * Relacionamentos (UUID) devem ser tratados manualmente no Service.
+     */
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "createdAt", ignore = true)
+    @Mapping(target = "updatedAt", ignore = true)
+    @Mapping(target = "active", ignore = true)
+    @Mapping(target = "equipeSaude", ignore = true)
+    @Mapping(target = "profissionalResponsavel", ignore = true)
+    void updateFromRequest(AcaoPromocaoPrevencaoRequest request, @MappingTarget AcaoPromocaoPrevencao entity);
+
+    /**
+     * Converte Entity para Response.
+     */
     AcaoPromocaoPrevencaoResponse toResponse(AcaoPromocaoPrevencao entity);
-
-    @Named("estabelecimentoFromId")
-    default Estabelecimentos estabelecimentoFromId(UUID id) {
-        if (id == null) return null;
-        Estabelecimentos e = new Estabelecimentos();
-        e.setId(id);
-        return e;
-    }
-
-    @Named("profissionalFromId")
-    default ProfissionaisSaude profissionalFromId(UUID id) {
-        if (id == null) return null;
-        ProfissionaisSaude p = new ProfissionaisSaude();
-        p.setId(id);
-        return p;
-    }
-
-    @Named("equipeFromId")
-    default EquipeSaude equipeFromId(UUID id) {
-        if (id == null) return null;
-        EquipeSaude e = new EquipeSaude();
-        e.setId(id);
-        return e;
-    }
-
-    @Named("tipoAcaoFromCodigo")
-    default TipoAcaoPromocaoSaudeEnum tipoAcaoFromCodigo(Integer codigo) {
-        return TipoAcaoPromocaoSaudeEnum.fromCodigo(codigo);
-    }
-
-    @Named("profissionaisFromIds")
-    default List<ProfissionaisSaude> profissionaisFromIds(List<UUID> ids) {
-        if (ids == null) return new ArrayList<>();
-        return ids.stream().map(id -> {
-            ProfissionaisSaude p = new ProfissionaisSaude();
-            p.setId(id);
-            return p;
-        }).collect(Collectors.toList());
-    }
-
-    @Named("profissionaisToIds")
-    default List<UUID> profissionaisToIds(List<ProfissionaisSaude> profissionais) {
-        if (profissionais == null) return new ArrayList<>();
-        return profissionais.stream().map(ProfissionaisSaude::getId).collect(Collectors.toList());
-    }
 }
-

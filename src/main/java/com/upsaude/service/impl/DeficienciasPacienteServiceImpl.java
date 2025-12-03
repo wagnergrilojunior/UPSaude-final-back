@@ -49,19 +49,13 @@ public class DeficienciasPacienteServiceImpl implements DeficienciasPacienteServ
         DeficienciasPaciente deficienciasPaciente = deficienciasPacienteMapper.fromRequest(request);
         
         // Carrega e define as entidades relacionadas
-        Paciente paciente = pacienteRepository.findById(request.getPacienteId())
-                .orElseThrow(() -> new NotFoundException("Paciente não encontrado com ID: " + request.getPacienteId()));
+        Paciente paciente = pacienteRepository.findById(request.getPaciente())
+                .orElseThrow(() -> new NotFoundException("Paciente não encontrado com ID: " + request.getPaciente()));
         deficienciasPaciente.setPaciente(paciente);
 
-        Deficiencias deficiencia = deficienciasRepository.findById(request.getDeficienciaId())
-                .orElseThrow(() -> new NotFoundException("Deficiência não encontrada com ID: " + request.getDeficienciaId()));
+        Deficiencias deficiencia = deficienciasRepository.findById(request.getDeficiencia())
+                .orElseThrow(() -> new NotFoundException("Deficiência não encontrada com ID: " + request.getDeficiencia()));
         deficienciasPaciente.setDeficiencia(deficiencia);
-
-        if (request.getPossuiLaudo() != null) {
-            deficienciasPaciente.setPossuiLaudo(request.getPossuiLaudo());
-        } else {
-            deficienciasPaciente.setPossuiLaudo(false);
-        }
 
         deficienciasPaciente.setActive(true);
 
@@ -144,10 +138,10 @@ public class DeficienciasPacienteServiceImpl implements DeficienciasPacienteServ
         if (request == null) {
             throw new BadRequestException("Dados da ligação paciente-deficiência são obrigatórios");
         }
-        if (request.getPacienteId() == null) {
+        if (request.getPaciente() == null) {
             throw new BadRequestException("ID do paciente é obrigatório");
         }
-        if (request.getDeficienciaId() == null) {
+        if (request.getDeficiencia() == null) {
             throw new BadRequestException("ID da deficiência é obrigatório");
         }
     }
@@ -157,23 +151,21 @@ public class DeficienciasPacienteServiceImpl implements DeficienciasPacienteServ
         if (request.getDataDiagnostico() != null) {
             deficienciasPaciente.setDataDiagnostico(request.getDataDiagnostico());
         }
-        if (request.getPossuiLaudo() != null) {
-            deficienciasPaciente.setPossuiLaudo(request.getPossuiLaudo());
-        }
+        // possuiLaudo não faz parte do Request
         if (request.getObservacoes() != null) {
             deficienciasPaciente.setObservacoes(request.getObservacoes());
         }
 
         // Atualiza relacionamentos se fornecidos
-        if (request.getPacienteId() != null) {
-            Paciente paciente = pacienteRepository.findById(request.getPacienteId())
-                    .orElseThrow(() -> new NotFoundException("Paciente não encontrado com ID: " + request.getPacienteId()));
+        if (request.getPaciente() != null) {
+            Paciente paciente = pacienteRepository.findById(request.getPaciente())
+                    .orElseThrow(() -> new NotFoundException("Paciente não encontrado com ID: " + request.getPaciente()));
             deficienciasPaciente.setPaciente(paciente);
         }
 
-        if (request.getDeficienciaId() != null) {
-            Deficiencias deficiencia = deficienciasRepository.findById(request.getDeficienciaId())
-                    .orElseThrow(() -> new NotFoundException("Deficiência não encontrada com ID: " + request.getDeficienciaId()));
+        if (request.getDeficiencia() != null) {
+            Deficiencias deficiencia = deficienciasRepository.findById(request.getDeficiencia())
+                    .orElseThrow(() -> new NotFoundException("Deficiência não encontrada com ID: " + request.getDeficiencia()));
             deficienciasPaciente.setDeficiencia(deficiencia);
         }
     }

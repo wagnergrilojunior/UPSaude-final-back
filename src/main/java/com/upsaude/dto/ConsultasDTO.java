@@ -7,12 +7,9 @@ import com.upsaude.entity.embeddable.EncaminhamentoConsulta;
 import com.upsaude.entity.embeddable.ExamesSolicitadosConsulta;
 import com.upsaude.entity.embeddable.InformacoesConsulta;
 import com.upsaude.entity.embeddable.PrescricaoConsulta;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-
+import java.time.OffsetDateTime;
 import java.util.UUID;
+import lombok.*;
 
 @Data
 @Builder
@@ -20,11 +17,14 @@ import java.util.UUID;
 @AllArgsConstructor
 public class ConsultasDTO {
     private UUID id;
-    private UUID pacienteId;
-    private UUID medicoId;
-    private UUID profissionalSaudeId;
-    private UUID especialidadeId;
-    private UUID convenioId;
+    private OffsetDateTime createdAt;
+    private OffsetDateTime updatedAt;
+    private Boolean active;
+    private PacienteDTO paciente;
+    private MedicosDTO medico;
+    private ProfissionaisSaudeDTO profissionalSaude;
+    private EspecialidadesMedicasDTO especialidade;
+    private ConvenioDTO convenio;
     private InformacoesConsulta informacoes;
     private AnamneseConsulta anamnese;
     private DiagnosticoConsulta diagnostico;
@@ -32,8 +32,7 @@ public class ConsultasDTO {
     private ExamesSolicitadosConsulta examesSolicitados;
     private EncaminhamentoConsulta encaminhamento;
     private AtestadoConsulta atestado;
-    private UUID cidPrincipalId;
+    private CidDoencasDTO cidPrincipal;
     private String observacoes;
     private String observacoesInternas;
-    private Boolean active;
 }

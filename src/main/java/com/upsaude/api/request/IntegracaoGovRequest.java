@@ -1,19 +1,17 @@
 package com.upsaude.api.request;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.util.UUID;
+import lombok.*;
 
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class IntegracaoGovRequest {
-    private UUID pacienteId;
+    private UUID paciente;
     private UUID uuidRnds;
     private String idIntegracaoGov;
     private LocalDateTime dataSincronizacaoGov;
@@ -22,4 +20,3 @@ public class IntegracaoGovRequest {
     private String cnesEstabelecimentoOrigem;
     private String origemCadastro;
 }
-

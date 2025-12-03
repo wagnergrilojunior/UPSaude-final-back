@@ -1,10 +1,18 @@
 package com.upsaude.api.request;
 
+import java.time.OffsetDateTime;
+import java.util.UUID;
 import lombok.*;
 
 @Data
 @Builder
 @NoArgsConstructor
+@AllArgsConstructor
 public class MovimentacoesEstoqueRequest {
+    private UUID estoqueVacina;
+    private String tipoMovimento;
+    private Integer quantidade;
+    private String motivo;
+    private UUID responsavel;
+    private OffsetDateTime dataMovimento;
 }
-

@@ -6,12 +6,9 @@ import com.upsaude.entity.embeddable.ContraindicacoesPrecaucoesMedicamento;
 import com.upsaude.entity.embeddable.DosagemAdministracaoMedicamento;
 import com.upsaude.entity.embeddable.IdentificacaoMedicamento;
 import com.upsaude.entity.embeddable.RegistroControleMedicamento;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-
+import java.time.OffsetDateTime;
 import java.util.UUID;
+import lombok.*;
 
 @Data
 @Builder
@@ -19,7 +16,10 @@ import java.util.UUID;
 @AllArgsConstructor
 public class MedicacaoDTO {
     private UUID id;
-    private UUID fabricanteId;
+    private OffsetDateTime createdAt;
+    private OffsetDateTime updatedAt;
+    private Boolean active;
+    private FabricantesMedicamentoDTO fabricanteEntity;
     private IdentificacaoMedicamento identificacao;
     private DosagemAdministracaoMedicamento dosagemAdministracao;
     private ClassificacaoMedicamento classificacao;
@@ -29,5 +29,4 @@ public class MedicacaoDTO {
     private String descricao;
     private String indicacoes;
     private String observacoes;
-    private Boolean active;
 }

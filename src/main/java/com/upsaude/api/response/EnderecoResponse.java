@@ -1,13 +1,11 @@
 package com.upsaude.api.response;
 
+import com.upsaude.enums.TipoEnderecoEnum;
 import com.upsaude.enums.TipoLogradouroEnum;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-
+import com.upsaude.enums.ZonaDomicilioEnum;
 import java.time.OffsetDateTime;
 import java.util.UUID;
+import lombok.*;
 
 @Data
 @Builder
@@ -25,9 +23,20 @@ public class EnderecoResponse {
     private String bairro;
     private String cep;
     private String pais;
+    private String distrito;
+    private String pontoReferencia;
     private Double latitude;
     private Double longitude;
-    private UUID estadoId;
-    private UUID cidadeId;
+    private TipoEnderecoEnum tipoEndereco;
+    private ZonaDomicilioEnum zona;
+    private String codigoIbgeMunicipio;
+    private String microarea;
+    private String ineEquipe;
+    private String quadra;
+    private String lote;
+    private String zonaRuralDescricao;
+    private String andar;
+    private String bloco;
+    private EstadosResponse estado;
+    private CidadesResponse cidade;
 }
-

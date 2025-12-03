@@ -3,14 +3,9 @@ package com.upsaude.dto;
 import com.upsaude.enums.NaturezaJuridicaEnum;
 import com.upsaude.enums.StatusFuncionamentoEnum;
 import com.upsaude.enums.TipoEstabelecimentoEnum;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-
 import java.time.OffsetDateTime;
-import java.util.List;
 import java.util.UUID;
+import lombok.*;
 
 @Data
 @Builder
@@ -18,6 +13,9 @@ import java.util.UUID;
 @AllArgsConstructor
 public class EstabelecimentosDTO {
     private UUID id;
+    private OffsetDateTime createdAt;
+    private OffsetDateTime updatedAt;
+    private Boolean active;
     private String nome;
     private String nomeFantasia;
     private TipoEstabelecimentoEnum tipo;
@@ -25,15 +23,14 @@ public class EstabelecimentosDTO {
     private String cnpj;
     private NaturezaJuridicaEnum naturezaJuridica;
     private String registroOficial;
-    private UUID enderecoPrincipalId;
-    private List<UUID> enderecosSecundariosIds;
+    private EnderecoDTO enderecoPrincipal;
     private String telefone;
     private String telefoneSecundario;
     private String fax;
     private String email;
     private String site;
-    private UUID responsavelTecnicoId;
-    private UUID responsavelAdministrativoId;
+    private ProfissionaisSaudeDTO responsavelTecnico;
+    private ProfissionaisSaudeDTO responsavelAdministrativo;
     private String responsavelLegalNome;
     private String responsavelLegalCpf;
     private StatusFuncionamentoEnum statusFuncionamento;
@@ -53,6 +50,4 @@ public class EstabelecimentosDTO {
     private Double longitude;
     private String observacoes;
     private String dadosComplementares;
-    private Boolean active;
 }
-
