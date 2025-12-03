@@ -24,3 +24,4 @@ public interface UserService {
 
     void excluir(UUID id);
 }
+

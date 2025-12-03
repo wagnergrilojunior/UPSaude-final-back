@@ -37,10 +37,10 @@ public class AuthServiceImpl implements AuthService {
         // Determinar se é email ou user
         String emailParaLogin = loginIdentifier;
         
-        // Se não contém @, pode ser um username (user)
+        // Se não contém @, pode ser um username
         if (!loginIdentifier.contains("@")) {
-            log.debug("Identificador não contém @, tentando buscar por campo 'user'");
-            UsuariosSistema usuarioSistema = usuariosSistemaRepository.findByUser(loginIdentifier)
+            log.debug("Identificador não contém @, tentando buscar por campo 'username'");
+            UsuariosSistema usuarioSistema = usuariosSistemaRepository.findByUsername(loginIdentifier)
                     .orElse(null);
             
             if (usuarioSistema != null) {
@@ -138,7 +138,7 @@ public class AuthServiceImpl implements AuthService {
                 .pacienteId(usuarioSistema.getPaciente() != null ? usuarioSistema.getPaciente().getId() : null)
                 .adminTenant(usuarioSistema.getAdminTenant())
                 .nomeExibicao(usuarioSistema.getNomeExibicao())
-                .user(usuarioSistema.getUser())
+                .user(usuarioSistema.getUsername())
                 .fotoUrl(usuarioSistema.getFotoUrl())
                 .estabelecimentos(estabelecimentosResponse)
                 .build();

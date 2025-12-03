@@ -29,7 +29,8 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 @Entity
 @Table(name = "usuarios_sistema", schema = "public",
        uniqueConstraints = {
-           @UniqueConstraint(name = "uk_usuarios_sistema_user_tenant", columnNames = {"user_id", "tenant_id"})
+           @UniqueConstraint(name = "uk_usuarios_sistema_user_tenant", columnNames = {"user_id", "tenant_id"}),
+           @UniqueConstraint(name = "uk_usuarios_sistema_username", columnNames = {"username"})
        },
        indexes = {
            @Index(name = "idx_usuarios_sistema_user", columnList = "user_id")
@@ -87,11 +88,18 @@ public class UsuariosSistema {
     @NotNull(message = "Admin tenant é obrigatório")
     private Boolean adminTenant = false;
 
+    /**
+     * Tipo de vínculo do usuário: MEDICO, PROFISSIONAL, PACIENTE, OUTROS.
+     * Define qual tipo de relacionamento o usuário tem e quais abas aparecem no formulário.
+     */
+    @Column(name = "tipo_vinculo", length = 50)
+    private String tipoVinculo; // Valores: MEDICO, PROFISSIONAL, PACIENTE, OUTROS
+
     @Column(name = "nome_exibicao", length = 255)
     private String nomeExibicao;
 
-    @Column(name = "user", length = 100, unique = true)
-    private String user; // Campo para login alternativo (username)
+    @Column(name = "username", length = 100, unique = true)
+    private String username; // Campo para login alternativo
 
     @Column(name = "foto_url", columnDefinition = "TEXT")
     private String fotoUrl; // URL da foto no Supabase Storage
