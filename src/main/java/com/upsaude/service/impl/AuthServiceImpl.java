@@ -4,12 +4,10 @@ import com.upsaude.api.request.LoginRequest;
 import com.upsaude.api.response.LoginResponse;
 import com.upsaude.api.response.UsuarioSistemaInfoResponse;
 import com.upsaude.entity.UsuarioEstabelecimento;
-import com.upsaude.entity.UsuariosPerfis;
 import com.upsaude.entity.UsuariosSistema;
 import com.upsaude.integration.supabase.SupabaseAuthResponse;
 import com.upsaude.integration.supabase.SupabaseAuthService;
 import com.upsaude.repository.UsuarioEstabelecimentoRepository;
-import com.upsaude.repository.UsuariosPerfisRepository;
 import com.upsaude.repository.UsuariosSistemaRepository;
 import com.upsaude.service.AuthService;
 import lombok.RequiredArgsConstructor;
@@ -30,7 +28,6 @@ public class AuthServiceImpl implements AuthService {
     private final SupabaseAuthService supabaseAuthService;
     private final UsuariosSistemaRepository usuariosSistemaRepository;
     private final UsuarioEstabelecimentoRepository usuarioEstabelecimentoRepository;
-    private final UsuariosPerfisRepository usuariosPerfisRepository;
 
     @Override
     public LoginResponse login(LoginRequest request) {
@@ -99,7 +96,7 @@ public class AuthServiceImpl implements AuthService {
     }
     
     /**
-     * Busca todas as informações do usuário no sistema, incluindo estabelecimentos e perfis.
+     * Busca todas as informações do usuário no sistema, incluindo estabelecimentos.
      */
     private UsuarioSistemaInfoResponse buscarInformacoesUsuarioSistema(UUID userId) {
         log.debug("Buscando informações do usuário sistema para userId: {}", userId);
@@ -116,31 +113,14 @@ public class AuthServiceImpl implements AuthService {
         List<UsuarioEstabelecimento> estabelecimentosVinculados = 
                 usuarioEstabelecimentoRepository.findByUsuarioUserId(userId);
         
-        // Montar lista de estabelecimentos com seus perfis
-        List<UsuarioSistemaInfoResponse.EstabelecimentoComPerfisResponse> estabelecimentosComPerfis = 
+        // Montar lista de estabelecimentos vinculados com seus tipos de acesso
+        List<UsuarioSistemaInfoResponse.EstabelecimentoVinculoResponse> estabelecimentosResponse = 
                 estabelecimentosVinculados.stream()
-                        .map(ue -> {
-                            UUID estabelecimentoId = ue.getEstabelecimento().getId();
-                            
-                            // Buscar perfis para este estabelecimento
-                            List<UsuariosPerfis> perfis = usuariosPerfisRepository
-                                    .findByUsuarioUserIdAndEstabelecimentoId(userId, estabelecimentoId);
-                            
-                            List<UsuarioSistemaInfoResponse.PerfilResponse> perfisResponse = perfis.stream()
-                                    .map(up -> UsuarioSistemaInfoResponse.PerfilResponse.builder()
-                                            .papelId(up.getPapel().getId())
-                                            .papelNome(up.getPapel().getNome())
-                                            .papelSlug(up.getPapel().getSlug())
-                                            .escopo(up.getEscopo())
-                                            .build())
-                                    .collect(Collectors.toList());
-                            
-                            return UsuarioSistemaInfoResponse.EstabelecimentoComPerfisResponse.builder()
-                                    .estabelecimentoId(estabelecimentoId)
-                                    .estabelecimentoNome(ue.getEstabelecimento().getNome())
-                                    .perfis(perfisResponse)
-                                    .build();
-                        })
+                        .map(ue -> UsuarioSistemaInfoResponse.EstabelecimentoVinculoResponse.builder()
+                                .estabelecimentoId(ue.getEstabelecimento().getId())
+                                .estabelecimentoNome(ue.getEstabelecimento().getNome())
+                                .tipoUsuario(ue.getTipoUsuario())
+                                .build())
                         .collect(Collectors.toList());
         
         // Montar resposta completa
@@ -156,15 +136,15 @@ public class AuthServiceImpl implements AuthService {
                 .profissionalSaudeId(usuarioSistema.getProfissionalSaude() != null ? usuarioSistema.getProfissionalSaude().getId() : null)
                 .medicoId(usuarioSistema.getMedico() != null ? usuarioSistema.getMedico().getId() : null)
                 .pacienteId(usuarioSistema.getPaciente() != null ? usuarioSistema.getPaciente().getId() : null)
-                .tipoUsuario(usuarioSistema.getTipoUsuario())
+                .adminTenant(usuarioSistema.getAdminTenant())
                 .nomeExibicao(usuarioSistema.getNomeExibicao())
                 .user(usuarioSistema.getUser())
                 .fotoUrl(usuarioSistema.getFotoUrl())
-                .estabelecimentos(estabelecimentosComPerfis)
+                .estabelecimentos(estabelecimentosResponse)
                 .build();
         
         log.debug("Informações do usuário sistema carregadas: {} estabelecimentos, tenant: {}", 
-                estabelecimentosComPerfis.size(), response.getTenantNome());
+                estabelecimentosResponse.size(), response.getTenantNome());
         
         return response;
     }

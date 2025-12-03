@@ -1,6 +1,5 @@
 package com.upsaude.api.response;
 
-import com.upsaude.enums.TipoUsuarioSistemaEnum;
 import java.time.OffsetDateTime;
 import java.util.UUID;
 import lombok.*;
@@ -18,7 +17,7 @@ public class UsuariosSistemaResponse {
     private ProfissionaisSaudeResponse profissionalSaude;
     private MedicosResponse medico;
     private PacienteResponse paciente;
-    private TipoUsuarioSistemaEnum tipoUsuario;
+    private Boolean adminTenant;
     private String nomeExibicao;
     private String user;
     private String fotoUrl;

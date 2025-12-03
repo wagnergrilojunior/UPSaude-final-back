@@ -1,6 +1,5 @@
 package com.upsaude.dto;
 
-import com.upsaude.enums.TipoUsuarioSistemaEnum;
 import java.time.OffsetDateTime;
 import java.util.UUID;
 import lombok.*;
@@ -18,7 +17,7 @@ public class UsuariosSistemaDTO {
     private ProfissionaisSaudeDTO profissionalSaude;
     private MedicosDTO medico;
     private PacienteDTO paciente;
-    private TipoUsuarioSistemaEnum tipoUsuario;
+    private Boolean adminTenant;
     private String nomeExibicao;
     private String user;
     private String fotoUrl;
