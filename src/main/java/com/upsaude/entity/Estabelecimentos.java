@@ -3,6 +3,7 @@ package com.upsaude.entity;
 import com.upsaude.enums.NaturezaJuridicaEnum;
 import com.upsaude.enums.StatusFuncionamentoEnum;
 import com.upsaude.enums.TipoEstabelecimentoEnum;
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -87,8 +88,11 @@ public class Estabelecimentos extends BaseEntityWithoutEstabelecimento {
     @JoinColumn(name = "endereco_principal_id")
     private Endereco enderecoPrincipal;
 
-    // Endereços secundários (para casos de múltiplas unidades no mesmo estabelecimento)
-    @OneToMany(fetch = FetchType.LAZY)
+    /**
+     * Endereços secundários (para casos de múltiplas unidades no mesmo estabelecimento).
+     * Cascade PERSIST/MERGE para gerenciar associações.
+     */
+    @OneToMany(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @jakarta.persistence.JoinTable(
         name = "estabelecimentos_enderecos_secundarios",
         schema = "public",
@@ -186,16 +190,32 @@ public class Estabelecimentos extends BaseEntityWithoutEstabelecimento {
 
     // ========== ESPECIALIDADES E SERVIÇOS ==========
     
-    @OneToMany(fetch = FetchType.LAZY, mappedBy = "estabelecimento")
+    /**
+     * Serviços oferecidos pelo estabelecimento.
+     * OneToMany bidirecional com cascade completo - JPA gerencia automaticamente.
+     */
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "estabelecimento", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ServicosEstabelecimento> servicos = new ArrayList<>();
 
-    @OneToMany(fetch = FetchType.LAZY, mappedBy = "estabelecimento")
+    /**
+     * Equipamentos do estabelecimento.
+     * OneToMany bidirecional com cascade completo - JPA gerencia automaticamente.
+     */
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "estabelecimento", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<EquipamentosEstabelecimento> equipamentos = new ArrayList<>();
 
-    @OneToMany(fetch = FetchType.LAZY, mappedBy = "estabelecimento")
+    /**
+     * Infraestrutura do estabelecimento.
+     * OneToMany bidirecional com cascade completo - JPA gerencia automaticamente.
+     */
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "estabelecimento", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<InfraestruturaEstabelecimento> infraestrutura = new ArrayList<>();
 
-    @OneToMany(fetch = FetchType.LAZY, mappedBy = "estabelecimento")
+    /**
+     * Equipes de saúde do estabelecimento.
+     * OneToMany bidirecional com cascade completo - JPA gerencia automaticamente.
+     */
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "estabelecimento", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<EquipeSaude> equipes = new ArrayList<>();
 
     // ========== GEOLOCALIZAÇÃO ==========

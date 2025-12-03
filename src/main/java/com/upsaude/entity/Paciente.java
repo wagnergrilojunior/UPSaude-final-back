@@ -108,7 +108,13 @@ public class Paciente extends BaseEntityWithoutTenant {
     @Column(name = "observacoes", columnDefinition = "TEXT")
     private String observacoes;
 
-    @OneToMany(fetch = FetchType.LAZY)
+    /**
+     * Endereços do paciente.
+     * Relacionamento OneToMany usando JoinTable.
+     * Usa cascade PERSIST e MERGE para gerenciar endereços associados,
+     * mas não remove endereços que podem ser compartilhados.
+     */
+    @OneToMany(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinTable(
         name = "pacientes_enderecos",
         schema = "public",
@@ -217,24 +223,44 @@ public class Paciente extends BaseEntityWithoutTenant {
     @Column(name = "acompanhado_por_equipe_esf", nullable = false)
     private Boolean acompanhadoPorEquipeEsf = false;
 
-    /** Dados sociodemográficos do paciente */
-    @OneToOne(mappedBy = "paciente", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    /** 
+     * Dados sociodemográficos do paciente.
+     * Relacionamento OneToOne bidirecional com cascade completo e remoção de órfãos.
+     * O JPA gerencia automaticamente a persistência e sincronização.
+     */
+    @OneToOne(mappedBy = "paciente", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
     private DadosSociodemograficos dadosSociodemograficos;
 
-    /** Dados clínicos básicos do paciente */
-    @OneToOne(mappedBy = "paciente", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    /** 
+     * Dados clínicos básicos do paciente.
+     * Relacionamento OneToOne bidirecional com cascade completo e remoção de órfãos.
+     * O JPA gerencia automaticamente a persistência e sincronização.
+     */
+    @OneToOne(mappedBy = "paciente", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
     private DadosClinicosBasicos dadosClinicosBasicos;
 
-    /** Responsável legal do paciente */
-    @OneToOne(mappedBy = "paciente", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    /** 
+     * Responsável legal do paciente.
+     * Relacionamento OneToOne bidirecional com cascade completo e remoção de órfãos.
+     * O JPA gerencia automaticamente a persistência e sincronização.
+     */
+    @OneToOne(mappedBy = "paciente", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
     private ResponsavelLegal responsavelLegal;
 
-    /** Consentimentos LGPD do paciente */
-    @OneToOne(mappedBy = "paciente", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    /** 
+     * Consentimentos LGPD do paciente.
+     * Relacionamento OneToOne bidirecional com cascade completo e remoção de órfãos.
+     * O JPA gerencia automaticamente a persistência e sincronização.
+     */
+    @OneToOne(mappedBy = "paciente", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
     private LGPDConsentimento lgpdConsentimento;
 
-    /** Informações de integração com sistemas governamentais */
-    @OneToOne(mappedBy = "paciente", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    /** 
+     * Informações de integração com sistemas governamentais.
+     * Relacionamento OneToOne bidirecional com cascade completo e remoção de órfãos.
+     * O JPA gerencia automaticamente a persistência e sincronização.
+     */
+    @OneToOne(mappedBy = "paciente", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
     private IntegracaoGov integracaoGov;
 
 }
