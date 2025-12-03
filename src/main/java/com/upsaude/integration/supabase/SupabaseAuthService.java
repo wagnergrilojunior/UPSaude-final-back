@@ -198,6 +198,215 @@ public class SupabaseAuthService {
     }
 
     /**
+     * Cria um novo usuário no Supabase Auth usando service_role key (admin).
+     * Este método permite criar usuários sem necessidade de confirmação de email.
+     *
+     * @param email Email do usuário
+     * @param password Senha do usuário
+     * @return Informações do usuário criado
+     * @throws RuntimeException se houver erro na criação
+     */
+    public SupabaseAuthResponse.User signUp(String email, String password) {
+        String baseUrl = supabaseConfig.getUrl();
+        if (baseUrl == null || baseUrl.isEmpty()) {
+            log.error("URL do Supabase não configurada!");
+            throw new RuntimeException("Configuração do Supabase inválida: URL não definida");
+        }
+        
+        // Remover barra final se existir
+        if (baseUrl.endsWith("/")) {
+            baseUrl = baseUrl.substring(0, baseUrl.length() - 1);
+        }
+        
+        String url = baseUrl + "/auth/v1/admin/users";
+        
+        log.debug("Criando novo usuário no Supabase Auth. URL: {}, Email: {}", url, email);
+        
+        // Preparar headers com service_role key (permissão admin)
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.set("apikey", supabaseConfig.getServiceRoleKey());
+        headers.set("Authorization", "Bearer " + supabaseConfig.getServiceRoleKey());
+        
+        // Preparar body
+        Map<String, Object> requestBody = new HashMap<>();
+        requestBody.put("email", email);
+        requestBody.put("password", password);
+        requestBody.put("email_confirm", true); // Auto-confirma o email
+        
+        HttpEntity<Map<String, Object>> request = new HttpEntity<>(requestBody, headers);
+        
+        try {
+            log.debug("Enviando requisição de criação de usuário para: {}", url);
+            ResponseEntity<SupabaseAuthResponse.User> response = restTemplate.exchange(
+                    url,
+                    HttpMethod.POST,
+                    request,
+                    SupabaseAuthResponse.User.class
+            );
+            
+            if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
+                log.info("Usuário criado com sucesso no Supabase Auth: {}", email);
+                return response.getBody();
+            }
+            
+            log.warn("Falha ao criar usuário - Status: {}, Body: {}", 
+                    response.getStatusCode(), response.getBody());
+            throw new RuntimeException("Falha ao criar usuário no Supabase Auth");
+            
+        } catch (HttpClientErrorException e) {
+            log.error("Erro HTTP ao criar usuário - Status: {}, Body: {}", 
+                    e.getStatusCode(), e.getResponseBodyAsString());
+            
+            String errorMessage = "Erro ao criar usuário: ";
+            if (e.getResponseBodyAsString().contains("already registered")) {
+                errorMessage = "Email já cadastrado";
+            } else if (e.getResponseBodyAsString().contains("password")) {
+                errorMessage = "Senha inválida (mínimo 6 caracteres)";
+            }
+            
+            throw new RuntimeException(errorMessage + e.getMessage());
+        } catch (Exception e) {
+            log.error("Erro inesperado ao criar usuário no Supabase Auth", e);
+            throw new RuntimeException("Erro ao criar usuário: " + e.getMessage(), e);
+        }
+    }
+
+    /**
+     * Atualiza um usuário no Supabase Auth usando service_role key (admin).
+     * Permite atualizar email e outros metadados.
+     *
+     * @param userId ID do usuário
+     * @param email Novo email
+     * @return Informações do usuário atualizado
+     * @throws RuntimeException se houver erro na atualização
+     */
+    public SupabaseAuthResponse.User updateUser(java.util.UUID userId, String email) {
+        String baseUrl = supabaseConfig.getUrl();
+        if (baseUrl == null || baseUrl.isEmpty()) {
+            log.error("URL do Supabase não configurada!");
+            throw new RuntimeException("Configuração do Supabase inválida: URL não definida");
+        }
+        
+        // Remover barra final se existir
+        if (baseUrl.endsWith("/")) {
+            baseUrl = baseUrl.substring(0, baseUrl.length() - 1);
+        }
+        
+        String url = baseUrl + "/auth/v1/admin/users/" + userId;
+        
+        log.debug("Atualizando usuário no Supabase Auth. URL: {}, UserID: {}, Email: {}", url, userId, email);
+        
+        // Preparar headers com service_role key (permissão admin)
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.set("apikey", supabaseConfig.getServiceRoleKey());
+        headers.set("Authorization", "Bearer " + supabaseConfig.getServiceRoleKey());
+        
+        // Preparar body
+        Map<String, Object> requestBody = new HashMap<>();
+        requestBody.put("email", email);
+        
+        HttpEntity<Map<String, Object>> request = new HttpEntity<>(requestBody, headers);
+        
+        try {
+            log.debug("Enviando requisição de atualização de usuário para: {}", url);
+            ResponseEntity<SupabaseAuthResponse.User> response = restTemplate.exchange(
+                    url,
+                    HttpMethod.PUT,
+                    request,
+                    SupabaseAuthResponse.User.class
+            );
+            
+            if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
+                log.info("Usuário atualizado com sucesso no Supabase Auth: {}", email);
+                return response.getBody();
+            }
+            
+            log.warn("Falha ao atualizar usuário - Status: {}, Body: {}", 
+                    response.getStatusCode(), response.getBody());
+            throw new RuntimeException("Falha ao atualizar usuário no Supabase Auth");
+            
+        } catch (HttpClientErrorException e) {
+            log.error("Erro HTTP ao atualizar usuário - Status: {}, Body: {}", 
+                    e.getStatusCode(), e.getResponseBodyAsString());
+            
+            String errorMessage = "Erro ao atualizar usuário: ";
+            if (e.getResponseBodyAsString().contains("already registered")) {
+                errorMessage = "Email já está em uso por outro usuário";
+            }
+            
+            throw new RuntimeException(errorMessage + e.getMessage());
+        } catch (Exception e) {
+            log.error("Erro inesperado ao atualizar usuário no Supabase Auth", e);
+            throw new RuntimeException("Erro ao atualizar usuário: " + e.getMessage(), e);
+        }
+    }
+
+    /**
+     * Deleta um usuário no Supabase Auth usando service_role key (admin).
+     * Remove o usuário permanentemente do sistema de autenticação.
+     *
+     * @param userId ID do usuário a ser deletado
+     * @throws RuntimeException se houver erro na exclusão
+     */
+    public void deleteUser(java.util.UUID userId) {
+        String baseUrl = supabaseConfig.getUrl();
+        if (baseUrl == null || baseUrl.isEmpty()) {
+            log.error("URL do Supabase não configurada!");
+            throw new RuntimeException("Configuração do Supabase inválida: URL não definida");
+        }
+        
+        // Remover barra final se existir
+        if (baseUrl.endsWith("/")) {
+            baseUrl = baseUrl.substring(0, baseUrl.length() - 1);
+        }
+        
+        String url = baseUrl + "/auth/v1/admin/users/" + userId;
+        
+        log.debug("Deletando usuário no Supabase Auth. URL: {}, UserID: {}", url, userId);
+        
+        // Preparar headers com service_role key (permissão admin)
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("apikey", supabaseConfig.getServiceRoleKey());
+        headers.set("Authorization", "Bearer " + supabaseConfig.getServiceRoleKey());
+        
+        HttpEntity<Void> request = new HttpEntity<>(headers);
+        
+        try {
+            log.debug("Enviando requisição de exclusão de usuário para: {}", url);
+            ResponseEntity<Void> response = restTemplate.exchange(
+                    url,
+                    HttpMethod.DELETE,
+                    request,
+                    Void.class
+            );
+            
+            if (response.getStatusCode().is2xxSuccessful()) {
+                log.info("Usuário deletado com sucesso no Supabase Auth: {}", userId);
+                return;
+            }
+            
+            log.warn("Falha ao deletar usuário - Status: {}", response.getStatusCode());
+            throw new RuntimeException("Falha ao deletar usuário no Supabase Auth");
+            
+        } catch (HttpClientErrorException e) {
+            log.error("Erro HTTP ao deletar usuário - Status: {}, Body: {}", 
+                    e.getStatusCode(), e.getResponseBodyAsString());
+            
+            if (e.getStatusCode() == HttpStatus.NOT_FOUND) {
+                log.warn("Usuário não encontrado no Supabase Auth: {}", userId);
+                return; // Considera como sucesso se já foi deletado
+            }
+            
+            throw new RuntimeException("Erro ao deletar usuário: " + e.getMessage());
+        } catch (Exception e) {
+            log.error("Erro inesperado ao deletar usuário no Supabase Auth", e);
+            throw new RuntimeException("Erro ao deletar usuário: " + e.getMessage(), e);
+        }
+    }
+
+    /**
      * Busca um usuário no Supabase Auth pelo ID usando service_role key.
      * Útil para buscar email quando temos apenas o userId.
      *

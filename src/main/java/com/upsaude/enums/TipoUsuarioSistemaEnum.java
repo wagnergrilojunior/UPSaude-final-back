@@ -14,8 +14,10 @@ import java.util.Optional;
 public enum TipoUsuarioSistemaEnum {
     
     // Administrativo
-    ADMIN_TENANT(1, "ADMIN_TENANT", "Administrador do Tenant", "Acesso total ao tenant com permissões administrativas completas"),
-    GESTOR(2, "GESTOR", "Gestor", "Gestão operacional e administrativa do estabelecimento"),
+    ADMIN_TENANT(1, "ADMIN_TENANT", "Administrador da Organização", "Acesso total à organização com permissões administrativas completas"),
+    GERENTE(2, "GERENTE", "Gerente da Organização", "Gestão operacional e administrativa da organização"),
+    ADMIN_ESTABELECIMENTO(3, "ADMIN_ESTABELECIMENTO", "Administrador do Estabelecimento", "Acesso administrativo completo ao estabelecimento"),
+    GERENTE_ESTABELECIMENTO(4, "GERENTE_ESTABELECIMENTO", "Gerente do Estabelecimento", "Gestão operacional do estabelecimento"),
     
     // Atendimento e Recepção
     RECEPCIONISTA(10, "RECEPCIONISTA", "Recepcionista", "Atendimento ao público e agendamentos"),
@@ -28,10 +30,16 @@ public enum TipoUsuarioSistemaEnum {
     FARMACEUTICO(23, "FARMACEUTICO", "Farmacêutico", "Profissional farmacêutico"),
     FISIOTERAPEUTA(24, "FISIOTERAPEUTA", "Fisioterapeuta", "Profissional de fisioterapia"),
     PSICOLOGO(25, "PSICOLOGO", "Psicólogo", "Profissional de psicologia"),
-    PROFISSIONAL_SAUDE(26, "PROFISSIONAL_SAUDE", "Profissional de Saúde", "Outros profissionais de saúde"),
+    NUTRICIONISTA(26, "NUTRICIONISTA", "Nutricionista", "Profissional de nutrição"),
+    DENTISTA(27, "DENTISTA", "Dentista", "Cirurgião dentista"),
+    TERAPEUTA_OCUPACIONAL(28, "TERAPEUTA_OCUPACIONAL", "Terapeuta Ocupacional", "Profissional de terapia ocupacional"),
+    FONOAUDIOLOGO(29, "FONOAUDIOLOGO", "Fonoaudiólogo", "Profissional de fonoaudiologia"),
+    BIOMEDICO(30, "BIOMEDICO", "Biomédico", "Profissional biomédico"),
+    ASSISTENTE_SOCIAL(31, "ASSISTENTE_SOCIAL", "Assistente Social", "Profissional de serviço social"),
+    PROFISSIONAL_SAUDE(32, "PROFISSIONAL_SAUDE", "Profissional de Saúde", "Outros profissionais de saúde"),
     
     // Paciente
-    PACIENTE(30, "PACIENTE", "Paciente", "Usuário paciente do sistema"),
+    PACIENTE(40, "PACIENTE", "Paciente", "Usuário paciente do sistema"),
     
     // Outros
     OUTRO(99, "OUTRO", "Outro", "Outros tipos de usuário");
@@ -93,7 +101,8 @@ public enum TipoUsuarioSistemaEnum {
      * Verifica se é um tipo administrativo
      */
     public boolean isAdministrativo() {
-        return this == ADMIN_TENANT || this == GESTOR;
+        return this == ADMIN_TENANT || this == GERENTE || 
+               this == ADMIN_ESTABELECIMENTO || this == GERENTE_ESTABELECIMENTO;
     }
 
     /**
@@ -102,6 +111,8 @@ public enum TipoUsuarioSistemaEnum {
     public boolean isProfissionalSaude() {
         return this == MEDICO || this == ENFERMEIRO || this == TECNICO_ENFERMAGEM ||
                this == FARMACEUTICO || this == FISIOTERAPEUTA || this == PSICOLOGO ||
+               this == NUTRICIONISTA || this == DENTISTA || this == TERAPEUTA_OCUPACIONAL ||
+               this == FONOAUDIOLOGO || this == BIOMEDICO || this == ASSISTENTE_SOCIAL ||
                this == PROFISSIONAL_SAUDE;
     }
 
