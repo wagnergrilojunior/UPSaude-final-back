@@ -3,78 +3,64 @@ package com.upsaude.mapper;
 import com.upsaude.api.request.VacinacoesRequest;
 import com.upsaude.api.response.VacinacoesResponse;
 import com.upsaude.dto.VacinacoesDTO;
-import com.upsaude.entity.Estabelecimentos;
+import com.upsaude.entity.Vacinacoes;
 import com.upsaude.entity.FabricantesVacina;
 import com.upsaude.entity.Paciente;
-import com.upsaude.entity.Vacinacoes;
 import com.upsaude.entity.Vacinas;
 import com.upsaude.mapper.config.MappingConfig;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
-import org.mapstruct.Named;
+import org.mapstruct.MappingTarget;
 
-import java.util.UUID;
-
-@Mapper(config = MappingConfig.class)
+/**
+ * Mapper para conversões de Vacinacoes.
+ * Entity ↔ DTO ↔ Request/Response
+ */
+@Mapper(config = MappingConfig.class, uses = {FabricantesVacinaMapper.class, PacienteMapper.class, VacinasMapper.class})
 public interface VacinacoesMapper extends EntityMapper<Vacinacoes, VacinacoesDTO> {
 
-    @Mapping(target = "tenant", ignore = true)
-    @Mapping(target = "estabelecimento", source = "estabelecimentoId", qualifiedByName = "estabelecimentoFromId")
-    @Mapping(target = "paciente", source = "pacienteId", qualifiedByName = "pacienteFromId")
-    @Mapping(target = "vacina", source = "vacinaId", qualifiedByName = "vacinaFromId")
-    @Mapping(target = "fabricante", source = "fabricanteId", qualifiedByName = "fabricanteFromId")
+    /**
+     * Converte DTO para Entity.
+     * O campo 'active' é ignorado (gerenciado pelo sistema).
+     */
+    @Mapping(target = "active", ignore = true)
     Vacinacoes toEntity(VacinacoesDTO dto);
 
-    @Mapping(target = "estabelecimentoId", source = "estabelecimento.id")
-    @Mapping(target = "pacienteId", source = "paciente.id")
-    @Mapping(target = "vacinaId", source = "vacina.id")
-    @Mapping(target = "fabricanteId", source = "fabricante.id")
+    /**
+     * Converte Entity para DTO.
+     */
     VacinacoesDTO toDTO(Vacinacoes entity);
 
-    @Mapping(target = "tenant", ignore = true)
+    /**
+     * Converte Request para Entity.
+     * Os campos 'id', 'createdAt', 'updatedAt', 'active' são ignorados.
+     * Relacionamentos (UUID) devem ser tratados manualmente no Service.
+     */
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "createdAt", ignore = true)
+    @Mapping(target = "updatedAt", ignore = true)
     @Mapping(target = "active", ignore = true)
-    @Mapping(target = "estabelecimento", source = "estabelecimentoId", qualifiedByName = "estabelecimentoFromId")
-    @Mapping(target = "paciente", source = "pacienteId", qualifiedByName = "pacienteFromId")
-    @Mapping(target = "vacina", source = "vacinaId", qualifiedByName = "vacinaFromId")
-    @Mapping(target = "fabricante", source = "fabricanteId", qualifiedByName = "fabricanteFromId")
+    @Mapping(target = "fabricante", ignore = true)
+    @Mapping(target = "paciente", ignore = true)
+    @Mapping(target = "vacina", ignore = true)
     Vacinacoes fromRequest(VacinacoesRequest request);
 
-    @Mapping(target = "estabelecimentoId", source = "estabelecimento.id")
-    @Mapping(target = "pacienteId", source = "paciente.id")
-    @Mapping(target = "vacinaId", source = "vacina.id")
-    @Mapping(target = "fabricanteId", source = "fabricante.id")
+    /**
+     * Atualiza Entity existente com dados do Request.
+     * Os campos 'id', 'createdAt', 'updatedAt', 'active' são ignorados.
+     * Relacionamentos (UUID) devem ser tratados manualmente no Service.
+     */
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "createdAt", ignore = true)
+    @Mapping(target = "updatedAt", ignore = true)
+    @Mapping(target = "active", ignore = true)
+    @Mapping(target = "fabricante", ignore = true)
+    @Mapping(target = "paciente", ignore = true)
+    @Mapping(target = "vacina", ignore = true)
+    void updateFromRequest(VacinacoesRequest request, @MappingTarget Vacinacoes entity);
+
+    /**
+     * Converte Entity para Response.
+     */
     VacinacoesResponse toResponse(Vacinacoes entity);
-
-    @Named("estabelecimentoFromId")
-    default Estabelecimentos estabelecimentoFromId(UUID id) {
-        if (id == null) return null;
-        Estabelecimentos e = new Estabelecimentos();
-        e.setId(id);
-        return e;
-    }
-
-    @Named("pacienteFromId")
-    default Paciente pacienteFromId(UUID id) {
-        if (id == null) return null;
-        Paciente p = new Paciente();
-        p.setId(id);
-        return p;
-    }
-
-    @Named("vacinaFromId")
-    default Vacinas vacinaFromId(UUID id) {
-        if (id == null) return null;
-        Vacinas v = new Vacinas();
-        v.setId(id);
-        return v;
-    }
-
-    @Named("fabricanteFromId")
-    default FabricantesVacina fabricanteFromId(UUID id) {
-        if (id == null) return null;
-        FabricantesVacina fv = new FabricantesVacina();
-        fv.setId(id);
-        return fv;
-    }
 }
-

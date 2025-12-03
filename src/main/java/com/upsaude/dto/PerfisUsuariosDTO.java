@@ -1,7 +1,8 @@
 package com.upsaude.dto;
 
-import lombok.*;
+import java.time.OffsetDateTime;
 import java.util.UUID;
+import lombok.*;
 
 @Data
 @Builder
@@ -9,6 +10,8 @@ import java.util.UUID;
 @AllArgsConstructor
 public class PerfisUsuariosDTO {
     private UUID id;
+    private OffsetDateTime createdAt;
+    private OffsetDateTime updatedAt;
     private Boolean active;
+    private UUID usuarioId;
 }
-

@@ -1,19 +1,28 @@
 package com.upsaude.dto;
 
-import lombok.*;
+import com.upsaude.enums.FrequenciaMedicacaoEnum;
+import com.upsaude.enums.ViaAdministracaoEnum;
+import java.time.LocalDate;
+import java.time.OffsetDateTime;
 import java.util.UUID;
+import lombok.*;
 
-/**
- * DTO (Data Transfer Object) para Medicações de Paciente.
- *
- * @author UPSaúde
- */
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class MedicacaoPacienteDTO {
     private UUID id;
+    private OffsetDateTime createdAt;
+    private OffsetDateTime updatedAt;
     private Boolean active;
+    private PacienteDTO paciente;
+    private MedicacaoDTO medicacao;
+    private String dose;
+    private FrequenciaMedicacaoEnum frequencia;
+    private ViaAdministracaoEnum via;
+    private CidDoencasDTO cidRelacionado;
+    private LocalDate dataInicio;
+    private LocalDate dataFim;
+    private String observacoes;
 }
-

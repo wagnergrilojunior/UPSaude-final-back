@@ -41,15 +41,15 @@ public class MedicaoClinicaServiceImpl implements MedicaoClinicaService {
     @Transactional
     @CacheEvict(value = "medicaoclinica", allEntries = true)
     public MedicaoClinicaResponse criar(MedicaoClinicaRequest request) {
-        log.debug("Criando nova medição clínica para paciente: {}", request.getPacienteId());
+        log.debug("Criando nova medição clínica para paciente: {}", request.getPaciente());
 
         validarDadosBasicos(request);
 
         MedicaoClinica medicaoClinica = medicaoClinicaMapper.fromRequest(request);
 
         // Carrega e define o paciente
-        Paciente paciente = pacienteRepository.findById(request.getPacienteId())
-                .orElseThrow(() -> new NotFoundException("Paciente não encontrado com ID: " + request.getPacienteId()));
+        Paciente paciente = pacienteRepository.findById(request.getPaciente())
+                .orElseThrow(() -> new NotFoundException("Paciente não encontrado com ID: " + request.getPaciente()));
         medicaoClinica.setPaciente(paciente);
 
         // Calcula IMC se peso e altura forem fornecidos
@@ -152,7 +152,7 @@ public class MedicaoClinicaServiceImpl implements MedicaoClinicaService {
         if (request == null) {
             throw new BadRequestException("Dados da medição clínica são obrigatórios");
         }
-        if (request.getPacienteId() == null) {
+        if (request.getPaciente() == null) {
             throw new BadRequestException("ID do paciente é obrigatório");
         }
         if (request.getDataHora() == null) {
@@ -209,9 +209,9 @@ public class MedicaoClinicaServiceImpl implements MedicaoClinicaService {
         }
 
         // Atualiza relacionamento com paciente se fornecido
-        if (request.getPacienteId() != null) {
-            Paciente paciente = pacienteRepository.findById(request.getPacienteId())
-                    .orElseThrow(() -> new NotFoundException("Paciente não encontrado com ID: " + request.getPacienteId()));
+        if (request.getPaciente() != null) {
+            Paciente paciente = pacienteRepository.findById(request.getPaciente())
+                    .orElseThrow(() -> new NotFoundException("Paciente não encontrado com ID: " + request.getPaciente()));
             medicaoClinica.setPaciente(paciente);
         }
     }

@@ -3,14 +3,9 @@ package com.upsaude.api.response;
 import com.upsaude.enums.NaturezaJuridicaEnum;
 import com.upsaude.enums.StatusFuncionamentoEnum;
 import com.upsaude.enums.TipoEstabelecimentoEnum;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-
 import java.time.OffsetDateTime;
-import java.util.List;
 import java.util.UUID;
+import lombok.*;
 
 @Data
 @Builder
@@ -28,23 +23,14 @@ public class EstabelecimentosResponse {
     private String cnpj;
     private NaturezaJuridicaEnum naturezaJuridica;
     private String registroOficial;
-    private UUID enderecoPrincipalId;
-    private String enderecoPrincipalLogradouro;
-    private String enderecoPrincipalNumero;
-    private String enderecoPrincipalBairro;
-    private String enderecoPrincipalCep;
-    private String enderecoPrincipalCidade;
-    private String enderecoPrincipalEstado;
-    private List<UUID> enderecosSecundariosIds;
+    private EnderecoResponse enderecoPrincipal;
     private String telefone;
     private String telefoneSecundario;
     private String fax;
     private String email;
     private String site;
-    private UUID responsavelTecnicoId;
-    private String responsavelTecnicoNome;
-    private UUID responsavelAdministrativoId;
-    private String responsavelAdministrativoNome;
+    private ProfissionaisSaudeResponse responsavelTecnico;
+    private ProfissionaisSaudeResponse responsavelAdministrativo;
     private String responsavelLegalNome;
     private String responsavelLegalCpf;
     private StatusFuncionamentoEnum statusFuncionamento;
@@ -65,4 +51,3 @@ public class EstabelecimentosResponse {
     private String observacoes;
     private String dadosComplementares;
 }
-

@@ -13,13 +13,9 @@ import com.upsaude.enums.StatusAtivoEnum;
 import com.upsaude.enums.TipoVacinaEnum;
 import com.upsaude.enums.UnidadeMedidaEnum;
 import com.upsaude.enums.ViaAdministracaoEnum;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-
 import java.time.OffsetDateTime;
 import java.util.UUID;
+import lombok.*;
 
 @Data
 @Builder
@@ -39,8 +35,7 @@ public class VacinasResponse {
     private TipoVacinaEnum tipo;
     private String categoria;
     private String grupoAlvo;
-    private UUID fabricanteId;
-    private String fabricanteNome;
+    private FabricantesVacinaResponse fabricante;
     private String lotePadrao;
     private ViaAdministracaoEnum viaAdministracao;
     private UnidadeMedidaEnum unidadeMedida;
@@ -53,8 +48,6 @@ public class VacinasResponse {
     private ReacoesAdversasVacina reacoesAdversas;
     private CalendarioVacinal calendario;
     private StatusAtivoEnum status;
-    private Boolean disponivelUso;
-    private Boolean obrigatoria;
     private String bula;
     private String fichaTecnica;
     private String manualUso;
@@ -63,4 +56,3 @@ public class VacinasResponse {
     private String observacoes;
     private IntegracaoGovernamentalVacina integracaoGovernamental;
 }
-

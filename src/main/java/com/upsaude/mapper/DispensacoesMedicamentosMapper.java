@@ -4,67 +4,60 @@ import com.upsaude.api.request.DispensacoesMedicamentosRequest;
 import com.upsaude.api.response.DispensacoesMedicamentosResponse;
 import com.upsaude.dto.DispensacoesMedicamentosDTO;
 import com.upsaude.entity.DispensacoesMedicamentos;
-import com.upsaude.entity.Estabelecimentos;
 import com.upsaude.entity.Medicacao;
 import com.upsaude.entity.Paciente;
 import com.upsaude.mapper.config.MappingConfig;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
-import org.mapstruct.Named;
+import org.mapstruct.MappingTarget;
 
-import java.util.UUID;
-
-@Mapper(config = MappingConfig.class)
+/**
+ * Mapper para conversões de DispensacoesMedicamentos.
+ * Entity ↔ DTO ↔ Request/Response
+ */
+@Mapper(config = MappingConfig.class, uses = {MedicacaoMapper.class, PacienteMapper.class})
 public interface DispensacoesMedicamentosMapper extends EntityMapper<DispensacoesMedicamentos, DispensacoesMedicamentosDTO> {
 
-    @Mapping(target = "tenant", ignore = true)
-    @Mapping(target = "estabelecimento", source = "estabelecimentoId", qualifiedByName = "estabelecimentoFromId")
-    @Mapping(target = "paciente", source = "pacienteId", qualifiedByName = "pacienteFromId")
-    @Mapping(target = "medicacao", source = "medicamentoId", qualifiedByName = "medicacaoFromId")
+    /**
+     * Converte DTO para Entity.
+     * O campo 'active' é ignorado (gerenciado pelo sistema).
+     */
+    @Mapping(target = "active", ignore = true)
     DispensacoesMedicamentos toEntity(DispensacoesMedicamentosDTO dto);
 
-    @Mapping(target = "estabelecimentoId", source = "estabelecimento.id")
-    @Mapping(target = "pacienteId", source = "paciente.id")
-    @Mapping(target = "medicamentoId", source = "medicacao.id")
+    /**
+     * Converte Entity para DTO.
+     */
     DispensacoesMedicamentosDTO toDTO(DispensacoesMedicamentos entity);
 
-    @Mapping(target = "tenant", ignore = true)
+    /**
+     * Converte Request para Entity.
+     * Os campos 'id', 'createdAt', 'updatedAt', 'active' são ignorados.
+     * Relacionamentos (UUID) devem ser tratados manualmente no Service.
+     */
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "createdAt", ignore = true)
+    @Mapping(target = "updatedAt", ignore = true)
     @Mapping(target = "active", ignore = true)
-    @Mapping(target = "estabelecimento", source = "estabelecimentoId", qualifiedByName = "estabelecimentoFromId")
-    @Mapping(target = "paciente", source = "pacienteId", qualifiedByName = "pacienteFromId")
-    @Mapping(target = "medicacao", source = "medicamentoId", qualifiedByName = "medicacaoFromId")
+    @Mapping(target = "medicacao", ignore = true)
+    @Mapping(target = "paciente", ignore = true)
     DispensacoesMedicamentos fromRequest(DispensacoesMedicamentosRequest request);
 
-    @Mapping(target = "estabelecimentoId", source = "estabelecimento.id")
-    @Mapping(target = "estabelecimentoNome", source = "estabelecimento.nome")
-    @Mapping(target = "pacienteId", source = "paciente.id")
-    @Mapping(target = "pacienteNome", source = "paciente.nomeCompleto")
-    @Mapping(target = "medicamentoId", source = "medicacao.id")
-    @Mapping(target = "medicamentoNome", source = "medicacao.identificacao.nomeComercial")
+    /**
+     * Atualiza Entity existente com dados do Request.
+     * Os campos 'id', 'createdAt', 'updatedAt', 'active' são ignorados.
+     * Relacionamentos (UUID) devem ser tratados manualmente no Service.
+     */
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "createdAt", ignore = true)
+    @Mapping(target = "updatedAt", ignore = true)
+    @Mapping(target = "active", ignore = true)
+    @Mapping(target = "medicacao", ignore = true)
+    @Mapping(target = "paciente", ignore = true)
+    void updateFromRequest(DispensacoesMedicamentosRequest request, @MappingTarget DispensacoesMedicamentos entity);
+
+    /**
+     * Converte Entity para Response.
+     */
     DispensacoesMedicamentosResponse toResponse(DispensacoesMedicamentos entity);
-
-    @Named("estabelecimentoFromId")
-    default Estabelecimentos estabelecimentoFromId(UUID id) {
-        if (id == null) return null;
-        Estabelecimentos e = new Estabelecimentos();
-        e.setId(id);
-        return e;
-    }
-
-    @Named("pacienteFromId")
-    default Paciente pacienteFromId(UUID id) {
-        if (id == null) return null;
-        Paciente p = new Paciente();
-        p.setId(id);
-        return p;
-    }
-
-    @Named("medicacaoFromId")
-    default Medicacao medicacaoFromId(UUID id) {
-        if (id == null) return null;
-        Medicacao m = new Medicacao();
-        m.setId(id);
-        return m;
-    }
 }
-

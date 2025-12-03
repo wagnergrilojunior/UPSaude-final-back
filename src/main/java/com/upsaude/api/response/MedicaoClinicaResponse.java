@@ -1,26 +1,20 @@
 package com.upsaude.api.response;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 import java.util.UUID;
+import lombok.*;
 
-/**
- * Classe de resposta para Medição Clínica.
- *
- * @author UPSaúde
- */
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class MedicaoClinicaResponse {
     private UUID id;
-    private UUID pacienteId;
+    private OffsetDateTime createdAt;
+    private OffsetDateTime updatedAt;
+    private Boolean active;
+    private PacienteResponse paciente;
     private OffsetDateTime dataHora;
     private Integer pressaoSistolica;
     private Integer pressaoDiastolica;
@@ -34,8 +28,4 @@ public class MedicaoClinicaResponse {
     private BigDecimal circunferenciaAbdominal;
     private BigDecimal imc;
     private String observacoes;
-    private OffsetDateTime createdAt;
-    private OffsetDateTime updatedAt;
-    private Boolean active;
 }
-

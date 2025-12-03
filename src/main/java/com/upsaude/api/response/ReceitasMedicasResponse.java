@@ -1,14 +1,9 @@
 package com.upsaude.api.response;
 
 import com.upsaude.enums.StatusReceitaEnum;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-
 import java.time.OffsetDateTime;
-import java.util.List;
 import java.util.UUID;
+import lombok.*;
 
 @Data
 @Builder
@@ -16,12 +11,11 @@ import java.util.UUID;
 @AllArgsConstructor
 public class ReceitasMedicasResponse {
     private UUID id;
-    private UUID estabelecimentoId;
-    private String estabelecimentoNome;
-    private UUID medicoId;
-    private String medicoNome;
-    private UUID pacienteId;
-    private String pacienteNome;
+    private OffsetDateTime createdAt;
+    private OffsetDateTime updatedAt;
+    private Boolean active;
+    private MedicosResponse medico;
+    private PacienteResponse paciente;
     private String numeroReceita;
     private OffsetDateTime dataPrescricao;
     private OffsetDateTime dataValidade;
@@ -29,12 +23,5 @@ public class ReceitasMedicasResponse {
     private String observacoes;
     private StatusReceitaEnum status;
     private String origemReceita;
-    private UUID cidPrincipalId;
-    private String cidPrincipalCodigo;
-    private String cidPrincipalDescricao;
-    private List<UUID> medicacoesIds;
-    private OffsetDateTime createdAt;
-    private OffsetDateTime updatedAt;
-    private Boolean active;
+    private CidDoencasResponse cidPrincipal;
 }
-

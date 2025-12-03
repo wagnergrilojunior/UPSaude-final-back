@@ -1,26 +1,20 @@
 package com.upsaude.dto;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 import java.util.UUID;
+import lombok.*;
 
-/**
- * DTO (Data Transfer Object) para Medição Clínica.
- *
- * @author UPSaúde
- */
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class MedicaoClinicaDTO {
     private UUID id;
-    private UUID pacienteId;
+    private OffsetDateTime createdAt;
+    private OffsetDateTime updatedAt;
+    private Boolean active;
+    private PacienteDTO paciente;
     private OffsetDateTime dataHora;
     private Integer pressaoSistolica;
     private Integer pressaoDiastolica;
@@ -34,6 +28,4 @@ public class MedicaoClinicaDTO {
     private BigDecimal circunferenciaAbdominal;
     private BigDecimal imc;
     private String observacoes;
-    private Boolean active;
 }
-

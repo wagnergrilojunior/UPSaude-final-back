@@ -8,61 +8,53 @@ import com.upsaude.entity.Endereco;
 import com.upsaude.mapper.config.MappingConfig;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
-import org.mapstruct.Named;
+import org.mapstruct.MappingTarget;
 
-import java.util.UUID;
-
-@Mapper(config = MappingConfig.class)
+/**
+ * Mapper para conversões de Convenio.
+ * Entity ↔ DTO ↔ Request/Response
+ */
+@Mapper(config = MappingConfig.class, uses = {EnderecoMapper.class})
 public interface ConvenioMapper extends EntityMapper<Convenio, ConvenioDTO> {
 
-    @Mapping(target = "tenant", ignore = true)
-    @Mapping(target = "endereco", source = "enderecoId", qualifiedByName = "enderecoFromId")
+    /**
+     * Converte DTO para Entity.
+     * O campo 'active' é ignorado (gerenciado pelo sistema).
+     */
+    @Mapping(target = "active", ignore = true)
     Convenio toEntity(ConvenioDTO dto);
 
-    @Mapping(target = "enderecoId", source = "endereco.id")
+    /**
+     * Converte Entity para DTO.
+     */
     ConvenioDTO toDTO(Convenio entity);
 
-    @Mapping(target = "tenant", ignore = true)
+    /**
+     * Converte Request para Entity.
+     * Os campos 'id', 'createdAt', 'updatedAt', 'active' são ignorados.
+     * Relacionamentos (UUID) devem ser tratados manualmente no Service.
+     */
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "createdAt", ignore = true)
+    @Mapping(target = "updatedAt", ignore = true)
     @Mapping(target = "active", ignore = true)
-    @Mapping(target = "endereco", source = "enderecoId", qualifiedByName = "enderecoFromId")
+    @Mapping(target = "endereco", ignore = true)
     Convenio fromRequest(ConvenioRequest request);
 
-    @Mapping(target = "enderecoId", source = "endereco.id")
-    @Mapping(target = "enderecoCompleto", source = "endereco", qualifiedByName = "enderecoCompleto")
+    /**
+     * Atualiza Entity existente com dados do Request.
+     * Os campos 'id', 'createdAt', 'updatedAt', 'active' são ignorados.
+     * Relacionamentos (UUID) devem ser tratados manualmente no Service.
+     */
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "createdAt", ignore = true)
+    @Mapping(target = "updatedAt", ignore = true)
+    @Mapping(target = "active", ignore = true)
+    @Mapping(target = "endereco", ignore = true)
+    void updateFromRequest(ConvenioRequest request, @MappingTarget Convenio entity);
+
+    /**
+     * Converte Entity para Response.
+     */
     ConvenioResponse toResponse(Convenio entity);
-
-    @Named("enderecoFromId")
-    default Endereco enderecoFromId(UUID id) {
-        if (id == null) return null;
-        Endereco e = new Endereco();
-        e.setId(id);
-        return e;
-    }
-
-    @Named("enderecoCompleto")
-    default String enderecoCompleto(Endereco endereco) {
-        if (endereco == null) return null;
-        // Construir endereço completo para exibição
-        StringBuilder sb = new StringBuilder();
-        if (endereco.getTipoLogradouro() != null) {
-            sb.append(endereco.getTipoLogradouro().getDescricao()).append(" ");
-        }
-        if (endereco.getLogradouro() != null) {
-            sb.append(endereco.getLogradouro());
-        }
-        if (endereco.getNumero() != null) {
-            sb.append(", ").append(endereco.getNumero());
-        }
-        if (endereco.getComplemento() != null) {
-            sb.append(" - ").append(endereco.getComplemento());
-        }
-        if (endereco.getBairro() != null) {
-            sb.append(", ").append(endereco.getBairro());
-        }
-        if (endereco.getCep() != null) {
-            sb.append(" - CEP: ").append(endereco.getCep());
-        }
-        return sb.length() > 0 ? sb.toString() : null;
-    }
 }
-

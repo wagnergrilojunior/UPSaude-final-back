@@ -1,8 +1,9 @@
 package com.upsaude.api.request;
 
-import lombok.*;
+import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.util.UUID;
+import java.util.Map;
+import lombok.*;
 
 @Data
 @Builder
@@ -11,8 +12,17 @@ import java.util.UUID;
 public class RelatorioEstatisticasRequest {
     private LocalDate dataInicio;
     private LocalDate dataFim;
-    private UUID estabelecimentoId;
-    private UUID profissionalId;
-    private UUID especialidadeId;
+    private Long totalAtendimentos;
+    private Long totalConsultas;
+    private Long totalExames;
+    private Long totalProcedimentos;
+    private Long totalAgendamentos;
+    private Long totalPacientes;
+    private Long totalVisitasDomiciliares;
+    private Map<String, Long> atendimentosPorTipo;
+    private Map<String, Long> atendimentosPorEspecialidade;
+    private Map<String, Long> examesPorTipo;
+    private Map<String, Long> procedimentosPorTipo;
+    private Map<String, Long> atendimentosPorProfissional;
+    private Map<String, BigDecimal> indicadoresSaude;
 }
-

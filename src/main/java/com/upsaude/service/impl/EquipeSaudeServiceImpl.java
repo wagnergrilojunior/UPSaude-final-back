@@ -52,13 +52,13 @@ public class EquipeSaudeServiceImpl implements EquipeSaudeService {
         validarDadosBasicos(request);
 
         // Valida se já existe equipe com mesmo INE no estabelecimento
-        if (equipeSaudeRepository.findByIneAndEstabelecimentoId(request.getIne(), request.getEstabelecimentoId()).isPresent()) {
+        if (equipeSaudeRepository.findByIneAndEstabelecimentoId(request.getIne(), request.getEstabelecimento()).isPresent()) {
             throw new BadRequestException("Já existe uma equipe com o INE " + request.getIne() + " neste estabelecimento");
         }
 
         // Carrega e valida estabelecimento
-        Estabelecimentos estabelecimento = estabelecimentosRepository.findById(request.getEstabelecimentoId())
-                .orElseThrow(() -> new NotFoundException("Estabelecimento não encontrado com ID: " + request.getEstabelecimentoId()));
+        Estabelecimentos estabelecimento = estabelecimentosRepository.findById(request.getEstabelecimento())
+                .orElseThrow(() -> new NotFoundException("Estabelecimento não encontrado com ID: " + request.getEstabelecimento()));
 
         EquipeSaude equipe = equipeSaudeMapper.fromRequest(request);
         equipe.setEstabelecimento(estabelecimento);
@@ -144,7 +144,7 @@ public class EquipeSaudeServiceImpl implements EquipeSaudeService {
 
         // Valida se o INE foi alterado e se já existe outro com o mesmo INE no estabelecimento
         if (!equipeExistente.getIne().equals(request.getIne())) {
-            if (equipeSaudeRepository.findByIneAndEstabelecimentoId(request.getIne(), request.getEstabelecimentoId()).isPresent()) {
+            if (equipeSaudeRepository.findByIneAndEstabelecimentoId(request.getIne(), request.getEstabelecimento()).isPresent()) {
                 throw new BadRequestException("Já existe uma equipe com o INE " + request.getIne() + " neste estabelecimento");
             }
         }
@@ -192,7 +192,7 @@ public class EquipeSaudeServiceImpl implements EquipeSaudeService {
         if (request.getTipoEquipe() == null) {
             throw new BadRequestException("Tipo de equipe é obrigatório");
         }
-        if (request.getEstabelecimentoId() == null) {
+        if (request.getEstabelecimento() == null) {
             throw new BadRequestException("Estabelecimento é obrigatório");
         }
         if (request.getDataAtivacao() == null) {
@@ -209,9 +209,9 @@ public class EquipeSaudeServiceImpl implements EquipeSaudeService {
         equipe.setTipoEquipe(request.getTipoEquipe());
 
         // Atualiza estabelecimento se foi alterado
-        if (!equipe.getEstabelecimento().getId().equals(request.getEstabelecimentoId())) {
-            Estabelecimentos estabelecimento = estabelecimentosRepository.findById(request.getEstabelecimentoId())
-                    .orElseThrow(() -> new NotFoundException("Estabelecimento não encontrado com ID: " + request.getEstabelecimentoId()));
+        if (!equipe.getEstabelecimento().getId().equals(request.getEstabelecimento())) {
+            Estabelecimentos estabelecimento = estabelecimentosRepository.findById(request.getEstabelecimento())
+                    .orElseThrow(() -> new NotFoundException("Estabelecimento não encontrado com ID: " + request.getEstabelecimento()));
             equipe.setEstabelecimento(estabelecimento);
         }
 

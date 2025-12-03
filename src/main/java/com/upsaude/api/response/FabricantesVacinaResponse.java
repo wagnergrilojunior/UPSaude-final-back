@@ -1,8 +1,8 @@
 package com.upsaude.api.response;
 
-import lombok.*;
 import java.time.OffsetDateTime;
 import java.util.UUID;
+import lombok.*;
 
 @Data
 @Builder
@@ -13,5 +13,16 @@ public class FabricantesVacinaResponse {
     private OffsetDateTime createdAt;
     private OffsetDateTime updatedAt;
     private Boolean active;
+    private String nome;
+    private String cnpj;
+    private String pais;
+    private String estado;
+    private String cidade;
+    private EnderecoResponse endereco;
+    private String telefone;
+    private String email;
+    private String site;
+    private String registroAnvisa;
+    private String registroMs;
+    private String observacoes;
 }
-

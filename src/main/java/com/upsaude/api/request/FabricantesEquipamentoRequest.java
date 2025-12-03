@@ -1,0 +1,23 @@
+package com.upsaude.api.request;
+
+import java.time.OffsetDateTime;
+import java.util.UUID;
+import lombok.*;
+
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+public class FabricantesEquipamentoRequest {
+    private String nome;
+    private String cnpj;
+    private String pais;
+    private String estado;
+    private String cidade;
+    private String endereco;
+    private String telefone;
+    private String email;
+    private String site;
+    private String registroAnvisa;
+    private String observacoes;
+}

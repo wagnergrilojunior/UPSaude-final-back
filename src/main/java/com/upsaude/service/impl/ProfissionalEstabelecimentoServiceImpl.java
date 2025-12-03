@@ -49,18 +49,18 @@ public class ProfissionalEstabelecimentoServiceImpl implements ProfissionalEstab
 
         // Valida se já existe vínculo ativo entre o profissional e o estabelecimento
         if (profissionalEstabelecimentoRepository
-                .findByProfissionalIdAndEstabelecimentoId(request.getProfissionalId(), request.getEstabelecimentoId())
+                .findByProfissionalIdAndEstabelecimentoId(request.getProfissional(), request.getEstabelecimento())
                 .isPresent()) {
             throw new BadRequestException("Já existe um vínculo entre este profissional e este estabelecimento");
         }
 
         // Valida se profissional existe
-        ProfissionaisSaude profissional = profissionaisSaudeRepository.findById(request.getProfissionalId())
-                .orElseThrow(() -> new NotFoundException("Profissional não encontrado com ID: " + request.getProfissionalId()));
+        ProfissionaisSaude profissional = profissionaisSaudeRepository.findById(request.getProfissional())
+                .orElseThrow(() -> new NotFoundException("Profissional não encontrado com ID: " + request.getProfissional()));
 
         // Valida se estabelecimento existe
-        Estabelecimentos estabelecimento = estabelecimentosRepository.findById(request.getEstabelecimentoId())
-                .orElseThrow(() -> new NotFoundException("Estabelecimento não encontrado com ID: " + request.getEstabelecimentoId()));
+        Estabelecimentos estabelecimento = estabelecimentosRepository.findById(request.getEstabelecimento())
+                .orElseThrow(() -> new NotFoundException("Estabelecimento não encontrado com ID: " + request.getEstabelecimento()));
 
         // Validar integridade multitenant: profissional e estabelecimento devem pertencer ao mesmo tenant
         if (!profissional.getTenant().getId().equals(estabelecimento.getTenant().getId())) {

@@ -1,30 +1,19 @@
 package com.upsaude.api.request;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.OffsetDateTime;
 import java.util.UUID;
+import lombok.*;
 
-/**
- * Request para criação/atualização de Puericultura.
- *
- * @author UPSaúde
- */
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class PuericulturaRequest {
-    private UUID estabelecimentoId;
-    private UUID pacienteId;
-    private UUID profissionalResponsavelId;
-    private UUID equipeSaudeId;
-    
-    // Dados do nascimento
+    private UUID paciente;
+    private UUID profissionalResponsavel;
+    private UUID equipeSaude;
     private LocalDate dataNascimento;
     private BigDecimal pesoNascimento;
     private BigDecimal comprimentoNascimento;
@@ -34,20 +23,14 @@ public class PuericulturaRequest {
     private String tipoParto;
     private Integer idadeGestacionalNascimento;
     private Boolean prematuro;
-    
-    // Dados da mãe
     private String nomeMae;
     private String tipoSanguineoMae;
     private Integer numeroConsultasPreNatal;
     private String intercorrenciasGestacao;
-    
-    // Aleitamento
     private Boolean aleitamentoMaternoExclusivo;
     private LocalDate dataInicioAlimentacaoComplementar;
     private LocalDate dataDesmame;
     private String tipoAleitamentoAtual;
-    
-    // Triagem neonatal
     private Boolean testePezinhoRealizado;
     private LocalDate dataTestePezinho;
     private String resultadoTestePezinho;
@@ -63,17 +46,11 @@ public class PuericulturaRequest {
     private Boolean testeLinguinhaRealizado;
     private LocalDate dataTesteLinguinha;
     private String resultadoTesteLinguinha;
-    
-    // Status
     private LocalDate dataInicioAcompanhamento;
-    private Boolean acompanhamentoAtivo;
     private LocalDate dataEncerramento;
     private String motivoEncerramento;
-    
-    // Informações adicionais
     private String antecedentesFamiliares;
     private String alergiasConhecidas;
     private String doencasCronicas;
     private String observacoes;
 }
-

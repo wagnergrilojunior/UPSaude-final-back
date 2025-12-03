@@ -162,7 +162,7 @@ public class AcaoPromocaoPrevencaoServiceImpl implements AcaoPromocaoPrevencaoSe
         if (request == null) {
             throw new BadRequestException("Dados da ação de promoção e prevenção são obrigatórios");
         }
-        if (request.getProfissionalResponsavelId() == null) {
+        if (request.getProfissionalResponsavel() == null) {
             throw new BadRequestException("Profissional responsável é obrigatório");
         }
         if (request.getTipoAcao() == null) {

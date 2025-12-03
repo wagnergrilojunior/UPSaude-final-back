@@ -1,9 +1,10 @@
 package com.upsaude.dto;
 
 import com.upsaude.enums.TipoProcedimentoEnum;
-import lombok.*;
 import java.math.BigDecimal;
+import java.time.OffsetDateTime;
 import java.util.UUID;
+import lombok.*;
 
 @Data
 @Builder
@@ -11,17 +12,16 @@ import java.util.UUID;
 @AllArgsConstructor
 public class CatalogoProcedimentosDTO {
     private UUID id;
+    private OffsetDateTime createdAt;
+    private OffsetDateTime updatedAt;
+    private Boolean active;
     private TipoProcedimentoEnum tipoProcedimento;
     private String nome;
     private String codigo;
     private String descricao;
     private Integer duracaoMinutos;
     private BigDecimal custoSugerido;
-    private Boolean requerProfissionalEspecifico;
     private String profissionalRequerido;
-    private Boolean requerPreparacao;
     private String instrucoesPreparacao;
     private String observacoes;
-    private Boolean active;
 }
-

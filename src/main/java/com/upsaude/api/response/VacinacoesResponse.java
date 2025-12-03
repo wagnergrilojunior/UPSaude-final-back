@@ -1,12 +1,8 @@
 package com.upsaude.api.response;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-
 import java.time.OffsetDateTime;
 import java.util.UUID;
+import lombok.*;
 
 @Data
 @Builder
@@ -17,10 +13,9 @@ public class VacinacoesResponse {
     private OffsetDateTime createdAt;
     private OffsetDateTime updatedAt;
     private Boolean active;
-    private UUID estabelecimentoId;
-    private UUID pacienteId;
-    private UUID vacinaId;
-    private UUID fabricanteId;
+    private PacienteResponse paciente;
+    private VacinasResponse vacina;
+    private FabricantesVacinaResponse fabricante;
     private String lote;
     private Integer numeroDose;
     private OffsetDateTime dataAplicacao;
@@ -29,4 +24,3 @@ public class VacinacoesResponse {
     private String reacaoAdversa;
     private String observacoes;
 }
-

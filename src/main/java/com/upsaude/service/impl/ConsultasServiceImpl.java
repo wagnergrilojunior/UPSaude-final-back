@@ -138,7 +138,7 @@ public class ConsultasServiceImpl implements ConsultasService {
         if (request == null) {
             throw new BadRequestException("Dados da consulta são obrigatórios");
         }
-        if (request.getPacienteId() == null) {
+        if (request.getPaciente() == null) {
             throw new BadRequestException("ID do paciente é obrigatório");
         }
         if (request.getInformacoes() == null) {

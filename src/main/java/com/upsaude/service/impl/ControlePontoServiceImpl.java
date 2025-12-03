@@ -52,22 +52,17 @@ public class ControlePontoServiceImpl implements ControlePontoService {
 
         ControlePonto controlePonto = controlePontoMapper.fromRequest(request);
 
-        // Carrega e define o estabelecimento
-        Estabelecimentos estabelecimento = estabelecimentosRepository.findById(request.getEstabelecimentoId())
-                .orElseThrow(() -> new NotFoundException("Estabelecimento não encontrado com ID: " + request.getEstabelecimentoId()));
-        controlePonto.setEstabelecimento(estabelecimento);
-
         // Carrega e define o profissional (obrigatório se médico não for fornecido)
-        if (request.getProfissionalId() != null) {
-            ProfissionaisSaude profissional = profissionaisSaudeRepository.findById(request.getProfissionalId())
-                    .orElseThrow(() -> new NotFoundException("Profissional de saúde não encontrado com ID: " + request.getProfissionalId()));
+        if (request.getProfissional() != null) {
+            ProfissionaisSaude profissional = profissionaisSaudeRepository.findById(request.getProfissional())
+                    .orElseThrow(() -> new NotFoundException("Profissional de saúde não encontrado com ID: " + request.getProfissional()));
             controlePonto.setProfissional(profissional);
         }
 
         // Carrega e define o médico (opcional)
-        if (request.getMedicoId() != null) {
-            Medicos medico = medicosRepository.findById(request.getMedicoId())
-                    .orElseThrow(() -> new NotFoundException("Médico não encontrado com ID: " + request.getMedicoId()));
+        if (request.getMedico() != null) {
+            Medicos medico = medicosRepository.findById(request.getMedico())
+                    .orElseThrow(() -> new NotFoundException("Médico não encontrado com ID: " + request.getMedico()));
             controlePonto.setMedico(medico);
         }
 
@@ -223,9 +218,6 @@ public class ControlePontoServiceImpl implements ControlePontoService {
         if (request == null) {
             throw new BadRequestException("Dados do registro de ponto são obrigatórios");
         }
-        if (request.getEstabelecimentoId() == null) {
-            throw new BadRequestException("ID do estabelecimento é obrigatório");
-        }
         if (request.getDataHora() == null) {
             throw new BadRequestException("Data e hora do ponto são obrigatórias");
         }
@@ -235,7 +227,7 @@ public class ControlePontoServiceImpl implements ControlePontoService {
         if (request.getTipoPonto() == null) {
             throw new BadRequestException("Tipo de ponto é obrigatório");
         }
-        if (request.getProfissionalId() == null && request.getMedicoId() == null) {
+        if (request.getProfissional() == null && request.getMedico() == null) {
             throw new BadRequestException("ID do profissional ou médico é obrigatório");
         }
     }
@@ -273,21 +265,17 @@ public class ControlePontoServiceImpl implements ControlePontoService {
         }
 
         // Atualiza relacionamentos se fornecidos
-        if (request.getEstabelecimentoId() != null) {
-            Estabelecimentos estabelecimento = estabelecimentosRepository.findById(request.getEstabelecimentoId())
-                    .orElseThrow(() -> new NotFoundException("Estabelecimento não encontrado com ID: " + request.getEstabelecimentoId()));
-            controlePonto.setEstabelecimento(estabelecimento);
-        }
+        // Estabelecimento não faz parte do Request
 
-        if (request.getProfissionalId() != null) {
-            ProfissionaisSaude profissional = profissionaisSaudeRepository.findById(request.getProfissionalId())
-                    .orElseThrow(() -> new NotFoundException("Profissional de saúde não encontrado com ID: " + request.getProfissionalId()));
+        if (request.getProfissional() != null) {
+            ProfissionaisSaude profissional = profissionaisSaudeRepository.findById(request.getProfissional())
+                    .orElseThrow(() -> new NotFoundException("Profissional de saúde não encontrado com ID: " + request.getProfissional()));
             controlePonto.setProfissional(profissional);
         }
 
-        if (request.getMedicoId() != null) {
-            Medicos medico = medicosRepository.findById(request.getMedicoId())
-                    .orElseThrow(() -> new NotFoundException("Médico não encontrado com ID: " + request.getMedicoId()));
+        if (request.getMedico() != null) {
+            Medicos medico = medicosRepository.findById(request.getMedico())
+                    .orElseThrow(() -> new NotFoundException("Médico não encontrado com ID: " + request.getMedico()));
             controlePonto.setMedico(medico);
         }
     }

@@ -32,13 +32,13 @@ public class IntegracaoGovServiceImpl implements IntegracaoGovService {
     @Transactional
     @CacheEvict(value = "integracaogov", allEntries = true)
     public IntegracaoGovResponse criar(IntegracaoGovRequest request) {
-        log.debug("Criando integração gov para paciente: {}", request.getPacienteId());
+        log.debug("Criando integração gov para paciente: {}", request.getPaciente());
 
-        if (request.getPacienteId() == null) {
+        if (request.getPaciente() == null) {
             throw new BadRequestException("ID do paciente é obrigatório");
         }
 
-        repository.findByPacienteId(request.getPacienteId())
+        repository.findByPacienteId(request.getPaciente())
                 .ifPresent(d -> {
                     throw new ConflictException("Integração gov já existe para este paciente");
                 });
@@ -101,8 +101,8 @@ public class IntegracaoGovServiceImpl implements IntegracaoGovService {
         IntegracaoGov entity = repository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Integração gov não encontrada com ID: " + id));
 
-        if (request.getPacienteId() != null && !request.getPacienteId().equals(entity.getPaciente().getId())) {
-            repository.findByPacienteId(request.getPacienteId())
+        if (request.getPaciente() != null && !request.getPaciente().equals(entity.getPaciente().getId())) {
+            repository.findByPacienteId(request.getPaciente())
                     .ifPresent(d -> {
                         if (!d.getId().equals(id)) {
                             throw new ConflictException("Integração gov já existe para este paciente");

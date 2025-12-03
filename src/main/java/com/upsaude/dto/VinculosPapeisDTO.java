@@ -1,7 +1,8 @@
 package com.upsaude.dto;
 
-import lombok.*;
+import java.time.OffsetDateTime;
 import java.util.UUID;
+import lombok.*;
 
 @Data
 @Builder
@@ -9,9 +10,10 @@ import java.util.UUID;
 @AllArgsConstructor
 public class VinculosPapeisDTO {
     private UUID id;
-    private UUID estabelecimentoId;
-    private UUID departamentoId;
-    private UUID papelId;
+    private OffsetDateTime createdAt;
+    private OffsetDateTime updatedAt;
     private Boolean active;
+    private EstabelecimentosDTO estabelecimento;
+    private DepartamentosDTO departamento;
+    private PapeisDTO papel;
 }
-

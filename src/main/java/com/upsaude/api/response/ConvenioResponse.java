@@ -8,14 +8,10 @@ import com.upsaude.entity.embeddable.RegistroANSConvenio;
 import com.upsaude.enums.ModalidadeConvenioEnum;
 import com.upsaude.enums.StatusAtivoEnum;
 import com.upsaude.enums.TipoConvenioEnum;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.UUID;
+import lombok.*;
 
 @Data
 @Builder
@@ -35,20 +31,15 @@ public class ConvenioResponse {
     private TipoConvenioEnum tipo;
     private ModalidadeConvenioEnum modalidade;
     private String categoria;
-    private UUID enderecoId;
-    private String enderecoCompleto; // Para exibição
+    private EnderecoResponse endereco;
     private ContatoConvenio contato;
     private RegistroANSConvenio registroAns;
     private CoberturaConvenio cobertura;
     private InformacoesFinanceirasConvenio informacoesFinanceiras;
     private StatusAtivoEnum status;
-    private Boolean ativoComercial;
-    private Boolean aceitaNovosClientes;
     private LocalDate dataCadastro;
     private LocalDate dataAtivacao;
     private LocalDate dataDesativacao;
-    private Boolean redeCredenciadaNacional;
-    private Boolean redeCredenciadaRegional;
     private Integer quantidadeEstabelecimentosCredenciados;
     private Integer quantidadeProfissionaisCredenciados;
     private String contrato;

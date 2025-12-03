@@ -152,7 +152,7 @@ public class PuericulturaServiceImpl implements PuericulturaService {
         if (request == null) {
             throw new BadRequestException("Dados da puericultura são obrigatórios");
         }
-        if (request.getPacienteId() == null) {
+        if (request.getPaciente() == null) {
             throw new BadRequestException("Paciente é obrigatório");
         }
     }

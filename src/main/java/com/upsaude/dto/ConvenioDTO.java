@@ -8,13 +8,10 @@ import com.upsaude.entity.embeddable.RegistroANSConvenio;
 import com.upsaude.enums.ModalidadeConvenioEnum;
 import com.upsaude.enums.StatusAtivoEnum;
 import com.upsaude.enums.TipoConvenioEnum;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-
 import java.time.LocalDate;
+import java.time.OffsetDateTime;
 import java.util.UUID;
+import lombok.*;
 
 @Data
 @Builder
@@ -22,6 +19,9 @@ import java.util.UUID;
 @AllArgsConstructor
 public class ConvenioDTO {
     private UUID id;
+    private OffsetDateTime createdAt;
+    private OffsetDateTime updatedAt;
+    private Boolean active;
     private String nome;
     private String nomeFantasia;
     private String codigo;
@@ -31,19 +31,15 @@ public class ConvenioDTO {
     private TipoConvenioEnum tipo;
     private ModalidadeConvenioEnum modalidade;
     private String categoria;
-    private UUID enderecoId;
+    private EnderecoDTO endereco;
     private ContatoConvenio contato;
     private RegistroANSConvenio registroAns;
     private CoberturaConvenio cobertura;
     private InformacoesFinanceirasConvenio informacoesFinanceiras;
     private StatusAtivoEnum status;
-    private Boolean ativoComercial;
-    private Boolean aceitaNovosClientes;
     private LocalDate dataCadastro;
     private LocalDate dataAtivacao;
     private LocalDate dataDesativacao;
-    private Boolean redeCredenciadaNacional;
-    private Boolean redeCredenciadaRegional;
     private Integer quantidadeEstabelecimentosCredenciados;
     private Integer quantidadeProfissionaisCredenciados;
     private String contrato;
@@ -52,5 +48,4 @@ public class ConvenioDTO {
     private String descricao;
     private String observacoes;
     private IntegracaoGovernamentalConvenio integracaoGovernamental;
-    private Boolean active;
 }

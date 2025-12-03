@@ -2,32 +2,26 @@ package com.upsaude.dto;
 
 import com.upsaude.enums.PrioridadeAtendimentoEnum;
 import com.upsaude.enums.StatusAgendamentoEnum;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-
 import java.time.OffsetDateTime;
 import java.util.UUID;
+import lombok.*;
 
-/**
- * DTO (Data Transfer Object) para Agendamento.
- *
- * @author UPSaúde
- */
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class AgendamentoDTO {
     private UUID id;
-    private UUID pacienteId;
-    private UUID profissionalId;
-    private UUID medicoId;
-    private UUID especialidadeId;
-    private UUID convenioId;
-    private UUID atendimentoId;
-    private UUID agendamentoOriginalId;
+    private OffsetDateTime createdAt;
+    private OffsetDateTime updatedAt;
+    private Boolean active;
+    private PacienteDTO paciente;
+    private ProfissionaisSaudeDTO profissional;
+    private MedicosDTO medico;
+    private EspecialidadesMedicasDTO especialidade;
+    private ConvenioDTO convenio;
+    private AtendimentoDTO atendimento;
+    private AgendamentoDTO agendamentoOriginal;
     private OffsetDateTime dataHora;
     private OffsetDateTime dataHoraFim;
     private Integer duracaoPrevistaMinutos;
@@ -55,6 +49,4 @@ public class AgendamentoDTO {
     private Boolean notificacaoEnviada24h;
     private Boolean notificacaoEnviada1h;
     private Boolean confirmacaoEnviada;
-    private Boolean active;
 }
-

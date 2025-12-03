@@ -1,12 +1,8 @@
 package com.upsaude.api.response;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-
 import java.time.OffsetDateTime;
 import java.util.UUID;
+import lombok.*;
 
 @Data
 @Builder
@@ -14,15 +10,25 @@ import java.util.UUID;
 @AllArgsConstructor
 public class ExamesResponse {
     private UUID id;
-    private UUID estabelecimentoId;
-    private String estabelecimentoNome;
-    private UUID pacienteId;
-    private String pacienteNome;
-    private String tipoExame;
-    private OffsetDateTime dataExame;
-    private String resultados;
     private OffsetDateTime createdAt;
     private OffsetDateTime updatedAt;
     private Boolean active;
+    private PacienteResponse paciente;
+    private CatalogoExamesResponse catalogoExame;
+    private AtendimentoResponse atendimento;
+    private ConsultasResponse consulta;
+    private ProfissionaisSaudeResponse profissionalSolicitante;
+    private MedicosResponse medicoSolicitante;
+    private String tipoExame;
+    private String nomeExame;
+    private OffsetDateTime dataSolicitacao;
+    private OffsetDateTime dataExame;
+    private OffsetDateTime dataResultado;
+    private String unidadeLaboratorio;
+    private EstabelecimentosResponse estabelecimentoRealizador;
+    private ProfissionaisSaudeResponse profissionalResponsavel;
+    private MedicosResponse medicoResponsavel;
+    private String resultados;
+    private String laudo;
+    private String observacoes;
 }
-

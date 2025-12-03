@@ -1,16 +1,18 @@
 package com.upsaude.api.response;
 
+import com.upsaude.enums.EscolaridadeEnum;
 import com.upsaude.enums.EstadoCivilEnum;
+import com.upsaude.enums.IdentidadeGeneroEnum;
+import com.upsaude.enums.NacionalidadeEnum;
+import com.upsaude.enums.OrientacaoSexualEnum;
+import com.upsaude.enums.RacaCorEnum;
 import com.upsaude.enums.SexoEnum;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-
+import com.upsaude.enums.TipoAtendimentoPreferencialEnum;
+import com.upsaude.enums.TipoCnsEnum;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
-import java.util.List;
 import java.util.UUID;
+import lombok.*;
 
 @Data
 @Builder
@@ -35,13 +37,30 @@ public class PacienteResponse {
     private String responsavelNome;
     private String responsavelCpf;
     private String responsavelTelefone;
-    private String enderecoJson;
-    private String contatoJson;
-    private String informacoesAdicionaisJson;
-    private UUID convenioId;
+    private ConvenioResponse convenio;
     private String numeroCarteirinha;
     private LocalDate dataValidadeCarteirinha;
     private String observacoes;
-    private List<UUID> enderecosIds;
+    private RacaCorEnum racaCor;
+    private NacionalidadeEnum nacionalidade;
+    private String paisNascimento;
+    private String naturalidade;
+    private String municipioNascimentoIbge;
+    private EscolaridadeEnum escolaridade;
+    private String ocupacaoProfissao;
+    private LocalDate dataObito;
+    private String causaObitoCid10;
+    private LocalDate dataAtualizacaoCns;
+    private TipoAtendimentoPreferencialEnum tipoAtendimentoPreferencial;
+    private String origemCadastro;
+    private String nomeSocial;
+    private IdentidadeGeneroEnum identidadeGenero;
+    private OrientacaoSexualEnum orientacaoSexual;
+    private String tipoDeficiencia;
+    private TipoCnsEnum tipoCns;
+    private DadosSociodemograficosResponse dadosSociodemograficos;
+    private DadosClinicosBasicosResponse dadosClinicosBasicos;
+    private ResponsavelLegalResponse responsavelLegal;
+    private LGPDConsentimentoResponse lgpdConsentimento;
+    private IntegracaoGovResponse integracaoGov;
 }
-
