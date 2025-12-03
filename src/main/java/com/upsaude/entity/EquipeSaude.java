@@ -3,6 +3,7 @@ package com.upsaude.entity;
 import com.upsaude.enums.StatusAtivoEnum;
 import com.upsaude.enums.TipoEquipeEnum;
 import com.upsaude.util.converter.StatusAtivoEnumConverter;
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Convert;
 import jakarta.persistence.Entity;
@@ -85,7 +86,11 @@ public class EquipeSaude extends BaseEntity {
 
     // ========== RELACIONAMENTO COM PROFISSIONAIS ==========
     
-    @OneToMany(mappedBy = "equipe", fetch = FetchType.LAZY)
+    /**
+     * Vínculos de profissionais com esta equipe.
+     * OneToMany bidirecional com cascade completo - JPA gerencia automaticamente.
+     */
+    @OneToMany(mappedBy = "equipe", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<VinculoProfissionalEquipe> vinculosProfissionais = new HashSet<>();
 
     // ========== OBSERVAÇÕES ==========

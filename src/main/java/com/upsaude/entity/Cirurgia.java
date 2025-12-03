@@ -2,6 +2,7 @@ package com.upsaude.entity;
 
 import com.upsaude.enums.StatusCirurgiaEnum;
 import com.upsaude.util.converter.StatusCirurgiaEnumConverter;
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Convert;
 import jakarta.persistence.Entity;
@@ -66,10 +67,18 @@ public class Cirurgia extends BaseEntity {
 
     // ========== RELACIONAMENTOS FILHOS ==========
 
-    @OneToMany(mappedBy = "cirurgia", fetch = FetchType.LAZY)
+    /**
+     * Procedimentos realizados na cirurgia.
+     * OneToMany bidirecional com cascade completo - JPA gerencia automaticamente.
+     */
+    @OneToMany(mappedBy = "cirurgia", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ProcedimentoCirurgico> procedimentos = new ArrayList<>();
 
-    @OneToMany(mappedBy = "cirurgia", fetch = FetchType.LAZY)
+    /**
+     * Equipe cirúrgica que participou da cirurgia.
+     * OneToMany bidirecional com cascade completo - JPA gerencia automaticamente.
+     */
+    @OneToMany(mappedBy = "cirurgia", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     private List<EquipeCirurgica> equipe = new ArrayList<>();
 
     // ========== DADOS BÁSICOS ==========

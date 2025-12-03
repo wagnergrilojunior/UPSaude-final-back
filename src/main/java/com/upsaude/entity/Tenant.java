@@ -1,5 +1,6 @@
 package com.upsaude.entity;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -53,7 +54,11 @@ public class Tenant extends BaseEntity {
     @Column(name = "is_active")
     private Boolean ativo;
 
-    @OneToMany(fetch = FetchType.LAZY)
+    /**
+     * Endereços do tenant.
+     * Cascade PERSIST/MERGE para gerenciar associações.
+     */
+    @OneToMany(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinTable(
         name = "tenants_enderecos",
         schema = "public",

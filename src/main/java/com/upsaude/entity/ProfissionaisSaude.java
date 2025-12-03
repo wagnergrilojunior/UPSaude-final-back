@@ -18,6 +18,7 @@ import com.upsaude.util.converter.SexoEnumConverter;
 import com.upsaude.util.converter.StatusAtivoEnumConverter;
 import com.upsaude.util.converter.TipoDeficienciaEnumConverter;
 import com.upsaude.util.converter.TipoProfissionalEnumConverter;
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Convert;
 import jakarta.persistence.Entity;
@@ -170,7 +171,11 @@ public class ProfissionaisSaude extends BaseEntity {
 
     // ========== ESPECIALIDADES ==========
 
-    @ManyToMany(fetch = FetchType.LAZY)
+    /**
+     * Especialidades do profissional de saúde.
+     * ManyToMany com cascade PERSIST/MERGE para associações.
+     */
+    @ManyToMany(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinTable(
         name = "profissionais_saude_especialidades",
         schema = "public",
@@ -231,17 +236,29 @@ public class ProfissionaisSaude extends BaseEntity {
 
     // ========== VÍNCULOS COM ESTABELECIMENTOS ==========
 
-    @OneToMany(mappedBy = "profissional", fetch = FetchType.LAZY)
+    /**
+     * Vínculos do profissional com estabelecimentos de saúde.
+     * OneToMany bidirecional com cascade completo - JPA gerencia automaticamente.
+     */
+    @OneToMany(mappedBy = "profissional", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<ProfissionalEstabelecimento> vinculosEstabelecimentos = new HashSet<>();
 
     // ========== VÍNCULOS COM EQUIPES ==========
 
-    @OneToMany(mappedBy = "profissional", fetch = FetchType.LAZY)
+    /**
+     * Vínculos do profissional com equipes de saúde.
+     * OneToMany bidirecional com cascade completo - JPA gerencia automaticamente.
+     */
+    @OneToMany(mappedBy = "profissional", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<VinculoProfissionalEquipe> vinculosEquipes = new HashSet<>();
 
     // ========== HISTÓRICO DE HABILITAÇÃO ==========
 
-    @OneToMany(mappedBy = "profissional", fetch = FetchType.LAZY)
+    /**
+     * Histórico de habilitações e certificações do profissional.
+     * OneToMany bidirecional com cascade completo - JPA gerencia automaticamente.
+     */
+    @OneToMany(mappedBy = "profissional", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<HistoricoHabilitacaoProfissional> historicoHabilitacao = new HashSet<>();
 
     // ========== OBSERVAÇÕES ==========
