@@ -5,6 +5,7 @@ import com.upsaude.entity.embeddable.DadosPessoaisMedico;
 import com.upsaude.entity.embeddable.FormacaoMedico;
 import com.upsaude.entity.embeddable.RegistroProfissionalMedico;
 import java.time.OffsetDateTime;
+import java.util.List;
 import java.util.UUID;
 import lombok.*;
 
@@ -23,5 +24,7 @@ public class MedicosResponse {
     private RegistroProfissionalMedico registroProfissional;
     private FormacaoMedico formacao;
     private ContatoMedico contato;
+    private List<EnderecoResponse> enderecos;
+    private List<MedicoEstabelecimentoResponse> medicosEstabelecimentos;
     private String observacoes;
 }
