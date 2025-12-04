@@ -14,4 +14,10 @@ public class DadosClinicosBasicosResponse {
     private OffsetDateTime updatedAt;
     private Boolean active;
     private PacienteResponse paciente;
+    private Boolean gestante;
+    private Boolean fumante;
+    private Boolean alcoolista;
+    private Boolean usuarioDrogas;
+    private Boolean historicoViolencia;
+    private Boolean acompanhamentoPsicossocial;
 }

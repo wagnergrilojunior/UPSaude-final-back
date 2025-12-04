@@ -19,4 +19,6 @@ public class ResponsavelLegalResponse {
     private String cpf;
     private String telefone;
     private TipoResponsavelEnum tipoResponsavel;
+    private Boolean autorizacaoUsoDadosLGPD;
+    private Boolean autorizacaoResponsavel;
 }

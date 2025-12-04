@@ -1,7 +1,6 @@
 package com.upsaude.api.response;
 
 import java.time.LocalDateTime;
-import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.UUID;
 import lombok.*;
@@ -16,5 +15,8 @@ public class LGPDConsentimentoResponse {
     private OffsetDateTime updatedAt;
     private Boolean active;
     private PacienteResponse paciente;
+    private Boolean autorizacaoUsoDados;
+    private Boolean autorizacaoContatoWhatsApp;
+    private Boolean autorizacaoContatoEmail;
     private LocalDateTime dataConsentimento;
 }
