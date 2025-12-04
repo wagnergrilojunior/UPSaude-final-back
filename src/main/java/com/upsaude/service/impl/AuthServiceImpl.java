@@ -13,8 +13,8 @@ import com.upsaude.service.AuthService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
@@ -30,6 +30,7 @@ public class AuthServiceImpl implements AuthService {
     private final UsuarioEstabelecimentoRepository usuarioEstabelecimentoRepository;
 
     @Override
+    @Transactional(readOnly = true)
     public LoginResponse login(LoginRequest request) {
         String loginIdentifier = request.getEmail(); // Pode ser email ou user
         log.debug("Iniciando processo de login para: {}", loginIdentifier);

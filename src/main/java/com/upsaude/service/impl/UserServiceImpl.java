@@ -87,7 +87,15 @@ public class UserServiceImpl implements UserService {
         log.info("Atualizando usuário no Supabase Auth via API: {}", id);
         
         // Atualizar usuário via API do Supabase Auth (service_role)
-        SupabaseAuthResponse.User supabaseUser = supabaseAuthService.updateUser(id, request.getEmail());
+        // Inclui senha se foi fornecida, caso contrário mantém a senha atual
+        String senha = request.getSenha();
+        if (senha != null && !senha.trim().isEmpty()) {
+            log.info("Atualizando email e senha do usuário: {}", id);
+        } else {
+            log.info("Atualizando apenas email do usuário (senha permanece inalterada): {}", id);
+        }
+        
+        SupabaseAuthResponse.User supabaseUser = supabaseAuthService.updateUser(id, request.getEmail(), senha);
         
         log.info("Usuário atualizado no Supabase Auth com sucesso: {}", id);
         
