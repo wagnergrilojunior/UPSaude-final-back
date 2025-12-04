@@ -44,19 +44,9 @@ public class SecurityConfig {
                 .requestMatchers("/v1/auth/login").permitAll()
                 .requestMatchers("/v1/auth/verificar-acesso").permitAll()
                 
-                // Endpoints do Actuator - públicos para monitoramento
+                // Endpoints do Actuator - públicos para monitoramento via Spring Boot Admin
                 // IMPORTANTE: Em produção, considere proteger estes endpoints com autenticação básica
-                .requestMatchers("/actuator/health").permitAll()
-                .requestMatchers("/actuator/health/**").permitAll() // Permite liveness, readiness, etc.
-                .requestMatchers("/actuator/info").permitAll()
-                .requestMatchers("/actuator/metrics").permitAll()
-                .requestMatchers("/actuator/metrics/**").permitAll()
-                .requestMatchers("/actuator/prometheus").permitAll()
-                .requestMatchers("/actuator/loggers").permitAll()
-                .requestMatchers("/actuator/loggers/**").permitAll()
-                .requestMatchers("/actuator/threaddump").permitAll()
-                .requestMatchers("/actuator/httpexchanges").permitAll()
-                .requestMatchers("/actuator/httpexchanges/**").permitAll()
+                .requestMatchers("/actuator/**").permitAll() // Permite todos os endpoints do Actuator para Spring Boot Admin
                 
                 // Swagger/OpenAPI - público para desenvolvimento
                 .requestMatchers("/api-docs/**").permitAll()
