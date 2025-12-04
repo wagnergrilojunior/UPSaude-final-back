@@ -5,6 +5,7 @@ import io.micrometer.core.instrument.MeterRegistry;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.CacheManager;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -25,6 +26,8 @@ import java.util.concurrent.atomic.AtomicInteger;
  * 3. Dashboard de Infraestrutura - DB, Cache, Memória
  * 4. Dashboard de Erros - Taxa de erro, Endpoints com problema
  * 
+ * NOTA: RedisConnectionFactory é opcional para permitir execução sem Redis no profile local.
+ * 
  * @author UPSaude
  */
 @Slf4j
@@ -35,7 +38,9 @@ public class DashboardMetricsService {
     private final MeterRegistry meterRegistry;
     private final DataSource dataSource;
     private final CacheManager cacheManager;
-    private final RedisConnectionFactory redisConnectionFactory;
+    
+    @Autowired(required = false)
+    private RedisConnectionFactory redisConnectionFactory;
 
     // Métricas de Dashboard
     private final AtomicInteger atendimentosSemana = new AtomicInteger(0);

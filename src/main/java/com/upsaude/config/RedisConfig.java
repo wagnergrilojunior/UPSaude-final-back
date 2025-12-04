@@ -8,10 +8,12 @@ import io.lettuce.core.ClientOptions;
 import io.lettuce.core.SocketOptions;
 import io.lettuce.core.TimeoutOptions;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
 import org.springframework.data.redis.cache.RedisCacheConfiguration;
 import org.springframework.data.redis.cache.RedisCacheManager;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
@@ -37,10 +39,14 @@ import java.time.Duration;
  * Nota: Valkey é 100% compatível com Redis e funciona com a mesma configuração.
  * O Render usa Valkey nas novas instâncias Key-Value.
  * 
+ * IMPORTANTE: Esta configuração é desabilitada no profile 'local' para permitir
+ * desenvolvimento sem Redis. Use @Profile("!local") para desabilitar.
+ * 
  * @author UPSaúde
  */
 @Configuration
 @EnableCaching
+@Profile("!local")
 public class RedisConfig {
 
     @Value("${spring.redis.host:localhost}")
