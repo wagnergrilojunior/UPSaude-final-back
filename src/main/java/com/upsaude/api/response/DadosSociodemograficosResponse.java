@@ -26,6 +26,7 @@ public class DadosSociodemograficosResponse {
     private String municipioNascimentoIbge;
     private EscolaridadeEnum escolaridade;
     private String ocupacaoProfissao;
+    private Boolean situacaoRua;
     private Integer tempoSituacaoRua;
     private CondicaoMoradiaEnum condicaoMoradia;
     private SituacaoFamiliarEnum situacaoFamiliar;

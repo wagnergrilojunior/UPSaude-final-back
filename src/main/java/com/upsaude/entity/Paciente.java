@@ -263,4 +263,39 @@ public class Paciente extends BaseEntityWithoutTenant {
     @OneToOne(mappedBy = "paciente", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
     private IntegracaoGov integracaoGov;
 
+    /** 
+     * Doenças do paciente.
+     * Relacionamento OneToMany bidirecional com cascade completo e remoção de órfãos.
+     * Permite registrar múltiplas doenças/comorbidades com informações de diagnóstico, 
+     * acompanhamento e tratamento.
+     */
+    @OneToMany(mappedBy = "paciente", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
+    private List<DoencasPaciente> doencas = new ArrayList<>();
+
+    /** 
+     * Alergias do paciente.
+     * Relacionamento OneToMany bidirecional com cascade completo e remoção de órfãos.
+     * Permite registrar múltiplas alergias com informações de diagnóstico e histórico de reações.
+     * Alertas médicos importantes são exibidos no prontuário.
+     */
+    @OneToMany(mappedBy = "paciente", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
+    private List<AlergiasPaciente> alergias = new ArrayList<>();
+
+    /** 
+     * Deficiências do paciente.
+     * Relacionamento OneToMany bidirecional com cascade completo e remoção de órfãos.
+     * Permite registrar múltiplas deficiências com informações de laudo e diagnóstico.
+     */
+    @OneToMany(mappedBy = "paciente", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
+    private List<DeficienciasPaciente> deficiencias = new ArrayList<>();
+
+    /** 
+     * Medicações contínuas do paciente.
+     * Relacionamento OneToMany bidirecional com cascade completo e remoção de órfãos.
+     * Permite registrar múltiplas medicações em uso contínuo com informações de dose, 
+     * frequência, via de administração e período de uso.
+     */
+    @OneToMany(mappedBy = "paciente", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
+    private List<MedicacaoPaciente> medicacoes = new ArrayList<>();
+
 }

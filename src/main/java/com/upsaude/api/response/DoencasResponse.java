@@ -21,6 +21,7 @@ public class DoencasResponse {
     private String nomeCientifico;
     private String codigoInterno;
     private ClassificacaoDoenca classificacao;
+    private Boolean cronica;
     private CidDoencasResponse cidPrincipal;
     private SintomasDoenca sintomas;
     private TratamentoPadraoDoenca tratamentoPadrao;

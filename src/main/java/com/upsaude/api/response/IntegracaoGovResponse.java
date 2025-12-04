@@ -1,7 +1,6 @@
 package com.upsaude.api.response;
 
 import java.time.LocalDateTime;
-import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.UUID;
 import lombok.*;

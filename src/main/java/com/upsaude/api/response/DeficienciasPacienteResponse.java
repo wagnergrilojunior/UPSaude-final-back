@@ -16,6 +16,7 @@ public class DeficienciasPacienteResponse {
     private Boolean active;
     private PacienteResponse paciente;
     private DeficienciasResponse deficiencia;
+    private Boolean possuiLaudo;
     private LocalDate dataDiagnostico;
     private String observacoes;
 }

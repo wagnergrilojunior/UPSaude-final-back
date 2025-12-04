@@ -20,4 +20,5 @@ public class AlergiasPacienteResponse {
     private DiagnosticoAlergiaPaciente diagnostico;
     private HistoricoReacoesAlergiaPaciente historicoReacoes;
     private String observacoes;
+    private Boolean alertaMedico;
 }
