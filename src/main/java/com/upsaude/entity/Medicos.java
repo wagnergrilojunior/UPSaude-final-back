@@ -100,6 +100,15 @@ public class Medicos extends BaseEntity {
     )
     private List<Endereco> enderecos = new ArrayList<>();
 
+    /**
+     * Vínculos do médico com estabelecimentos.
+     * Relacionamento OneToMany bidirecional com cascade completo e remoção de órfãos.
+     * Permite gerenciar múltiplos vínculos do médico com diferentes estabelecimentos,
+     * incluindo tipo de vínculo, carga horária, salário e período de trabalho.
+     */
+    @OneToMany(mappedBy = "medico", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
+    private List<MedicoEstabelecimento> medicosEstabelecimentos = new ArrayList<>();
+
     // ========== OBSERVAÇÕES ==========
 
     @Column(name = "observacoes", columnDefinition = "TEXT")
