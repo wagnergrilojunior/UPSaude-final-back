@@ -274,14 +274,15 @@ public class SupabaseAuthService {
 
     /**
      * Atualiza um usuário no Supabase Auth usando service_role key (admin).
-     * Permite atualizar email e outros metadados.
+     * Permite atualizar email e senha (ambos opcionais).
      *
      * @param userId ID do usuário
-     * @param email Novo email
+     * @param email Novo email (opcional, pode ser null)
+     * @param password Nova senha (opcional, pode ser null)
      * @return Informações do usuário atualizado
      * @throws RuntimeException se houver erro na atualização
      */
-    public SupabaseAuthResponse.User updateUser(java.util.UUID userId, String email) {
+    public SupabaseAuthResponse.User updateUser(java.util.UUID userId, String email, String password) {
         String baseUrl = supabaseConfig.getUrl();
         if (baseUrl == null || baseUrl.isEmpty()) {
             log.error("URL do Supabase não configurada!");
@@ -295,7 +296,8 @@ public class SupabaseAuthService {
         
         String url = baseUrl + "/auth/v1/admin/users/" + userId;
         
-        log.debug("Atualizando usuário no Supabase Auth. URL: {}, UserID: {}, Email: {}", url, userId, email);
+        log.debug("Atualizando usuário no Supabase Auth. URL: {}, UserID: {}, Email: {}, Senha: {}", 
+                url, userId, email, password != null ? "***" : "não fornecida");
         
         // Preparar headers com service_role key (permissão admin)
         HttpHeaders headers = new HttpHeaders();
@@ -303,9 +305,23 @@ public class SupabaseAuthService {
         headers.set("apikey", supabaseConfig.getServiceRoleKey());
         headers.set("Authorization", "Bearer " + supabaseConfig.getServiceRoleKey());
         
-        // Preparar body
+        // Preparar body - incluir apenas os campos fornecidos
         Map<String, Object> requestBody = new HashMap<>();
-        requestBody.put("email", email);
+        
+        if (email != null && !email.trim().isEmpty()) {
+            requestBody.put("email", email);
+        }
+        
+        if (password != null && !password.trim().isEmpty()) {
+            requestBody.put("password", password);
+            log.debug("Nova senha será atualizada para o usuário {}", userId);
+        }
+        
+        // Se nenhum campo foi fornecido, não faz sentido atualizar
+        if (requestBody.isEmpty()) {
+            log.warn("Nenhum campo para atualizar foi fornecido para o usuário: {}", userId);
+            throw new RuntimeException("Nenhum dado fornecido para atualização");
+        }
         
         HttpEntity<Map<String, Object>> request = new HttpEntity<>(requestBody, headers);
         
@@ -319,7 +335,7 @@ public class SupabaseAuthService {
             );
             
             if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
-                log.info("Usuário atualizado com sucesso no Supabase Auth: {}", email);
+                log.info("Usuário atualizado com sucesso no Supabase Auth. UserID: {}", userId);
                 return response.getBody();
             }
             
@@ -334,6 +350,8 @@ public class SupabaseAuthService {
             String errorMessage = "Erro ao atualizar usuário: ";
             if (e.getResponseBodyAsString().contains("already registered")) {
                 errorMessage = "Email já está em uso por outro usuário";
+            } else if (e.getResponseBodyAsString().contains("password")) {
+                errorMessage = "Senha inválida (mínimo 6 caracteres)";
             }
             
             throw new RuntimeException(errorMessage + e.getMessage());
@@ -341,6 +359,19 @@ public class SupabaseAuthService {
             log.error("Erro inesperado ao atualizar usuário no Supabase Auth", e);
             throw new RuntimeException("Erro ao atualizar usuário: " + e.getMessage(), e);
         }
+    }
+    
+    /**
+     * Atualiza um usuário no Supabase Auth usando service_role key (admin).
+     * Sobrecarga do método para manter compatibilidade com código existente.
+     *
+     * @param userId ID do usuário
+     * @param email Novo email
+     * @return Informações do usuário atualizado
+     * @throws RuntimeException se houver erro na atualização
+     */
+    public SupabaseAuthResponse.User updateUser(java.util.UUID userId, String email) {
+        return updateUser(userId, email, null);
     }
 
     /**
