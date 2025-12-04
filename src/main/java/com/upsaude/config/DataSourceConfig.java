@@ -46,8 +46,9 @@ public class DataSourceConfig {
         config.setDriverClassName(dataSourceProperties.getDriverClassName());
         
         // Propriedades específicas do PostgreSQL para resolver problemas com prepared statements
-        // IMPORTANTE: Desabilita o cache de prepared statements no lado do cliente
-        // Isso força o PostgreSQL a gerenciar prepared statements no lado do servidor
+        // IMPORTANTE: Desabilita COMPLETAMENTE o uso de server-side prepared statements
+        // Isso evita o erro "prepared statement does not exist" quando conexões são reutilizadas
+        config.addDataSourceProperty("prepareThreshold", "0");
         config.addDataSourceProperty("preparedStatementCacheQueries", "0");
         config.addDataSourceProperty("preparedStatementCacheSizeMiB", "0");
         
