@@ -26,7 +26,7 @@ Abra seu navegador em: **http://localhost:9090/admin**
 
 **Faça login com**:
 - Usuário: `admin`
-- Senha: `admin123`
+- Senha: `UPSaudeAdmin2025Prod`
 
 #### 3️⃣ Inicie o Backend
 
@@ -94,7 +94,7 @@ BACKEND_PID=$!
 echo ""
 echo -e "${GREEN}✅ Tudo iniciado!${NC}"
 echo ""
-echo "Admin Server: http://localhost:9090/admin (admin/admin123)"
+echo "Admin Server: http://localhost:9090/admin (admin/UPSaudeAdmin2025Prod)"
 echo "Backend API: http://localhost:8080/api"
 echo ""
 echo "PIDs: Admin=$ADMIN_PID Backend=$BACKEND_PID"
@@ -313,7 +313,7 @@ SPRING_BOOT_ADMIN_PASSWORD=senha_forte_aqui
 ### Desenvolvimento
 - [ ] Admin Server iniciou na porta 9090
 - [ ] Painel Admin acessível em http://localhost:9090/admin
-- [ ] Login funciona (admin/admin123)
+- [ ] Login funciona (admin/UPSaudeAdmin2025Prod)
 - [ ] Backend aparece na lista de aplicações
 - [ ] Status mostra "UP" (verde)
 - [ ] Métricas carregam corretamente

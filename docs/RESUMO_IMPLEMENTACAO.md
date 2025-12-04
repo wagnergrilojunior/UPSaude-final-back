@@ -22,7 +22,7 @@
 
 **Porta**: 9090  
 **URL**: http://localhost:9090/admin  
-**Credenciais**: admin / admin123 (dev)
+**Credenciais**: admin / UPSaudeAdmin2025Prod (dev)
 
 ### 2. 🔧 Backend Atualizado
 
@@ -157,7 +157,7 @@ mvn spring-boot:run -Dspring-boot.run.profiles=dev
 ```
 
 **Acesse**: http://localhost:9090/admin  
-**Login**: admin / admin123
+**Login**: admin / UPSaudeAdmin2025Prod
 
 ### 2. Produção
 
@@ -249,7 +249,7 @@ ADMIN_PASSWORD=senha_forte
 
 ### Desenvolvimento
 - Usuários em memória
-- Credenciais simples (admin/admin123)
+- Credenciais simples (admin/UPSaudeAdmin2025Prod)
 - Endpoints do Actuator públicos
 
 ### Produção (Recomendações)
