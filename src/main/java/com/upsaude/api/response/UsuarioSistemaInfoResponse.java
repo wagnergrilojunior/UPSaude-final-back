@@ -20,33 +20,52 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 public class UsuarioSistemaInfoResponse {
+    // ========== DADOS DO USUARIO_SISTEMA ==========
     private UUID id;
     private OffsetDateTime createdAt;
     private OffsetDateTime updatedAt;
     private Boolean active;
-    private UUID tenantId;
-    private String tenantNome;
-    private String tenantSlug;
     private UUID userId;
+    
+    // Vínculos do usuário
     private UUID profissionalSaudeId;
     private UUID medicoId;
     private UUID pacienteId;
-    private Boolean adminTenant; // Se true, tem acesso total ao tenant
+    private String tipoVinculo; // MEDICO, PROFISSIONAL, PACIENTE, OUTROS
+    
+    // Dados de exibição
     private String nomeExibicao;
-    private String user; // Username para login alternativo
+    private String username; // Campo para login alternativo
     private String fotoUrl; // URL da foto no Supabase Storage
     
+    // Permissões
+    private Boolean adminTenant; // Se true, tem acesso total ao tenant
+    
+    // ========== DADOS DO TENANT ==========
+    private UUID tenantId;
+    private String tenantNome;
+    private String tenantSlug;
+    private Boolean tenantAtivo;
+    private String tenantCnes;
+    
+    // ========== ESTABELECIMENTOS VINCULADOS ==========
     // Lista de estabelecimentos vinculados (vazio se adminTenant=true)
     @lombok.Builder.Default
     private List<EstabelecimentoVinculoResponse> estabelecimentos = new ArrayList<>();
     
+    /**
+     * Informações de vínculo com estabelecimento
+     */
     @Data
     @Builder
     @NoArgsConstructor
     @AllArgsConstructor
     public static class EstabelecimentoVinculoResponse {
+        private UUID id; // ID do vínculo
         private UUID estabelecimentoId;
         private String estabelecimentoNome;
+        private String estabelecimentoCnes;
+        private Boolean estabelecimentoAtivo;
         private TipoUsuarioSistemaEnum tipoUsuario; // Tipo de acesso neste estabelecimento
     }
 }
