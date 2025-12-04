@@ -117,8 +117,11 @@ public class AuthServiceImpl implements AuthService {
         List<UsuarioSistemaInfoResponse.EstabelecimentoVinculoResponse> estabelecimentosResponse = 
                 estabelecimentosVinculados.stream()
                         .map(ue -> UsuarioSistemaInfoResponse.EstabelecimentoVinculoResponse.builder()
+                                .id(ue.getId())
                                 .estabelecimentoId(ue.getEstabelecimento().getId())
                                 .estabelecimentoNome(ue.getEstabelecimento().getNome())
+                                .estabelecimentoCnes(ue.getEstabelecimento().getCodigoCnes())
+                                .estabelecimentoAtivo(ue.getEstabelecimento().getActive())
                                 .tipoUsuario(ue.getTipoUsuario())
                                 .build())
                         .collect(Collectors.toList());
@@ -129,17 +132,25 @@ public class AuthServiceImpl implements AuthService {
                 .createdAt(usuarioSistema.getCreatedAt())
                 .updatedAt(usuarioSistema.getUpdatedAt())
                 .active(usuarioSistema.getActive())
-                .tenantId(usuarioSistema.getTenant() != null ? usuarioSistema.getTenant().getId() : null)
-                .tenantNome(usuarioSistema.getTenant() != null ? usuarioSistema.getTenant().getNome() : null)
-                .tenantSlug(usuarioSistema.getTenant() != null ? usuarioSistema.getTenant().getSlug() : null)
                 .userId(usuarioSistema.getUserId())
+                // Vínculos do usuário
                 .profissionalSaudeId(usuarioSistema.getProfissionalSaude() != null ? usuarioSistema.getProfissionalSaude().getId() : null)
                 .medicoId(usuarioSistema.getMedico() != null ? usuarioSistema.getMedico().getId() : null)
                 .pacienteId(usuarioSistema.getPaciente() != null ? usuarioSistema.getPaciente().getId() : null)
-                .adminTenant(usuarioSistema.getAdminTenant())
+                .tipoVinculo(usuarioSistema.getTipoVinculo())
+                // Dados de exibição
                 .nomeExibicao(usuarioSistema.getNomeExibicao())
-                .user(usuarioSistema.getUsername())
+                .username(usuarioSistema.getUsername())
                 .fotoUrl(usuarioSistema.getFotoUrl())
+                // Permissões
+                .adminTenant(usuarioSistema.getAdminTenant())
+                // Dados do Tenant
+                .tenantId(usuarioSistema.getTenant() != null ? usuarioSistema.getTenant().getId() : null)
+                .tenantNome(usuarioSistema.getTenant() != null ? usuarioSistema.getTenant().getNome() : null)
+                .tenantSlug(usuarioSistema.getTenant() != null ? usuarioSistema.getTenant().getSlug() : null)
+                .tenantAtivo(usuarioSistema.getTenant() != null ? usuarioSistema.getTenant().getAtivo() : null)
+                .tenantCnes(usuarioSistema.getTenant() != null ? usuarioSistema.getTenant().getCnes() : null)
+                // Estabelecimentos vinculados
                 .estabelecimentos(estabelecimentosResponse)
                 .build();
         
