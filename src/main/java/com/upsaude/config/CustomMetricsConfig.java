@@ -33,16 +33,9 @@ import java.util.concurrent.atomic.AtomicLong;
 @Slf4j
 @Configuration
 public class CustomMetricsConfig {
-
-    /**
-     * Customiza tags globais das métricas.
-     */
-    @Bean
-    public MeterRegistryCustomizer<MeterRegistry> metricsCommonTags() {
-        return registry -> registry.config()
-            .commonTags("sistema", "UPSaude")
-            .commonTags("tipo", "gestao_saude");
-    }
+    
+    // Nota: metricsCommonTags já está definido em MetricsConfig.java
+    // Não duplicar o bean para evitar conflito!
 
     /**
      * Componente que atualiza métricas de negócio periodicamente.
