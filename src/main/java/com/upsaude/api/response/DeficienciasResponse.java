@@ -18,4 +18,6 @@ public class DeficienciasResponse {
     private String descricao;
     private TipoDeficienciaEnum tipoDeficiencia;
     private String cid10Relacionado;
+    private Boolean permanente;
+    private Boolean acompanhamentoContinuo;
 }

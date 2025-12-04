@@ -24,5 +24,6 @@ public class MedicacaoPacienteResponse {
     private CidDoencasResponse cidRelacionado;
     private LocalDate dataInicio;
     private LocalDate dataFim;
+    private Boolean medicacaoAtiva;
     private String observacoes;
 }
