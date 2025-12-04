@@ -10,7 +10,7 @@ mvn spring-boot:run -Dspring-boot.run.profiles=dev
 ```
 
 ✅ **Acesse**: http://localhost:9090/admin  
-🔐 **Login**: `admin` / `admin123`
+🔐 **Login**: `admin` / `UPSaudeAdmin2025Prod`
 
 ### Passo 2: Inicie o Backend
 

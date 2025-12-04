@@ -132,7 +132,7 @@ mvn spring-boot:run -Dspring-boot.run.profiles=dev
 ```
 
 **Acesse**: http://localhost:9090/admin  
-**Login**: `admin` / `admin123`
+**Login**: `admin` / `UPSaudeAdmin2025Prod`
 
 #### 2. Inicie o Backend
 
@@ -260,7 +260,7 @@ curl http://localhost:8080/api/actuator/health
 Verifique se as credenciais no backend correspondem ao Admin Server:
 ```properties
 spring.boot.admin.client.username=admin
-spring.boot.admin.client.password=admin123
+spring.boot.admin.client.password=UPSaudeAdmin2025Prod
 ```
 
 ---

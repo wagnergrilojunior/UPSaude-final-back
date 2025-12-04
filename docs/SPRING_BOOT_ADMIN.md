@@ -78,7 +78,7 @@ mvn spring-boot:run -Dspring-boot.run.profiles=dev
 
 **Credenciais padrão**:
 - Usuário: `admin`
-- Senha: `admin123`
+- Senha: `UPSaudeAdmin2025Prod`
 
 ### Cliente (Backend UPSaude)
 
@@ -350,7 +350,7 @@ O painel Admin está protegido com Spring Security:
 
 ```java
 // Usuários em memória (desenvolvimento)
-admin / admin123   - Acesso total
+admin / UPSaudeAdmin2025Prod   - Acesso total
 viewer / viewer123 - Apenas visualização
 ```
 
