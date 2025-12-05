@@ -52,13 +52,17 @@ public class DataSourceConfig {
         config.addDataSourceProperty("preparedStatementCacheQueries", "0");
         config.addDataSourceProperty("preparedStatementCacheSizeMiB", "0");
         
-        // Outras propriedades para melhorar a estabilidade
+        // Outras propriedades para melhorar a estabilidade e reduzir conexões
         config.addDataSourceProperty("tcpKeepAlive", "true");
-        config.addDataSourceProperty("socketTimeout", "30");
-        config.addDataSourceProperty("loginTimeout", "10");
+        config.addDataSourceProperty("socketTimeout", "20");
+        config.addDataSourceProperty("loginTimeout", "5");
         
-        // Configuração para revalidar conexões automaticamente
+        // Configuração para revalidar conexões automaticamente (mais rápido)
         config.setConnectionTestQuery("SELECT 1");
+        
+        // Configurações adicionais para reduzir conexões ociosas
+        config.setInitializationFailTimeout(1); // Falha rápido se não conseguir conectar
+        config.setRegisterMbeans(false); // Desabilita MBeans para reduzir overhead
         
         log.info("DataSource HikariCP configurado com prepared statement cache desabilitado");
         

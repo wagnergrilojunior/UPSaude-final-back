@@ -122,7 +122,16 @@
         <artifactId>spring-boot-maven-plugin</artifactId>
         <configuration>
           <mainClass>com.upsaude.UpSaudeApplication</mainClass>
+          <!-- Exclui DevTools em builds de produção -->
+          <excludeDevtools>true</excludeDevtools>
         </configuration>
+        <executions>
+          <execution>
+            <goals>
+              <goal>repackage</goal>
+            </goals>
+          </execution>
+        </executions>
       </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
