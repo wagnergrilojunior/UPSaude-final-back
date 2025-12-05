@@ -8,7 +8,6 @@ import io.lettuce.core.ClientOptions;
 import io.lettuce.core.SocketOptions;
 import io.lettuce.core.TimeoutOptions;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.annotation.Bean;
@@ -23,6 +22,7 @@ import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactor
 import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.RedisSerializationContext;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
+import lombok.extern.slf4j.Slf4j;
 
 import java.time.Duration;
 
@@ -44,6 +44,7 @@ import java.time.Duration;
  * 
  * @author UPSaúde
  */
+@Slf4j
 @Configuration
 @EnableCaching
 @Profile("!local")
@@ -86,30 +87,48 @@ public class RedisConfig {
             config.setPassword(redisPassword);
         }
 
-        // Configuração do cliente Lettuce para não bloquear startup
+        // Configuração do cliente Lettuce com timeouts adequados
         SocketOptions socketOptions = SocketOptions.builder()
-            .connectTimeout(Duration.ofSeconds(2)) // Timeout curto para não travar
+            .connectTimeout(Duration.ofSeconds(5)) // Timeout de conexão aumentado
+            .keepAlive(true) // Mantém conexão viva
             .build();
 
         TimeoutOptions timeoutOptions = TimeoutOptions.builder()
-            .fixedTimeout(Duration.ofSeconds(2))
+            .fixedTimeout(Duration.ofSeconds(5)) // Timeout de comandos aumentado
             .build();
 
         ClientOptions clientOptions = ClientOptions.builder()
             .socketOptions(socketOptions)
             .timeoutOptions(timeoutOptions)
             .autoReconnect(true) // Reconecta automaticamente
+            .pingBeforeActivateConnection(true) // Valida conexão antes de usar
             .build();
 
         LettuceClientConfiguration clientConfig = LettuceClientConfiguration.builder()
             .clientOptions(clientOptions)
-            .commandTimeout(Duration.ofSeconds(2))
-            .shutdownTimeout(Duration.ofSeconds(1))
+            .commandTimeout(Duration.ofSeconds(5)) // Timeout de comandos aumentado
+            .shutdownTimeout(Duration.ofSeconds(2)) // Tempo para fechar conexões
             .build();
 
         LettuceConnectionFactory factory = new LettuceConnectionFactory(config, clientConfig);
-        factory.setValidateConnection(false); // Não valida conexão no startup
+        // Não valida no startup para não bloquear, mas valida quando usar
+        factory.setValidateConnection(false);
         factory.afterPropertiesSet();
+        
+        // Tenta validar a conexão de forma assíncrona e loga o resultado
+        try {
+            var connection = factory.getConnection();
+            connection.ping();
+            connection.close();
+            log.info("✅ Redis conectado com sucesso - Host: {}, Port: {}, Database: {}", 
+                redisHost, redisPort, redisDatabase);
+        } catch (Exception e) {
+            log.warn("⚠️  Redis não está disponível no momento - Host: {}, Port: {}, Database: {}. " +
+                "A aplicação continuará sem cache. Erro: {}. " +
+                "Verifique se o Redis está rodando e se as variáveis de ambiente estão configuradas corretamente.", 
+                redisHost, redisPort, redisDatabase, e.getMessage());
+            // Não lança exceção para não bloquear startup - aplicação funciona sem cache
+        }
         
         return factory;
     }

@@ -54,8 +54,12 @@ public class DataSourceConfig {
         
         // Outras propriedades para melhorar a estabilidade e reduzir conexões
         config.addDataSourceProperty("tcpKeepAlive", "true");
-        config.addDataSourceProperty("socketTimeout", "20");
+        // Socket timeout reduzido: mata conexões travadas após 10 segundos
+        config.addDataSourceProperty("socketTimeout", "10");
+        // Login timeout: falha rápido se não conseguir autenticar
         config.addDataSourceProperty("loginTimeout", "5");
+        // Cancelar queries lentas após 10 segundos
+        config.addDataSourceProperty("cancelSignalTimeout", "10");
         
         // Configuração para revalidar conexões automaticamente (mais rápido)
         config.setConnectionTestQuery("SELECT 1");
