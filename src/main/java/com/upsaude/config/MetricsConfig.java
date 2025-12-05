@@ -39,7 +39,11 @@ import java.sql.SQLException;
 public class MetricsConfig implements ApplicationListener<ContextRefreshedEvent> {
 
     private final MeterRegistry meterRegistry;
-    private final DataSource dataSource;
+    
+    // DataSource como opcional e lazy para evitar conexões durante inicialização
+    @Autowired(required = false)
+    @Lazy
+    private DataSource dataSource;
     
     // Dependências opcionais - podem ser null se não configuradas
     @Autowired(required = false)
@@ -53,10 +57,10 @@ public class MetricsConfig implements ApplicationListener<ContextRefreshedEvent>
 
     /**
      * Construtor com @Lazy para evitar dependência circular.
+     * DataSource removido do construtor para evitar criação de conexão durante inicialização.
      */
-    public MetricsConfig(@Lazy MeterRegistry meterRegistry, DataSource dataSource) {
+    public MetricsConfig(@Lazy MeterRegistry meterRegistry) {
         this.meterRegistry = meterRegistry;
-        this.dataSource = dataSource;
     }
 
     /**
@@ -99,36 +103,14 @@ public class MetricsConfig implements ApplicationListener<ContextRefreshedEvent>
 
     /**
      * Registra métricas do DataSource (HikariCP).
+     * DESABILITADO para evitar criação de conexões extras durante inicialização.
+     * As métricas do HikariCP já são expostas automaticamente pelo Actuator quando habilitadas.
      */
     private void registerDataSourceMetrics() {
-        try {
-            // Métrica de conexões ativas
-            Gauge.builder("upsaude.datasource.connections.active", dataSource, ds -> {
-                try (Connection conn = ds.getConnection()) {
-                    // Verifica se a conexão está válida
-                    return conn.isValid(1) ? 1 : 0;
-                } catch (SQLException e) {
-                    return 0;
-                }
-            })
-            .description("Número de conexões ativas no pool do HikariCP")
-            .register(meterRegistry);
-
-            // Métrica de disponibilidade do DataSource
-            Gauge.builder("upsaude.datasource.available", dataSource, ds -> {
-                try (Connection conn = ds.getConnection()) {
-                    return conn.isValid(1) ? 1 : 0;
-                } catch (SQLException e) {
-                    return 0;
-                }
-            })
-            .description("Disponibilidade do DataSource (1 = disponível, 0 = indisponível)")
-            .register(meterRegistry);
-
-            log.debug("Métricas do DataSource registradas");
-        } catch (Exception e) {
-            log.warn("Não foi possível registrar métricas do DataSource: {}", e.getMessage());
-        }
+        // Métricas do DataSource desabilitadas para evitar conexões extras
+        // O Actuator já expõe métricas do HikariCP quando management.metrics.jdbc.datasource.enabled=true
+        // Como desabilitamos isso, não precisamos registrar métricas customizadas
+        log.debug("Métricas do DataSource desabilitadas para evitar conexões extras durante inicialização");
     }
 
     /**
