@@ -5,7 +5,6 @@ import jakarta.persistence.Embeddable;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
 /**
  * Classe embeddable para informações de diagnóstico da consulta.
@@ -15,9 +14,16 @@ import lombok.NoArgsConstructor;
 @Embeddable
 @Data
 @Builder
-@NoArgsConstructor
 @AllArgsConstructor
 public class DiagnosticoConsulta {
+
+    public DiagnosticoConsulta() {
+        this.diagnostico = "";
+        this.diagnosticosSecundarios = "";
+        this.hipoteseDiagnostica = "";
+        this.diagnosticoDiferencial = "";
+        this.conduta = "";
+    }
 
     @Column(name = "diagnostico", columnDefinition = "TEXT")
     private String diagnostico; // Diagnóstico principal

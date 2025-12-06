@@ -5,7 +5,6 @@ import jakarta.persistence.Embeddable;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
 /**
  * Classe embeddable para tratamento padrão da doença.
@@ -15,9 +14,16 @@ import lombok.NoArgsConstructor;
 @Embeddable
 @Data
 @Builder
-@NoArgsConstructor
 @AllArgsConstructor
 public class TratamentoPadraoDoenca {
+
+    public TratamentoPadraoDoenca() {
+        this.tratamentoPadrao = "";
+        this.medicamentosComuns = "";
+        this.procedimentosComuns = "";
+        this.cuidadosEspeciais = "";
+        this.prevencao = "";
+    }
 
     @Column(name = "tratamento_padrao", columnDefinition = "TEXT")
     private String tratamentoPadrao; // Tratamento padrão recomendado

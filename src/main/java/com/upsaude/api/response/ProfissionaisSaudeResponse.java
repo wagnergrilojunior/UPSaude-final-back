@@ -11,10 +11,19 @@ import com.upsaude.enums.TipoDeficienciaEnum;
 import com.upsaude.enums.TipoProfissionalEnum;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 import java.util.UUID;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
-@Data
+@Getter
+@Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
@@ -54,5 +63,12 @@ public class ProfissionaisSaudeResponse {
     private String telefoneInstitucional;
     private String emailInstitucional;
     private EnderecoResponse enderecoProfissional;
+    
+    @Builder.Default
+    private List<EspecialidadesMedicasResponse> especialidades = new ArrayList<>();
+    
+    @Builder.Default
+    private Set<HistoricoHabilitacaoProfissionalResponse> historicoHabilitacao = new HashSet<>();
+    
     private String observacoes;
 }

@@ -49,6 +49,6 @@ public abstract class BaseEntityWithoutEstabelecimento {
     private Tenant tenant;
 
     @Column(name = "ativo", nullable = false)
-    private Boolean active;
+    private Boolean active = true;
 }
 

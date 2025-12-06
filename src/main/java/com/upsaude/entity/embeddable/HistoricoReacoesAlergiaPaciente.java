@@ -10,7 +10,6 @@ import jakarta.persistence.Embeddable;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
 
@@ -22,9 +21,14 @@ import java.time.LocalDate;
 @Embeddable
 @Data
 @Builder
-@NoArgsConstructor
 @AllArgsConstructor
 public class HistoricoReacoesAlergiaPaciente {
+
+    public HistoricoReacoesAlergiaPaciente() {
+        this.reacaoMaisGrave = "";
+        this.tratamentoUtilizado = "";
+        this.necessitouHospitalizacao = false;
+    }
 
     @Column(name = "data_ultima_reacao")
     private LocalDate dataUltimaReacao; // Data da última reação alérgica

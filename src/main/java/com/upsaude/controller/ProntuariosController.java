@@ -2,6 +2,9 @@ package com.upsaude.controller;
 
 import com.upsaude.api.request.ProntuariosRequest;
 import com.upsaude.api.response.ProntuariosResponse;
+import com.upsaude.exception.BadRequestException;
+import com.upsaude.exception.ConflictException;
+import com.upsaude.exception.NotFoundException;
 import com.upsaude.service.ProntuariosService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -12,6 +15,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -29,6 +33,7 @@ import java.util.UUID;
 @RequestMapping("/v1/prontuarios")
 @Tag(name = "Prontuários", description = "API para gerenciamento de Prontuários")
 @RequiredArgsConstructor
+@Slf4j
 public class ProntuariosController {
 
     private final ProntuariosService prontuariosService;
@@ -42,8 +47,18 @@ public class ProntuariosController {
             @ApiResponse(responseCode = "403", description = "Acesso negado")
     })
     public ResponseEntity<ProntuariosResponse> criar(@Valid @RequestBody ProntuariosRequest request) {
-        ProntuariosResponse response = prontuariosService.criar(request);
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        log.debug("REQUEST POST /v1/prontuarios - payload: {}", request);
+        try {
+            ProntuariosResponse response = prontuariosService.criar(request);
+            log.info("Prontuário criado com sucesso. ID: {}", response.getId());
+            return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        } catch (BadRequestException | ConflictException ex) {
+            log.warn("Falha ao criar prontuário — mensagem: {}, payload: {}", ex.getMessage(), request);
+            throw ex;
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao criar prontuário — payload: {}", request, ex);
+            throw ex;
+        }
     }
 
     @GetMapping
@@ -55,8 +70,14 @@ public class ProntuariosController {
     public ResponseEntity<Page<ProntuariosResponse>> listar(
             @Parameter(description = "Parâmetros de paginação (page, size, sort)")
             Pageable pageable) {
-        Page<ProntuariosResponse> response = prontuariosService.listar(pageable);
-        return ResponseEntity.ok(response);
+        log.debug("REQUEST GET /v1/prontuarios - pageable: {}", pageable);
+        try {
+            Page<ProntuariosResponse> response = prontuariosService.listar(pageable);
+            return ResponseEntity.ok(response);
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao listar prontuários — pageable: {}", pageable, ex);
+            throw ex;
+        }
     }
 
     @GetMapping("/{id}")
@@ -70,8 +91,17 @@ public class ProntuariosController {
     public ResponseEntity<ProntuariosResponse> obterPorId(
             @Parameter(description = "ID do prontuário", required = true)
             @PathVariable UUID id) {
-        ProntuariosResponse response = prontuariosService.obterPorId(id);
-        return ResponseEntity.ok(response);
+        log.debug("REQUEST GET /v1/prontuarios/{}", id);
+        try {
+            ProntuariosResponse response = prontuariosService.obterPorId(id);
+            return ResponseEntity.ok(response);
+        } catch (NotFoundException ex) {
+            log.warn("Prontuário não encontrado — ID: {}, mensagem: {}", id, ex.getMessage());
+            throw ex;
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao obter prontuário por ID — ID: {}", id, ex);
+            throw ex;
+        }
     }
 
     @PutMapping("/{id}")
@@ -87,8 +117,18 @@ public class ProntuariosController {
             @Parameter(description = "ID do prontuário", required = true)
             @PathVariable UUID id,
             @Valid @RequestBody ProntuariosRequest request) {
-        ProntuariosResponse response = prontuariosService.atualizar(id, request);
-        return ResponseEntity.ok(response);
+        log.debug("REQUEST PUT /v1/prontuarios/{} - payload: {}", id, request);
+        try {
+            ProntuariosResponse response = prontuariosService.atualizar(id, request);
+            log.info("Prontuário atualizado com sucesso. ID: {}", response.getId());
+            return ResponseEntity.ok(response);
+        } catch (BadRequestException | NotFoundException | ConflictException ex) {
+            log.warn("Falha ao atualizar prontuário — ID: {}, mensagem: {}, payload: {}", id, ex.getMessage(), request);
+            throw ex;
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao atualizar prontuário — ID: {}, payload: {}", id, request, ex);
+            throw ex;
+        }
     }
 
     @DeleteMapping("/{id}")
@@ -101,8 +141,17 @@ public class ProntuariosController {
     public ResponseEntity<Void> excluir(
             @Parameter(description = "ID do prontuário", required = true)
             @PathVariable UUID id) {
-        prontuariosService.excluir(id);
-        return ResponseEntity.noContent().build();
+        log.debug("REQUEST DELETE /v1/prontuarios/{}", id);
+        try {
+            prontuariosService.excluir(id);
+            log.info("Prontuário excluído com sucesso. ID: {}", id);
+            return ResponseEntity.noContent().build();
+        } catch (NotFoundException ex) {
+            log.warn("Prontuário não encontrado para exclusão — ID: {}, mensagem: {}", id, ex.getMessage());
+            throw ex;
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao excluir prontuário — ID: {}", id, ex);
+            throw ex;
+        }
     }
 }
-

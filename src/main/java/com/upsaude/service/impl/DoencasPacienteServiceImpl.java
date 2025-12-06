@@ -9,6 +9,9 @@ import com.upsaude.entity.Paciente;
 import com.upsaude.exception.BadRequestException;
 import com.upsaude.exception.NotFoundException;
 import com.upsaude.mapper.DoencasPacienteMapper;
+import com.upsaude.mapper.embeddable.DiagnosticoDoencaPacienteMapper;
+import com.upsaude.mapper.embeddable.AcompanhamentoDoencaPacienteMapper;
+import com.upsaude.mapper.embeddable.TratamentoAtualDoencaPacienteMapper;
 import com.upsaude.repository.CidDoencasRepository;
 import com.upsaude.repository.DoencasPacienteRepository;
 import com.upsaude.repository.DoencasRepository;
@@ -37,6 +40,9 @@ public class DoencasPacienteServiceImpl implements DoencasPacienteService {
 
     private final DoencasPacienteRepository doencasPacienteRepository;
     private final DoencasPacienteMapper doencasPacienteMapper;
+    private final DiagnosticoDoencaPacienteMapper diagnosticoDoencaPacienteMapper;
+    private final AcompanhamentoDoencaPacienteMapper acompanhamentoDoencaPacienteMapper;
+    private final TratamentoAtualDoencaPacienteMapper tratamentoAtualDoencaPacienteMapper;
     private final PacienteRepository pacienteRepository;
     private final DoencasRepository doencasRepository;
     private final CidDoencasRepository cidDoencasRepository;
@@ -51,14 +57,18 @@ public class DoencasPacienteServiceImpl implements DoencasPacienteService {
 
         DoencasPaciente doencasPaciente = doencasPacienteMapper.fromRequest(request);
 
-        // Carrega e define relacionamentos obrigatórios
-        Paciente paciente = pacienteRepository.findById(request.getPaciente())
-                .orElseThrow(() -> new NotFoundException("Paciente não encontrado com ID: " + request.getPaciente()));
-        doencasPaciente.setPaciente(paciente);
+        // Carrega e define relacionamentos se fornecidos (opcionais)
+        if (request.getPaciente() != null) {
+            Paciente paciente = pacienteRepository.findById(request.getPaciente())
+                    .orElseThrow(() -> new NotFoundException("Paciente não encontrado com ID: " + request.getPaciente()));
+            doencasPaciente.setPaciente(paciente);
+        }
 
-        Doencas doenca = doencasRepository.findById(request.getDoenca())
-                .orElseThrow(() -> new NotFoundException("Doença não encontrada com ID: " + request.getDoenca()));
-        doencasPaciente.setDoenca(doenca);
+        if (request.getDoenca() != null) {
+            Doencas doenca = doencasRepository.findById(request.getDoenca())
+                    .orElseThrow(() -> new NotFoundException("Doença não encontrada com ID: " + request.getDoenca()));
+            doencasPaciente.setDoenca(doenca);
+        }
 
         // Paciente não possui estabelecimento nem tenant
         // O estabelecimento e tenant devem ser definidos de outra forma se necessário
@@ -177,23 +187,33 @@ public class DoencasPacienteServiceImpl implements DoencasPacienteService {
         if (request == null) {
             throw new BadRequestException("Dados do registro são obrigatórios");
         }
-        if (request.getPaciente() == null) {
-            throw new BadRequestException("ID do paciente é obrigatório");
-        }
-        if (request.getDoenca() == null) {
-            throw new BadRequestException("ID da doença é obrigatório");
-        }
+        // Removidas validações obrigatórias: paciente e doença
+        // Esses campos são opcionais pois nem sempre o paciente tem doenças cadastradas
+        // Se paciente ou doença forem fornecidos, serão validados no momento do relacionamento
     }
 
     private void atualizarDadosDoencasPaciente(DoencasPaciente doencasPaciente, DoencasPacienteRequest request) {
+        // Atualiza embeddables usando mappers
         if (request.getDiagnostico() != null) {
-            doencasPaciente.setDiagnostico(request.getDiagnostico());
+            if (doencasPaciente.getDiagnostico() == null) {
+                doencasPaciente.setDiagnostico(diagnosticoDoencaPacienteMapper.toEntity(request.getDiagnostico()));
+            } else {
+                diagnosticoDoencaPacienteMapper.updateFromRequest(request.getDiagnostico(), doencasPaciente.getDiagnostico());
+            }
         }
         if (request.getAcompanhamento() != null) {
-            doencasPaciente.setAcompanhamento(request.getAcompanhamento());
+            if (doencasPaciente.getAcompanhamento() == null) {
+                doencasPaciente.setAcompanhamento(acompanhamentoDoencaPacienteMapper.toEntity(request.getAcompanhamento()));
+            } else {
+                acompanhamentoDoencaPacienteMapper.updateFromRequest(request.getAcompanhamento(), doencasPaciente.getAcompanhamento());
+            }
         }
         if (request.getTratamentoAtual() != null) {
-            doencasPaciente.setTratamentoAtual(request.getTratamentoAtual());
+            if (doencasPaciente.getTratamentoAtual() == null) {
+                doencasPaciente.setTratamentoAtual(tratamentoAtualDoencaPacienteMapper.toEntity(request.getTratamentoAtual()));
+            } else {
+                tratamentoAtualDoencaPacienteMapper.updateFromRequest(request.getTratamentoAtual(), doencasPaciente.getTratamentoAtual());
+            }
         }
         if (request.getObservacoes() != null) {
             doencasPaciente.setObservacoes(request.getObservacoes());

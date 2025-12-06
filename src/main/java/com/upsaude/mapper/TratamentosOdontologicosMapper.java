@@ -41,6 +41,7 @@ public interface TratamentosOdontologicosMapper extends EntityMapper<Tratamentos
     @Mapping(target = "active", ignore = true)
     @Mapping(target = "paciente", ignore = true)
     @Mapping(target = "profissional", ignore = true)
+    @Mapping(target = "procedimentos", ignore = true)
     TratamentosOdontologicos fromRequest(TratamentosOdontologicosRequest request);
 
     /**
@@ -54,6 +55,7 @@ public interface TratamentosOdontologicosMapper extends EntityMapper<Tratamentos
     @Mapping(target = "active", ignore = true)
     @Mapping(target = "paciente", ignore = true)
     @Mapping(target = "profissional", ignore = true)
+    @Mapping(target = "procedimentos", ignore = true)
     void updateFromRequest(TratamentosOdontologicosRequest request, @MappingTarget TratamentosOdontologicos entity);
 
     /**

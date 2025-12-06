@@ -41,6 +41,7 @@ public interface AcaoPromocaoPrevencaoMapper extends EntityMapper<AcaoPromocaoPr
     @Mapping(target = "active", ignore = true)
     @Mapping(target = "equipeSaude", ignore = true)
     @Mapping(target = "profissionalResponsavel", ignore = true)
+    @Mapping(target = "profissionaisParticipantes", ignore = true)
     AcaoPromocaoPrevencao fromRequest(AcaoPromocaoPrevencaoRequest request);
 
     /**
@@ -54,6 +55,7 @@ public interface AcaoPromocaoPrevencaoMapper extends EntityMapper<AcaoPromocaoPr
     @Mapping(target = "active", ignore = true)
     @Mapping(target = "equipeSaude", ignore = true)
     @Mapping(target = "profissionalResponsavel", ignore = true)
+    @Mapping(target = "profissionaisParticipantes", ignore = true)
     void updateFromRequest(AcaoPromocaoPrevencaoRequest request, @MappingTarget AcaoPromocaoPrevencao entity);
 
     /**

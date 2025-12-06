@@ -1,9 +1,9 @@
 package com.upsaude.dto;
 
-import com.upsaude.entity.embeddable.ContatoMedico;
-import com.upsaude.entity.embeddable.DadosPessoaisMedico;
-import com.upsaude.entity.embeddable.FormacaoMedico;
-import com.upsaude.entity.embeddable.RegistroProfissionalMedico;
+import com.upsaude.dto.embeddable.ContatoMedicoDTO;
+import com.upsaude.dto.embeddable.DadosPessoaisMedicoDTO;
+import com.upsaude.dto.embeddable.FormacaoMedicoDTO;
+import com.upsaude.dto.embeddable.RegistroProfissionalMedicoDTO;
 import java.time.OffsetDateTime;
 import java.util.UUID;
 import lombok.*;
@@ -19,9 +19,9 @@ public class MedicosDTO {
     private Boolean active;
     private EspecialidadesMedicasDTO especialidade;
     private String nomeCompleto;
-    private DadosPessoaisMedico dadosPessoais;
-    private RegistroProfissionalMedico registroProfissional;
-    private FormacaoMedico formacao;
-    private ContatoMedico contato;
+    private DadosPessoaisMedicoDTO dadosPessoais;
+    private RegistroProfissionalMedicoDTO registroProfissional;
+    private FormacaoMedicoDTO formacao;
+    private ContatoMedicoDTO contato;
     private String observacoes;
 }

@@ -5,6 +5,8 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Index;
+import jakarta.persistence.PrePersist;
+import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
@@ -28,6 +30,10 @@ import lombok.EqualsAndHashCode;
 @Data
 @EqualsAndHashCode(callSuper = true)
 public class EspecialidadesMedicas extends BaseEntityWithoutTenant {
+
+    public EspecialidadesMedicas() {
+        this.classificacao = new ClassificacaoEspecialidadeMedica();
+    }
 
     // ========== IDENTIFICAÇÃO BÁSICA ==========
 
@@ -62,4 +68,12 @@ public class EspecialidadesMedicas extends BaseEntityWithoutTenant {
 
     @Column(name = "observacoes", columnDefinition = "TEXT")
     private String observacoes; // Observações gerais
+
+    @PrePersist
+    @PreUpdate
+    public void validateEmbeddables() {
+        if (classificacao == null) {
+            classificacao = new ClassificacaoEspecialidadeMedica();
+        }
+    }
 }

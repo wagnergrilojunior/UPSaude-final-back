@@ -2,6 +2,9 @@ package com.upsaude.controller;
 
 import com.upsaude.api.request.AlergiasRequest;
 import com.upsaude.api.response.AlergiasResponse;
+import com.upsaude.exception.BadRequestException;
+import com.upsaude.exception.NotFoundException;
+import com.upsaude.exception.ConflictException;
 import com.upsaude.service.AlergiasService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -12,6 +15,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -20,15 +24,11 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
 
-/**
- * Controlador REST para operações relacionadas a Alergias.
- *
- * @author UPSaúde
- */
 @RestController
 @RequestMapping("/v1/alergias")
 @Tag(name = "Alergias", description = "API para gerenciamento de Alergias")
 @RequiredArgsConstructor
+@Slf4j
 public class AlergiasController {
 
     private final AlergiasService alergiasService;
@@ -42,8 +42,18 @@ public class AlergiasController {
             @ApiResponse(responseCode = "403", description = "Acesso negado")
     })
     public ResponseEntity<AlergiasResponse> criar(@Valid @RequestBody AlergiasRequest request) {
-        AlergiasResponse response = alergiasService.criar(request);
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        log.debug("REQUEST POST /v1/alergias - payload: {}", request);
+        try {
+            AlergiasResponse response = alergiasService.criar(request);
+            log.info("Alergia criada com sucesso. ID: {}", response.getId());
+            return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        } catch (BadRequestException | ConflictException ex) {
+            log.warn("Falha ao criar alergia — mensagem: {}, payload: {}", ex.getMessage(), request);
+            throw ex;
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao criar alergia — payload: {}", request, ex);
+            throw ex;
+        }
     }
 
     @GetMapping
@@ -55,8 +65,15 @@ public class AlergiasController {
     public ResponseEntity<Page<AlergiasResponse>> listar(
             @Parameter(description = "Parâmetros de paginação (page, size, sort)")
             Pageable pageable) {
-        Page<AlergiasResponse> response = alergiasService.listar(pageable);
-        return ResponseEntity.ok(response);
+        log.debug("REQUEST GET /v1/alergias - pageable: page={}, size={}, sort={}",
+                pageable.getPageNumber(), pageable.getPageSize(), pageable.getSort());
+        try {
+            Page<AlergiasResponse> response = alergiasService.listar(pageable);
+            return ResponseEntity.ok(response);
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao listar alergias — pageable: {}", pageable, ex);
+            throw ex;
+        }
     }
 
     @GetMapping("/{id}")
@@ -70,8 +87,17 @@ public class AlergiasController {
     public ResponseEntity<AlergiasResponse> obterPorId(
             @Parameter(description = "ID da alergia", required = true)
             @PathVariable UUID id) {
-        AlergiasResponse response = alergiasService.obterPorId(id);
-        return ResponseEntity.ok(response);
+        log.debug("REQUEST GET /v1/alergias/{} ", id);
+        try {
+            AlergiasResponse response = alergiasService.obterPorId(id);
+            return ResponseEntity.ok(response);
+        } catch (NotFoundException ex) {
+            log.warn("Alergia não encontrada — ID: {}", id);
+            throw ex;
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao buscar alergia — id: {}", id, ex);
+            throw ex;
+        }
     }
 
     @PutMapping("/{id}")
@@ -87,8 +113,19 @@ public class AlergiasController {
             @Parameter(description = "ID da alergia", required = true)
             @PathVariable UUID id,
             @Valid @RequestBody AlergiasRequest request) {
-        AlergiasResponse response = alergiasService.atualizar(id, request);
-        return ResponseEntity.ok(response);
+        log.debug("REQUEST PUT /v1/alergias/{} - payload: {}", id, request);
+        try {
+            AlergiasResponse response = alergiasService.atualizar(id, request);
+            log.info("Alergia atualizada com sucesso. ID: {}", response.getId());
+            return ResponseEntity.ok(response);
+        } catch (BadRequestException | NotFoundException | ConflictException ex) {
+            log.warn("Falha ao atualizar alergia — id: {}, mensagem: {}", id, ex.getMessage());
+            throw ex;
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao atualizar alergia — id: {}, payload: {}",
+                    id, request, ex);
+            throw ex;
+        }
     }
 
     @DeleteMapping("/{id}")
@@ -101,8 +138,17 @@ public class AlergiasController {
     public ResponseEntity<Void> excluir(
             @Parameter(description = "ID da alergia", required = true)
             @PathVariable UUID id) {
-        alergiasService.excluir(id);
-        return ResponseEntity.noContent().build();
+        log.debug("REQUEST DELETE /v1/alergias/{} ", id);
+        try {
+            alergiasService.excluir(id);
+            log.info("Alergia desativada com sucesso. ID: {}", id);
+            return ResponseEntity.noContent().build();
+        } catch (BadRequestException | NotFoundException ex) {
+            log.warn("Falha ao excluir alergia — id: {}, mensagem: {}", id, ex.getMessage());
+            throw ex;
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao excluir alergia — id: {}", id, ex);
+            throw ex;
+        }
     }
 }
-

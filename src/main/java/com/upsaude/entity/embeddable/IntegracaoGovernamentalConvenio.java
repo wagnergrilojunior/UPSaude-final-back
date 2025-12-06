@@ -6,7 +6,6 @@ import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
 import java.time.OffsetDateTime;
 
@@ -18,9 +17,18 @@ import java.time.OffsetDateTime;
 @Embeddable
 @Data
 @Builder
-@NoArgsConstructor
 @AllArgsConstructor
 public class IntegracaoGovernamentalConvenio {
+
+    public IntegracaoGovernamentalConvenio() {
+        this.sincronizarAns = false;
+        this.sincronizarTiss = false;
+        this.sincronizarSus = false;
+        this.codigoSistemaExterno = "";
+        this.urlApi = "";
+        this.tokenApi = "";
+        this.chaveApi = "";
+    }
 
     @Column(name = "sincronizar_ans", nullable = false)
     @Builder.Default

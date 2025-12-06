@@ -8,7 +8,6 @@ import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
 /**
  * Classe embeddable para dados de contato do médico.
@@ -18,9 +17,17 @@ import lombok.NoArgsConstructor;
 @Embeddable
 @Data
 @Builder
-@NoArgsConstructor
 @AllArgsConstructor
 public class ContatoMedico {
+
+    public ContatoMedico() {
+        this.telefone = "";
+        this.telefoneCelular = "";
+        this.whatsapp = "";
+        this.email = "";
+        this.emailInstitucional = "";
+        this.site = "";
+    }
 
     @Pattern(regexp = "^\\d{10,11}$", message = "Telefone deve ter 10 ou 11 dígitos")
     @Column(name = "telefone", length = 20)

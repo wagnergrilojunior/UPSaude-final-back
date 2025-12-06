@@ -11,7 +11,6 @@ import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
 /**
  * Classe embeddable para classificação do medicamento.
@@ -21,9 +20,14 @@ import lombok.NoArgsConstructor;
 @Embeddable
 @Data
 @Builder
-@NoArgsConstructor
 @AllArgsConstructor
 public class ClassificacaoMedicamento {
+
+    public ClassificacaoMedicamento() {
+        this.categoria = "";
+        this.subcategoria = "";
+        this.codigoAtc = "";
+    }
 
     @Convert(converter = ClasseTerapeuticaEnumConverter.class)
     @Column(name = "classe_terapeutica")

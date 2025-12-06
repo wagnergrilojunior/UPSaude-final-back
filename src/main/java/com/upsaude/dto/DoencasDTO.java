@@ -1,9 +1,9 @@
 package com.upsaude.dto;
 
-import com.upsaude.entity.embeddable.ClassificacaoDoenca;
-import com.upsaude.entity.embeddable.EpidemiologiaDoenca;
-import com.upsaude.entity.embeddable.SintomasDoenca;
-import com.upsaude.entity.embeddable.TratamentoPadraoDoenca;
+import com.upsaude.dto.embeddable.ClassificacaoDoencaDTO;
+import com.upsaude.dto.embeddable.EpidemiologiaDoencaDTO;
+import com.upsaude.dto.embeddable.SintomasDoencaDTO;
+import com.upsaude.dto.embeddable.TratamentoPadraoDoencaDTO;
 import java.time.OffsetDateTime;
 import java.util.UUID;
 import lombok.*;
@@ -20,11 +20,11 @@ public class DoencasDTO {
     private String nome;
     private String nomeCientifico;
     private String codigoInterno;
-    private ClassificacaoDoenca classificacao;
+    private ClassificacaoDoencaDTO classificacao;
     private CidDoencasDTO cidPrincipal;
-    private SintomasDoenca sintomas;
-    private TratamentoPadraoDoenca tratamentoPadrao;
-    private EpidemiologiaDoenca epidemiologia;
+    private SintomasDoencaDTO sintomas;
+    private TratamentoPadraoDoencaDTO tratamentoPadrao;
+    private EpidemiologiaDoencaDTO epidemiologia;
     private String descricao;
     private String causas;
     private String fisiopatologia;

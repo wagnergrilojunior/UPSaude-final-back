@@ -14,6 +14,8 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.PrePersist;
+import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -24,6 +26,13 @@ import lombok.Data;
 @Table(name = "receitas_medicas", schema = "public")
 @Data
 public class ReceitasMedicas extends BaseEntity {
+
+    /**
+     * Construtor padrão que inicializa as coleções para evitar NullPointerException.
+     */
+    public ReceitasMedicas() {
+        this.medicacoes = new ArrayList<>();
+    }
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "medico_id", nullable = false)
@@ -77,4 +86,18 @@ public class ReceitasMedicas extends BaseEntity {
         inverseJoinColumns = @JoinColumn(name = "medicacao_id")
     )
     private List<Medicacao> medicacoes = new ArrayList<>();
+
+    // ========== MÉTODOS DE CICLO DE VIDA ==========
+
+    /**
+     * Garante que as coleções não sejam nulas antes de persistir ou atualizar.
+     * Recria a lista se estiver nula.
+     */
+    @PrePersist
+    @PreUpdate
+    public void validateCollections() {
+        if (medicacoes == null) {
+            medicacoes = new ArrayList<>();
+        }
+    }
 }

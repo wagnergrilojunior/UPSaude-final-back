@@ -13,7 +13,7 @@ import org.mapstruct.MappingTarget;
  * Mapper para conversões de EspecialidadesMedicas.
  * Entity ↔ DTO ↔ Request/Response
  */
-@Mapper(config = MappingConfig.class)
+@Mapper(config = MappingConfig.class, uses = {com.upsaude.mapper.embeddable.ClassificacaoEspecialidadeMedicaMapper.class})
 public interface EspecialidadesMedicasMapper extends EntityMapper<EspecialidadesMedicas, EspecialidadesMedicasDTO> {
 
     /**

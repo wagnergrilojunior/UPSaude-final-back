@@ -13,6 +13,8 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.PrePersist;
+import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -38,6 +40,15 @@ import lombok.EqualsAndHashCode;
 @Data
 @EqualsAndHashCode(callSuper = true)
 public class Medicacao extends BaseEntityWithoutTenant {
+
+    public Medicacao() {
+        this.identificacao = new IdentificacaoMedicamento();
+        this.dosagemAdministracao = new DosagemAdministracaoMedicamento();
+        this.classificacao = new ClassificacaoMedicamento();
+        this.registroControle = new RegistroControleMedicamento();
+        this.contraindicacoesPrecaucoes = new ContraindicacoesPrecaucoesMedicamento();
+        this.conservacaoArmazenamento = new ConservacaoArmazenamentoMedicamento();
+    }
 
     // ========== RELACIONAMENTOS ==========
 
@@ -85,4 +96,27 @@ public class Medicacao extends BaseEntityWithoutTenant {
 
     @Column(name = "observacoes", columnDefinition = "TEXT")
     private String observacoes; // Observações gerais
+
+    @PrePersist
+    @PreUpdate
+    public void validateEmbeddables() {
+        if (identificacao == null) {
+            identificacao = new IdentificacaoMedicamento();
+        }
+        if (dosagemAdministracao == null) {
+            dosagemAdministracao = new DosagemAdministracaoMedicamento();
+        }
+        if (classificacao == null) {
+            classificacao = new ClassificacaoMedicamento();
+        }
+        if (registroControle == null) {
+            registroControle = new RegistroControleMedicamento();
+        }
+        if (contraindicacoesPrecaucoes == null) {
+            contraindicacoesPrecaucoes = new ContraindicacoesPrecaucoesMedicamento();
+        }
+        if (conservacaoArmazenamento == null) {
+            conservacaoArmazenamento = new ConservacaoArmazenamentoMedicamento();
+        }
+    }
 }

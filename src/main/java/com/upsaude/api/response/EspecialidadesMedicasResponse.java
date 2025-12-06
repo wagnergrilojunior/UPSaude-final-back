@@ -1,11 +1,16 @@
 package com.upsaude.api.response;
 
-import com.upsaude.entity.embeddable.ClassificacaoEspecialidadeMedica;
+import com.upsaude.api.response.embeddable.ClassificacaoEspecialidadeMedicaResponse;
 import java.time.OffsetDateTime;
 import java.util.UUID;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
-@Data
+@Getter
+@Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
@@ -17,7 +22,7 @@ public class EspecialidadesMedicasResponse {
     private String nome;
     private String codigo;
     private String nomeCientifico;
-    private ClassificacaoEspecialidadeMedica classificacao;
+    private ClassificacaoEspecialidadeMedicaResponse classificacao;
     private String descricao;
     private String areaAtuacaoDescricao;
     private String requisitosFormacao;

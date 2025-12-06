@@ -5,7 +5,6 @@ import jakarta.persistence.Embeddable;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
 /**
  * Classe embeddable para informações de composição e tecnologia da vacina.
@@ -15,9 +14,15 @@ import lombok.NoArgsConstructor;
 @Embeddable
 @Data
 @Builder
-@NoArgsConstructor
 @AllArgsConstructor
 public class ComposicaoVacina {
+
+    public ComposicaoVacina() {
+        this.composicao = "";
+        this.tecnologia = "";
+        this.adjuvante = "";
+        this.conservante = "";
+    }
 
     @Column(name = "composicao", columnDefinition = "TEXT")
     private String composicao; // Composição da vacina

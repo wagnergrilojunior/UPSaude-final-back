@@ -11,7 +11,6 @@ import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
 import java.time.OffsetDateTime;
 
@@ -23,9 +22,14 @@ import java.time.OffsetDateTime;
 @Embeddable
 @Data
 @Builder
-@NoArgsConstructor
 @AllArgsConstructor
 public class InformacoesAtendimento {
+
+    public InformacoesAtendimento() {
+        this.motivo = "";
+        this.localAtendimento = "";
+        this.numeroAtendimento = "";
+    }
 
     @Column(name = "data_hora", nullable = false)
     @NotNull(message = "Data e hora do atendimento são obrigatórias")

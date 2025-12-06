@@ -2,6 +2,9 @@ package com.upsaude.controller;
 
 import com.upsaude.api.request.ProfissionaisSaudeRequest;
 import com.upsaude.api.response.ProfissionaisSaudeResponse;
+import com.upsaude.exception.BadRequestException;
+import com.upsaude.exception.ConflictException;
+import com.upsaude.exception.NotFoundException;
 import com.upsaude.service.ProfissionaisSaudeService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -12,6 +15,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -29,6 +33,7 @@ import java.util.UUID;
 @RequestMapping("/v1/profissionais-saude")
 @Tag(name = "Profissionais de Saúde", description = "API para gerenciamento de Profissionais de Saúde")
 @RequiredArgsConstructor
+@Slf4j
 public class ProfissionaisSaudeController {
 
     private final ProfissionaisSaudeService profissionaisSaudeService;
@@ -42,8 +47,18 @@ public class ProfissionaisSaudeController {
             @ApiResponse(responseCode = "403", description = "Acesso negado")
     })
     public ResponseEntity<ProfissionaisSaudeResponse> criar(@Valid @RequestBody ProfissionaisSaudeRequest request) {
-        ProfissionaisSaudeResponse response = profissionaisSaudeService.criar(request);
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        log.debug("REQUEST POST /v1/profissionais-saude - payload: {}", request);
+        try {
+            ProfissionaisSaudeResponse response = profissionaisSaudeService.criar(request);
+            log.info("Profissional de saúde criado com sucesso. ID: {}", response.getId());
+            return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        } catch (BadRequestException | ConflictException ex) {
+            log.warn("Falha ao criar profissional de saúde — mensagem: {}, payload: {}", ex.getMessage(), request);
+            throw ex;
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao criar profissional de saúde — payload: {}", request, ex);
+            throw ex;
+        }
     }
 
     @GetMapping
@@ -55,8 +70,14 @@ public class ProfissionaisSaudeController {
     public ResponseEntity<Page<ProfissionaisSaudeResponse>> listar(
             @Parameter(description = "Parâmetros de paginação (page, size, sort)")
             Pageable pageable) {
-        Page<ProfissionaisSaudeResponse> response = profissionaisSaudeService.listar(pageable);
-        return ResponseEntity.ok(response);
+        log.debug("REQUEST GET /v1/profissionais-saude - pageable: {}", pageable);
+        try {
+            Page<ProfissionaisSaudeResponse> response = profissionaisSaudeService.listar(pageable);
+            return ResponseEntity.ok(response);
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao listar profissionais de saúde — pageable: {}", pageable, ex);
+            throw ex;
+        }
     }
 
     @GetMapping("/{id}")
@@ -70,8 +91,17 @@ public class ProfissionaisSaudeController {
     public ResponseEntity<ProfissionaisSaudeResponse> obterPorId(
             @Parameter(description = "ID do profissional de saúde", required = true)
             @PathVariable UUID id) {
-        ProfissionaisSaudeResponse response = profissionaisSaudeService.obterPorId(id);
-        return ResponseEntity.ok(response);
+        log.debug("REQUEST GET /v1/profissionais-saude/{}", id);
+        try {
+            ProfissionaisSaudeResponse response = profissionaisSaudeService.obterPorId(id);
+            return ResponseEntity.ok(response);
+        } catch (NotFoundException ex) {
+            log.warn("Profissional de saúde não encontrado — ID: {}, mensagem: {}", id, ex.getMessage());
+            throw ex;
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao obter profissional de saúde por ID — ID: {}", id, ex);
+            throw ex;
+        }
     }
 
     @PutMapping("/{id}")
@@ -87,8 +117,18 @@ public class ProfissionaisSaudeController {
             @Parameter(description = "ID do profissional de saúde", required = true)
             @PathVariable UUID id,
             @Valid @RequestBody ProfissionaisSaudeRequest request) {
-        ProfissionaisSaudeResponse response = profissionaisSaudeService.atualizar(id, request);
-        return ResponseEntity.ok(response);
+        log.debug("REQUEST PUT /v1/profissionais-saude/{} - payload: {}", id, request);
+        try {
+            ProfissionaisSaudeResponse response = profissionaisSaudeService.atualizar(id, request);
+            log.info("Profissional de saúde atualizado com sucesso. ID: {}", response.getId());
+            return ResponseEntity.ok(response);
+        } catch (BadRequestException | NotFoundException | ConflictException ex) {
+            log.warn("Falha ao atualizar profissional de saúde — ID: {}, mensagem: {}, payload: {}", id, ex.getMessage(), request);
+            throw ex;
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao atualizar profissional de saúde — ID: {}, payload: {}", id, request, ex);
+            throw ex;
+        }
     }
 
     @DeleteMapping("/{id}")
@@ -101,8 +141,17 @@ public class ProfissionaisSaudeController {
     public ResponseEntity<Void> excluir(
             @Parameter(description = "ID do profissional de saúde", required = true)
             @PathVariable UUID id) {
-        profissionaisSaudeService.excluir(id);
-        return ResponseEntity.noContent().build();
+        log.debug("REQUEST DELETE /v1/profissionais-saude/{}", id);
+        try {
+            profissionaisSaudeService.excluir(id);
+            log.info("Profissional de saúde excluído com sucesso. ID: {}", id);
+            return ResponseEntity.noContent().build();
+        } catch (NotFoundException ex) {
+            log.warn("Profissional de saúde não encontrado para exclusão — ID: {}, mensagem: {}", id, ex.getMessage());
+            throw ex;
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao excluir profissional de saúde — ID: {}", id, ex);
+            throw ex;
+        }
     }
 }
-

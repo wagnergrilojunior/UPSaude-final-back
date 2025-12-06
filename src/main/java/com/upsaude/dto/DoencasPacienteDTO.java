@@ -1,8 +1,8 @@
 package com.upsaude.dto;
 
-import com.upsaude.entity.embeddable.AcompanhamentoDoencaPaciente;
-import com.upsaude.entity.embeddable.DiagnosticoDoencaPaciente;
-import com.upsaude.entity.embeddable.TratamentoAtualDoencaPaciente;
+import com.upsaude.dto.embeddable.AcompanhamentoDoencaPacienteDTO;
+import com.upsaude.dto.embeddable.DiagnosticoDoencaPacienteDTO;
+import com.upsaude.dto.embeddable.TratamentoAtualDoencaPacienteDTO;
 import java.time.OffsetDateTime;
 import java.util.UUID;
 import lombok.*;
@@ -19,8 +19,8 @@ public class DoencasPacienteDTO {
     private PacienteDTO paciente;
     private DoencasDTO doenca;
     private CidDoencasDTO cidPrincipal;
-    private DiagnosticoDoencaPaciente diagnostico;
-    private AcompanhamentoDoencaPaciente acompanhamento;
-    private TratamentoAtualDoencaPaciente tratamentoAtual;
+    private DiagnosticoDoencaPacienteDTO diagnostico;
+    private AcompanhamentoDoencaPacienteDTO acompanhamento;
+    private TratamentoAtualDoencaPacienteDTO tratamentoAtual;
     private String observacoes;
 }

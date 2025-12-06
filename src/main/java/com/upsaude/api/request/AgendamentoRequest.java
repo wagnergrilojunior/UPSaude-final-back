@@ -2,25 +2,37 @@ package com.upsaude.api.request;
 
 import com.upsaude.enums.PrioridadeAtendimentoEnum;
 import com.upsaude.enums.StatusAgendamentoEnum;
+import jakarta.validation.constraints.NotNull;
 import java.time.OffsetDateTime;
 import java.util.UUID;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
-@Data
+@Getter
+@Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class AgendamentoRequest {
+    @NotNull(message = "Paciente é obrigatório")
     private UUID paciente;
+    
     private UUID profissional;
     private UUID medico;
     private UUID especialidade;
     private UUID convenio;
     private UUID atendimento;
     private UUID agendamentoOriginal;
+    
+    @NotNull(message = "Data e hora são obrigatórias")
     private OffsetDateTime dataHora;
     private OffsetDateTime dataHoraFim;
     private Integer duracaoPrevistaMinutos;
+    
+    @NotNull(message = "Status do agendamento é obrigatório")
     private StatusAgendamentoEnum status;
     private PrioridadeAtendimentoEnum prioridade;
     private Boolean ehEncaixe;

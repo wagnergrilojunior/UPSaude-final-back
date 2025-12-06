@@ -10,7 +10,6 @@ import jakarta.persistence.Embeddable;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
 import java.time.OffsetDateTime;
 
@@ -22,9 +21,14 @@ import java.time.OffsetDateTime;
 @Embeddable
 @Data
 @Builder
-@NoArgsConstructor
 @AllArgsConstructor
 public class InformacoesConsulta {
+
+    public InformacoesConsulta() {
+        this.motivo = "";
+        this.localAtendimento = "";
+        this.numeroConsulta = "";
+    }
 
     @Column(name = "data_consulta", nullable = false)
     private OffsetDateTime dataConsulta; // Data e hora da consulta

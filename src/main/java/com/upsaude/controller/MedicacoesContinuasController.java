@@ -2,6 +2,9 @@ package com.upsaude.controller;
 
 import com.upsaude.api.request.MedicacoesContinuasRequest;
 import com.upsaude.api.response.MedicacoesContinuasResponse;
+import com.upsaude.exception.BadRequestException;
+import com.upsaude.exception.ConflictException;
+import com.upsaude.exception.NotFoundException;
 import com.upsaude.service.MedicacoesContinuasService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -12,6 +15,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -25,6 +29,7 @@ import java.util.UUID;
  *
  * @author UPSaúde
  */
+@Slf4j
 @RestController
 @RequestMapping("/v1/medicacoes-continuas")
 @Tag(name = "Medicações Contínuas", description = "API para gerenciamento de Medicações Contínuas")
@@ -42,8 +47,18 @@ public class MedicacoesContinuasController {
             @ApiResponse(responseCode = "403", description = "Acesso negado")
     })
     public ResponseEntity<MedicacoesContinuasResponse> criar(@Valid @RequestBody MedicacoesContinuasRequest request) {
-        MedicacoesContinuasResponse response = medicacoesContinuasService.criar(request);
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        log.debug("REQUEST POST /v1/medicacoes-continuas - payload: {}", request);
+        try {
+            MedicacoesContinuasResponse response = medicacoesContinuasService.criar(request);
+            log.info("Medicação contínua criada com sucesso. ID: {}", response.getId());
+            return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        } catch (BadRequestException | ConflictException ex) {
+            log.warn("Falha ao criar medicação contínua — mensagem: {}, payload: {}", ex.getMessage(), request);
+            throw ex;
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao criar medicação contínua — payload: {}", request, ex);
+            throw ex;
+        }
     }
 
     @GetMapping
@@ -55,8 +70,14 @@ public class MedicacoesContinuasController {
     public ResponseEntity<Page<MedicacoesContinuasResponse>> listar(
             @Parameter(description = "Parâmetros de paginação (page, size, sort)")
             Pageable pageable) {
-        Page<MedicacoesContinuasResponse> response = medicacoesContinuasService.listar(pageable);
-        return ResponseEntity.ok(response);
+        log.debug("REQUEST GET /v1/medicacoes-continuas - pageable: {}", pageable);
+        try {
+            Page<MedicacoesContinuasResponse> response = medicacoesContinuasService.listar(pageable);
+            return ResponseEntity.ok(response);
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao listar medicações contínuas — pageable: {}", pageable, ex);
+            throw ex;
+        }
     }
 
     @GetMapping("/{id}")
@@ -70,8 +91,17 @@ public class MedicacoesContinuasController {
     public ResponseEntity<MedicacoesContinuasResponse> obterPorId(
             @Parameter(description = "ID da medicação contínua", required = true)
             @PathVariable UUID id) {
-        MedicacoesContinuasResponse response = medicacoesContinuasService.obterPorId(id);
-        return ResponseEntity.ok(response);
+        log.debug("REQUEST GET /v1/medicacoes-continuas/{}", id);
+        try {
+            MedicacoesContinuasResponse response = medicacoesContinuasService.obterPorId(id);
+            return ResponseEntity.ok(response);
+        } catch (NotFoundException ex) {
+            log.warn("Medicação contínua não encontrada — ID: {}, mensagem: {}", id, ex.getMessage());
+            throw ex;
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao obter medicação contínua por ID — ID: {}", id, ex);
+            throw ex;
+        }
     }
 
     @PutMapping("/{id}")
@@ -87,8 +117,18 @@ public class MedicacoesContinuasController {
             @Parameter(description = "ID da medicação contínua", required = true)
             @PathVariable UUID id,
             @Valid @RequestBody MedicacoesContinuasRequest request) {
-        MedicacoesContinuasResponse response = medicacoesContinuasService.atualizar(id, request);
-        return ResponseEntity.ok(response);
+        log.debug("REQUEST PUT /v1/medicacoes-continuas/{} - payload: {}", id, request);
+        try {
+            MedicacoesContinuasResponse response = medicacoesContinuasService.atualizar(id, request);
+            log.info("Medicação contínua atualizada com sucesso. ID: {}", id);
+            return ResponseEntity.ok(response);
+        } catch (BadRequestException | NotFoundException ex) {
+            log.warn("Falha ao atualizar medicação contínua — ID: {}, mensagem: {}, payload: {}", id, ex.getMessage(), request);
+            throw ex;
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao atualizar medicação contínua — ID: {}, payload: {}", id, request, ex);
+            throw ex;
+        }
     }
 
     @DeleteMapping("/{id}")
@@ -101,8 +141,18 @@ public class MedicacoesContinuasController {
     public ResponseEntity<Void> excluir(
             @Parameter(description = "ID da medicação contínua", required = true)
             @PathVariable UUID id) {
-        medicacoesContinuasService.excluir(id);
-        return ResponseEntity.noContent().build();
+        log.debug("REQUEST DELETE /v1/medicacoes-continuas/{}", id);
+        try {
+            medicacoesContinuasService.excluir(id);
+            log.info("Medicação contínua excluída com sucesso. ID: {}", id);
+            return ResponseEntity.noContent().build();
+        } catch (NotFoundException ex) {
+            log.warn("Falha ao excluir medicação contínua — ID: {}, mensagem: {}", id, ex.getMessage());
+            throw ex;
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao excluir medicação contínua — ID: {}", id, ex);
+            throw ex;
+        }
     }
 }
 

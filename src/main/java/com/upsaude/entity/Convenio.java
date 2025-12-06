@@ -19,6 +19,8 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.PrePersist;
+import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 import jakarta.validation.constraints.NotBlank;
@@ -55,6 +57,14 @@ import java.time.LocalDate;
 @Data
 @EqualsAndHashCode(callSuper = true)
 public class Convenio extends BaseEntity {
+
+    public Convenio() {
+        this.contato = new ContatoConvenio();
+        this.registroAns = new RegistroANSConvenio();
+        this.cobertura = new CoberturaConvenio();
+        this.informacoesFinanceiras = new InformacoesFinanceirasConvenio();
+        this.integracaoGovernamental = new IntegracaoGovernamentalConvenio();
+    }
 
     // ========== IDENTIFICAÇÃO BÁSICA ==========
 
@@ -188,4 +198,24 @@ public class Convenio extends BaseEntity {
 
     @Embedded
     private IntegracaoGovernamentalConvenio integracaoGovernamental;
+
+    @PrePersist
+    @PreUpdate
+    public void validateEmbeddables() {
+        if (contato == null) {
+            contato = new ContatoConvenio();
+        }
+        if (registroAns == null) {
+            registroAns = new RegistroANSConvenio();
+        }
+        if (cobertura == null) {
+            cobertura = new CoberturaConvenio();
+        }
+        if (informacoesFinanceiras == null) {
+            informacoesFinanceiras = new InformacoesFinanceirasConvenio();
+        }
+        if (integracaoGovernamental == null) {
+            integracaoGovernamental = new IntegracaoGovernamentalConvenio();
+        }
+    }
 }

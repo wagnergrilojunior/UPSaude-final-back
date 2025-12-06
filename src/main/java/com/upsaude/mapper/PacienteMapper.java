@@ -4,12 +4,6 @@ import com.upsaude.api.request.PacienteRequest;
 import com.upsaude.api.response.PacienteResponse;
 import com.upsaude.dto.PacienteDTO;
 import com.upsaude.entity.Paciente;
-import com.upsaude.entity.Convenio;
-import com.upsaude.entity.DadosClinicosBasicos;
-import com.upsaude.entity.DadosSociodemograficos;
-import com.upsaude.entity.IntegracaoGov;
-import com.upsaude.entity.LGPDConsentimento;
-import com.upsaude.entity.ResponsavelLegal;
 import com.upsaude.mapper.config.MappingConfig;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -37,7 +31,7 @@ public interface PacienteMapper extends EntityMapper<Paciente, PacienteDTO> {
     /**
      * Converte Request para Entity.
      * Os campos 'id', 'createdAt', 'updatedAt', 'active' são ignorados.
-     * Relacionamentos (UUID) devem ser tratados manualmente no Service.
+     * Relacionamentos (UUID) e listas devem ser tratados manualmente no Service.
      */
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
@@ -49,12 +43,17 @@ public interface PacienteMapper extends EntityMapper<Paciente, PacienteDTO> {
     @Mapping(target = "integracaoGov", ignore = true)
     @Mapping(target = "lgpdConsentimento", ignore = true)
     @Mapping(target = "responsavelLegal", ignore = true)
+    @Mapping(target = "enderecos", ignore = true)
+    @Mapping(target = "doencas", ignore = true)
+    @Mapping(target = "alergias", ignore = true)
+    @Mapping(target = "deficiencias", ignore = true)
+    @Mapping(target = "medicacoes", ignore = true)
     Paciente fromRequest(PacienteRequest request);
 
     /**
      * Atualiza Entity existente com dados do Request.
      * Os campos 'id', 'createdAt', 'updatedAt', 'active' são ignorados.
-     * Relacionamentos (UUID) devem ser tratados manualmente no Service.
+     * Relacionamentos (UUID) e listas devem ser tratados manualmente no Service.
      */
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
@@ -66,6 +65,11 @@ public interface PacienteMapper extends EntityMapper<Paciente, PacienteDTO> {
     @Mapping(target = "integracaoGov", ignore = true)
     @Mapping(target = "lgpdConsentimento", ignore = true)
     @Mapping(target = "responsavelLegal", ignore = true)
+    @Mapping(target = "enderecos", ignore = true)
+    @Mapping(target = "doencas", ignore = true)
+    @Mapping(target = "alergias", ignore = true)
+    @Mapping(target = "deficiencias", ignore = true)
+    @Mapping(target = "medicacoes", ignore = true)
     void updateFromRequest(PacienteRequest request, @MappingTarget Paciente entity);
 
     /**

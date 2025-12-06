@@ -3,10 +3,13 @@ package com.upsaude.entity;
 import com.upsaude.entity.embeddable.ClassificacaoAlergia;
 import com.upsaude.entity.embeddable.PrevencaoTratamentoAlergia;
 import com.upsaude.entity.embeddable.ReacoesAlergia;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Index;
+import jakarta.persistence.PrePersist;
+import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
@@ -30,6 +33,12 @@ import lombok.EqualsAndHashCode;
 @Data
 @EqualsAndHashCode(callSuper = true)
 public class Alergias extends BaseEntityWithoutTenant {
+	
+	public Alergias() {
+        this.classificacao = new ClassificacaoAlergia();
+        this.reacoes = new ReacoesAlergia();
+        this.prevencaoTratamento = new PrevencaoTratamentoAlergia();
+    }
 
     // ========== IDENTIFICAÇÃO BÁSICA ==========
 
@@ -71,4 +80,18 @@ public class Alergias extends BaseEntityWithoutTenant {
 
     @Column(name = "observacoes", columnDefinition = "TEXT")
     private String observacoes; // Observações gerais
+
+    @PrePersist
+    @PreUpdate
+    public void validateEmbeddables() {
+        if (classificacao == null) {
+            classificacao = new ClassificacaoAlergia();
+        }
+        if (reacoes == null) {
+            reacoes = new ReacoesAlergia();
+        }
+        if (prevencaoTratamento == null) {
+            prevencaoTratamento = new PrevencaoTratamentoAlergia();
+        }
+    }
 }

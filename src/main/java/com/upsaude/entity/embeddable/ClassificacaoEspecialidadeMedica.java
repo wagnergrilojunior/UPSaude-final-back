@@ -9,7 +9,6 @@ import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
 /**
  * Classe embeddable para classificação da especialidade médica.
@@ -19,9 +18,17 @@ import lombok.NoArgsConstructor;
 @Embeddable
 @Data
 @Builder
-@NoArgsConstructor
 @AllArgsConstructor
 public class ClassificacaoEspecialidadeMedica {
+
+    public ClassificacaoEspecialidadeMedica() {
+        this.codigoCfm = "";
+        this.codigoCnes = "";
+        this.areaAtuacao = "";
+        this.subarea = "";
+        this.requerResidencia = false;
+        this.requerTituloEspecialista = false;
+    }
 
     @Convert(converter = TipoEspecialidadeMedicaEnumConverter.class)
     @Column(name = "tipo_especialidade")

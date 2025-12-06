@@ -1,10 +1,17 @@
 package com.upsaude.api.response;
 
 import java.time.OffsetDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
-@Data
+@Getter
+@Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
@@ -31,5 +38,9 @@ public class TenantResponse {
     private String responsavelCpf;
     private String responsavelTelefone;
     private String horarioFuncionamento;
+    
+    @Builder.Default
+    private List<EnderecoResponse> enderecos = new ArrayList<>();
+    
     private String observacoes;
 }

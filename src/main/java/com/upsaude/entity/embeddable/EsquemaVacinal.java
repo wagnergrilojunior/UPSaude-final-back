@@ -6,7 +6,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Builder.Default;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 
@@ -18,9 +17,14 @@ import java.math.BigDecimal;
 @Embeddable
 @Data
 @Builder
-@NoArgsConstructor
 @AllArgsConstructor
 public class EsquemaVacinal {
+
+    public EsquemaVacinal() {
+        this.numeroDoses = 1;
+        this.doseReforco = false;
+        this.localAplicacaoPadrao = "";
+    }
 
     @Column(name = "numero_doses", nullable = false)
     @Default

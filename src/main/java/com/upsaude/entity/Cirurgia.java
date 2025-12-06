@@ -11,6 +11,8 @@ import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.PrePersist;
+import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
@@ -40,6 +42,14 @@ import java.util.List;
 @Data
 @EqualsAndHashCode(callSuper = true)
 public class Cirurgia extends BaseEntity {
+
+    /**
+     * Construtor padrão que inicializa as coleções para evitar NullPointerException.
+     */
+    public Cirurgia() {
+        this.procedimentos = new ArrayList<>();
+        this.equipe = new ArrayList<>();
+    }
 
     // ========== RELACIONAMENTOS ==========
 
@@ -147,5 +157,94 @@ public class Cirurgia extends BaseEntity {
 
     @Column(name = "observacoes_internas", columnDefinition = "TEXT")
     private String observacoesInternas; // Observações internas (não visíveis ao paciente)
+
+    // ========== MÉTODOS DE CICLO DE VIDA ==========
+
+    /**
+     * Garante que as coleções não sejam nulas antes de persistir ou atualizar.
+     * Recria as listas se estiverem nulas.
+     */
+    @PrePersist
+    @PreUpdate
+    public void validateCollections() {
+        if (procedimentos == null) {
+            procedimentos = new ArrayList<>();
+        }
+        if (equipe == null) {
+            equipe = new ArrayList<>();
+        }
+    }
+
+    // ========== MÉTODOS UTILITÁRIOS - PROCEDIMENTOS ==========
+
+    /**
+     * Adiciona um procedimento à cirurgia com sincronização bidirecional.
+     * Garante que o procedimento também referencia esta cirurgia.
+     *
+     * @param procedimento O procedimento a ser adicionado
+     */
+    public void addProcedimento(ProcedimentoCirurgico procedimento) {
+        if (procedimento == null) {
+            return;
+        }
+        if (procedimentos == null) {
+            procedimentos = new ArrayList<>();
+        }
+        if (!procedimentos.contains(procedimento)) {
+            procedimentos.add(procedimento);
+            procedimento.setCirurgia(this);
+        }
+    }
+
+    /**
+     * Remove um procedimento da cirurgia com sincronização bidirecional.
+     * Remove a referência do procedimento para esta cirurgia.
+     *
+     * @param procedimento O procedimento a ser removido
+     */
+    public void removeProcedimento(ProcedimentoCirurgico procedimento) {
+        if (procedimento == null || procedimentos == null) {
+            return;
+        }
+        if (procedimentos.remove(procedimento)) {
+            procedimento.setCirurgia(null);
+        }
+    }
+
+    // ========== MÉTODOS UTILITÁRIOS - EQUIPE ==========
+
+    /**
+     * Adiciona um membro à equipe cirúrgica com sincronização bidirecional.
+     * Garante que o membro da equipe também referencia esta cirurgia.
+     *
+     * @param membroEquipe O membro da equipe a ser adicionado
+     */
+    public void addMembroEquipe(EquipeCirurgica membroEquipe) {
+        if (membroEquipe == null) {
+            return;
+        }
+        if (equipe == null) {
+            equipe = new ArrayList<>();
+        }
+        if (!equipe.contains(membroEquipe)) {
+            equipe.add(membroEquipe);
+            membroEquipe.setCirurgia(this);
+        }
+    }
+
+    /**
+     * Remove um membro da equipe cirúrgica com sincronização bidirecional.
+     * Remove a referência do membro para esta cirurgia.
+     *
+     * @param membroEquipe O membro da equipe a ser removido
+     */
+    public void removeMembroEquipe(EquipeCirurgica membroEquipe) {
+        if (membroEquipe == null || equipe == null) {
+            return;
+        }
+        if (equipe.remove(membroEquipe)) {
+            membroEquipe.setCirurgia(null);
+        }
+    }
 }
 

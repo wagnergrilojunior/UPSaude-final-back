@@ -1,7 +1,7 @@
 package com.upsaude.dto;
 
-import com.upsaude.entity.embeddable.DiagnosticoAlergiaPaciente;
-import com.upsaude.entity.embeddable.HistoricoReacoesAlergiaPaciente;
+import com.upsaude.dto.embeddable.DiagnosticoAlergiaPacienteDTO;
+import com.upsaude.dto.embeddable.HistoricoReacoesAlergiaPacienteDTO;
 import java.time.OffsetDateTime;
 import java.util.UUID;
 import lombok.*;
@@ -17,7 +17,7 @@ public class AlergiasPacienteDTO {
     private Boolean active;
     private PacienteDTO paciente;
     private AlergiasDTO alergia;
-    private DiagnosticoAlergiaPaciente diagnostico;
-    private HistoricoReacoesAlergiaPaciente historicoReacoes;
+    private DiagnosticoAlergiaPacienteDTO diagnostico;
+    private HistoricoReacoesAlergiaPacienteDTO historicoReacoes;
     private String observacoes;
 }

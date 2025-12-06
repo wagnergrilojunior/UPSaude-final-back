@@ -14,7 +14,7 @@ import org.mapstruct.MappingTarget;
  * Mapper para conversões de Convenio.
  * Entity ↔ DTO ↔ Request/Response
  */
-@Mapper(config = MappingConfig.class, uses = {EnderecoMapper.class})
+@Mapper(config = MappingConfig.class, uses = {EnderecoMapper.class, com.upsaude.mapper.embeddable.ContatoConvenioMapper.class, com.upsaude.mapper.embeddable.RegistroANSConvenioMapper.class, com.upsaude.mapper.embeddable.CoberturaConvenioMapper.class, com.upsaude.mapper.embeddable.InformacoesFinanceirasConvenioMapper.class, com.upsaude.mapper.embeddable.IntegracaoGovernamentalConvenioMapper.class})
 public interface ConvenioMapper extends EntityMapper<Convenio, ConvenioDTO> {
 
     /**

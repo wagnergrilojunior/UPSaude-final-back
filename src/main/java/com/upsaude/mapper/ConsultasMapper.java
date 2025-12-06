@@ -19,7 +19,7 @@ import org.mapstruct.MappingTarget;
  * Mapper para conversões de Consultas.
  * Entity ↔ DTO ↔ Request/Response
  */
-@Mapper(config = MappingConfig.class, uses = {CidDoencasMapper.class, ConvenioMapper.class, EspecialidadesMedicasMapper.class, MedicosMapper.class, PacienteMapper.class, ProfissionaisSaudeMapper.class})
+@Mapper(config = MappingConfig.class, uses = {CidDoencasMapper.class, ConvenioMapper.class, EspecialidadesMedicasMapper.class, MedicosMapper.class, PacienteMapper.class, ProfissionaisSaudeMapper.class, com.upsaude.mapper.embeddable.InformacoesConsultaMapper.class, com.upsaude.mapper.embeddable.AnamneseConsultaMapper.class, com.upsaude.mapper.embeddable.DiagnosticoConsultaMapper.class, com.upsaude.mapper.embeddable.PrescricaoConsultaMapper.class, com.upsaude.mapper.embeddable.ExamesSolicitadosConsultaMapper.class, com.upsaude.mapper.embeddable.EncaminhamentoConsultaMapper.class, com.upsaude.mapper.embeddable.AtestadoConsultaMapper.class})
 public interface ConsultasMapper extends EntityMapper<Consultas, ConsultasDTO> {
 
     /**

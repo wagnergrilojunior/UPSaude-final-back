@@ -2,6 +2,9 @@ package com.upsaude.controller;
 
 import com.upsaude.api.request.LGPDConsentimentoRequest;
 import com.upsaude.api.response.LGPDConsentimentoResponse;
+import com.upsaude.exception.BadRequestException;
+import com.upsaude.exception.ConflictException;
+import com.upsaude.exception.NotFoundException;
 import com.upsaude.service.LGPDConsentimentoService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -12,6 +15,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -20,6 +24,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
 
+@Slf4j
 @RestController
 @RequestMapping("/v1/lgpd-consentimentos")
 @Tag(name = "LGPD Consentimentos", description = "API para gerenciamento de Consentimentos LGPD")
@@ -37,8 +42,18 @@ public class LGPDConsentimentoController {
             @ApiResponse(responseCode = "403", description = "Acesso negado")
     })
     public ResponseEntity<LGPDConsentimentoResponse> criar(@Valid @RequestBody LGPDConsentimentoRequest request) {
-        LGPDConsentimentoResponse response = service.criar(request);
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        log.debug("REQUEST POST /v1/lgpd-consentimentos - payload: {}", request);
+        try {
+            LGPDConsentimentoResponse response = service.criar(request);
+            log.info("Consentimento LGPD criado com sucesso. ID: {}", response.getId());
+            return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        } catch (BadRequestException | ConflictException ex) {
+            log.warn("Falha ao criar consentimento LGPD — mensagem: {}, payload: {}", ex.getMessage(), request);
+            throw ex;
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao criar consentimento LGPD — payload: {}", request, ex);
+            throw ex;
+        }
     }
 
     @GetMapping
@@ -50,8 +65,14 @@ public class LGPDConsentimentoController {
     public ResponseEntity<Page<LGPDConsentimentoResponse>> listar(
             @Parameter(description = "Parâmetros de paginação (page, size, sort)")
             Pageable pageable) {
-        Page<LGPDConsentimentoResponse> response = service.listar(pageable);
-        return ResponseEntity.ok(response);
+        log.debug("REQUEST GET /v1/lgpd-consentimentos - pageable: {}", pageable);
+        try {
+            Page<LGPDConsentimentoResponse> response = service.listar(pageable);
+            return ResponseEntity.ok(response);
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao listar consentimentos LGPD — pageable: {}", pageable, ex);
+            throw ex;
+        }
     }
 
     @GetMapping("/{id}")
@@ -65,8 +86,17 @@ public class LGPDConsentimentoController {
     public ResponseEntity<LGPDConsentimentoResponse> obterPorId(
             @Parameter(description = "ID do consentimento LGPD", required = true)
             @PathVariable UUID id) {
-        LGPDConsentimentoResponse response = service.obterPorId(id);
-        return ResponseEntity.ok(response);
+        log.debug("REQUEST GET /v1/lgpd-consentimentos/{}", id);
+        try {
+            LGPDConsentimentoResponse response = service.obterPorId(id);
+            return ResponseEntity.ok(response);
+        } catch (NotFoundException ex) {
+            log.warn("Consentimento LGPD não encontrado — ID: {}, mensagem: {}", id, ex.getMessage());
+            throw ex;
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao obter consentimento LGPD por ID — ID: {}", id, ex);
+            throw ex;
+        }
     }
 
     @GetMapping("/paciente/{pacienteId}")
@@ -80,8 +110,17 @@ public class LGPDConsentimentoController {
     public ResponseEntity<LGPDConsentimentoResponse> obterPorPacienteId(
             @Parameter(description = "ID do paciente", required = true)
             @PathVariable UUID pacienteId) {
-        LGPDConsentimentoResponse response = service.obterPorPacienteId(pacienteId);
-        return ResponseEntity.ok(response);
+        log.debug("REQUEST GET /v1/lgpd-consentimentos/paciente/{}", pacienteId);
+        try {
+            LGPDConsentimentoResponse response = service.obterPorPacienteId(pacienteId);
+            return ResponseEntity.ok(response);
+        } catch (NotFoundException ex) {
+            log.warn("Consentimento LGPD não encontrado para paciente — pacienteId: {}, mensagem: {}", pacienteId, ex.getMessage());
+            throw ex;
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao obter consentimento LGPD por paciente ID — pacienteId: {}", pacienteId, ex);
+            throw ex;
+        }
     }
 
     @PutMapping("/{id}")
@@ -97,8 +136,18 @@ public class LGPDConsentimentoController {
             @Parameter(description = "ID do consentimento LGPD", required = true)
             @PathVariable UUID id,
             @Valid @RequestBody LGPDConsentimentoRequest request) {
-        LGPDConsentimentoResponse response = service.atualizar(id, request);
-        return ResponseEntity.ok(response);
+        log.debug("REQUEST PUT /v1/lgpd-consentimentos/{} - payload: {}", id, request);
+        try {
+            LGPDConsentimentoResponse response = service.atualizar(id, request);
+            log.info("Consentimento LGPD atualizado com sucesso. ID: {}", id);
+            return ResponseEntity.ok(response);
+        } catch (BadRequestException | NotFoundException ex) {
+            log.warn("Falha ao atualizar consentimento LGPD — ID: {}, mensagem: {}, payload: {}", id, ex.getMessage(), request);
+            throw ex;
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao atualizar consentimento LGPD — ID: {}, payload: {}", id, request, ex);
+            throw ex;
+        }
     }
 
     @DeleteMapping("/{id}")
@@ -111,8 +160,18 @@ public class LGPDConsentimentoController {
     public ResponseEntity<Void> excluir(
             @Parameter(description = "ID do consentimento LGPD", required = true)
             @PathVariable UUID id) {
-        service.excluir(id);
-        return ResponseEntity.noContent().build();
+        log.debug("REQUEST DELETE /v1/lgpd-consentimentos/{}", id);
+        try {
+            service.excluir(id);
+            log.info("Consentimento LGPD excluído com sucesso. ID: {}", id);
+            return ResponseEntity.noContent().build();
+        } catch (NotFoundException ex) {
+            log.warn("Falha ao excluir consentimento LGPD — ID: {}, mensagem: {}", id, ex.getMessage());
+            throw ex;
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao excluir consentimento LGPD — ID: {}", id, ex);
+            throw ex;
+        }
     }
 }
 

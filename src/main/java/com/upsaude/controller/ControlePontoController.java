@@ -2,6 +2,9 @@ package com.upsaude.controller;
 
 import com.upsaude.api.request.ControlePontoRequest;
 import com.upsaude.api.response.ControlePontoResponse;
+import com.upsaude.exception.BadRequestException;
+import com.upsaude.exception.ConflictException;
+import com.upsaude.exception.NotFoundException;
 import com.upsaude.service.ControlePontoService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -12,6 +15,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -31,6 +35,7 @@ import java.util.UUID;
 @RequestMapping("/v1/controle-ponto")
 @Tag(name = "Controle de Ponto", description = "API para gerenciamento de Controle de Ponto")
 @RequiredArgsConstructor
+@Slf4j
 public class ControlePontoController {
 
     private final ControlePontoService controlePontoService;
@@ -44,8 +49,18 @@ public class ControlePontoController {
             @ApiResponse(responseCode = "403", description = "Acesso negado")
     })
     public ResponseEntity<ControlePontoResponse> criar(@Valid @RequestBody ControlePontoRequest request) {
-        ControlePontoResponse response = controlePontoService.criar(request);
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        log.debug("REQUEST POST /v1/controle-ponto - payload: {}", request);
+        try {
+            ControlePontoResponse response = controlePontoService.criar(request);
+            log.info("Registro de ponto criado com sucesso. ID: {}", response.getId());
+            return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        } catch (BadRequestException | ConflictException ex) {
+            log.warn("Falha ao criar registro de ponto — mensagem: {}, payload: {}", ex.getMessage(), request);
+            throw ex;
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao criar registro de ponto — payload: {}", request, ex);
+            throw ex;
+        }
     }
 
     @GetMapping
@@ -57,8 +72,14 @@ public class ControlePontoController {
     public ResponseEntity<Page<ControlePontoResponse>> listar(
             @Parameter(description = "Parâmetros de paginação (page, size, sort)")
             Pageable pageable) {
-        Page<ControlePontoResponse> response = controlePontoService.listar(pageable);
-        return ResponseEntity.ok(response);
+        log.debug("REQUEST GET /v1/controle-ponto - pageable: {}", pageable);
+        try {
+            Page<ControlePontoResponse> response = controlePontoService.listar(pageable);
+            return ResponseEntity.ok(response);
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao listar registros de ponto — pageable: {}", pageable, ex);
+            throw ex;
+        }
     }
 
     @GetMapping("/profissional/{profissionalId}")
@@ -73,8 +94,17 @@ public class ControlePontoController {
             @PathVariable UUID profissionalId,
             @Parameter(description = "Parâmetros de paginação (page, size, sort)")
             Pageable pageable) {
-        Page<ControlePontoResponse> response = controlePontoService.listarPorProfissional(profissionalId, pageable);
-        return ResponseEntity.ok(response);
+        log.debug("REQUEST GET /v1/controle-ponto/profissional/{} - pageable: {}", profissionalId, pageable);
+        try {
+            Page<ControlePontoResponse> response = controlePontoService.listarPorProfissional(profissionalId, pageable);
+            return ResponseEntity.ok(response);
+        } catch (BadRequestException ex) {
+            log.warn("Falha ao listar registros de ponto por profissional — profissionalId: {}, mensagem: {}", profissionalId, ex.getMessage());
+            throw ex;
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao listar registros de ponto por profissional — profissionalId: {}, pageable: {}", profissionalId, pageable, ex);
+            throw ex;
+        }
     }
 
     @GetMapping("/medico/{medicoId}")
@@ -89,8 +119,17 @@ public class ControlePontoController {
             @PathVariable UUID medicoId,
             @Parameter(description = "Parâmetros de paginação (page, size, sort)")
             Pageable pageable) {
-        Page<ControlePontoResponse> response = controlePontoService.listarPorMedico(medicoId, pageable);
-        return ResponseEntity.ok(response);
+        log.debug("REQUEST GET /v1/controle-ponto/medico/{} - pageable: {}", medicoId, pageable);
+        try {
+            Page<ControlePontoResponse> response = controlePontoService.listarPorMedico(medicoId, pageable);
+            return ResponseEntity.ok(response);
+        } catch (BadRequestException ex) {
+            log.warn("Falha ao listar registros de ponto por médico — medicoId: {}, mensagem: {}", medicoId, ex.getMessage());
+            throw ex;
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao listar registros de ponto por médico — medicoId: {}, pageable: {}", medicoId, pageable, ex);
+            throw ex;
+        }
     }
 
     @GetMapping("/estabelecimento/{estabelecimentoId}")
@@ -105,8 +144,17 @@ public class ControlePontoController {
             @PathVariable UUID estabelecimentoId,
             @Parameter(description = "Parâmetros de paginação (page, size, sort)")
             Pageable pageable) {
-        Page<ControlePontoResponse> response = controlePontoService.listarPorEstabelecimento(estabelecimentoId, pageable);
-        return ResponseEntity.ok(response);
+        log.debug("REQUEST GET /v1/controle-ponto/estabelecimento/{} - pageable: {}", estabelecimentoId, pageable);
+        try {
+            Page<ControlePontoResponse> response = controlePontoService.listarPorEstabelecimento(estabelecimentoId, pageable);
+            return ResponseEntity.ok(response);
+        } catch (BadRequestException ex) {
+            log.warn("Falha ao listar registros de ponto por estabelecimento — estabelecimentoId: {}, mensagem: {}", estabelecimentoId, ex.getMessage());
+            throw ex;
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao listar registros de ponto por estabelecimento — estabelecimentoId: {}, pageable: {}", estabelecimentoId, pageable, ex);
+            throw ex;
+        }
     }
 
     @GetMapping("/profissional/{profissionalId}/data/{data}")
@@ -123,8 +171,17 @@ public class ControlePontoController {
             @PathVariable @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate data,
             @Parameter(description = "Parâmetros de paginação (page, size, sort)")
             Pageable pageable) {
-        Page<ControlePontoResponse> response = controlePontoService.listarPorProfissionalEData(profissionalId, data, pageable);
-        return ResponseEntity.ok(response);
+        log.debug("REQUEST GET /v1/controle-ponto/profissional/{}/data/{} - pageable: {}", profissionalId, data, pageable);
+        try {
+            Page<ControlePontoResponse> response = controlePontoService.listarPorProfissionalEData(profissionalId, data, pageable);
+            return ResponseEntity.ok(response);
+        } catch (BadRequestException ex) {
+            log.warn("Falha ao listar registros de ponto por profissional e data — profissionalId: {}, data: {}, mensagem: {}", profissionalId, data, ex.getMessage());
+            throw ex;
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao listar registros de ponto por profissional e data — profissionalId: {}, data: {}, pageable: {}", profissionalId, data, pageable, ex);
+            throw ex;
+        }
     }
 
     @GetMapping("/profissional/{profissionalId}/periodo")
@@ -143,8 +200,17 @@ public class ControlePontoController {
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dataFim,
             @Parameter(description = "Parâmetros de paginação (page, size, sort)")
             Pageable pageable) {
-        Page<ControlePontoResponse> response = controlePontoService.listarPorProfissionalEPeriodo(profissionalId, dataInicio, dataFim, pageable);
-        return ResponseEntity.ok(response);
+        log.debug("REQUEST GET /v1/controle-ponto/profissional/{}/periodo - dataInicio: {}, dataFim: {}, pageable: {}", profissionalId, dataInicio, dataFim, pageable);
+        try {
+            Page<ControlePontoResponse> response = controlePontoService.listarPorProfissionalEPeriodo(profissionalId, dataInicio, dataFim, pageable);
+            return ResponseEntity.ok(response);
+        } catch (BadRequestException ex) {
+            log.warn("Falha ao listar registros de ponto por profissional e período — profissionalId: {}, dataInicio: {}, dataFim: {}, mensagem: {}", profissionalId, dataInicio, dataFim, ex.getMessage());
+            throw ex;
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao listar registros de ponto por profissional e período — profissionalId: {}, dataInicio: {}, dataFim: {}, pageable: {}", profissionalId, dataInicio, dataFim, pageable, ex);
+            throw ex;
+        }
     }
 
     @GetMapping("/{id}")
@@ -158,8 +224,17 @@ public class ControlePontoController {
     public ResponseEntity<ControlePontoResponse> obterPorId(
             @Parameter(description = "ID do registro de ponto", required = true)
             @PathVariable UUID id) {
-        ControlePontoResponse response = controlePontoService.obterPorId(id);
-        return ResponseEntity.ok(response);
+        log.debug("REQUEST GET /v1/controle-ponto/{}", id);
+        try {
+            ControlePontoResponse response = controlePontoService.obterPorId(id);
+            return ResponseEntity.ok(response);
+        } catch (NotFoundException ex) {
+            log.warn("Registro de ponto não encontrado — ID: {}, mensagem: {}", id, ex.getMessage());
+            throw ex;
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao obter registro de ponto por ID — ID: {}", id, ex);
+            throw ex;
+        }
     }
 
     @PutMapping("/{id}")
@@ -175,8 +250,18 @@ public class ControlePontoController {
             @Parameter(description = "ID do registro de ponto", required = true)
             @PathVariable UUID id,
             @Valid @RequestBody ControlePontoRequest request) {
-        ControlePontoResponse response = controlePontoService.atualizar(id, request);
-        return ResponseEntity.ok(response);
+        log.debug("REQUEST PUT /v1/controle-ponto/{} - payload: {}", id, request);
+        try {
+            ControlePontoResponse response = controlePontoService.atualizar(id, request);
+            log.info("Registro de ponto atualizado com sucesso. ID: {}", response.getId());
+            return ResponseEntity.ok(response);
+        } catch (BadRequestException | NotFoundException | ConflictException ex) {
+            log.warn("Falha ao atualizar registro de ponto — ID: {}, mensagem: {}, payload: {}", id, ex.getMessage(), request);
+            throw ex;
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao atualizar registro de ponto — ID: {}, payload: {}", id, request, ex);
+            throw ex;
+        }
     }
 
     @DeleteMapping("/{id}")
@@ -189,8 +274,17 @@ public class ControlePontoController {
     public ResponseEntity<Void> excluir(
             @Parameter(description = "ID do registro de ponto", required = true)
             @PathVariable UUID id) {
-        controlePontoService.excluir(id);
-        return ResponseEntity.noContent().build();
+        log.debug("REQUEST DELETE /v1/controle-ponto/{}", id);
+        try {
+            controlePontoService.excluir(id);
+            log.info("Registro de ponto excluído com sucesso. ID: {}", id);
+            return ResponseEntity.noContent().build();
+        } catch (NotFoundException ex) {
+            log.warn("Registro de ponto não encontrado para exclusão — ID: {}, mensagem: {}", id, ex.getMessage());
+            throw ex;
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao excluir registro de ponto — ID: {}", id, ex);
+            throw ex;
+        }
     }
 }
-

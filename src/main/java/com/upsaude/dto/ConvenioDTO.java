@@ -1,10 +1,10 @@
 package com.upsaude.dto;
 
-import com.upsaude.entity.embeddable.CoberturaConvenio;
-import com.upsaude.entity.embeddable.ContatoConvenio;
-import com.upsaude.entity.embeddable.InformacoesFinanceirasConvenio;
-import com.upsaude.entity.embeddable.IntegracaoGovernamentalConvenio;
-import com.upsaude.entity.embeddable.RegistroANSConvenio;
+import com.upsaude.dto.embeddable.CoberturaConvenioDTO;
+import com.upsaude.dto.embeddable.ContatoConvenioDTO;
+import com.upsaude.dto.embeddable.InformacoesFinanceirasConvenioDTO;
+import com.upsaude.dto.embeddable.IntegracaoGovernamentalConvenioDTO;
+import com.upsaude.dto.embeddable.RegistroANSConvenioDTO;
 import com.upsaude.enums.ModalidadeConvenioEnum;
 import com.upsaude.enums.StatusAtivoEnum;
 import com.upsaude.enums.TipoConvenioEnum;
@@ -32,10 +32,10 @@ public class ConvenioDTO {
     private ModalidadeConvenioEnum modalidade;
     private String categoria;
     private EnderecoDTO endereco;
-    private ContatoConvenio contato;
-    private RegistroANSConvenio registroAns;
-    private CoberturaConvenio cobertura;
-    private InformacoesFinanceirasConvenio informacoesFinanceiras;
+    private ContatoConvenioDTO contato;
+    private RegistroANSConvenioDTO registroAns;
+    private CoberturaConvenioDTO cobertura;
+    private InformacoesFinanceirasConvenioDTO informacoesFinanceiras;
     private StatusAtivoEnum status;
     private LocalDate dataCadastro;
     private LocalDate dataAtivacao;
@@ -47,5 +47,5 @@ public class ConvenioDTO {
     private String manualConvenio;
     private String descricao;
     private String observacoes;
-    private IntegracaoGovernamentalConvenio integracaoGovernamental;
+    private IntegracaoGovernamentalConvenioDTO integracaoGovernamental;
 }

@@ -1,5 +1,6 @@
 package com.upsaude.api.request;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.upsaude.enums.CondicaoMoradiaEnum;
 import com.upsaude.enums.EscolaridadeEnum;
 import com.upsaude.enums.NacionalidadeEnum;
@@ -13,6 +14,7 @@ import lombok.*;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class DadosSociodemograficosRequest {
     private UUID paciente;
     private RacaCorEnum racaCor;
@@ -22,6 +24,7 @@ public class DadosSociodemograficosRequest {
     private String municipioNascimentoIbge;
     private EscolaridadeEnum escolaridade;
     private String ocupacaoProfissao;
+    private Boolean situacaoRua;
     private Integer tempoSituacaoRua;
     private CondicaoMoradiaEnum condicaoMoradia;
     private SituacaoFamiliarEnum situacaoFamiliar;

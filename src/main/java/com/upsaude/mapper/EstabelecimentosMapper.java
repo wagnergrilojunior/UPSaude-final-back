@@ -42,6 +42,11 @@ public interface EstabelecimentosMapper extends EntityMapper<Estabelecimentos, E
     @Mapping(target = "enderecoPrincipal", ignore = true)
     @Mapping(target = "responsavelAdministrativo", ignore = true)
     @Mapping(target = "responsavelTecnico", ignore = true)
+    @Mapping(target = "enderecosSecundarios", ignore = true)
+    @Mapping(target = "servicos", ignore = true)
+    @Mapping(target = "equipamentos", ignore = true)
+    @Mapping(target = "infraestrutura", ignore = true)
+    @Mapping(target = "equipes", ignore = true)
     Estabelecimentos fromRequest(EstabelecimentosRequest request);
 
     /**
@@ -56,6 +61,11 @@ public interface EstabelecimentosMapper extends EntityMapper<Estabelecimentos, E
     @Mapping(target = "enderecoPrincipal", ignore = true)
     @Mapping(target = "responsavelAdministrativo", ignore = true)
     @Mapping(target = "responsavelTecnico", ignore = true)
+    @Mapping(target = "enderecosSecundarios", ignore = true)
+    @Mapping(target = "servicos", ignore = true)
+    @Mapping(target = "equipamentos", ignore = true)
+    @Mapping(target = "infraestrutura", ignore = true)
+    @Mapping(target = "equipes", ignore = true)
     void updateFromRequest(EstabelecimentosRequest request, @MappingTarget Estabelecimentos entity);
 
     /**

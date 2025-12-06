@@ -1,19 +1,24 @@
 package com.upsaude.api.response;
 
-import com.upsaude.entity.embeddable.CoberturaConvenio;
-import com.upsaude.entity.embeddable.ContatoConvenio;
-import com.upsaude.entity.embeddable.InformacoesFinanceirasConvenio;
-import com.upsaude.entity.embeddable.IntegracaoGovernamentalConvenio;
-import com.upsaude.entity.embeddable.RegistroANSConvenio;
+import com.upsaude.api.response.embeddable.CoberturaConvenioResponse;
+import com.upsaude.api.response.embeddable.ContatoConvenioResponse;
+import com.upsaude.api.response.embeddable.InformacoesFinanceirasConvenioResponse;
+import com.upsaude.api.response.embeddable.IntegracaoGovernamentalConvenioResponse;
+import com.upsaude.api.response.embeddable.RegistroANSConvenioResponse;
 import com.upsaude.enums.ModalidadeConvenioEnum;
 import com.upsaude.enums.StatusAtivoEnum;
 import com.upsaude.enums.TipoConvenioEnum;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.UUID;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
-@Data
+@Getter
+@Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
@@ -32,10 +37,10 @@ public class ConvenioResponse {
     private ModalidadeConvenioEnum modalidade;
     private String categoria;
     private EnderecoResponse endereco;
-    private ContatoConvenio contato;
-    private RegistroANSConvenio registroAns;
-    private CoberturaConvenio cobertura;
-    private InformacoesFinanceirasConvenio informacoesFinanceiras;
+    private ContatoConvenioResponse contato;
+    private RegistroANSConvenioResponse registroAns;
+    private CoberturaConvenioResponse cobertura;
+    private InformacoesFinanceirasConvenioResponse informacoesFinanceiras;
     private StatusAtivoEnum status;
     private LocalDate dataCadastro;
     private LocalDate dataAtivacao;
@@ -47,5 +52,5 @@ public class ConvenioResponse {
     private String manualConvenio;
     private String descricao;
     private String observacoes;
-    private IntegracaoGovernamentalConvenio integracaoGovernamental;
+    private IntegracaoGovernamentalConvenioResponse integracaoGovernamental;
 }

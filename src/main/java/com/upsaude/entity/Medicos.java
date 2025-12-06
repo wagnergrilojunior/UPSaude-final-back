@@ -14,6 +14,8 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.PrePersist;
+import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 import jakarta.validation.constraints.NotBlank;
@@ -45,6 +47,15 @@ import java.util.List;
 @Data
 @EqualsAndHashCode(callSuper = true)
 public class Medicos extends BaseEntity {
+
+    public Medicos() {
+        this.dadosPessoais = new DadosPessoaisMedico();
+        this.registroProfissional = new RegistroProfissionalMedico();
+        this.formacao = new FormacaoMedico();
+        this.contato = new ContatoMedico();
+        this.enderecos = new ArrayList<>();
+        this.medicosEstabelecimentos = new ArrayList<>();
+    }
 
     // ========== RELACIONAMENTOS ==========
 
@@ -113,4 +124,66 @@ public class Medicos extends BaseEntity {
 
     @Column(name = "observacoes", columnDefinition = "TEXT")
     private String observacoes; // Observações gerais sobre o médico
+
+    @PrePersist
+    @PreUpdate
+    public void validateEmbeddablesAndCollections() {
+        // Valida embeddables
+        if (dadosPessoais == null) {
+            dadosPessoais = new DadosPessoaisMedico();
+        }
+        if (registroProfissional == null) {
+            registroProfissional = new RegistroProfissionalMedico();
+        }
+        if (formacao == null) {
+            formacao = new FormacaoMedico();
+        }
+        if (contato == null) {
+            contato = new ContatoMedico();
+        }
+        
+        // Valida coleções
+        if (enderecos == null) {
+            enderecos = new ArrayList<>();
+        }
+        if (medicosEstabelecimentos == null) {
+            medicosEstabelecimentos = new ArrayList<>();
+        }
+    }
+
+    // ========== MÉTODOS UTILITÁRIOS - MEDICOS ESTABELECIMENTOS ==========
+
+    /**
+     * Adiciona um vínculo médico-estabelecimento com sincronização bidirecional.
+     * Garante que o vínculo também referencia este médico.
+     *
+     * @param medicoEstabelecimento O vínculo a ser adicionado
+     */
+    public void addMedicoEstabelecimento(MedicoEstabelecimento medicoEstabelecimento) {
+        if (medicoEstabelecimento == null) {
+            return;
+        }
+        if (medicosEstabelecimentos == null) {
+            medicosEstabelecimentos = new ArrayList<>();
+        }
+        if (!medicosEstabelecimentos.contains(medicoEstabelecimento)) {
+            medicosEstabelecimentos.add(medicoEstabelecimento);
+            medicoEstabelecimento.setMedico(this);
+        }
+    }
+
+    /**
+     * Remove um vínculo médico-estabelecimento com sincronização bidirecional.
+     * Remove a referência do vínculo para este médico.
+     *
+     * @param medicoEstabelecimento O vínculo a ser removido
+     */
+    public void removeMedicoEstabelecimento(MedicoEstabelecimento medicoEstabelecimento) {
+        if (medicoEstabelecimento == null || medicosEstabelecimentos == null) {
+            return;
+        }
+        if (medicosEstabelecimentos.remove(medicoEstabelecimento)) {
+            medicoEstabelecimento.setMedico(null);
+        }
+    }
 }

@@ -1,11 +1,16 @@
 package com.upsaude.api.response;
 
+import com.upsaude.enums.TipoUsuarioSistemaEnum;
 import java.time.OffsetDateTime;
 import java.util.UUID;
-import com.upsaude.enums.TipoUsuarioSistemaEnum;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
-@Data
+@Getter
+@Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
