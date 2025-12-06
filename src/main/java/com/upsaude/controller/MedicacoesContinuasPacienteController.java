@@ -2,6 +2,9 @@ package com.upsaude.controller;
 
 import com.upsaude.api.request.MedicacoesContinuasPacienteRequest;
 import com.upsaude.api.response.MedicacoesContinuasPacienteResponse;
+import com.upsaude.exception.BadRequestException;
+import com.upsaude.exception.ConflictException;
+import com.upsaude.exception.NotFoundException;
 import com.upsaude.service.MedicacoesContinuasPacienteService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -12,6 +15,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -29,6 +33,7 @@ import java.util.UUID;
 @RequestMapping("/v1/medicacoes-continuas-paciente")
 @Tag(name = "Medicações Contínuas de Paciente", description = "API para gerenciamento de Medicações Contínuas de Paciente")
 @RequiredArgsConstructor
+@Slf4j
 public class MedicacoesContinuasPacienteController {
 
     private final MedicacoesContinuasPacienteService medicacoesContinuasPacienteService;
@@ -42,8 +47,18 @@ public class MedicacoesContinuasPacienteController {
             @ApiResponse(responseCode = "403", description = "Acesso negado")
     })
     public ResponseEntity<MedicacoesContinuasPacienteResponse> criar(@Valid @RequestBody MedicacoesContinuasPacienteRequest request) {
-        MedicacoesContinuasPacienteResponse response = medicacoesContinuasPacienteService.criar(request);
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        log.debug("REQUEST POST /v1/medicacoes-continuas-paciente - payload: {}", request);
+        try {
+            MedicacoesContinuasPacienteResponse response = medicacoesContinuasPacienteService.criar(request);
+            log.info("Medicação contínua de paciente criada com sucesso. ID: {}", response.getId());
+            return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        } catch (BadRequestException | ConflictException ex) {
+            log.warn("Falha ao criar medicação contínua de paciente — mensagem: {}, payload: {}", ex.getMessage(), request);
+            throw ex;
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao criar medicação contínua de paciente — payload: {}", request, ex);
+            throw ex;
+        }
     }
 
     @GetMapping
@@ -55,8 +70,14 @@ public class MedicacoesContinuasPacienteController {
     public ResponseEntity<Page<MedicacoesContinuasPacienteResponse>> listar(
             @Parameter(description = "Parâmetros de paginação (page, size, sort)")
             Pageable pageable) {
-        Page<MedicacoesContinuasPacienteResponse> response = medicacoesContinuasPacienteService.listar(pageable);
-        return ResponseEntity.ok(response);
+        log.debug("REQUEST GET /v1/medicacoes-continuas-paciente - pageable: {}", pageable);
+        try {
+            Page<MedicacoesContinuasPacienteResponse> response = medicacoesContinuasPacienteService.listar(pageable);
+            return ResponseEntity.ok(response);
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao listar medicações contínuas de paciente — pageable: {}", pageable, ex);
+            throw ex;
+        }
     }
 
     @GetMapping("/{id}")
@@ -70,8 +91,17 @@ public class MedicacoesContinuasPacienteController {
     public ResponseEntity<MedicacoesContinuasPacienteResponse> obterPorId(
             @Parameter(description = "ID da medicação contínua de paciente", required = true)
             @PathVariable UUID id) {
-        MedicacoesContinuasPacienteResponse response = medicacoesContinuasPacienteService.obterPorId(id);
-        return ResponseEntity.ok(response);
+        log.debug("REQUEST GET /v1/medicacoes-continuas-paciente/{}", id);
+        try {
+            MedicacoesContinuasPacienteResponse response = medicacoesContinuasPacienteService.obterPorId(id);
+            return ResponseEntity.ok(response);
+        } catch (NotFoundException ex) {
+            log.warn("Medicação contínua de paciente não encontrada — ID: {}, mensagem: {}", id, ex.getMessage());
+            throw ex;
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao obter medicação contínua de paciente por ID — ID: {}", id, ex);
+            throw ex;
+        }
     }
 
     @PutMapping("/{id}")
@@ -87,8 +117,18 @@ public class MedicacoesContinuasPacienteController {
             @Parameter(description = "ID da medicação contínua de paciente", required = true)
             @PathVariable UUID id,
             @Valid @RequestBody MedicacoesContinuasPacienteRequest request) {
-        MedicacoesContinuasPacienteResponse response = medicacoesContinuasPacienteService.atualizar(id, request);
-        return ResponseEntity.ok(response);
+        log.debug("REQUEST PUT /v1/medicacoes-continuas-paciente/{} - payload: {}", id, request);
+        try {
+            MedicacoesContinuasPacienteResponse response = medicacoesContinuasPacienteService.atualizar(id, request);
+            log.info("Medicação contínua de paciente atualizada com sucesso. ID: {}", response.getId());
+            return ResponseEntity.ok(response);
+        } catch (BadRequestException | NotFoundException | ConflictException ex) {
+            log.warn("Falha ao atualizar medicação contínua de paciente — ID: {}, mensagem: {}, payload: {}", id, ex.getMessage(), request);
+            throw ex;
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao atualizar medicação contínua de paciente — ID: {}, payload: {}", id, request, ex);
+            throw ex;
+        }
     }
 
     @DeleteMapping("/{id}")
@@ -101,8 +141,17 @@ public class MedicacoesContinuasPacienteController {
     public ResponseEntity<Void> excluir(
             @Parameter(description = "ID da medicação contínua de paciente", required = true)
             @PathVariable UUID id) {
-        medicacoesContinuasPacienteService.excluir(id);
-        return ResponseEntity.noContent().build();
+        log.debug("REQUEST DELETE /v1/medicacoes-continuas-paciente/{}", id);
+        try {
+            medicacoesContinuasPacienteService.excluir(id);
+            log.info("Medicação contínua de paciente excluída com sucesso. ID: {}", id);
+            return ResponseEntity.noContent().build();
+        } catch (NotFoundException ex) {
+            log.warn("Medicação contínua de paciente não encontrada para exclusão — ID: {}, mensagem: {}", id, ex.getMessage());
+            throw ex;
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao excluir medicação contínua de paciente — ID: {}", id, ex);
+            throw ex;
+        }
     }
 }
-

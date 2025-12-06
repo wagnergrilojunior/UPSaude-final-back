@@ -2,6 +2,9 @@ package com.upsaude.controller;
 
 import com.upsaude.api.request.EducacaoSaudeRequest;
 import com.upsaude.api.response.EducacaoSaudeResponse;
+import com.upsaude.exception.BadRequestException;
+import com.upsaude.exception.ConflictException;
+import com.upsaude.exception.NotFoundException;
 import com.upsaude.service.EducacaoSaudeService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -12,6 +15,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -29,6 +33,7 @@ import java.util.UUID;
 @RequestMapping("/v1/educacao-saude")
 @Tag(name = "Educação em Saúde", description = "API para gerenciamento de ações de educação em saúde")
 @RequiredArgsConstructor
+@Slf4j
 public class EducacaoSaudeController {
 
     private final EducacaoSaudeService educacaoSaudeService;
@@ -42,8 +47,18 @@ public class EducacaoSaudeController {
             @ApiResponse(responseCode = "403", description = "Acesso negado")
     })
     public ResponseEntity<EducacaoSaudeResponse> criar(@Valid @RequestBody EducacaoSaudeRequest request) {
-        EducacaoSaudeResponse response = educacaoSaudeService.criar(request);
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        log.debug("REQUEST POST /v1/educacao-saude - payload: {}", request);
+        try {
+            EducacaoSaudeResponse response = educacaoSaudeService.criar(request);
+            log.info("Educação em saúde criada com sucesso. ID: {}", response.getId());
+            return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        } catch (BadRequestException | ConflictException ex) {
+            log.warn("Falha ao criar educação em saúde — mensagem: {}, payload: {}", ex.getMessage(), request);
+            throw ex;
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao criar educação em saúde — payload: {}", request, ex);
+            throw ex;
+        }
     }
 
     @GetMapping
@@ -55,8 +70,14 @@ public class EducacaoSaudeController {
     public ResponseEntity<Page<EducacaoSaudeResponse>> listar(
             @Parameter(description = "Parâmetros de paginação (page, size, sort)")
             Pageable pageable) {
-        Page<EducacaoSaudeResponse> response = educacaoSaudeService.listar(pageable);
-        return ResponseEntity.ok(response);
+        log.debug("REQUEST GET /v1/educacao-saude - pageable: {}", pageable);
+        try {
+            Page<EducacaoSaudeResponse> response = educacaoSaudeService.listar(pageable);
+            return ResponseEntity.ok(response);
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao listar ações de educação em saúde — pageable: {}", pageable, ex);
+            throw ex;
+        }
     }
 
     @GetMapping("/{id}")
@@ -70,8 +91,17 @@ public class EducacaoSaudeController {
     public ResponseEntity<EducacaoSaudeResponse> obterPorId(
             @Parameter(description = "ID da ação de educação em saúde", required = true)
             @PathVariable UUID id) {
-        EducacaoSaudeResponse response = educacaoSaudeService.obterPorId(id);
-        return ResponseEntity.ok(response);
+        log.debug("REQUEST GET /v1/educacao-saude/{}", id);
+        try {
+            EducacaoSaudeResponse response = educacaoSaudeService.obterPorId(id);
+            return ResponseEntity.ok(response);
+        } catch (NotFoundException ex) {
+            log.warn("Educação em saúde não encontrada — ID: {}, mensagem: {}", id, ex.getMessage());
+            throw ex;
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao obter educação em saúde por ID — ID: {}", id, ex);
+            throw ex;
+        }
     }
 
     @GetMapping("/estabelecimento/{estabelecimentoId}")
@@ -79,8 +109,17 @@ public class EducacaoSaudeController {
     public ResponseEntity<Page<EducacaoSaudeResponse>> listarPorEstabelecimento(
             @PathVariable UUID estabelecimentoId,
             Pageable pageable) {
-        Page<EducacaoSaudeResponse> response = educacaoSaudeService.listarPorEstabelecimento(estabelecimentoId, pageable);
-        return ResponseEntity.ok(response);
+        log.debug("REQUEST GET /v1/educacao-saude/estabelecimento/{} - pageable: {}", estabelecimentoId, pageable);
+        try {
+            Page<EducacaoSaudeResponse> response = educacaoSaudeService.listarPorEstabelecimento(estabelecimentoId, pageable);
+            return ResponseEntity.ok(response);
+        } catch (BadRequestException ex) {
+            log.warn("Falha ao listar ações de educação em saúde por estabelecimento — estabelecimentoId: {}, mensagem: {}", estabelecimentoId, ex.getMessage());
+            throw ex;
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao listar ações de educação em saúde por estabelecimento — estabelecimentoId: {}, pageable: {}", estabelecimentoId, pageable, ex);
+            throw ex;
+        }
     }
 
     @GetMapping("/profissional/{profissionalId}")
@@ -88,8 +127,17 @@ public class EducacaoSaudeController {
     public ResponseEntity<Page<EducacaoSaudeResponse>> listarPorProfissionalResponsavel(
             @PathVariable UUID profissionalId,
             Pageable pageable) {
-        Page<EducacaoSaudeResponse> response = educacaoSaudeService.listarPorProfissionalResponsavel(profissionalId, pageable);
-        return ResponseEntity.ok(response);
+        log.debug("REQUEST GET /v1/educacao-saude/profissional/{} - pageable: {}", profissionalId, pageable);
+        try {
+            Page<EducacaoSaudeResponse> response = educacaoSaudeService.listarPorProfissionalResponsavel(profissionalId, pageable);
+            return ResponseEntity.ok(response);
+        } catch (BadRequestException ex) {
+            log.warn("Falha ao listar ações de educação em saúde por profissional — profissionalId: {}, mensagem: {}", profissionalId, ex.getMessage());
+            throw ex;
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao listar ações de educação em saúde por profissional — profissionalId: {}, pageable: {}", profissionalId, pageable, ex);
+            throw ex;
+        }
     }
 
     @GetMapping("/realizadas/{estabelecimentoId}")
@@ -97,8 +145,17 @@ public class EducacaoSaudeController {
     public ResponseEntity<Page<EducacaoSaudeResponse>> listarRealizadas(
             @PathVariable UUID estabelecimentoId,
             Pageable pageable) {
-        Page<EducacaoSaudeResponse> response = educacaoSaudeService.listarRealizadas(estabelecimentoId, pageable);
-        return ResponseEntity.ok(response);
+        log.debug("REQUEST GET /v1/educacao-saude/realizadas/{} - pageable: {}", estabelecimentoId, pageable);
+        try {
+            Page<EducacaoSaudeResponse> response = educacaoSaudeService.listarRealizadas(estabelecimentoId, pageable);
+            return ResponseEntity.ok(response);
+        } catch (BadRequestException ex) {
+            log.warn("Falha ao listar ações de educação em saúde realizadas — estabelecimentoId: {}, mensagem: {}", estabelecimentoId, ex.getMessage());
+            throw ex;
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao listar ações de educação em saúde realizadas — estabelecimentoId: {}, pageable: {}", estabelecimentoId, pageable, ex);
+            throw ex;
+        }
     }
 
     @PutMapping("/{id}")
@@ -114,8 +171,18 @@ public class EducacaoSaudeController {
             @Parameter(description = "ID da ação de educação em saúde", required = true)
             @PathVariable UUID id,
             @Valid @RequestBody EducacaoSaudeRequest request) {
-        EducacaoSaudeResponse response = educacaoSaudeService.atualizar(id, request);
-        return ResponseEntity.ok(response);
+        log.debug("REQUEST PUT /v1/educacao-saude/{} - payload: {}", id, request);
+        try {
+            EducacaoSaudeResponse response = educacaoSaudeService.atualizar(id, request);
+            log.info("Educação em saúde atualizada com sucesso. ID: {}", response.getId());
+            return ResponseEntity.ok(response);
+        } catch (BadRequestException | NotFoundException | ConflictException ex) {
+            log.warn("Falha ao atualizar educação em saúde — ID: {}, mensagem: {}, payload: {}", id, ex.getMessage(), request);
+            throw ex;
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao atualizar educação em saúde — ID: {}, payload: {}", id, request, ex);
+            throw ex;
+        }
     }
 
     @DeleteMapping("/{id}")
@@ -128,8 +195,17 @@ public class EducacaoSaudeController {
     public ResponseEntity<Void> excluir(
             @Parameter(description = "ID da ação de educação em saúde", required = true)
             @PathVariable UUID id) {
-        educacaoSaudeService.excluir(id);
-        return ResponseEntity.noContent().build();
+        log.debug("REQUEST DELETE /v1/educacao-saude/{}", id);
+        try {
+            educacaoSaudeService.excluir(id);
+            log.info("Educação em saúde excluída com sucesso. ID: {}", id);
+            return ResponseEntity.noContent().build();
+        } catch (NotFoundException ex) {
+            log.warn("Educação em saúde não encontrada para exclusão — ID: {}, mensagem: {}", id, ex.getMessage());
+            throw ex;
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao excluir educação em saúde — ID: {}", id, ex);
+            throw ex;
+        }
     }
 }
-

@@ -2,6 +2,9 @@ package com.upsaude.controller;
 
 import com.upsaude.api.request.DadosClinicosBasicosRequest;
 import com.upsaude.api.response.DadosClinicosBasicosResponse;
+import com.upsaude.exception.BadRequestException;
+import com.upsaude.exception.ConflictException;
+import com.upsaude.exception.NotFoundException;
 import com.upsaude.service.DadosClinicosBasicosService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -12,6 +15,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -24,6 +28,7 @@ import java.util.UUID;
 @RequestMapping("/v1/dados-clinicos-basicos")
 @Tag(name = "Dados Clínicos Básicos", description = "API para gerenciamento de Dados Clínicos Básicos")
 @RequiredArgsConstructor
+@Slf4j
 public class DadosClinicosBasicosController {
 
     private final DadosClinicosBasicosService service;
@@ -37,8 +42,18 @@ public class DadosClinicosBasicosController {
             @ApiResponse(responseCode = "403", description = "Acesso negado")
     })
     public ResponseEntity<DadosClinicosBasicosResponse> criar(@Valid @RequestBody DadosClinicosBasicosRequest request) {
-        DadosClinicosBasicosResponse response = service.criar(request);
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        log.debug("REQUEST POST /v1/dados-clinicos-basicos - payload: {}", request);
+        try {
+            DadosClinicosBasicosResponse response = service.criar(request);
+            log.info("Dados clínicos básicos criados com sucesso. ID: {}", response.getId());
+            return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        } catch (BadRequestException | ConflictException ex) {
+            log.warn("Falha ao criar dados clínicos básicos — mensagem: {}, payload: {}", ex.getMessage(), request);
+            throw ex;
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao criar dados clínicos básicos — payload: {}", request, ex);
+            throw ex;
+        }
     }
 
     @GetMapping
@@ -50,8 +65,14 @@ public class DadosClinicosBasicosController {
     public ResponseEntity<Page<DadosClinicosBasicosResponse>> listar(
             @Parameter(description = "Parâmetros de paginação (page, size, sort)")
             Pageable pageable) {
-        Page<DadosClinicosBasicosResponse> response = service.listar(pageable);
-        return ResponseEntity.ok(response);
+        log.debug("REQUEST GET /v1/dados-clinicos-basicos - pageable: {}", pageable);
+        try {
+            Page<DadosClinicosBasicosResponse> response = service.listar(pageable);
+            return ResponseEntity.ok(response);
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao listar dados clínicos básicos — pageable: {}", pageable, ex);
+            throw ex;
+        }
     }
 
     @GetMapping("/{id}")
@@ -65,8 +86,17 @@ public class DadosClinicosBasicosController {
     public ResponseEntity<DadosClinicosBasicosResponse> obterPorId(
             @Parameter(description = "ID dos dados clínicos básicos", required = true)
             @PathVariable UUID id) {
-        DadosClinicosBasicosResponse response = service.obterPorId(id);
-        return ResponseEntity.ok(response);
+        log.debug("REQUEST GET /v1/dados-clinicos-basicos/{}", id);
+        try {
+            DadosClinicosBasicosResponse response = service.obterPorId(id);
+            return ResponseEntity.ok(response);
+        } catch (NotFoundException ex) {
+            log.warn("Dados clínicos básicos não encontrados — ID: {}, mensagem: {}", id, ex.getMessage());
+            throw ex;
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao obter dados clínicos básicos por ID — ID: {}", id, ex);
+            throw ex;
+        }
     }
 
     @GetMapping("/paciente/{pacienteId}")
@@ -80,8 +110,17 @@ public class DadosClinicosBasicosController {
     public ResponseEntity<DadosClinicosBasicosResponse> obterPorPacienteId(
             @Parameter(description = "ID do paciente", required = true)
             @PathVariable UUID pacienteId) {
-        DadosClinicosBasicosResponse response = service.obterPorPacienteId(pacienteId);
-        return ResponseEntity.ok(response);
+        log.debug("REQUEST GET /v1/dados-clinicos-basicos/paciente/{}", pacienteId);
+        try {
+            DadosClinicosBasicosResponse response = service.obterPorPacienteId(pacienteId);
+            return ResponseEntity.ok(response);
+        } catch (NotFoundException ex) {
+            log.warn("Dados clínicos básicos não encontrados para paciente — pacienteId: {}, mensagem: {}", pacienteId, ex.getMessage());
+            throw ex;
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao obter dados clínicos básicos por paciente ID — pacienteId: {}", pacienteId, ex);
+            throw ex;
+        }
     }
 
     @PutMapping("/{id}")
@@ -97,8 +136,18 @@ public class DadosClinicosBasicosController {
             @Parameter(description = "ID dos dados clínicos básicos", required = true)
             @PathVariable UUID id,
             @Valid @RequestBody DadosClinicosBasicosRequest request) {
-        DadosClinicosBasicosResponse response = service.atualizar(id, request);
-        return ResponseEntity.ok(response);
+        log.debug("REQUEST PUT /v1/dados-clinicos-basicos/{} - payload: {}", id, request);
+        try {
+            DadosClinicosBasicosResponse response = service.atualizar(id, request);
+            log.info("Dados clínicos básicos atualizados com sucesso. ID: {}", response.getId());
+            return ResponseEntity.ok(response);
+        } catch (BadRequestException | NotFoundException | ConflictException ex) {
+            log.warn("Falha ao atualizar dados clínicos básicos — ID: {}, mensagem: {}, payload: {}", id, ex.getMessage(), request);
+            throw ex;
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao atualizar dados clínicos básicos — ID: {}, payload: {}", id, request, ex);
+            throw ex;
+        }
     }
 
     @DeleteMapping("/{id}")
@@ -111,8 +160,17 @@ public class DadosClinicosBasicosController {
     public ResponseEntity<Void> excluir(
             @Parameter(description = "ID dos dados clínicos básicos", required = true)
             @PathVariable UUID id) {
-        service.excluir(id);
-        return ResponseEntity.noContent().build();
+        log.debug("REQUEST DELETE /v1/dados-clinicos-basicos/{}", id);
+        try {
+            service.excluir(id);
+            log.info("Dados clínicos básicos excluídos com sucesso. ID: {}", id);
+            return ResponseEntity.noContent().build();
+        } catch (NotFoundException ex) {
+            log.warn("Dados clínicos básicos não encontrados para exclusão — ID: {}, mensagem: {}", id, ex.getMessage());
+            throw ex;
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao excluir dados clínicos básicos — ID: {}", id, ex);
+            throw ex;
+        }
     }
 }
-

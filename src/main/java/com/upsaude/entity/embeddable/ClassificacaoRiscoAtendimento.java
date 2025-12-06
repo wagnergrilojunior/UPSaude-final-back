@@ -6,7 +6,6 @@ import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
 /**
  * Classe embeddable para classificação de risco do atendimento.
@@ -16,9 +15,16 @@ import lombok.NoArgsConstructor;
 @Embeddable
 @Data
 @Builder
-@NoArgsConstructor
 @AllArgsConstructor
 public class ClassificacaoRiscoAtendimento {
+
+    public ClassificacaoRiscoAtendimento() {
+        this.classificacaoRisco = "";
+        this.prioridade = "";
+        this.gravidade = "";
+        this.necessitaObservacao = false;
+        this.necessitaInternacao = false;
+    }
 
     @Size(max = 50, message = "Classificação de risco deve ter no máximo 50 caracteres")
     @Column(name = "classificacao_risco", length = 50)

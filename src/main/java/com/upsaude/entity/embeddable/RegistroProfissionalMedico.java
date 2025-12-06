@@ -10,7 +10,6 @@ import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
 
@@ -22,9 +21,15 @@ import java.time.LocalDate;
 @Embeddable
 @Data
 @Builder
-@NoArgsConstructor
 @AllArgsConstructor
 public class RegistroProfissionalMedico {
+
+    public RegistroProfissionalMedico() {
+        this.crm = "";
+        this.crmUf = "";
+        this.crmComplementar = "";
+        this.observacoesCrm = "";
+    }
 
     @Pattern(regexp = "^\\d{4,10}$", message = "CRM deve ter entre 4 e 10 dígitos")
     @Column(name = "crm", nullable = false, length = 20)

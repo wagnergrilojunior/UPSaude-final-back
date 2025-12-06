@@ -2,6 +2,9 @@ package com.upsaude.controller;
 
 import com.upsaude.api.request.ConselhosProfissionaisRequest;
 import com.upsaude.api.response.ConselhosProfissionaisResponse;
+import com.upsaude.exception.BadRequestException;
+import com.upsaude.exception.ConflictException;
+import com.upsaude.exception.NotFoundException;
 import com.upsaude.service.ConselhosProfissionaisService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -12,6 +15,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -25,6 +29,7 @@ import java.util.UUID;
  *
  * @author UPSaúde
  */
+@Slf4j
 @RestController
 @RequestMapping("/v1/conselhos-profissionais")
 @Tag(name = "Conselhos Profissionais", description = "API para gerenciamento de Conselhos Profissionais")
@@ -42,8 +47,18 @@ public class ConselhosProfissionaisController {
             @ApiResponse(responseCode = "403", description = "Acesso negado")
     })
     public ResponseEntity<ConselhosProfissionaisResponse> criar(@Valid @RequestBody ConselhosProfissionaisRequest request) {
-        ConselhosProfissionaisResponse response = conselhosProfissionaisService.criar(request);
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        log.debug("REQUEST POST /v1/conselhos-profissionais - payload: {}", request);
+        try {
+            ConselhosProfissionaisResponse response = conselhosProfissionaisService.criar(request);
+            log.info("Conselho profissional criado com sucesso. ID: {}", response.getId());
+            return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        } catch (BadRequestException | ConflictException ex) {
+            log.warn("Falha ao criar conselho profissional — mensagem: {}, payload: {}", ex.getMessage(), request);
+            throw ex;
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao criar conselho profissional — payload: {}", request, ex);
+            throw ex;
+        }
     }
 
     @GetMapping
@@ -55,8 +70,14 @@ public class ConselhosProfissionaisController {
     public ResponseEntity<Page<ConselhosProfissionaisResponse>> listar(
             @Parameter(description = "Parâmetros de paginação (page, size, sort)")
             Pageable pageable) {
-        Page<ConselhosProfissionaisResponse> response = conselhosProfissionaisService.listar(pageable);
-        return ResponseEntity.ok(response);
+        log.debug("REQUEST GET /v1/conselhos-profissionais - pageable: {}", pageable);
+        try {
+            Page<ConselhosProfissionaisResponse> response = conselhosProfissionaisService.listar(pageable);
+            return ResponseEntity.ok(response);
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao listar conselhos profissionais — pageable: {}", pageable, ex);
+            throw ex;
+        }
     }
 
     @GetMapping("/{id}")
@@ -70,8 +91,17 @@ public class ConselhosProfissionaisController {
     public ResponseEntity<ConselhosProfissionaisResponse> obterPorId(
             @Parameter(description = "ID do conselho profissional", required = true)
             @PathVariable UUID id) {
-        ConselhosProfissionaisResponse response = conselhosProfissionaisService.obterPorId(id);
-        return ResponseEntity.ok(response);
+        log.debug("REQUEST GET /v1/conselhos-profissionais/{}", id);
+        try {
+            ConselhosProfissionaisResponse response = conselhosProfissionaisService.obterPorId(id);
+            return ResponseEntity.ok(response);
+        } catch (NotFoundException ex) {
+            log.warn("Conselho profissional não encontrado — ID: {}, mensagem: {}", id, ex.getMessage());
+            throw ex;
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao obter conselho profissional por ID — ID: {}", id, ex);
+            throw ex;
+        }
     }
 
     @PutMapping("/{id}")
@@ -87,8 +117,18 @@ public class ConselhosProfissionaisController {
             @Parameter(description = "ID do conselho profissional", required = true)
             @PathVariable UUID id,
             @Valid @RequestBody ConselhosProfissionaisRequest request) {
-        ConselhosProfissionaisResponse response = conselhosProfissionaisService.atualizar(id, request);
-        return ResponseEntity.ok(response);
+        log.debug("REQUEST PUT /v1/conselhos-profissionais/{} - payload: {}", id, request);
+        try {
+            ConselhosProfissionaisResponse response = conselhosProfissionaisService.atualizar(id, request);
+            log.info("Conselho profissional atualizado com sucesso. ID: {}", id);
+            return ResponseEntity.ok(response);
+        } catch (BadRequestException | NotFoundException ex) {
+            log.warn("Falha ao atualizar conselho profissional — ID: {}, mensagem: {}, payload: {}", id, ex.getMessage(), request);
+            throw ex;
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao atualizar conselho profissional — ID: {}, payload: {}", id, request, ex);
+            throw ex;
+        }
     }
 
     @DeleteMapping("/{id}")
@@ -101,8 +141,18 @@ public class ConselhosProfissionaisController {
     public ResponseEntity<Void> excluir(
             @Parameter(description = "ID do conselho profissional", required = true)
             @PathVariable UUID id) {
-        conselhosProfissionaisService.excluir(id);
-        return ResponseEntity.noContent().build();
+        log.debug("REQUEST DELETE /v1/conselhos-profissionais/{}", id);
+        try {
+            conselhosProfissionaisService.excluir(id);
+            log.info("Conselho profissional excluído com sucesso. ID: {}", id);
+            return ResponseEntity.noContent().build();
+        } catch (NotFoundException ex) {
+            log.warn("Falha ao excluir conselho profissional — ID: {}, mensagem: {}", id, ex.getMessage());
+            throw ex;
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao excluir conselho profissional — ID: {}", id, ex);
+            throw ex;
+        }
     }
 }
 

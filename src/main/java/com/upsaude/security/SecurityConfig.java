@@ -44,6 +44,10 @@ public class SecurityConfig {
                 .requestMatchers("/v1/auth/login").permitAll()
                 .requestMatchers("/v1/auth/verificar-acesso").permitAll()
                 
+                // TEMPORÁRIO: Endpoints de alergias públicos para testes
+                // TODO: Remover após testes
+                .requestMatchers("/v1/alergias/**").permitAll()
+                
                 // Endpoints do Actuator - públicos para monitoramento via Spring Boot Admin
                 // IMPORTANTE: Em produção, considere proteger estes endpoints com autenticação básica
                 .requestMatchers("/actuator/**").permitAll() // Permite todos os endpoints do Actuator para Spring Boot Admin

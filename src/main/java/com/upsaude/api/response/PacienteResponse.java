@@ -12,11 +12,17 @@ import com.upsaude.enums.TipoAtendimentoPreferencialEnum;
 import com.upsaude.enums.TipoCnsEnum;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
-@Data
+@Getter
+@Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
@@ -66,14 +72,25 @@ public class PacienteResponse {
     private Boolean cnsValidado;
     private TipoCnsEnum tipoCns;
     private Boolean acompanhadoPorEquipeEsf;
-    private List<EnderecoResponse> enderecos;
+    
+    @Builder.Default
+    private List<EnderecoResponse> enderecos = new ArrayList<>();
+    
     private DadosSociodemograficosResponse dadosSociodemograficos;
     private DadosClinicosBasicosResponse dadosClinicosBasicos;
     private ResponsavelLegalResponse responsavelLegal;
     private LGPDConsentimentoResponse lgpdConsentimento;
     private IntegracaoGovResponse integracaoGov;
-    private List<DoencasPacienteResponse> doencas;
-    private List<AlergiasPacienteResponse> alergias;
-    private List<DeficienciasPacienteResponse> deficiencias;
-    private List<MedicacaoPacienteResponse> medicacoes;
+    
+    @Builder.Default
+    private List<DoencasPacienteResponse> doencas = new ArrayList<>();
+    
+    @Builder.Default
+    private List<AlergiasPacienteResponse> alergias = new ArrayList<>();
+    
+    @Builder.Default
+    private List<DeficienciasPacienteResponse> deficiencias = new ArrayList<>();
+    
+    @Builder.Default
+    private List<MedicacaoPacienteResponse> medicacoes = new ArrayList<>();
 }

@@ -5,7 +5,6 @@ import jakarta.persistence.Embeddable;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
 /**
  * Classe embeddable para informações de cobertura e rede credenciada do convênio.
@@ -15,9 +14,36 @@ import lombok.NoArgsConstructor;
 @Embeddable
 @Data
 @Builder
-@NoArgsConstructor
 @AllArgsConstructor
 public class CoberturaConvenio {
+
+    public CoberturaConvenio() {
+        this.coberturaNacional = false;
+        this.coberturaRegional = false;
+        this.coberturaLocal = false;
+        this.coberturaEmergencia = false;
+        this.coberturaUrgencia = false;
+        this.coberturaInternacao = false;
+        this.coberturaAmbulatorial = false;
+        this.coberturaExames = false;
+        this.coberturaCirurgias = false;
+        this.coberturaMedicamentos = false;
+        this.coberturaOdontologia = false;
+        this.coberturaFisioterapia = false;
+        this.coberturaPsicologia = false;
+        this.coberturaNutricao = false;
+        this.coberturaFonoaudiologia = false;
+        this.coberturaTerapiaOcupacional = false;
+        this.coberturaTransplantes = false;
+        this.coberturaQuimioterapia = false;
+        this.coberturaRadioterapia = false;
+        this.coberturaHemodialise = false;
+        this.coberturaObstetricia = false;
+        this.coberturaPediatria = false;
+        this.coberturaGeriatria = false;
+        this.coberturaPsiquiatria = false;
+        this.coberturaOutras = "";
+    }
 
     @Column(name = "cobertura_nacional", nullable = false)
     @Builder.Default

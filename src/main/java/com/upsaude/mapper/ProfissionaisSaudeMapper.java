@@ -41,6 +41,8 @@ public interface ProfissionaisSaudeMapper extends EntityMapper<ProfissionaisSaud
     @Mapping(target = "active", ignore = true)
     @Mapping(target = "conselho", ignore = true)
     @Mapping(target = "enderecoProfissional", ignore = true)
+    @Mapping(target = "especialidades", ignore = true)
+    @Mapping(target = "historicoHabilitacao", ignore = true)
     ProfissionaisSaude fromRequest(ProfissionaisSaudeRequest request);
 
     /**
@@ -54,6 +56,8 @@ public interface ProfissionaisSaudeMapper extends EntityMapper<ProfissionaisSaud
     @Mapping(target = "active", ignore = true)
     @Mapping(target = "conselho", ignore = true)
     @Mapping(target = "enderecoProfissional", ignore = true)
+    @Mapping(target = "especialidades", ignore = true)
+    @Mapping(target = "historicoHabilitacao", ignore = true)
     void updateFromRequest(ProfissionaisSaudeRequest request, @MappingTarget ProfissionaisSaude entity);
 
     /**

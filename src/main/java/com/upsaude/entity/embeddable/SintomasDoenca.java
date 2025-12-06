@@ -5,7 +5,6 @@ import jakarta.persistence.Embeddable;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
 /**
  * Classe embeddable para sintomas e manifestações da doença.
@@ -15,9 +14,15 @@ import lombok.NoArgsConstructor;
 @Embeddable
 @Data
 @Builder
-@NoArgsConstructor
 @AllArgsConstructor
 public class SintomasDoenca {
+
+    public SintomasDoenca() {
+        this.sintomasComuns = "";
+        this.sintomasGraves = "";
+        this.sinaisClinicos = "";
+        this.manifestacoesExtras = "";
+    }
 
     @Column(name = "sintomas_comuns", columnDefinition = "TEXT")
     private String sintomasComuns; // Sintomas comuns da doença

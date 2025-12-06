@@ -2,6 +2,9 @@ package com.upsaude.controller;
 
 import com.upsaude.api.request.CatalogoProcedimentosRequest;
 import com.upsaude.api.response.CatalogoProcedimentosResponse;
+import com.upsaude.exception.BadRequestException;
+import com.upsaude.exception.ConflictException;
+import com.upsaude.exception.NotFoundException;
 import com.upsaude.service.CatalogoProcedimentosService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -12,6 +15,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -29,6 +33,7 @@ import java.util.UUID;
 @RequestMapping("/v1/catalogo-procedimentos")
 @Tag(name = "Catálogo de Procedimentos", description = "API para gerenciamento de Catálogo de Procedimentos")
 @RequiredArgsConstructor
+@Slf4j
 public class CatalogoProcedimentosController {
 
     private final CatalogoProcedimentosService catalogoProcedimentosService;
@@ -42,8 +47,18 @@ public class CatalogoProcedimentosController {
             @ApiResponse(responseCode = "403", description = "Acesso negado")
     })
     public ResponseEntity<CatalogoProcedimentosResponse> criar(@Valid @RequestBody CatalogoProcedimentosRequest request) {
-        CatalogoProcedimentosResponse response = catalogoProcedimentosService.criar(request);
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        log.debug("REQUEST POST /v1/catalogo-procedimentos - payload: {}", request);
+        try {
+            CatalogoProcedimentosResponse response = catalogoProcedimentosService.criar(request);
+            log.info("Procedimento do catálogo criado com sucesso. ID: {}", response.getId());
+            return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        } catch (BadRequestException | ConflictException ex) {
+            log.warn("Falha ao criar procedimento no catálogo — mensagem: {}, payload: {}", ex.getMessage(), request);
+            throw ex;
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao criar procedimento no catálogo — payload: {}", request, ex);
+            throw ex;
+        }
     }
 
     @GetMapping
@@ -55,8 +70,14 @@ public class CatalogoProcedimentosController {
     public ResponseEntity<Page<CatalogoProcedimentosResponse>> listar(
             @Parameter(description = "Parâmetros de paginação (page, size, sort)")
             Pageable pageable) {
-        Page<CatalogoProcedimentosResponse> response = catalogoProcedimentosService.listar(pageable);
-        return ResponseEntity.ok(response);
+        log.debug("REQUEST GET /v1/catalogo-procedimentos - pageable: {}", pageable);
+        try {
+            Page<CatalogoProcedimentosResponse> response = catalogoProcedimentosService.listar(pageable);
+            return ResponseEntity.ok(response);
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao listar procedimentos do catálogo — pageable: {}", pageable, ex);
+            throw ex;
+        }
     }
 
     @GetMapping("/{id}")
@@ -70,8 +91,17 @@ public class CatalogoProcedimentosController {
     public ResponseEntity<CatalogoProcedimentosResponse> obterPorId(
             @Parameter(description = "ID do procedimento", required = true)
             @PathVariable UUID id) {
-        CatalogoProcedimentosResponse response = catalogoProcedimentosService.obterPorId(id);
-        return ResponseEntity.ok(response);
+        log.debug("REQUEST GET /v1/catalogo-procedimentos/{}", id);
+        try {
+            CatalogoProcedimentosResponse response = catalogoProcedimentosService.obterPorId(id);
+            return ResponseEntity.ok(response);
+        } catch (NotFoundException ex) {
+            log.warn("Falha ao obter procedimento do catálogo por ID — ID: {}, mensagem: {}", id, ex.getMessage());
+            throw ex;
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao obter procedimento do catálogo por ID — ID: {}", id, ex);
+            throw ex;
+        }
     }
 
     @PutMapping("/{id}")
@@ -87,8 +117,18 @@ public class CatalogoProcedimentosController {
             @Parameter(description = "ID do procedimento", required = true)
             @PathVariable UUID id,
             @Valid @RequestBody CatalogoProcedimentosRequest request) {
-        CatalogoProcedimentosResponse response = catalogoProcedimentosService.atualizar(id, request);
-        return ResponseEntity.ok(response);
+        log.debug("REQUEST PUT /v1/catalogo-procedimentos/{} - payload: {}", id, request);
+        try {
+            CatalogoProcedimentosResponse response = catalogoProcedimentosService.atualizar(id, request);
+            log.info("Procedimento do catálogo atualizado com sucesso. ID: {}", response.getId());
+            return ResponseEntity.ok(response);
+        } catch (BadRequestException | NotFoundException ex) {
+            log.warn("Falha ao atualizar procedimento do catálogo — ID: {}, mensagem: {}, payload: {}", id, ex.getMessage(), request);
+            throw ex;
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao atualizar procedimento do catálogo — ID: {}, payload: {}", id, request, ex);
+            throw ex;
+        }
     }
 
     @DeleteMapping("/{id}")
@@ -101,8 +141,18 @@ public class CatalogoProcedimentosController {
     public ResponseEntity<Void> excluir(
             @Parameter(description = "ID do procedimento", required = true)
             @PathVariable UUID id) {
-        catalogoProcedimentosService.excluir(id);
-        return ResponseEntity.noContent().build();
+        log.debug("REQUEST DELETE /v1/catalogo-procedimentos/{}", id);
+        try {
+            catalogoProcedimentosService.excluir(id);
+            log.info("Procedimento do catálogo excluído com sucesso. ID: {}", id);
+            return ResponseEntity.noContent().build();
+        } catch (NotFoundException ex) {
+            log.warn("Falha ao excluir procedimento do catálogo — ID: {}, mensagem: {}", id, ex.getMessage());
+            throw ex;
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao excluir procedimento do catálogo — ID: {}", id, ex);
+            throw ex;
+        }
     }
 }
 

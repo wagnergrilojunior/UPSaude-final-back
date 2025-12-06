@@ -1,12 +1,17 @@
 package com.upsaude.api.response;
 
-import com.upsaude.entity.embeddable.DiagnosticoAlergiaPaciente;
-import com.upsaude.entity.embeddable.HistoricoReacoesAlergiaPaciente;
+import com.upsaude.api.response.embeddable.DiagnosticoAlergiaPacienteResponse;
+import com.upsaude.api.response.embeddable.HistoricoReacoesAlergiaPacienteResponse;
 import java.time.OffsetDateTime;
 import java.util.UUID;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
-@Data
+@Getter
+@Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
@@ -17,8 +22,8 @@ public class AlergiasPacienteResponse {
     private Boolean active;
     private PacienteResponse paciente;
     private AlergiasResponse alergia;
-    private DiagnosticoAlergiaPaciente diagnostico;
-    private HistoricoReacoesAlergiaPaciente historicoReacoes;
+    private DiagnosticoAlergiaPacienteResponse diagnostico;
+    private HistoricoReacoesAlergiaPacienteResponse historicoReacoes;
     private String observacoes;
     private Boolean alertaMedico;
 }

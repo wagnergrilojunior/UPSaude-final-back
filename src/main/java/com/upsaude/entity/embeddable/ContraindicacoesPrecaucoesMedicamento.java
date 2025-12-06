@@ -5,7 +5,6 @@ import jakarta.persistence.Embeddable;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
 /**
  * Classe embeddable para contraindicações e precauções do medicamento.
@@ -15,9 +14,19 @@ import lombok.NoArgsConstructor;
 @Embeddable
 @Data
 @Builder
-@NoArgsConstructor
 @AllArgsConstructor
 public class ContraindicacoesPrecaucoesMedicamento {
+
+    public ContraindicacoesPrecaucoesMedicamento() {
+        this.contraindicacoes = "";
+        this.precaucoes = "";
+        this.gestantePode = false;
+        this.lactantePode = false;
+        this.criancaPode = true;
+        this.idosoPode = true;
+        this.interacoesMedicamentosas = "";
+        this.efeitosColaterais = "";
+    }
 
     @Column(name = "contraindicacoes", columnDefinition = "TEXT")
     private String contraindicacoes; // Contraindicações gerais

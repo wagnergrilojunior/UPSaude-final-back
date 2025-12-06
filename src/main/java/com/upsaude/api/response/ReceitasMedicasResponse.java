@@ -2,10 +2,17 @@ package com.upsaude.api.response;
 
 import com.upsaude.enums.StatusReceitaEnum;
 import java.time.OffsetDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
-@Data
+@Getter
+@Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
@@ -24,4 +31,7 @@ public class ReceitasMedicasResponse {
     private StatusReceitaEnum status;
     private String origemReceita;
     private CidDoencasResponse cidPrincipal;
+    
+    @Builder.Default
+    private List<MedicacaoResponse> medicacoes = new ArrayList<>();
 }

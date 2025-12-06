@@ -2,6 +2,9 @@ package com.upsaude.controller;
 
 import com.upsaude.api.request.FabricantesMedicamentoRequest;
 import com.upsaude.api.response.FabricantesMedicamentoResponse;
+import com.upsaude.exception.BadRequestException;
+import com.upsaude.exception.ConflictException;
+import com.upsaude.exception.NotFoundException;
 import com.upsaude.service.FabricantesMedicamentoService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -12,6 +15,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -25,6 +29,7 @@ import java.util.UUID;
  *
  * @author UPSaúde
  */
+@Slf4j
 @RestController
 @RequestMapping("/v1/fabricantes-medicamento")
 @Tag(name = "Fabricantes de Medicamento", description = "API para gerenciamento de Fabricantes de Medicamento")
@@ -42,8 +47,18 @@ public class FabricantesMedicamentoController {
             @ApiResponse(responseCode = "403", description = "Acesso negado")
     })
     public ResponseEntity<FabricantesMedicamentoResponse> criar(@Valid @RequestBody FabricantesMedicamentoRequest request) {
-        FabricantesMedicamentoResponse response = fabricantesMedicamentoService.criar(request);
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        log.debug("REQUEST POST /v1/fabricantes-medicamento - payload: {}", request);
+        try {
+            FabricantesMedicamentoResponse response = fabricantesMedicamentoService.criar(request);
+            log.info("Fabricante de medicamento criado com sucesso. ID: {}", response.getId());
+            return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        } catch (BadRequestException | ConflictException ex) {
+            log.warn("Falha ao criar fabricante de medicamento — mensagem: {}, payload: {}", ex.getMessage(), request);
+            throw ex;
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao criar fabricante de medicamento — payload: {}", request, ex);
+            throw ex;
+        }
     }
 
     @GetMapping
@@ -55,8 +70,14 @@ public class FabricantesMedicamentoController {
     public ResponseEntity<Page<FabricantesMedicamentoResponse>> listar(
             @Parameter(description = "Parâmetros de paginação (page, size, sort)")
             Pageable pageable) {
-        Page<FabricantesMedicamentoResponse> response = fabricantesMedicamentoService.listar(pageable);
-        return ResponseEntity.ok(response);
+        log.debug("REQUEST GET /v1/fabricantes-medicamento - pageable: {}", pageable);
+        try {
+            Page<FabricantesMedicamentoResponse> response = fabricantesMedicamentoService.listar(pageable);
+            return ResponseEntity.ok(response);
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao listar fabricantes de medicamento — pageable: {}", pageable, ex);
+            throw ex;
+        }
     }
 
     @GetMapping("/{id}")
@@ -70,8 +91,17 @@ public class FabricantesMedicamentoController {
     public ResponseEntity<FabricantesMedicamentoResponse> obterPorId(
             @Parameter(description = "ID do fabricante de medicamento", required = true)
             @PathVariable UUID id) {
-        FabricantesMedicamentoResponse response = fabricantesMedicamentoService.obterPorId(id);
-        return ResponseEntity.ok(response);
+        log.debug("REQUEST GET /v1/fabricantes-medicamento/{}", id);
+        try {
+            FabricantesMedicamentoResponse response = fabricantesMedicamentoService.obterPorId(id);
+            return ResponseEntity.ok(response);
+        } catch (NotFoundException ex) {
+            log.warn("Fabricante de medicamento não encontrado — ID: {}, mensagem: {}", id, ex.getMessage());
+            throw ex;
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao obter fabricante de medicamento por ID — ID: {}", id, ex);
+            throw ex;
+        }
     }
 
     @PutMapping("/{id}")
@@ -87,8 +117,18 @@ public class FabricantesMedicamentoController {
             @Parameter(description = "ID do fabricante de medicamento", required = true)
             @PathVariable UUID id,
             @Valid @RequestBody FabricantesMedicamentoRequest request) {
-        FabricantesMedicamentoResponse response = fabricantesMedicamentoService.atualizar(id, request);
-        return ResponseEntity.ok(response);
+        log.debug("REQUEST PUT /v1/fabricantes-medicamento/{} - payload: {}", id, request);
+        try {
+            FabricantesMedicamentoResponse response = fabricantesMedicamentoService.atualizar(id, request);
+            log.info("Fabricante de medicamento atualizado com sucesso. ID: {}", id);
+            return ResponseEntity.ok(response);
+        } catch (BadRequestException | NotFoundException ex) {
+            log.warn("Falha ao atualizar fabricante de medicamento — ID: {}, mensagem: {}, payload: {}", id, ex.getMessage(), request);
+            throw ex;
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao atualizar fabricante de medicamento — ID: {}, payload: {}", id, request, ex);
+            throw ex;
+        }
     }
 
     @DeleteMapping("/{id}")
@@ -101,8 +141,18 @@ public class FabricantesMedicamentoController {
     public ResponseEntity<Void> excluir(
             @Parameter(description = "ID do fabricante de medicamento", required = true)
             @PathVariable UUID id) {
-        fabricantesMedicamentoService.excluir(id);
-        return ResponseEntity.noContent().build();
+        log.debug("REQUEST DELETE /v1/fabricantes-medicamento/{}", id);
+        try {
+            fabricantesMedicamentoService.excluir(id);
+            log.info("Fabricante de medicamento excluído com sucesso. ID: {}", id);
+            return ResponseEntity.noContent().build();
+        } catch (NotFoundException ex) {
+            log.warn("Falha ao excluir fabricante de medicamento — ID: {}, mensagem: {}", id, ex.getMessage());
+            throw ex;
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao excluir fabricante de medicamento — ID: {}", id, ex);
+            throw ex;
+        }
     }
 }
 

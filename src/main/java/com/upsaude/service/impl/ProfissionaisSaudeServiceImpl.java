@@ -5,19 +5,21 @@ import com.upsaude.api.response.ProfissionaisSaudeResponse;
 import com.upsaude.entity.EspecialidadesMedicas;
 import com.upsaude.entity.ProfissionaisSaude;
 import com.upsaude.exception.BadRequestException;
+import com.upsaude.exception.InternalServerErrorException;
 import com.upsaude.exception.NotFoundException;
 import com.upsaude.mapper.ProfissionaisSaudeMapper;
 import com.upsaude.repository.EspecialidadesMedicasRepository;
 import com.upsaude.repository.ProfissionaisSaudeRepository;
 import com.upsaude.service.ProfissionaisSaudeService;
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.Page;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.dao.DataAccessException;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -42,65 +44,125 @@ public class ProfissionaisSaudeServiceImpl implements ProfissionaisSaudeService 
     @Transactional
     @CacheEvict(value = "profissionaissaude", allEntries = true)
     public ProfissionaisSaudeResponse criar(ProfissionaisSaudeRequest request) {
-        log.debug("Criando novo profissional de saúde");
+        log.debug("Criando novo profissional de saúde. Request: {}", request);
+        
+        if (request == null) {
+            log.warn("Tentativa de criar profissional de saúde com request nulo");
+            throw new BadRequestException("Dados do profissional de saúde são obrigatórios");
+        }
 
-        validarDadosBasicos(request);
-        validarUnicidade(request);
+        try {
+            validarDadosBasicos(request);
+            validarUnicidade(request);
 
-        ProfissionaisSaude profissional = profissionaisSaudeMapper.fromRequest(request);
-        profissional.setActive(true);
+            ProfissionaisSaude profissional = profissionaisSaudeMapper.fromRequest(request);
+            profissional.setActive(true);
 
-        ProfissionaisSaude profissionalSalvo = profissionaisSaudeRepository.save(profissional);
-        log.info("Profissional de saúde criado com sucesso. ID: {}", profissionalSalvo.getId());
+            ProfissionaisSaude profissionalSalvo = profissionaisSaudeRepository.save(profissional);
+            log.info("Profissional de saúde criado com sucesso. ID: {}", profissionalSalvo.getId());
 
-        return profissionaisSaudeMapper.toResponse(profissionalSalvo);
+            return profissionaisSaudeMapper.toResponse(profissionalSalvo);
+        } catch (BadRequestException e) {
+            log.warn("Erro de validação ao criar profissional de saúde. Request: {}. Erro: {}", request, e.getMessage());
+            throw e;
+        } catch (DataAccessException e) {
+            log.error("Erro de acesso a dados ao criar profissional de saúde. Request: {}", request, e);
+            throw new InternalServerErrorException("Erro ao persistir profissional de saúde", e);
+        } catch (RuntimeException e) {
+            log.error("Erro inesperado ao criar profissional de saúde. Request: {}", request, e);
+            throw e;
+        }
     }
 
     @Override
-    @Transactional
+    @Transactional(readOnly = true)
     @Cacheable(value = "profissionaissaude", key = "#id")
     public ProfissionaisSaudeResponse obterPorId(UUID id) {
         log.debug("Buscando profissional de saúde por ID: {} (cache miss)", id);
+        
         if (id == null) {
+            log.warn("ID nulo recebido para busca de profissional de saúde");
             throw new BadRequestException("ID do profissional de saúde é obrigatório");
         }
 
-        ProfissionaisSaude profissional = profissionaisSaudeRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("Profissional de saúde não encontrado com ID: " + id));
+        try {
+            ProfissionaisSaude profissional = profissionaisSaudeRepository.findById(id)
+                    .orElseThrow(() -> new NotFoundException("Profissional de saúde não encontrado com ID: " + id));
 
-        return profissionaisSaudeMapper.toResponse(profissional);
+            log.debug("Profissional de saúde encontrado. ID: {}", id);
+            return profissionaisSaudeMapper.toResponse(profissional);
+        } catch (NotFoundException e) {
+            log.warn("Profissional de saúde não encontrado. ID: {}", id);
+            throw e;
+        } catch (DataAccessException e) {
+            log.error("Erro de acesso a dados ao buscar profissional de saúde. ID: {}", id, e);
+            throw new InternalServerErrorException("Erro ao buscar profissional de saúde", e);
+        } catch (RuntimeException e) {
+            log.error("Erro inesperado ao buscar profissional de saúde. ID: {}", id, e);
+            throw e;
+        }
     }
 
     @Override
+    @Transactional(readOnly = true)
     public Page<ProfissionaisSaudeResponse> listar(Pageable pageable) {
         log.debug("Listando profissionais de saúde paginados. Página: {}, Tamanho: {}",
                 pageable.getPageNumber(), pageable.getPageSize());
 
-        Page<ProfissionaisSaude> profissionais = profissionaisSaudeRepository.findAll(pageable);
-        return profissionais.map(profissionaisSaudeMapper::toResponse);
+        try {
+            Page<ProfissionaisSaude> profissionais = profissionaisSaudeRepository.findAll(pageable);
+            log.debug("Listagem de profissionais de saúde concluída. Total de elementos: {}", profissionais.getTotalElements());
+            return profissionais.map(profissionaisSaudeMapper::toResponse);
+        } catch (DataAccessException e) {
+            log.error("Erro de acesso a dados ao listar profissionais de saúde. Pageable: {}", pageable, e);
+            throw new InternalServerErrorException("Erro ao listar profissionais de saúde", e);
+        } catch (RuntimeException e) {
+            log.error("Erro inesperado ao listar profissionais de saúde. Pageable: {}", pageable, e);
+            throw e;
+        }
     }
 
     @Override
     @Transactional
     @CacheEvict(value = "profissionaissaude", key = "#id")
     public ProfissionaisSaudeResponse atualizar(UUID id, ProfissionaisSaudeRequest request) {
-        log.debug("Atualizando profissional de saúde. ID: {}", id);
+        log.debug("Atualizando profissional de saúde. ID: {}, Request: {}", id, request);
 
         if (id == null) {
+            log.warn("ID nulo recebido para atualização de profissional de saúde");
             throw new BadRequestException("ID do profissional de saúde é obrigatório");
         }
+        if (request == null) {
+            log.warn("Request nulo recebido para atualização de profissional de saúde. ID: {}", id);
+            throw new BadRequestException("Dados do profissional de saúde são obrigatórios");
+        }
 
-        validarDadosBasicos(request);
+        try {
+            validarDadosBasicos(request);
 
-        ProfissionaisSaude profissionalExistente = profissionaisSaudeRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("Profissional de saúde não encontrado com ID: " + id));
+            ProfissionaisSaude profissionalExistente = profissionaisSaudeRepository.findById(id)
+                    .orElseThrow(() -> new NotFoundException("Profissional de saúde não encontrado com ID: " + id));
 
-        atualizarDadosProfissional(profissionalExistente, request);
+            // Usa mapper do MapStruct que preserva campos de controle automaticamente
+            profissionaisSaudeMapper.updateFromRequest(request, profissionalExistente);
 
-        ProfissionaisSaude profissionalAtualizado = profissionaisSaudeRepository.save(profissionalExistente);
-        log.info("Profissional de saúde atualizado com sucesso. ID: {}", profissionalAtualizado.getId());
+            ProfissionaisSaude profissionalAtualizado = profissionaisSaudeRepository.save(profissionalExistente);
+            log.info("Profissional de saúde atualizado com sucesso. ID: {}", profissionalAtualizado.getId());
 
-        return profissionaisSaudeMapper.toResponse(profissionalAtualizado);
+            return profissionaisSaudeMapper.toResponse(profissionalAtualizado);
+        } catch (NotFoundException e) {
+            log.warn("Tentativa de atualizar profissional de saúde não existente. ID: {}", id);
+            throw e;
+        } catch (BadRequestException e) {
+            log.warn("Erro de validação ao atualizar profissional de saúde. ID: {}, Request: {}. Erro: {}", id, request, e.getMessage());
+            throw e;
+        } catch (DataAccessException e) {
+            log.error("Erro de acesso a dados ao atualizar profissional de saúde. ID: {}, Request: {}", id, request, e);
+            throw new InternalServerErrorException("Erro ao atualizar profissional de saúde", e);
+        } catch (RuntimeException e) {
+            log.error("Erro inesperado ao atualizar profissional de saúde. ID: {}, Request: {}", id, request, e);
+            throw e;
+        }
     }
 
     @Override
@@ -110,19 +172,35 @@ public class ProfissionaisSaudeServiceImpl implements ProfissionaisSaudeService 
         log.debug("Excluindo profissional de saúde. ID: {}", id);
 
         if (id == null) {
+            log.warn("ID nulo recebido para exclusão de profissional de saúde");
             throw new BadRequestException("ID do profissional de saúde é obrigatório");
         }
 
-        ProfissionaisSaude profissional = profissionaisSaudeRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("Profissional de saúde não encontrado com ID: " + id));
+        try {
+            ProfissionaisSaude profissional = profissionaisSaudeRepository.findById(id)
+                    .orElseThrow(() -> new NotFoundException("Profissional de saúde não encontrado com ID: " + id));
 
-        if (Boolean.FALSE.equals(profissional.getActive())) {
-            throw new BadRequestException("Profissional de saúde já está inativo");
+            if (Boolean.FALSE.equals(profissional.getActive())) {
+                log.warn("Tentativa de excluir profissional de saúde já inativo. ID: {}", id);
+                throw new BadRequestException("Profissional de saúde já está inativo");
+            }
+
+            profissional.setActive(false);
+            profissionaisSaudeRepository.save(profissional);
+            log.info("Profissional de saúde excluído (desativado) com sucesso. ID: {}", id);
+        } catch (NotFoundException e) {
+            log.warn("Tentativa de excluir profissional de saúde não existente. ID: {}", id);
+            throw e;
+        } catch (BadRequestException e) {
+            log.warn("Erro de validação ao excluir profissional de saúde. ID: {}. Erro: {}", id, e.getMessage());
+            throw e;
+        } catch (DataAccessException e) {
+            log.error("Erro de acesso a dados ao excluir profissional de saúde. ID: {}", id, e);
+            throw new InternalServerErrorException("Erro ao excluir profissional de saúde", e);
+        } catch (RuntimeException e) {
+            log.error("Erro inesperado ao excluir profissional de saúde. ID: {}", id, e);
+            throw e;
         }
-
-        profissional.setActive(false);
-        profissionaisSaudeRepository.save(profissional);
-        log.info("Profissional de saúde excluído (desativado) com sucesso. ID: {}", id);
     }
 
     private void validarDadosBasicos(ProfissionaisSaudeRequest request) {
@@ -162,45 +240,8 @@ public class ProfissionaisSaudeServiceImpl implements ProfissionaisSaudeService 
         }
     }
 
-    private void atualizarDadosProfissional(ProfissionaisSaude profissional, ProfissionaisSaudeRequest request) {
-        ProfissionaisSaude profissionalAtualizado = profissionaisSaudeMapper.fromRequest(request);
-
-        profissional.setNomeCompleto(profissionalAtualizado.getNomeCompleto());
-        profissional.setCpf(profissionalAtualizado.getCpf());
-        profissional.setDataNascimento(profissionalAtualizado.getDataNascimento());
-        profissional.setSexo(profissionalAtualizado.getSexo());
-        profissional.setEstadoCivil(profissionalAtualizado.getEstadoCivil());
-        profissional.setEscolaridade(profissionalAtualizado.getEscolaridade());
-        profissional.setIdentidadeGenero(profissionalAtualizado.getIdentidadeGenero());
-        profissional.setRacaCor(profissionalAtualizado.getRacaCor());
-        profissional.setTemDeficiencia(profissionalAtualizado.getTemDeficiencia() != null ? profissionalAtualizado.getTemDeficiencia() : false);
-        profissional.setTipoDeficiencia(profissionalAtualizado.getTipoDeficiencia());
-        profissional.setRg(profissionalAtualizado.getRg());
-        profissional.setOrgaoEmissorRg(profissionalAtualizado.getOrgaoEmissorRg());
-        profissional.setUfEmissaoRg(profissionalAtualizado.getUfEmissaoRg());
-        profissional.setDataEmissaoRg(profissionalAtualizado.getDataEmissaoRg());
-        profissional.setNacionalidade(profissionalAtualizado.getNacionalidade());
-        profissional.setNaturalidade(profissionalAtualizado.getNaturalidade());
-        profissional.setRegistroProfissional(profissionalAtualizado.getRegistroProfissional());
-        profissional.setConselho(profissionalAtualizado.getConselho());
-        profissional.setUfRegistro(profissionalAtualizado.getUfRegistro());
-        profissional.setDataEmissaoRegistro(profissionalAtualizado.getDataEmissaoRegistro());
-        profissional.setDataValidadeRegistro(profissionalAtualizado.getDataValidadeRegistro());
-        profissional.setStatusRegistro(profissionalAtualizado.getStatusRegistro());
-        profissional.setTipoProfissional(profissionalAtualizado.getTipoProfissional());
-        profissional.setCns(profissionalAtualizado.getCns());
-        profissional.setCodigoCbo(profissionalAtualizado.getCodigoCbo());
-        profissional.setDescricaoCbo(profissionalAtualizado.getDescricaoCbo());
-        profissional.setCodigoOcupacional(profissionalAtualizado.getCodigoOcupacional());
-        profissional.setTelefone(profissionalAtualizado.getTelefone());
-        profissional.setEmail(profissionalAtualizado.getEmail());
-        profissional.setTelefoneInstitucional(profissionalAtualizado.getTelefoneInstitucional());
-        profissional.setEmailInstitucional(profissionalAtualizado.getEmailInstitucional());
-        profissional.setEnderecoProfissional(profissionalAtualizado.getEnderecoProfissional());
-        profissional.setObservacoes(profissionalAtualizado.getObservacoes());
-
-        // Atualizar especialidades
-        // Especialidades são gerenciadas por relacionamento separado
-    }
+    // Método removido - agora usa profissionaisSaudeMapper.updateFromRequest diretamente
+    // O MapStruct já preserva campos de controle automaticamente
+    // Especialidades são gerenciadas por relacionamento separado
 }
 

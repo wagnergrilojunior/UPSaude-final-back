@@ -11,6 +11,8 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.PrePersist;
+import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
@@ -38,6 +40,13 @@ import java.util.List;
 @Data
 @EqualsAndHashCode(callSuper = true)
 public class AcaoPromocaoPrevencao extends BaseEntity {
+
+    /**
+     * Construtor padrão que inicializa as coleções para evitar NullPointerException.
+     */
+    public AcaoPromocaoPrevencao() {
+        this.profissionaisParticipantes = new ArrayList<>();
+    }
 
     // ========== RELACIONAMENTOS ==========
 
@@ -181,5 +190,19 @@ public class AcaoPromocaoPrevencao extends BaseEntity {
 
     @Column(name = "observacoes", columnDefinition = "TEXT")
     private String observacoes;
+
+    // ========== MÉTODOS DE CICLO DE VIDA ==========
+
+    /**
+     * Garante que as coleções não sejam nulas antes de persistir ou atualizar.
+     * Recria a lista se estiver nula.
+     */
+    @PrePersist
+    @PreUpdate
+    public void validateCollections() {
+        if (profissionaisParticipantes == null) {
+            profissionaisParticipantes = new ArrayList<>();
+        }
+    }
 }
 

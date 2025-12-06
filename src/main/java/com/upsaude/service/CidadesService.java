@@ -20,6 +20,8 @@ public interface CidadesService {
 
     Page<CidadesResponse> listar(Pageable pageable);
 
+    Page<CidadesResponse> listarPorEstado(UUID estadoId, Pageable pageable);
+
     CidadesResponse atualizar(UUID id, CidadesRequest request);
 
     void excluir(UUID id);

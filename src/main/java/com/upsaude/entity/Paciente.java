@@ -45,6 +45,17 @@ import java.util.List;
 @EqualsAndHashCode(callSuper = true)
 public class Paciente extends BaseEntityWithoutTenant {
 
+    /**
+     * Construtor padrão que inicializa as coleções para evitar NullPointerException.
+     */
+    public Paciente() {
+        this.enderecos = new ArrayList<>();
+        this.doencas = new ArrayList<>();
+        this.alergias = new ArrayList<>();
+        this.deficiencias = new ArrayList<>();
+        this.medicacoes = new ArrayList<>();
+    }
+
     @NotBlank(message = "Nome completo é obrigatório")
     @Size(max = 255, message = "Nome completo deve ter no máximo 255 caracteres")
     @Column(name = "nome_completo", nullable = false, length = 255)
@@ -298,4 +309,173 @@ public class Paciente extends BaseEntityWithoutTenant {
     @OneToMany(mappedBy = "paciente", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
     private List<MedicacaoPaciente> medicacoes = new ArrayList<>();
 
+    // ========== MÉTODOS DE CICLO DE VIDA ==========
+
+    /**
+     * Garante que as coleções não sejam nulas antes de persistir ou atualizar.
+     * Recria as listas se estiverem nulas.
+     */
+    @PrePersist
+    @PreUpdate
+    public void validateCollections() {
+        if (enderecos == null) {
+            enderecos = new ArrayList<>();
+        }
+        if (doencas == null) {
+            doencas = new ArrayList<>();
+        }
+        if (alergias == null) {
+            alergias = new ArrayList<>();
+        }
+        if (deficiencias == null) {
+            deficiencias = new ArrayList<>();
+        }
+        if (medicacoes == null) {
+            medicacoes = new ArrayList<>();
+        }
+    }
+
+    // ========== MÉTODOS UTILITÁRIOS - DOENÇAS ==========
+
+    /**
+     * Adiciona uma doença ao paciente com sincronização bidirecional.
+     * Garante que a doença também referencia este paciente.
+     *
+     * @param doenca A doença a ser adicionada
+     */
+    public void addDoenca(DoencasPaciente doenca) {
+        if (doenca == null) {
+            return;
+        }
+        if (doencas == null) {
+            doencas = new ArrayList<>();
+        }
+        if (!doencas.contains(doenca)) {
+            doencas.add(doenca);
+            doenca.setPaciente(this);
+        }
+    }
+
+    /**
+     * Remove uma doença do paciente com sincronização bidirecional.
+     * Remove a referência da doença para este paciente.
+     *
+     * @param doenca A doença a ser removida
+     */
+    public void removeDoenca(DoencasPaciente doenca) {
+        if (doenca == null || doencas == null) {
+            return;
+        }
+        if (doencas.remove(doenca)) {
+            doenca.setPaciente(null);
+        }
+    }
+
+    // ========== MÉTODOS UTILITÁRIOS - ALERGIAS ==========
+
+    /**
+     * Adiciona uma alergia ao paciente com sincronização bidirecional.
+     * Garante que a alergia também referencia este paciente.
+     *
+     * @param alergia A alergia a ser adicionada
+     */
+    public void addAlergia(AlergiasPaciente alergia) {
+        if (alergia == null) {
+            return;
+        }
+        if (alergias == null) {
+            alergias = new ArrayList<>();
+        }
+        if (!alergias.contains(alergia)) {
+            alergias.add(alergia);
+            alergia.setPaciente(this);
+        }
+    }
+
+    /**
+     * Remove uma alergia do paciente com sincronização bidirecional.
+     * Remove a referência da alergia para este paciente.
+     *
+     * @param alergia A alergia a ser removida
+     */
+    public void removeAlergia(AlergiasPaciente alergia) {
+        if (alergia == null || alergias == null) {
+            return;
+        }
+        if (alergias.remove(alergia)) {
+            alergia.setPaciente(null);
+        }
+    }
+
+    // ========== MÉTODOS UTILITÁRIOS - DEFICIÊNCIAS ==========
+
+    /**
+     * Adiciona uma deficiência ao paciente com sincronização bidirecional.
+     * Garante que a deficiência também referencia este paciente.
+     *
+     * @param deficiencia A deficiência a ser adicionada
+     */
+    public void addDeficiencia(DeficienciasPaciente deficiencia) {
+        if (deficiencia == null) {
+            return;
+        }
+        if (deficiencias == null) {
+            deficiencias = new ArrayList<>();
+        }
+        if (!deficiencias.contains(deficiencia)) {
+            deficiencias.add(deficiencia);
+            deficiencia.setPaciente(this);
+        }
+    }
+
+    /**
+     * Remove uma deficiência do paciente com sincronização bidirecional.
+     * Remove a referência da deficiência para este paciente.
+     *
+     * @param deficiencia A deficiência a ser removida
+     */
+    public void removeDeficiencia(DeficienciasPaciente deficiencia) {
+        if (deficiencia == null || deficiencias == null) {
+            return;
+        }
+        if (deficiencias.remove(deficiencia)) {
+            deficiencia.setPaciente(null);
+        }
+    }
+
+    // ========== MÉTODOS UTILITÁRIOS - MEDICAÇÕES ==========
+
+    /**
+     * Adiciona uma medicação ao paciente com sincronização bidirecional.
+     * Garante que a medicação também referencia este paciente.
+     *
+     * @param medicacao A medicação a ser adicionada
+     */
+    public void addMedicacao(MedicacaoPaciente medicacao) {
+        if (medicacao == null) {
+            return;
+        }
+        if (medicacoes == null) {
+            medicacoes = new ArrayList<>();
+        }
+        if (!medicacoes.contains(medicacao)) {
+            medicacoes.add(medicacao);
+            medicacao.setPaciente(this);
+        }
+    }
+
+    /**
+     * Remove uma medicação do paciente com sincronização bidirecional.
+     * Remove a referência da medicação para este paciente.
+     *
+     * @param medicacao A medicação a ser removida
+     */
+    public void removeMedicacao(MedicacaoPaciente medicacao) {
+        if (medicacao == null || medicacoes == null) {
+            return;
+        }
+        if (medicacoes.remove(medicacao)) {
+            medicacao.setPaciente(null);
+        }
+    }
 }

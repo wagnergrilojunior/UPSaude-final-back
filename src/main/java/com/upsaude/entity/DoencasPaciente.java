@@ -10,6 +10,8 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.PrePersist;
+import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
@@ -33,6 +35,12 @@ import lombok.EqualsAndHashCode;
 @Data
 @EqualsAndHashCode(callSuper = true)
 public class DoencasPaciente extends BaseEntity {
+
+    public DoencasPaciente() {
+        this.diagnostico = new DiagnosticoDoencaPaciente();
+        this.acompanhamento = new AcompanhamentoDoencaPaciente();
+        this.tratamentoAtual = new TratamentoAtualDoencaPaciente();
+    }
 
     // ========== RELACIONAMENTOS ==========
 
@@ -69,5 +77,19 @@ public class DoencasPaciente extends BaseEntity {
 
     @Column(name = "observacoes", columnDefinition = "TEXT")
     private String observacoes; // Observações específicas sobre a doença neste paciente
+
+    @PrePersist
+    @PreUpdate
+    public void validateEmbeddables() {
+        if (diagnostico == null) {
+            diagnostico = new DiagnosticoDoencaPaciente();
+        }
+        if (acompanhamento == null) {
+            acompanhamento = new AcompanhamentoDoencaPaciente();
+        }
+        if (tratamentoAtual == null) {
+            tratamentoAtual = new TratamentoAtualDoencaPaciente();
+        }
+    }
 }
 

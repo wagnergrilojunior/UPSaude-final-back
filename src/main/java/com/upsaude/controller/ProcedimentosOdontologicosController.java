@@ -2,6 +2,9 @@ package com.upsaude.controller;
 
 import com.upsaude.api.request.ProcedimentosOdontologicosRequest;
 import com.upsaude.api.response.ProcedimentosOdontologicosResponse;
+import com.upsaude.exception.BadRequestException;
+import com.upsaude.exception.ConflictException;
+import com.upsaude.exception.NotFoundException;
 import com.upsaude.service.ProcedimentosOdontologicosService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -12,6 +15,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -29,6 +33,7 @@ import java.util.UUID;
 @RequestMapping("/v1/procedimentos-odontologicos")
 @Tag(name = "Procedimentos Odontológicos", description = "API para gerenciamento de Procedimentos Odontológicos")
 @RequiredArgsConstructor
+@Slf4j
 public class ProcedimentosOdontologicosController {
 
     private final ProcedimentosOdontologicosService procedimentosOdontologicosService;
@@ -42,8 +47,18 @@ public class ProcedimentosOdontologicosController {
             @ApiResponse(responseCode = "403", description = "Acesso negado")
     })
     public ResponseEntity<ProcedimentosOdontologicosResponse> criar(@Valid @RequestBody ProcedimentosOdontologicosRequest request) {
-        ProcedimentosOdontologicosResponse response = procedimentosOdontologicosService.criar(request);
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        log.debug("REQUEST POST /v1/procedimentos-odontologicos - payload: {}", request);
+        try {
+            ProcedimentosOdontologicosResponse response = procedimentosOdontologicosService.criar(request);
+            log.info("Procedimento odontológico criado com sucesso. ID: {}", response.getId());
+            return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        } catch (BadRequestException | ConflictException ex) {
+            log.warn("Falha ao criar procedimento odontológico — mensagem: {}, payload: {}", ex.getMessage(), request);
+            throw ex;
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao criar procedimento odontológico — payload: {}", request, ex);
+            throw ex;
+        }
     }
 
     @GetMapping
@@ -55,8 +70,14 @@ public class ProcedimentosOdontologicosController {
     public ResponseEntity<Page<ProcedimentosOdontologicosResponse>> listar(
             @Parameter(description = "Parâmetros de paginação (page, size, sort)")
             Pageable pageable) {
-        Page<ProcedimentosOdontologicosResponse> response = procedimentosOdontologicosService.listar(pageable);
-        return ResponseEntity.ok(response);
+        log.debug("REQUEST GET /v1/procedimentos-odontologicos - pageable: {}", pageable);
+        try {
+            Page<ProcedimentosOdontologicosResponse> response = procedimentosOdontologicosService.listar(pageable);
+            return ResponseEntity.ok(response);
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao listar procedimentos odontológicos — pageable: {}", pageable, ex);
+            throw ex;
+        }
     }
 
     @GetMapping("/{id}")
@@ -70,8 +91,17 @@ public class ProcedimentosOdontologicosController {
     public ResponseEntity<ProcedimentosOdontologicosResponse> obterPorId(
             @Parameter(description = "ID do procedimento odontológico", required = true)
             @PathVariable UUID id) {
-        ProcedimentosOdontologicosResponse response = procedimentosOdontologicosService.obterPorId(id);
-        return ResponseEntity.ok(response);
+        log.debug("REQUEST GET /v1/procedimentos-odontologicos/{}", id);
+        try {
+            ProcedimentosOdontologicosResponse response = procedimentosOdontologicosService.obterPorId(id);
+            return ResponseEntity.ok(response);
+        } catch (NotFoundException ex) {
+            log.warn("Falha ao obter procedimento odontológico por ID — ID: {}, mensagem: {}", id, ex.getMessage());
+            throw ex;
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao obter procedimento odontológico por ID — ID: {}", id, ex);
+            throw ex;
+        }
     }
 
     @PutMapping("/{id}")
@@ -87,8 +117,18 @@ public class ProcedimentosOdontologicosController {
             @Parameter(description = "ID do procedimento odontológico", required = true)
             @PathVariable UUID id,
             @Valid @RequestBody ProcedimentosOdontologicosRequest request) {
-        ProcedimentosOdontologicosResponse response = procedimentosOdontologicosService.atualizar(id, request);
-        return ResponseEntity.ok(response);
+        log.debug("REQUEST PUT /v1/procedimentos-odontologicos/{} - payload: {}", id, request);
+        try {
+            ProcedimentosOdontologicosResponse response = procedimentosOdontologicosService.atualizar(id, request);
+            log.info("Procedimento odontológico atualizado com sucesso. ID: {}", response.getId());
+            return ResponseEntity.ok(response);
+        } catch (BadRequestException | NotFoundException ex) {
+            log.warn("Falha ao atualizar procedimento odontológico — ID: {}, mensagem: {}, payload: {}", id, ex.getMessage(), request);
+            throw ex;
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao atualizar procedimento odontológico — ID: {}, payload: {}", id, request, ex);
+            throw ex;
+        }
     }
 
     @DeleteMapping("/{id}")
@@ -101,8 +141,18 @@ public class ProcedimentosOdontologicosController {
     public ResponseEntity<Void> excluir(
             @Parameter(description = "ID do procedimento odontológico", required = true)
             @PathVariable UUID id) {
-        procedimentosOdontologicosService.excluir(id);
-        return ResponseEntity.noContent().build();
+        log.debug("REQUEST DELETE /v1/procedimentos-odontologicos/{}", id);
+        try {
+            procedimentosOdontologicosService.excluir(id);
+            log.info("Procedimento odontológico excluído com sucesso. ID: {}", id);
+            return ResponseEntity.noContent().build();
+        } catch (NotFoundException ex) {
+            log.warn("Falha ao excluir procedimento odontológico — ID: {}, mensagem: {}", id, ex.getMessage());
+            throw ex;
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao excluir procedimento odontológico — ID: {}", id, ex);
+            throw ex;
+        }
     }
 }
 

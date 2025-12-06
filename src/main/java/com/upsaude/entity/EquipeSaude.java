@@ -14,6 +14,8 @@ import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.PrePersist;
+import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 import jakarta.validation.constraints.NotBlank;
@@ -45,6 +47,13 @@ import java.util.Set;
 @Data
 @EqualsAndHashCode(callSuper = true)
 public class EquipeSaude extends BaseEntity {
+
+    /**
+     * Construtor padrão que inicializa as coleções para evitar NullPointerException.
+     */
+    public EquipeSaude() {
+        this.vinculosProfissionais = new HashSet<>();
+    }
 
     // ========== IDENTIFICAÇÃO ==========
     
@@ -97,5 +106,55 @@ public class EquipeSaude extends BaseEntity {
     
     @Column(name = "observacoes", columnDefinition = "TEXT")
     private String observacoes;
+
+    // ========== MÉTODOS DE CICLO DE VIDA ==========
+
+    /**
+     * Garante que as coleções não sejam nulas antes de persistir ou atualizar.
+     * Recria o Set se estiver nulo.
+     */
+    @PrePersist
+    @PreUpdate
+    public void validateCollections() {
+        if (vinculosProfissionais == null) {
+            vinculosProfissionais = new HashSet<>();
+        }
+    }
+
+    // ========== MÉTODOS UTILITÁRIOS - VÍNCULOS PROFISSIONAIS ==========
+
+    /**
+     * Adiciona um vínculo profissional com sincronização bidirecional.
+     * Garante que o vínculo também referencia esta equipe.
+     *
+     * @param vinculo O vínculo a ser adicionado
+     */
+    public void addVinculoProfissional(VinculoProfissionalEquipe vinculo) {
+        if (vinculo == null) {
+            return;
+        }
+        if (vinculosProfissionais == null) {
+            vinculosProfissionais = new HashSet<>();
+        }
+        if (!vinculosProfissionais.contains(vinculo)) {
+            vinculosProfissionais.add(vinculo);
+            vinculo.setEquipe(this);
+        }
+    }
+
+    /**
+     * Remove um vínculo profissional com sincronização bidirecional.
+     * Remove a referência do vínculo para esta equipe.
+     *
+     * @param vinculo O vínculo a ser removido
+     */
+    public void removeVinculoProfissional(VinculoProfissionalEquipe vinculo) {
+        if (vinculo == null || vinculosProfissionais == null) {
+            return;
+        }
+        if (vinculosProfissionais.remove(vinculo)) {
+            vinculo.setEquipe(null);
+        }
+    }
 }
 

@@ -11,7 +11,6 @@ import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
 /**
  * Classe embeddable para classificação da doença.
@@ -21,9 +20,16 @@ import lombok.NoArgsConstructor;
 @Embeddable
 @Data
 @Builder
-@NoArgsConstructor
 @AllArgsConstructor
 public class ClassificacaoDoenca {
+
+    public ClassificacaoDoenca() {
+        this.categoria = "";
+        this.subcategoria = "";
+        this.codigoCidPrincipal = "";
+        this.doencaNotificavel = false;
+        this.doencaTransmissivel = false;
+    }
 
     @Convert(converter = TipoDoencaEnumConverter.class)
     @Column(name = "tipo_doenca")

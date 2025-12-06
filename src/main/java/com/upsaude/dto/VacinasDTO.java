@@ -1,14 +1,14 @@
 package com.upsaude.dto;
 
-import com.upsaude.entity.embeddable.CalendarioVacinal;
-import com.upsaude.entity.embeddable.ComposicaoVacina;
-import com.upsaude.entity.embeddable.ConservacaoVacina;
-import com.upsaude.entity.embeddable.ContraindicacoesVacina;
-import com.upsaude.entity.embeddable.EficaciaVacina;
-import com.upsaude.entity.embeddable.EsquemaVacinal;
-import com.upsaude.entity.embeddable.IdadeAplicacaoVacina;
-import com.upsaude.entity.embeddable.IntegracaoGovernamentalVacina;
-import com.upsaude.entity.embeddable.ReacoesAdversasVacina;
+import com.upsaude.dto.embeddable.CalendarioVacinalDTO;
+import com.upsaude.dto.embeddable.ComposicaoVacinaDTO;
+import com.upsaude.dto.embeddable.ConservacaoVacinaDTO;
+import com.upsaude.dto.embeddable.ContraindicacoesVacinaDTO;
+import com.upsaude.dto.embeddable.EficaciaVacinaDTO;
+import com.upsaude.dto.embeddable.EsquemaVacinalDTO;
+import com.upsaude.dto.embeddable.IdadeAplicacaoVacinaDTO;
+import com.upsaude.dto.embeddable.IntegracaoGovernamentalVacinaDTO;
+import com.upsaude.dto.embeddable.ReacoesAdversasVacinaDTO;
 import com.upsaude.enums.StatusAtivoEnum;
 import com.upsaude.enums.TipoVacinaEnum;
 import com.upsaude.enums.UnidadeMedidaEnum;
@@ -39,14 +39,14 @@ public class VacinasDTO {
     private String lotePadrao;
     private ViaAdministracaoEnum viaAdministracao;
     private UnidadeMedidaEnum unidadeMedida;
-    private EsquemaVacinal esquemaVacinal;
-    private IdadeAplicacaoVacina idadeAplicacao;
-    private ContraindicacoesVacina contraindicacoes;
-    private ConservacaoVacina conservacao;
-    private ComposicaoVacina composicao;
-    private EficaciaVacina eficacia;
-    private ReacoesAdversasVacina reacoesAdversas;
-    private CalendarioVacinal calendario;
+    private EsquemaVacinalDTO esquemaVacinal;
+    private IdadeAplicacaoVacinaDTO idadeAplicacao;
+    private ContraindicacoesVacinaDTO contraindicacoes;
+    private ConservacaoVacinaDTO conservacao;
+    private ComposicaoVacinaDTO composicao;
+    private EficaciaVacinaDTO eficacia;
+    private ReacoesAdversasVacinaDTO reacoesAdversas;
+    private CalendarioVacinalDTO calendario;
     private StatusAtivoEnum status;
     private String bula;
     private String fichaTecnica;
@@ -54,5 +54,5 @@ public class VacinasDTO {
     private String descricao;
     private String indicacoes;
     private String observacoes;
-    private IntegracaoGovernamentalVacina integracaoGovernamental;
+    private IntegracaoGovernamentalVacinaDTO integracaoGovernamental;
 }

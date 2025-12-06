@@ -7,6 +7,8 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinTable;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.PrePersist;
+import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 import jakarta.persistence.Index;
@@ -30,6 +32,13 @@ import java.util.List;
        })
 @Data
 public class Tenant extends BaseEntity {
+
+    /**
+     * Construtor padrão que inicializa as coleções para evitar NullPointerException.
+     */
+    public Tenant() {
+        this.enderecos = new ArrayList<>();
+    }
 
     @NotBlank(message = "Nome é obrigatório")
     @Size(max = 255, message = "Nome deve ter no máximo 255 caracteres")
@@ -110,4 +119,18 @@ public class Tenant extends BaseEntity {
 
     @Column(name = "observacoes", columnDefinition = "TEXT")
     private String observacoes;
+
+    // ========== MÉTODOS DE CICLO DE VIDA ==========
+
+    /**
+     * Garante que as coleções não sejam nulas antes de persistir ou atualizar.
+     * Recria a lista se estiver nula.
+     */
+    @PrePersist
+    @PreUpdate
+    public void validateCollections() {
+        if (enderecos == null) {
+            enderecos = new ArrayList<>();
+        }
+    }
 }

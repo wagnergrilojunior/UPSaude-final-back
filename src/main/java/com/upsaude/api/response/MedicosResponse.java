@@ -1,15 +1,21 @@
 package com.upsaude.api.response;
 
-import com.upsaude.entity.embeddable.ContatoMedico;
-import com.upsaude.entity.embeddable.DadosPessoaisMedico;
-import com.upsaude.entity.embeddable.FormacaoMedico;
-import com.upsaude.entity.embeddable.RegistroProfissionalMedico;
+import com.upsaude.api.response.embeddable.ContatoMedicoResponse;
+import com.upsaude.api.response.embeddable.DadosPessoaisMedicoResponse;
+import com.upsaude.api.response.embeddable.FormacaoMedicoResponse;
+import com.upsaude.api.response.embeddable.RegistroProfissionalMedicoResponse;
 import java.time.OffsetDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
-@Data
+@Getter
+@Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
@@ -20,11 +26,16 @@ public class MedicosResponse {
     private Boolean active;
     private EspecialidadesMedicasResponse especialidade;
     private String nomeCompleto;
-    private DadosPessoaisMedico dadosPessoais;
-    private RegistroProfissionalMedico registroProfissional;
-    private FormacaoMedico formacao;
-    private ContatoMedico contato;
-    private List<EnderecoResponse> enderecos;
-    private List<MedicoEstabelecimentoResponse> medicosEstabelecimentos;
+    private DadosPessoaisMedicoResponse dadosPessoais;
+    private RegistroProfissionalMedicoResponse registroProfissional;
+    private FormacaoMedicoResponse formacao;
+    private ContatoMedicoResponse contato;
+    
+    @Builder.Default
+    private List<EnderecoResponse> enderecos = new ArrayList<>();
+    
+    @Builder.Default
+    private List<MedicoEstabelecimentoResponse> medicosEstabelecimentos = new ArrayList<>();
+    
     private String observacoes;
 }

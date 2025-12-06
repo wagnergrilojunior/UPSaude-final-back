@@ -2,6 +2,9 @@ package com.upsaude.controller;
 
 import com.upsaude.api.request.TenantRequest;
 import com.upsaude.api.response.TenantResponse;
+import com.upsaude.exception.BadRequestException;
+import com.upsaude.exception.ConflictException;
+import com.upsaude.exception.NotFoundException;
 import com.upsaude.service.TenantService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -12,6 +15,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -29,6 +33,7 @@ import java.util.UUID;
 @RequestMapping("/v1/tenants")
 @Tag(name = "Tenants", description = "API para gerenciamento de Tenants")
 @RequiredArgsConstructor
+@Slf4j
 public class TenantController {
 
     private final TenantService tenantService;
@@ -42,8 +47,18 @@ public class TenantController {
             @ApiResponse(responseCode = "403", description = "Acesso negado")
     })
     public ResponseEntity<TenantResponse> criar(@Valid @RequestBody TenantRequest request) {
-        TenantResponse response = tenantService.criar(request);
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        log.debug("REQUEST POST /v1/tenants - payload: {}", request);
+        try {
+            TenantResponse response = tenantService.criar(request);
+            log.info("Tenant criado com sucesso. ID: {}", response.getId());
+            return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        } catch (BadRequestException | ConflictException ex) {
+            log.warn("Falha ao criar tenant — mensagem: {}, payload: {}", ex.getMessage(), request);
+            throw ex;
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao criar tenant — payload: {}", request, ex);
+            throw ex;
+        }
     }
 
     @GetMapping
@@ -55,8 +70,14 @@ public class TenantController {
     public ResponseEntity<Page<TenantResponse>> listar(
             @Parameter(description = "Parâmetros de paginação (page, size, sort)")
             Pageable pageable) {
-        Page<TenantResponse> response = tenantService.listar(pageable);
-        return ResponseEntity.ok(response);
+        log.debug("REQUEST GET /v1/tenants - pageable: {}", pageable);
+        try {
+            Page<TenantResponse> response = tenantService.listar(pageable);
+            return ResponseEntity.ok(response);
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao listar tenants — pageable: {}", pageable, ex);
+            throw ex;
+        }
     }
 
     @GetMapping("/{id}")
@@ -70,8 +91,17 @@ public class TenantController {
     public ResponseEntity<TenantResponse> obterPorId(
             @Parameter(description = "ID do tenant", required = true)
             @PathVariable UUID id) {
-        TenantResponse response = tenantService.obterPorId(id);
-        return ResponseEntity.ok(response);
+        log.debug("REQUEST GET /v1/tenants/{}", id);
+        try {
+            TenantResponse response = tenantService.obterPorId(id);
+            return ResponseEntity.ok(response);
+        } catch (NotFoundException ex) {
+            log.warn("Tenant não encontrado — ID: {}, mensagem: {}", id, ex.getMessage());
+            throw ex;
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao obter tenant por ID — ID: {}", id, ex);
+            throw ex;
+        }
     }
 
     @PutMapping("/{id}")
@@ -87,8 +117,18 @@ public class TenantController {
             @Parameter(description = "ID do tenant", required = true)
             @PathVariable UUID id,
             @Valid @RequestBody TenantRequest request) {
-        TenantResponse response = tenantService.atualizar(id, request);
-        return ResponseEntity.ok(response);
+        log.debug("REQUEST PUT /v1/tenants/{} - payload: {}", id, request);
+        try {
+            TenantResponse response = tenantService.atualizar(id, request);
+            log.info("Tenant atualizado com sucesso. ID: {}", response.getId());
+            return ResponseEntity.ok(response);
+        } catch (BadRequestException | NotFoundException | ConflictException ex) {
+            log.warn("Falha ao atualizar tenant — ID: {}, mensagem: {}, payload: {}", id, ex.getMessage(), request);
+            throw ex;
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao atualizar tenant — ID: {}, payload: {}", id, request, ex);
+            throw ex;
+        }
     }
 
     @DeleteMapping("/{id}")
@@ -101,8 +141,17 @@ public class TenantController {
     public ResponseEntity<Void> excluir(
             @Parameter(description = "ID do tenant", required = true)
             @PathVariable UUID id) {
-        tenantService.excluir(id);
-        return ResponseEntity.noContent().build();
+        log.debug("REQUEST DELETE /v1/tenants/{}", id);
+        try {
+            tenantService.excluir(id);
+            log.info("Tenant excluído com sucesso. ID: {}", id);
+            return ResponseEntity.noContent().build();
+        } catch (NotFoundException ex) {
+            log.warn("Tenant não encontrado para exclusão — ID: {}, mensagem: {}", id, ex.getMessage());
+            throw ex;
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao excluir tenant — ID: {}", id, ex);
+            throw ex;
+        }
     }
 }
-

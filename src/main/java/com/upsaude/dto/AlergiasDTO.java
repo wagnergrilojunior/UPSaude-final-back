@@ -1,8 +1,8 @@
 package com.upsaude.dto;
 
-import com.upsaude.entity.embeddable.ClassificacaoAlergia;
-import com.upsaude.entity.embeddable.PrevencaoTratamentoAlergia;
-import com.upsaude.entity.embeddable.ReacoesAlergia;
+import com.upsaude.dto.embeddable.ClassificacaoAlergiaDTO;
+import com.upsaude.dto.embeddable.PrevencaoTratamentoAlergiaDTO;
+import com.upsaude.dto.embeddable.ReacoesAlergiaDTO;
 import java.time.OffsetDateTime;
 import java.util.UUID;
 import lombok.*;
@@ -19,9 +19,9 @@ public class AlergiasDTO {
     private String nome;
     private String nomeCientifico;
     private String codigoInterno;
-    private ClassificacaoAlergia classificacao;
-    private ReacoesAlergia reacoes;
-    private PrevencaoTratamentoAlergia prevencaoTratamento;
+    private ClassificacaoAlergiaDTO classificacao;
+    private ReacoesAlergiaDTO reacoes;
+    private PrevencaoTratamentoAlergiaDTO prevencaoTratamento;
     private String descricao;
     private String substanciasRelacionadas;
     private String observacoes;

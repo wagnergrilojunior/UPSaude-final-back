@@ -2,6 +2,9 @@ package com.upsaude.controller;
 
 import com.upsaude.api.request.MedicaoClinicaRequest;
 import com.upsaude.api.response.MedicaoClinicaResponse;
+import com.upsaude.exception.BadRequestException;
+import com.upsaude.exception.ConflictException;
+import com.upsaude.exception.NotFoundException;
 import com.upsaude.service.MedicaoClinicaService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -12,6 +15,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -29,6 +33,7 @@ import java.util.UUID;
 @RequestMapping("/v1/medicoes-clinicas")
 @Tag(name = "Medições Clínicas", description = "API para gerenciamento de Medições Clínicas")
 @RequiredArgsConstructor
+@Slf4j
 public class MedicaoClinicaController {
 
     private final MedicaoClinicaService medicaoClinicaService;
@@ -42,8 +47,18 @@ public class MedicaoClinicaController {
             @ApiResponse(responseCode = "403", description = "Acesso negado")
     })
     public ResponseEntity<MedicaoClinicaResponse> criar(@Valid @RequestBody MedicaoClinicaRequest request) {
-        MedicaoClinicaResponse response = medicaoClinicaService.criar(request);
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        log.debug("REQUEST POST /v1/medicoes-clinicas - payload: {}", request);
+        try {
+            MedicaoClinicaResponse response = medicaoClinicaService.criar(request);
+            log.info("Medição clínica criada com sucesso. ID: {}", response.getId());
+            return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        } catch (BadRequestException | ConflictException ex) {
+            log.warn("Falha ao criar medição clínica — mensagem: {}, payload: {}", ex.getMessage(), request);
+            throw ex;
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao criar medição clínica — payload: {}", request, ex);
+            throw ex;
+        }
     }
 
     @GetMapping
@@ -55,8 +70,14 @@ public class MedicaoClinicaController {
     public ResponseEntity<Page<MedicaoClinicaResponse>> listar(
             @Parameter(description = "Parâmetros de paginação (page, size, sort)")
             Pageable pageable) {
-        Page<MedicaoClinicaResponse> response = medicaoClinicaService.listar(pageable);
-        return ResponseEntity.ok(response);
+        log.debug("REQUEST GET /v1/medicoes-clinicas - pageable: {}", pageable);
+        try {
+            Page<MedicaoClinicaResponse> response = medicaoClinicaService.listar(pageable);
+            return ResponseEntity.ok(response);
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao listar medições clínicas — pageable: {}", pageable, ex);
+            throw ex;
+        }
     }
 
     @GetMapping("/paciente/{pacienteId}")
@@ -71,8 +92,17 @@ public class MedicaoClinicaController {
             @PathVariable UUID pacienteId,
             @Parameter(description = "Parâmetros de paginação (page, size, sort)")
             Pageable pageable) {
-        Page<MedicaoClinicaResponse> response = medicaoClinicaService.listarPorPaciente(pacienteId, pageable);
-        return ResponseEntity.ok(response);
+        log.debug("REQUEST GET /v1/medicoes-clinicas/paciente/{} - pageable: {}", pacienteId, pageable);
+        try {
+            Page<MedicaoClinicaResponse> response = medicaoClinicaService.listarPorPaciente(pacienteId, pageable);
+            return ResponseEntity.ok(response);
+        } catch (BadRequestException ex) {
+            log.warn("Falha ao listar medições clínicas por paciente — pacienteId: {}, mensagem: {}", pacienteId, ex.getMessage());
+            throw ex;
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao listar medições clínicas por paciente — pacienteId: {}, pageable: {}", pacienteId, pageable, ex);
+            throw ex;
+        }
     }
 
     @GetMapping("/{id}")
@@ -86,8 +116,17 @@ public class MedicaoClinicaController {
     public ResponseEntity<MedicaoClinicaResponse> obterPorId(
             @Parameter(description = "ID da medição clínica", required = true)
             @PathVariable UUID id) {
-        MedicaoClinicaResponse response = medicaoClinicaService.obterPorId(id);
-        return ResponseEntity.ok(response);
+        log.debug("REQUEST GET /v1/medicoes-clinicas/{}", id);
+        try {
+            MedicaoClinicaResponse response = medicaoClinicaService.obterPorId(id);
+            return ResponseEntity.ok(response);
+        } catch (NotFoundException ex) {
+            log.warn("Medição clínica não encontrada — ID: {}, mensagem: {}", id, ex.getMessage());
+            throw ex;
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao obter medição clínica por ID — ID: {}", id, ex);
+            throw ex;
+        }
     }
 
     @PutMapping("/{id}")
@@ -103,8 +142,18 @@ public class MedicaoClinicaController {
             @Parameter(description = "ID da medição clínica", required = true)
             @PathVariable UUID id,
             @Valid @RequestBody MedicaoClinicaRequest request) {
-        MedicaoClinicaResponse response = medicaoClinicaService.atualizar(id, request);
-        return ResponseEntity.ok(response);
+        log.debug("REQUEST PUT /v1/medicoes-clinicas/{} - payload: {}", id, request);
+        try {
+            MedicaoClinicaResponse response = medicaoClinicaService.atualizar(id, request);
+            log.info("Medição clínica atualizada com sucesso. ID: {}", response.getId());
+            return ResponseEntity.ok(response);
+        } catch (BadRequestException | NotFoundException | ConflictException ex) {
+            log.warn("Falha ao atualizar medição clínica — ID: {}, mensagem: {}, payload: {}", id, ex.getMessage(), request);
+            throw ex;
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao atualizar medição clínica — ID: {}, payload: {}", id, request, ex);
+            throw ex;
+        }
     }
 
     @DeleteMapping("/{id}")
@@ -117,8 +166,17 @@ public class MedicaoClinicaController {
     public ResponseEntity<Void> excluir(
             @Parameter(description = "ID da medição clínica", required = true)
             @PathVariable UUID id) {
-        medicaoClinicaService.excluir(id);
-        return ResponseEntity.noContent().build();
+        log.debug("REQUEST DELETE /v1/medicoes-clinicas/{}", id);
+        try {
+            medicaoClinicaService.excluir(id);
+            log.info("Medição clínica excluída com sucesso. ID: {}", id);
+            return ResponseEntity.noContent().build();
+        } catch (NotFoundException ex) {
+            log.warn("Medição clínica não encontrada para exclusão — ID: {}, mensagem: {}", id, ex.getMessage());
+            throw ex;
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao excluir medição clínica — ID: {}", id, ex);
+            throw ex;
+        }
     }
 }
-

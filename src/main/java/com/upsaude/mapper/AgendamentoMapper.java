@@ -51,6 +51,9 @@ public interface AgendamentoMapper extends EntityMapper<Agendamento, Agendamento
     @Mapping(target = "medico", ignore = true)
     @Mapping(target = "paciente", ignore = true)
     @Mapping(target = "profissional", ignore = true)
+    @Mapping(target = "reagendamentos", ignore = true)
+    @Mapping(target = "notificacoes", ignore = true)
+    @Mapping(target = "checkIns", ignore = true)
     Agendamento fromRequest(AgendamentoRequest request);
 
     /**
@@ -69,6 +72,9 @@ public interface AgendamentoMapper extends EntityMapper<Agendamento, Agendamento
     @Mapping(target = "medico", ignore = true)
     @Mapping(target = "paciente", ignore = true)
     @Mapping(target = "profissional", ignore = true)
+    @Mapping(target = "reagendamentos", ignore = true)
+    @Mapping(target = "notificacoes", ignore = true)
+    @Mapping(target = "checkIns", ignore = true)
     void updateFromRequest(AgendamentoRequest request, @MappingTarget Agendamento entity);
 
     /**

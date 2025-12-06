@@ -9,6 +9,8 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.PrePersist;
+import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
@@ -30,6 +32,11 @@ import lombok.EqualsAndHashCode;
 @Data
 @EqualsAndHashCode(callSuper = true)
 public class AlergiasPaciente extends BaseEntity {
+
+    public AlergiasPaciente() {
+        this.diagnostico = new DiagnosticoAlergiaPaciente();
+        this.historicoReacoes = new HistoricoReacoesAlergiaPaciente();
+    }
 
     // ========== RELACIONAMENTOS ==========
 
@@ -60,4 +67,15 @@ public class AlergiasPaciente extends BaseEntity {
 
     @Column(name = "alerta_medico", nullable = false)
     private Boolean alertaMedico = true; // Se deve aparecer alerta médico no prontuário
+
+    @PrePersist
+    @PreUpdate
+    public void validateEmbeddables() {
+        if (diagnostico == null) {
+            diagnostico = new DiagnosticoAlergiaPaciente();
+        }
+        if (historicoReacoes == null) {
+            historicoReacoes = new HistoricoReacoesAlergiaPaciente();
+        }
+    }
 }

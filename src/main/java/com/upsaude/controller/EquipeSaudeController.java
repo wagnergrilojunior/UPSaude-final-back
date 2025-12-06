@@ -3,6 +3,9 @@ package com.upsaude.controller;
 import com.upsaude.api.request.EquipeSaudeRequest;
 import com.upsaude.api.response.EquipeSaudeResponse;
 import com.upsaude.enums.StatusAtivoEnum;
+import com.upsaude.exception.BadRequestException;
+import com.upsaude.exception.ConflictException;
+import com.upsaude.exception.NotFoundException;
 import com.upsaude.service.EquipeSaudeService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -13,6 +16,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -30,6 +34,7 @@ import java.util.UUID;
 @RequestMapping("/v1/equipes-saude")
 @Tag(name = "Equipes de Saúde", description = "API para gerenciamento de Equipes de Saúde")
 @RequiredArgsConstructor
+@Slf4j
 public class EquipeSaudeController {
 
     private final EquipeSaudeService equipeSaudeService;
@@ -43,8 +48,18 @@ public class EquipeSaudeController {
             @ApiResponse(responseCode = "403", description = "Acesso negado")
     })
     public ResponseEntity<EquipeSaudeResponse> criar(@Valid @RequestBody EquipeSaudeRequest request) {
-        EquipeSaudeResponse response = equipeSaudeService.criar(request);
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        log.debug("REQUEST POST /v1/equipes-saude - payload: {}", request);
+        try {
+            EquipeSaudeResponse response = equipeSaudeService.criar(request);
+            log.info("Equipe de saúde criada com sucesso. ID: {}", response.getId());
+            return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        } catch (BadRequestException | ConflictException ex) {
+            log.warn("Falha ao criar equipe de saúde — mensagem: {}, payload: {}", ex.getMessage(), request);
+            throw ex;
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao criar equipe de saúde — payload: {}", request, ex);
+            throw ex;
+        }
     }
 
     @GetMapping
@@ -56,8 +71,14 @@ public class EquipeSaudeController {
     public ResponseEntity<Page<EquipeSaudeResponse>> listar(
             @Parameter(description = "Parâmetros de paginação (page, size, sort)")
             Pageable pageable) {
-        Page<EquipeSaudeResponse> response = equipeSaudeService.listar(pageable);
-        return ResponseEntity.ok(response);
+        log.debug("REQUEST GET /v1/equipes-saude - pageable: {}", pageable);
+        try {
+            Page<EquipeSaudeResponse> response = equipeSaudeService.listar(pageable);
+            return ResponseEntity.ok(response);
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao listar equipes de saúde — pageable: {}", pageable, ex);
+            throw ex;
+        }
     }
 
     @GetMapping("/estabelecimento/{estabelecimentoId}")
@@ -72,8 +93,17 @@ public class EquipeSaudeController {
             @PathVariable UUID estabelecimentoId,
             @Parameter(description = "Parâmetros de paginação (page, size, sort)")
             Pageable pageable) {
-        Page<EquipeSaudeResponse> response = equipeSaudeService.listarPorEstabelecimento(estabelecimentoId, pageable);
-        return ResponseEntity.ok(response);
+        log.debug("REQUEST GET /v1/equipes-saude/estabelecimento/{} - pageable: {}", estabelecimentoId, pageable);
+        try {
+            Page<EquipeSaudeResponse> response = equipeSaudeService.listarPorEstabelecimento(estabelecimentoId, pageable);
+            return ResponseEntity.ok(response);
+        } catch (BadRequestException ex) {
+            log.warn("Falha ao listar equipes por estabelecimento — estabelecimentoId: {}, mensagem: {}", estabelecimentoId, ex.getMessage());
+            throw ex;
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao listar equipes por estabelecimento — estabelecimentoId: {}, pageable: {}", estabelecimentoId, pageable, ex);
+            throw ex;
+        }
     }
 
     @GetMapping("/estabelecimento/{estabelecimentoId}/status/{status}")
@@ -90,8 +120,17 @@ public class EquipeSaudeController {
             @PathVariable StatusAtivoEnum status,
             @Parameter(description = "Parâmetros de paginação (page, size, sort)")
             Pageable pageable) {
-        Page<EquipeSaudeResponse> response = equipeSaudeService.listarPorStatus(status, estabelecimentoId, pageable);
-        return ResponseEntity.ok(response);
+        log.debug("REQUEST GET /v1/equipes-saude/estabelecimento/{}/status/{} - pageable: {}", estabelecimentoId, status, pageable);
+        try {
+            Page<EquipeSaudeResponse> response = equipeSaudeService.listarPorStatus(status, estabelecimentoId, pageable);
+            return ResponseEntity.ok(response);
+        } catch (BadRequestException ex) {
+            log.warn("Falha ao listar equipes por status e estabelecimento — estabelecimentoId: {}, status: {}, mensagem: {}", estabelecimentoId, status, ex.getMessage());
+            throw ex;
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao listar equipes por status e estabelecimento — estabelecimentoId: {}, status: {}, pageable: {}", estabelecimentoId, status, pageable, ex);
+            throw ex;
+        }
     }
 
     @GetMapping("/{id}")
@@ -105,8 +144,17 @@ public class EquipeSaudeController {
     public ResponseEntity<EquipeSaudeResponse> obterPorId(
             @Parameter(description = "ID da equipe", required = true)
             @PathVariable UUID id) {
-        EquipeSaudeResponse response = equipeSaudeService.obterPorId(id);
-        return ResponseEntity.ok(response);
+        log.debug("REQUEST GET /v1/equipes-saude/{}", id);
+        try {
+            EquipeSaudeResponse response = equipeSaudeService.obterPorId(id);
+            return ResponseEntity.ok(response);
+        } catch (NotFoundException ex) {
+            log.warn("Equipe não encontrada — ID: {}, mensagem: {}", id, ex.getMessage());
+            throw ex;
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao obter equipe por ID — ID: {}", id, ex);
+            throw ex;
+        }
     }
 
     @PutMapping("/{id}")
@@ -122,8 +170,18 @@ public class EquipeSaudeController {
             @Parameter(description = "ID da equipe", required = true)
             @PathVariable UUID id,
             @Valid @RequestBody EquipeSaudeRequest request) {
-        EquipeSaudeResponse response = equipeSaudeService.atualizar(id, request);
-        return ResponseEntity.ok(response);
+        log.debug("REQUEST PUT /v1/equipes-saude/{} - payload: {}", id, request);
+        try {
+            EquipeSaudeResponse response = equipeSaudeService.atualizar(id, request);
+            log.info("Equipe de saúde atualizada com sucesso. ID: {}", response.getId());
+            return ResponseEntity.ok(response);
+        } catch (BadRequestException | NotFoundException | ConflictException ex) {
+            log.warn("Falha ao atualizar equipe de saúde — ID: {}, mensagem: {}, payload: {}", id, ex.getMessage(), request);
+            throw ex;
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao atualizar equipe de saúde — ID: {}, payload: {}", id, request, ex);
+            throw ex;
+        }
     }
 
     @DeleteMapping("/{id}")
@@ -136,8 +194,17 @@ public class EquipeSaudeController {
     public ResponseEntity<Void> excluir(
             @Parameter(description = "ID da equipe", required = true)
             @PathVariable UUID id) {
-        equipeSaudeService.excluir(id);
-        return ResponseEntity.noContent().build();
+        log.debug("REQUEST DELETE /v1/equipes-saude/{}", id);
+        try {
+            equipeSaudeService.excluir(id);
+            log.info("Equipe de saúde excluída com sucesso. ID: {}", id);
+            return ResponseEntity.noContent().build();
+        } catch (NotFoundException ex) {
+            log.warn("Equipe não encontrada para exclusão — ID: {}, mensagem: {}", id, ex.getMessage());
+            throw ex;
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao excluir equipe de saúde — ID: {}", id, ex);
+            throw ex;
+        }
     }
 }
-

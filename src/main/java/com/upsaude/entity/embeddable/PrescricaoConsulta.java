@@ -5,7 +5,6 @@ import jakarta.persistence.Embeddable;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
 /**
  * Classe embeddable para informações de prescrição da consulta.
@@ -15,9 +14,17 @@ import lombok.NoArgsConstructor;
 @Embeddable
 @Data
 @Builder
-@NoArgsConstructor
 @AllArgsConstructor
 public class PrescricaoConsulta {
+
+    public PrescricaoConsulta() {
+        this.medicamentosPrescritos = "";
+        this.orientacoes = "";
+        this.dieta = "";
+        this.atividadeFisica = "";
+        this.repouso = "";
+        this.outrasOrientacoes = "";
+    }
 
     @Column(name = "medicamentos_prescritos", columnDefinition = "TEXT")
     private String medicamentosPrescritos; // Medicamentos prescritos

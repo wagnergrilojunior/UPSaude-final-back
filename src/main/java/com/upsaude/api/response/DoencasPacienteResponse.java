@@ -1,13 +1,18 @@
 package com.upsaude.api.response;
 
-import com.upsaude.entity.embeddable.AcompanhamentoDoencaPaciente;
-import com.upsaude.entity.embeddable.DiagnosticoDoencaPaciente;
-import com.upsaude.entity.embeddable.TratamentoAtualDoencaPaciente;
+import com.upsaude.api.response.embeddable.AcompanhamentoDoencaPacienteResponse;
+import com.upsaude.api.response.embeddable.DiagnosticoDoencaPacienteResponse;
+import com.upsaude.api.response.embeddable.TratamentoAtualDoencaPacienteResponse;
 import java.time.OffsetDateTime;
 import java.util.UUID;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
-@Data
+@Getter
+@Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
@@ -19,8 +24,8 @@ public class DoencasPacienteResponse {
     private PacienteResponse paciente;
     private DoencasResponse doenca;
     private CidDoencasResponse cidPrincipal;
-    private DiagnosticoDoencaPaciente diagnostico;
-    private AcompanhamentoDoencaPaciente acompanhamento;
-    private TratamentoAtualDoencaPaciente tratamentoAtual;
+    private DiagnosticoDoencaPacienteResponse diagnostico;
+    private AcompanhamentoDoencaPacienteResponse acompanhamento;
+    private TratamentoAtualDoencaPacienteResponse tratamentoAtual;
     private String observacoes;
 }

@@ -47,6 +47,8 @@ public interface CirurgiaMapper extends EntityMapper<Cirurgia, CirurgiaDTO> {
     @Mapping(target = "especialidade", ignore = true)
     @Mapping(target = "medicoCirurgiao", ignore = true)
     @Mapping(target = "paciente", ignore = true)
+    @Mapping(target = "procedimentos", ignore = true)
+    @Mapping(target = "equipe", ignore = true)
     Cirurgia fromRequest(CirurgiaRequest request);
 
     /**
@@ -63,6 +65,8 @@ public interface CirurgiaMapper extends EntityMapper<Cirurgia, CirurgiaDTO> {
     @Mapping(target = "especialidade", ignore = true)
     @Mapping(target = "medicoCirurgiao", ignore = true)
     @Mapping(target = "paciente", ignore = true)
+    @Mapping(target = "procedimentos", ignore = true)
+    @Mapping(target = "equipe", ignore = true)
     void updateFromRequest(CirurgiaRequest request, @MappingTarget Cirurgia entity);
 
     /**

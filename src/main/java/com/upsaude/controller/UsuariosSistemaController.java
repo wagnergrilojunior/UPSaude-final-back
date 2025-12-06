@@ -2,6 +2,9 @@ package com.upsaude.controller;
 
 import com.upsaude.api.request.UsuariosSistemaRequest;
 import com.upsaude.api.response.UsuariosSistemaResponse;
+import com.upsaude.exception.BadRequestException;
+import com.upsaude.exception.ConflictException;
+import com.upsaude.exception.NotFoundException;
 import com.upsaude.service.UsuariosSistemaService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -13,6 +16,7 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -33,6 +37,7 @@ import java.util.UUID;
 @RequestMapping("/v1/usuarios-sistema")
 @Tag(name = "Usuários do Sistema", description = "API para gerenciamento de Usuários do Sistema")
 @RequiredArgsConstructor
+@Slf4j
 public class UsuariosSistemaController {
 
     private final UsuariosSistemaService usuariosSistemaService;
@@ -46,8 +51,18 @@ public class UsuariosSistemaController {
             @ApiResponse(responseCode = "403", description = "Acesso negado")
     })
     public ResponseEntity<UsuariosSistemaResponse> criar(@Valid @RequestBody UsuariosSistemaRequest request) {
-        UsuariosSistemaResponse response = usuariosSistemaService.criar(request);
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        log.debug("REQUEST POST /v1/usuarios-sistema - payload: {}", request);
+        try {
+            UsuariosSistemaResponse response = usuariosSistemaService.criar(request);
+            log.info("Usuário do sistema criado com sucesso. ID: {}", response.getId());
+            return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        } catch (BadRequestException | ConflictException ex) {
+            log.warn("Falha ao criar usuário do sistema — mensagem: {}, payload: {}", ex.getMessage(), request);
+            throw ex;
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao criar usuário do sistema — payload: {}", request, ex);
+            throw ex;
+        }
     }
 
     @GetMapping
@@ -59,8 +74,14 @@ public class UsuariosSistemaController {
     public ResponseEntity<Page<UsuariosSistemaResponse>> listar(
             @Parameter(description = "Parâmetros de paginação (page, size, sort)")
             Pageable pageable) {
-        Page<UsuariosSistemaResponse> response = usuariosSistemaService.listar(pageable);
-        return ResponseEntity.ok(response);
+        log.debug("REQUEST GET /v1/usuarios-sistema - pageable: {}", pageable);
+        try {
+            Page<UsuariosSistemaResponse> response = usuariosSistemaService.listar(pageable);
+            return ResponseEntity.ok(response);
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao listar usuários do sistema — pageable: {}", pageable, ex);
+            throw ex;
+        }
     }
 
     @GetMapping("/{id}")
@@ -74,8 +95,17 @@ public class UsuariosSistemaController {
     public ResponseEntity<UsuariosSistemaResponse> obterPorId(
             @Parameter(description = "ID do usuário do sistema", required = true)
             @PathVariable UUID id) {
-        UsuariosSistemaResponse response = usuariosSistemaService.obterPorId(id);
-        return ResponseEntity.ok(response);
+        log.debug("REQUEST GET /v1/usuarios-sistema/{}", id);
+        try {
+            UsuariosSistemaResponse response = usuariosSistemaService.obterPorId(id);
+            return ResponseEntity.ok(response);
+        } catch (NotFoundException ex) {
+            log.warn("Usuário do sistema não encontrado — ID: {}, mensagem: {}", id, ex.getMessage());
+            throw ex;
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao obter usuário do sistema por ID — ID: {}", id, ex);
+            throw ex;
+        }
     }
 
     @PutMapping("/{id}")
@@ -91,8 +121,18 @@ public class UsuariosSistemaController {
             @Parameter(description = "ID do usuário do sistema", required = true)
             @PathVariable UUID id,
             @Valid @RequestBody UsuariosSistemaRequest request) {
-        UsuariosSistemaResponse response = usuariosSistemaService.atualizar(id, request);
-        return ResponseEntity.ok(response);
+        log.debug("REQUEST PUT /v1/usuarios-sistema/{} - payload: {}", id, request);
+        try {
+            UsuariosSistemaResponse response = usuariosSistemaService.atualizar(id, request);
+            log.info("Usuário do sistema atualizado com sucesso. ID: {}", response.getId());
+            return ResponseEntity.ok(response);
+        } catch (BadRequestException | NotFoundException | ConflictException ex) {
+            log.warn("Falha ao atualizar usuário do sistema — ID: {}, mensagem: {}, payload: {}", id, ex.getMessage(), request);
+            throw ex;
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao atualizar usuário do sistema — ID: {}, payload: {}", id, request, ex);
+            throw ex;
+        }
     }
 
     @DeleteMapping("/{id}")
@@ -105,8 +145,18 @@ public class UsuariosSistemaController {
     public ResponseEntity<Void> excluir(
             @Parameter(description = "ID do usuário do sistema", required = true)
             @PathVariable UUID id) {
-        usuariosSistemaService.excluir(id);
-        return ResponseEntity.noContent().build();
+        log.debug("REQUEST DELETE /v1/usuarios-sistema/{}", id);
+        try {
+            usuariosSistemaService.excluir(id);
+            log.info("Usuário do sistema excluído com sucesso. ID: {}", id);
+            return ResponseEntity.noContent().build();
+        } catch (NotFoundException ex) {
+            log.warn("Usuário do sistema não encontrado para exclusão — ID: {}, mensagem: {}", id, ex.getMessage());
+            throw ex;
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao excluir usuário do sistema — ID: {}", id, ex);
+            throw ex;
+        }
     }
 
     @PostMapping("/{id}/foto")
@@ -126,11 +176,21 @@ public class UsuariosSistemaController {
             @PathVariable UUID id,
             @Parameter(description = "Arquivo de imagem (JPEG, PNG, WEBP ou GIF, máximo 5MB)", required = true)
             @RequestParam("file") MultipartFile file) {
-        String fotoUrl = usuariosSistemaService.uploadFoto(id, file);
-        Map<String, String> response = new HashMap<>();
-        response.put("fotoUrl", fotoUrl);
-        response.put("message", "Foto enviada com sucesso");
-        return ResponseEntity.ok(response);
+        log.debug("REQUEST POST /v1/usuarios-sistema/{}/foto - filename: {}, size: {} bytes", id, file.getOriginalFilename(), file.getSize());
+        try {
+            String fotoUrl = usuariosSistemaService.uploadFoto(id, file);
+            Map<String, String> response = new HashMap<>();
+            response.put("fotoUrl", fotoUrl);
+            response.put("message", "Foto enviada com sucesso");
+            log.info("Foto do usuário enviada com sucesso. ID: {}, fotoUrl: {}", id, fotoUrl);
+            return ResponseEntity.ok(response);
+        } catch (BadRequestException | NotFoundException ex) {
+            log.warn("Falha ao fazer upload de foto do usuário — ID: {}, filename: {}, mensagem: {}", id, file.getOriginalFilename(), ex.getMessage());
+            throw ex;
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao fazer upload de foto do usuário — ID: {}, filename: {}", id, file.getOriginalFilename(), ex);
+            throw ex;
+        }
     }
 
     @GetMapping("/{id}/foto")
@@ -147,10 +207,19 @@ public class UsuariosSistemaController {
     public ResponseEntity<Map<String, String>> obterFoto(
             @Parameter(description = "ID do usuário do sistema", required = true)
             @PathVariable UUID id) {
-        String fotoUrl = usuariosSistemaService.obterFotoUrl(id);
-        Map<String, String> response = new HashMap<>();
-        response.put("fotoUrl", fotoUrl);
-        return ResponseEntity.ok(response);
+        log.debug("REQUEST GET /v1/usuarios-sistema/{}/foto", id);
+        try {
+            String fotoUrl = usuariosSistemaService.obterFotoUrl(id);
+            Map<String, String> response = new HashMap<>();
+            response.put("fotoUrl", fotoUrl);
+            return ResponseEntity.ok(response);
+        } catch (NotFoundException ex) {
+            log.warn("Foto do usuário não encontrada — ID: {}, mensagem: {}", id, ex.getMessage());
+            throw ex;
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao obter foto do usuário — ID: {}", id, ex);
+            throw ex;
+        }
     }
 
     @DeleteMapping("/{id}/foto")
@@ -167,8 +236,17 @@ public class UsuariosSistemaController {
     public ResponseEntity<Void> deletarFoto(
             @Parameter(description = "ID do usuário do sistema", required = true)
             @PathVariable UUID id) {
-        usuariosSistemaService.deletarFoto(id);
-        return ResponseEntity.noContent().build();
+        log.debug("REQUEST DELETE /v1/usuarios-sistema/{}/foto", id);
+        try {
+            usuariosSistemaService.deletarFoto(id);
+            log.info("Foto do usuário deletada com sucesso. ID: {}", id);
+            return ResponseEntity.noContent().build();
+        } catch (NotFoundException ex) {
+            log.warn("Usuário não encontrado para deletar foto — ID: {}, mensagem: {}", id, ex.getMessage());
+            throw ex;
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao deletar foto do usuário — ID: {}", id, ex);
+            throw ex;
+        }
     }
 }
-

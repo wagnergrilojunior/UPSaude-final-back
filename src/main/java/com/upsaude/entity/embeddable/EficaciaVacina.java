@@ -5,7 +5,6 @@ import jakarta.persistence.Embeddable;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 
@@ -17,9 +16,12 @@ import java.math.BigDecimal;
 @Embeddable
 @Data
 @Builder
-@NoArgsConstructor
 @AllArgsConstructor
 public class EficaciaVacina {
+
+    public EficaciaVacina() {
+        this.doencasProtege = "";
+    }
 
     @Column(name = "eficacia_percentual", precision = 5, scale = 2)
     private BigDecimal eficaciaPercentual; // Eficácia da vacina em percentual

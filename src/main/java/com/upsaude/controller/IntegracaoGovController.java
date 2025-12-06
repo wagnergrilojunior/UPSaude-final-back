@@ -2,6 +2,9 @@ package com.upsaude.controller;
 
 import com.upsaude.api.request.IntegracaoGovRequest;
 import com.upsaude.api.response.IntegracaoGovResponse;
+import com.upsaude.exception.BadRequestException;
+import com.upsaude.exception.ConflictException;
+import com.upsaude.exception.NotFoundException;
 import com.upsaude.service.IntegracaoGovService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -12,6 +15,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -20,6 +24,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
 
+@Slf4j
 @RestController
 @RequestMapping("/v1/integracao-gov")
 @Tag(name = "Integração Governamental", description = "API para gerenciamento de Integração Governamental")
@@ -37,8 +42,18 @@ public class IntegracaoGovController {
             @ApiResponse(responseCode = "403", description = "Acesso negado")
     })
     public ResponseEntity<IntegracaoGovResponse> criar(@Valid @RequestBody IntegracaoGovRequest request) {
-        IntegracaoGovResponse response = service.criar(request);
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        log.debug("REQUEST POST /v1/integracao-gov - payload: {}", request);
+        try {
+            IntegracaoGovResponse response = service.criar(request);
+            log.info("Integração governamental criada com sucesso. ID: {}", response.getId());
+            return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        } catch (BadRequestException | ConflictException ex) {
+            log.warn("Falha ao criar integração governamental — mensagem: {}, payload: {}", ex.getMessage(), request);
+            throw ex;
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao criar integração governamental — payload: {}", request, ex);
+            throw ex;
+        }
     }
 
     @GetMapping
@@ -50,8 +65,14 @@ public class IntegracaoGovController {
     public ResponseEntity<Page<IntegracaoGovResponse>> listar(
             @Parameter(description = "Parâmetros de paginação (page, size, sort)")
             Pageable pageable) {
-        Page<IntegracaoGovResponse> response = service.listar(pageable);
-        return ResponseEntity.ok(response);
+        log.debug("REQUEST GET /v1/integracao-gov - pageable: {}", pageable);
+        try {
+            Page<IntegracaoGovResponse> response = service.listar(pageable);
+            return ResponseEntity.ok(response);
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao listar integrações governamentais — pageable: {}", pageable, ex);
+            throw ex;
+        }
     }
 
     @GetMapping("/{id}")
@@ -65,8 +86,17 @@ public class IntegracaoGovController {
     public ResponseEntity<IntegracaoGovResponse> obterPorId(
             @Parameter(description = "ID da integração gov", required = true)
             @PathVariable UUID id) {
-        IntegracaoGovResponse response = service.obterPorId(id);
-        return ResponseEntity.ok(response);
+        log.debug("REQUEST GET /v1/integracao-gov/{}", id);
+        try {
+            IntegracaoGovResponse response = service.obterPorId(id);
+            return ResponseEntity.ok(response);
+        } catch (NotFoundException ex) {
+            log.warn("Integração governamental não encontrada — ID: {}, mensagem: {}", id, ex.getMessage());
+            throw ex;
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao obter integração governamental por ID — ID: {}", id, ex);
+            throw ex;
+        }
     }
 
     @GetMapping("/paciente/{pacienteId}")
@@ -80,8 +110,17 @@ public class IntegracaoGovController {
     public ResponseEntity<IntegracaoGovResponse> obterPorPacienteId(
             @Parameter(description = "ID do paciente", required = true)
             @PathVariable UUID pacienteId) {
-        IntegracaoGovResponse response = service.obterPorPacienteId(pacienteId);
-        return ResponseEntity.ok(response);
+        log.debug("REQUEST GET /v1/integracao-gov/paciente/{}", pacienteId);
+        try {
+            IntegracaoGovResponse response = service.obterPorPacienteId(pacienteId);
+            return ResponseEntity.ok(response);
+        } catch (NotFoundException ex) {
+            log.warn("Integração governamental não encontrada para paciente — pacienteId: {}, mensagem: {}", pacienteId, ex.getMessage());
+            throw ex;
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao obter integração governamental por paciente ID — pacienteId: {}", pacienteId, ex);
+            throw ex;
+        }
     }
 
     @PutMapping("/{id}")
@@ -97,8 +136,18 @@ public class IntegracaoGovController {
             @Parameter(description = "ID da integração gov", required = true)
             @PathVariable UUID id,
             @Valid @RequestBody IntegracaoGovRequest request) {
-        IntegracaoGovResponse response = service.atualizar(id, request);
-        return ResponseEntity.ok(response);
+        log.debug("REQUEST PUT /v1/integracao-gov/{} - payload: {}", id, request);
+        try {
+            IntegracaoGovResponse response = service.atualizar(id, request);
+            log.info("Integração governamental atualizada com sucesso. ID: {}", id);
+            return ResponseEntity.ok(response);
+        } catch (BadRequestException | NotFoundException ex) {
+            log.warn("Falha ao atualizar integração governamental — ID: {}, mensagem: {}, payload: {}", id, ex.getMessage(), request);
+            throw ex;
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao atualizar integração governamental — ID: {}, payload: {}", id, request, ex);
+            throw ex;
+        }
     }
 
     @DeleteMapping("/{id}")
@@ -111,8 +160,18 @@ public class IntegracaoGovController {
     public ResponseEntity<Void> excluir(
             @Parameter(description = "ID da integração gov", required = true)
             @PathVariable UUID id) {
-        service.excluir(id);
-        return ResponseEntity.noContent().build();
+        log.debug("REQUEST DELETE /v1/integracao-gov/{}", id);
+        try {
+            service.excluir(id);
+            log.info("Integração governamental excluída com sucesso. ID: {}", id);
+            return ResponseEntity.noContent().build();
+        } catch (NotFoundException ex) {
+            log.warn("Falha ao excluir integração governamental — ID: {}, mensagem: {}", id, ex.getMessage());
+            throw ex;
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao excluir integração governamental — ID: {}", id, ex);
+            throw ex;
+        }
     }
 }
 

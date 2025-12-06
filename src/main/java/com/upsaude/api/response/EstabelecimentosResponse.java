@@ -4,10 +4,17 @@ import com.upsaude.enums.NaturezaJuridicaEnum;
 import com.upsaude.enums.StatusFuncionamentoEnum;
 import com.upsaude.enums.TipoEstabelecimentoEnum;
 import java.time.OffsetDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
-@Data
+@Getter
+@Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
@@ -50,4 +57,19 @@ public class EstabelecimentosResponse {
     private Double longitude;
     private String observacoes;
     private String dadosComplementares;
+    
+    @Builder.Default
+    private List<EnderecoResponse> enderecosSecundarios = new ArrayList<>();
+    
+    @Builder.Default
+    private List<ServicosEstabelecimentoResponse> servicos = new ArrayList<>();
+    
+    @Builder.Default
+    private List<EquipamentosEstabelecimentoResponse> equipamentos = new ArrayList<>();
+    
+    @Builder.Default
+    private List<InfraestruturaEstabelecimentoResponse> infraestrutura = new ArrayList<>();
+    
+    @Builder.Default
+    private List<EquipeSaudeResponse> equipes = new ArrayList<>();
 }

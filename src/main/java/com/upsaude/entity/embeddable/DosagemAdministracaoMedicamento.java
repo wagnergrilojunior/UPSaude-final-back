@@ -12,7 +12,6 @@ import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 
@@ -24,9 +23,15 @@ import java.math.BigDecimal;
 @Embeddable
 @Data
 @Builder
-@NoArgsConstructor
 @AllArgsConstructor
 public class DosagemAdministracaoMedicamento {
+
+    public DosagemAdministracaoMedicamento() {
+        this.dosagem = "";
+        this.unidadeConcentracao = "";
+        this.posologiaPadrao = "";
+        this.instrucoesUso = "";
+    }
 
     @NotBlank(message = "Dosagem é obrigatória")
     @Size(max = 50, message = "Dosagem deve ter no máximo 50 caracteres")

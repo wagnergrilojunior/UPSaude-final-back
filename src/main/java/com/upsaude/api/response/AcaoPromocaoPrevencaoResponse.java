@@ -3,10 +3,17 @@ package com.upsaude.api.response;
 import com.upsaude.enums.TipoAcaoPromocaoSaudeEnum;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
-@Data
+@Getter
+@Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
@@ -44,5 +51,9 @@ public class AcaoPromocaoPrevencaoResponse {
     private String parcerias;
     private LocalDate dataInicioExecucao;
     private LocalDate dataConclusao;
+    
+    @Builder.Default
+    private List<ProfissionaisSaudeResponse> profissionaisParticipantes = new ArrayList<>();
+    
     private String observacoes;
 }

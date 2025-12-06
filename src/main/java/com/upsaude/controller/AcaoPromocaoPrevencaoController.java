@@ -2,6 +2,9 @@ package com.upsaude.controller;
 
 import com.upsaude.api.request.AcaoPromocaoPrevencaoRequest;
 import com.upsaude.api.response.AcaoPromocaoPrevencaoResponse;
+import com.upsaude.exception.BadRequestException;
+import com.upsaude.exception.ConflictException;
+import com.upsaude.exception.NotFoundException;
 import com.upsaude.service.AcaoPromocaoPrevencaoService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -12,6 +15,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -25,6 +29,7 @@ import java.util.UUID;
  *
  * @author UPSaúde
  */
+@Slf4j
 @RestController
 @RequestMapping("/v1/acoes-promocao-prevencao")
 @Tag(name = "Ações de Promoção e Prevenção", description = "API para gerenciamento de programas e ações de promoção e prevenção em saúde")
@@ -42,8 +47,18 @@ public class AcaoPromocaoPrevencaoController {
             @ApiResponse(responseCode = "403", description = "Acesso negado")
     })
     public ResponseEntity<AcaoPromocaoPrevencaoResponse> criar(@Valid @RequestBody AcaoPromocaoPrevencaoRequest request) {
-        AcaoPromocaoPrevencaoResponse response = acaoPromocaoPrevencaoService.criar(request);
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        log.debug("REQUEST POST /v1/acoes-promocao-prevencao - payload: {}", request);
+        try {
+            AcaoPromocaoPrevencaoResponse response = acaoPromocaoPrevencaoService.criar(request);
+            log.info("Ação de promoção e prevenção criada com sucesso. ID: {}", response.getId());
+            return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        } catch (BadRequestException | ConflictException ex) {
+            log.warn("Falha ao criar ação de promoção e prevenção — mensagem: {}, payload: {}", ex.getMessage(), request);
+            throw ex;
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao criar ação de promoção e prevenção — payload: {}", request, ex);
+            throw ex;
+        }
     }
 
     @GetMapping
@@ -55,8 +70,14 @@ public class AcaoPromocaoPrevencaoController {
     public ResponseEntity<Page<AcaoPromocaoPrevencaoResponse>> listar(
             @Parameter(description = "Parâmetros de paginação (page, size, sort)")
             Pageable pageable) {
-        Page<AcaoPromocaoPrevencaoResponse> response = acaoPromocaoPrevencaoService.listar(pageable);
-        return ResponseEntity.ok(response);
+        log.debug("REQUEST GET /v1/acoes-promocao-prevencao - pageable: {}", pageable);
+        try {
+            Page<AcaoPromocaoPrevencaoResponse> response = acaoPromocaoPrevencaoService.listar(pageable);
+            return ResponseEntity.ok(response);
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao listar ações de promoção e prevenção — pageable: {}", pageable, ex);
+            throw ex;
+        }
     }
 
     @GetMapping("/{id}")
@@ -70,8 +91,17 @@ public class AcaoPromocaoPrevencaoController {
     public ResponseEntity<AcaoPromocaoPrevencaoResponse> obterPorId(
             @Parameter(description = "ID da ação de promoção e prevenção", required = true)
             @PathVariable UUID id) {
-        AcaoPromocaoPrevencaoResponse response = acaoPromocaoPrevencaoService.obterPorId(id);
-        return ResponseEntity.ok(response);
+        log.debug("REQUEST GET /v1/acoes-promocao-prevencao/{}", id);
+        try {
+            AcaoPromocaoPrevencaoResponse response = acaoPromocaoPrevencaoService.obterPorId(id);
+            return ResponseEntity.ok(response);
+        } catch (NotFoundException ex) {
+            log.warn("Ação de promoção e prevenção não encontrada — ID: {}, mensagem: {}", id, ex.getMessage());
+            throw ex;
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao obter ação de promoção e prevenção por ID — ID: {}", id, ex);
+            throw ex;
+        }
     }
 
     @GetMapping("/estabelecimento/{estabelecimentoId}")
@@ -79,8 +109,14 @@ public class AcaoPromocaoPrevencaoController {
     public ResponseEntity<Page<AcaoPromocaoPrevencaoResponse>> listarPorEstabelecimento(
             @PathVariable UUID estabelecimentoId,
             Pageable pageable) {
-        Page<AcaoPromocaoPrevencaoResponse> response = acaoPromocaoPrevencaoService.listarPorEstabelecimento(estabelecimentoId, pageable);
-        return ResponseEntity.ok(response);
+        log.debug("REQUEST GET /v1/acoes-promocao-prevencao/estabelecimento/{} - pageable: {}", estabelecimentoId, pageable);
+        try {
+            Page<AcaoPromocaoPrevencaoResponse> response = acaoPromocaoPrevencaoService.listarPorEstabelecimento(estabelecimentoId, pageable);
+            return ResponseEntity.ok(response);
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao listar ações de promoção e prevenção por estabelecimento — estabelecimentoId: {}, pageable: {}", estabelecimentoId, pageable, ex);
+            throw ex;
+        }
     }
 
     @GetMapping("/profissional/{profissionalId}")
@@ -88,8 +124,14 @@ public class AcaoPromocaoPrevencaoController {
     public ResponseEntity<Page<AcaoPromocaoPrevencaoResponse>> listarPorProfissionalResponsavel(
             @PathVariable UUID profissionalId,
             Pageable pageable) {
-        Page<AcaoPromocaoPrevencaoResponse> response = acaoPromocaoPrevencaoService.listarPorProfissionalResponsavel(profissionalId, pageable);
-        return ResponseEntity.ok(response);
+        log.debug("REQUEST GET /v1/acoes-promocao-prevencao/profissional/{} - pageable: {}", profissionalId, pageable);
+        try {
+            Page<AcaoPromocaoPrevencaoResponse> response = acaoPromocaoPrevencaoService.listarPorProfissionalResponsavel(profissionalId, pageable);
+            return ResponseEntity.ok(response);
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao listar ações de promoção e prevenção por profissional — profissionalId: {}, pageable: {}", profissionalId, pageable, ex);
+            throw ex;
+        }
     }
 
     @GetMapping("/status/{status}/estabelecimento/{estabelecimentoId}")
@@ -98,8 +140,14 @@ public class AcaoPromocaoPrevencaoController {
             @PathVariable String status,
             @PathVariable UUID estabelecimentoId,
             Pageable pageable) {
-        Page<AcaoPromocaoPrevencaoResponse> response = acaoPromocaoPrevencaoService.listarPorStatus(status, estabelecimentoId, pageable);
-        return ResponseEntity.ok(response);
+        log.debug("REQUEST GET /v1/acoes-promocao-prevencao/status/{}/estabelecimento/{} - pageable: {}", status, estabelecimentoId, pageable);
+        try {
+            Page<AcaoPromocaoPrevencaoResponse> response = acaoPromocaoPrevencaoService.listarPorStatus(status, estabelecimentoId, pageable);
+            return ResponseEntity.ok(response);
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao listar ações de promoção e prevenção por status — status: {}, estabelecimentoId: {}, pageable: {}", status, estabelecimentoId, pageable, ex);
+            throw ex;
+        }
     }
 
     @GetMapping("/continuas/{estabelecimentoId}")
@@ -107,8 +155,14 @@ public class AcaoPromocaoPrevencaoController {
     public ResponseEntity<Page<AcaoPromocaoPrevencaoResponse>> listarContinuas(
             @PathVariable UUID estabelecimentoId,
             Pageable pageable) {
-        Page<AcaoPromocaoPrevencaoResponse> response = acaoPromocaoPrevencaoService.listarContinuas(estabelecimentoId, pageable);
-        return ResponseEntity.ok(response);
+        log.debug("REQUEST GET /v1/acoes-promocao-prevencao/continuas/{} - pageable: {}", estabelecimentoId, pageable);
+        try {
+            Page<AcaoPromocaoPrevencaoResponse> response = acaoPromocaoPrevencaoService.listarContinuas(estabelecimentoId, pageable);
+            return ResponseEntity.ok(response);
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao listar ações de promoção e prevenção contínuas — estabelecimentoId: {}, pageable: {}", estabelecimentoId, pageable, ex);
+            throw ex;
+        }
     }
 
     @PutMapping("/{id}")
@@ -124,8 +178,18 @@ public class AcaoPromocaoPrevencaoController {
             @Parameter(description = "ID da ação de promoção e prevenção", required = true)
             @PathVariable UUID id,
             @Valid @RequestBody AcaoPromocaoPrevencaoRequest request) {
-        AcaoPromocaoPrevencaoResponse response = acaoPromocaoPrevencaoService.atualizar(id, request);
-        return ResponseEntity.ok(response);
+        log.debug("REQUEST PUT /v1/acoes-promocao-prevencao/{} - payload: {}", id, request);
+        try {
+            AcaoPromocaoPrevencaoResponse response = acaoPromocaoPrevencaoService.atualizar(id, request);
+            log.info("Ação de promoção e prevenção atualizada com sucesso. ID: {}", id);
+            return ResponseEntity.ok(response);
+        } catch (BadRequestException | NotFoundException ex) {
+            log.warn("Falha ao atualizar ação de promoção e prevenção — ID: {}, mensagem: {}, payload: {}", id, ex.getMessage(), request);
+            throw ex;
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao atualizar ação de promoção e prevenção — ID: {}, payload: {}", id, request, ex);
+            throw ex;
+        }
     }
 
     @DeleteMapping("/{id}")
@@ -138,8 +202,18 @@ public class AcaoPromocaoPrevencaoController {
     public ResponseEntity<Void> excluir(
             @Parameter(description = "ID da ação de promoção e prevenção", required = true)
             @PathVariable UUID id) {
-        acaoPromocaoPrevencaoService.excluir(id);
-        return ResponseEntity.noContent().build();
+        log.debug("REQUEST DELETE /v1/acoes-promocao-prevencao/{}", id);
+        try {
+            acaoPromocaoPrevencaoService.excluir(id);
+            log.info("Ação de promoção e prevenção excluída com sucesso. ID: {}", id);
+            return ResponseEntity.noContent().build();
+        } catch (NotFoundException ex) {
+            log.warn("Falha ao excluir ação de promoção e prevenção — ID: {}, mensagem: {}", id, ex.getMessage());
+            throw ex;
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao excluir ação de promoção e prevenção — ID: {}", id, ex);
+            throw ex;
+        }
     }
 }
 

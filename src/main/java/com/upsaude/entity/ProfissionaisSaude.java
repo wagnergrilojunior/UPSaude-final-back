@@ -29,6 +29,8 @@ import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.PrePersist;
+import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 import jakarta.validation.constraints.Email;
@@ -68,6 +70,14 @@ import java.util.Set;
 @Data
 @EqualsAndHashCode(callSuper = true)
 public class ProfissionaisSaude extends BaseEntity {
+
+    /**
+     * Construtor padrão que inicializa as coleções para evitar NullPointerException.
+     */
+    public ProfissionaisSaude() {
+        this.especialidades = new ArrayList<>();
+        this.historicoHabilitacao = new HashSet<>();
+    }
 
     // ========== DADOS PESSOAIS ==========
 
@@ -247,4 +257,57 @@ public class ProfissionaisSaude extends BaseEntity {
 
     @Column(name = "observacoes", columnDefinition = "TEXT")
     private String observacoes;
+
+    // ========== MÉTODOS DE CICLO DE VIDA ==========
+
+    /**
+     * Garante que as coleções não sejam nulas antes de persistir ou atualizar.
+     * Recria as coleções se estiverem nulas.
+     */
+    @PrePersist
+    @PreUpdate
+    public void validateCollections() {
+        if (especialidades == null) {
+            especialidades = new ArrayList<>();
+        }
+        if (historicoHabilitacao == null) {
+            historicoHabilitacao = new HashSet<>();
+        }
+    }
+
+    // ========== MÉTODOS UTILITÁRIOS - HISTÓRICO HABILITAÇÃO ==========
+
+    /**
+     * Adiciona um histórico de habilitação com sincronização bidirecional.
+     * Garante que o histórico também referencia este profissional.
+     *
+     * @param historico O histórico a ser adicionado
+     */
+    public void addHistoricoHabilitacao(HistoricoHabilitacaoProfissional historico) {
+        if (historico == null) {
+            return;
+        }
+        if (historicoHabilitacao == null) {
+            historicoHabilitacao = new HashSet<>();
+        }
+        if (!historicoHabilitacao.contains(historico)) {
+            historicoHabilitacao.add(historico);
+            historico.setProfissional(this);
+        }
+    }
+
+    /**
+     * Remove um histórico de habilitação com sincronização bidirecional.
+     * Remove a referência do histórico para este profissional.
+     *
+     * @param historico O histórico a ser removido
+     */
+    public void removeHistoricoHabilitacao(HistoricoHabilitacaoProfissional historico) {
+        if (historico == null || historicoHabilitacao == null) {
+            return;
+        }
+        if (historicoHabilitacao.remove(historico)) {
+            historico.setProfissional(null);
+        }
+    }
 }

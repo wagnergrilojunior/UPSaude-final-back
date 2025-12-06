@@ -1,22 +1,35 @@
 package com.upsaude.api.request;
 
-import com.upsaude.entity.embeddable.AcompanhamentoDoencaPaciente;
-import com.upsaude.entity.embeddable.DiagnosticoDoencaPaciente;
-import com.upsaude.entity.embeddable.TratamentoAtualDoencaPaciente;
-import java.time.OffsetDateTime;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.upsaude.api.request.embeddable.AcompanhamentoDoencaPacienteRequest;
+import com.upsaude.api.request.embeddable.DiagnosticoDoencaPacienteRequest;
+import com.upsaude.api.request.embeddable.TratamentoAtualDoencaPacienteRequest;
+import jakarta.validation.constraints.NotNull;
 import java.util.UUID;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
-@Data
+@Getter
+@Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class DoencasPacienteRequest {
+    @NotNull(message = "Paciente é obrigatório")
     private UUID paciente;
+    
+    @NotNull(message = "Doença é obrigatória")
     private UUID doenca;
+    
     private UUID cidPrincipal;
-    private DiagnosticoDoencaPaciente diagnostico;
-    private AcompanhamentoDoencaPaciente acompanhamento;
-    private TratamentoAtualDoencaPaciente tratamentoAtual;
+    
+    private DiagnosticoDoencaPacienteRequest diagnostico;
+    private AcompanhamentoDoencaPacienteRequest acompanhamento;
+    private TratamentoAtualDoencaPacienteRequest tratamentoAtual;
+    
     private String observacoes;
 }

@@ -9,7 +9,6 @@ import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
 
@@ -21,9 +20,18 @@ import java.time.LocalDate;
 @Embeddable
 @Data
 @Builder
-@NoArgsConstructor
 @AllArgsConstructor
 public class RegistroANSConvenio {
+
+    public RegistroANSConvenio() {
+        this.registroAns = "";
+        this.codigoAns = "";
+        this.razaoSocialAns = "";
+        this.nomeFantasiaAns = "";
+        this.codigoTiss = "";
+        this.habilitadoTiss = false;
+        this.observacoesAns = "";
+    }
 
     @Size(max = 50, message = "Registro ANS deve ter no máximo 50 caracteres")
     @Column(name = "registro_ans", length = 50)

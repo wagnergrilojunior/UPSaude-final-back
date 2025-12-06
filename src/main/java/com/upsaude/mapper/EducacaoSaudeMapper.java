@@ -41,6 +41,8 @@ public interface EducacaoSaudeMapper extends EntityMapper<EducacaoSaude, Educaca
     @Mapping(target = "active", ignore = true)
     @Mapping(target = "equipeSaude", ignore = true)
     @Mapping(target = "profissionalResponsavel", ignore = true)
+    @Mapping(target = "participantes", ignore = true)
+    @Mapping(target = "profissionaisParticipantes", ignore = true)
     EducacaoSaude fromRequest(EducacaoSaudeRequest request);
 
     /**
@@ -54,6 +56,8 @@ public interface EducacaoSaudeMapper extends EntityMapper<EducacaoSaude, Educaca
     @Mapping(target = "active", ignore = true)
     @Mapping(target = "equipeSaude", ignore = true)
     @Mapping(target = "profissionalResponsavel", ignore = true)
+    @Mapping(target = "participantes", ignore = true)
+    @Mapping(target = "profissionaisParticipantes", ignore = true)
     void updateFromRequest(EducacaoSaudeRequest request, @MappingTarget EducacaoSaude entity);
 
     /**

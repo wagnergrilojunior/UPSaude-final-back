@@ -5,7 +5,6 @@ import jakarta.persistence.Embeddable;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
 /**
  * Classe embeddable para informações epidemiológicas da doença.
@@ -15,9 +14,16 @@ import lombok.NoArgsConstructor;
 @Embeddable
 @Data
 @Builder
-@NoArgsConstructor
 @AllArgsConstructor
 public class EpidemiologiaDoenca {
+
+    public EpidemiologiaDoenca() {
+        this.faixaEtariaMaisAfetada = "";
+        this.sexoMaisAfetado = "";
+        this.fatoresRisco = "";
+        this.sazonalidade = "";
+        this.distribuicaoGeografica = "";
+    }
 
     @Column(name = "incidencia_anual")
     private Integer incidenciaAnual; // Incidência anual estimada (por 100.000 habitantes)

@@ -1,15 +1,20 @@
 package com.upsaude.api.response;
 
-import com.upsaude.entity.embeddable.AnamneseAtendimento;
-import com.upsaude.entity.embeddable.ClassificacaoRiscoAtendimento;
-import com.upsaude.entity.embeddable.DiagnosticoAtendimento;
-import com.upsaude.entity.embeddable.InformacoesAtendimento;
-import com.upsaude.entity.embeddable.ProcedimentosRealizadosAtendimento;
+import com.upsaude.api.response.embeddable.AnamneseAtendimentoResponse;
+import com.upsaude.api.response.embeddable.ClassificacaoRiscoAtendimentoResponse;
+import com.upsaude.api.response.embeddable.DiagnosticoAtendimentoResponse;
+import com.upsaude.api.response.embeddable.InformacoesAtendimentoResponse;
+import com.upsaude.api.response.embeddable.ProcedimentosRealizadosAtendimentoResponse;
 import java.time.OffsetDateTime;
 import java.util.UUID;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
-@Data
+@Getter
+@Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
@@ -23,11 +28,11 @@ public class AtendimentoResponse {
     private EspecialidadesMedicasResponse especialidade;
     private EquipeSaudeResponse equipeSaude;
     private ConvenioResponse convenio;
-    private InformacoesAtendimento informacoes;
-    private AnamneseAtendimento anamnese;
-    private DiagnosticoAtendimento diagnostico;
-    private ProcedimentosRealizadosAtendimento procedimentosRealizados;
-    private ClassificacaoRiscoAtendimento classificacaoRisco;
+    private InformacoesAtendimentoResponse informacoes;
+    private AnamneseAtendimentoResponse anamnese;
+    private DiagnosticoAtendimentoResponse diagnostico;
+    private ProcedimentosRealizadosAtendimentoResponse procedimentosRealizados;
+    private ClassificacaoRiscoAtendimentoResponse classificacaoRisco;
     private CidDoencasResponse cidPrincipal;
     private String anotacoes;
     private String observacoesInternas;

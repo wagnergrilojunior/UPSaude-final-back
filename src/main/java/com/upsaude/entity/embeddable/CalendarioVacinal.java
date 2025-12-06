@@ -6,7 +6,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Builder.Default;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
 /**
  * Classe embeddable para informações de calendário vacinal.
@@ -16,9 +15,16 @@ import lombok.NoArgsConstructor;
 @Embeddable
 @Data
 @Builder
-@NoArgsConstructor
 @AllArgsConstructor
 public class CalendarioVacinal {
+
+    public CalendarioVacinal() {
+        this.calendarioBasico = false;
+        this.calendarioCampanha = false;
+        this.faixaEtariaCalendario = "";
+        this.situacaoEpidemiologica = "";
+        this.obrigatoria = false;
+    }
 
     @Column(name = "calendario_basico", nullable = false)
     @Builder.Default

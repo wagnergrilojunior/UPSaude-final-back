@@ -43,6 +43,7 @@ public interface ReceitasMedicasMapper extends EntityMapper<ReceitasMedicas, Rec
     @Mapping(target = "cidPrincipal", ignore = true)
     @Mapping(target = "medico", ignore = true)
     @Mapping(target = "paciente", ignore = true)
+    @Mapping(target = "medicacoes", ignore = true)
     ReceitasMedicas fromRequest(ReceitasMedicasRequest request);
 
     /**
@@ -57,6 +58,7 @@ public interface ReceitasMedicasMapper extends EntityMapper<ReceitasMedicas, Rec
     @Mapping(target = "cidPrincipal", ignore = true)
     @Mapping(target = "medico", ignore = true)
     @Mapping(target = "paciente", ignore = true)
+    @Mapping(target = "medicacoes", ignore = true)
     void updateFromRequest(ReceitasMedicasRequest request, @MappingTarget ReceitasMedicas entity);
 
     /**

@@ -5,7 +5,6 @@ import jakarta.persistence.Embeddable;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
 /**
  * Classe embeddable para informações de idade mínima e máxima para aplicação da vacina.
@@ -15,9 +14,12 @@ import lombok.NoArgsConstructor;
 @Embeddable
 @Data
 @Builder
-@NoArgsConstructor
 @AllArgsConstructor
 public class IdadeAplicacaoVacina {
+
+    public IdadeAplicacaoVacina() {
+        // Não há campos String ou Boolean NOT NULL para inicializar
+    }
 
     @Column(name = "idade_minima_dias")
     private Integer idadeMinimaDias; // Idade mínima para aplicação em dias
