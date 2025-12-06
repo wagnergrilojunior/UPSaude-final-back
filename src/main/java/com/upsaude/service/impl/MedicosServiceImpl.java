@@ -5,20 +5,21 @@ import com.upsaude.api.response.MedicosResponse;
 import com.upsaude.entity.EspecialidadesMedicas;
 import com.upsaude.entity.Medicos;
 import com.upsaude.exception.BadRequestException;
+import com.upsaude.exception.InternalServerErrorException;
 import com.upsaude.exception.NotFoundException;
 import com.upsaude.mapper.MedicosMapper;
 import com.upsaude.repository.EspecialidadesMedicasRepository;
 import com.upsaude.repository.MedicosRepository;
 import com.upsaude.service.MedicosService;
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.BeanUtils;
-import org.springframework.data.domain.Page;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.dao.DataAccessException;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.UUID;
 
@@ -41,93 +42,168 @@ public class MedicosServiceImpl implements MedicosService {
     @Transactional
     @CacheEvict(value = "medicos", allEntries = true)
     public MedicosResponse criar(MedicosRequest request) {
-        log.debug("Criando novo médico");
-
-        validarDadosBasicos(request);
-
-        Medicos medicos = medicosMapper.fromRequest(request);
-        medicos.setActive(true);
-
-        // Processar relacionamentos - JPA gerencia a persistência automaticamente
-        processarRelacionamentos(medicos, request);
-
-        Medicos medicosSalvo = medicosRepository.save(medicos);
-        log.info("Médico criado com sucesso. ID: {}", medicosSalvo.getId());
-
-        return medicosMapper.toResponse(medicosSalvo);
-    }
-
-    @Override
-    @Transactional
-    @Cacheable(value = "medicos", key = "#id")
-    public MedicosResponse obterPorId(UUID id) {
-        log.debug("Buscando medicos por ID: {} (cache miss)", id);
-
-        if (id == null) {
-            throw new BadRequestException("ID do medicos é obrigatório");
+        log.debug("Criando novo médico. Request: {}", request);
+        
+        if (request == null) {
+            log.warn("Tentativa de criar médico com request nulo");
+            throw new BadRequestException("Dados do médico são obrigatórios");
         }
 
-        Medicos medicos = medicosRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("Medicos não encontrado com ID: " + id));
+        try {
+            validarDadosBasicos(request);
 
-        return medicosMapper.toResponse(medicos);
+            Medicos medicos = medicosMapper.fromRequest(request);
+            medicos.setActive(true);
+
+            // Processar relacionamentos - JPA gerencia a persistência automaticamente
+            processarRelacionamentos(medicos, request);
+
+            Medicos medicosSalvo = medicosRepository.save(medicos);
+            log.info("Médico criado com sucesso. ID: {}", medicosSalvo.getId());
+
+            return medicosMapper.toResponse(medicosSalvo);
+        } catch (BadRequestException | NotFoundException e) {
+            log.warn("Erro de validação ao criar médico. Request: {}. Erro: {}", request, e.getMessage());
+            throw e;
+        } catch (DataAccessException e) {
+            log.error("Erro de acesso a dados ao criar médico. Request: {}", request, e);
+            throw new InternalServerErrorException("Erro ao persistir médico", e);
+        } catch (RuntimeException e) {
+            log.error("Erro inesperado ao criar médico. Request: {}", request, e);
+            throw e;
+        }
     }
 
     @Override
+    @Transactional(readOnly = true)
+    @Cacheable(value = "medicos", key = "#id")
+    public MedicosResponse obterPorId(UUID id) {
+        log.debug("Buscando médico por ID: {} (cache miss)", id);
+        
+        if (id == null) {
+            log.warn("ID nulo recebido para busca de médico");
+            throw new BadRequestException("ID do médico é obrigatório");
+        }
+
+        try {
+            Medicos medicos = medicosRepository.findById(id)
+                    .orElseThrow(() -> new NotFoundException("Médico não encontrado com ID: " + id));
+
+            log.debug("Médico encontrado. ID: {}", id);
+            return medicosMapper.toResponse(medicos);
+        } catch (NotFoundException e) {
+            log.warn("Médico não encontrado. ID: {}", id);
+            throw e;
+        } catch (DataAccessException e) {
+            log.error("Erro de acesso a dados ao buscar médico. ID: {}", id, e);
+            throw new InternalServerErrorException("Erro ao buscar médico", e);
+        } catch (RuntimeException e) {
+            log.error("Erro inesperado ao buscar médico. ID: {}", id, e);
+            throw e;
+        }
+    }
+
+    @Override
+    @Transactional(readOnly = true)
     public Page<MedicosResponse> listar(Pageable pageable) {
-        log.debug("Listando Medicos paginados. Página: {}, Tamanho: {}",
+        log.debug("Listando médicos paginados. Página: {}, Tamanho: {}",
                 pageable.getPageNumber(), pageable.getPageSize());
 
-        Page<Medicos> medicos = medicosRepository.findAll(pageable);
-        return medicos.map(medicosMapper::toResponse);
+        try {
+            Page<Medicos> medicos = medicosRepository.findAll(pageable);
+            log.debug("Listagem de médicos concluída. Total de elementos: {}", medicos.getTotalElements());
+            return medicos.map(medicosMapper::toResponse);
+        } catch (DataAccessException e) {
+            log.error("Erro de acesso a dados ao listar médicos. Pageable: {}", pageable, e);
+            throw new InternalServerErrorException("Erro ao listar médicos", e);
+        } catch (RuntimeException e) {
+            log.error("Erro inesperado ao listar médicos. Pageable: {}", pageable, e);
+            throw e;
+        }
     }
 
     @Override
     @Transactional
     @CacheEvict(value = "medicos", key = "#id")
     public MedicosResponse atualizar(UUID id, MedicosRequest request) {
-        log.debug("Atualizando médico. ID: {}", id);
+        log.debug("Atualizando médico. ID: {}, Request: {}", id, request);
 
         if (id == null) {
+            log.warn("ID nulo recebido para atualização de médico");
             throw new BadRequestException("ID do médico é obrigatório");
         }
+        if (request == null) {
+            log.warn("Request nulo recebido para atualização de médico. ID: {}", id);
+            throw new BadRequestException("Dados do médico são obrigatórios");
+        }
 
-        validarDadosBasicos(request);
+        try {
+            validarDadosBasicos(request);
 
-        Medicos medicosExistente = medicosRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("Médico não encontrado com ID: " + id));
+            Medicos medicosExistente = medicosRepository.findById(id)
+                    .orElseThrow(() -> new NotFoundException("Médico não encontrado com ID: " + id));
 
-        atualizarDadosMedicos(medicosExistente, request);
-        
-        // Processar relacionamentos - JPA gerencia a persistência automaticamente
-        processarRelacionamentos(medicosExistente, request);
+            // Usa mapper do MapStruct que preserva campos de controle automaticamente
+            medicosMapper.updateFromRequest(request, medicosExistente);
+            
+            // Processar relacionamentos - JPA gerencia a persistência automaticamente
+            processarRelacionamentos(medicosExistente, request);
 
-        Medicos medicosAtualizado = medicosRepository.save(medicosExistente);
-        log.info("Médico atualizado com sucesso. ID: {}", medicosAtualizado.getId());
+            Medicos medicosAtualizado = medicosRepository.save(medicosExistente);
+            log.info("Médico atualizado com sucesso. ID: {}", medicosAtualizado.getId());
 
-        return medicosMapper.toResponse(medicosAtualizado);
+            return medicosMapper.toResponse(medicosAtualizado);
+        } catch (NotFoundException e) {
+            log.warn("Tentativa de atualizar médico não existente. ID: {}", id);
+            throw e;
+        } catch (BadRequestException e) {
+            log.warn("Erro de validação ao atualizar médico. ID: {}, Request: {}. Erro: {}", id, request, e.getMessage());
+            throw e;
+        } catch (DataAccessException e) {
+            log.error("Erro de acesso a dados ao atualizar médico. ID: {}, Request: {}", id, request, e);
+            throw new InternalServerErrorException("Erro ao atualizar médico", e);
+        } catch (RuntimeException e) {
+            log.error("Erro inesperado ao atualizar médico. ID: {}, Request: {}", id, request, e);
+            throw e;
+        }
     }
 
     @Override
     @Transactional
     @CacheEvict(value = "medicos", key = "#id")
     public void excluir(UUID id) {
-        log.debug("Excluindo medicos. ID: {}", id);
+        log.debug("Excluindo médico. ID: {}", id);
 
         if (id == null) {
-            throw new BadRequestException("ID do medicos é obrigatório");
+            log.warn("ID nulo recebido para exclusão de médico");
+            throw new BadRequestException("ID do médico é obrigatório");
         }
 
-        Medicos medicos = medicosRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("Medicos não encontrado com ID: " + id));
+        try {
+            Medicos medicos = medicosRepository.findById(id)
+                    .orElseThrow(() -> new NotFoundException("Médico não encontrado com ID: " + id));
 
-        if (Boolean.FALSE.equals(medicos.getActive())) {
-            throw new BadRequestException("Medicos já está inativo");
+            if (Boolean.FALSE.equals(medicos.getActive())) {
+                log.warn("Tentativa de excluir médico já inativo. ID: {}", id);
+                throw new BadRequestException("Médico já está inativo");
+            }
+
+            medicos.setActive(false);
+            medicosRepository.save(medicos);
+            log.info("Médico excluído (desativado) com sucesso. ID: {}", id);
+        } catch (NotFoundException e) {
+            log.warn("Tentativa de excluir médico não existente. ID: {}", id);
+            throw e;
+        } catch (BadRequestException e) {
+            log.warn("Erro de validação ao excluir médico. ID: {}. Erro: {}", id, e.getMessage());
+            throw e;
+        } catch (DataAccessException e) {
+            log.error("Erro de acesso a dados ao excluir médico. ID: {}", id, e);
+            throw new InternalServerErrorException("Erro ao excluir médico", e);
+        } catch (RuntimeException e) {
+            log.error("Erro inesperado ao excluir médico. ID: {}", id, e);
+            throw e;
         }
-
-        medicos.setActive(false);
-        medicosRepository.save(medicos);
-        log.info("Medicos excluído (desativado) com sucesso. ID: {}", id);
     }
 
     private void validarDadosBasicos(MedicosRequest request) {
@@ -136,24 +212,8 @@ public class MedicosServiceImpl implements MedicosService {
         }
     }
 
-    private void atualizarDadosMedicos(Medicos medicos, MedicosRequest request) {
-        Medicos medicosAtualizado = medicosMapper.fromRequest(request);
-        
-        // Preserva campos de controle
-        UUID idOriginal = medicos.getId();
-        com.upsaude.entity.Tenant tenantOriginal = medicos.getTenant();
-        Boolean activeOriginal = medicos.getActive();
-        java.time.OffsetDateTime createdAtOriginal = medicos.getCreatedAt();
-        
-        // Copia todas as propriedades do objeto atualizado (exceto relacionamentos)
-        BeanUtils.copyProperties(medicosAtualizado, medicos, "especialidade", "vinculosEstabelecimentos", "enderecos");
-        
-        // Restaura campos de controle
-        medicos.setId(idOriginal);
-        medicos.setTenant(tenantOriginal);
-        medicos.setActive(activeOriginal);
-        medicos.setCreatedAt(createdAtOriginal);
-    }
+    // Método removido - agora usa medicosMapper.updateFromRequest diretamente
+    // O MapStruct já preserva campos de controle automaticamente
 
     /**
      * Processa relacionamentos do médico de forma simplificada.

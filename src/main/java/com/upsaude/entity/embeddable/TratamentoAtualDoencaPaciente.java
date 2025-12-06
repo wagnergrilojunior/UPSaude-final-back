@@ -5,7 +5,6 @@ import jakarta.persistence.Embeddable;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
 
@@ -17,9 +16,18 @@ import java.time.LocalDate;
 @Embeddable
 @Data
 @Builder
-@NoArgsConstructor
 @AllArgsConstructor
 public class TratamentoAtualDoencaPaciente {
+
+    public TratamentoAtualDoencaPaciente() {
+        this.medicacaoAtual = "";
+        this.doseMedicacao = "";
+        this.frequenciaMedicacao = "";
+        this.procedimentosEmAndamento = "";
+        this.adherenciaTratamento = "";
+        this.efeitosColaterais = "";
+        this.contraindicacoes = "";
+    }
 
     @Column(name = "medicacao_atual", columnDefinition = "TEXT")
     private String medicacaoAtual; // Medicamentos em uso atual

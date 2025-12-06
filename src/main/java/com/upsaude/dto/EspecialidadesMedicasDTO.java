@@ -1,6 +1,6 @@
 package com.upsaude.dto;
 
-import com.upsaude.entity.embeddable.ClassificacaoEspecialidadeMedica;
+import com.upsaude.dto.embeddable.ClassificacaoEspecialidadeMedicaDTO;
 import java.time.OffsetDateTime;
 import java.util.UUID;
 import lombok.*;
@@ -17,7 +17,7 @@ public class EspecialidadesMedicasDTO {
     private String nome;
     private String codigo;
     private String nomeCientifico;
-    private ClassificacaoEspecialidadeMedica classificacao;
+    private ClassificacaoEspecialidadeMedicaDTO classificacao;
     private String descricao;
     private String areaAtuacaoDescricao;
     private String requisitosFormacao;

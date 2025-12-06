@@ -9,7 +9,6 @@ import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
 
@@ -21,9 +20,17 @@ import java.time.LocalDate;
 @Embeddable
 @Data
 @Builder
-@NoArgsConstructor
 @AllArgsConstructor
 public class RegistroControleMedicamento {
+
+    public RegistroControleMedicamento() {
+        this.registroAnvisa = "";
+        this.receitaObrigatoria = false;
+        this.controlado = false;
+        this.usoContinuo = false;
+        this.medicamentoEspecial = false;
+        this.medicamentoExcepcional = false;
+    }
 
     @Size(max = 50, message = "Registro ANVISA deve ter no máximo 50 caracteres")
     @Column(name = "registro_anvisa", length = 50)

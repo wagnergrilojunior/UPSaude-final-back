@@ -5,7 +5,6 @@ import jakarta.persistence.Embeddable;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
 /**
  * Classe embeddable para informações de anamnese da consulta.
@@ -15,9 +14,20 @@ import lombok.NoArgsConstructor;
 @Embeddable
 @Data
 @Builder
-@NoArgsConstructor
 @AllArgsConstructor
 public class AnamneseConsulta {
+
+    public AnamneseConsulta() {
+        this.queixaPrincipal = "";
+        this.historiaDoencaAtual = "";
+        this.antecedentesPessoais = "";
+        this.antecedentesFamiliares = "";
+        this.medicamentosUso = "";
+        this.alergias = "";
+        this.habitosVida = "";
+        this.exameFisico = "";
+        this.sinaisVitais = "";
+    }
 
     @Column(name = "queixa_principal", columnDefinition = "TEXT")
     private String queixaPrincipal; // Queixa principal do paciente

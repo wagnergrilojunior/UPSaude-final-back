@@ -7,7 +7,6 @@ import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
 /**
  * Classe embeddable para informações de contato do convênio.
@@ -17,9 +16,22 @@ import lombok.NoArgsConstructor;
 @Embeddable
 @Data
 @Builder
-@NoArgsConstructor
 @AllArgsConstructor
 public class ContatoConvenio {
+
+    public ContatoConvenio() {
+        this.telefonePrincipal = "";
+        this.telefoneSecundario = "";
+        this.fax = "";
+        this.whatsapp = "";
+        this.emailPrincipal = "";
+        this.emailSecundario = "";
+        this.site = "";
+        this.nomeContato = "";
+        this.cargoContato = "";
+        this.telefoneContato = "";
+        this.emailContato = "";
+    }
 
     @Size(max = 20, message = "Telefone principal deve ter no máximo 20 caracteres")
     @Column(name = "telefone_principal", length = 20)

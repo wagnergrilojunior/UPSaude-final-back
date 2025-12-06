@@ -14,7 +14,7 @@ import org.mapstruct.MappingTarget;
  * Mapper para conversões de Medicos.
  * Entity ↔ DTO ↔ Request/Response
  */
-@Mapper(config = MappingConfig.class, uses = {EspecialidadesMedicasMapper.class})
+@Mapper(config = MappingConfig.class, uses = {EspecialidadesMedicasMapper.class, com.upsaude.mapper.embeddable.DadosPessoaisMedicoMapper.class, com.upsaude.mapper.embeddable.RegistroProfissionalMedicoMapper.class, com.upsaude.mapper.embeddable.FormacaoMedicoMapper.class, com.upsaude.mapper.embeddable.ContatoMedicoMapper.class})
 public interface MedicosMapper extends EntityMapper<Medicos, MedicosDTO> {
 
     /**
@@ -39,6 +39,8 @@ public interface MedicosMapper extends EntityMapper<Medicos, MedicosDTO> {
     @Mapping(target = "updatedAt", ignore = true)
     @Mapping(target = "active", ignore = true)
     @Mapping(target = "especialidade", ignore = true)
+    @Mapping(target = "enderecos", ignore = true)
+    @Mapping(target = "medicosEstabelecimentos", ignore = true)
     Medicos fromRequest(MedicosRequest request);
 
     /**
@@ -51,6 +53,8 @@ public interface MedicosMapper extends EntityMapper<Medicos, MedicosDTO> {
     @Mapping(target = "updatedAt", ignore = true)
     @Mapping(target = "active", ignore = true)
     @Mapping(target = "especialidade", ignore = true)
+    @Mapping(target = "enderecos", ignore = true)
+    @Mapping(target = "medicosEstabelecimentos", ignore = true)
     void updateFromRequest(MedicosRequest request, @MappingTarget Medicos entity);
 
     /**

@@ -1,11 +1,11 @@
 package com.upsaude.dto;
 
-import com.upsaude.entity.embeddable.ClassificacaoMedicamento;
-import com.upsaude.entity.embeddable.ConservacaoArmazenamentoMedicamento;
-import com.upsaude.entity.embeddable.ContraindicacoesPrecaucoesMedicamento;
-import com.upsaude.entity.embeddable.DosagemAdministracaoMedicamento;
-import com.upsaude.entity.embeddable.IdentificacaoMedicamento;
-import com.upsaude.entity.embeddable.RegistroControleMedicamento;
+import com.upsaude.dto.embeddable.ClassificacaoMedicamentoDTO;
+import com.upsaude.dto.embeddable.ConservacaoArmazenamentoMedicamentoDTO;
+import com.upsaude.dto.embeddable.ContraindicacoesPrecaucoesMedicamentoDTO;
+import com.upsaude.dto.embeddable.DosagemAdministracaoMedicamentoDTO;
+import com.upsaude.dto.embeddable.IdentificacaoMedicamentoDTO;
+import com.upsaude.dto.embeddable.RegistroControleMedicamentoDTO;
 import java.time.OffsetDateTime;
 import java.util.UUID;
 import lombok.*;
@@ -20,12 +20,12 @@ public class MedicacaoDTO {
     private OffsetDateTime updatedAt;
     private Boolean active;
     private FabricantesMedicamentoDTO fabricanteEntity;
-    private IdentificacaoMedicamento identificacao;
-    private DosagemAdministracaoMedicamento dosagemAdministracao;
-    private ClassificacaoMedicamento classificacao;
-    private RegistroControleMedicamento registroControle;
-    private ContraindicacoesPrecaucoesMedicamento contraindicacoesPrecaucoes;
-    private ConservacaoArmazenamentoMedicamento conservacaoArmazenamento;
+    private IdentificacaoMedicamentoDTO identificacao;
+    private DosagemAdministracaoMedicamentoDTO dosagemAdministracao;
+    private ClassificacaoMedicamentoDTO classificacao;
+    private RegistroControleMedicamentoDTO registroControle;
+    private ContraindicacoesPrecaucoesMedicamentoDTO contraindicacoesPrecaucoes;
+    private ConservacaoArmazenamentoMedicamentoDTO conservacaoArmazenamento;
     private String descricao;
     private String indicacoes;
     private String observacoes;

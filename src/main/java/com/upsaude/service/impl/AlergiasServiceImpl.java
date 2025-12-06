@@ -1,5 +1,12 @@
 package com.upsaude.service.impl;
 
+import java.util.UUID;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.upsaude.api.request.AlergiasRequest;
 import com.upsaude.api.response.AlergiasResponse;
 import com.upsaude.entity.Alergias;
@@ -8,23 +15,10 @@ import com.upsaude.exception.NotFoundException;
 import com.upsaude.mapper.AlergiasMapper;
 import com.upsaude.repository.AlergiasRepository;
 import com.upsaude.service.AlergiasService;
-import jakarta.transaction.Transactional;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.BeanUtils;
-import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.Cacheable;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.stereotype.Service;
 
-import java.util.UUID;
-
-/**
- * Implementação do serviço de gerenciamento de Alergias.
- *
- * @author UPSaúde
- */
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -35,111 +29,118 @@ public class AlergiasServiceImpl implements AlergiasService {
 
     @Override
     @Transactional
-    @CacheEvict(value = "alergias", allEntries = true)
     public AlergiasResponse criar(AlergiasRequest request) {
-        log.debug("Criando novo alergias");
-
-        validarDadosBasicos(request);
-
-        Alergias alergias = alergiasMapper.fromRequest(request);
-        alergias.setActive(true);
-
-        Alergias alergiasSalvo = alergiasRepository.save(alergias);
-        log.info("Alergias criado com sucesso. ID: {}", alergiasSalvo.getId());
-
-        return alergiasMapper.toResponse(alergiasSalvo);
-    }
-
-    @Override
-    @Transactional
-    @Cacheable(value = "alergias", key = "#id")
-    public AlergiasResponse obterPorId(UUID id) {
-        log.debug("Buscando alergias por ID: {} (cache miss)", id);
-
-        if (id == null) {
-            throw new BadRequestException("ID do alergias é obrigatório");
-        }
-
-        Alergias alergias = alergiasRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("Alergias não encontrado com ID: " + id));
-
-        return alergiasMapper.toResponse(alergias);
-    }
-
-    @Override
-    public Page<AlergiasResponse> listar(Pageable pageable) {
-        log.debug("Listando Alergias paginados. Página: {}, Tamanho: {}",
-                pageable.getPageNumber(), pageable.getPageSize());
-
-        Page<Alergias> alergias = alergiasRepository.findAll(pageable);
-        return alergias.map(alergiasMapper::toResponse);
-    }
-
-    @Override
-    @Transactional
-    @CacheEvict(value = "alergias", key = "#id")
-    public AlergiasResponse atualizar(UUID id, AlergiasRequest request) {
-        log.debug("Atualizando alergias. ID: {}", id);
-
-        if (id == null) {
-            throw new BadRequestException("ID do alergias é obrigatório");
-        }
-
-        validarDadosBasicos(request);
-
-        Alergias alergiasExistente = alergiasRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("Alergias não encontrado com ID: " + id));
-
-        atualizarDadosAlergias(alergiasExistente, request);
-
-        Alergias alergiasAtualizado = alergiasRepository.save(alergiasExistente);
-        log.info("Alergias atualizado com sucesso. ID: {}", alergiasAtualizado.getId());
-
-        return alergiasMapper.toResponse(alergiasAtualizado);
-    }
-
-    @Override
-    @Transactional
-    @CacheEvict(value = "alergias", key = "#id")
-    public void excluir(UUID id) {
-        log.debug("Excluindo alergias. ID: {}", id);
-
-        if (id == null) {
-            throw new BadRequestException("ID do alergias é obrigatório");
-        }
-
-        Alergias alergias = alergiasRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("Alergias não encontrado com ID: " + id));
-
-        if (Boolean.FALSE.equals(alergias.getActive())) {
-            throw new BadRequestException("Alergias já está inativo");
-        }
-
-        alergias.setActive(false);
-        alergiasRepository.save(alergias);
-        log.info("Alergias excluído (desativado) com sucesso. ID: {}", id);
-    }
-
-    private void validarDadosBasicos(AlergiasRequest request) {
+        log.debug("Criando nova Alergia — payload: {}", request);
         if (request == null) {
-            throw new BadRequestException("Dados do alergias são obrigatórios");
+            log.error("Request de criação de Alergia é nula");
+            throw new BadRequestException("Dados da alergia são obrigatórios");
+        }
+
+        try {
+            Alergias alergia = alergiasMapper.fromRequest(request);
+            alergia.setActive(true);
+            Alergias salvo = alergiasRepository.save(alergia);
+            log.info("Alergia criada com sucesso. ID: {}", salvo.getId());
+            return alergiasMapper.toResponse(salvo);
+        } catch (Exception ex) {
+            log.error("Erro ao criar Alergia — payload: {}. Exception: {}", request, ex.getMessage(), ex);
+            throw ex;
         }
     }
 
-    private void atualizarDadosAlergias(Alergias alergias, AlergiasRequest request) {
-        Alergias alergiasAtualizado = alergiasMapper.fromRequest(request);
-        
-        // Preserva campos de controle
-        java.util.UUID idOriginal = alergias.getId();
-        Boolean activeOriginal = alergias.getActive();
-        java.time.OffsetDateTime createdAtOriginal = alergias.getCreatedAt();
-        
-        // Copia todas as propriedades do objeto atualizado
-        BeanUtils.copyProperties(alergiasAtualizado, alergias);
-        
-        // Restaura campos de controle
-        alergias.setId(idOriginal);
-        alergias.setActive(activeOriginal);
-        alergias.setCreatedAt(createdAtOriginal);
+    @Override
+    @Transactional(readOnly = true)
+    public AlergiasResponse obterPorId(UUID id) {
+        log.debug("Buscando Alergia por ID: {}", id);
+        if (id == null) {
+            log.error("ID para busca de Alergia é nulo");
+            throw new BadRequestException("ID da alergia é obrigatório");
+        }
+
+        try {
+            Alergias alergia = alergiasRepository.findById(id)
+                    .orElseThrow(() -> new NotFoundException("Alergia não encontrada com ID: " + id));
+            return alergiasMapper.toResponse(alergia);
+        } catch (NotFoundException nf) {
+            log.warn("Alergia não encontrada — ID: {}", id);
+            throw nf;
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao buscar Alergia por ID: {} — Exception: {}", id, ex.getMessage(), ex);
+            throw ex;
+        }
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Page<AlergiasResponse> listar(Pageable pageable) {
+        log.debug("Listando alergias — page: {}, size: {}", pageable.getPageNumber(), pageable.getPageSize());
+        try {
+            Page<Alergias> page = alergiasRepository.findAll(pageable);
+            return page.map(alergiasMapper::toResponse);
+        } catch (Exception ex) {
+            log.error("Erro ao listar alergias — pageable: {}. Exception: {}", pageable, ex.getMessage(), ex);
+            throw ex;
+        }
+    }
+
+    @Override
+    @Transactional
+    public AlergiasResponse atualizar(UUID id, AlergiasRequest request) {
+        log.debug("Atualizando Alergia — ID: {}, payload: {}", id, request);
+        if (id == null) {
+            log.error("ID para atualização de Alergia é nulo");
+            throw new BadRequestException("ID da alergia é obrigatório");
+        }
+        if (request == null) {
+            log.error("Request de atualização de Alergia é nula — ID: {}", id);
+            throw new BadRequestException("Dados da alergia são obrigatórios");
+        }
+
+        try {
+            Alergias existente = alergiasRepository.findById(id)
+                    .orElseThrow(() -> new NotFoundException("Alergia não encontrada com ID: " + id));
+
+            alergiasMapper.updateFromRequest(request, existente);
+
+            Alergias atualizado = alergiasRepository.save(existente);
+            log.info("Alergia atualizada com sucesso. ID: {}", atualizado.getId());
+            return alergiasMapper.toResponse(atualizado);
+        } catch (NotFoundException nf) {
+            log.warn("Tentativa de atualizar Alergia não existente — ID: {}", id);
+            throw nf;
+        } catch (Exception ex) {
+            log.error("Erro ao atualizar Alergia — ID: {}, payload: {}. Exception: {}", id, request, ex.getMessage(), ex);
+            throw ex;
+        }
+    }
+
+    @Override
+    @Transactional
+    public void excluir(UUID id) {
+        log.debug("Excluindo Alergia — ID: {}", id);
+        if (id == null) {
+            log.error("ID para exclusão de Alergia é nulo");
+            throw new BadRequestException("ID da alergia é obrigatório");
+        }
+
+        try {
+            Alergias existente = alergiasRepository.findById(id)
+                    .orElseThrow(() -> new NotFoundException("Alergia não encontrada com ID: " + id));
+
+            if (Boolean.FALSE.equals(existente.getActive())) {
+                log.warn("Tentativa de excluir Alergia já inativa — ID: {}", id);
+                throw new BadRequestException("Alergia já está inativa");
+            }
+
+            existente.setActive(false);
+            alergiasRepository.save(existente);
+            log.info("Alergia desativada com sucesso. ID: {}", id);
+        } catch (NotFoundException nf) {
+            log.warn("Tentativa de excluir Alergia não existente — ID: {}", id);
+            throw nf;
+        } catch (Exception ex) {
+            log.error("Erro ao excluir Alergia — ID: {}. Exception: {}", id, ex.getMessage(), ex);
+            throw ex;
+        }
     }
 }

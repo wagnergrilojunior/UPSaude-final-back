@@ -42,6 +42,6 @@ public abstract class BaseEntityWithoutTenant {
     private OffsetDateTime updatedAt;
 
     @Column(name = "ativo", nullable = false)
-    private Boolean active;
+    private Boolean active = true;
 }
 

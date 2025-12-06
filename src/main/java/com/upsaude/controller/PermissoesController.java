@@ -2,6 +2,9 @@ package com.upsaude.controller;
 
 import com.upsaude.api.request.PermissoesRequest;
 import com.upsaude.api.response.PermissoesResponse;
+import com.upsaude.exception.BadRequestException;
+import com.upsaude.exception.ConflictException;
+import com.upsaude.exception.NotFoundException;
 import com.upsaude.service.PermissoesService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -12,6 +15,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -25,6 +29,7 @@ import java.util.UUID;
  *
  * @author UPSaúde
  */
+@Slf4j
 @RestController
 @RequestMapping("/v1/permissoes")
 @Tag(name = "Permissões", description = "API para gerenciamento de Permissões")
@@ -42,8 +47,18 @@ public class PermissoesController {
             @ApiResponse(responseCode = "403", description = "Acesso negado")
     })
     public ResponseEntity<PermissoesResponse> criar(@Valid @RequestBody PermissoesRequest request) {
-        PermissoesResponse response = permissoesService.criar(request);
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        log.debug("REQUEST POST /v1/permissoes - payload: {}", request);
+        try {
+            PermissoesResponse response = permissoesService.criar(request);
+            log.info("Permissão criada com sucesso. ID: {}", response.getId());
+            return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        } catch (BadRequestException | ConflictException ex) {
+            log.warn("Falha ao criar permissão — mensagem: {}, payload: {}", ex.getMessage(), request);
+            throw ex;
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao criar permissão — payload: {}", request, ex);
+            throw ex;
+        }
     }
 
     @GetMapping
@@ -55,8 +70,14 @@ public class PermissoesController {
     public ResponseEntity<Page<PermissoesResponse>> listar(
             @Parameter(description = "Parâmetros de paginação (page, size, sort)")
             Pageable pageable) {
-        Page<PermissoesResponse> response = permissoesService.listar(pageable);
-        return ResponseEntity.ok(response);
+        log.debug("REQUEST GET /v1/permissoes - pageable: {}", pageable);
+        try {
+            Page<PermissoesResponse> response = permissoesService.listar(pageable);
+            return ResponseEntity.ok(response);
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao listar permissões — pageable: {}", pageable, ex);
+            throw ex;
+        }
     }
 
     @GetMapping("/{id}")
@@ -70,8 +91,17 @@ public class PermissoesController {
     public ResponseEntity<PermissoesResponse> obterPorId(
             @Parameter(description = "ID da permissão", required = true)
             @PathVariable UUID id) {
-        PermissoesResponse response = permissoesService.obterPorId(id);
-        return ResponseEntity.ok(response);
+        log.debug("REQUEST GET /v1/permissoes/{}", id);
+        try {
+            PermissoesResponse response = permissoesService.obterPorId(id);
+            return ResponseEntity.ok(response);
+        } catch (NotFoundException ex) {
+            log.warn("Permissão não encontrada — ID: {}, mensagem: {}", id, ex.getMessage());
+            throw ex;
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao obter permissão por ID — ID: {}", id, ex);
+            throw ex;
+        }
     }
 
     @PutMapping("/{id}")
@@ -87,8 +117,18 @@ public class PermissoesController {
             @Parameter(description = "ID da permissão", required = true)
             @PathVariable UUID id,
             @Valid @RequestBody PermissoesRequest request) {
-        PermissoesResponse response = permissoesService.atualizar(id, request);
-        return ResponseEntity.ok(response);
+        log.debug("REQUEST PUT /v1/permissoes/{} - payload: {}", id, request);
+        try {
+            PermissoesResponse response = permissoesService.atualizar(id, request);
+            log.info("Permissão atualizada com sucesso. ID: {}", id);
+            return ResponseEntity.ok(response);
+        } catch (BadRequestException | NotFoundException ex) {
+            log.warn("Falha ao atualizar permissão — ID: {}, mensagem: {}, payload: {}", id, ex.getMessage(), request);
+            throw ex;
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao atualizar permissão — ID: {}, payload: {}", id, request, ex);
+            throw ex;
+        }
     }
 
     @DeleteMapping("/{id}")
@@ -101,8 +141,18 @@ public class PermissoesController {
     public ResponseEntity<Void> excluir(
             @Parameter(description = "ID da permissão", required = true)
             @PathVariable UUID id) {
-        permissoesService.excluir(id);
-        return ResponseEntity.noContent().build();
+        log.debug("REQUEST DELETE /v1/permissoes/{}", id);
+        try {
+            permissoesService.excluir(id);
+            log.info("Permissão excluída com sucesso. ID: {}", id);
+            return ResponseEntity.noContent().build();
+        } catch (NotFoundException ex) {
+            log.warn("Falha ao excluir permissão — ID: {}, mensagem: {}", id, ex.getMessage());
+            throw ex;
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao excluir permissão — ID: {}", id, ex);
+            throw ex;
+        }
     }
 }
 

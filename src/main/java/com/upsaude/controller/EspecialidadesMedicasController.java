@@ -2,6 +2,9 @@ package com.upsaude.controller;
 
 import com.upsaude.api.request.EspecialidadesMedicasRequest;
 import com.upsaude.api.response.EspecialidadesMedicasResponse;
+import com.upsaude.exception.BadRequestException;
+import com.upsaude.exception.ConflictException;
+import com.upsaude.exception.NotFoundException;
 import com.upsaude.service.EspecialidadesMedicasService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -12,6 +15,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -29,6 +33,7 @@ import java.util.UUID;
 @RequestMapping("/v1/especialidades-medicas")
 @Tag(name = "Especialidades Médicas", description = "API para gerenciamento de Especialidades Médicas")
 @RequiredArgsConstructor
+@Slf4j
 public class EspecialidadesMedicasController {
 
     private final EspecialidadesMedicasService especialidadesMedicasService;
@@ -42,8 +47,18 @@ public class EspecialidadesMedicasController {
             @ApiResponse(responseCode = "403", description = "Acesso negado")
     })
     public ResponseEntity<EspecialidadesMedicasResponse> criar(@Valid @RequestBody EspecialidadesMedicasRequest request) {
-        EspecialidadesMedicasResponse response = especialidadesMedicasService.criar(request);
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        log.debug("REQUEST POST /v1/especialidades-medicas - payload: {}", request);
+        try {
+            EspecialidadesMedicasResponse response = especialidadesMedicasService.criar(request);
+            log.info("Especialidade médica criada com sucesso. ID: {}", response.getId());
+            return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        } catch (BadRequestException | ConflictException ex) {
+            log.warn("Falha ao criar especialidade médica — mensagem: {}, payload: {}", ex.getMessage(), request);
+            throw ex;
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao criar especialidade médica — payload: {}", request, ex);
+            throw ex;
+        }
     }
 
     @GetMapping
@@ -55,8 +70,14 @@ public class EspecialidadesMedicasController {
     public ResponseEntity<Page<EspecialidadesMedicasResponse>> listar(
             @Parameter(description = "Parâmetros de paginação (page, size, sort)")
             Pageable pageable) {
-        Page<EspecialidadesMedicasResponse> response = especialidadesMedicasService.listar(pageable);
-        return ResponseEntity.ok(response);
+        log.debug("REQUEST GET /v1/especialidades-medicas - pageable: {}", pageable);
+        try {
+            Page<EspecialidadesMedicasResponse> response = especialidadesMedicasService.listar(pageable);
+            return ResponseEntity.ok(response);
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao listar especialidades médicas — pageable: {}", pageable, ex);
+            throw ex;
+        }
     }
 
     @GetMapping("/{id}")
@@ -70,8 +91,17 @@ public class EspecialidadesMedicasController {
     public ResponseEntity<EspecialidadesMedicasResponse> obterPorId(
             @Parameter(description = "ID da especialidade médica", required = true)
             @PathVariable UUID id) {
-        EspecialidadesMedicasResponse response = especialidadesMedicasService.obterPorId(id);
-        return ResponseEntity.ok(response);
+        log.debug("REQUEST GET /v1/especialidades-medicas/{}", id);
+        try {
+            EspecialidadesMedicasResponse response = especialidadesMedicasService.obterPorId(id);
+            return ResponseEntity.ok(response);
+        } catch (NotFoundException ex) {
+            log.warn("Especialidade médica não encontrada — ID: {}, mensagem: {}", id, ex.getMessage());
+            throw ex;
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao obter especialidade médica por ID — ID: {}", id, ex);
+            throw ex;
+        }
     }
 
     @PutMapping("/{id}")
@@ -87,8 +117,18 @@ public class EspecialidadesMedicasController {
             @Parameter(description = "ID da especialidade médica", required = true)
             @PathVariable UUID id,
             @Valid @RequestBody EspecialidadesMedicasRequest request) {
-        EspecialidadesMedicasResponse response = especialidadesMedicasService.atualizar(id, request);
-        return ResponseEntity.ok(response);
+        log.debug("REQUEST PUT /v1/especialidades-medicas/{} - payload: {}", id, request);
+        try {
+            EspecialidadesMedicasResponse response = especialidadesMedicasService.atualizar(id, request);
+            log.info("Especialidade médica atualizada com sucesso. ID: {}", response.getId());
+            return ResponseEntity.ok(response);
+        } catch (BadRequestException | NotFoundException | ConflictException ex) {
+            log.warn("Falha ao atualizar especialidade médica — ID: {}, mensagem: {}, payload: {}", id, ex.getMessage(), request);
+            throw ex;
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao atualizar especialidade médica — ID: {}, payload: {}", id, request, ex);
+            throw ex;
+        }
     }
 
     @DeleteMapping("/{id}")
@@ -101,8 +141,17 @@ public class EspecialidadesMedicasController {
     public ResponseEntity<Void> excluir(
             @Parameter(description = "ID da especialidade médica", required = true)
             @PathVariable UUID id) {
-        especialidadesMedicasService.excluir(id);
-        return ResponseEntity.noContent().build();
+        log.debug("REQUEST DELETE /v1/especialidades-medicas/{}", id);
+        try {
+            especialidadesMedicasService.excluir(id);
+            log.info("Especialidade médica excluída com sucesso. ID: {}", id);
+            return ResponseEntity.noContent().build();
+        } catch (NotFoundException ex) {
+            log.warn("Especialidade médica não encontrada para exclusão — ID: {}, mensagem: {}", id, ex.getMessage());
+            throw ex;
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao excluir especialidade médica — ID: {}", id, ex);
+            throw ex;
+        }
     }
 }
-

@@ -2,6 +2,9 @@ package com.upsaude.controller;
 
 import com.upsaude.api.request.FabricantesVacinaRequest;
 import com.upsaude.api.response.FabricantesVacinaResponse;
+import com.upsaude.exception.BadRequestException;
+import com.upsaude.exception.ConflictException;
+import com.upsaude.exception.NotFoundException;
 import com.upsaude.service.FabricantesVacinaService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -12,6 +15,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -25,6 +29,7 @@ import java.util.UUID;
  *
  * @author UPSaúde
  */
+@Slf4j
 @RestController
 @RequestMapping("/v1/fabricantes-vacina")
 @Tag(name = "Fabricantes de Vacina", description = "API para gerenciamento de Fabricantes de Vacina")
@@ -42,8 +47,18 @@ public class FabricantesVacinaController {
             @ApiResponse(responseCode = "403", description = "Acesso negado")
     })
     public ResponseEntity<FabricantesVacinaResponse> criar(@Valid @RequestBody FabricantesVacinaRequest request) {
-        FabricantesVacinaResponse response = fabricantesVacinaService.criar(request);
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        log.debug("REQUEST POST /v1/fabricantes-vacina - payload: {}", request);
+        try {
+            FabricantesVacinaResponse response = fabricantesVacinaService.criar(request);
+            log.info("Fabricante de vacina criado com sucesso. ID: {}", response.getId());
+            return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        } catch (BadRequestException | ConflictException ex) {
+            log.warn("Falha ao criar fabricante de vacina — mensagem: {}, payload: {}", ex.getMessage(), request);
+            throw ex;
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao criar fabricante de vacina — payload: {}", request, ex);
+            throw ex;
+        }
     }
 
     @GetMapping
@@ -55,8 +70,14 @@ public class FabricantesVacinaController {
     public ResponseEntity<Page<FabricantesVacinaResponse>> listar(
             @Parameter(description = "Parâmetros de paginação (page, size, sort)")
             Pageable pageable) {
-        Page<FabricantesVacinaResponse> response = fabricantesVacinaService.listar(pageable);
-        return ResponseEntity.ok(response);
+        log.debug("REQUEST GET /v1/fabricantes-vacina - pageable: {}", pageable);
+        try {
+            Page<FabricantesVacinaResponse> response = fabricantesVacinaService.listar(pageable);
+            return ResponseEntity.ok(response);
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao listar fabricantes de vacina — pageable: {}", pageable, ex);
+            throw ex;
+        }
     }
 
     @GetMapping("/{id}")
@@ -70,8 +91,17 @@ public class FabricantesVacinaController {
     public ResponseEntity<FabricantesVacinaResponse> obterPorId(
             @Parameter(description = "ID do fabricante de vacina", required = true)
             @PathVariable UUID id) {
-        FabricantesVacinaResponse response = fabricantesVacinaService.obterPorId(id);
-        return ResponseEntity.ok(response);
+        log.debug("REQUEST GET /v1/fabricantes-vacina/{}", id);
+        try {
+            FabricantesVacinaResponse response = fabricantesVacinaService.obterPorId(id);
+            return ResponseEntity.ok(response);
+        } catch (NotFoundException ex) {
+            log.warn("Fabricante de vacina não encontrado — ID: {}, mensagem: {}", id, ex.getMessage());
+            throw ex;
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao obter fabricante de vacina por ID — ID: {}", id, ex);
+            throw ex;
+        }
     }
 
     @PutMapping("/{id}")
@@ -87,8 +117,18 @@ public class FabricantesVacinaController {
             @Parameter(description = "ID do fabricante de vacina", required = true)
             @PathVariable UUID id,
             @Valid @RequestBody FabricantesVacinaRequest request) {
-        FabricantesVacinaResponse response = fabricantesVacinaService.atualizar(id, request);
-        return ResponseEntity.ok(response);
+        log.debug("REQUEST PUT /v1/fabricantes-vacina/{} - payload: {}", id, request);
+        try {
+            FabricantesVacinaResponse response = fabricantesVacinaService.atualizar(id, request);
+            log.info("Fabricante de vacina atualizado com sucesso. ID: {}", id);
+            return ResponseEntity.ok(response);
+        } catch (BadRequestException | NotFoundException ex) {
+            log.warn("Falha ao atualizar fabricante de vacina — ID: {}, mensagem: {}, payload: {}", id, ex.getMessage(), request);
+            throw ex;
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao atualizar fabricante de vacina — ID: {}, payload: {}", id, request, ex);
+            throw ex;
+        }
     }
 
     @DeleteMapping("/{id}")
@@ -101,8 +141,18 @@ public class FabricantesVacinaController {
     public ResponseEntity<Void> excluir(
             @Parameter(description = "ID do fabricante de vacina", required = true)
             @PathVariable UUID id) {
-        fabricantesVacinaService.excluir(id);
-        return ResponseEntity.noContent().build();
+        log.debug("REQUEST DELETE /v1/fabricantes-vacina/{}", id);
+        try {
+            fabricantesVacinaService.excluir(id);
+            log.info("Fabricante de vacina excluído com sucesso. ID: {}", id);
+            return ResponseEntity.noContent().build();
+        } catch (NotFoundException ex) {
+            log.warn("Falha ao excluir fabricante de vacina — ID: {}, mensagem: {}", id, ex.getMessage());
+            throw ex;
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao excluir fabricante de vacina — ID: {}", id, ex);
+            throw ex;
+        }
     }
 }
 

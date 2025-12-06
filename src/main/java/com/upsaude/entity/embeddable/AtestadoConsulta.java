@@ -5,7 +5,6 @@ import jakarta.persistence.Embeddable;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
 
@@ -17,9 +16,15 @@ import java.time.LocalDate;
 @Embeddable
 @Data
 @Builder
-@NoArgsConstructor
 @AllArgsConstructor
 public class AtestadoConsulta {
+
+    public AtestadoConsulta() {
+        this.atestadoEmitido = false;
+        this.tipoAtestado = "";
+        this.motivoAtestado = "";
+        this.cidAtestado = "";
+    }
 
     @Column(name = "atestado_emitido", nullable = false)
     @Builder.Default

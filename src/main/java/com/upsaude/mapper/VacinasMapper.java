@@ -14,7 +14,7 @@ import org.mapstruct.MappingTarget;
  * Mapper para conversões de Vacinas.
  * Entity ↔ DTO ↔ Request/Response
  */
-@Mapper(config = MappingConfig.class, uses = {FabricantesVacinaMapper.class})
+@Mapper(config = MappingConfig.class, uses = {FabricantesVacinaMapper.class, com.upsaude.mapper.embeddable.EsquemaVacinalMapper.class, com.upsaude.mapper.embeddable.IdadeAplicacaoVacinaMapper.class, com.upsaude.mapper.embeddable.ContraindicacoesVacinaMapper.class, com.upsaude.mapper.embeddable.ConservacaoVacinaMapper.class, com.upsaude.mapper.embeddable.ComposicaoVacinaMapper.class, com.upsaude.mapper.embeddable.EficaciaVacinaMapper.class, com.upsaude.mapper.embeddable.ReacoesAdversasVacinaMapper.class, com.upsaude.mapper.embeddable.CalendarioVacinalMapper.class, com.upsaude.mapper.embeddable.IntegracaoGovernamentalVacinaMapper.class})
 public interface VacinasMapper extends EntityMapper<Vacinas, VacinasDTO> {
 
     /**

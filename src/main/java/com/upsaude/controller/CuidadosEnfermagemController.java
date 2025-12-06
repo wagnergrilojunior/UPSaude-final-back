@@ -2,6 +2,9 @@ package com.upsaude.controller;
 
 import com.upsaude.api.request.CuidadosEnfermagemRequest;
 import com.upsaude.api.response.CuidadosEnfermagemResponse;
+import com.upsaude.exception.BadRequestException;
+import com.upsaude.exception.ConflictException;
+import com.upsaude.exception.NotFoundException;
 import com.upsaude.service.CuidadosEnfermagemService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -12,6 +15,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -29,6 +33,7 @@ import java.util.UUID;
 @RequestMapping("/v1/cuidados-enfermagem")
 @Tag(name = "Cuidados de Enfermagem", description = "API para gerenciamento de cuidados e procedimentos de enfermagem")
 @RequiredArgsConstructor
+@Slf4j
 public class CuidadosEnfermagemController {
 
     private final CuidadosEnfermagemService cuidadosEnfermagemService;
@@ -42,8 +47,18 @@ public class CuidadosEnfermagemController {
             @ApiResponse(responseCode = "403", description = "Acesso negado")
     })
     public ResponseEntity<CuidadosEnfermagemResponse> criar(@Valid @RequestBody CuidadosEnfermagemRequest request) {
-        CuidadosEnfermagemResponse response = cuidadosEnfermagemService.criar(request);
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        log.debug("REQUEST POST /v1/cuidados-enfermagem - payload: {}", request);
+        try {
+            CuidadosEnfermagemResponse response = cuidadosEnfermagemService.criar(request);
+            log.info("Cuidado de enfermagem criado com sucesso. ID: {}", response.getId());
+            return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        } catch (BadRequestException | ConflictException ex) {
+            log.warn("Falha ao criar cuidado de enfermagem — mensagem: {}, payload: {}", ex.getMessage(), request);
+            throw ex;
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao criar cuidado de enfermagem — payload: {}", request, ex);
+            throw ex;
+        }
     }
 
     @GetMapping
@@ -55,8 +70,14 @@ public class CuidadosEnfermagemController {
     public ResponseEntity<Page<CuidadosEnfermagemResponse>> listar(
             @Parameter(description = "Parâmetros de paginação (page, size, sort)")
             Pageable pageable) {
-        Page<CuidadosEnfermagemResponse> response = cuidadosEnfermagemService.listar(pageable);
-        return ResponseEntity.ok(response);
+        log.debug("REQUEST GET /v1/cuidados-enfermagem - pageable: {}", pageable);
+        try {
+            Page<CuidadosEnfermagemResponse> response = cuidadosEnfermagemService.listar(pageable);
+            return ResponseEntity.ok(response);
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao listar cuidados de enfermagem — pageable: {}", pageable, ex);
+            throw ex;
+        }
     }
 
     @GetMapping("/{id}")
@@ -70,8 +91,17 @@ public class CuidadosEnfermagemController {
     public ResponseEntity<CuidadosEnfermagemResponse> obterPorId(
             @Parameter(description = "ID do cuidado de enfermagem", required = true)
             @PathVariable UUID id) {
-        CuidadosEnfermagemResponse response = cuidadosEnfermagemService.obterPorId(id);
-        return ResponseEntity.ok(response);
+        log.debug("REQUEST GET /v1/cuidados-enfermagem/{}", id);
+        try {
+            CuidadosEnfermagemResponse response = cuidadosEnfermagemService.obterPorId(id);
+            return ResponseEntity.ok(response);
+        } catch (NotFoundException ex) {
+            log.warn("Cuidado de enfermagem não encontrado — ID: {}, mensagem: {}", id, ex.getMessage());
+            throw ex;
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao obter cuidado de enfermagem por ID — ID: {}", id, ex);
+            throw ex;
+        }
     }
 
     @GetMapping("/estabelecimento/{estabelecimentoId}")
@@ -79,8 +109,17 @@ public class CuidadosEnfermagemController {
     public ResponseEntity<Page<CuidadosEnfermagemResponse>> listarPorEstabelecimento(
             @PathVariable UUID estabelecimentoId,
             Pageable pageable) {
-        Page<CuidadosEnfermagemResponse> response = cuidadosEnfermagemService.listarPorEstabelecimento(estabelecimentoId, pageable);
-        return ResponseEntity.ok(response);
+        log.debug("REQUEST GET /v1/cuidados-enfermagem/estabelecimento/{} - pageable: {}", estabelecimentoId, pageable);
+        try {
+            Page<CuidadosEnfermagemResponse> response = cuidadosEnfermagemService.listarPorEstabelecimento(estabelecimentoId, pageable);
+            return ResponseEntity.ok(response);
+        } catch (BadRequestException ex) {
+            log.warn("Falha ao listar cuidados de enfermagem por estabelecimento — estabelecimentoId: {}, mensagem: {}", estabelecimentoId, ex.getMessage());
+            throw ex;
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao listar cuidados de enfermagem por estabelecimento — estabelecimentoId: {}, pageable: {}", estabelecimentoId, pageable, ex);
+            throw ex;
+        }
     }
 
     @GetMapping("/paciente/{pacienteId}")
@@ -88,8 +127,17 @@ public class CuidadosEnfermagemController {
     public ResponseEntity<Page<CuidadosEnfermagemResponse>> listarPorPaciente(
             @PathVariable UUID pacienteId,
             Pageable pageable) {
-        Page<CuidadosEnfermagemResponse> response = cuidadosEnfermagemService.listarPorPaciente(pacienteId, pageable);
-        return ResponseEntity.ok(response);
+        log.debug("REQUEST GET /v1/cuidados-enfermagem/paciente/{} - pageable: {}", pacienteId, pageable);
+        try {
+            Page<CuidadosEnfermagemResponse> response = cuidadosEnfermagemService.listarPorPaciente(pacienteId, pageable);
+            return ResponseEntity.ok(response);
+        } catch (BadRequestException ex) {
+            log.warn("Falha ao listar cuidados de enfermagem por paciente — pacienteId: {}, mensagem: {}", pacienteId, ex.getMessage());
+            throw ex;
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao listar cuidados de enfermagem por paciente — pacienteId: {}, pageable: {}", pacienteId, pageable, ex);
+            throw ex;
+        }
     }
 
     @GetMapping("/profissional/{profissionalId}")
@@ -97,8 +145,17 @@ public class CuidadosEnfermagemController {
     public ResponseEntity<Page<CuidadosEnfermagemResponse>> listarPorProfissional(
             @PathVariable UUID profissionalId,
             Pageable pageable) {
-        Page<CuidadosEnfermagemResponse> response = cuidadosEnfermagemService.listarPorProfissional(profissionalId, pageable);
-        return ResponseEntity.ok(response);
+        log.debug("REQUEST GET /v1/cuidados-enfermagem/profissional/{} - pageable: {}", profissionalId, pageable);
+        try {
+            Page<CuidadosEnfermagemResponse> response = cuidadosEnfermagemService.listarPorProfissional(profissionalId, pageable);
+            return ResponseEntity.ok(response);
+        } catch (BadRequestException ex) {
+            log.warn("Falha ao listar cuidados de enfermagem por profissional — profissionalId: {}, mensagem: {}", profissionalId, ex.getMessage());
+            throw ex;
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao listar cuidados de enfermagem por profissional — profissionalId: {}, pageable: {}", profissionalId, pageable, ex);
+            throw ex;
+        }
     }
 
     @PutMapping("/{id}")
@@ -114,8 +171,18 @@ public class CuidadosEnfermagemController {
             @Parameter(description = "ID do cuidado de enfermagem", required = true)
             @PathVariable UUID id,
             @Valid @RequestBody CuidadosEnfermagemRequest request) {
-        CuidadosEnfermagemResponse response = cuidadosEnfermagemService.atualizar(id, request);
-        return ResponseEntity.ok(response);
+        log.debug("REQUEST PUT /v1/cuidados-enfermagem/{} - payload: {}", id, request);
+        try {
+            CuidadosEnfermagemResponse response = cuidadosEnfermagemService.atualizar(id, request);
+            log.info("Cuidado de enfermagem atualizado com sucesso. ID: {}", response.getId());
+            return ResponseEntity.ok(response);
+        } catch (BadRequestException | NotFoundException | ConflictException ex) {
+            log.warn("Falha ao atualizar cuidado de enfermagem — ID: {}, mensagem: {}, payload: {}", id, ex.getMessage(), request);
+            throw ex;
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao atualizar cuidado de enfermagem — ID: {}, payload: {}", id, request, ex);
+            throw ex;
+        }
     }
 
     @DeleteMapping("/{id}")
@@ -128,8 +195,17 @@ public class CuidadosEnfermagemController {
     public ResponseEntity<Void> excluir(
             @Parameter(description = "ID do cuidado de enfermagem", required = true)
             @PathVariable UUID id) {
-        cuidadosEnfermagemService.excluir(id);
-        return ResponseEntity.noContent().build();
+        log.debug("REQUEST DELETE /v1/cuidados-enfermagem/{}", id);
+        try {
+            cuidadosEnfermagemService.excluir(id);
+            log.info("Cuidado de enfermagem excluído com sucesso. ID: {}", id);
+            return ResponseEntity.noContent().build();
+        } catch (NotFoundException ex) {
+            log.warn("Cuidado de enfermagem não encontrado para exclusão — ID: {}, mensagem: {}", id, ex.getMessage());
+            throw ex;
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao excluir cuidado de enfermagem — ID: {}", id, ex);
+            throw ex;
+        }
     }
 }
-

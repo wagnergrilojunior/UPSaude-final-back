@@ -15,7 +15,7 @@ import org.mapstruct.MappingTarget;
  * Mapper para conversões de AlergiasPaciente.
  * Entity ↔ DTO ↔ Request/Response
  */
-@Mapper(config = MappingConfig.class, uses = {AlergiasMapper.class, PacienteMapper.class})
+@Mapper(config = MappingConfig.class, uses = {AlergiasMapper.class, PacienteMapper.class, com.upsaude.mapper.embeddable.DiagnosticoAlergiaPacienteMapper.class, com.upsaude.mapper.embeddable.HistoricoReacoesAlergiaPacienteMapper.class})
 public interface AlergiasPacienteMapper extends EntityMapper<AlergiasPaciente, AlergiasPacienteDTO> {
 
     /**

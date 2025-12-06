@@ -12,7 +12,6 @@ import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
 
@@ -24,9 +23,18 @@ import java.time.LocalDate;
 @Embeddable
 @Data
 @Builder
-@NoArgsConstructor
 @AllArgsConstructor
 public class DadosPessoaisMedico {
+
+    public DadosPessoaisMedico() {
+        this.nomeSocial = "";
+        this.cpf = "";
+        this.rg = "";
+        this.orgaoEmissorRg = "";
+        this.ufEmissorRg = "";
+        this.nacionalidade = "";
+        this.naturalidade = "";
+    }
 
     @Size(max = 255, message = "Nome social deve ter no máximo 255 caracteres")
     @Column(name = "nome_social", length = 255)

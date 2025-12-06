@@ -2,10 +2,17 @@ package com.upsaude.api.response;
 
 import com.upsaude.enums.TipoEducacaoSaudeEnum;
 import java.time.OffsetDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
-@Data
+@Getter
+@Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
@@ -40,5 +47,12 @@ public class EducacaoSaudeResponse {
     private String encaminhamentosRealizados;
     private String materialDistribuido;
     private Integer quantidadeMaterialDistribuido;
+    
+    @Builder.Default
+    private List<PacienteResponse> participantes = new ArrayList<>();
+    
+    @Builder.Default
+    private List<ProfissionaisSaudeResponse> profissionaisParticipantes = new ArrayList<>();
+    
     private String observacoes;
 }

@@ -14,6 +14,8 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.PrePersist;
+import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
@@ -38,6 +40,16 @@ import lombok.EqualsAndHashCode;
 @Data
 @EqualsAndHashCode(callSuper = true)
 public class Consultas extends BaseEntity {
+
+    public Consultas() {
+        this.informacoes = new InformacoesConsulta();
+        this.anamnese = new AnamneseConsulta();
+        this.diagnostico = new DiagnosticoConsulta();
+        this.prescricao = new PrescricaoConsulta();
+        this.examesSolicitados = new ExamesSolicitadosConsulta();
+        this.encaminhamento = new EncaminhamentoConsulta();
+        this.atestado = new AtestadoConsulta();
+    }
 
     // ========== RELACIONAMENTOS ==========
 
@@ -110,4 +122,30 @@ public class Consultas extends BaseEntity {
 
     @Column(name = "observacoes_internas", columnDefinition = "TEXT")
     private String observacoesInternas; // Observações internas (não visíveis ao paciente)
+
+    @PrePersist
+    @PreUpdate
+    public void validateEmbeddables() {
+        if (informacoes == null) {
+            informacoes = new InformacoesConsulta();
+        }
+        if (anamnese == null) {
+            anamnese = new AnamneseConsulta();
+        }
+        if (diagnostico == null) {
+            diagnostico = new DiagnosticoConsulta();
+        }
+        if (prescricao == null) {
+            prescricao = new PrescricaoConsulta();
+        }
+        if (examesSolicitados == null) {
+            examesSolicitados = new ExamesSolicitadosConsulta();
+        }
+        if (encaminhamento == null) {
+            encaminhamento = new EncaminhamentoConsulta();
+        }
+        if (atestado == null) {
+            atestado = new AtestadoConsulta();
+        }
+    }
 }

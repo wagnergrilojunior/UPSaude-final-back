@@ -1,11 +1,21 @@
 package com.upsaude.api.request;
 
+import com.upsaude.enums.TipoUsuarioSistemaEnum;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
-import com.upsaude.enums.TipoUsuarioSistemaEnum;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
-@Data
+@Getter
+@Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
@@ -14,31 +24,47 @@ public class UsuariosSistemaRequest {
     private UUID profissionalSaude;
     private UUID medico;
     private UUID paciente;
+    @NotNull(message = "Tenant é obrigatório")
     private UUID tenantId;
+    
     private Boolean adminTenant;
-    private String tipoVinculo; // MEDICO, PROFISSIONAL, PACIENTE, OUTROS
+    
+    @Size(max = 50, message = "Tipo vínculo deve ter no máximo 50 caracteres")
+    private String tipoVinculo;
+    
+    @Size(max = 255, message = "Nome exibição deve ter no máximo 255 caracteres")
     private String nomeExibicao;
+    
+    @NotBlank(message = "Username é obrigatório")
+    @Size(max = 100, message = "Username deve ter no máximo 100 caracteres")
     private String username;
+    
+    @Email(message = "Email inválido")
+    @Size(max = 255, message = "Email deve ter no máximo 255 caracteres")
     private String email;
+    
+    @Size(max = 255, message = "Senha deve ter no máximo 255 caracteres")
     private String senha;
+    
+    @Size(max = 500, message = "URL da foto deve ter no máximo 500 caracteres")
     private String fotoUrl;
     
-    // NOVO: Lista de vínculos com estabelecimentos (estabelecimento + papel)
-    private List<EstabelecimentoVinculoRequest> estabelecimentos;
+    @Builder.Default
+    private List<EstabelecimentoVinculoRequest> estabelecimentos = new ArrayList<>();
     
-    // DEPRECATED: Manter para compatibilidade com código antigo
     @Deprecated
-    private List<UUID> estabelecimentosIds;
+    @Builder.Default
+    private List<UUID> estabelecimentosIds = new ArrayList<>();
     
-    /**
-     * DTO interno para representar vínculo de estabelecimento com papel.
-     */
-    @Data
+    @Getter
+    @Setter
     @Builder
     @NoArgsConstructor
     @AllArgsConstructor
     public static class EstabelecimentoVinculoRequest {
+        @NotNull(message = "Estabelecimento é obrigatório")
         private UUID estabelecimentoId;
-        private TipoUsuarioSistemaEnum tipoUsuario; // Papel do usuário neste estabelecimento
+        
+        private TipoUsuarioSistemaEnum tipoUsuario;
     }
 }

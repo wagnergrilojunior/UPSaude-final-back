@@ -19,7 +19,7 @@ import org.mapstruct.MappingTarget;
  * Mapper para conversões de Atendimento.
  * Entity ↔ DTO ↔ Request/Response
  */
-@Mapper(config = MappingConfig.class, uses = {CidDoencasMapper.class, ConvenioMapper.class, EquipeSaudeMapper.class, EspecialidadesMedicasMapper.class, PacienteMapper.class, ProfissionaisSaudeMapper.class})
+@Mapper(config = MappingConfig.class, uses = {CidDoencasMapper.class, ConvenioMapper.class, EquipeSaudeMapper.class, EspecialidadesMedicasMapper.class, PacienteMapper.class, ProfissionaisSaudeMapper.class, com.upsaude.mapper.embeddable.InformacoesAtendimentoMapper.class, com.upsaude.mapper.embeddable.AnamneseAtendimentoMapper.class, com.upsaude.mapper.embeddable.DiagnosticoAtendimentoMapper.class, com.upsaude.mapper.embeddable.ProcedimentosRealizadosAtendimentoMapper.class, com.upsaude.mapper.embeddable.ClassificacaoRiscoAtendimentoMapper.class})
 public interface AtendimentoMapper extends EntityMapper<Atendimento, AtendimentoDTO> {
 
     /**

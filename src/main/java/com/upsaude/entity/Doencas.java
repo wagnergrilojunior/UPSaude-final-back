@@ -11,6 +11,8 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.PrePersist;
+import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
@@ -34,6 +36,13 @@ import lombok.EqualsAndHashCode;
 @Data
 @EqualsAndHashCode(callSuper = true)
 public class Doencas extends BaseEntityWithoutTenant {
+
+    public Doencas() {
+        this.classificacao = new ClassificacaoDoenca();
+        this.sintomas = new SintomasDoenca();
+        this.tratamentoPadrao = new TratamentoPadraoDoenca();
+        this.epidemiologia = new EpidemiologiaDoenca();
+    }
 
     // ========== IDENTIFICAÇÃO BÁSICA ==========
 
@@ -95,5 +104,22 @@ public class Doencas extends BaseEntityWithoutTenant {
 
     @Column(name = "observacoes", columnDefinition = "TEXT")
     private String observacoes; // Observações gerais
+
+    @PrePersist
+    @PreUpdate
+    public void validateEmbeddables() {
+        if (classificacao == null) {
+            classificacao = new ClassificacaoDoenca();
+        }
+        if (sintomas == null) {
+            sintomas = new SintomasDoenca();
+        }
+        if (tratamentoPadrao == null) {
+            tratamentoPadrao = new TratamentoPadraoDoenca();
+        }
+        if (epidemiologia == null) {
+            epidemiologia = new EpidemiologiaDoenca();
+        }
+    }
 }
 

@@ -3,6 +3,9 @@ package com.upsaude.controller;
 import com.upsaude.api.request.ProfissionalEstabelecimentoRequest;
 import com.upsaude.api.response.ProfissionalEstabelecimentoResponse;
 import com.upsaude.enums.TipoVinculoProfissionalEnum;
+import com.upsaude.exception.BadRequestException;
+import com.upsaude.exception.ConflictException;
+import com.upsaude.exception.NotFoundException;
 import com.upsaude.service.ProfissionalEstabelecimentoService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -13,6 +16,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -30,6 +34,7 @@ import java.util.UUID;
 @RequestMapping("/v1/profissionais-estabelecimentos")
 @Tag(name = "Vínculos Profissional-Estabelecimento", description = "API para gerenciamento de vínculos entre profissionais e estabelecimentos")
 @RequiredArgsConstructor
+@Slf4j
 public class ProfissionalEstabelecimentoController {
 
     private final ProfissionalEstabelecimentoService profissionalEstabelecimentoService;
@@ -43,8 +48,18 @@ public class ProfissionalEstabelecimentoController {
             @ApiResponse(responseCode = "403", description = "Acesso negado")
     })
     public ResponseEntity<ProfissionalEstabelecimentoResponse> criar(@Valid @RequestBody ProfissionalEstabelecimentoRequest request) {
-        ProfissionalEstabelecimentoResponse response = profissionalEstabelecimentoService.criar(request);
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        log.debug("REQUEST POST /v1/profissionais-estabelecimentos - payload: {}", request);
+        try {
+            ProfissionalEstabelecimentoResponse response = profissionalEstabelecimentoService.criar(request);
+            log.info("Vínculo profissional-estabelecimento criado com sucesso. ID: {}", response.getId());
+            return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        } catch (BadRequestException | ConflictException ex) {
+            log.warn("Falha ao criar vínculo profissional-estabelecimento — mensagem: {}, payload: {}", ex.getMessage(), request);
+            throw ex;
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao criar vínculo profissional-estabelecimento — payload: {}", request, ex);
+            throw ex;
+        }
     }
 
     @GetMapping
@@ -56,8 +71,14 @@ public class ProfissionalEstabelecimentoController {
     public ResponseEntity<Page<ProfissionalEstabelecimentoResponse>> listar(
             @Parameter(description = "Parâmetros de paginação (page, size, sort)")
             Pageable pageable) {
-        Page<ProfissionalEstabelecimentoResponse> response = profissionalEstabelecimentoService.listar(pageable);
-        return ResponseEntity.ok(response);
+        log.debug("REQUEST GET /v1/profissionais-estabelecimentos - pageable: {}", pageable);
+        try {
+            Page<ProfissionalEstabelecimentoResponse> response = profissionalEstabelecimentoService.listar(pageable);
+            return ResponseEntity.ok(response);
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao listar vínculos profissional-estabelecimento — pageable: {}", pageable, ex);
+            throw ex;
+        }
     }
 
     @GetMapping("/profissional/{profissionalId}")
@@ -72,8 +93,17 @@ public class ProfissionalEstabelecimentoController {
             @PathVariable UUID profissionalId,
             @Parameter(description = "Parâmetros de paginação (page, size, sort)")
             Pageable pageable) {
-        Page<ProfissionalEstabelecimentoResponse> response = profissionalEstabelecimentoService.listarPorProfissional(profissionalId, pageable);
-        return ResponseEntity.ok(response);
+        log.debug("REQUEST GET /v1/profissionais-estabelecimentos/profissional/{} - pageable: {}", profissionalId, pageable);
+        try {
+            Page<ProfissionalEstabelecimentoResponse> response = profissionalEstabelecimentoService.listarPorProfissional(profissionalId, pageable);
+            return ResponseEntity.ok(response);
+        } catch (BadRequestException ex) {
+            log.warn("Falha ao listar vínculos por profissional — profissionalId: {}, mensagem: {}", profissionalId, ex.getMessage());
+            throw ex;
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao listar vínculos por profissional — profissionalId: {}, pageable: {}", profissionalId, pageable, ex);
+            throw ex;
+        }
     }
 
     @GetMapping("/estabelecimento/{estabelecimentoId}")
@@ -88,8 +118,17 @@ public class ProfissionalEstabelecimentoController {
             @PathVariable UUID estabelecimentoId,
             @Parameter(description = "Parâmetros de paginação (page, size, sort)")
             Pageable pageable) {
-        Page<ProfissionalEstabelecimentoResponse> response = profissionalEstabelecimentoService.listarPorEstabelecimento(estabelecimentoId, pageable);
-        return ResponseEntity.ok(response);
+        log.debug("REQUEST GET /v1/profissionais-estabelecimentos/estabelecimento/{} - pageable: {}", estabelecimentoId, pageable);
+        try {
+            Page<ProfissionalEstabelecimentoResponse> response = profissionalEstabelecimentoService.listarPorEstabelecimento(estabelecimentoId, pageable);
+            return ResponseEntity.ok(response);
+        } catch (BadRequestException ex) {
+            log.warn("Falha ao listar vínculos por estabelecimento — estabelecimentoId: {}, mensagem: {}", estabelecimentoId, ex.getMessage());
+            throw ex;
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao listar vínculos por estabelecimento — estabelecimentoId: {}, pageable: {}", estabelecimentoId, pageable, ex);
+            throw ex;
+        }
     }
 
     @GetMapping("/estabelecimento/{estabelecimentoId}/tipo-vinculo/{tipoVinculo}")
@@ -106,8 +145,17 @@ public class ProfissionalEstabelecimentoController {
             @PathVariable TipoVinculoProfissionalEnum tipoVinculo,
             @Parameter(description = "Parâmetros de paginação (page, size, sort)")
             Pageable pageable) {
-        Page<ProfissionalEstabelecimentoResponse> response = profissionalEstabelecimentoService.listarPorTipoVinculo(tipoVinculo, estabelecimentoId, pageable);
-        return ResponseEntity.ok(response);
+        log.debug("REQUEST GET /v1/profissionais-estabelecimentos/estabelecimento/{}/tipo-vinculo/{} - pageable: {}", estabelecimentoId, tipoVinculo, pageable);
+        try {
+            Page<ProfissionalEstabelecimentoResponse> response = profissionalEstabelecimentoService.listarPorTipoVinculo(tipoVinculo, estabelecimentoId, pageable);
+            return ResponseEntity.ok(response);
+        } catch (BadRequestException ex) {
+            log.warn("Falha ao listar vínculos por tipo e estabelecimento — estabelecimentoId: {}, tipoVinculo: {}, mensagem: {}", estabelecimentoId, tipoVinculo, ex.getMessage());
+            throw ex;
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao listar vínculos por tipo e estabelecimento — estabelecimentoId: {}, tipoVinculo: {}, pageable: {}", estabelecimentoId, tipoVinculo, pageable, ex);
+            throw ex;
+        }
     }
 
     @GetMapping("/{id}")
@@ -121,8 +169,17 @@ public class ProfissionalEstabelecimentoController {
     public ResponseEntity<ProfissionalEstabelecimentoResponse> obterPorId(
             @Parameter(description = "ID do vínculo", required = true)
             @PathVariable UUID id) {
-        ProfissionalEstabelecimentoResponse response = profissionalEstabelecimentoService.obterPorId(id);
-        return ResponseEntity.ok(response);
+        log.debug("REQUEST GET /v1/profissionais-estabelecimentos/{}", id);
+        try {
+            ProfissionalEstabelecimentoResponse response = profissionalEstabelecimentoService.obterPorId(id);
+            return ResponseEntity.ok(response);
+        } catch (NotFoundException ex) {
+            log.warn("Vínculo profissional-estabelecimento não encontrado — ID: {}, mensagem: {}", id, ex.getMessage());
+            throw ex;
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao obter vínculo profissional-estabelecimento por ID — ID: {}", id, ex);
+            throw ex;
+        }
     }
 
     @PutMapping("/{id}")
@@ -138,8 +195,18 @@ public class ProfissionalEstabelecimentoController {
             @Parameter(description = "ID do vínculo", required = true)
             @PathVariable UUID id,
             @Valid @RequestBody ProfissionalEstabelecimentoRequest request) {
-        ProfissionalEstabelecimentoResponse response = profissionalEstabelecimentoService.atualizar(id, request);
-        return ResponseEntity.ok(response);
+        log.debug("REQUEST PUT /v1/profissionais-estabelecimentos/{} - payload: {}", id, request);
+        try {
+            ProfissionalEstabelecimentoResponse response = profissionalEstabelecimentoService.atualizar(id, request);
+            log.info("Vínculo profissional-estabelecimento atualizado com sucesso. ID: {}", response.getId());
+            return ResponseEntity.ok(response);
+        } catch (BadRequestException | NotFoundException | ConflictException ex) {
+            log.warn("Falha ao atualizar vínculo profissional-estabelecimento — ID: {}, mensagem: {}, payload: {}", id, ex.getMessage(), request);
+            throw ex;
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao atualizar vínculo profissional-estabelecimento — ID: {}, payload: {}", id, request, ex);
+            throw ex;
+        }
     }
 
     @DeleteMapping("/{id}")
@@ -152,8 +219,17 @@ public class ProfissionalEstabelecimentoController {
     public ResponseEntity<Void> excluir(
             @Parameter(description = "ID do vínculo", required = true)
             @PathVariable UUID id) {
-        profissionalEstabelecimentoService.excluir(id);
-        return ResponseEntity.noContent().build();
+        log.debug("REQUEST DELETE /v1/profissionais-estabelecimentos/{}", id);
+        try {
+            profissionalEstabelecimentoService.excluir(id);
+            log.info("Vínculo profissional-estabelecimento excluído com sucesso. ID: {}", id);
+            return ResponseEntity.noContent().build();
+        } catch (NotFoundException ex) {
+            log.warn("Vínculo profissional-estabelecimento não encontrado para exclusão — ID: {}, mensagem: {}", id, ex.getMessage());
+            throw ex;
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao excluir vínculo profissional-estabelecimento — ID: {}", id, ex);
+            throw ex;
+        }
     }
 }
-

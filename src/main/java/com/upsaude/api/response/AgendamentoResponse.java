@@ -3,10 +3,17 @@ package com.upsaude.api.response;
 import com.upsaude.enums.PrioridadeAtendimentoEnum;
 import com.upsaude.enums.StatusAgendamentoEnum;
 import java.time.OffsetDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
-@Data
+@Getter
+@Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
@@ -49,4 +56,13 @@ public class AgendamentoResponse {
     private Boolean notificacaoEnviada24h;
     private Boolean notificacaoEnviada1h;
     private Boolean confirmacaoEnviada;
+    
+    @Builder.Default
+    private List<AgendamentoResponse> reagendamentos = new ArrayList<>();
+    
+    @Builder.Default
+    private List<NotificacaoResponse> notificacoes = new ArrayList<>();
+    
+    @Builder.Default
+    private List<CheckInAtendimentoResponse> checkIns = new ArrayList<>();
 }

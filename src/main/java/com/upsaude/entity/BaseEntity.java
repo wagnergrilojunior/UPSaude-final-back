@@ -47,5 +47,5 @@ public abstract class BaseEntity {
     private Estabelecimentos estabelecimento;
 
     @Column(name = "ativo", nullable = false)
-    private Boolean active;
+    private Boolean active = true;
 }

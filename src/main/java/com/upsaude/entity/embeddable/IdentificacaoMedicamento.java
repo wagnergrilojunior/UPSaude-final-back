@@ -7,7 +7,6 @@ import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
 /**
  * Classe embeddable para identificação do medicamento.
@@ -17,9 +16,19 @@ import lombok.NoArgsConstructor;
 @Embeddable
 @Data
 @Builder
-@NoArgsConstructor
 @AllArgsConstructor
 public class IdentificacaoMedicamento {
+
+    public IdentificacaoMedicamento() {
+        this.principioAtivo = "";
+        this.nomeComercial = "";
+        this.nomeGenerico = "";
+        this.codigoInterno = "";
+        this.catmatCodigo = "";
+        this.codigoAnvisa = "";
+        this.codigoTuss = "";
+        this.codigoSigtap = "";
+    }
 
     @NotBlank(message = "Princípio ativo é obrigatório")
     @Size(max = 255, message = "Princípio ativo deve ter no máximo 255 caracteres")

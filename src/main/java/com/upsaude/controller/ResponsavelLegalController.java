@@ -2,6 +2,9 @@ package com.upsaude.controller;
 
 import com.upsaude.api.request.ResponsavelLegalRequest;
 import com.upsaude.api.response.ResponsavelLegalResponse;
+import com.upsaude.exception.BadRequestException;
+import com.upsaude.exception.ConflictException;
+import com.upsaude.exception.NotFoundException;
 import com.upsaude.service.ResponsavelLegalService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -12,6 +15,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -24,6 +28,7 @@ import java.util.UUID;
 @RequestMapping("/v1/responsaveis-legais")
 @Tag(name = "Responsáveis Legais", description = "API para gerenciamento de Responsáveis Legais")
 @RequiredArgsConstructor
+@Slf4j
 public class ResponsavelLegalController {
 
     private final ResponsavelLegalService service;
@@ -37,8 +42,18 @@ public class ResponsavelLegalController {
             @ApiResponse(responseCode = "403", description = "Acesso negado")
     })
     public ResponseEntity<ResponsavelLegalResponse> criar(@Valid @RequestBody ResponsavelLegalRequest request) {
-        ResponsavelLegalResponse response = service.criar(request);
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        log.debug("REQUEST POST /v1/responsaveis-legais - payload: {}", request);
+        try {
+            ResponsavelLegalResponse response = service.criar(request);
+            log.info("Responsável legal criado com sucesso. ID: {}", response.getId());
+            return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        } catch (BadRequestException | ConflictException ex) {
+            log.warn("Falha ao criar responsável legal — mensagem: {}, payload: {}", ex.getMessage(), request);
+            throw ex;
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao criar responsável legal — payload: {}", request, ex);
+            throw ex;
+        }
     }
 
     @GetMapping
@@ -50,8 +65,14 @@ public class ResponsavelLegalController {
     public ResponseEntity<Page<ResponsavelLegalResponse>> listar(
             @Parameter(description = "Parâmetros de paginação (page, size, sort)")
             Pageable pageable) {
-        Page<ResponsavelLegalResponse> response = service.listar(pageable);
-        return ResponseEntity.ok(response);
+        log.debug("REQUEST GET /v1/responsaveis-legais - pageable: {}", pageable);
+        try {
+            Page<ResponsavelLegalResponse> response = service.listar(pageable);
+            return ResponseEntity.ok(response);
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao listar responsáveis legais — pageable: {}", pageable, ex);
+            throw ex;
+        }
     }
 
     @GetMapping("/{id}")
@@ -65,8 +86,17 @@ public class ResponsavelLegalController {
     public ResponseEntity<ResponsavelLegalResponse> obterPorId(
             @Parameter(description = "ID do responsável legal", required = true)
             @PathVariable UUID id) {
-        ResponsavelLegalResponse response = service.obterPorId(id);
-        return ResponseEntity.ok(response);
+        log.debug("REQUEST GET /v1/responsaveis-legais/{}", id);
+        try {
+            ResponsavelLegalResponse response = service.obterPorId(id);
+            return ResponseEntity.ok(response);
+        } catch (NotFoundException ex) {
+            log.warn("Responsável legal não encontrado — ID: {}, mensagem: {}", id, ex.getMessage());
+            throw ex;
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao obter responsável legal por ID — ID: {}", id, ex);
+            throw ex;
+        }
     }
 
     @GetMapping("/paciente/{pacienteId}")
@@ -80,8 +110,17 @@ public class ResponsavelLegalController {
     public ResponseEntity<ResponsavelLegalResponse> obterPorPacienteId(
             @Parameter(description = "ID do paciente", required = true)
             @PathVariable UUID pacienteId) {
-        ResponsavelLegalResponse response = service.obterPorPacienteId(pacienteId);
-        return ResponseEntity.ok(response);
+        log.debug("REQUEST GET /v1/responsaveis-legais/paciente/{}", pacienteId);
+        try {
+            ResponsavelLegalResponse response = service.obterPorPacienteId(pacienteId);
+            return ResponseEntity.ok(response);
+        } catch (NotFoundException ex) {
+            log.warn("Responsável legal não encontrado para paciente — pacienteId: {}, mensagem: {}", pacienteId, ex.getMessage());
+            throw ex;
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao obter responsável legal por paciente ID — pacienteId: {}", pacienteId, ex);
+            throw ex;
+        }
     }
 
     @PutMapping("/{id}")
@@ -97,8 +136,18 @@ public class ResponsavelLegalController {
             @Parameter(description = "ID do responsável legal", required = true)
             @PathVariable UUID id,
             @Valid @RequestBody ResponsavelLegalRequest request) {
-        ResponsavelLegalResponse response = service.atualizar(id, request);
-        return ResponseEntity.ok(response);
+        log.debug("REQUEST PUT /v1/responsaveis-legais/{} - payload: {}", id, request);
+        try {
+            ResponsavelLegalResponse response = service.atualizar(id, request);
+            log.info("Responsável legal atualizado com sucesso. ID: {}", response.getId());
+            return ResponseEntity.ok(response);
+        } catch (BadRequestException | NotFoundException | ConflictException ex) {
+            log.warn("Falha ao atualizar responsável legal — ID: {}, mensagem: {}, payload: {}", id, ex.getMessage(), request);
+            throw ex;
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao atualizar responsável legal — ID: {}, payload: {}", id, request, ex);
+            throw ex;
+        }
     }
 
     @DeleteMapping("/{id}")
@@ -111,8 +160,17 @@ public class ResponsavelLegalController {
     public ResponseEntity<Void> excluir(
             @Parameter(description = "ID do responsável legal", required = true)
             @PathVariable UUID id) {
-        service.excluir(id);
-        return ResponseEntity.noContent().build();
+        log.debug("REQUEST DELETE /v1/responsaveis-legais/{}", id);
+        try {
+            service.excluir(id);
+            log.info("Responsável legal excluído com sucesso. ID: {}", id);
+            return ResponseEntity.noContent().build();
+        } catch (NotFoundException ex) {
+            log.warn("Responsável legal não encontrado para exclusão — ID: {}, mensagem: {}", id, ex.getMessage());
+            throw ex;
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao excluir responsável legal — ID: {}", id, ex);
+            throw ex;
+        }
     }
 }
-

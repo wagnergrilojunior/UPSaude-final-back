@@ -2,6 +2,9 @@ package com.upsaude.controller;
 
 import com.upsaude.api.request.DepartamentosRequest;
 import com.upsaude.api.response.DepartamentosResponse;
+import com.upsaude.exception.BadRequestException;
+import com.upsaude.exception.ConflictException;
+import com.upsaude.exception.NotFoundException;
 import com.upsaude.service.DepartamentosService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -12,6 +15,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -29,6 +33,7 @@ import java.util.UUID;
 @RequestMapping("/v1/departamentos")
 @Tag(name = "Departamentos", description = "API para gerenciamento de Departamentos")
 @RequiredArgsConstructor
+@Slf4j
 public class DepartamentosController {
 
     private final DepartamentosService departamentosService;
@@ -42,8 +47,18 @@ public class DepartamentosController {
             @ApiResponse(responseCode = "403", description = "Acesso negado")
     })
     public ResponseEntity<DepartamentosResponse> criar(@Valid @RequestBody DepartamentosRequest request) {
-        DepartamentosResponse response = departamentosService.criar(request);
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        log.debug("REQUEST POST /v1/departamentos - payload: {}", request);
+        try {
+            DepartamentosResponse response = departamentosService.criar(request);
+            log.info("Departamento criado com sucesso. ID: {}", response.getId());
+            return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        } catch (BadRequestException | ConflictException ex) {
+            log.warn("Falha ao criar departamento — mensagem: {}, payload: {}", ex.getMessage(), request);
+            throw ex;
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao criar departamento — payload: {}", request, ex);
+            throw ex;
+        }
     }
 
     @GetMapping
@@ -55,8 +70,14 @@ public class DepartamentosController {
     public ResponseEntity<Page<DepartamentosResponse>> listar(
             @Parameter(description = "Parâmetros de paginação (page, size, sort)")
             Pageable pageable) {
-        Page<DepartamentosResponse> response = departamentosService.listar(pageable);
-        return ResponseEntity.ok(response);
+        log.debug("REQUEST GET /v1/departamentos - pageable: {}", pageable);
+        try {
+            Page<DepartamentosResponse> response = departamentosService.listar(pageable);
+            return ResponseEntity.ok(response);
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao listar departamentos — pageable: {}", pageable, ex);
+            throw ex;
+        }
     }
 
     @GetMapping("/{id}")
@@ -70,8 +91,17 @@ public class DepartamentosController {
     public ResponseEntity<DepartamentosResponse> obterPorId(
             @Parameter(description = "ID do departamento", required = true)
             @PathVariable UUID id) {
-        DepartamentosResponse response = departamentosService.obterPorId(id);
-        return ResponseEntity.ok(response);
+        log.debug("REQUEST GET /v1/departamentos/{}", id);
+        try {
+            DepartamentosResponse response = departamentosService.obterPorId(id);
+            return ResponseEntity.ok(response);
+        } catch (NotFoundException ex) {
+            log.warn("Departamento não encontrado — ID: {}, mensagem: {}", id, ex.getMessage());
+            throw ex;
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao obter departamento por ID — ID: {}", id, ex);
+            throw ex;
+        }
     }
 
     @PutMapping("/{id}")
@@ -87,8 +117,18 @@ public class DepartamentosController {
             @Parameter(description = "ID do departamento", required = true)
             @PathVariable UUID id,
             @Valid @RequestBody DepartamentosRequest request) {
-        DepartamentosResponse response = departamentosService.atualizar(id, request);
-        return ResponseEntity.ok(response);
+        log.debug("REQUEST PUT /v1/departamentos/{} - payload: {}", id, request);
+        try {
+            DepartamentosResponse response = departamentosService.atualizar(id, request);
+            log.info("Departamento atualizado com sucesso. ID: {}", response.getId());
+            return ResponseEntity.ok(response);
+        } catch (BadRequestException | NotFoundException | ConflictException ex) {
+            log.warn("Falha ao atualizar departamento — ID: {}, mensagem: {}, payload: {}", id, ex.getMessage(), request);
+            throw ex;
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao atualizar departamento — ID: {}, payload: {}", id, request, ex);
+            throw ex;
+        }
     }
 
     @DeleteMapping("/{id}")
@@ -101,8 +141,17 @@ public class DepartamentosController {
     public ResponseEntity<Void> excluir(
             @Parameter(description = "ID do departamento", required = true)
             @PathVariable UUID id) {
-        departamentosService.excluir(id);
-        return ResponseEntity.noContent().build();
+        log.debug("REQUEST DELETE /v1/departamentos/{}", id);
+        try {
+            departamentosService.excluir(id);
+            log.info("Departamento excluído com sucesso. ID: {}", id);
+            return ResponseEntity.noContent().build();
+        } catch (NotFoundException ex) {
+            log.warn("Departamento não encontrado para exclusão — ID: {}, mensagem: {}", id, ex.getMessage());
+            throw ex;
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao excluir departamento — ID: {}", id, ex);
+            throw ex;
+        }
     }
 }
-

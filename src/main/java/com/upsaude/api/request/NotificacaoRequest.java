@@ -2,11 +2,19 @@ package com.upsaude.api.request;
 
 import com.upsaude.enums.CanalNotificacaoEnum;
 import com.upsaude.enums.TipoNotificacaoEnum;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import java.time.OffsetDateTime;
 import java.util.UUID;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
-@Data
+@Getter
+@Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
@@ -15,10 +23,20 @@ public class NotificacaoRequest {
     private UUID profissional;
     private UUID agendamento;
     private UUID template;
+    
+    @NotNull(message = "Tipo de notificação é obrigatório")
     private TipoNotificacaoEnum tipoNotificacao;
+    
+    @NotNull(message = "Canal de notificação é obrigatório")
     private CanalNotificacaoEnum canal;
+    
+    @NotBlank(message = "Destinatário é obrigatório")
+    @Size(max = 255, message = "Destinatário deve ter no máximo 255 caracteres")
     private String destinatario;
+    @Size(max = 500, message = "Assunto deve ter no máximo 500 caracteres")
     private String assunto;
+    
+    @NotBlank(message = "Mensagem é obrigatória")
     private String mensagem;
     private String statusEnvio;
     private OffsetDateTime dataEnvioPrevista;

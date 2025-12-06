@@ -13,6 +13,8 @@ import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.PrePersist;
+import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 import jakarta.validation.constraints.Email;
@@ -47,6 +49,17 @@ import java.util.List;
 @Data
 @EqualsAndHashCode(callSuper = true)
 public class Estabelecimentos extends BaseEntityWithoutEstabelecimento {
+
+    /**
+     * Construtor padrão que inicializa as coleções para evitar NullPointerException.
+     */
+    public Estabelecimentos() {
+        this.enderecosSecundarios = new ArrayList<>();
+        this.servicos = new ArrayList<>();
+        this.equipamentos = new ArrayList<>();
+        this.infraestrutura = new ArrayList<>();
+        this.equipes = new ArrayList<>();
+    }
 
     // ========== IDENTIFICAÇÃO BÁSICA ==========
     
@@ -233,4 +246,174 @@ public class Estabelecimentos extends BaseEntityWithoutEstabelecimento {
 
     @Column(name = "dados_complementares", columnDefinition = "jsonb")
     private String dadosComplementares;
+
+    // ========== MÉTODOS DE CICLO DE VIDA ==========
+
+    /**
+     * Garante que as coleções não sejam nulas antes de persistir ou atualizar.
+     * Recria as listas se estiverem nulas.
+     */
+    @PrePersist
+    @PreUpdate
+    public void validateCollections() {
+        if (enderecosSecundarios == null) {
+            enderecosSecundarios = new ArrayList<>();
+        }
+        if (servicos == null) {
+            servicos = new ArrayList<>();
+        }
+        if (equipamentos == null) {
+            equipamentos = new ArrayList<>();
+        }
+        if (infraestrutura == null) {
+            infraestrutura = new ArrayList<>();
+        }
+        if (equipes == null) {
+            equipes = new ArrayList<>();
+        }
+    }
+
+    // ========== MÉTODOS UTILITÁRIOS - SERVIÇOS ==========
+
+    /**
+     * Adiciona um serviço ao estabelecimento com sincronização bidirecional.
+     * Garante que o serviço também referencia este estabelecimento.
+     *
+     * @param servico O serviço a ser adicionado
+     */
+    public void addServico(ServicosEstabelecimento servico) {
+        if (servico == null) {
+            return;
+        }
+        if (servicos == null) {
+            servicos = new ArrayList<>();
+        }
+        if (!servicos.contains(servico)) {
+            servicos.add(servico);
+            servico.setEstabelecimento(this);
+        }
+    }
+
+    /**
+     * Remove um serviço do estabelecimento com sincronização bidirecional.
+     * Remove a referência do serviço para este estabelecimento.
+     *
+     * @param servico O serviço a ser removido
+     */
+    public void removeServico(ServicosEstabelecimento servico) {
+        if (servico == null || servicos == null) {
+            return;
+        }
+        if (servicos.remove(servico)) {
+            servico.setEstabelecimento(null);
+        }
+    }
+
+    // ========== MÉTODOS UTILITÁRIOS - EQUIPAMENTOS ==========
+
+    /**
+     * Adiciona um equipamento ao estabelecimento com sincronização bidirecional.
+     * Garante que o equipamento também referencia este estabelecimento.
+     *
+     * @param equipamento O equipamento a ser adicionado
+     */
+    public void addEquipamento(EquipamentosEstabelecimento equipamento) {
+        if (equipamento == null) {
+            return;
+        }
+        if (equipamentos == null) {
+            equipamentos = new ArrayList<>();
+        }
+        if (!equipamentos.contains(equipamento)) {
+            equipamentos.add(equipamento);
+            equipamento.setEstabelecimento(this);
+        }
+    }
+
+    /**
+     * Remove um equipamento do estabelecimento com sincronização bidirecional.
+     * Remove a referência do equipamento para este estabelecimento.
+     *
+     * @param equipamento O equipamento a ser removido
+     */
+    public void removeEquipamento(EquipamentosEstabelecimento equipamento) {
+        if (equipamento == null || equipamentos == null) {
+            return;
+        }
+        if (equipamentos.remove(equipamento)) {
+            equipamento.setEstabelecimento(null);
+        }
+    }
+
+    // ========== MÉTODOS UTILITÁRIOS - INFRAESTRUTURA ==========
+
+    /**
+     * Adiciona uma infraestrutura ao estabelecimento com sincronização bidirecional.
+     * Garante que a infraestrutura também referencia este estabelecimento.
+     *
+     * @param infraestruturaItem A infraestrutura a ser adicionada
+     */
+    public void addInfraestrutura(InfraestruturaEstabelecimento infraestruturaItem) {
+        if (infraestruturaItem == null) {
+            return;
+        }
+        if (infraestrutura == null) {
+            infraestrutura = new ArrayList<>();
+        }
+        if (!infraestrutura.contains(infraestruturaItem)) {
+            infraestrutura.add(infraestruturaItem);
+            infraestruturaItem.setEstabelecimento(this);
+        }
+    }
+
+    /**
+     * Remove uma infraestrutura do estabelecimento com sincronização bidirecional.
+     * Remove a referência da infraestrutura para este estabelecimento.
+     *
+     * @param infraestruturaItem A infraestrutura a ser removida
+     */
+    public void removeInfraestrutura(InfraestruturaEstabelecimento infraestruturaItem) {
+        if (infraestruturaItem == null || infraestrutura == null) {
+            return;
+        }
+        if (infraestrutura.remove(infraestruturaItem)) {
+            infraestruturaItem.setEstabelecimento(null);
+        }
+    }
+
+    // ========== MÉTODOS UTILITÁRIOS - EQUIPES ==========
+
+    /**
+     * Adiciona uma equipe ao estabelecimento com sincronização bidirecional.
+     * Garante que a equipe também referencia este estabelecimento.
+     *
+     * @param equipe A equipe a ser adicionada
+     */
+    public void addEquipe(EquipeSaude equipe) {
+        if (equipe == null) {
+            return;
+        }
+        if (equipes == null) {
+            equipes = new ArrayList<>();
+        }
+        if (!equipes.contains(equipe)) {
+            equipes.add(equipe);
+            equipe.setEstabelecimento(this);
+        }
+    }
+
+    /**
+     * Remove uma equipe do estabelecimento com sincronização bidirecional.
+     * Remove a referência da equipe para este estabelecimento.
+     *
+     * @param equipe A equipe a ser removida
+     */
+    public void removeEquipe(EquipeSaude equipe) {
+        if (equipe == null || equipes == null) {
+            return;
+        }
+        if (equipes.remove(equipe)) {
+            equipe.setEstabelecimento(null);
+        }
+    }
 }

@@ -1,5 +1,6 @@
 package com.upsaude.api.request;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
@@ -10,7 +11,11 @@ import lombok.*;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class LGPDConsentimentoRequest {
     private UUID paciente;
+    private Boolean autorizacaoUsoDados;
+    private Boolean autorizacaoContatoWhatsApp;
+    private Boolean autorizacaoContatoEmail;
     private LocalDateTime dataConsentimento;
 }

@@ -1,24 +1,31 @@
 package com.upsaude.service.impl;
 
 import com.upsaude.api.request.PacienteRequest;
+import com.upsaude.api.request.EnderecoRequest;
 import com.upsaude.api.response.PacienteResponse;
 import com.upsaude.entity.*;
 import com.upsaude.exception.BadRequestException;
 import com.upsaude.exception.ConflictException;
 import com.upsaude.exception.NotFoundException;
 import com.upsaude.mapper.PacienteMapper;
+import com.upsaude.mapper.EnderecoMapper;
 import com.upsaude.repository.*;
 import com.upsaude.service.PacienteService;
-import jakarta.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.hibernate.Hibernate;
 import org.springframework.data.domain.Page;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -35,6 +42,10 @@ public class PacienteServiceImpl implements PacienteService {
 
     private final PacienteRepository pacienteRepository;
     private final PacienteMapper pacienteMapper;
+    private final EnderecoMapper enderecoMapper;
+    private final EstadosRepository estadosRepository;
+    private final CidadesRepository cidadesRepository;
+    private final UsuariosSistemaRepository usuariosSistemaRepository;
     
     // Repositories para entidades relacionadas
     private final ConvenioRepository convenioRepository;
@@ -90,11 +101,25 @@ public class PacienteServiceImpl implements PacienteService {
      * {@inheritDoc}
      */
     @Override
+    @Transactional(readOnly = true)
     public Page<PacienteResponse> listar(Pageable pageable) {
         log.debug("Listando pacientes paginados. Página: {}, Tamanho: {}", 
                 pageable.getPageNumber(), pageable.getPageSize());
 
+        // Busca pacientes paginados
         Page<Paciente> pacientes = pacienteRepository.findAll(pageable);
+        
+        // Inicializa as coleções lazy dentro da transação para evitar LazyInitializationException
+        // Isso força o Hibernate a carregar os endereços antes de fechar a sessão
+        pacientes.getContent().forEach(paciente -> {
+            Hibernate.initialize(paciente.getEnderecos());
+            // Inicializa outras coleções lazy se necessário
+            Hibernate.initialize(paciente.getDoencas());
+            Hibernate.initialize(paciente.getAlergias());
+            Hibernate.initialize(paciente.getDeficiencias());
+            Hibernate.initialize(paciente.getMedicacoes());
+        });
+        
         return pacientes.map(pacienteMapper::toResponse);
     }
 
@@ -316,6 +341,51 @@ public class PacienteServiceImpl implements PacienteService {
             "Integração governamental"
         );
 
+        // ENDEREÇOS (OneToMany) - Criar endereços e associar ao paciente
+        if (request.getEnderecos() != null && !request.getEnderecos().isEmpty()) {
+            // Obtém o tenant do usuário autenticado (obrigatório para Endereco que estende BaseEntity)
+            Tenant tenant = obterTenantDoUsuarioAutenticado();
+            if (tenant == null) {
+                throw new BadRequestException("Não foi possível obter tenant do usuário autenticado. É necessário estar autenticado para criar endereços.");
+            }
+            
+            List<Endereco> enderecos = new ArrayList<>();
+            for (EnderecoRequest enderecoRequest : request.getEnderecos()) {
+                // Só processa endereço se tiver logradouro ou número
+                if (enderecoRequest.getLogradouro() != null || enderecoRequest.getNumero() != null) {
+                    Endereco endereco = enderecoMapper.fromRequest(enderecoRequest);
+                    endereco.setActive(true);
+                    
+                    // Define o tenant do endereço (obrigatório para BaseEntity)
+                    endereco.setTenant(tenant);
+                    
+                    // Garante valores padrão para campos obrigatórios
+                    if (endereco.getSemNumero() == null) {
+                        endereco.setSemNumero(false);
+                    }
+                    
+                    // Processa relacionamentos estado e cidade (opcionais)
+                    if (enderecoRequest.getEstado() != null) {
+                        Estados estado = estadosRepository.findById(enderecoRequest.getEstado())
+                                .orElseThrow(() -> new NotFoundException("Estado não encontrado com ID: " + enderecoRequest.getEstado()));
+                        endereco.setEstado(estado);
+                    }
+
+                    if (enderecoRequest.getCidade() != null) {
+                        Cidades cidade = cidadesRepository.findById(enderecoRequest.getCidade())
+                                .orElseThrow(() -> new NotFoundException("Cidade não encontrada com ID: " + enderecoRequest.getCidade()));
+                        endereco.setCidade(cidade);
+                    }
+                    
+                    enderecos.add(endereco);
+                }
+            }
+            if (!enderecos.isEmpty()) {
+                paciente.setEnderecos(enderecos);
+                log.debug("{} endereço(s) processado(s) para associação ao paciente", enderecos.size());
+            }
+        }
+
         log.debug("Relacionamentos processados. JPA gerenciará persistência automaticamente.");
     }
 
@@ -340,6 +410,62 @@ public class PacienteServiceImpl implements PacienteService {
                     .orElseThrow(() -> new NotFoundException(nomeEntidade + " não encontrado com ID: " + uuid));
             sincronizador.accept(entidade);
         }
+    }
+
+    /**
+     * Obtém o tenant do usuário autenticado.
+     * 
+     * @return Tenant do usuário autenticado ou null se não encontrado
+     */
+    private Tenant obterTenantDoUsuarioAutenticado() {
+        try {
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            if (authentication == null || !authentication.isAuthenticated()) {
+                log.warn("Usuário não autenticado. Não é possível obter tenant.");
+                return null;
+            }
+
+            // Obtém o userId do token JWT
+            UUID userId = null;
+            Object details = authentication.getDetails();
+            if (details instanceof com.upsaude.integration.supabase.SupabaseAuthResponse.User) {
+                com.upsaude.integration.supabase.SupabaseAuthResponse.User user = 
+                    (com.upsaude.integration.supabase.SupabaseAuthResponse.User) details;
+                userId = user.getId();
+                log.debug("UserId obtido do SupabaseAuthResponse.User: {}", userId);
+            } else if (authentication.getPrincipal() instanceof String) {
+                try {
+                    userId = UUID.fromString(authentication.getPrincipal().toString());
+                    log.debug("UserId obtido do Principal (String): {}", userId);
+                } catch (IllegalArgumentException e) {
+                    log.warn("Principal não é um UUID válido: {}", authentication.getPrincipal());
+                    return null;
+                }
+            } else {
+                log.warn("Tipo de Principal não reconhecido: {}", authentication.getPrincipal() != null ? authentication.getPrincipal().getClass().getName() : "null");
+            }
+
+            if (userId != null) {
+                java.util.Optional<com.upsaude.entity.UsuariosSistema> usuarioOpt = usuariosSistemaRepository.findByUserId(userId);
+                if (usuarioOpt.isPresent()) {
+                    com.upsaude.entity.UsuariosSistema usuario = usuarioOpt.get();
+                    Tenant tenant = usuario.getTenant();
+                    if (tenant != null) {
+                        log.debug("Tenant obtido com sucesso: {} (ID: {})", tenant.getNome(), tenant.getId());
+                        return tenant;
+                    } else {
+                        log.warn("Usuário encontrado mas sem tenant associado. UserId: {}", userId);
+                    }
+                } else {
+                    log.warn("Usuário não encontrado no sistema. UserId: {}", userId);
+                }
+            } else {
+                log.warn("Não foi possível obter userId do contexto de autenticação");
+            }
+        } catch (Exception e) {
+            log.error("Erro ao obter tenant do usuário autenticado", e);
+        }
+        return null;
     }
 }
 

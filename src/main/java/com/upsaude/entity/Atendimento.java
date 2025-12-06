@@ -12,6 +12,8 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.PrePersist;
+import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
@@ -37,6 +39,14 @@ import lombok.EqualsAndHashCode;
 @Data
 @EqualsAndHashCode(callSuper = true)
 public class Atendimento extends BaseEntity {
+
+    public Atendimento() {
+        this.informacoes = new InformacoesAtendimento();
+        this.anamnese = new AnamneseAtendimento();
+        this.diagnostico = new DiagnosticoAtendimento();
+        this.procedimentosRealizados = new ProcedimentosRealizadosAtendimento();
+        this.classificacaoRisco = new ClassificacaoRiscoAtendimento();
+    }
 
     // ========== RELACIONAMENTOS ==========
 
@@ -100,4 +110,24 @@ public class Atendimento extends BaseEntity {
 
     @Column(name = "observacoes_internas", columnDefinition = "TEXT")
     private String observacoesInternas; // Observações internas (não visíveis ao paciente)
+
+    @PrePersist
+    @PreUpdate
+    public void validateEmbeddables() {
+        if (informacoes == null) {
+            informacoes = new InformacoesAtendimento();
+        }
+        if (anamnese == null) {
+            anamnese = new AnamneseAtendimento();
+        }
+        if (diagnostico == null) {
+            diagnostico = new DiagnosticoAtendimento();
+        }
+        if (procedimentosRealizados == null) {
+            procedimentosRealizados = new ProcedimentosRealizadosAtendimento();
+        }
+        if (classificacaoRisco == null) {
+            classificacaoRisco = new ClassificacaoRiscoAtendimento();
+        }
+    }
 }

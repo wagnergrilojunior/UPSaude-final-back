@@ -12,6 +12,8 @@ import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.PrePersist;
+import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
@@ -42,6 +44,15 @@ import java.util.List;
 @Data
 @EqualsAndHashCode(callSuper = true)
 public class Agendamento extends BaseEntity {
+
+    /**
+     * Construtor padrão que inicializa as coleções para evitar NullPointerException.
+     */
+    public Agendamento() {
+        this.reagendamentos = new ArrayList<>();
+        this.notificacoes = new ArrayList<>();
+        this.checkIns = new ArrayList<>();
+    }
 
     // ========== RELACIONAMENTOS ==========
 
@@ -182,5 +193,133 @@ public class Agendamento extends BaseEntity {
 
     @Column(name = "confirmacao_enviada")
     private Boolean confirmacaoEnviada; // Se confirmação foi enviada
+
+    // ========== MÉTODOS DE CICLO DE VIDA ==========
+
+    /**
+     * Garante que as coleções não sejam nulas antes de persistir ou atualizar.
+     * Recria as listas se estiverem nulas.
+     */
+    @PrePersist
+    @PreUpdate
+    public void validateCollections() {
+        if (reagendamentos == null) {
+            reagendamentos = new ArrayList<>();
+        }
+        if (notificacoes == null) {
+            notificacoes = new ArrayList<>();
+        }
+        if (checkIns == null) {
+            checkIns = new ArrayList<>();
+        }
+    }
+
+    // ========== MÉTODOS UTILITÁRIOS - REAGENDAMENTOS ==========
+
+    /**
+     * Adiciona um reagendamento com sincronização bidirecional.
+     * Garante que o reagendamento também referencia este agendamento como original.
+     *
+     * @param reagendamento O reagendamento a ser adicionado
+     */
+    public void addReagendamento(Agendamento reagendamento) {
+        if (reagendamento == null) {
+            return;
+        }
+        if (reagendamentos == null) {
+            reagendamentos = new ArrayList<>();
+        }
+        if (!reagendamentos.contains(reagendamento)) {
+            reagendamentos.add(reagendamento);
+            reagendamento.setAgendamentoOriginal(this);
+        }
+    }
+
+    /**
+     * Remove um reagendamento com sincronização bidirecional.
+     * Remove a referência do reagendamento para este agendamento.
+     *
+     * @param reagendamento O reagendamento a ser removido
+     */
+    public void removeReagendamento(Agendamento reagendamento) {
+        if (reagendamento == null || reagendamentos == null) {
+            return;
+        }
+        if (reagendamentos.remove(reagendamento)) {
+            reagendamento.setAgendamentoOriginal(null);
+        }
+    }
+
+    // ========== MÉTODOS UTILITÁRIOS - NOTIFICAÇÕES ==========
+
+    /**
+     * Adiciona uma notificação com sincronização bidirecional.
+     * Garante que a notificação também referencia este agendamento.
+     *
+     * @param notificacao A notificação a ser adicionada
+     */
+    public void addNotificacao(Notificacao notificacao) {
+        if (notificacao == null) {
+            return;
+        }
+        if (notificacoes == null) {
+            notificacoes = new ArrayList<>();
+        }
+        if (!notificacoes.contains(notificacao)) {
+            notificacoes.add(notificacao);
+            notificacao.setAgendamento(this);
+        }
+    }
+
+    /**
+     * Remove uma notificação com sincronização bidirecional.
+     * Remove a referência da notificação para este agendamento.
+     *
+     * @param notificacao A notificação a ser removida
+     */
+    public void removeNotificacao(Notificacao notificacao) {
+        if (notificacao == null || notificacoes == null) {
+            return;
+        }
+        if (notificacoes.remove(notificacao)) {
+            notificacao.setAgendamento(null);
+        }
+    }
+
+    // ========== MÉTODOS UTILITÁRIOS - CHECK-INS ==========
+
+    /**
+     * Adiciona um check-in com sincronização bidirecional.
+     * Garante que o check-in também referencia este agendamento.
+     *
+     * @param checkIn O check-in a ser adicionado
+     */
+    public void addCheckIn(CheckInAtendimento checkIn) {
+        if (checkIn == null) {
+            return;
+        }
+        if (checkIns == null) {
+            checkIns = new ArrayList<>();
+        }
+        if (!checkIns.contains(checkIn)) {
+            checkIns.add(checkIn);
+            checkIn.setAgendamento(this);
+        }
+    }
+
+    /**
+     * Remove um check-in com sincronização bidirecional.
+     * Remove a referência do check-in para este agendamento.
+     *
+     * @param checkIn O check-in a ser removido
+     */
+    public void removeCheckIn(CheckInAtendimento checkIn) {
+        if (checkIn == null || checkIns == null) {
+            return;
+        }
+        if (checkIns.remove(checkIn)) {
+            checkIn.setAgendamento(null);
+        }
+    }
 }
 

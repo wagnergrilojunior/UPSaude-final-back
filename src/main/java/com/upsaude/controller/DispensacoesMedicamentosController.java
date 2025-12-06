@@ -2,6 +2,9 @@ package com.upsaude.controller;
 
 import com.upsaude.api.request.DispensacoesMedicamentosRequest;
 import com.upsaude.api.response.DispensacoesMedicamentosResponse;
+import com.upsaude.exception.BadRequestException;
+import com.upsaude.exception.ConflictException;
+import com.upsaude.exception.NotFoundException;
 import com.upsaude.service.DispensacoesMedicamentosService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -12,6 +15,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -29,6 +33,7 @@ import java.util.UUID;
 @RequestMapping("/v1/dispensacoes-medicamentos")
 @Tag(name = "Dispensações de Medicamentos", description = "API para gerenciamento de Dispensações de Medicamentos")
 @RequiredArgsConstructor
+@Slf4j
 public class DispensacoesMedicamentosController {
 
     private final DispensacoesMedicamentosService dispensacoesMedicamentosService;
@@ -42,8 +47,18 @@ public class DispensacoesMedicamentosController {
             @ApiResponse(responseCode = "403", description = "Acesso negado")
     })
     public ResponseEntity<DispensacoesMedicamentosResponse> criar(@Valid @RequestBody DispensacoesMedicamentosRequest request) {
-        DispensacoesMedicamentosResponse response = dispensacoesMedicamentosService.criar(request);
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        log.debug("REQUEST POST /v1/dispensacoes-medicamentos - payload: {}", request);
+        try {
+            DispensacoesMedicamentosResponse response = dispensacoesMedicamentosService.criar(request);
+            log.info("Dispensação de medicamento criada com sucesso. ID: {}", response.getId());
+            return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        } catch (BadRequestException | ConflictException ex) {
+            log.warn("Falha ao criar dispensação de medicamento — mensagem: {}, payload: {}", ex.getMessage(), request);
+            throw ex;
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao criar dispensação de medicamento — payload: {}", request, ex);
+            throw ex;
+        }
     }
 
     @GetMapping
@@ -55,8 +70,14 @@ public class DispensacoesMedicamentosController {
     public ResponseEntity<Page<DispensacoesMedicamentosResponse>> listar(
             @Parameter(description = "Parâmetros de paginação (page, size, sort)")
             Pageable pageable) {
-        Page<DispensacoesMedicamentosResponse> response = dispensacoesMedicamentosService.listar(pageable);
-        return ResponseEntity.ok(response);
+        log.debug("REQUEST GET /v1/dispensacoes-medicamentos - pageable: {}", pageable);
+        try {
+            Page<DispensacoesMedicamentosResponse> response = dispensacoesMedicamentosService.listar(pageable);
+            return ResponseEntity.ok(response);
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao listar dispensações de medicamentos — pageable: {}", pageable, ex);
+            throw ex;
+        }
     }
 
     @GetMapping("/{id}")
@@ -70,8 +91,17 @@ public class DispensacoesMedicamentosController {
     public ResponseEntity<DispensacoesMedicamentosResponse> obterPorId(
             @Parameter(description = "ID da dispensação de medicamento", required = true)
             @PathVariable UUID id) {
-        DispensacoesMedicamentosResponse response = dispensacoesMedicamentosService.obterPorId(id);
-        return ResponseEntity.ok(response);
+        log.debug("REQUEST GET /v1/dispensacoes-medicamentos/{}", id);
+        try {
+            DispensacoesMedicamentosResponse response = dispensacoesMedicamentosService.obterPorId(id);
+            return ResponseEntity.ok(response);
+        } catch (NotFoundException ex) {
+            log.warn("Dispensação de medicamento não encontrada — ID: {}, mensagem: {}", id, ex.getMessage());
+            throw ex;
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao obter dispensação de medicamento por ID — ID: {}", id, ex);
+            throw ex;
+        }
     }
 
     @PutMapping("/{id}")
@@ -87,8 +117,18 @@ public class DispensacoesMedicamentosController {
             @Parameter(description = "ID da dispensação de medicamento", required = true)
             @PathVariable UUID id,
             @Valid @RequestBody DispensacoesMedicamentosRequest request) {
-        DispensacoesMedicamentosResponse response = dispensacoesMedicamentosService.atualizar(id, request);
-        return ResponseEntity.ok(response);
+        log.debug("REQUEST PUT /v1/dispensacoes-medicamentos/{} - payload: {}", id, request);
+        try {
+            DispensacoesMedicamentosResponse response = dispensacoesMedicamentosService.atualizar(id, request);
+            log.info("Dispensação de medicamento atualizada com sucesso. ID: {}", response.getId());
+            return ResponseEntity.ok(response);
+        } catch (BadRequestException | NotFoundException | ConflictException ex) {
+            log.warn("Falha ao atualizar dispensação de medicamento — ID: {}, mensagem: {}, payload: {}", id, ex.getMessage(), request);
+            throw ex;
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao atualizar dispensação de medicamento — ID: {}, payload: {}", id, request, ex);
+            throw ex;
+        }
     }
 
     @DeleteMapping("/{id}")
@@ -101,8 +141,17 @@ public class DispensacoesMedicamentosController {
     public ResponseEntity<Void> excluir(
             @Parameter(description = "ID da dispensação de medicamento", required = true)
             @PathVariable UUID id) {
-        dispensacoesMedicamentosService.excluir(id);
-        return ResponseEntity.noContent().build();
+        log.debug("REQUEST DELETE /v1/dispensacoes-medicamentos/{}", id);
+        try {
+            dispensacoesMedicamentosService.excluir(id);
+            log.info("Dispensação de medicamento excluída com sucesso. ID: {}", id);
+            return ResponseEntity.noContent().build();
+        } catch (NotFoundException ex) {
+            log.warn("Dispensação de medicamento não encontrada para exclusão — ID: {}, mensagem: {}", id, ex.getMessage());
+            throw ex;
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao excluir dispensação de medicamento — ID: {}", id, ex);
+            throw ex;
+        }
     }
 }
-

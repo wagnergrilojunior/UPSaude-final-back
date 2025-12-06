@@ -1,17 +1,22 @@
 package com.upsaude.api.response;
 
-import com.upsaude.entity.embeddable.AnamneseConsulta;
-import com.upsaude.entity.embeddable.AtestadoConsulta;
-import com.upsaude.entity.embeddable.DiagnosticoConsulta;
-import com.upsaude.entity.embeddable.EncaminhamentoConsulta;
-import com.upsaude.entity.embeddable.ExamesSolicitadosConsulta;
-import com.upsaude.entity.embeddable.InformacoesConsulta;
-import com.upsaude.entity.embeddable.PrescricaoConsulta;
+import com.upsaude.api.response.embeddable.AnamneseConsultaResponse;
+import com.upsaude.api.response.embeddable.AtestadoConsultaResponse;
+import com.upsaude.api.response.embeddable.DiagnosticoConsultaResponse;
+import com.upsaude.api.response.embeddable.EncaminhamentoConsultaResponse;
+import com.upsaude.api.response.embeddable.ExamesSolicitadosConsultaResponse;
+import com.upsaude.api.response.embeddable.InformacoesConsultaResponse;
+import com.upsaude.api.response.embeddable.PrescricaoConsultaResponse;
 import java.time.OffsetDateTime;
 import java.util.UUID;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
-@Data
+@Getter
+@Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
@@ -25,13 +30,13 @@ public class ConsultasResponse {
     private ProfissionaisSaudeResponse profissionalSaude;
     private EspecialidadesMedicasResponse especialidade;
     private ConvenioResponse convenio;
-    private InformacoesConsulta informacoes;
-    private AnamneseConsulta anamnese;
-    private DiagnosticoConsulta diagnostico;
-    private PrescricaoConsulta prescricao;
-    private ExamesSolicitadosConsulta examesSolicitados;
-    private EncaminhamentoConsulta encaminhamento;
-    private AtestadoConsulta atestado;
+    private InformacoesConsultaResponse informacoes;
+    private AnamneseConsultaResponse anamnese;
+    private DiagnosticoConsultaResponse diagnostico;
+    private PrescricaoConsultaResponse prescricao;
+    private ExamesSolicitadosConsultaResponse examesSolicitados;
+    private EncaminhamentoConsultaResponse encaminhamento;
+    private AtestadoConsultaResponse atestado;
     private CidDoencasResponse cidPrincipal;
     private String observacoes;
     private String observacoesInternas;

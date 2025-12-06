@@ -3,6 +3,9 @@ package com.upsaude.controller;
 import com.upsaude.api.request.AgendamentoRequest;
 import com.upsaude.api.response.AgendamentoResponse;
 import com.upsaude.enums.StatusAgendamentoEnum;
+import com.upsaude.exception.BadRequestException;
+import com.upsaude.exception.ConflictException;
+import com.upsaude.exception.NotFoundException;
 import com.upsaude.service.AgendamentoService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -13,6 +16,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -32,6 +36,7 @@ import java.util.UUID;
 @RequestMapping("/v1/agendamentos")
 @Tag(name = "Agendamentos", description = "API para gerenciamento de Agendamentos")
 @RequiredArgsConstructor
+@Slf4j
 public class AgendamentoController {
 
     private final AgendamentoService agendamentoService;
@@ -45,8 +50,18 @@ public class AgendamentoController {
             @ApiResponse(responseCode = "403", description = "Acesso negado")
     })
     public ResponseEntity<AgendamentoResponse> criar(@Valid @RequestBody AgendamentoRequest request) {
-        AgendamentoResponse response = agendamentoService.criar(request);
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        log.debug("REQUEST POST /v1/agendamentos - payload: {}", request);
+        try {
+            AgendamentoResponse response = agendamentoService.criar(request);
+            log.info("Agendamento criado com sucesso. ID: {}", response.getId());
+            return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        } catch (BadRequestException | ConflictException ex) {
+            log.warn("Falha ao criar agendamento — mensagem: {}, payload: {}", ex.getMessage(), request);
+            throw ex;
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao criar agendamento — payload: {}", request, ex);
+            throw ex;
+        }
     }
 
     @GetMapping
@@ -58,8 +73,14 @@ public class AgendamentoController {
     public ResponseEntity<Page<AgendamentoResponse>> listar(
             @Parameter(description = "Parâmetros de paginação (page, size, sort)")
             Pageable pageable) {
-        Page<AgendamentoResponse> response = agendamentoService.listar(pageable);
-        return ResponseEntity.ok(response);
+        log.debug("REQUEST GET /v1/agendamentos - pageable: {}", pageable);
+        try {
+            Page<AgendamentoResponse> response = agendamentoService.listar(pageable);
+            return ResponseEntity.ok(response);
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao listar agendamentos — pageable: {}", pageable, ex);
+            throw ex;
+        }
     }
 
     @GetMapping("/paciente/{pacienteId}")
@@ -74,8 +95,17 @@ public class AgendamentoController {
             @PathVariable UUID pacienteId,
             @Parameter(description = "Parâmetros de paginação (page, size, sort)")
             Pageable pageable) {
-        Page<AgendamentoResponse> response = agendamentoService.listarPorPaciente(pacienteId, pageable);
-        return ResponseEntity.ok(response);
+        log.debug("REQUEST GET /v1/agendamentos/paciente/{} - pageable: {}", pacienteId, pageable);
+        try {
+            Page<AgendamentoResponse> response = agendamentoService.listarPorPaciente(pacienteId, pageable);
+            return ResponseEntity.ok(response);
+        } catch (BadRequestException ex) {
+            log.warn("Falha ao listar agendamentos por paciente — pacienteId: {}, mensagem: {}", pacienteId, ex.getMessage());
+            throw ex;
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao listar agendamentos por paciente — pacienteId: {}, pageable: {}", pacienteId, pageable, ex);
+            throw ex;
+        }
     }
 
     @GetMapping("/profissional/{profissionalId}")
@@ -90,8 +120,17 @@ public class AgendamentoController {
             @PathVariable UUID profissionalId,
             @Parameter(description = "Parâmetros de paginação (page, size, sort)")
             Pageable pageable) {
-        Page<AgendamentoResponse> response = agendamentoService.listarPorProfissional(profissionalId, pageable);
-        return ResponseEntity.ok(response);
+        log.debug("REQUEST GET /v1/agendamentos/profissional/{} - pageable: {}", profissionalId, pageable);
+        try {
+            Page<AgendamentoResponse> response = agendamentoService.listarPorProfissional(profissionalId, pageable);
+            return ResponseEntity.ok(response);
+        } catch (BadRequestException ex) {
+            log.warn("Falha ao listar agendamentos por profissional — profissionalId: {}, mensagem: {}", profissionalId, ex.getMessage());
+            throw ex;
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao listar agendamentos por profissional — profissionalId: {}, pageable: {}", profissionalId, pageable, ex);
+            throw ex;
+        }
     }
 
     @GetMapping("/medico/{medicoId}")
@@ -106,8 +145,17 @@ public class AgendamentoController {
             @PathVariable UUID medicoId,
             @Parameter(description = "Parâmetros de paginação (page, size, sort)")
             Pageable pageable) {
-        Page<AgendamentoResponse> response = agendamentoService.listarPorMedico(medicoId, pageable);
-        return ResponseEntity.ok(response);
+        log.debug("REQUEST GET /v1/agendamentos/medico/{} - pageable: {}", medicoId, pageable);
+        try {
+            Page<AgendamentoResponse> response = agendamentoService.listarPorMedico(medicoId, pageable);
+            return ResponseEntity.ok(response);
+        } catch (BadRequestException ex) {
+            log.warn("Falha ao listar agendamentos por médico — medicoId: {}, mensagem: {}", medicoId, ex.getMessage());
+            throw ex;
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao listar agendamentos por médico — medicoId: {}, pageable: {}", medicoId, pageable, ex);
+            throw ex;
+        }
     }
 
     @GetMapping("/estabelecimento/{estabelecimentoId}")
@@ -122,8 +170,17 @@ public class AgendamentoController {
             @PathVariable UUID estabelecimentoId,
             @Parameter(description = "Parâmetros de paginação (page, size, sort)")
             Pageable pageable) {
-        Page<AgendamentoResponse> response = agendamentoService.listarPorEstabelecimento(estabelecimentoId, pageable);
-        return ResponseEntity.ok(response);
+        log.debug("REQUEST GET /v1/agendamentos/estabelecimento/{} - pageable: {}", estabelecimentoId, pageable);
+        try {
+            Page<AgendamentoResponse> response = agendamentoService.listarPorEstabelecimento(estabelecimentoId, pageable);
+            return ResponseEntity.ok(response);
+        } catch (BadRequestException ex) {
+            log.warn("Falha ao listar agendamentos por estabelecimento — estabelecimentoId: {}, mensagem: {}", estabelecimentoId, ex.getMessage());
+            throw ex;
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao listar agendamentos por estabelecimento — estabelecimentoId: {}, pageable: {}", estabelecimentoId, pageable, ex);
+            throw ex;
+        }
     }
 
     @GetMapping("/status/{status}")
@@ -138,8 +195,17 @@ public class AgendamentoController {
             @PathVariable StatusAgendamentoEnum status,
             @Parameter(description = "Parâmetros de paginação (page, size, sort)")
             Pageable pageable) {
-        Page<AgendamentoResponse> response = agendamentoService.listarPorStatus(status, pageable);
-        return ResponseEntity.ok(response);
+        log.debug("REQUEST GET /v1/agendamentos/status/{} - pageable: {}", status, pageable);
+        try {
+            Page<AgendamentoResponse> response = agendamentoService.listarPorStatus(status, pageable);
+            return ResponseEntity.ok(response);
+        } catch (BadRequestException ex) {
+            log.warn("Falha ao listar agendamentos por status — status: {}, mensagem: {}", status, ex.getMessage());
+            throw ex;
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao listar agendamentos por status — status: {}, pageable: {}", status, pageable, ex);
+            throw ex;
+        }
     }
 
     @GetMapping("/profissional/{profissionalId}/periodo")
@@ -158,8 +224,17 @@ public class AgendamentoController {
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) OffsetDateTime dataFim,
             @Parameter(description = "Parâmetros de paginação (page, size, sort)")
             Pageable pageable) {
-        Page<AgendamentoResponse> response = agendamentoService.listarPorProfissionalEPeriodo(profissionalId, dataInicio, dataFim, pageable);
-        return ResponseEntity.ok(response);
+        log.debug("REQUEST GET /v1/agendamentos/profissional/{}/periodo - dataInicio: {}, dataFim: {}, pageable: {}", profissionalId, dataInicio, dataFim, pageable);
+        try {
+            Page<AgendamentoResponse> response = agendamentoService.listarPorProfissionalEPeriodo(profissionalId, dataInicio, dataFim, pageable);
+            return ResponseEntity.ok(response);
+        } catch (BadRequestException ex) {
+            log.warn("Falha ao listar agendamentos por profissional e período — profissionalId: {}, dataInicio: {}, dataFim: {}, mensagem: {}", profissionalId, dataInicio, dataFim, ex.getMessage());
+            throw ex;
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao listar agendamentos por profissional e período — profissionalId: {}, dataInicio: {}, dataFim: {}, pageable: {}", profissionalId, dataInicio, dataFim, pageable, ex);
+            throw ex;
+        }
     }
 
     @GetMapping("/estabelecimento/{estabelecimentoId}/periodo")
@@ -178,8 +253,17 @@ public class AgendamentoController {
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) OffsetDateTime dataFim,
             @Parameter(description = "Parâmetros de paginação (page, size, sort)")
             Pageable pageable) {
-        Page<AgendamentoResponse> response = agendamentoService.listarPorEstabelecimentoEPeriodo(estabelecimentoId, dataInicio, dataFim, pageable);
-        return ResponseEntity.ok(response);
+        log.debug("REQUEST GET /v1/agendamentos/estabelecimento/{}/periodo - dataInicio: {}, dataFim: {}, pageable: {}", estabelecimentoId, dataInicio, dataFim, pageable);
+        try {
+            Page<AgendamentoResponse> response = agendamentoService.listarPorEstabelecimentoEPeriodo(estabelecimentoId, dataInicio, dataFim, pageable);
+            return ResponseEntity.ok(response);
+        } catch (BadRequestException ex) {
+            log.warn("Falha ao listar agendamentos por estabelecimento e período — estabelecimentoId: {}, dataInicio: {}, dataFim: {}, mensagem: {}", estabelecimentoId, dataInicio, dataFim, ex.getMessage());
+            throw ex;
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao listar agendamentos por estabelecimento e período — estabelecimentoId: {}, dataInicio: {}, dataFim: {}, pageable: {}", estabelecimentoId, dataInicio, dataFim, pageable, ex);
+            throw ex;
+        }
     }
 
     @GetMapping("/profissional/{profissionalId}/status/{status}")
@@ -196,8 +280,17 @@ public class AgendamentoController {
             @PathVariable StatusAgendamentoEnum status,
             @Parameter(description = "Parâmetros de paginação (page, size, sort)")
             Pageable pageable) {
-        Page<AgendamentoResponse> response = agendamentoService.listarPorProfissionalEStatus(profissionalId, status, pageable);
-        return ResponseEntity.ok(response);
+        log.debug("REQUEST GET /v1/agendamentos/profissional/{}/status/{} - pageable: {}", profissionalId, status, pageable);
+        try {
+            Page<AgendamentoResponse> response = agendamentoService.listarPorProfissionalEStatus(profissionalId, status, pageable);
+            return ResponseEntity.ok(response);
+        } catch (BadRequestException ex) {
+            log.warn("Falha ao listar agendamentos por profissional e status — profissionalId: {}, status: {}, mensagem: {}", profissionalId, status, ex.getMessage());
+            throw ex;
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao listar agendamentos por profissional e status — profissionalId: {}, status: {}, pageable: {}", profissionalId, status, pageable, ex);
+            throw ex;
+        }
     }
 
     @GetMapping("/{id}")
@@ -211,8 +304,17 @@ public class AgendamentoController {
     public ResponseEntity<AgendamentoResponse> obterPorId(
             @Parameter(description = "ID do agendamento", required = true)
             @PathVariable UUID id) {
-        AgendamentoResponse response = agendamentoService.obterPorId(id);
-        return ResponseEntity.ok(response);
+        log.debug("REQUEST GET /v1/agendamentos/{}", id);
+        try {
+            AgendamentoResponse response = agendamentoService.obterPorId(id);
+            return ResponseEntity.ok(response);
+        } catch (NotFoundException ex) {
+            log.warn("Agendamento não encontrado — ID: {}, mensagem: {}", id, ex.getMessage());
+            throw ex;
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao obter agendamento por ID — ID: {}", id, ex);
+            throw ex;
+        }
     }
 
     @PutMapping("/{id}")
@@ -228,8 +330,18 @@ public class AgendamentoController {
             @Parameter(description = "ID do agendamento", required = true)
             @PathVariable UUID id,
             @Valid @RequestBody AgendamentoRequest request) {
-        AgendamentoResponse response = agendamentoService.atualizar(id, request);
-        return ResponseEntity.ok(response);
+        log.debug("REQUEST PUT /v1/agendamentos/{} - payload: {}", id, request);
+        try {
+            AgendamentoResponse response = agendamentoService.atualizar(id, request);
+            log.info("Agendamento atualizado com sucesso. ID: {}", response.getId());
+            return ResponseEntity.ok(response);
+        } catch (BadRequestException | NotFoundException | ConflictException ex) {
+            log.warn("Falha ao atualizar agendamento — ID: {}, mensagem: {}, payload: {}", id, ex.getMessage(), request);
+            throw ex;
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao atualizar agendamento — ID: {}, payload: {}", id, request, ex);
+            throw ex;
+        }
     }
 
     @PostMapping("/{id}/cancelar")
@@ -246,8 +358,18 @@ public class AgendamentoController {
             @PathVariable UUID id,
             @Parameter(description = "Motivo do cancelamento")
             @RequestParam(required = false) String motivoCancelamento) {
-        AgendamentoResponse response = agendamentoService.cancelar(id, motivoCancelamento);
-        return ResponseEntity.ok(response);
+        log.debug("REQUEST POST /v1/agendamentos/{}/cancelar - motivoCancelamento: {}", id, motivoCancelamento);
+        try {
+            AgendamentoResponse response = agendamentoService.cancelar(id, motivoCancelamento);
+            log.info("Agendamento cancelado com sucesso. ID: {}", response.getId());
+            return ResponseEntity.ok(response);
+        } catch (BadRequestException | NotFoundException | ConflictException ex) {
+            log.warn("Falha ao cancelar agendamento — ID: {}, motivoCancelamento: {}, mensagem: {}", id, motivoCancelamento, ex.getMessage());
+            throw ex;
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao cancelar agendamento — ID: {}, motivoCancelamento: {}", id, motivoCancelamento, ex);
+            throw ex;
+        }
     }
 
     @PostMapping("/{id}/confirmar")
@@ -262,8 +384,18 @@ public class AgendamentoController {
     public ResponseEntity<AgendamentoResponse> confirmar(
             @Parameter(description = "ID do agendamento", required = true)
             @PathVariable UUID id) {
-        AgendamentoResponse response = agendamentoService.confirmar(id);
-        return ResponseEntity.ok(response);
+        log.debug("REQUEST POST /v1/agendamentos/{}/confirmar", id);
+        try {
+            AgendamentoResponse response = agendamentoService.confirmar(id);
+            log.info("Agendamento confirmado com sucesso. ID: {}", response.getId());
+            return ResponseEntity.ok(response);
+        } catch (BadRequestException | NotFoundException | ConflictException ex) {
+            log.warn("Falha ao confirmar agendamento — ID: {}, mensagem: {}", id, ex.getMessage());
+            throw ex;
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao confirmar agendamento — ID: {}", id, ex);
+            throw ex;
+        }
     }
 
     @PostMapping("/{id}/reagendar")
@@ -281,8 +413,18 @@ public class AgendamentoController {
             @Valid @RequestBody AgendamentoRequest novoAgendamentoRequest,
             @Parameter(description = "Motivo do reagendamento")
             @RequestParam(required = false) String motivoReagendamento) {
-        AgendamentoResponse response = agendamentoService.reagendar(id, novoAgendamentoRequest, motivoReagendamento);
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        log.debug("REQUEST POST /v1/agendamentos/{}/reagendar - novoAgendamentoRequest: {}, motivoReagendamento: {}", id, novoAgendamentoRequest, motivoReagendamento);
+        try {
+            AgendamentoResponse response = agendamentoService.reagendar(id, novoAgendamentoRequest, motivoReagendamento);
+            log.info("Agendamento reagendado com sucesso. ID original: {}, ID novo: {}", id, response.getId());
+            return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        } catch (BadRequestException | NotFoundException | ConflictException ex) {
+            log.warn("Falha ao reagendar agendamento — ID: {}, motivoReagendamento: {}, mensagem: {}, payload: {}", id, motivoReagendamento, ex.getMessage(), novoAgendamentoRequest);
+            throw ex;
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao reagendar agendamento — ID: {}, motivoReagendamento: {}, payload: {}", id, motivoReagendamento, novoAgendamentoRequest, ex);
+            throw ex;
+        }
     }
 
     @DeleteMapping("/{id}")
@@ -295,8 +437,17 @@ public class AgendamentoController {
     public ResponseEntity<Void> excluir(
             @Parameter(description = "ID do agendamento", required = true)
             @PathVariable UUID id) {
-        agendamentoService.excluir(id);
-        return ResponseEntity.noContent().build();
+        log.debug("REQUEST DELETE /v1/agendamentos/{}", id);
+        try {
+            agendamentoService.excluir(id);
+            log.info("Agendamento excluído com sucesso. ID: {}", id);
+            return ResponseEntity.noContent().build();
+        } catch (NotFoundException ex) {
+            log.warn("Agendamento não encontrado para exclusão — ID: {}, mensagem: {}", id, ex.getMessage());
+            throw ex;
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao excluir agendamento — ID: {}", id, ex);
+            throw ex;
+        }
     }
 }
-

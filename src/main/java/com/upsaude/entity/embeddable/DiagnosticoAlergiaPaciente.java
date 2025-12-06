@@ -10,7 +10,6 @@ import jakarta.persistence.Embeddable;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
 
@@ -22,9 +21,14 @@ import java.time.LocalDate;
 @Embeddable
 @Data
 @Builder
-@NoArgsConstructor
 @AllArgsConstructor
 public class DiagnosticoAlergiaPaciente {
+
+    public DiagnosticoAlergiaPaciente() {
+        this.metodoDiagnostico = "";
+        this.localDiagnostico = "";
+        this.profissionalDiagnostico = "";
+    }
 
     @Column(name = "data_diagnostico")
     private LocalDate dataDiagnostico; // Data do diagnóstico da alergia

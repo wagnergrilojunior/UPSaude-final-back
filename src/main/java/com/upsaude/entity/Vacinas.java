@@ -25,6 +25,8 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.PrePersist;
+import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 import jakarta.validation.constraints.NotBlank;
@@ -57,6 +59,18 @@ import lombok.EqualsAndHashCode;
 @Data
 @EqualsAndHashCode(callSuper = true)
 public class Vacinas extends BaseEntityWithoutTenant {
+
+    public Vacinas() {
+        this.esquemaVacinal = new EsquemaVacinal();
+        this.idadeAplicacao = new IdadeAplicacaoVacina();
+        this.contraindicacoes = new ContraindicacoesVacina();
+        this.conservacao = new ConservacaoVacina();
+        this.composicao = new ComposicaoVacina();
+        this.eficacia = new EficaciaVacina();
+        this.reacoesAdversas = new ReacoesAdversasVacina();
+        this.calendario = new CalendarioVacinal();
+        this.integracaoGovernamental = new IntegracaoGovernamentalVacina();
+    }
 
     // ========== IDENTIFICAÇÃO BÁSICA ==========
 
@@ -196,4 +210,36 @@ public class Vacinas extends BaseEntityWithoutTenant {
 
     @Embedded
     private IntegracaoGovernamentalVacina integracaoGovernamental;
+
+    @PrePersist
+    @PreUpdate
+    public void validateEmbeddables() {
+        if (esquemaVacinal == null) {
+            esquemaVacinal = new EsquemaVacinal();
+        }
+        if (idadeAplicacao == null) {
+            idadeAplicacao = new IdadeAplicacaoVacina();
+        }
+        if (contraindicacoes == null) {
+            contraindicacoes = new ContraindicacoesVacina();
+        }
+        if (conservacao == null) {
+            conservacao = new ConservacaoVacina();
+        }
+        if (composicao == null) {
+            composicao = new ComposicaoVacina();
+        }
+        if (eficacia == null) {
+            eficacia = new EficaciaVacina();
+        }
+        if (reacoesAdversas == null) {
+            reacoesAdversas = new ReacoesAdversasVacina();
+        }
+        if (calendario == null) {
+            calendario = new CalendarioVacinal();
+        }
+        if (integracaoGovernamental == null) {
+            integracaoGovernamental = new IntegracaoGovernamentalVacina();
+        }
+    }
 }

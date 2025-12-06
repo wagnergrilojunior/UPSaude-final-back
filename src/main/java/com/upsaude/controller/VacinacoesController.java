@@ -2,6 +2,9 @@ package com.upsaude.controller;
 
 import com.upsaude.api.request.VacinacoesRequest;
 import com.upsaude.api.response.VacinacoesResponse;
+import com.upsaude.exception.BadRequestException;
+import com.upsaude.exception.ConflictException;
+import com.upsaude.exception.NotFoundException;
 import com.upsaude.service.VacinacoesService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -12,6 +15,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -29,6 +33,7 @@ import java.util.UUID;
 @RequestMapping("/v1/vacinacoes")
 @Tag(name = "Vacinações", description = "API para gerenciamento de Vacinações")
 @RequiredArgsConstructor
+@Slf4j
 public class VacinacoesController {
 
     private final VacinacoesService vacinacoesService;
@@ -42,8 +47,18 @@ public class VacinacoesController {
             @ApiResponse(responseCode = "403", description = "Acesso negado")
     })
     public ResponseEntity<VacinacoesResponse> criar(@Valid @RequestBody VacinacoesRequest request) {
-        VacinacoesResponse response = vacinacoesService.criar(request);
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        log.debug("REQUEST POST /v1/vacinacoes - payload: {}", request);
+        try {
+            VacinacoesResponse response = vacinacoesService.criar(request);
+            log.info("Vacinação criada com sucesso. ID: {}", response.getId());
+            return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        } catch (BadRequestException | ConflictException ex) {
+            log.warn("Falha ao criar vacinação — mensagem: {}, payload: {}", ex.getMessage(), request);
+            throw ex;
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao criar vacinação — payload: {}", request, ex);
+            throw ex;
+        }
     }
 
     @GetMapping
@@ -55,8 +70,14 @@ public class VacinacoesController {
     public ResponseEntity<Page<VacinacoesResponse>> listar(
             @Parameter(description = "Parâmetros de paginação (page, size, sort)")
             Pageable pageable) {
-        Page<VacinacoesResponse> response = vacinacoesService.listar(pageable);
-        return ResponseEntity.ok(response);
+        log.debug("REQUEST GET /v1/vacinacoes - pageable: {}", pageable);
+        try {
+            Page<VacinacoesResponse> response = vacinacoesService.listar(pageable);
+            return ResponseEntity.ok(response);
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao listar vacinações — pageable: {}", pageable, ex);
+            throw ex;
+        }
     }
 
     @GetMapping("/{id}")
@@ -70,8 +91,17 @@ public class VacinacoesController {
     public ResponseEntity<VacinacoesResponse> obterPorId(
             @Parameter(description = "ID da vacinação", required = true)
             @PathVariable UUID id) {
-        VacinacoesResponse response = vacinacoesService.obterPorId(id);
-        return ResponseEntity.ok(response);
+        log.debug("REQUEST GET /v1/vacinacoes/{}", id);
+        try {
+            VacinacoesResponse response = vacinacoesService.obterPorId(id);
+            return ResponseEntity.ok(response);
+        } catch (NotFoundException ex) {
+            log.warn("Vacinação não encontrada — ID: {}, mensagem: {}", id, ex.getMessage());
+            throw ex;
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao obter vacinação por ID — ID: {}", id, ex);
+            throw ex;
+        }
     }
 
     @PutMapping("/{id}")
@@ -87,8 +117,18 @@ public class VacinacoesController {
             @Parameter(description = "ID da vacinação", required = true)
             @PathVariable UUID id,
             @Valid @RequestBody VacinacoesRequest request) {
-        VacinacoesResponse response = vacinacoesService.atualizar(id, request);
-        return ResponseEntity.ok(response);
+        log.debug("REQUEST PUT /v1/vacinacoes/{} - payload: {}", id, request);
+        try {
+            VacinacoesResponse response = vacinacoesService.atualizar(id, request);
+            log.info("Vacinação atualizada com sucesso. ID: {}", response.getId());
+            return ResponseEntity.ok(response);
+        } catch (BadRequestException | NotFoundException | ConflictException ex) {
+            log.warn("Falha ao atualizar vacinação — ID: {}, mensagem: {}, payload: {}", id, ex.getMessage(), request);
+            throw ex;
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao atualizar vacinação — ID: {}, payload: {}", id, request, ex);
+            throw ex;
+        }
     }
 
     @DeleteMapping("/{id}")
@@ -101,8 +141,17 @@ public class VacinacoesController {
     public ResponseEntity<Void> excluir(
             @Parameter(description = "ID da vacinação", required = true)
             @PathVariable UUID id) {
-        vacinacoesService.excluir(id);
-        return ResponseEntity.noContent().build();
+        log.debug("REQUEST DELETE /v1/vacinacoes/{}", id);
+        try {
+            vacinacoesService.excluir(id);
+            log.info("Vacinação excluída com sucesso. ID: {}", id);
+            return ResponseEntity.noContent().build();
+        } catch (NotFoundException ex) {
+            log.warn("Vacinação não encontrada para exclusão — ID: {}, mensagem: {}", id, ex.getMessage());
+            throw ex;
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao excluir vacinação — ID: {}", id, ex);
+            throw ex;
+        }
     }
 }
-

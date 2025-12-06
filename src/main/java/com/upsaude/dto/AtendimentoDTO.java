@@ -1,10 +1,10 @@
 package com.upsaude.dto;
 
-import com.upsaude.entity.embeddable.AnamneseAtendimento;
-import com.upsaude.entity.embeddable.ClassificacaoRiscoAtendimento;
-import com.upsaude.entity.embeddable.DiagnosticoAtendimento;
-import com.upsaude.entity.embeddable.InformacoesAtendimento;
-import com.upsaude.entity.embeddable.ProcedimentosRealizadosAtendimento;
+import com.upsaude.dto.embeddable.AnamneseAtendimentoDTO;
+import com.upsaude.dto.embeddable.ClassificacaoRiscoAtendimentoDTO;
+import com.upsaude.dto.embeddable.DiagnosticoAtendimentoDTO;
+import com.upsaude.dto.embeddable.InformacoesAtendimentoDTO;
+import com.upsaude.dto.embeddable.ProcedimentosRealizadosAtendimentoDTO;
 import java.time.OffsetDateTime;
 import java.util.UUID;
 import lombok.*;
@@ -23,11 +23,11 @@ public class AtendimentoDTO {
     private EspecialidadesMedicasDTO especialidade;
     private EquipeSaudeDTO equipeSaude;
     private ConvenioDTO convenio;
-    private InformacoesAtendimento informacoes;
-    private AnamneseAtendimento anamnese;
-    private DiagnosticoAtendimento diagnostico;
-    private ProcedimentosRealizadosAtendimento procedimentosRealizados;
-    private ClassificacaoRiscoAtendimento classificacaoRisco;
+    private InformacoesAtendimentoDTO informacoes;
+    private AnamneseAtendimentoDTO anamnese;
+    private DiagnosticoAtendimentoDTO diagnostico;
+    private ProcedimentosRealizadosAtendimentoDTO procedimentosRealizados;
+    private ClassificacaoRiscoAtendimentoDTO classificacaoRisco;
     private CidDoencasDTO cidPrincipal;
     private String anotacoes;
     private String observacoesInternas;

@@ -5,7 +5,6 @@ import jakarta.persistence.Embeddable;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
 
@@ -17,9 +16,16 @@ import java.time.LocalDate;
 @Embeddable
 @Data
 @Builder
-@NoArgsConstructor
 @AllArgsConstructor
 public class AcompanhamentoDoencaPaciente {
+
+    public AcompanhamentoDoencaPaciente() {
+        this.frequenciaAcompanhamento = "";
+        this.especialistaResponsavel = "";
+        this.estabelecimentoAcompanhamento = "";
+        this.evolucaoClinica = "";
+        this.complicacoes = "";
+    }
 
     @Column(name = "data_ultima_consulta")
     private LocalDate dataUltimaConsulta; // Data da última consulta relacionada à doença

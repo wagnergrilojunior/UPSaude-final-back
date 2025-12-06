@@ -2,6 +2,9 @@ package com.upsaude.controller;
 
 import com.upsaude.api.request.MedicosRequest;
 import com.upsaude.api.response.MedicosResponse;
+import com.upsaude.exception.BadRequestException;
+import com.upsaude.exception.ConflictException;
+import com.upsaude.exception.NotFoundException;
 import com.upsaude.service.MedicosService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -12,6 +15,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -29,6 +33,7 @@ import java.util.UUID;
 @RequestMapping("/v1/medicos")
 @Tag(name = "Médicos", description = "API para gerenciamento de Médicos")
 @RequiredArgsConstructor
+@Slf4j
 public class MedicosController {
 
     private final MedicosService medicosService;
@@ -42,8 +47,18 @@ public class MedicosController {
             @ApiResponse(responseCode = "403", description = "Acesso negado")
     })
     public ResponseEntity<MedicosResponse> criar(@Valid @RequestBody MedicosRequest request) {
-        MedicosResponse response = medicosService.criar(request);
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        log.debug("REQUEST POST /v1/medicos - payload: {}", request);
+        try {
+            MedicosResponse response = medicosService.criar(request);
+            log.info("Médico criado com sucesso. ID: {}", response.getId());
+            return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        } catch (BadRequestException | ConflictException ex) {
+            log.warn("Falha ao criar médico — mensagem: {}, payload: {}", ex.getMessage(), request);
+            throw ex;
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao criar médico — payload: {}", request, ex);
+            throw ex;
+        }
     }
 
     @GetMapping
@@ -55,8 +70,14 @@ public class MedicosController {
     public ResponseEntity<Page<MedicosResponse>> listar(
             @Parameter(description = "Parâmetros de paginação (page, size, sort)")
             Pageable pageable) {
-        Page<MedicosResponse> response = medicosService.listar(pageable);
-        return ResponseEntity.ok(response);
+        log.debug("REQUEST GET /v1/medicos - pageable: {}", pageable);
+        try {
+            Page<MedicosResponse> response = medicosService.listar(pageable);
+            return ResponseEntity.ok(response);
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao listar médicos — pageable: {}", pageable, ex);
+            throw ex;
+        }
     }
 
     @GetMapping("/{id}")
@@ -70,8 +91,17 @@ public class MedicosController {
     public ResponseEntity<MedicosResponse> obterPorId(
             @Parameter(description = "ID do médico", required = true)
             @PathVariable UUID id) {
-        MedicosResponse response = medicosService.obterPorId(id);
-        return ResponseEntity.ok(response);
+        log.debug("REQUEST GET /v1/medicos/{}", id);
+        try {
+            MedicosResponse response = medicosService.obterPorId(id);
+            return ResponseEntity.ok(response);
+        } catch (NotFoundException ex) {
+            log.warn("Médico não encontrado — ID: {}, mensagem: {}", id, ex.getMessage());
+            throw ex;
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao obter médico por ID — ID: {}", id, ex);
+            throw ex;
+        }
     }
 
     @PutMapping("/{id}")
@@ -87,8 +117,18 @@ public class MedicosController {
             @Parameter(description = "ID do médico", required = true)
             @PathVariable UUID id,
             @Valid @RequestBody MedicosRequest request) {
-        MedicosResponse response = medicosService.atualizar(id, request);
-        return ResponseEntity.ok(response);
+        log.debug("REQUEST PUT /v1/medicos/{} - payload: {}", id, request);
+        try {
+            MedicosResponse response = medicosService.atualizar(id, request);
+            log.info("Médico atualizado com sucesso. ID: {}", response.getId());
+            return ResponseEntity.ok(response);
+        } catch (BadRequestException | NotFoundException | ConflictException ex) {
+            log.warn("Falha ao atualizar médico — ID: {}, mensagem: {}, payload: {}", id, ex.getMessage(), request);
+            throw ex;
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao atualizar médico — ID: {}, payload: {}", id, request, ex);
+            throw ex;
+        }
     }
 
     @DeleteMapping("/{id}")
@@ -101,8 +141,17 @@ public class MedicosController {
     public ResponseEntity<Void> excluir(
             @Parameter(description = "ID do médico", required = true)
             @PathVariable UUID id) {
-        medicosService.excluir(id);
-        return ResponseEntity.noContent().build();
+        log.debug("REQUEST DELETE /v1/medicos/{}", id);
+        try {
+            medicosService.excluir(id);
+            log.info("Médico excluído com sucesso. ID: {}", id);
+            return ResponseEntity.noContent().build();
+        } catch (NotFoundException ex) {
+            log.warn("Médico não encontrado para exclusão — ID: {}, mensagem: {}", id, ex.getMessage());
+            throw ex;
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao excluir médico — ID: {}", id, ex);
+            throw ex;
+        }
     }
 }
-

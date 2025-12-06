@@ -5,7 +5,6 @@ import jakarta.persistence.Embeddable;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
 /**
  * Classe embeddable para informações de exames solicitados na consulta.
@@ -15,9 +14,16 @@ import lombok.NoArgsConstructor;
 @Embeddable
 @Data
 @Builder
-@NoArgsConstructor
 @AllArgsConstructor
 public class ExamesSolicitadosConsulta {
+
+    public ExamesSolicitadosConsulta() {
+        this.examesSolicitados = "";
+        this.examesLaboratoriais = "";
+        this.examesImagem = "";
+        this.examesOutros = "";
+        this.urgenciaExames = false;
+    }
 
     @Column(name = "exames_solicitados", columnDefinition = "TEXT")
     private String examesSolicitados; // Exames solicitados

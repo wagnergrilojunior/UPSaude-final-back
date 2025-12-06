@@ -6,7 +6,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Builder.Default;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
 import java.time.OffsetDateTime;
 
@@ -18,9 +17,14 @@ import java.time.OffsetDateTime;
 @Embeddable
 @Data
 @Builder
-@NoArgsConstructor
 @AllArgsConstructor
 public class IntegracaoGovernamentalVacina {
+
+    public IntegracaoGovernamentalVacina() {
+        this.codigoSiPni = "";
+        this.codigoESus = "";
+        this.sincronizarPni = false;
+    }
 
     @Column(name = "codigo_si_pni", length = 50)
     private String codigoSiPni; // Código no Sistema de Informação do PNI

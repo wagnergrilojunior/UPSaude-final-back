@@ -5,7 +5,6 @@ import jakarta.persistence.Embeddable;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
 /**
  * Classe embeddable para informações de reações adversas da vacina.
@@ -15,9 +14,14 @@ import lombok.NoArgsConstructor;
 @Embeddable
 @Data
 @Builder
-@NoArgsConstructor
 @AllArgsConstructor
 public class ReacoesAdversasVacina {
+
+    public ReacoesAdversasVacina() {
+        this.reacoesAdversasComuns = "";
+        this.reacoesAdversasRaras = "";
+        this.reacoesAdversasGraves = "";
+    }
 
     @Column(name = "reacoes_adversas_comuns", columnDefinition = "TEXT")
     private String reacoesAdversasComuns; // Reações adversas comuns

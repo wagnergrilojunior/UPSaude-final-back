@@ -17,6 +17,8 @@ import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.PrePersist;
+import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 import jakarta.validation.constraints.NotNull;
@@ -39,6 +41,13 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @EntityListeners({AuditingEntityListener.class})
 public class UsuariosSistema {
+
+    /**
+     * Construtor padrão que inicializa as coleções para evitar NullPointerException.
+     */
+    public UsuariosSistema() {
+        this.estabelecimentosVinculados = new ArrayList<>();
+    }
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
@@ -112,4 +121,54 @@ public class UsuariosSistema {
      */
     @OneToMany(mappedBy = "usuario", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     private List<UsuarioEstabelecimento> estabelecimentosVinculados = new ArrayList<>();
+
+    // ========== MÉTODOS DE CICLO DE VIDA ==========
+
+    /**
+     * Garante que as coleções não sejam nulas antes de persistir ou atualizar.
+     * Recria a lista se estiver nula.
+     */
+    @PrePersist
+    @PreUpdate
+    public void validateCollections() {
+        if (estabelecimentosVinculados == null) {
+            estabelecimentosVinculados = new ArrayList<>();
+        }
+    }
+
+    // ========== MÉTODOS UTILITÁRIOS - ESTABELECIMENTOS VINCULADOS ==========
+
+    /**
+     * Adiciona um estabelecimento vinculado com sincronização bidirecional.
+     * Garante que o vínculo também referencia este usuário.
+     *
+     * @param estabelecimentoVinculado O vínculo a ser adicionado
+     */
+    public void addEstabelecimentoVinculado(UsuarioEstabelecimento estabelecimentoVinculado) {
+        if (estabelecimentoVinculado == null) {
+            return;
+        }
+        if (estabelecimentosVinculados == null) {
+            estabelecimentosVinculados = new ArrayList<>();
+        }
+        if (!estabelecimentosVinculados.contains(estabelecimentoVinculado)) {
+            estabelecimentosVinculados.add(estabelecimentoVinculado);
+            estabelecimentoVinculado.setUsuario(this);
+        }
+    }
+
+    /**
+     * Remove um estabelecimento vinculado com sincronização bidirecional.
+     * Remove a referência do vínculo para este usuário.
+     *
+     * @param estabelecimentoVinculado O vínculo a ser removido
+     */
+    public void removeEstabelecimentoVinculado(UsuarioEstabelecimento estabelecimentoVinculado) {
+        if (estabelecimentoVinculado == null || estabelecimentosVinculados == null) {
+            return;
+        }
+        if (estabelecimentosVinculados.remove(estabelecimentoVinculado)) {
+            estabelecimentoVinculado.setUsuario(null);
+        }
+    }
 }

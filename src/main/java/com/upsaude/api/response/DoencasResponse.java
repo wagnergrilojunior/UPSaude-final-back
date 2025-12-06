@@ -1,14 +1,19 @@
 package com.upsaude.api.response;
 
-import com.upsaude.entity.embeddable.ClassificacaoDoenca;
-import com.upsaude.entity.embeddable.EpidemiologiaDoenca;
-import com.upsaude.entity.embeddable.SintomasDoenca;
-import com.upsaude.entity.embeddable.TratamentoPadraoDoenca;
+import com.upsaude.api.response.embeddable.ClassificacaoDoencaResponse;
+import com.upsaude.api.response.embeddable.EpidemiologiaDoencaResponse;
+import com.upsaude.api.response.embeddable.SintomasDoencaResponse;
+import com.upsaude.api.response.embeddable.TratamentoPadraoDoencaResponse;
 import java.time.OffsetDateTime;
 import java.util.UUID;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
-@Data
+@Getter
+@Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
@@ -20,12 +25,12 @@ public class DoencasResponse {
     private String nome;
     private String nomeCientifico;
     private String codigoInterno;
-    private ClassificacaoDoenca classificacao;
+    private ClassificacaoDoencaResponse classificacao;
     private Boolean cronica;
     private CidDoencasResponse cidPrincipal;
-    private SintomasDoenca sintomas;
-    private TratamentoPadraoDoenca tratamentoPadrao;
-    private EpidemiologiaDoenca epidemiologia;
+    private SintomasDoencaResponse sintomas;
+    private TratamentoPadraoDoencaResponse tratamentoPadrao;
+    private EpidemiologiaDoencaResponse epidemiologia;
     private String descricao;
     private String causas;
     private String fisiopatologia;

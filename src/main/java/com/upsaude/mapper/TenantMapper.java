@@ -37,6 +37,7 @@ public interface TenantMapper extends EntityMapper<Tenant, TenantDTO> {
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
     @Mapping(target = "active", ignore = true)
+    @Mapping(target = "enderecos", ignore = true)
     Tenant fromRequest(TenantRequest request);
 
     /**
@@ -48,6 +49,7 @@ public interface TenantMapper extends EntityMapper<Tenant, TenantDTO> {
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
     @Mapping(target = "active", ignore = true)
+    @Mapping(target = "enderecos", ignore = true)
     void updateFromRequest(TenantRequest request, @MappingTarget Tenant entity);
 
     /**

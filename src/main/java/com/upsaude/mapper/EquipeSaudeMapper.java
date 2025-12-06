@@ -39,6 +39,7 @@ public interface EquipeSaudeMapper extends EntityMapper<EquipeSaude, EquipeSaude
     @Mapping(target = "updatedAt", ignore = true)
     @Mapping(target = "active", ignore = true)
     @Mapping(target = "estabelecimento", ignore = true)
+    @Mapping(target = "vinculosProfissionais", ignore = true)
     EquipeSaude fromRequest(EquipeSaudeRequest request);
 
     /**
@@ -51,6 +52,7 @@ public interface EquipeSaudeMapper extends EntityMapper<EquipeSaude, EquipeSaude
     @Mapping(target = "updatedAt", ignore = true)
     @Mapping(target = "active", ignore = true)
     @Mapping(target = "estabelecimento", ignore = true)
+    @Mapping(target = "vinculosProfissionais", ignore = true)
     void updateFromRequest(EquipeSaudeRequest request, @MappingTarget EquipeSaude entity);
 
     /**

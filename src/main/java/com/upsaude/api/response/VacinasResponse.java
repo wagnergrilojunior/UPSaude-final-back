@@ -1,23 +1,28 @@
 package com.upsaude.api.response;
 
-import com.upsaude.entity.embeddable.CalendarioVacinal;
-import com.upsaude.entity.embeddable.ComposicaoVacina;
-import com.upsaude.entity.embeddable.ConservacaoVacina;
-import com.upsaude.entity.embeddable.ContraindicacoesVacina;
-import com.upsaude.entity.embeddable.EficaciaVacina;
-import com.upsaude.entity.embeddable.EsquemaVacinal;
-import com.upsaude.entity.embeddable.IdadeAplicacaoVacina;
-import com.upsaude.entity.embeddable.IntegracaoGovernamentalVacina;
-import com.upsaude.entity.embeddable.ReacoesAdversasVacina;
+import com.upsaude.api.response.embeddable.CalendarioVacinalResponse;
+import com.upsaude.api.response.embeddable.ComposicaoVacinaResponse;
+import com.upsaude.api.response.embeddable.ConservacaoVacinaResponse;
+import com.upsaude.api.response.embeddable.ContraindicacoesVacinaResponse;
+import com.upsaude.api.response.embeddable.EficaciaVacinaResponse;
+import com.upsaude.api.response.embeddable.EsquemaVacinalResponse;
+import com.upsaude.api.response.embeddable.IdadeAplicacaoVacinaResponse;
+import com.upsaude.api.response.embeddable.IntegracaoGovernamentalVacinaResponse;
+import com.upsaude.api.response.embeddable.ReacoesAdversasVacinaResponse;
 import com.upsaude.enums.StatusAtivoEnum;
 import com.upsaude.enums.TipoVacinaEnum;
 import com.upsaude.enums.UnidadeMedidaEnum;
 import com.upsaude.enums.ViaAdministracaoEnum;
 import java.time.OffsetDateTime;
 import java.util.UUID;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
-@Data
+@Getter
+@Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
@@ -39,14 +44,14 @@ public class VacinasResponse {
     private String lotePadrao;
     private ViaAdministracaoEnum viaAdministracao;
     private UnidadeMedidaEnum unidadeMedida;
-    private EsquemaVacinal esquemaVacinal;
-    private IdadeAplicacaoVacina idadeAplicacao;
-    private ContraindicacoesVacina contraindicacoes;
-    private ConservacaoVacina conservacao;
-    private ComposicaoVacina composicao;
-    private EficaciaVacina eficacia;
-    private ReacoesAdversasVacina reacoesAdversas;
-    private CalendarioVacinal calendario;
+    private EsquemaVacinalResponse esquemaVacinal;
+    private IdadeAplicacaoVacinaResponse idadeAplicacao;
+    private ContraindicacoesVacinaResponse contraindicacoes;
+    private ConservacaoVacinaResponse conservacao;
+    private ComposicaoVacinaResponse composicao;
+    private EficaciaVacinaResponse eficacia;
+    private ReacoesAdversasVacinaResponse reacoesAdversas;
+    private CalendarioVacinalResponse calendario;
     private StatusAtivoEnum status;
     private String bula;
     private String fichaTecnica;
@@ -54,5 +59,5 @@ public class VacinasResponse {
     private String descricao;
     private String indicacoes;
     private String observacoes;
-    private IntegracaoGovernamentalVacina integracaoGovernamental;
+    private IntegracaoGovernamentalVacinaResponse integracaoGovernamental;
 }

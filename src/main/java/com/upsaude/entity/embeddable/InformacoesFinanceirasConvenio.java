@@ -6,7 +6,6 @@ import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -19,9 +18,14 @@ import java.time.LocalDate;
 @Embeddable
 @Data
 @Builder
-@NoArgsConstructor
 @AllArgsConstructor
 public class InformacoesFinanceirasConvenio {
+
+    public InformacoesFinanceirasConvenio() {
+        this.formaPagamento = "";
+        this.diaVencimento = "";
+        this.observacoesFinanceiras = "";
+    }
 
     @Column(name = "data_inicio_contrato")
     private LocalDate dataInicioContrato; // Data de início do contrato com o estabelecimento

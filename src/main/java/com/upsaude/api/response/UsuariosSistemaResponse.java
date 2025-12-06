@@ -1,11 +1,18 @@
 package com.upsaude.api.response;
 
-import java.time.OffsetDateTime;
-import java.util.UUID;
 import com.upsaude.enums.TipoUsuarioSistemaEnum;
-import lombok.*;
+import java.time.OffsetDateTime;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
-@Data
+@Getter
+@Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
@@ -33,14 +40,11 @@ public class UsuariosSistemaResponse {
     // Tipo de usuário (baseado em vínculos) - ENUM
     private TipoUsuarioSistemaEnum tipoUsuario;
     
-    // Vínculos com estabelecimentos (DTO simplificado para evitar referência circular)
-    private java.util.List<EstabelecimentoVinculoSimples> estabelecimentosVinculados;
+    @Builder.Default
+    private List<EstabelecimentoVinculoSimples> estabelecimentosVinculados = new ArrayList<>();
     
-    /**
-     * DTO simplificado para vínculo de estabelecimento.
-     * Sem referência ao usuário para evitar StackOverflow em serialização JSON.
-     */
-    @Data
+    @Getter
+    @Setter
     @Builder
     @NoArgsConstructor
     @AllArgsConstructor

@@ -2,6 +2,9 @@ package com.upsaude.controller;
 
 import com.upsaude.api.request.DeficienciasRequest;
 import com.upsaude.api.response.DeficienciasResponse;
+import com.upsaude.exception.BadRequestException;
+import com.upsaude.exception.ConflictException;
+import com.upsaude.exception.NotFoundException;
 import com.upsaude.service.DeficienciasService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -12,6 +15,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -25,6 +29,7 @@ import java.util.UUID;
  *
  * @author UPSaúde
  */
+@Slf4j
 @RestController
 @RequestMapping("/v1/deficiencias")
 @Tag(name = "Deficiências", description = "API para gerenciamento de Deficiências")
@@ -42,8 +47,18 @@ public class DeficienciasController {
             @ApiResponse(responseCode = "403", description = "Acesso negado")
     })
     public ResponseEntity<DeficienciasResponse> criar(@Valid @RequestBody DeficienciasRequest request) {
-        DeficienciasResponse response = deficienciasService.criar(request);
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        log.debug("REQUEST POST /v1/deficiencias - payload: {}", request);
+        try {
+            DeficienciasResponse response = deficienciasService.criar(request);
+            log.info("Deficiência criada com sucesso. ID: {}", response.getId());
+            return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        } catch (BadRequestException | ConflictException ex) {
+            log.warn("Falha ao criar deficiência — mensagem: {}, payload: {}", ex.getMessage(), request);
+            throw ex;
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao criar deficiência — payload: {}", request, ex);
+            throw ex;
+        }
     }
 
     @GetMapping
@@ -55,8 +70,14 @@ public class DeficienciasController {
     public ResponseEntity<Page<DeficienciasResponse>> listar(
             @Parameter(description = "Parâmetros de paginação (page, size, sort)")
             Pageable pageable) {
-        Page<DeficienciasResponse> response = deficienciasService.listar(pageable);
-        return ResponseEntity.ok(response);
+        log.debug("REQUEST GET /v1/deficiencias - pageable: {}", pageable);
+        try {
+            Page<DeficienciasResponse> response = deficienciasService.listar(pageable);
+            return ResponseEntity.ok(response);
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao listar deficiências — pageable: {}", pageable, ex);
+            throw ex;
+        }
     }
 
     @GetMapping("/{id}")
@@ -70,8 +91,17 @@ public class DeficienciasController {
     public ResponseEntity<DeficienciasResponse> obterPorId(
             @Parameter(description = "ID da deficiência", required = true)
             @PathVariable UUID id) {
-        DeficienciasResponse response = deficienciasService.obterPorId(id);
-        return ResponseEntity.ok(response);
+        log.debug("REQUEST GET /v1/deficiencias/{}", id);
+        try {
+            DeficienciasResponse response = deficienciasService.obterPorId(id);
+            return ResponseEntity.ok(response);
+        } catch (NotFoundException ex) {
+            log.warn("Deficiência não encontrada — ID: {}, mensagem: {}", id, ex.getMessage());
+            throw ex;
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao obter deficiência por ID — ID: {}", id, ex);
+            throw ex;
+        }
     }
 
     @PutMapping("/{id}")
@@ -87,8 +117,18 @@ public class DeficienciasController {
             @Parameter(description = "ID da deficiência", required = true)
             @PathVariable UUID id,
             @Valid @RequestBody DeficienciasRequest request) {
-        DeficienciasResponse response = deficienciasService.atualizar(id, request);
-        return ResponseEntity.ok(response);
+        log.debug("REQUEST PUT /v1/deficiencias/{} - payload: {}", id, request);
+        try {
+            DeficienciasResponse response = deficienciasService.atualizar(id, request);
+            log.info("Deficiência atualizada com sucesso. ID: {}", id);
+            return ResponseEntity.ok(response);
+        } catch (BadRequestException | NotFoundException ex) {
+            log.warn("Falha ao atualizar deficiência — ID: {}, mensagem: {}, payload: {}", id, ex.getMessage(), request);
+            throw ex;
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao atualizar deficiência — ID: {}, payload: {}", id, request, ex);
+            throw ex;
+        }
     }
 
     @DeleteMapping("/{id}")
@@ -101,8 +141,18 @@ public class DeficienciasController {
     public ResponseEntity<Void> excluir(
             @Parameter(description = "ID da deficiência", required = true)
             @PathVariable UUID id) {
-        deficienciasService.excluir(id);
-        return ResponseEntity.noContent().build();
+        log.debug("REQUEST DELETE /v1/deficiencias/{}", id);
+        try {
+            deficienciasService.excluir(id);
+            log.info("Deficiência excluída com sucesso. ID: {}", id);
+            return ResponseEntity.noContent().build();
+        } catch (NotFoundException ex) {
+            log.warn("Falha ao excluir deficiência — ID: {}, mensagem: {}", id, ex.getMessage());
+            throw ex;
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao excluir deficiência — ID: {}", id, ex);
+            throw ex;
+        }
     }
 }
 

@@ -9,6 +9,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -25,6 +26,7 @@ import java.util.stream.Collectors;
  *
  * @author UPSaúde
  */
+@Slf4j
 @RestController
 @RequestMapping("/v1/enums")
 @Tag(name = "Enums", description = "API para listagem de todos os enums do sistema. " +
@@ -108,7 +110,13 @@ public class EnumsController {
                     content = @Content(schema = @Schema(implementation = EnumInfoResponse.class)))
     })
     public ResponseEntity<EnumInfoResponse> listarCanalNotificacao() {
-        return ResponseEntity.ok(converterEnum(CanalNotificacaoEnum.class, CanalNotificacaoEnum.values()));
+        log.debug("REQUEST GET /v1/enums/canal-notificacao");
+        try {
+            return ResponseEntity.ok(converterEnum(CanalNotificacaoEnum.class, CanalNotificacaoEnum.values()));
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao listar CanalNotificacaoEnum", ex);
+            throw ex;
+        }
     }
 
     @GetMapping("/classe-terapeutica")
@@ -118,7 +126,13 @@ public class EnumsController {
                     content = @Content(schema = @Schema(implementation = EnumInfoResponse.class)))
     })
     public ResponseEntity<EnumInfoResponse> listarClasseTerapeutica() {
-        return ResponseEntity.ok(converterEnum(ClasseTerapeuticaEnum.class, ClasseTerapeuticaEnum.values()));
+        log.debug("REQUEST GET /v1/enums/classe-terapeutica");
+        try {
+            return ResponseEntity.ok(converterEnum(ClasseTerapeuticaEnum.class, ClasseTerapeuticaEnum.values()));
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao listar ClasseTerapeuticaEnum", ex);
+            throw ex;
+        }
     }
 
     @GetMapping("/classificacao-risco-gestacional")
@@ -128,7 +142,13 @@ public class EnumsController {
                     content = @Content(schema = @Schema(implementation = EnumInfoResponse.class)))
     })
     public ResponseEntity<EnumInfoResponse> listarClassificacaoRiscoGestacional() {
-        return ResponseEntity.ok(converterEnum(ClassificacaoRiscoGestacionalEnum.class, ClassificacaoRiscoGestacionalEnum.values()));
+        log.debug("REQUEST GET /v1/enums/classificacao-risco-gestacional");
+        try {
+            return ResponseEntity.ok(converterEnum(ClassificacaoRiscoGestacionalEnum.class, ClassificacaoRiscoGestacionalEnum.values()));
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao listar ClassificacaoRiscoGestacionalEnum", ex);
+            throw ex;
+        }
     }
 
     @GetMapping("/condicao-moradia")
@@ -138,7 +158,13 @@ public class EnumsController {
                     content = @Content(schema = @Schema(implementation = EnumInfoResponse.class)))
     })
     public ResponseEntity<EnumInfoResponse> listarCondicaoMoradia() {
-        return ResponseEntity.ok(converterEnum(CondicaoMoradiaEnum.class, CondicaoMoradiaEnum.values()));
+        log.debug("REQUEST GET /v1/enums/condicao-moradia");
+        try {
+            return ResponseEntity.ok(converterEnum(CondicaoMoradiaEnum.class, CondicaoMoradiaEnum.values()));
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao listar CondicaoMoradiaEnum", ex);
+            throw ex;
+        }
     }
 
     @GetMapping("/escolaridade")
@@ -148,7 +174,13 @@ public class EnumsController {
                     content = @Content(schema = @Schema(implementation = EnumInfoResponse.class)))
     })
     public ResponseEntity<EnumInfoResponse> listarEscolaridade() {
-        return ResponseEntity.ok(converterEnum(EscolaridadeEnum.class, EscolaridadeEnum.values()));
+        log.debug("REQUEST GET /v1/enums/escolaridade");
+        try {
+            return ResponseEntity.ok(converterEnum(EscolaridadeEnum.class, EscolaridadeEnum.values()));
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao listar EscolaridadeEnum", ex);
+            throw ex;
+        }
     }
 
     @GetMapping("/estado-civil")
@@ -158,7 +190,13 @@ public class EnumsController {
                     content = @Content(schema = @Schema(implementation = EnumInfoResponse.class)))
     })
     public ResponseEntity<EnumInfoResponse> listarEstadoCivil() {
-        return ResponseEntity.ok(converterEnum(EstadoCivilEnum.class, EstadoCivilEnum.values()));
+        log.debug("REQUEST GET /v1/enums/estado-civil");
+        try {
+            return ResponseEntity.ok(converterEnum(EstadoCivilEnum.class, EstadoCivilEnum.values()));
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao listar EstadoCivilEnum", ex);
+            throw ex;
+        }
     }
 
     @GetMapping("/forma-farmaceutica")
@@ -168,7 +206,13 @@ public class EnumsController {
                     content = @Content(schema = @Schema(implementation = EnumInfoResponse.class)))
     })
     public ResponseEntity<EnumInfoResponse> listarFormaFarmaceutica() {
-        return ResponseEntity.ok(converterEnum(FormaFarmaceuticaEnum.class, FormaFarmaceuticaEnum.values()));
+        log.debug("REQUEST GET /v1/enums/forma-farmaceutica");
+        try {
+            return ResponseEntity.ok(converterEnum(FormaFarmaceuticaEnum.class, FormaFarmaceuticaEnum.values()));
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao listar FormaFarmaceuticaEnum", ex);
+            throw ex;
+        }
     }
 
     @GetMapping("/frequencia-medicacao")
@@ -178,7 +222,13 @@ public class EnumsController {
                     content = @Content(schema = @Schema(implementation = EnumInfoResponse.class)))
     })
     public ResponseEntity<EnumInfoResponse> listarFrequenciaMedicacao() {
-        return ResponseEntity.ok(converterEnum(FrequenciaMedicacaoEnum.class, FrequenciaMedicacaoEnum.values()));
+        log.debug("REQUEST GET /v1/enums/frequencia-medicacao");
+        try {
+            return ResponseEntity.ok(converterEnum(FrequenciaMedicacaoEnum.class, FrequenciaMedicacaoEnum.values()));
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao listar FrequenciaMedicacaoEnum", ex);
+            throw ex;
+        }
     }
 
     @GetMapping("/gravidade-doenca")
@@ -188,7 +238,13 @@ public class EnumsController {
                     content = @Content(schema = @Schema(implementation = EnumInfoResponse.class)))
     })
     public ResponseEntity<EnumInfoResponse> listarGravidadeDoenca() {
-        return ResponseEntity.ok(converterEnum(GravidadeDoencaEnum.class, GravidadeDoencaEnum.values()));
+        log.debug("REQUEST GET /v1/enums/gravidade-doenca");
+        try {
+            return ResponseEntity.ok(converterEnum(GravidadeDoencaEnum.class, GravidadeDoencaEnum.values()));
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao listar GravidadeDoencaEnum", ex);
+            throw ex;
+        }
     }
 
     @GetMapping("/identidade-genero")
@@ -198,7 +254,13 @@ public class EnumsController {
                     content = @Content(schema = @Schema(implementation = EnumInfoResponse.class)))
     })
     public ResponseEntity<EnumInfoResponse> listarIdentidadeGenero() {
-        return ResponseEntity.ok(converterEnum(IdentidadeGeneroEnum.class, IdentidadeGeneroEnum.values()));
+        log.debug("REQUEST GET /v1/enums/identidade-genero");
+        try {
+            return ResponseEntity.ok(converterEnum(IdentidadeGeneroEnum.class, IdentidadeGeneroEnum.values()));
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao listar IdentidadeGeneroEnum", ex);
+            throw ex;
+        }
     }
 
     @GetMapping("/modalidade-convenio")
@@ -208,7 +270,13 @@ public class EnumsController {
                     content = @Content(schema = @Schema(implementation = EnumInfoResponse.class)))
     })
     public ResponseEntity<EnumInfoResponse> listarModalidadeConvenio() {
-        return ResponseEntity.ok(converterEnum(ModalidadeConvenioEnum.class, ModalidadeConvenioEnum.values()));
+        log.debug("REQUEST GET /v1/enums/modalidade-convenio");
+        try {
+            return ResponseEntity.ok(converterEnum(ModalidadeConvenioEnum.class, ModalidadeConvenioEnum.values()));
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao listar ModalidadeConvenioEnum", ex);
+            throw ex;
+        }
     }
 
     @GetMapping("/nacionalidade")
@@ -218,7 +286,13 @@ public class EnumsController {
                     content = @Content(schema = @Schema(implementation = EnumInfoResponse.class)))
     })
     public ResponseEntity<EnumInfoResponse> listarNacionalidade() {
-        return ResponseEntity.ok(converterEnum(NacionalidadeEnum.class, NacionalidadeEnum.values()));
+        log.debug("REQUEST GET /v1/enums/nacionalidade");
+        try {
+            return ResponseEntity.ok(converterEnum(NacionalidadeEnum.class, NacionalidadeEnum.values()));
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao listar NacionalidadeEnum", ex);
+            throw ex;
+        }
     }
 
     @GetMapping("/natureza-juridica")
@@ -228,7 +302,13 @@ public class EnumsController {
                     content = @Content(schema = @Schema(implementation = EnumInfoResponse.class)))
     })
     public ResponseEntity<EnumInfoResponse> listarNaturezaJuridica() {
-        return ResponseEntity.ok(converterEnum(NaturezaJuridicaEnum.class, NaturezaJuridicaEnum.values()));
+        log.debug("REQUEST GET /v1/enums/natureza-juridica");
+        try {
+            return ResponseEntity.ok(converterEnum(NaturezaJuridicaEnum.class, NaturezaJuridicaEnum.values()));
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao listar NaturezaJuridicaEnum", ex);
+            throw ex;
+        }
     }
 
     @GetMapping("/orientacao-sexual")
@@ -238,7 +318,13 @@ public class EnumsController {
                     content = @Content(schema = @Schema(implementation = EnumInfoResponse.class)))
     })
     public ResponseEntity<EnumInfoResponse> listarOrientacaoSexual() {
-        return ResponseEntity.ok(converterEnum(OrientacaoSexualEnum.class, OrientacaoSexualEnum.values()));
+        log.debug("REQUEST GET /v1/enums/orientacao-sexual");
+        try {
+            return ResponseEntity.ok(converterEnum(OrientacaoSexualEnum.class, OrientacaoSexualEnum.values()));
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao listar OrientacaoSexualEnum", ex);
+            throw ex;
+        }
     }
 
     @GetMapping("/prioridade-atendimento")
@@ -248,7 +334,13 @@ public class EnumsController {
                     content = @Content(schema = @Schema(implementation = EnumInfoResponse.class)))
     })
     public ResponseEntity<EnumInfoResponse> listarPrioridadeAtendimento() {
-        return ResponseEntity.ok(converterEnum(PrioridadeAtendimentoEnum.class, PrioridadeAtendimentoEnum.values()));
+        log.debug("REQUEST GET /v1/enums/prioridade-atendimento");
+        try {
+            return ResponseEntity.ok(converterEnum(PrioridadeAtendimentoEnum.class, PrioridadeAtendimentoEnum.values()));
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao listar PrioridadeAtendimentoEnum", ex);
+            throw ex;
+        }
     }
 
     @GetMapping("/raca-cor")
@@ -258,7 +350,13 @@ public class EnumsController {
                     content = @Content(schema = @Schema(implementation = EnumInfoResponse.class)))
     })
     public ResponseEntity<EnumInfoResponse> listarRacaCor() {
-        return ResponseEntity.ok(converterEnum(RacaCorEnum.class, RacaCorEnum.values()));
+        log.debug("REQUEST GET /v1/enums/raca-cor");
+        try {
+            return ResponseEntity.ok(converterEnum(RacaCorEnum.class, RacaCorEnum.values()));
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao listar RacaCorEnum", ex);
+            throw ex;
+        }
     }
 
     @GetMapping("/severidade-alergia")
@@ -268,7 +366,13 @@ public class EnumsController {
                     content = @Content(schema = @Schema(implementation = EnumInfoResponse.class)))
     })
     public ResponseEntity<EnumInfoResponse> listarSeveridadeAlergia() {
-        return ResponseEntity.ok(converterEnum(SeveridadeAlergiaEnum.class, SeveridadeAlergiaEnum.values()));
+        log.debug("REQUEST GET /v1/enums/severidade-alergia");
+        try {
+            return ResponseEntity.ok(converterEnum(SeveridadeAlergiaEnum.class, SeveridadeAlergiaEnum.values()));
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao listar SeveridadeAlergiaEnum", ex);
+            throw ex;
+        }
     }
 
     @GetMapping("/sexo")
@@ -278,7 +382,13 @@ public class EnumsController {
                     content = @Content(schema = @Schema(implementation = EnumInfoResponse.class)))
     })
     public ResponseEntity<EnumInfoResponse> listarSexo() {
-        return ResponseEntity.ok(converterEnum(SexoEnum.class, SexoEnum.values()));
+        log.debug("REQUEST GET /v1/enums/sexo");
+        try {
+            return ResponseEntity.ok(converterEnum(SexoEnum.class, SexoEnum.values()));
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao listar SexoEnum", ex);
+            throw ex;
+        }
     }
 
     @GetMapping("/situacao-familiar")
@@ -288,7 +398,13 @@ public class EnumsController {
                     content = @Content(schema = @Schema(implementation = EnumInfoResponse.class)))
     })
     public ResponseEntity<EnumInfoResponse> listarSituacaoFamiliar() {
-        return ResponseEntity.ok(converterEnum(SituacaoFamiliarEnum.class, SituacaoFamiliarEnum.values()));
+        log.debug("REQUEST GET /v1/enums/situacao-familiar");
+        try {
+            return ResponseEntity.ok(converterEnum(SituacaoFamiliarEnum.class, SituacaoFamiliarEnum.values()));
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao listar SituacaoFamiliarEnum", ex);
+            throw ex;
+        }
     }
 
     @GetMapping("/status-agendamento")
@@ -298,7 +414,13 @@ public class EnumsController {
                     content = @Content(schema = @Schema(implementation = EnumInfoResponse.class)))
     })
     public ResponseEntity<EnumInfoResponse> listarStatusAgendamento() {
-        return ResponseEntity.ok(converterEnum(StatusAgendamentoEnum.class, StatusAgendamentoEnum.values()));
+        log.debug("REQUEST GET /v1/enums/status-agendamento");
+        try {
+            return ResponseEntity.ok(converterEnum(StatusAgendamentoEnum.class, StatusAgendamentoEnum.values()));
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao listar StatusAgendamentoEnum", ex);
+            throw ex;
+        }
     }
 
     @GetMapping("/status-atendimento")
@@ -308,7 +430,13 @@ public class EnumsController {
                     content = @Content(schema = @Schema(implementation = EnumInfoResponse.class)))
     })
     public ResponseEntity<EnumInfoResponse> listarStatusAtendimento() {
-        return ResponseEntity.ok(converterEnum(StatusAtendimentoEnum.class, StatusAtendimentoEnum.values()));
+        log.debug("REQUEST GET /v1/enums/status-atendimento");
+        try {
+            return ResponseEntity.ok(converterEnum(StatusAtendimentoEnum.class, StatusAtendimentoEnum.values()));
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao listar StatusAtendimentoEnum", ex);
+            throw ex;
+        }
     }
 
     @GetMapping("/status-ativo")
@@ -318,7 +446,13 @@ public class EnumsController {
                     content = @Content(schema = @Schema(implementation = EnumInfoResponse.class)))
     })
     public ResponseEntity<EnumInfoResponse> listarStatusAtivo() {
-        return ResponseEntity.ok(converterEnum(StatusAtivoEnum.class, StatusAtivoEnum.values()));
+        log.debug("REQUEST GET /v1/enums/status-ativo");
+        try {
+            return ResponseEntity.ok(converterEnum(StatusAtivoEnum.class, StatusAtivoEnum.values()));
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao listar StatusAtivoEnum", ex);
+            throw ex;
+        }
     }
 
     @GetMapping("/status-cirurgia")
@@ -328,7 +462,13 @@ public class EnumsController {
                     content = @Content(schema = @Schema(implementation = EnumInfoResponse.class)))
     })
     public ResponseEntity<EnumInfoResponse> listarStatusCirurgia() {
-        return ResponseEntity.ok(converterEnum(StatusCirurgiaEnum.class, StatusCirurgiaEnum.values()));
+        log.debug("REQUEST GET /v1/enums/status-cirurgia");
+        try {
+            return ResponseEntity.ok(converterEnum(StatusCirurgiaEnum.class, StatusCirurgiaEnum.values()));
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao listar StatusCirurgiaEnum", ex);
+            throw ex;
+        }
     }
 
     @GetMapping("/status-consulta")
@@ -338,7 +478,13 @@ public class EnumsController {
                     content = @Content(schema = @Schema(implementation = EnumInfoResponse.class)))
     })
     public ResponseEntity<EnumInfoResponse> listarStatusConsulta() {
-        return ResponseEntity.ok(converterEnum(StatusConsultaEnum.class, StatusConsultaEnum.values()));
+        log.debug("REQUEST GET /v1/enums/status-consulta");
+        try {
+            return ResponseEntity.ok(converterEnum(StatusConsultaEnum.class, StatusConsultaEnum.values()));
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao listar StatusConsultaEnum", ex);
+            throw ex;
+        }
     }
 
     @GetMapping("/status-diagnostico")
@@ -348,7 +494,13 @@ public class EnumsController {
                     content = @Content(schema = @Schema(implementation = EnumInfoResponse.class)))
     })
     public ResponseEntity<EnumInfoResponse> listarStatusDiagnostico() {
-        return ResponseEntity.ok(converterEnum(StatusDiagnosticoEnum.class, StatusDiagnosticoEnum.values()));
+        log.debug("REQUEST GET /v1/enums/status-diagnostico");
+        try {
+            return ResponseEntity.ok(converterEnum(StatusDiagnosticoEnum.class, StatusDiagnosticoEnum.values()));
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao listar StatusDiagnosticoEnum", ex);
+            throw ex;
+        }
     }
 
     @GetMapping("/status-funcionamento")
@@ -358,7 +510,13 @@ public class EnumsController {
                     content = @Content(schema = @Schema(implementation = EnumInfoResponse.class)))
     })
     public ResponseEntity<EnumInfoResponse> listarStatusFuncionamento() {
-        return ResponseEntity.ok(converterEnum(StatusFuncionamentoEnum.class, StatusFuncionamentoEnum.values()));
+        log.debug("REQUEST GET /v1/enums/status-funcionamento");
+        try {
+            return ResponseEntity.ok(converterEnum(StatusFuncionamentoEnum.class, StatusFuncionamentoEnum.values()));
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao listar StatusFuncionamentoEnum", ex);
+            throw ex;
+        }
     }
 
     @GetMapping("/status-manutencao")
@@ -368,7 +526,13 @@ public class EnumsController {
                     content = @Content(schema = @Schema(implementation = EnumInfoResponse.class)))
     })
     public ResponseEntity<EnumInfoResponse> listarStatusManutencao() {
-        return ResponseEntity.ok(converterEnum(StatusManutencaoEnum.class, StatusManutencaoEnum.values()));
+        log.debug("REQUEST GET /v1/enums/status-manutencao");
+        try {
+            return ResponseEntity.ok(converterEnum(StatusManutencaoEnum.class, StatusManutencaoEnum.values()));
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao listar StatusManutencaoEnum", ex);
+            throw ex;
+        }
     }
 
     @GetMapping("/status-paciente")
@@ -378,7 +542,13 @@ public class EnumsController {
                     content = @Content(schema = @Schema(implementation = EnumInfoResponse.class)))
     })
     public ResponseEntity<EnumInfoResponse> listarStatusPaciente() {
-        return ResponseEntity.ok(converterEnum(StatusPacienteEnum.class, StatusPacienteEnum.values()));
+        log.debug("REQUEST GET /v1/enums/status-paciente");
+        try {
+            return ResponseEntity.ok(converterEnum(StatusPacienteEnum.class, StatusPacienteEnum.values()));
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao listar StatusPacienteEnum", ex);
+            throw ex;
+        }
     }
 
     @GetMapping("/status-pre-natal")
@@ -388,7 +558,13 @@ public class EnumsController {
                     content = @Content(schema = @Schema(implementation = EnumInfoResponse.class)))
     })
     public ResponseEntity<EnumInfoResponse> listarStatusPreNatal() {
-        return ResponseEntity.ok(converterEnum(StatusPreNatalEnum.class, StatusPreNatalEnum.values()));
+        log.debug("REQUEST GET /v1/enums/status-pre-natal");
+        try {
+            return ResponseEntity.ok(converterEnum(StatusPreNatalEnum.class, StatusPreNatalEnum.values()));
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao listar StatusPreNatalEnum", ex);
+            throw ex;
+        }
     }
 
     @GetMapping("/status-receita")
@@ -398,7 +574,13 @@ public class EnumsController {
                     content = @Content(schema = @Schema(implementation = EnumInfoResponse.class)))
     })
     public ResponseEntity<EnumInfoResponse> listarStatusReceita() {
-        return ResponseEntity.ok(converterEnum(StatusReceitaEnum.class, StatusReceitaEnum.values()));
+        log.debug("REQUEST GET /v1/enums/status-receita");
+        try {
+            return ResponseEntity.ok(converterEnum(StatusReceitaEnum.class, StatusReceitaEnum.values()));
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao listar StatusReceitaEnum", ex);
+            throw ex;
+        }
     }
 
     @GetMapping("/status-registro-medico")
@@ -408,7 +590,13 @@ public class EnumsController {
                     content = @Content(schema = @Schema(implementation = EnumInfoResponse.class)))
     })
     public ResponseEntity<EnumInfoResponse> listarStatusRegistroMedico() {
-        return ResponseEntity.ok(converterEnum(StatusRegistroMedicoEnum.class, StatusRegistroMedicoEnum.values()));
+        log.debug("REQUEST GET /v1/enums/status-registro-medico");
+        try {
+            return ResponseEntity.ok(converterEnum(StatusRegistroMedicoEnum.class, StatusRegistroMedicoEnum.values()));
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao listar StatusRegistroMedicoEnum", ex);
+            throw ex;
+        }
     }
 
     @GetMapping("/tipo-acao-promocao-saude")
@@ -418,7 +606,13 @@ public class EnumsController {
                     content = @Content(schema = @Schema(implementation = EnumInfoResponse.class)))
     })
     public ResponseEntity<EnumInfoResponse> listarTipoAcaoPromocaoSaude() {
-        return ResponseEntity.ok(converterEnum(TipoAcaoPromocaoSaudeEnum.class, TipoAcaoPromocaoSaudeEnum.values()));
+        log.debug("REQUEST GET /v1/enums/tipo-acao-promocao-saude");
+        try {
+            return ResponseEntity.ok(converterEnum(TipoAcaoPromocaoSaudeEnum.class, TipoAcaoPromocaoSaudeEnum.values()));
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao listar TipoAcaoPromocaoSaudeEnum", ex);
+            throw ex;
+        }
     }
 
     @GetMapping("/tipo-alergia")
@@ -428,7 +622,13 @@ public class EnumsController {
                     content = @Content(schema = @Schema(implementation = EnumInfoResponse.class)))
     })
     public ResponseEntity<EnumInfoResponse> listarTipoAlergia() {
-        return ResponseEntity.ok(converterEnum(TipoAlergiaEnum.class, TipoAlergiaEnum.values()));
+        log.debug("REQUEST GET /v1/enums/tipo-alergia");
+        try {
+            return ResponseEntity.ok(converterEnum(TipoAlergiaEnum.class, TipoAlergiaEnum.values()));
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao listar TipoAlergiaEnum", ex);
+            throw ex;
+        }
     }
 
     @GetMapping("/tipo-atendimento")
@@ -438,7 +638,13 @@ public class EnumsController {
                     content = @Content(schema = @Schema(implementation = EnumInfoResponse.class)))
     })
     public ResponseEntity<EnumInfoResponse> listarTipoAtendimento() {
-        return ResponseEntity.ok(converterEnum(TipoAtendimentoEnum.class, TipoAtendimentoEnum.values()));
+        log.debug("REQUEST GET /v1/enums/tipo-atendimento");
+        try {
+            return ResponseEntity.ok(converterEnum(TipoAtendimentoEnum.class, TipoAtendimentoEnum.values()));
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao listar TipoAtendimentoEnum", ex);
+            throw ex;
+        }
     }
 
     @GetMapping("/tipo-atendimento-preferencial")
@@ -448,7 +654,13 @@ public class EnumsController {
                     content = @Content(schema = @Schema(implementation = EnumInfoResponse.class)))
     })
     public ResponseEntity<EnumInfoResponse> listarTipoAtendimentoPreferencial() {
-        return ResponseEntity.ok(converterEnum(TipoAtendimentoPreferencialEnum.class, TipoAtendimentoPreferencialEnum.values()));
+        log.debug("REQUEST GET /v1/enums/tipo-atendimento-preferencial");
+        try {
+            return ResponseEntity.ok(converterEnum(TipoAtendimentoPreferencialEnum.class, TipoAtendimentoPreferencialEnum.values()));
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao listar TipoAtendimentoPreferencialEnum", ex);
+            throw ex;
+        }
     }
 
     @GetMapping("/tipo-atividade-profissional")
@@ -458,7 +670,13 @@ public class EnumsController {
                     content = @Content(schema = @Schema(implementation = EnumInfoResponse.class)))
     })
     public ResponseEntity<EnumInfoResponse> listarTipoAtividadeProfissional() {
-        return ResponseEntity.ok(converterEnum(TipoAtividadeProfissionalEnum.class, TipoAtividadeProfissionalEnum.values()));
+        log.debug("REQUEST GET /v1/enums/tipo-atividade-profissional");
+        try {
+            return ResponseEntity.ok(converterEnum(TipoAtividadeProfissionalEnum.class, TipoAtividadeProfissionalEnum.values()));
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao listar TipoAtividadeProfissionalEnum", ex);
+            throw ex;
+        }
     }
 
     @GetMapping("/tipo-cns")
@@ -468,7 +686,13 @@ public class EnumsController {
                     content = @Content(schema = @Schema(implementation = EnumInfoResponse.class)))
     })
     public ResponseEntity<EnumInfoResponse> listarTipoCns() {
-        return ResponseEntity.ok(converterEnum(TipoCnsEnum.class, TipoCnsEnum.values()));
+        log.debug("REQUEST GET /v1/enums/tipo-cns");
+        try {
+            return ResponseEntity.ok(converterEnum(TipoCnsEnum.class, TipoCnsEnum.values()));
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao listar TipoCnsEnum", ex);
+            throw ex;
+        }
     }
 
     @GetMapping("/tipo-consulta")
@@ -478,7 +702,13 @@ public class EnumsController {
                     content = @Content(schema = @Schema(implementation = EnumInfoResponse.class)))
     })
     public ResponseEntity<EnumInfoResponse> listarTipoConsulta() {
-        return ResponseEntity.ok(converterEnum(TipoConsultaEnum.class, TipoConsultaEnum.values()));
+        log.debug("REQUEST GET /v1/enums/tipo-consulta");
+        try {
+            return ResponseEntity.ok(converterEnum(TipoConsultaEnum.class, TipoConsultaEnum.values()));
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao listar TipoConsultaEnum", ex);
+            throw ex;
+        }
     }
 
     @GetMapping("/tipo-controle-medicamento")
@@ -488,7 +718,13 @@ public class EnumsController {
                     content = @Content(schema = @Schema(implementation = EnumInfoResponse.class)))
     })
     public ResponseEntity<EnumInfoResponse> listarTipoControleMedicamento() {
-        return ResponseEntity.ok(converterEnum(TipoControleMedicamentoEnum.class, TipoControleMedicamentoEnum.values()));
+        log.debug("REQUEST GET /v1/enums/tipo-controle-medicamento");
+        try {
+            return ResponseEntity.ok(converterEnum(TipoControleMedicamentoEnum.class, TipoControleMedicamentoEnum.values()));
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao listar TipoControleMedicamentoEnum", ex);
+            throw ex;
+        }
     }
 
     @GetMapping("/tipo-convenio")
@@ -498,7 +734,13 @@ public class EnumsController {
                     content = @Content(schema = @Schema(implementation = EnumInfoResponse.class)))
     })
     public ResponseEntity<EnumInfoResponse> listarTipoConvenio() {
-        return ResponseEntity.ok(converterEnum(TipoConvenioEnum.class, TipoConvenioEnum.values()));
+        log.debug("REQUEST GET /v1/enums/tipo-convenio");
+        try {
+            return ResponseEntity.ok(converterEnum(TipoConvenioEnum.class, TipoConvenioEnum.values()));
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao listar TipoConvenioEnum", ex);
+            throw ex;
+        }
     }
 
     @GetMapping("/tipo-cuidado-enfermagem")
@@ -508,7 +750,13 @@ public class EnumsController {
                     content = @Content(schema = @Schema(implementation = EnumInfoResponse.class)))
     })
     public ResponseEntity<EnumInfoResponse> listarTipoCuidadoEnfermagem() {
-        return ResponseEntity.ok(converterEnum(TipoCuidadoEnfermagemEnum.class, TipoCuidadoEnfermagemEnum.values()));
+        log.debug("REQUEST GET /v1/enums/tipo-cuidado-enfermagem");
+        try {
+            return ResponseEntity.ok(converterEnum(TipoCuidadoEnfermagemEnum.class, TipoCuidadoEnfermagemEnum.values()));
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao listar TipoCuidadoEnfermagemEnum", ex);
+            throw ex;
+        }
     }
 
     @GetMapping("/tipo-deficiencia")
@@ -518,7 +766,13 @@ public class EnumsController {
                     content = @Content(schema = @Schema(implementation = EnumInfoResponse.class)))
     })
     public ResponseEntity<EnumInfoResponse> listarTipoDeficiencia() {
-        return ResponseEntity.ok(converterEnum(TipoDeficienciaEnum.class, TipoDeficienciaEnum.values()));
+        log.debug("REQUEST GET /v1/enums/tipo-deficiencia");
+        try {
+            return ResponseEntity.ok(converterEnum(TipoDeficienciaEnum.class, TipoDeficienciaEnum.values()));
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao listar TipoDeficienciaEnum", ex);
+            throw ex;
+        }
     }
 
     @GetMapping("/tipo-doenca")
@@ -528,7 +782,13 @@ public class EnumsController {
                     content = @Content(schema = @Schema(implementation = EnumInfoResponse.class)))
     })
     public ResponseEntity<EnumInfoResponse> listarTipoDoenca() {
-        return ResponseEntity.ok(converterEnum(TipoDoencaEnum.class, TipoDoencaEnum.values()));
+        log.debug("REQUEST GET /v1/enums/tipo-doenca");
+        try {
+            return ResponseEntity.ok(converterEnum(TipoDoencaEnum.class, TipoDoencaEnum.values()));
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao listar TipoDoencaEnum", ex);
+            throw ex;
+        }
     }
 
     @GetMapping("/tipo-educacao-saude")
@@ -538,7 +798,13 @@ public class EnumsController {
                     content = @Content(schema = @Schema(implementation = EnumInfoResponse.class)))
     })
     public ResponseEntity<EnumInfoResponse> listarTipoEducacaoSaude() {
-        return ResponseEntity.ok(converterEnum(TipoEducacaoSaudeEnum.class, TipoEducacaoSaudeEnum.values()));
+        log.debug("REQUEST GET /v1/enums/tipo-educacao-saude");
+        try {
+            return ResponseEntity.ok(converterEnum(TipoEducacaoSaudeEnum.class, TipoEducacaoSaudeEnum.values()));
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao listar TipoEducacaoSaudeEnum", ex);
+            throw ex;
+        }
     }
 
     @GetMapping("/tipo-endereco")
@@ -548,7 +814,13 @@ public class EnumsController {
                     content = @Content(schema = @Schema(implementation = EnumInfoResponse.class)))
     })
     public ResponseEntity<EnumInfoResponse> listarTipoEndereco() {
-        return ResponseEntity.ok(converterEnum(TipoEnderecoEnum.class, TipoEnderecoEnum.values()));
+        log.debug("REQUEST GET /v1/enums/tipo-endereco");
+        try {
+            return ResponseEntity.ok(converterEnum(TipoEnderecoEnum.class, TipoEnderecoEnum.values()));
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao listar TipoEnderecoEnum", ex);
+            throw ex;
+        }
     }
 
     @GetMapping("/tipo-equipamento")
@@ -558,7 +830,13 @@ public class EnumsController {
                     content = @Content(schema = @Schema(implementation = EnumInfoResponse.class)))
     })
     public ResponseEntity<EnumInfoResponse> listarTipoEquipamento() {
-        return ResponseEntity.ok(converterEnum(TipoEquipamentoEnum.class, TipoEquipamentoEnum.values()));
+        log.debug("REQUEST GET /v1/enums/tipo-equipamento");
+        try {
+            return ResponseEntity.ok(converterEnum(TipoEquipamentoEnum.class, TipoEquipamentoEnum.values()));
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao listar TipoEquipamentoEnum", ex);
+            throw ex;
+        }
     }
 
     @GetMapping("/tipo-equipe")
@@ -568,7 +846,13 @@ public class EnumsController {
                     content = @Content(schema = @Schema(implementation = EnumInfoResponse.class)))
     })
     public ResponseEntity<EnumInfoResponse> listarTipoEquipe() {
-        return ResponseEntity.ok(converterEnum(TipoEquipeEnum.class, TipoEquipeEnum.values()));
+        log.debug("REQUEST GET /v1/enums/tipo-equipe");
+        try {
+            return ResponseEntity.ok(converterEnum(TipoEquipeEnum.class, TipoEquipeEnum.values()));
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao listar TipoEquipeEnum", ex);
+            throw ex;
+        }
     }
 
     @GetMapping("/tipo-especialidade-medica")
@@ -578,7 +862,13 @@ public class EnumsController {
                     content = @Content(schema = @Schema(implementation = EnumInfoResponse.class)))
     })
     public ResponseEntity<EnumInfoResponse> listarTipoEspecialidadeMedica() {
-        return ResponseEntity.ok(converterEnum(TipoEspecialidadeMedicaEnum.class, TipoEspecialidadeMedicaEnum.values()));
+        log.debug("REQUEST GET /v1/enums/tipo-especialidade-medica");
+        try {
+            return ResponseEntity.ok(converterEnum(TipoEspecialidadeMedicaEnum.class, TipoEspecialidadeMedicaEnum.values()));
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao listar TipoEspecialidadeMedicaEnum", ex);
+            throw ex;
+        }
     }
 
     @GetMapping("/tipo-estabelecimento")
@@ -588,7 +878,13 @@ public class EnumsController {
                     content = @Content(schema = @Schema(implementation = EnumInfoResponse.class)))
     })
     public ResponseEntity<EnumInfoResponse> listarTipoEstabelecimento() {
-        return ResponseEntity.ok(converterEnum(TipoEstabelecimentoEnum.class, TipoEstabelecimentoEnum.values()));
+        log.debug("REQUEST GET /v1/enums/tipo-estabelecimento");
+        try {
+            return ResponseEntity.ok(converterEnum(TipoEstabelecimentoEnum.class, TipoEstabelecimentoEnum.values()));
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao listar TipoEstabelecimentoEnum", ex);
+            throw ex;
+        }
     }
 
     @GetMapping("/tipo-exame")
@@ -598,7 +894,13 @@ public class EnumsController {
                     content = @Content(schema = @Schema(implementation = EnumInfoResponse.class)))
     })
     public ResponseEntity<EnumInfoResponse> listarTipoExame() {
-        return ResponseEntity.ok(converterEnum(TipoExameEnum.class, TipoExameEnum.values()));
+        log.debug("REQUEST GET /v1/enums/tipo-exame");
+        try {
+            return ResponseEntity.ok(converterEnum(TipoExameEnum.class, TipoExameEnum.values()));
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao listar TipoExameEnum", ex);
+            throw ex;
+        }
     }
 
     @GetMapping("/tipo-falta")
@@ -608,7 +910,13 @@ public class EnumsController {
                     content = @Content(schema = @Schema(implementation = EnumInfoResponse.class)))
     })
     public ResponseEntity<EnumInfoResponse> listarTipoFalta() {
-        return ResponseEntity.ok(converterEnum(TipoFaltaEnum.class, TipoFaltaEnum.values()));
+        log.debug("REQUEST GET /v1/enums/tipo-falta");
+        try {
+            return ResponseEntity.ok(converterEnum(TipoFaltaEnum.class, TipoFaltaEnum.values()));
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao listar TipoFaltaEnum", ex);
+            throw ex;
+        }
     }
 
     @GetMapping("/tipo-logradouro")
@@ -618,7 +926,13 @@ public class EnumsController {
                     content = @Content(schema = @Schema(implementation = EnumInfoResponse.class)))
     })
     public ResponseEntity<EnumInfoResponse> listarTipoLogradouro() {
-        return ResponseEntity.ok(converterEnum(TipoLogradouroEnum.class, TipoLogradouroEnum.values()));
+        log.debug("REQUEST GET /v1/enums/tipo-logradouro");
+        try {
+            return ResponseEntity.ok(converterEnum(TipoLogradouroEnum.class, TipoLogradouroEnum.values()));
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao listar TipoLogradouroEnum", ex);
+            throw ex;
+        }
     }
 
     @GetMapping("/tipo-metodo-contraceptivo")
@@ -628,7 +942,13 @@ public class EnumsController {
                     content = @Content(schema = @Schema(implementation = EnumInfoResponse.class)))
     })
     public ResponseEntity<EnumInfoResponse> listarTipoMetodoContraceptivo() {
-        return ResponseEntity.ok(converterEnum(TipoMetodoContraceptivoEnum.class, TipoMetodoContraceptivoEnum.values()));
+        log.debug("REQUEST GET /v1/enums/tipo-metodo-contraceptivo");
+        try {
+            return ResponseEntity.ok(converterEnum(TipoMetodoContraceptivoEnum.class, TipoMetodoContraceptivoEnum.values()));
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao listar TipoMetodoContraceptivoEnum", ex);
+            throw ex;
+        }
     }
 
     @GetMapping("/tipo-notificacao")
@@ -638,7 +958,13 @@ public class EnumsController {
                     content = @Content(schema = @Schema(implementation = EnumInfoResponse.class)))
     })
     public ResponseEntity<EnumInfoResponse> listarTipoNotificacao() {
-        return ResponseEntity.ok(converterEnum(TipoNotificacaoEnum.class, TipoNotificacaoEnum.values()));
+        log.debug("REQUEST GET /v1/enums/tipo-notificacao");
+        try {
+            return ResponseEntity.ok(converterEnum(TipoNotificacaoEnum.class, TipoNotificacaoEnum.values()));
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao listar TipoNotificacaoEnum", ex);
+            throw ex;
+        }
     }
 
     @GetMapping("/tipo-planto")
@@ -648,7 +974,13 @@ public class EnumsController {
                     content = @Content(schema = @Schema(implementation = EnumInfoResponse.class)))
     })
     public ResponseEntity<EnumInfoResponse> listarTipoPlantao() {
-        return ResponseEntity.ok(converterEnum(TipoPlantaoEnum.class, TipoPlantaoEnum.values()));
+        log.debug("REQUEST GET /v1/enums/tipo-planto");
+        try {
+            return ResponseEntity.ok(converterEnum(TipoPlantaoEnum.class, TipoPlantaoEnum.values()));
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao listar TipoPlantaoEnum", ex);
+            throw ex;
+        }
     }
 
     @GetMapping("/tipo-ponto")
@@ -658,7 +990,13 @@ public class EnumsController {
                     content = @Content(schema = @Schema(implementation = EnumInfoResponse.class)))
     })
     public ResponseEntity<EnumInfoResponse> listarTipoPonto() {
-        return ResponseEntity.ok(converterEnum(TipoPontoEnum.class, TipoPontoEnum.values()));
+        log.debug("REQUEST GET /v1/enums/tipo-ponto");
+        try {
+            return ResponseEntity.ok(converterEnum(TipoPontoEnum.class, TipoPontoEnum.values()));
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao listar TipoPontoEnum", ex);
+            throw ex;
+        }
     }
 
     @GetMapping("/tipo-procedimento")
@@ -668,7 +1006,13 @@ public class EnumsController {
                     content = @Content(schema = @Schema(implementation = EnumInfoResponse.class)))
     })
     public ResponseEntity<EnumInfoResponse> listarTipoProcedimento() {
-        return ResponseEntity.ok(converterEnum(TipoProcedimentoEnum.class, TipoProcedimentoEnum.values()));
+        log.debug("REQUEST GET /v1/enums/tipo-procedimento");
+        try {
+            return ResponseEntity.ok(converterEnum(TipoProcedimentoEnum.class, TipoProcedimentoEnum.values()));
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao listar TipoProcedimentoEnum", ex);
+            throw ex;
+        }
     }
 
     @GetMapping("/tipo-profissional")
@@ -678,7 +1022,13 @@ public class EnumsController {
                     content = @Content(schema = @Schema(implementation = EnumInfoResponse.class)))
     })
     public ResponseEntity<EnumInfoResponse> listarTipoProfissional() {
-        return ResponseEntity.ok(converterEnum(TipoProfissionalEnum.class, TipoProfissionalEnum.values()));
+        log.debug("REQUEST GET /v1/enums/tipo-profissional");
+        try {
+            return ResponseEntity.ok(converterEnum(TipoProfissionalEnum.class, TipoProfissionalEnum.values()));
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao listar TipoProfissionalEnum", ex);
+            throw ex;
+        }
     }
 
     @GetMapping("/tipo-reacao-alergica")
@@ -688,7 +1038,13 @@ public class EnumsController {
                     content = @Content(schema = @Schema(implementation = EnumInfoResponse.class)))
     })
     public ResponseEntity<EnumInfoResponse> listarTipoReacaoAlergica() {
-        return ResponseEntity.ok(converterEnum(TipoReacaoAlergicaEnum.class, TipoReacaoAlergicaEnum.values()));
+        log.debug("REQUEST GET /v1/enums/tipo-reacao-alergica");
+        try {
+            return ResponseEntity.ok(converterEnum(TipoReacaoAlergicaEnum.class, TipoReacaoAlergicaEnum.values()));
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao listar TipoReacaoAlergicaEnum", ex);
+            throw ex;
+        }
     }
 
     @GetMapping("/tipo-responsavel")
@@ -698,7 +1054,13 @@ public class EnumsController {
                     content = @Content(schema = @Schema(implementation = EnumInfoResponse.class)))
     })
     public ResponseEntity<EnumInfoResponse> listarTipoResponsavel() {
-        return ResponseEntity.ok(converterEnum(TipoResponsavelEnum.class, TipoResponsavelEnum.values()));
+        log.debug("REQUEST GET /v1/enums/tipo-responsavel");
+        try {
+            return ResponseEntity.ok(converterEnum(TipoResponsavelEnum.class, TipoResponsavelEnum.values()));
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao listar TipoResponsavelEnum", ex);
+            throw ex;
+        }
     }
 
     @GetMapping("/tipo-servico-saude")
@@ -708,7 +1070,13 @@ public class EnumsController {
                     content = @Content(schema = @Schema(implementation = EnumInfoResponse.class)))
     })
     public ResponseEntity<EnumInfoResponse> listarTipoServicoSaude() {
-        return ResponseEntity.ok(converterEnum(TipoServicoSaudeEnum.class, TipoServicoSaudeEnum.values()));
+        log.debug("REQUEST GET /v1/enums/tipo-servico-saude");
+        try {
+            return ResponseEntity.ok(converterEnum(TipoServicoSaudeEnum.class, TipoServicoSaudeEnum.values()));
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao listar TipoServicoSaudeEnum", ex);
+            throw ex;
+        }
     }
 
     @GetMapping("/tipo-usuario-sistema")
@@ -718,7 +1086,13 @@ public class EnumsController {
                     content = @Content(schema = @Schema(implementation = EnumInfoResponse.class)))
     })
     public ResponseEntity<EnumInfoResponse> listarTipoUsuarioSistema() {
-        return ResponseEntity.ok(converterEnum(TipoUsuarioSistemaEnum.class, TipoUsuarioSistemaEnum.values()));
+        log.debug("REQUEST GET /v1/enums/tipo-usuario-sistema");
+        try {
+            return ResponseEntity.ok(converterEnum(TipoUsuarioSistemaEnum.class, TipoUsuarioSistemaEnum.values()));
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao listar TipoUsuarioSistemaEnum", ex);
+            throw ex;
+        }
     }
 
     @GetMapping("/tipo-vacina")
@@ -728,7 +1102,13 @@ public class EnumsController {
                     content = @Content(schema = @Schema(implementation = EnumInfoResponse.class)))
     })
     public ResponseEntity<EnumInfoResponse> listarTipoVacina() {
-        return ResponseEntity.ok(converterEnum(TipoVacinaEnum.class, TipoVacinaEnum.values()));
+        log.debug("REQUEST GET /v1/enums/tipo-vacina");
+        try {
+            return ResponseEntity.ok(converterEnum(TipoVacinaEnum.class, TipoVacinaEnum.values()));
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao listar TipoVacinaEnum", ex);
+            throw ex;
+        }
     }
 
     @GetMapping("/tipo-vinculo-profissional")
@@ -738,7 +1118,13 @@ public class EnumsController {
                     content = @Content(schema = @Schema(implementation = EnumInfoResponse.class)))
     })
     public ResponseEntity<EnumInfoResponse> listarTipoVinculoProfissional() {
-        return ResponseEntity.ok(converterEnum(TipoVinculoProfissionalEnum.class, TipoVinculoProfissionalEnum.values()));
+        log.debug("REQUEST GET /v1/enums/tipo-vinculo-profissional");
+        try {
+            return ResponseEntity.ok(converterEnum(TipoVinculoProfissionalEnum.class, TipoVinculoProfissionalEnum.values()));
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao listar TipoVinculoProfissionalEnum", ex);
+            throw ex;
+        }
     }
 
     @GetMapping("/tipo-visita-domiciliar")
@@ -748,7 +1134,13 @@ public class EnumsController {
                     content = @Content(schema = @Schema(implementation = EnumInfoResponse.class)))
     })
     public ResponseEntity<EnumInfoResponse> listarTipoVisitaDomiciliar() {
-        return ResponseEntity.ok(converterEnum(TipoVisitaDomiciliarEnum.class, TipoVisitaDomiciliarEnum.values()));
+        log.debug("REQUEST GET /v1/enums/tipo-visita-domiciliar");
+        try {
+            return ResponseEntity.ok(converterEnum(TipoVisitaDomiciliarEnum.class, TipoVisitaDomiciliarEnum.values()));
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao listar TipoVisitaDomiciliarEnum", ex);
+            throw ex;
+        }
     }
 
     @GetMapping("/unidade-medida")
@@ -758,7 +1150,13 @@ public class EnumsController {
                     content = @Content(schema = @Schema(implementation = EnumInfoResponse.class)))
     })
     public ResponseEntity<EnumInfoResponse> listarUnidadeMedida() {
-        return ResponseEntity.ok(converterEnum(UnidadeMedidaEnum.class, UnidadeMedidaEnum.values()));
+        log.debug("REQUEST GET /v1/enums/unidade-medida");
+        try {
+            return ResponseEntity.ok(converterEnum(UnidadeMedidaEnum.class, UnidadeMedidaEnum.values()));
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao listar UnidadeMedidaEnum", ex);
+            throw ex;
+        }
     }
 
     @GetMapping("/via-administracao")
@@ -768,7 +1166,13 @@ public class EnumsController {
                     content = @Content(schema = @Schema(implementation = EnumInfoResponse.class)))
     })
     public ResponseEntity<EnumInfoResponse> listarViaAdministracao() {
-        return ResponseEntity.ok(converterEnum(ViaAdministracaoEnum.class, ViaAdministracaoEnum.values()));
+        log.debug("REQUEST GET /v1/enums/via-administracao");
+        try {
+            return ResponseEntity.ok(converterEnum(ViaAdministracaoEnum.class, ViaAdministracaoEnum.values()));
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao listar ViaAdministracaoEnum", ex);
+            throw ex;
+        }
     }
 
     @GetMapping("/via-administracao-medicamento")
@@ -778,7 +1182,13 @@ public class EnumsController {
                     content = @Content(schema = @Schema(implementation = EnumInfoResponse.class)))
     })
     public ResponseEntity<EnumInfoResponse> listarViaAdministracaoMedicamento() {
-        return ResponseEntity.ok(converterEnum(ViaAdministracaoMedicamentoEnum.class, ViaAdministracaoMedicamentoEnum.values()));
+        log.debug("REQUEST GET /v1/enums/via-administracao-medicamento");
+        try {
+            return ResponseEntity.ok(converterEnum(ViaAdministracaoMedicamentoEnum.class, ViaAdministracaoMedicamentoEnum.values()));
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao listar ViaAdministracaoMedicamentoEnum", ex);
+            throw ex;
+        }
     }
 
     @GetMapping("/via-administracao-vacina")
@@ -788,7 +1198,13 @@ public class EnumsController {
                     content = @Content(schema = @Schema(implementation = EnumInfoResponse.class)))
     })
     public ResponseEntity<EnumInfoResponse> listarViaAdministracaoVacina() {
-        return ResponseEntity.ok(converterEnum(ViaAdministracaoVacinaEnum.class, ViaAdministracaoVacinaEnum.values()));
+        log.debug("REQUEST GET /v1/enums/via-administracao-vacina");
+        try {
+            return ResponseEntity.ok(converterEnum(ViaAdministracaoVacinaEnum.class, ViaAdministracaoVacinaEnum.values()));
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao listar ViaAdministracaoVacinaEnum", ex);
+            throw ex;
+        }
     }
 
     @GetMapping("/zona-domicilio")
@@ -798,6 +1214,12 @@ public class EnumsController {
                     content = @Content(schema = @Schema(implementation = EnumInfoResponse.class)))
     })
     public ResponseEntity<EnumInfoResponse> listarZonaDomicilio() {
-        return ResponseEntity.ok(converterEnum(ZonaDomicilioEnum.class, ZonaDomicilioEnum.values()));
+        log.debug("REQUEST GET /v1/enums/zona-domicilio");
+        try {
+            return ResponseEntity.ok(converterEnum(ZonaDomicilioEnum.class, ZonaDomicilioEnum.values()));
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao listar ZonaDomicilioEnum", ex);
+            throw ex;
+        }
     }
 }

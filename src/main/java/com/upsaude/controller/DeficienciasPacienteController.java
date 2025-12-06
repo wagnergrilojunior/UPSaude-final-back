@@ -2,6 +2,9 @@ package com.upsaude.controller;
 
 import com.upsaude.api.request.DeficienciasPacienteRequest;
 import com.upsaude.api.response.DeficienciasPacienteResponse;
+import com.upsaude.exception.BadRequestException;
+import com.upsaude.exception.ConflictException;
+import com.upsaude.exception.NotFoundException;
 import com.upsaude.service.DeficienciasPacienteService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -12,6 +15,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -29,6 +33,7 @@ import java.util.UUID;
 @RequestMapping("/v1/deficiencias-paciente")
 @Tag(name = "Deficiências de Paciente", description = "API para gerenciamento de Deficiências de Paciente")
 @RequiredArgsConstructor
+@Slf4j
 public class DeficienciasPacienteController {
 
     private final DeficienciasPacienteService deficienciasPacienteService;
@@ -42,8 +47,18 @@ public class DeficienciasPacienteController {
             @ApiResponse(responseCode = "403", description = "Acesso negado")
     })
     public ResponseEntity<DeficienciasPacienteResponse> criar(@Valid @RequestBody DeficienciasPacienteRequest request) {
-        DeficienciasPacienteResponse response = deficienciasPacienteService.criar(request);
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        log.debug("REQUEST POST /v1/deficiencias-paciente - payload: {}", request);
+        try {
+            DeficienciasPacienteResponse response = deficienciasPacienteService.criar(request);
+            log.info("Ligação paciente-deficiência criada com sucesso. ID: {}", response.getId());
+            return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        } catch (BadRequestException | ConflictException ex) {
+            log.warn("Falha ao criar ligação paciente-deficiência — mensagem: {}, payload: {}", ex.getMessage(), request);
+            throw ex;
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao criar ligação paciente-deficiência — payload: {}", request, ex);
+            throw ex;
+        }
     }
 
     @GetMapping
@@ -55,8 +70,14 @@ public class DeficienciasPacienteController {
     public ResponseEntity<Page<DeficienciasPacienteResponse>> listar(
             @Parameter(description = "Parâmetros de paginação (page, size, sort)")
             Pageable pageable) {
-        Page<DeficienciasPacienteResponse> response = deficienciasPacienteService.listar(pageable);
-        return ResponseEntity.ok(response);
+        log.debug("REQUEST GET /v1/deficiencias-paciente - pageable: {}", pageable);
+        try {
+            Page<DeficienciasPacienteResponse> response = deficienciasPacienteService.listar(pageable);
+            return ResponseEntity.ok(response);
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao listar ligações paciente-deficiência — pageable: {}", pageable, ex);
+            throw ex;
+        }
     }
 
     @GetMapping("/{id}")
@@ -70,8 +91,17 @@ public class DeficienciasPacienteController {
     public ResponseEntity<DeficienciasPacienteResponse> obterPorId(
             @Parameter(description = "ID da ligação paciente-deficiência", required = true)
             @PathVariable UUID id) {
-        DeficienciasPacienteResponse response = deficienciasPacienteService.obterPorId(id);
-        return ResponseEntity.ok(response);
+        log.debug("REQUEST GET /v1/deficiencias-paciente/{}", id);
+        try {
+            DeficienciasPacienteResponse response = deficienciasPacienteService.obterPorId(id);
+            return ResponseEntity.ok(response);
+        } catch (NotFoundException ex) {
+            log.warn("Ligação paciente-deficiência não encontrada — ID: {}, mensagem: {}", id, ex.getMessage());
+            throw ex;
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao obter ligação paciente-deficiência por ID — ID: {}", id, ex);
+            throw ex;
+        }
     }
 
     @PutMapping("/{id}")
@@ -87,8 +117,18 @@ public class DeficienciasPacienteController {
             @Parameter(description = "ID da ligação paciente-deficiência", required = true)
             @PathVariable UUID id,
             @Valid @RequestBody DeficienciasPacienteRequest request) {
-        DeficienciasPacienteResponse response = deficienciasPacienteService.atualizar(id, request);
-        return ResponseEntity.ok(response);
+        log.debug("REQUEST PUT /v1/deficiencias-paciente/{} - payload: {}", id, request);
+        try {
+            DeficienciasPacienteResponse response = deficienciasPacienteService.atualizar(id, request);
+            log.info("Ligação paciente-deficiência atualizada com sucesso. ID: {}", response.getId());
+            return ResponseEntity.ok(response);
+        } catch (BadRequestException | NotFoundException | ConflictException ex) {
+            log.warn("Falha ao atualizar ligação paciente-deficiência — ID: {}, mensagem: {}, payload: {}", id, ex.getMessage(), request);
+            throw ex;
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao atualizar ligação paciente-deficiência — ID: {}, payload: {}", id, request, ex);
+            throw ex;
+        }
     }
 
     @DeleteMapping("/{id}")
@@ -101,8 +141,17 @@ public class DeficienciasPacienteController {
     public ResponseEntity<Void> excluir(
             @Parameter(description = "ID da ligação paciente-deficiência", required = true)
             @PathVariable UUID id) {
-        deficienciasPacienteService.excluir(id);
-        return ResponseEntity.noContent().build();
+        log.debug("REQUEST DELETE /v1/deficiencias-paciente/{}", id);
+        try {
+            deficienciasPacienteService.excluir(id);
+            log.info("Ligação paciente-deficiência excluída com sucesso. ID: {}", id);
+            return ResponseEntity.noContent().build();
+        } catch (NotFoundException ex) {
+            log.warn("Ligação paciente-deficiência não encontrada para exclusão — ID: {}, mensagem: {}", id, ex.getMessage());
+            throw ex;
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao excluir ligação paciente-deficiência — ID: {}", id, ex);
+            throw ex;
+        }
     }
 }
-

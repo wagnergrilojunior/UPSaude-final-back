@@ -1,0 +1,21 @@
+package com.upsaude.mapper.embeddable;
+
+import com.upsaude.api.request.embeddable.IntegracaoGovernamentalVacinaRequest;
+import com.upsaude.api.response.embeddable.IntegracaoGovernamentalVacinaResponse;
+import com.upsaude.entity.embeddable.IntegracaoGovernamentalVacina;
+import com.upsaude.dto.embeddable.IntegracaoGovernamentalVacinaDTO;
+import com.upsaude.mapper.config.MappingConfig;
+import org.mapstruct.Mapper;
+import org.mapstruct.MappingTarget;
+
+@Mapper(config = MappingConfig.class)
+public interface IntegracaoGovernamentalVacinaMapper {
+    IntegracaoGovernamentalVacina toEntity(IntegracaoGovernamentalVacinaRequest request);
+    IntegracaoGovernamentalVacinaResponse toResponse(IntegracaoGovernamentalVacina entity);
+    void updateFromRequest(IntegracaoGovernamentalVacinaRequest request, @MappingTarget IntegracaoGovernamentalVacina entity);
+
+    // Mapeamento entre DTO e Entity
+    IntegracaoGovernamentalVacina toEntity(com.upsaude.dto.embeddable.IntegracaoGovernamentalVacinaDTO dto);
+    com.upsaude.dto.embeddable.IntegracaoGovernamentalVacinaDTO toDTO(IntegracaoGovernamentalVacina entity);
+    void updateFromDTO(com.upsaude.dto.embeddable.IntegracaoGovernamentalVacinaDTO dto, @MappingTarget IntegracaoGovernamentalVacina entity);
+}

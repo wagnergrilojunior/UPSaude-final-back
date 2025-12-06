@@ -2,10 +2,17 @@ package com.upsaude.api.response;
 
 import com.upsaude.entity.TratamentosOdontologicos.StatusTratamento;
 import java.time.OffsetDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
-@Data
+@Getter
+@Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
@@ -21,5 +28,9 @@ public class TratamentosOdontologicosResponse {
     private OffsetDateTime dataInicio;
     private OffsetDateTime dataFim;
     private StatusTratamento status;
+    
+    @Builder.Default
+    private List<TratamentosProcedimentosResponse> procedimentos = new ArrayList<>();
+    
     private String observacoes;
 }

@@ -14,7 +14,7 @@ import org.mapstruct.MappingTarget;
  * Mapper para conversões de Medicacao.
  * Entity ↔ DTO ↔ Request/Response
  */
-@Mapper(config = MappingConfig.class, uses = {FabricantesMedicamentoMapper.class})
+@Mapper(config = MappingConfig.class, uses = {FabricantesMedicamentoMapper.class, com.upsaude.mapper.embeddable.IdentificacaoMedicamentoMapper.class, com.upsaude.mapper.embeddable.DosagemAdministracaoMedicamentoMapper.class, com.upsaude.mapper.embeddable.ClassificacaoMedicamentoMapper.class, com.upsaude.mapper.embeddable.RegistroControleMedicamentoMapper.class, com.upsaude.mapper.embeddable.ContraindicacoesPrecaucoesMedicamentoMapper.class, com.upsaude.mapper.embeddable.ConservacaoArmazenamentoMedicamentoMapper.class})
 public interface MedicacaoMapper extends EntityMapper<Medicacao, MedicacaoDTO> {
 
     /**

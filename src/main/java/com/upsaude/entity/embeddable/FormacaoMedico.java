@@ -6,7 +6,6 @@ import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
 
@@ -18,9 +17,19 @@ import java.time.LocalDate;
 @Embeddable
 @Data
 @Builder
-@NoArgsConstructor
 @AllArgsConstructor
 public class FormacaoMedico {
+
+    public FormacaoMedico() {
+        this.instituicaoEnsino = "";
+        this.especializacao = "";
+        this.residenciaMedica = "";
+        this.mestrado = "";
+        this.doutorado = "";
+        this.posGraduacao = "";
+        this.tituloEspecialista = false;
+        this.rqe = "";
+    }
 
     @Size(max = 255, message = "Instituição de ensino deve ter no máximo 255 caracteres")
     @Column(name = "instituicao_ensino", length = 255)

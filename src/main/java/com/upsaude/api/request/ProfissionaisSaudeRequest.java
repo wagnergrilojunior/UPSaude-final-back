@@ -9,17 +9,31 @@ import com.upsaude.enums.SexoEnum;
 import com.upsaude.enums.StatusAtivoEnum;
 import com.upsaude.enums.TipoDeficienciaEnum;
 import com.upsaude.enums.TipoProfissionalEnum;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
-@Data
+@Getter
+@Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class ProfissionaisSaudeRequest {
+    @NotBlank(message = "Nome completo é obrigatório")
+    @Size(max = 255, message = "Nome completo deve ter no máximo 255 caracteres")
     private String nomeCompleto;
+    @Pattern(regexp = "^\\d{11}$", message = "CPF deve ter 11 dígitos")
     private String cpf;
     private LocalDate dataNascimento;
     private SexoEnum sexo;
@@ -34,7 +48,11 @@ public class ProfissionaisSaudeRequest {
     private LocalDate dataEmissaoRg;
     private NacionalidadeEnum nacionalidade;
     private String naturalidade;
+    @NotBlank(message = "Registro profissional é obrigatório")
+    @Size(max = 20, message = "Registro deve ter no máximo 20 caracteres")
     private String registroProfissional;
+    
+    @NotNull(message = "Conselho profissional é obrigatório")
     private UUID conselho;
     private String ufRegistro;
     private OffsetDateTime dataEmissaoRegistro;
@@ -50,5 +68,9 @@ public class ProfissionaisSaudeRequest {
     private String telefoneInstitucional;
     private String emailInstitucional;
     private UUID enderecoProfissional;
+    
+    @Builder.Default
+    private List<UUID> especialidades = new ArrayList<>();
+    
     private String observacoes;
 }
