@@ -23,10 +23,12 @@ import com.upsaude.service.MedicacaoPacienteService;
 import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.hibernate.Hibernate;
 import org.springframework.data.domain.Page;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -69,6 +71,13 @@ public class PacienteServiceImpl implements PacienteService {
     private final DeficienciasPacienteService deficienciasPacienteService;
     private final DoencasPacienteService doencasPacienteService;
     private final MedicacaoPacienteService medicacaoPacienteService;
+    
+    // Self-injection: injeta o próprio service (proxy) para evitar self-invocation
+    // @Lazy evita dependência circular na inicialização
+    // @Autowired é necessário porque @RequiredArgsConstructor não injeta campos com @Lazy
+    @Autowired
+    @Lazy
+    private PacienteService self;
 
     /**
      * {@inheritDoc}
@@ -99,9 +108,16 @@ public class PacienteServiceImpl implements PacienteService {
 
     /**
      * {@inheritDoc}
+     * 
+     * IMPORTANTE: O cache funciona porque quando este método é chamado externamente
+     * (via controller), o Spring automaticamente usa o proxy AOP, ativando o @Cacheable.
+     * 
+     * O campo 'self' está disponível caso seja necessário chamar este método internamente
+     * de outros métodos da mesma classe. Nesse caso, use this.self.obterPorId(id) para
+     * garantir que o proxy seja usado e o cache funcione.
      */
     @Override
-    @Transactional
+    @Transactional(readOnly = true)
     @Cacheable(value = "paciente", key = "#id")
     public PacienteResponse obterPorId(UUID id) {
         log.debug("Buscando paciente por ID: {} (cache miss)", id);
