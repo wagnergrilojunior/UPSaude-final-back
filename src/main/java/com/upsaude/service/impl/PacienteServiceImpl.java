@@ -94,6 +94,54 @@ public class PacienteServiceImpl implements PacienteService {
         Paciente paciente = pacienteRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Paciente não encontrado com ID: " + id));
 
+        // Inicializa as coleções lazy dentro da transação para evitar LazyInitializationException
+        // Isso força o Hibernate a carregar os relacionamentos antes de fechar a sessão
+        Hibernate.initialize(paciente.getEnderecos());
+        Hibernate.initialize(paciente.getDoencas());
+        Hibernate.initialize(paciente.getAlergias());
+        Hibernate.initialize(paciente.getDeficiencias());
+        Hibernate.initialize(paciente.getMedicacoes());
+        Hibernate.initialize(paciente.getDadosSociodemograficos());
+        Hibernate.initialize(paciente.getDadosClinicosBasicos());
+        Hibernate.initialize(paciente.getResponsavelLegal());
+        Hibernate.initialize(paciente.getLgpdConsentimento());
+        Hibernate.initialize(paciente.getIntegracaoGov());
+        
+        // Inicializar objetos nested dentro dos relacionamentos se necessário
+        if (paciente.getDoencas() != null) {
+            paciente.getDoencas().forEach(doenca -> {
+                if (doenca.getDoenca() != null) {
+                    Hibernate.initialize(doenca.getDoenca());
+                }
+                if (doenca.getCidPrincipal() != null) {
+                    Hibernate.initialize(doenca.getCidPrincipal());
+                }
+            });
+        }
+        
+        if (paciente.getAlergias() != null) {
+            paciente.getAlergias().forEach(alergia -> {
+                if (alergia.getAlergia() != null) {
+                    Hibernate.initialize(alergia.getAlergia());
+                }
+            });
+        }
+        
+        if (paciente.getMedicacoes() != null) {
+            paciente.getMedicacoes().forEach(medicacao -> {
+                if (medicacao.getMedicacao() != null) {
+                    Hibernate.initialize(medicacao.getMedicacao());
+                    // Inicializar objetos nested da medicacao se necessário
+                    if (medicacao.getMedicacao().getIdentificacao() != null) {
+                        Hibernate.initialize(medicacao.getMedicacao().getIdentificacao());
+                    }
+                    if (medicacao.getMedicacao().getFabricanteEntity() != null) {
+                        Hibernate.initialize(medicacao.getMedicacao().getFabricanteEntity());
+                    }
+                }
+            });
+        }
+
         return pacienteMapper.toResponse(paciente);
     }
 
