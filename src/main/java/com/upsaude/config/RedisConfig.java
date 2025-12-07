@@ -24,6 +24,7 @@ import org.springframework.data.redis.serializer.RedisSerializationContext;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 import lombok.extern.slf4j.Slf4j;
 
+import java.net.URI;
 import java.time.Duration;
 
 /**
@@ -50,23 +51,56 @@ import java.time.Duration;
 @Profile("!local")
 public class RedisConfig {
 
-    @Value("${spring.redis.host:localhost}")
-    private String redisHost;
-
-    @Value("${spring.redis.port:6379}")
-    private int redisPort;
-
-    @Value("${spring.redis.password:}")
-    private String redisPassword;
-
-    @Value("${spring.redis.database:0}")
-    private int redisDatabase;
+    @Value("${spring.redis.url:redis://localhost:6379}")
+    private String redisUrl;
 
     @Value("${spring.cache.redis.time-to-live:300000}")
     private long cacheTtl;
 
     @Value("${spring.cache.redis.key-prefix:upsaude::}")
     private String keyPrefix;
+
+    /**
+     * Faz o parse da URL do Redis e extrai host, porta, senha e database.
+     * Suporta formatos: redis://host:port, redis://password@host:port, redis://host:port/database
+     * 
+     * @param url URL do Redis no formato redis://[password@]host:port[/database]
+     * @return array com [host, port, password, database]
+     */
+    private String[] parseRedisUrl(String url) {
+        try {
+            URI uri = URI.create(url);
+            String host = uri.getHost();
+            if (host == null || host.isEmpty()) {
+                throw new IllegalArgumentException("Host não pode ser nulo ou vazio na URL do Redis");
+            }
+            
+            int port = uri.getPort() > 0 ? uri.getPort() : 6379;
+            String password = null;
+            int database = 0;
+            
+            // Extrai senha se presente no formato password@host
+            String userInfo = uri.getUserInfo();
+            if (userInfo != null && !userInfo.isEmpty()) {
+                password = userInfo;
+            }
+            
+            // Extrai database do path se presente
+            String path = uri.getPath();
+            if (path != null && path.length() > 1) {
+                try {
+                    database = Integer.parseInt(path.substring(1));
+                } catch (NumberFormatException e) {
+                    log.warn("Database inválido na URL do Redis: {}. Usando database 0.", path);
+                }
+            }
+            
+            return new String[]{host, String.valueOf(port), password != null ? password : "", String.valueOf(database)};
+        } catch (Exception e) {
+            log.error("Erro ao fazer parse da URL do Redis: {}. Usando valores padrão.", url, e);
+            return new String[]{"localhost", "6379", "", "0"};
+        }
+    }
 
     /**
      * Configura a conexão com o Redis/Valkey usando Lettuce.
@@ -78,6 +112,12 @@ public class RedisConfig {
      */
     @Bean
     public RedisConnectionFactory redisConnectionFactory() {
+        String[] redisConfig = parseRedisUrl(redisUrl);
+        String redisHost = redisConfig[0];
+        int redisPort = Integer.parseInt(redisConfig[1]);
+        String redisPassword = redisConfig[2];
+        int redisDatabase = Integer.parseInt(redisConfig[3]);
+        
         RedisStandaloneConfiguration config = new RedisStandaloneConfiguration();
         config.setHostName(redisHost);
         config.setPort(redisPort);
@@ -125,7 +165,7 @@ public class RedisConfig {
         } catch (Exception e) {
             log.warn("⚠️  Redis não está disponível no momento - Host: {}, Port: {}, Database: {}. " +
                 "A aplicação continuará sem cache. Erro: {}. " +
-                "Verifique se o Redis está rodando e se as variáveis de ambiente estão configuradas corretamente.", 
+                "Verifique se o Redis está rodando e se a variável de ambiente REDIS_URL está configurada corretamente.", 
                 redisHost, redisPort, redisDatabase, e.getMessage());
             // Não lança exceção para não bloquear startup - aplicação funciona sem cache
         }
