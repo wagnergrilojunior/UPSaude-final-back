@@ -1,6 +1,7 @@
 package com.upsaude.service;
 
 import com.upsaude.api.request.MedicacaoPacienteRequest;
+import com.upsaude.api.request.MedicacaoPacienteSimplificadoRequest;
 import com.upsaude.api.response.MedicacaoPacienteResponse;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -21,6 +22,15 @@ public interface MedicacaoPacienteService {
      * @return Resposta com os dados da ligação criada
      */
     MedicacaoPacienteResponse criar(MedicacaoPacienteRequest request);
+
+    /**
+     * Cria uma nova ligação entre paciente e medicação no sistema de forma simplificada.
+     * Apenas requer paciente, tenant e medicação. Os demais campos são criados com valores padrão.
+     *
+     * @param request Dados simplificados da ligação a ser criada
+     * @return Resposta com os dados da ligação criada
+     */
+    MedicacaoPacienteResponse criarSimplificado(MedicacaoPacienteSimplificadoRequest request);
 
     /**
      * Obtém uma ligação paciente-medicação pelo seu ID.

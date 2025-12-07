@@ -1,6 +1,7 @@
 package com.upsaude.service;
 
 import com.upsaude.api.request.DeficienciasPacienteRequest;
+import com.upsaude.api.request.DeficienciasPacienteSimplificadoRequest;
 import com.upsaude.api.response.DeficienciasPacienteResponse;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -21,6 +22,15 @@ public interface DeficienciasPacienteService {
      * @return Resposta com os dados da ligação criada
      */
     DeficienciasPacienteResponse criar(DeficienciasPacienteRequest request);
+
+    /**
+     * Cria uma nova ligação entre paciente e deficiência no sistema de forma simplificada.
+     * Apenas requer paciente, tenant e deficiência. Os demais campos são criados com valores padrão.
+     *
+     * @param request Dados simplificados da ligação a ser criada
+     * @return Resposta com os dados da ligação criada
+     */
+    DeficienciasPacienteResponse criarSimplificado(DeficienciasPacienteSimplificadoRequest request);
 
     /**
      * Obtém uma ligação paciente-deficiência pelo seu ID.
