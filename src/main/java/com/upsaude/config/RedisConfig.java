@@ -39,6 +39,13 @@ import java.time.Duration;
  * Nota: Valkey é 100% compatível com Redis e funciona com a mesma configuração.
  * O Render usa Valkey nas novas instâncias Key-Value.
  * 
+ * OBSERVABILIDADE: As métricas do Redis são coletadas automaticamente pelo Micrometer
+ * quando as configurações de métricas estão habilitadas no application-prod.properties:
+ * - Métricas de conexão (pool de conexões Lettuce)
+ * - Métricas de comandos (latência, contadores por comando)
+ * - Métricas de cache (hit/miss ratio, tamanho, evictions)
+ * - Métricas do Spring Data Redis (operações de repositório)
+ * 
  * IMPORTANTE: Esta configuração é desabilitada no profile 'local' para permitir
  * desenvolvimento sem Redis. Use @Profile("!local") para desabilitar.
  * 
