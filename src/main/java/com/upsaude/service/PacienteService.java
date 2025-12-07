@@ -2,6 +2,7 @@ package com.upsaude.service;
 
 import com.upsaude.api.request.PacienteRequest;
 import com.upsaude.api.response.PacienteResponse;
+import com.upsaude.api.response.PacienteSimplificadoResponse;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -41,6 +42,15 @@ public interface PacienteService {
      * @return página contendo os pacientes encontrados
      */
     Page<PacienteResponse> listar(Pageable pageable);
+
+    /**
+     * Lista todos os pacientes de forma paginada e simplificada.
+     * Retorna apenas os dados básicos dos pacientes, sem relacionamentos.
+     *
+     * @param pageable informações de paginação (página, tamanho, ordenação)
+     * @return página contendo os pacientes simplificados encontrados
+     */
+    Page<PacienteSimplificadoResponse> listarSimplificado(Pageable pageable);
 
     /**
      * Atualiza os dados de um paciente existente.
