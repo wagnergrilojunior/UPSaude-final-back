@@ -61,6 +61,9 @@ public interface MedicacaoPacienteMapper extends EntityMapper<MedicacaoPaciente,
 
     /**
      * Converte Entity para Response.
+     * IMPORTANTE: O campo 'paciente' é ignorado para evitar recursão circular,
+     * pois quando PacienteResponse é mapeado, ele já contém a lista de medicações.
      */
+    @Mapping(target = "paciente", ignore = true)
     MedicacaoPacienteResponse toResponse(MedicacaoPaciente entity);
 }
