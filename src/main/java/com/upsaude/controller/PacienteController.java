@@ -2,6 +2,7 @@ package com.upsaude.controller;
 
 import com.upsaude.api.request.PacienteRequest;
 import com.upsaude.api.response.PacienteResponse;
+import com.upsaude.api.response.PacienteSimplificadoResponse;
 import com.upsaude.exception.BadRequestException;
 import com.upsaude.exception.ConflictException;
 import com.upsaude.exception.NotFoundException;
@@ -62,17 +63,17 @@ public class PacienteController {
     }
 
     @GetMapping
-    @Operation(summary = "Listar pacientes", description = "Retorna uma lista paginada de pacientes")
+    @Operation(summary = "Listar pacientes", description = "Retorna uma lista paginada de pacientes com apenas os dados básicos, sem relacionamentos")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Lista de pacientes retornada com sucesso"),
             @ApiResponse(responseCode = "403", description = "Acesso negado")
     })
-    public ResponseEntity<Page<PacienteResponse>> listar(
+    public ResponseEntity<Page<PacienteSimplificadoResponse>> listar(
             @Parameter(description = "Parâmetros de paginação (page, size, sort)")
             Pageable pageable) {
         log.debug("REQUEST GET /v1/pacientes - pageable: {}", pageable);
         try {
-            Page<PacienteResponse> response = pacienteService.listar(pageable);
+            Page<PacienteSimplificadoResponse> response = pacienteService.listarSimplificado(pageable);
             return ResponseEntity.ok(response);
         } catch (Exception ex) {
             log.error("Erro inesperado ao listar pacientes — pageable: {}", pageable, ex);
@@ -100,6 +101,25 @@ public class PacienteController {
             throw ex;
         } catch (Exception ex) {
             log.error("Erro inesperado ao obter paciente por ID — ID: {}", id, ex);
+            throw ex;
+        }
+    }
+
+    @GetMapping("/completo")
+    @Operation(summary = "Listar pacientes completos", description = "Retorna uma lista paginada de pacientes com todos os dados e relacionamentos")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Lista de pacientes completos retornada com sucesso"),
+            @ApiResponse(responseCode = "403", description = "Acesso negado")
+    })
+    public ResponseEntity<Page<PacienteResponse>> listarCompleto(
+            @Parameter(description = "Parâmetros de paginação (page, size, sort)")
+            Pageable pageable) {
+        log.debug("REQUEST GET /v1/pacientes/completo - pageable: {}", pageable);
+        try {
+            Page<PacienteResponse> response = pacienteService.listar(pageable);
+            return ResponseEntity.ok(response);
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao listar pacientes completos — pageable: {}", pageable, ex);
             throw ex;
         }
     }

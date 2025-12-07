@@ -3,6 +3,7 @@ package com.upsaude.service.impl;
 import com.upsaude.api.request.PacienteRequest;
 import com.upsaude.api.request.EnderecoRequest;
 import com.upsaude.api.response.PacienteResponse;
+import com.upsaude.api.response.PacienteSimplificadoResponse;
 import com.upsaude.entity.*;
 import com.upsaude.exception.BadRequestException;
 import com.upsaude.exception.ConflictException;
@@ -145,6 +146,63 @@ public class PacienteServiceImpl implements PacienteService {
         return pacienteMapper.toResponse(paciente);
     }
 
+
+    /**
+     * Converte uma entidade Paciente para PacienteSimplificadoResponse.
+     * Retorna apenas os dados básicos, sem relacionamentos.
+     *
+     * @param paciente entidade Paciente a ser convertida
+     * @return PacienteSimplificadoResponse com dados básicos
+     */
+    private PacienteSimplificadoResponse converterParaSimplificado(Paciente paciente) {
+        return PacienteSimplificadoResponse.builder()
+                .id(paciente.getId())
+                .createdAt(paciente.getCreatedAt())
+                .updatedAt(paciente.getUpdatedAt())
+                .active(paciente.getActive())
+                .nomeCompleto(paciente.getNomeCompleto())
+                .cpf(paciente.getCpf())
+                .rg(paciente.getRg())
+                .cns(paciente.getCns())
+                .dataNascimento(paciente.getDataNascimento())
+                .sexo(paciente.getSexo())
+                .estadoCivil(paciente.getEstadoCivil())
+                .telefone(paciente.getTelefone())
+                .email(paciente.getEmail())
+                .nomeMae(paciente.getNomeMae())
+                .nomePai(paciente.getNomePai())
+                .responsavelNome(paciente.getResponsavelNome())
+                .responsavelCpf(paciente.getResponsavelCpf())
+                .responsavelTelefone(paciente.getResponsavelTelefone())
+                .numeroCarteirinha(paciente.getNumeroCarteirinha())
+                .dataValidadeCarteirinha(paciente.getDataValidadeCarteirinha())
+                .observacoes(paciente.getObservacoes())
+                .racaCor(paciente.getRacaCor())
+                .nacionalidade(paciente.getNacionalidade())
+                .paisNascimento(paciente.getPaisNascimento())
+                .naturalidade(paciente.getNaturalidade())
+                .municipioNascimentoIbge(paciente.getMunicipioNascimentoIbge())
+                .escolaridade(paciente.getEscolaridade())
+                .ocupacaoProfissao(paciente.getOcupacaoProfissao())
+                .situacaoRua(paciente.getSituacaoRua())
+                .statusPaciente(paciente.getStatusPaciente())
+                .dataObito(paciente.getDataObito())
+                .causaObitoCid10(paciente.getCausaObitoCid10())
+                .cartaoSusAtivo(paciente.getCartaoSusAtivo())
+                .dataAtualizacaoCns(paciente.getDataAtualizacaoCns())
+                .tipoAtendimentoPreferencial(paciente.getTipoAtendimentoPreferencial())
+                .origemCadastro(paciente.getOrigemCadastro())
+                .nomeSocial(paciente.getNomeSocial())
+                .identidadeGenero(paciente.getIdentidadeGenero())
+                .orientacaoSexual(paciente.getOrientacaoSexual())
+                .possuiDeficiencia(paciente.getPossuiDeficiencia())
+                .tipoDeficiencia(paciente.getTipoDeficiencia())
+                .cnsValidado(paciente.getCnsValidado())
+                .tipoCns(paciente.getTipoCns())
+                .acompanhadoPorEquipeEsf(paciente.getAcompanhadoPorEquipeEsf())
+                .build();
+    }
+
     /**
      * {@inheritDoc}
      */
@@ -169,6 +227,22 @@ public class PacienteServiceImpl implements PacienteService {
         });
         
         return pacientes.map(pacienteMapper::toResponse);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    @Transactional(readOnly = true)
+    public Page<PacienteSimplificadoResponse> listarSimplificado(Pageable pageable) {
+        log.debug("Listando pacientes simplificados paginados. Página: {}, Tamanho: {}", 
+                pageable.getPageNumber(), pageable.getPageSize());
+
+        // Busca pacientes paginados sem inicializar relacionamentos lazy
+        Page<Paciente> pacientes = pacienteRepository.findAll(pageable);
+        
+        // Converte para resposta simplificada sem carregar relacionamentos
+        return pacientes.map(this::converterParaSimplificado);
     }
 
     /**
