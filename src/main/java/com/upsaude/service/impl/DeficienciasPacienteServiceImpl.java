@@ -1,16 +1,19 @@
 package com.upsaude.service.impl;
 
 import com.upsaude.api.request.DeficienciasPacienteRequest;
+import com.upsaude.api.request.DeficienciasPacienteSimplificadoRequest;
 import com.upsaude.api.response.DeficienciasPacienteResponse;
 import com.upsaude.entity.DeficienciasPaciente;
 import com.upsaude.entity.Paciente;
 import com.upsaude.entity.Deficiencias;
+import com.upsaude.entity.Tenant;
 import com.upsaude.exception.BadRequestException;
 import com.upsaude.exception.NotFoundException;
 import com.upsaude.mapper.DeficienciasPacienteMapper;
 import com.upsaude.repository.DeficienciasPacienteRepository;
 import com.upsaude.repository.PacienteRepository;
 import com.upsaude.repository.DeficienciasRepository;
+import com.upsaude.repository.TenantRepository;
 import com.upsaude.service.DeficienciasPacienteService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -37,6 +40,7 @@ public class DeficienciasPacienteServiceImpl implements DeficienciasPacienteServ
     private final DeficienciasPacienteMapper deficienciasPacienteMapper;
     private final PacienteRepository pacienteRepository;
     private final DeficienciasRepository deficienciasRepository;
+    private final TenantRepository tenantRepository;
 
     @Override
     @Transactional
@@ -61,6 +65,56 @@ public class DeficienciasPacienteServiceImpl implements DeficienciasPacienteServ
 
         DeficienciasPaciente deficienciasPacienteSalvo = deficienciasPacienteRepository.save(deficienciasPaciente);
         log.info("Ligação paciente-deficiência criada com sucesso. ID: {}", deficienciasPacienteSalvo.getId());
+
+        return deficienciasPacienteMapper.toResponse(deficienciasPacienteSalvo);
+    }
+
+    @Override
+    @Transactional
+    @CacheEvict(value = "deficienciaspaciente", allEntries = true)
+    public DeficienciasPacienteResponse criarSimplificado(DeficienciasPacienteSimplificadoRequest request) {
+        log.debug("Criando nova ligação paciente-deficiência simplificada - Paciente: {}, Tenant: {}, Deficiência: {}", 
+                request.getPaciente(), request.getTenant(), request.getDeficiencia());
+
+        if (request == null) {
+            throw new BadRequestException("Dados da ligação paciente-deficiência são obrigatórios");
+        }
+
+        if (request.getPaciente() == null) {
+            throw new BadRequestException("ID do paciente é obrigatório");
+        }
+
+        if (request.getTenant() == null) {
+            throw new BadRequestException("ID do tenant é obrigatório");
+        }
+
+        if (request.getDeficiencia() == null) {
+            throw new BadRequestException("ID da deficiência é obrigatório");
+        }
+
+        // Busca paciente
+        Paciente paciente = pacienteRepository.findById(request.getPaciente())
+                .orElseThrow(() -> new NotFoundException("Paciente não encontrado com ID: " + request.getPaciente()));
+
+        // Busca tenant
+        Tenant tenant = tenantRepository.findById(request.getTenant())
+                .orElseThrow(() -> new NotFoundException("Tenant não encontrado com ID: " + request.getTenant()));
+
+        // Busca deficiência
+        Deficiencias deficiencia = deficienciasRepository.findById(request.getDeficiencia())
+                .orElseThrow(() -> new NotFoundException("Deficiência não encontrada com ID: " + request.getDeficiencia()));
+
+        // Cria nova entidade com valores padrão
+        DeficienciasPaciente deficienciasPaciente = new DeficienciasPaciente();
+        deficienciasPaciente.setPaciente(paciente);
+        deficienciasPaciente.setTenant(tenant);
+        deficienciasPaciente.setDeficiencia(deficiencia);
+        deficienciasPaciente.setActive(true);
+        deficienciasPaciente.setPossuiLaudo(false); // Valor padrão
+        // dataDiagnostico e observacoes ficam null
+
+        DeficienciasPaciente deficienciasPacienteSalvo = deficienciasPacienteRepository.save(deficienciasPaciente);
+        log.info("Ligação paciente-deficiência criada com sucesso (simplificado). ID: {}", deficienciasPacienteSalvo.getId());
 
         return deficienciasPacienteMapper.toResponse(deficienciasPacienteSalvo);
     }

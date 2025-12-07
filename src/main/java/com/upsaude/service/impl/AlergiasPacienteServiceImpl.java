@@ -1,6 +1,7 @@
 package com.upsaude.service.impl;
 
 import com.upsaude.api.request.AlergiasPacienteRequest;
+import com.upsaude.api.request.AlergiasPacienteSimplificadoRequest;
 import com.upsaude.api.response.AlergiasPacienteResponse;
 import com.upsaude.entity.Alergias;
 import com.upsaude.entity.AlergiasPaciente;
@@ -12,6 +13,7 @@ import com.upsaude.mapper.AlergiasPacienteMapper;
 import com.upsaude.repository.AlergiasPacienteRepository;
 import com.upsaude.repository.AlergiasRepository;
 import com.upsaude.repository.PacienteRepository;
+import com.upsaude.repository.TenantRepository;
 import com.upsaude.repository.UsuariosSistemaRepository;
 import com.upsaude.service.AlergiasPacienteService;
 import jakarta.transaction.Transactional;
@@ -43,6 +45,7 @@ public class AlergiasPacienteServiceImpl implements AlergiasPacienteService {
     private final PacienteRepository pacienteRepository;
     private final AlergiasRepository alergiasRepository;
     private final UsuariosSistemaRepository usuariosSistemaRepository;
+    private final TenantRepository tenantRepository;
 
     @Override
     @Transactional
@@ -75,9 +78,65 @@ public class AlergiasPacienteServiceImpl implements AlergiasPacienteService {
         alergiasPaciente.setTenant(tenant);
         
         alergiasPaciente.setActive(true);
+        
+        // Garante que alertaMedico não seja null (obrigatório no banco)
+        if (alergiasPaciente.getAlertaMedico() == null) {
+            alergiasPaciente.setAlertaMedico(true);
+        }
 
         AlergiasPaciente alergiasPacienteSalvo = alergiasPacienteRepository.save(alergiasPaciente);
         log.info("AlergiasPaciente criado com sucesso. ID: {}", alergiasPacienteSalvo.getId());
+
+        return alergiasPacienteMapper.toResponse(alergiasPacienteSalvo);
+    }
+
+    @Override
+    @Transactional
+    @CacheEvict(value = "alergiaspaciente", allEntries = true)
+    public AlergiasPacienteResponse criarSimplificado(AlergiasPacienteSimplificadoRequest request) {
+        log.debug("Criando novo alergiaspaciente simplificado - Paciente: {}, Tenant: {}, Alergia: {}", 
+                request.getPaciente(), request.getTenant(), request.getAlergia());
+
+        if (request == null) {
+            throw new BadRequestException("Dados do alergiaspaciente são obrigatórios");
+        }
+
+        if (request.getPaciente() == null) {
+            throw new BadRequestException("ID do paciente é obrigatório");
+        }
+
+        if (request.getTenant() == null) {
+            throw new BadRequestException("ID do tenant é obrigatório");
+        }
+
+        if (request.getAlergia() == null) {
+            throw new BadRequestException("ID da alergia é obrigatório");
+        }
+
+        // Busca paciente
+        Paciente paciente = pacienteRepository.findById(request.getPaciente())
+                .orElseThrow(() -> new NotFoundException("Paciente não encontrado com ID: " + request.getPaciente()));
+
+        // Busca tenant
+        Tenant tenant = tenantRepository.findById(request.getTenant())
+                .orElseThrow(() -> new NotFoundException("Tenant não encontrado com ID: " + request.getTenant()));
+
+        // Busca alergia
+        Alergias alergia = alergiasRepository.findById(request.getAlergia())
+                .orElseThrow(() -> new NotFoundException("Alergia não encontrada com ID: " + request.getAlergia()));
+
+        // Cria nova entidade com valores padrão
+        AlergiasPaciente alergiasPaciente = new AlergiasPaciente();
+        alergiasPaciente.setPaciente(paciente);
+        alergiasPaciente.setTenant(tenant);
+        alergiasPaciente.setAlergia(alergia);
+        alergiasPaciente.setActive(true);
+        alergiasPaciente.setAlertaMedico(true); // Define explicitamente para evitar NULL
+        // Valores padrão: diagnostico e historicoReacoes são inicializados no construtor
+        // observacoes fica null
+
+        AlergiasPaciente alergiasPacienteSalvo = alergiasPacienteRepository.save(alergiasPaciente);
+        log.info("AlergiasPaciente criado com sucesso (simplificado). ID: {}", alergiasPacienteSalvo.getId());
 
         return alergiasPacienteMapper.toResponse(alergiasPacienteSalvo);
     }

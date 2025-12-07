@@ -1,6 +1,7 @@
 package com.upsaude.controller;
 
 import com.upsaude.api.request.AlergiasPacienteRequest;
+import com.upsaude.api.request.AlergiasPacienteSimplificadoRequest;
 import com.upsaude.api.response.AlergiasPacienteResponse;
 import com.upsaude.exception.BadRequestException;
 import com.upsaude.exception.ConflictException;
@@ -57,6 +58,30 @@ public class AlergiasPacienteController {
             throw ex;
         } catch (Exception ex) {
             log.error("Erro inesperado ao criar alergia de paciente — payload: {}", request, ex);
+            throw ex;
+        }
+    }
+
+    @PostMapping("/simplificado")
+    @Operation(summary = "Criar alergia de paciente simplificada", description = "Cria uma nova alergia de paciente informando apenas paciente, tenant e alergia. Os demais campos são criados com valores padrão")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "201", description = "Alergia de paciente criada com sucesso",
+                    content = @Content(schema = @Schema(implementation = AlergiasPacienteResponse.class))),
+            @ApiResponse(responseCode = "400", description = "Dados inválidos fornecidos"),
+            @ApiResponse(responseCode = "404", description = "Paciente, tenant ou alergia não encontrados"),
+            @ApiResponse(responseCode = "403", description = "Acesso negado")
+    })
+    public ResponseEntity<AlergiasPacienteResponse> criarSimplificado(@Valid @RequestBody AlergiasPacienteSimplificadoRequest request) {
+        log.debug("REQUEST POST /v1/alergias-paciente/simplificado - payload: {}", request);
+        try {
+            AlergiasPacienteResponse response = alergiasPacienteService.criarSimplificado(request);
+            log.info("Alergia de paciente criada com sucesso (simplificado). ID: {}", response.getId());
+            return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        } catch (BadRequestException | NotFoundException ex) {
+            log.warn("Falha ao criar alergia de paciente simplificada — mensagem: {}, payload: {}", ex.getMessage(), request);
+            throw ex;
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao criar alergia de paciente simplificada — payload: {}", request, ex);
             throw ex;
         }
     }

@@ -6,7 +6,9 @@ import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 import com.upsaude.enums.EscolaridadeEnum;
@@ -94,14 +96,14 @@ public class PacienteRequest {
     private UUID integracaoGov;
     
     @Builder.Default
-    private List<DoencasPacienteRequest> doencas = new ArrayList<>();
+    private Set<UUID> doencas = new HashSet<>();
     
     @Builder.Default
-    private List<AlergiasPacienteRequest> alergias = new ArrayList<>();
+    private Set<UUID> alergias = new HashSet<>();
     
     @Builder.Default
-    private List<DeficienciasPacienteRequest> deficiencias = new ArrayList<>();
+    private Set<UUID> deficiencias = new HashSet<>();
     
     @Builder.Default
-    private List<MedicacaoPacienteRequest> medicacoes = new ArrayList<>();
+    private Set<UUID> medicacoes = new HashSet<>();
 }

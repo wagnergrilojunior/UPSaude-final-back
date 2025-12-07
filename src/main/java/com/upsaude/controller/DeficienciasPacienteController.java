@@ -1,6 +1,7 @@
 package com.upsaude.controller;
 
 import com.upsaude.api.request.DeficienciasPacienteRequest;
+import com.upsaude.api.request.DeficienciasPacienteSimplificadoRequest;
 import com.upsaude.api.response.DeficienciasPacienteResponse;
 import com.upsaude.exception.BadRequestException;
 import com.upsaude.exception.ConflictException;
@@ -57,6 +58,30 @@ public class DeficienciasPacienteController {
             throw ex;
         } catch (Exception ex) {
             log.error("Erro inesperado ao criar ligação paciente-deficiência — payload: {}", request, ex);
+            throw ex;
+        }
+    }
+
+    @PostMapping("/simplificado")
+    @Operation(summary = "Criar ligação paciente-deficiência simplificada", description = "Cria uma nova ligação entre paciente e deficiência informando apenas paciente, tenant e deficiência. Os demais campos são criados com valores padrão")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "201", description = "Ligação paciente-deficiência criada com sucesso",
+                    content = @Content(schema = @Schema(implementation = DeficienciasPacienteResponse.class))),
+            @ApiResponse(responseCode = "400", description = "Dados inválidos fornecidos"),
+            @ApiResponse(responseCode = "404", description = "Paciente, tenant ou deficiência não encontrados"),
+            @ApiResponse(responseCode = "403", description = "Acesso negado")
+    })
+    public ResponseEntity<DeficienciasPacienteResponse> criarSimplificado(@Valid @RequestBody DeficienciasPacienteSimplificadoRequest request) {
+        log.debug("REQUEST POST /v1/deficiencias-paciente/simplificado - payload: {}", request);
+        try {
+            DeficienciasPacienteResponse response = deficienciasPacienteService.criarSimplificado(request);
+            log.info("Ligação paciente-deficiência criada com sucesso (simplificado). ID: {}", response.getId());
+            return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        } catch (BadRequestException | NotFoundException ex) {
+            log.warn("Falha ao criar ligação paciente-deficiência simplificada — mensagem: {}, payload: {}", ex.getMessage(), request);
+            throw ex;
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao criar ligação paciente-deficiência simplificada — payload: {}", request, ex);
             throw ex;
         }
     }
