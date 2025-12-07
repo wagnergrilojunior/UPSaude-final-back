@@ -2,6 +2,10 @@ package com.upsaude.service.impl;
 
 import com.upsaude.api.request.PacienteRequest;
 import com.upsaude.api.request.EnderecoRequest;
+import com.upsaude.api.request.AlergiasPacienteSimplificadoRequest;
+import com.upsaude.api.request.DeficienciasPacienteSimplificadoRequest;
+import com.upsaude.api.request.DoencasPacienteSimplificadoRequest;
+import com.upsaude.api.request.MedicacaoPacienteSimplificadoRequest;
 import com.upsaude.api.response.PacienteResponse;
 import com.upsaude.entity.*;
 import com.upsaude.exception.BadRequestException;
@@ -11,6 +15,10 @@ import com.upsaude.mapper.PacienteMapper;
 import com.upsaude.mapper.EnderecoMapper;
 import com.upsaude.repository.*;
 import com.upsaude.service.PacienteService;
+import com.upsaude.service.AlergiasPacienteService;
+import com.upsaude.service.DeficienciasPacienteService;
+import com.upsaude.service.DoencasPacienteService;
+import com.upsaude.service.MedicacaoPacienteService;
 import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -54,6 +62,12 @@ public class PacienteServiceImpl implements PacienteService {
     private final ResponsavelLegalRepository responsavelLegalRepository;
     private final LGPDConsentimentoRepository lgpdConsentimentoRepository;
     private final IntegracaoGovRepository integracaoGovRepository;
+    
+    // Services para criar relacionamentos simplificados
+    private final AlergiasPacienteService alergiasPacienteService;
+    private final DeficienciasPacienteService deficienciasPacienteService;
+    private final DoencasPacienteService doencasPacienteService;
+    private final MedicacaoPacienteService medicacaoPacienteService;
 
     /**
      * {@inheritDoc}
@@ -75,6 +89,9 @@ public class PacienteServiceImpl implements PacienteService {
 
         Paciente pacienteSalvo = pacienteRepository.save(paciente);
         log.info("Paciente criado com sucesso. ID: {}", pacienteSalvo.getId());
+
+        // Processar listas de IDs de doenças, alergias, deficiências e medicações após salvar o paciente
+        processarRelacionamentosPorId(pacienteSalvo, request);
 
         return pacienteMapper.toResponse(pacienteSalvo);
     }
@@ -198,6 +215,9 @@ public class PacienteServiceImpl implements PacienteService {
 
         Paciente pacienteAtualizado = pacienteRepository.save(pacienteExistente);
         log.info("Paciente atualizado com sucesso. ID: {}", pacienteAtualizado.getId());
+
+        // Processar listas de IDs de doenças, alergias, deficiências e medicações após salvar o paciente
+        processarRelacionamentosPorId(pacienteAtualizado, request);
 
         return pacienteMapper.toResponse(pacienteAtualizado);
     }
@@ -435,6 +455,101 @@ public class PacienteServiceImpl implements PacienteService {
         }
 
         log.debug("Relacionamentos processados. JPA gerenciará persistência automaticamente.");
+    }
+
+    /**
+     * Processa relacionamentos de doenças, alergias, deficiências e medicações usando apenas IDs.
+     * Cria os registros usando os métodos simplificados após o paciente ser salvo.
+     *
+     * @param paciente paciente já salvo no banco
+     * @param request dados do request com as listas de IDs
+     */
+    private void processarRelacionamentosPorId(Paciente paciente, PacienteRequest request) {
+        log.debug("Processando relacionamentos por ID do paciente: {}", paciente.getId());
+
+        // Obtém o tenant do usuário autenticado (obrigatório para os relacionamentos)
+        Tenant tenant = obterTenantDoUsuarioAutenticado();
+        if (tenant == null) {
+            throw new BadRequestException("Não foi possível obter tenant do usuário autenticado. É necessário estar autenticado para criar relacionamentos.");
+        }
+
+        // Processa DOENÇAS
+        if (request.getDoencas() != null && !request.getDoencas().isEmpty()) {
+            log.debug("Processando {} doença(s) para o paciente", request.getDoencas().size());
+            for (UUID doencaId : request.getDoencas()) {
+                try {
+                    DoencasPacienteSimplificadoRequest doencaRequest = DoencasPacienteSimplificadoRequest.builder()
+                            .paciente(paciente.getId())
+                            .tenant(tenant.getId())
+                            .doenca(doencaId)
+                            .build();
+                    doencasPacienteService.criarSimplificado(doencaRequest);
+                    log.debug("Doença {} associada ao paciente {}", doencaId, paciente.getId());
+                } catch (Exception e) {
+                    log.error("Erro ao associar doença {} ao paciente {}: {}", doencaId, paciente.getId(), e.getMessage());
+                    throw new BadRequestException("Erro ao associar doença " + doencaId + ": " + e.getMessage());
+                }
+            }
+        }
+
+        // Processa ALERGIAS
+        if (request.getAlergias() != null && !request.getAlergias().isEmpty()) {
+            log.debug("Processando {} alergia(s) para o paciente", request.getAlergias().size());
+            for (UUID alergiaId : request.getAlergias()) {
+                try {
+                    AlergiasPacienteSimplificadoRequest alergiaRequest = AlergiasPacienteSimplificadoRequest.builder()
+                            .paciente(paciente.getId())
+                            .tenant(tenant.getId())
+                            .alergia(alergiaId)
+                            .build();
+                    alergiasPacienteService.criarSimplificado(alergiaRequest);
+                    log.debug("Alergia {} associada ao paciente {}", alergiaId, paciente.getId());
+                } catch (Exception e) {
+                    log.error("Erro ao associar alergia {} ao paciente {}: {}", alergiaId, paciente.getId(), e.getMessage());
+                    throw new BadRequestException("Erro ao associar alergia " + alergiaId + ": " + e.getMessage());
+                }
+            }
+        }
+
+        // Processa DEFICIÊNCIAS
+        if (request.getDeficiencias() != null && !request.getDeficiencias().isEmpty()) {
+            log.debug("Processando {} deficiência(s) para o paciente", request.getDeficiencias().size());
+            for (UUID deficienciaId : request.getDeficiencias()) {
+                try {
+                    DeficienciasPacienteSimplificadoRequest deficienciaRequest = DeficienciasPacienteSimplificadoRequest.builder()
+                            .paciente(paciente.getId())
+                            .tenant(tenant.getId())
+                            .deficiencia(deficienciaId)
+                            .build();
+                    deficienciasPacienteService.criarSimplificado(deficienciaRequest);
+                    log.debug("Deficiência {} associada ao paciente {}", deficienciaId, paciente.getId());
+                } catch (Exception e) {
+                    log.error("Erro ao associar deficiência {} ao paciente {}: {}", deficienciaId, paciente.getId(), e.getMessage());
+                    throw new BadRequestException("Erro ao associar deficiência " + deficienciaId + ": " + e.getMessage());
+                }
+            }
+        }
+
+        // Processa MEDICAÇÕES
+        if (request.getMedicacoes() != null && !request.getMedicacoes().isEmpty()) {
+            log.debug("Processando {} medicação(ões) para o paciente", request.getMedicacoes().size());
+            for (UUID medicacaoId : request.getMedicacoes()) {
+                try {
+                    MedicacaoPacienteSimplificadoRequest medicacaoRequest = MedicacaoPacienteSimplificadoRequest.builder()
+                            .paciente(paciente.getId())
+                            .tenant(tenant.getId())
+                            .medicacao(medicacaoId)
+                            .build();
+                    medicacaoPacienteService.criarSimplificado(medicacaoRequest);
+                    log.debug("Medicação {} associada ao paciente {}", medicacaoId, paciente.getId());
+                } catch (Exception e) {
+                    log.error("Erro ao associar medicação {} ao paciente {}: {}", medicacaoId, paciente.getId(), e.getMessage());
+                    throw new BadRequestException("Erro ao associar medicação " + medicacaoId + ": " + e.getMessage());
+                }
+            }
+        }
+
+        log.debug("Relacionamentos por ID processados com sucesso.");
     }
 
     /**

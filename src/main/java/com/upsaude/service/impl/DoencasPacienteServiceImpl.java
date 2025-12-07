@@ -1,6 +1,7 @@
 package com.upsaude.service.impl;
 
 import com.upsaude.api.request.DoencasPacienteRequest;
+import com.upsaude.api.request.DoencasPacienteSimplificadoRequest;
 import com.upsaude.api.response.DoencasPacienteResponse;
 import com.upsaude.entity.CidDoencas;
 import com.upsaude.entity.Doencas;
@@ -17,6 +18,7 @@ import com.upsaude.repository.CidDoencasRepository;
 import com.upsaude.repository.DoencasPacienteRepository;
 import com.upsaude.repository.DoencasRepository;
 import com.upsaude.repository.PacienteRepository;
+import com.upsaude.repository.TenantRepository;
 import com.upsaude.repository.UsuariosSistemaRepository;
 import com.upsaude.service.DoencasPacienteService;
 import jakarta.transaction.Transactional;
@@ -50,6 +52,7 @@ public class DoencasPacienteServiceImpl implements DoencasPacienteService {
     private final PacienteRepository pacienteRepository;
     private final DoencasRepository doencasRepository;
     private final CidDoencasRepository cidDoencasRepository;
+    private final TenantRepository tenantRepository;
     private final UsuariosSistemaRepository usuariosSistemaRepository;
 
     @Override
@@ -96,6 +99,56 @@ public class DoencasPacienteServiceImpl implements DoencasPacienteService {
 
         DoencasPaciente doencasPacienteSalvo = doencasPacienteRepository.save(doencasPaciente);
         log.info("Registro de doença do paciente criado com sucesso. ID: {}", doencasPacienteSalvo.getId());
+
+        return doencasPacienteMapper.toResponse(doencasPacienteSalvo);
+    }
+
+    @Override
+    @Transactional
+    @CacheEvict(value = "doencaspaciente", allEntries = true)
+    public DoencasPacienteResponse criarSimplificado(DoencasPacienteSimplificadoRequest request) {
+        log.debug("Criando novo registro de doença do paciente simplificado - Paciente: {}, Tenant: {}, Doença: {}", 
+                request.getPaciente(), request.getTenant(), request.getDoenca());
+
+        if (request == null) {
+            throw new BadRequestException("Dados do registro são obrigatórios");
+        }
+
+        if (request.getPaciente() == null) {
+            throw new BadRequestException("ID do paciente é obrigatório");
+        }
+
+        if (request.getTenant() == null) {
+            throw new BadRequestException("ID do tenant é obrigatório");
+        }
+
+        if (request.getDoenca() == null) {
+            throw new BadRequestException("ID da doença é obrigatório");
+        }
+
+        // Busca paciente
+        Paciente paciente = pacienteRepository.findById(request.getPaciente())
+                .orElseThrow(() -> new NotFoundException("Paciente não encontrado com ID: " + request.getPaciente()));
+
+        // Busca tenant
+        Tenant tenant = tenantRepository.findById(request.getTenant())
+                .orElseThrow(() -> new NotFoundException("Tenant não encontrado com ID: " + request.getTenant()));
+
+        // Busca doença
+        Doencas doenca = doencasRepository.findById(request.getDoenca())
+                .orElseThrow(() -> new NotFoundException("Doença não encontrada com ID: " + request.getDoenca()));
+
+        // Cria nova entidade com valores padrão
+        DoencasPaciente doencasPaciente = new DoencasPaciente();
+        doencasPaciente.setPaciente(paciente);
+        doencasPaciente.setTenant(tenant);
+        doencasPaciente.setDoenca(doenca);
+        doencasPaciente.setActive(true);
+        // diagnostico, acompanhamento e tratamentoAtual são inicializados no construtor
+        // observacoes e cidPrincipal ficam null
+
+        DoencasPaciente doencasPacienteSalvo = doencasPacienteRepository.save(doencasPaciente);
+        log.info("Registro de doença do paciente criado com sucesso (simplificado). ID: {}", doencasPacienteSalvo.getId());
 
         return doencasPacienteMapper.toResponse(doencasPacienteSalvo);
     }

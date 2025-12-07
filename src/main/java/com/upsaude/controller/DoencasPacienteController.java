@@ -1,6 +1,7 @@
 package com.upsaude.controller;
 
 import com.upsaude.api.request.DoencasPacienteRequest;
+import com.upsaude.api.request.DoencasPacienteSimplificadoRequest;
 import com.upsaude.api.response.DoencasPacienteResponse;
 import com.upsaude.exception.BadRequestException;
 import com.upsaude.exception.ConflictException;
@@ -57,6 +58,30 @@ public class DoencasPacienteController {
             throw ex;
         } catch (Exception ex) {
             log.error("Erro inesperado ao criar registro de doença do paciente — payload: {}", request, ex);
+            throw ex;
+        }
+    }
+
+    @PostMapping("/simplificado")
+    @Operation(summary = "Criar registro de doença do paciente simplificado", description = "Cria um novo registro de doença do paciente informando apenas paciente, tenant e doença. Os demais campos são criados com valores padrão")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "201", description = "Registro de doença do paciente criado com sucesso",
+                    content = @Content(schema = @Schema(implementation = DoencasPacienteResponse.class))),
+            @ApiResponse(responseCode = "400", description = "Dados inválidos fornecidos"),
+            @ApiResponse(responseCode = "404", description = "Paciente, tenant ou doença não encontrados"),
+            @ApiResponse(responseCode = "403", description = "Acesso negado")
+    })
+    public ResponseEntity<DoencasPacienteResponse> criarSimplificado(@Valid @RequestBody DoencasPacienteSimplificadoRequest request) {
+        log.debug("REQUEST POST /v1/doencas-paciente/simplificado - payload: {}", request);
+        try {
+            DoencasPacienteResponse response = doencasPacienteService.criarSimplificado(request);
+            log.info("Registro de doença do paciente criado com sucesso (simplificado). ID: {}", response.getId());
+            return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        } catch (BadRequestException | NotFoundException ex) {
+            log.warn("Falha ao criar registro de doença do paciente simplificado — mensagem: {}, payload: {}", ex.getMessage(), request);
+            throw ex;
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao criar registro de doença do paciente simplificado — payload: {}", request, ex);
             throw ex;
         }
     }

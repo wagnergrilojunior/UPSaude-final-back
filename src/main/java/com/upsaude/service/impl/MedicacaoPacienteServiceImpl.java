@@ -1,6 +1,7 @@
 package com.upsaude.service.impl;
 
 import com.upsaude.api.request.MedicacaoPacienteRequest;
+import com.upsaude.api.request.MedicacaoPacienteSimplificadoRequest;
 import com.upsaude.api.response.MedicacaoPacienteResponse;
 import com.upsaude.entity.MedicacaoPaciente;
 import com.upsaude.entity.Paciente;
@@ -14,6 +15,7 @@ import com.upsaude.repository.MedicacaoPacienteRepository;
 import com.upsaude.repository.PacienteRepository;
 import com.upsaude.repository.MedicacaoRepository;
 import com.upsaude.repository.CidDoencasRepository;
+import com.upsaude.repository.TenantRepository;
 import com.upsaude.repository.UsuariosSistemaRepository;
 import com.upsaude.service.MedicacaoPacienteService;
 import jakarta.transaction.Transactional;
@@ -44,6 +46,7 @@ public class MedicacaoPacienteServiceImpl implements MedicacaoPacienteService {
     private final PacienteRepository pacienteRepository;
     private final MedicacaoRepository medicacaoRepository;
     private final CidDoencasRepository cidDoencasRepository;
+    private final TenantRepository tenantRepository;
     private final UsuariosSistemaRepository usuariosSistemaRepository;
 
     @Override
@@ -86,6 +89,56 @@ public class MedicacaoPacienteServiceImpl implements MedicacaoPacienteService {
 
         MedicacaoPaciente medicacaoPacienteSalvo = medicacaoPacienteRepository.save(medicacaoPaciente);
         log.info("Ligação paciente-medicação criada com sucesso. ID: {}", medicacaoPacienteSalvo.getId());
+
+        return medicacaoPacienteMapper.toResponse(medicacaoPacienteSalvo);
+    }
+
+    @Override
+    @Transactional
+    @CacheEvict(value = "medicacaopaciente", allEntries = true)
+    public MedicacaoPacienteResponse criarSimplificado(MedicacaoPacienteSimplificadoRequest request) {
+        log.debug("Criando nova ligação paciente-medicação simplificada - Paciente: {}, Tenant: {}, Medicação: {}", 
+                request.getPaciente(), request.getTenant(), request.getMedicacao());
+
+        if (request == null) {
+            throw new BadRequestException("Dados da ligação paciente-medicação são obrigatórios");
+        }
+
+        if (request.getPaciente() == null) {
+            throw new BadRequestException("ID do paciente é obrigatório");
+        }
+
+        if (request.getTenant() == null) {
+            throw new BadRequestException("ID do tenant é obrigatório");
+        }
+
+        if (request.getMedicacao() == null) {
+            throw new BadRequestException("ID da medicação é obrigatório");
+        }
+
+        // Busca paciente
+        Paciente paciente = pacienteRepository.findById(request.getPaciente())
+                .orElseThrow(() -> new NotFoundException("Paciente não encontrado com ID: " + request.getPaciente()));
+
+        // Busca tenant
+        Tenant tenant = tenantRepository.findById(request.getTenant())
+                .orElseThrow(() -> new NotFoundException("Tenant não encontrado com ID: " + request.getTenant()));
+
+        // Busca medicação
+        Medicacao medicacao = medicacaoRepository.findById(request.getMedicacao())
+                .orElseThrow(() -> new NotFoundException("Medicação não encontrada com ID: " + request.getMedicacao()));
+
+        // Cria nova entidade com valores padrão
+        MedicacaoPaciente medicacaoPaciente = new MedicacaoPaciente();
+        medicacaoPaciente.setPaciente(paciente);
+        medicacaoPaciente.setTenant(tenant);
+        medicacaoPaciente.setMedicacao(medicacao);
+        medicacaoPaciente.setActive(true);
+        medicacaoPaciente.setMedicacaoAtiva(true); // Valor padrão
+        // dose, frequencia, via, cidRelacionado, dataInicio, dataFim e observacoes ficam null
+
+        MedicacaoPaciente medicacaoPacienteSalvo = medicacaoPacienteRepository.save(medicacaoPaciente);
+        log.info("Ligação paciente-medicação criada com sucesso (simplificado). ID: {}", medicacaoPacienteSalvo.getId());
 
         return medicacaoPacienteMapper.toResponse(medicacaoPacienteSalvo);
     }

@@ -4,7 +4,6 @@ import com.upsaude.enums.TipoUsuarioSistemaEnum;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
@@ -17,7 +16,6 @@ import java.util.UUID;
  */
 @Data
 @Builder
-@NoArgsConstructor
 @AllArgsConstructor
 public class UsuarioSistemaInfoResponse {
     // ========== DADOS DO USUARIO_SISTEMA ==========
@@ -58,7 +56,6 @@ public class UsuarioSistemaInfoResponse {
      */
     @Data
     @Builder
-    @NoArgsConstructor
     @AllArgsConstructor
     public static class EstabelecimentoVinculoResponse {
         private UUID id; // ID do vínculo

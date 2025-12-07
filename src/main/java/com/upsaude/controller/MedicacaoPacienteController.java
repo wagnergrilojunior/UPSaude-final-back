@@ -1,6 +1,7 @@
 package com.upsaude.controller;
 
 import com.upsaude.api.request.MedicacaoPacienteRequest;
+import com.upsaude.api.request.MedicacaoPacienteSimplificadoRequest;
 import com.upsaude.api.response.MedicacaoPacienteResponse;
 import com.upsaude.exception.BadRequestException;
 import com.upsaude.exception.ConflictException;
@@ -57,6 +58,30 @@ public class MedicacaoPacienteController {
             throw ex;
         } catch (Exception ex) {
             log.error("Erro inesperado ao criar ligação paciente-medicação — payload: {}", request, ex);
+            throw ex;
+        }
+    }
+
+    @PostMapping("/simplificado")
+    @Operation(summary = "Criar ligação paciente-medicação simplificada", description = "Cria uma nova ligação entre paciente e medicação informando apenas paciente, tenant e medicação. Os demais campos são criados com valores padrão")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "201", description = "Ligação paciente-medicação criada com sucesso",
+                    content = @Content(schema = @Schema(implementation = MedicacaoPacienteResponse.class))),
+            @ApiResponse(responseCode = "400", description = "Dados inválidos fornecidos"),
+            @ApiResponse(responseCode = "404", description = "Paciente, tenant ou medicação não encontrados"),
+            @ApiResponse(responseCode = "403", description = "Acesso negado")
+    })
+    public ResponseEntity<MedicacaoPacienteResponse> criarSimplificado(@Valid @RequestBody MedicacaoPacienteSimplificadoRequest request) {
+        log.debug("REQUEST POST /v1/medicacoes-paciente/simplificado - payload: {}", request);
+        try {
+            MedicacaoPacienteResponse response = medicacaoPacienteService.criarSimplificado(request);
+            log.info("Ligação paciente-medicação criada com sucesso (simplificado). ID: {}", response.getId());
+            return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        } catch (BadRequestException | NotFoundException ex) {
+            log.warn("Falha ao criar ligação paciente-medicação simplificada — mensagem: {}, payload: {}", ex.getMessage(), request);
+            throw ex;
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao criar ligação paciente-medicação simplificada — payload: {}", request, ex);
             throw ex;
         }
     }
