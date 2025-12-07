@@ -13,7 +13,7 @@ import org.mapstruct.MappingTarget;
  * Mapper para conversões de Paciente.
  * Entity ↔ DTO ↔ Request/Response
  */
-@Mapper(config = MappingConfig.class, uses = {ConvenioMapper.class, DadosClinicosBasicosMapper.class, DadosSociodemograficosMapper.class, IntegracaoGovMapper.class, LGPDConsentimentoMapper.class, ResponsavelLegalMapper.class})
+@Mapper(config = MappingConfig.class, uses = {ConvenioMapper.class, DadosClinicosBasicosMapper.class, DadosSociodemograficosMapper.class, IntegracaoGovMapper.class, LGPDConsentimentoMapper.class, ResponsavelLegalMapper.class, DoencasPacienteMapper.class, AlergiasPacienteMapper.class, DeficienciasPacienteMapper.class, MedicacaoPacienteMapper.class})
 public interface PacienteMapper extends EntityMapper<Paciente, PacienteDTO> {
 
     /**

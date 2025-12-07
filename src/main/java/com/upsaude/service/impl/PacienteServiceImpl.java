@@ -9,6 +9,7 @@ import com.upsaude.api.request.MedicacaoPacienteSimplificadoRequest;
 import com.upsaude.api.response.PacienteResponse;
 import com.upsaude.api.response.PacienteSimplificadoResponse;
 import com.upsaude.entity.*;
+import com.upsaude.enums.StatusPacienteEnum;
 import com.upsaude.exception.BadRequestException;
 import com.upsaude.exception.ConflictException;
 import com.upsaude.exception.NotFoundException;
@@ -93,6 +94,27 @@ public class PacienteServiceImpl implements PacienteService {
 
         Paciente paciente = pacienteMapper.fromRequest(request);
         paciente.setActive(true);
+        
+        // Garantir valores padrão para campos obrigatórios que podem ser null após mapeamento
+        // O MapStruct pode sobrescrever valores padrão da entidade com null quando o campo não vem no request
+        if (paciente.getAcompanhadoPorEquipeEsf() == null) {
+            paciente.setAcompanhadoPorEquipeEsf(false);
+        }
+        if (paciente.getPossuiDeficiencia() == null) {
+            paciente.setPossuiDeficiencia(false);
+        }
+        if (paciente.getCnsValidado() == null) {
+            paciente.setCnsValidado(false);
+        }
+        if (paciente.getSituacaoRua() == null) {
+            paciente.setSituacaoRua(false);
+        }
+        if (paciente.getCartaoSusAtivo() == null) {
+            paciente.setCartaoSusAtivo(true);
+        }
+        if (paciente.getStatusPaciente() == null) {
+            paciente.setStatusPaciente(StatusPacienteEnum.ATIVO);
+        }
 
         // Processar relacionamentos na ordem correta ANTES de salvar o paciente
         processarRelacionamentos(paciente, request);

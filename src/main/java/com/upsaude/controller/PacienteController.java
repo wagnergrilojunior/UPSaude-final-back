@@ -62,7 +62,7 @@ public class PacienteController {
         }
     }
 
-    @GetMapping
+    @GetMapping({"", "/"})
     @Operation(summary = "Listar pacientes", description = "Retorna uma lista paginada de pacientes com apenas os dados básicos, sem relacionamentos")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Lista de pacientes retornada com sucesso"),
