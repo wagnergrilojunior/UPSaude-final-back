@@ -60,7 +60,8 @@ public class UsuariosSistemaController {
             log.warn("Falha ao criar usuário do sistema — mensagem: {}, payload: {}", ex.getMessage(), request);
             throw ex;
         } catch (Exception ex) {
-            log.error("Erro inesperado ao criar usuário do sistema — payload: {}", request, ex);
+            log.error("Erro inesperado ao criar usuário do sistema — Path: /v1/usuarios-sistema, Method: POST, payload: {}, Exception: {}", 
+                request, ex.getClass().getName(), ex);
             throw ex;
         }
     }
@@ -79,7 +80,8 @@ public class UsuariosSistemaController {
             Page<UsuariosSistemaResponse> response = usuariosSistemaService.listar(pageable);
             return ResponseEntity.ok(response);
         } catch (Exception ex) {
-            log.error("Erro inesperado ao listar usuários do sistema — pageable: {}", pageable, ex);
+            log.error("Erro inesperado ao listar usuários do sistema — Path: /v1/usuarios-sistema, Method: GET, pageable: {}, Exception: {}", 
+                pageable, ex.getClass().getName(), ex);
             throw ex;
         }
     }
@@ -103,7 +105,8 @@ public class UsuariosSistemaController {
             log.warn("Usuário do sistema não encontrado — ID: {}, mensagem: {}", id, ex.getMessage());
             throw ex;
         } catch (Exception ex) {
-            log.error("Erro inesperado ao obter usuário do sistema por ID — ID: {}", id, ex);
+            log.error("Erro inesperado ao obter usuário do sistema por ID — Path: /v1/usuarios-sistema/{}, Method: GET, ID: {}, Exception: {}", 
+                id, id, ex.getClass().getName(), ex);
             throw ex;
         }
     }
@@ -130,7 +133,8 @@ public class UsuariosSistemaController {
             log.warn("Falha ao atualizar usuário do sistema — ID: {}, mensagem: {}, payload: {}", id, ex.getMessage(), request);
             throw ex;
         } catch (Exception ex) {
-            log.error("Erro inesperado ao atualizar usuário do sistema — ID: {}, payload: {}", id, request, ex);
+            log.error("Erro inesperado ao atualizar usuário do sistema — Path: /v1/usuarios-sistema/{}, Method: PUT, ID: {}, payload: {}, Exception: {}", 
+                id, id, request, ex.getClass().getName(), ex);
             throw ex;
         }
     }
@@ -154,7 +158,8 @@ public class UsuariosSistemaController {
             log.warn("Usuário do sistema não encontrado para exclusão — ID: {}, mensagem: {}", id, ex.getMessage());
             throw ex;
         } catch (Exception ex) {
-            log.error("Erro inesperado ao excluir usuário do sistema — ID: {}", id, ex);
+            log.error("Erro inesperado ao excluir usuário do sistema — Path: /v1/usuarios-sistema/{}, Method: DELETE, ID: {}, Exception: {}", 
+                id, id, ex.getClass().getName(), ex);
             throw ex;
         }
     }
@@ -188,7 +193,8 @@ public class UsuariosSistemaController {
             log.warn("Falha ao fazer upload de foto do usuário — ID: {}, filename: {}, mensagem: {}", id, file.getOriginalFilename(), ex.getMessage());
             throw ex;
         } catch (Exception ex) {
-            log.error("Erro inesperado ao fazer upload de foto do usuário — ID: {}, filename: {}", id, file.getOriginalFilename(), ex);
+            log.error("Erro inesperado ao fazer upload de foto do usuário — Path: /v1/usuarios-sistema/{}/foto, Method: POST, ID: {}, filename: {}, Exception: {}", 
+                id, id, file.getOriginalFilename(), ex.getClass().getName(), ex);
             throw ex;
         }
     }
@@ -217,7 +223,8 @@ public class UsuariosSistemaController {
             log.warn("Foto do usuário não encontrada — ID: {}, mensagem: {}", id, ex.getMessage());
             throw ex;
         } catch (Exception ex) {
-            log.error("Erro inesperado ao obter foto do usuário — ID: {}", id, ex);
+            log.error("Erro inesperado ao obter foto do usuário — Path: /v1/usuarios-sistema/{}/foto, Method: GET, ID: {}, Exception: {}", 
+                id, id, ex.getClass().getName(), ex);
             throw ex;
         }
     }
@@ -245,7 +252,8 @@ public class UsuariosSistemaController {
             log.warn("Usuário não encontrado para deletar foto — ID: {}, mensagem: {}", id, ex.getMessage());
             throw ex;
         } catch (Exception ex) {
-            log.error("Erro inesperado ao deletar foto do usuário — ID: {}", id, ex);
+            log.error("Erro inesperado ao deletar foto do usuário — Path: /v1/usuarios-sistema/{}/foto, Method: DELETE, ID: {}, Exception: {}", 
+                id, id, ex.getClass().getName(), ex);
             throw ex;
         }
     }

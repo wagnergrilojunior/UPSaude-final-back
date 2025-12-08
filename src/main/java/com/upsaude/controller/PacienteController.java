@@ -57,7 +57,8 @@ public class PacienteController {
             log.warn("Falha ao criar paciente — mensagem: {}, payload: {}", ex.getMessage(), request);
             throw ex;
         } catch (Exception ex) {
-            log.error("Erro inesperado ao criar paciente — payload: {}", request, ex);
+            log.error("Erro inesperado ao criar paciente — Path: /v1/pacientes, Method: POST, payload: {}, Exception: {}", 
+                request, ex.getClass().getName(), ex);
             throw ex;
         }
     }
@@ -76,7 +77,8 @@ public class PacienteController {
             Page<PacienteSimplificadoResponse> response = pacienteService.listarSimplificado(pageable);
             return ResponseEntity.ok(response);
         } catch (Exception ex) {
-            log.error("Erro inesperado ao listar pacientes — pageable: {}", pageable, ex);
+            log.error("Erro inesperado ao listar pacientes — Path: /v1/pacientes, Method: GET, pageable: {}, Exception: {}", 
+                pageable, ex.getClass().getName(), ex);
             throw ex;
         }
     }
@@ -100,7 +102,8 @@ public class PacienteController {
             log.warn("Paciente não encontrado — ID: {}, mensagem: {}", id, ex.getMessage());
             throw ex;
         } catch (Exception ex) {
-            log.error("Erro inesperado ao obter paciente por ID — ID: {}", id, ex);
+            log.error("Erro inesperado ao obter paciente por ID — Path: /v1/pacientes/{}, Method: GET, ID: {}, Exception: {}", 
+                id, id, ex.getClass().getName(), ex);
             throw ex;
         }
     }
@@ -119,7 +122,8 @@ public class PacienteController {
             Page<PacienteResponse> response = pacienteService.listar(pageable);
             return ResponseEntity.ok(response);
         } catch (Exception ex) {
-            log.error("Erro inesperado ao listar pacientes completos — pageable: {}", pageable, ex);
+            log.error("Erro inesperado ao listar pacientes completos — Path: /v1/pacientes/completo, Method: GET, pageable: {}, Exception: {}", 
+                pageable, ex.getClass().getName(), ex);
             throw ex;
         }
     }
@@ -146,7 +150,8 @@ public class PacienteController {
             log.warn("Falha ao atualizar paciente — ID: {}, mensagem: {}, payload: {}", id, ex.getMessage(), request);
             throw ex;
         } catch (Exception ex) {
-            log.error("Erro inesperado ao atualizar paciente — ID: {}, payload: {}", id, request, ex);
+            log.error("Erro inesperado ao atualizar paciente — Path: /v1/pacientes/{}, Method: PUT, ID: {}, payload: {}, Exception: {}", 
+                id, id, request, ex.getClass().getName(), ex);
             throw ex;
         }
     }
@@ -170,7 +175,8 @@ public class PacienteController {
             log.warn("Paciente não encontrado para exclusão — ID: {}, mensagem: {}", id, ex.getMessage());
             throw ex;
         } catch (Exception ex) {
-            log.error("Erro inesperado ao excluir paciente — ID: {}", id, ex);
+            log.error("Erro inesperado ao excluir paciente — Path: /v1/pacientes/{}, Method: DELETE, ID: {}, Exception: {}", 
+                id, id, ex.getClass().getName(), ex);
             throw ex;
         }
     }

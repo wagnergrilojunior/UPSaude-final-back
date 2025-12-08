@@ -92,47 +92,55 @@ public class PacienteServiceImpl implements PacienteService {
     @Transactional
     @CachePut(value = "paciente", key = "#result.id")
     public PacienteResponse criar(PacienteRequest request) {
-        log.debug("Criando novo paciente: {}", request.getNomeCompleto());
+        log.debug("Criando novo paciente: {}", request != null ? request.getNomeCompleto() : "null");
 
-        validarDadosBasicos(request);
-        validarCPFUnico(null, request.getCpf());
+        try {
+            validarDadosBasicos(request);
+            validarCPFUnico(null, request.getCpf());
 
-        Paciente paciente = pacienteMapper.fromRequest(request);
-        paciente.setActive(true);
-        
-        // Garantir valores padrão para campos obrigatórios que podem ser null após mapeamento
-        // O MapStruct pode sobrescrever valores padrão da entidade com null quando o campo não vem no request
-        if (paciente.getAcompanhadoPorEquipeEsf() == null) {
-            paciente.setAcompanhadoPorEquipeEsf(false);
-        }
-        if (paciente.getPossuiDeficiencia() == null) {
-            paciente.setPossuiDeficiencia(false);
-        }
-        if (paciente.getCnsValidado() == null) {
-            paciente.setCnsValidado(false);
-        }
-        if (paciente.getSituacaoRua() == null) {
-            paciente.setSituacaoRua(false);
-        }
-        if (paciente.getCartaoSusAtivo() == null) {
-            paciente.setCartaoSusAtivo(true);
-        }
-        if (paciente.getStatusPaciente() == null) {
-            paciente.setStatusPaciente(StatusPacienteEnum.ATIVO);
-        }
+            Paciente paciente = pacienteMapper.fromRequest(request);
+            paciente.setActive(true);
+            
+            // Garantir valores padrão para campos obrigatórios que podem ser null após mapeamento
+            // O MapStruct pode sobrescrever valores padrão da entidade com null quando o campo não vem no request
+            if (paciente.getAcompanhadoPorEquipeEsf() == null) {
+                paciente.setAcompanhadoPorEquipeEsf(false);
+            }
+            if (paciente.getPossuiDeficiencia() == null) {
+                paciente.setPossuiDeficiencia(false);
+            }
+            if (paciente.getCnsValidado() == null) {
+                paciente.setCnsValidado(false);
+            }
+            if (paciente.getSituacaoRua() == null) {
+                paciente.setSituacaoRua(false);
+            }
+            if (paciente.getCartaoSusAtivo() == null) {
+                paciente.setCartaoSusAtivo(true);
+            }
+            if (paciente.getStatusPaciente() == null) {
+                paciente.setStatusPaciente(StatusPacienteEnum.ATIVO);
+            }
 
-        // Processar relacionamentos na ordem correta ANTES de salvar o paciente
-        processarRelacionamentos(paciente, request);
+            // Processar relacionamentos na ordem correta ANTES de salvar o paciente
+            processarRelacionamentos(paciente, request);
 
-        Paciente pacienteSalvo = pacienteRepository.save(paciente);
-        log.info("Paciente criado com sucesso. ID: {} - Será adicionado ao cache automaticamente", pacienteSalvo.getId());
+            Paciente pacienteSalvo = pacienteRepository.save(paciente);
+            log.info("Paciente criado com sucesso. ID: {} - Será adicionado ao cache automaticamente", pacienteSalvo.getId());
 
-        // Processar listas de IDs de doenças, alergias, deficiências e medicações após salvar o paciente
-        processarRelacionamentosPorId(pacienteSalvo, request);
+            // Processar listas de IDs de doenças, alergias, deficiências e medicações após salvar o paciente
+            processarRelacionamentosPorId(pacienteSalvo, request);
 
-        PacienteResponse response = pacienteMapper.toResponse(pacienteSalvo);
-        log.debug("Paciente criado adicionado ao cache com chave: {}", response.getId());
-        return response;
+            PacienteResponse response = pacienteMapper.toResponse(pacienteSalvo);
+            log.debug("Paciente criado adicionado ao cache com chave: {}", response.getId());
+            return response;
+        } catch (BadRequestException | ConflictException | NotFoundException e) {
+            log.warn("Erro de validação ao criar paciente. Request: {}. Erro: {}", request, e.getMessage());
+            throw e;
+        } catch (Exception e) {
+            log.error("Erro inesperado ao criar paciente. Request: {}, Exception: {}", request, e.getClass().getName(), e);
+            throw e;
+        }
     }
 
     /**
@@ -614,7 +622,8 @@ public class PacienteServiceImpl implements PacienteService {
                     doencasPacienteService.criarSimplificado(doencaRequest);
                     log.debug("Doença {} associada ao paciente {}", doencaId, paciente.getId());
                 } catch (Exception e) {
-                    log.error("Erro ao associar doença {} ao paciente {}: {}", doencaId, paciente.getId(), e.getMessage());
+                    log.error("Erro ao associar doença {} ao paciente {}: {}, Exception: {}", 
+                        doencaId, paciente.getId(), e.getMessage(), e.getClass().getName(), e);
                     throw new BadRequestException("Erro ao associar doença " + doencaId + ": " + e.getMessage());
                 }
             }
@@ -633,7 +642,8 @@ public class PacienteServiceImpl implements PacienteService {
                     alergiasPacienteService.criarSimplificado(alergiaRequest);
                     log.debug("Alergia {} associada ao paciente {}", alergiaId, paciente.getId());
                 } catch (Exception e) {
-                    log.error("Erro ao associar alergia {} ao paciente {}: {}", alergiaId, paciente.getId(), e.getMessage());
+                    log.error("Erro ao associar alergia {} ao paciente {}: {}, Exception: {}", 
+                        alergiaId, paciente.getId(), e.getMessage(), e.getClass().getName(), e);
                     throw new BadRequestException("Erro ao associar alergia " + alergiaId + ": " + e.getMessage());
                 }
             }
@@ -652,7 +662,8 @@ public class PacienteServiceImpl implements PacienteService {
                     deficienciasPacienteService.criarSimplificado(deficienciaRequest);
                     log.debug("Deficiência {} associada ao paciente {}", deficienciaId, paciente.getId());
                 } catch (Exception e) {
-                    log.error("Erro ao associar deficiência {} ao paciente {}: {}", deficienciaId, paciente.getId(), e.getMessage());
+                    log.error("Erro ao associar deficiência {} ao paciente {}: {}, Exception: {}", 
+                        deficienciaId, paciente.getId(), e.getMessage(), e.getClass().getName(), e);
                     throw new BadRequestException("Erro ao associar deficiência " + deficienciaId + ": " + e.getMessage());
                 }
             }
@@ -671,7 +682,8 @@ public class PacienteServiceImpl implements PacienteService {
                     medicacaoPacienteService.criarSimplificado(medicacaoRequest);
                     log.debug("Medicação {} associada ao paciente {}", medicacaoId, paciente.getId());
                 } catch (Exception e) {
-                    log.error("Erro ao associar medicação {} ao paciente {}: {}", medicacaoId, paciente.getId(), e.getMessage());
+                    log.error("Erro ao associar medicação {} ao paciente {}: {}, Exception: {}", 
+                        medicacaoId, paciente.getId(), e.getMessage(), e.getClass().getName(), e);
                     throw new BadRequestException("Erro ao associar medicação " + medicacaoId + ": " + e.getMessage());
                 }
             }
@@ -754,7 +766,7 @@ public class PacienteServiceImpl implements PacienteService {
                 log.warn("Não foi possível obter userId do contexto de autenticação");
             }
         } catch (Exception e) {
-            log.error("Erro ao obter tenant do usuário autenticado", e);
+            log.error("Erro ao obter tenant do usuário autenticado, Exception: {}", e.getClass().getName(), e);
         }
         return null;
     }

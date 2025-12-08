@@ -1,6 +1,7 @@
 package com.upsaude.exception;
 
 import jakarta.servlet.http.HttpServletRequest;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
@@ -13,8 +14,11 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import java.time.LocalDateTime;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * Handler global para tratamento de exceções da API UPSaúde.
@@ -24,6 +28,7 @@ import java.util.Map;
  * O Actuator usa /error como fallback quando ocorre exceção interna.
  * Esses endpoints devem tratar seus próprios erros normalmente.
  */
+@Slf4j
 @RestControllerAdvice(basePackages = "com.upsaude.controller")
 public class ApiExceptionHandler {
 
@@ -191,7 +196,7 @@ public class ApiExceptionHandler {
      *
      * @param ex exceção lançada
      * @param request requisição HTTP
-     * @return resposta JSON com detalhes do erro
+     * @return resposta JSON com detalhes do erro incluindo stack trace
      */
     @ExceptionHandler(InternalServerErrorException.class)
     public ResponseEntity<Map<String, Object>> handleInternalServerErrorException(
@@ -200,11 +205,19 @@ public class ApiExceptionHandler {
         if (shouldIgnoreEndpoint(request.getRequestURI())) {
             throw new RuntimeException("Actuator or error endpoint exception", ex);
         }
-        return buildErrorResponse(
+        
+        // Log detalhado com stack trace completo
+        log.error("Erro interno do servidor - Path: {}, Method: {}, Exception: {}", 
+            request.getRequestURI(), request.getMethod(), ex.getClass().getName(), ex);
+        
+        // Retorna resposta com stack trace
+        return buildErrorResponseWithStackTrace(
                 HttpStatus.INTERNAL_SERVER_ERROR,
                 "Erro Interno do Servidor",
-                ex.getMessage(),
-                request.getRequestURI()
+                ex.getMessage() != null ? ex.getMessage() : "Ocorreu um erro interno no servidor",
+                request.getRequestURI(),
+                request.getMethod(),
+                ex
         );
     }
 
@@ -291,7 +304,7 @@ public class ApiExceptionHandler {
      *
      * @param ex exceção lançada
      * @param request requisição HTTP
-     * @return resposta JSON com detalhes do erro
+     * @return resposta JSON com detalhes do erro incluindo stack trace
      */
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Map<String, Object>> handleGenericException(
@@ -302,20 +315,18 @@ public class ApiExceptionHandler {
             throw runtimeEx; // Re-lança para que o Actuator trate
         }
         
-        // Log detalhado do erro para facilitar diagnóstico
-        System.err.println("=== ERRO NÃO TRATADO ===");
-        System.err.println("Path: " + request.getRequestURI());
-        System.err.println("Method: " + request.getMethod());
-        System.err.println("Exception: " + ex.getClass().getName());
-        System.err.println("Message: " + ex.getMessage());
-        ex.printStackTrace();
-        System.err.println("========================");
+        // Log detalhado do erro com stack trace completo
+        log.error("Erro não tratado - Path: {}, Method: {}, Exception: {}, Message: {}", 
+            request.getRequestURI(), request.getMethod(), ex.getClass().getName(), ex.getMessage(), ex);
         
-        return buildErrorResponse(
+        // Retorna resposta com stack trace completo
+        return buildErrorResponseWithStackTrace(
                 HttpStatus.INTERNAL_SERVER_ERROR,
                 "Erro Interno do Servidor",
-                "Ocorreu um erro inesperado no sistema",
-                request.getRequestURI()
+                ex.getMessage() != null ? ex.getMessage() : "Ocorreu um erro inesperado no sistema",
+                request.getRequestURI(),
+                request.getMethod(),
+                ex
         );
     }
 
@@ -336,6 +347,50 @@ public class ApiExceptionHandler {
         resposta.put("erro", erro);
         resposta.put("mensagem", mensagem);
         resposta.put("path", path);
+
+        return ResponseEntity.status(status).body(resposta);
+    }
+
+    /**
+     * Constrói uma resposta de erro padronizada com stack trace completo.
+     * Usado para erros 500 para facilitar debug e ajustes rápidos.
+     *
+     * @param status status HTTP
+     * @param erro nome do erro
+     * @param mensagem mensagem de erro
+     * @param path caminho da requisição
+     * @param method método HTTP (GET, POST, etc.)
+     * @param ex exceção que causou o erro
+     * @return resposta JSON com detalhes do erro incluindo stack trace
+     */
+    private ResponseEntity<Map<String, Object>> buildErrorResponseWithStackTrace(
+            HttpStatus status, String erro, String mensagem, String path, String method, Throwable ex) {
+        Map<String, Object> resposta = new HashMap<>();
+        resposta.put("timestamp", LocalDateTime.now());
+        resposta.put("status", status.value());
+        resposta.put("erro", erro);
+        resposta.put("mensagem", mensagem);
+        resposta.put("path", path);
+        resposta.put("method", method);
+        resposta.put("exception", ex.getClass().getName());
+        
+        // Adiciona stack trace como array de strings
+        List<String> stackTrace = Arrays.stream(ex.getStackTrace())
+            .map(StackTraceElement::toString)
+            .collect(Collectors.toList());
+        resposta.put("stackTrace", stackTrace);
+        
+        // Se houver causa (caused by), adiciona também
+        if (ex.getCause() != null) {
+            Map<String, Object> causa = new HashMap<>();
+            causa.put("exception", ex.getCause().getClass().getName());
+            causa.put("message", ex.getCause().getMessage());
+            List<String> causaStackTrace = Arrays.stream(ex.getCause().getStackTrace())
+                .map(StackTraceElement::toString)
+                .collect(Collectors.toList());
+            causa.put("stackTrace", causaStackTrace);
+            resposta.put("causedBy", causa);
+        }
 
         return ResponseEntity.status(status).body(resposta);
     }

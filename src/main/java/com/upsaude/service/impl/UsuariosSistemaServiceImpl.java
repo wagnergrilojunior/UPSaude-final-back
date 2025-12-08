@@ -62,49 +62,58 @@ public class UsuariosSistemaServiceImpl implements UsuariosSistemaService {
     public UsuariosSistemaResponse criar(UsuariosSistemaRequest request) {
         log.debug("Criando novo usuariossistema");
 
-        validarDadosBasicos(request);
+        try {
+            validarDadosBasicos(request);
 
-        UsuariosSistema usuariosSistema = usuariosSistemaMapper.fromRequest(request);
-        usuariosSistema.setActive(true);
-        
-        // Setar tenant
-        if (request.getTenantId() != null) {
-            Tenant tenant = tenantRepository.findById(request.getTenantId())
-                    .orElseThrow(() -> new NotFoundException("Tenant não encontrado com ID: " + request.getTenantId()));
-            usuariosSistema.setTenant(tenant);
-        }
-        
-        // Setar relacionamentos se fornecidos
-        if (request.getMedico() != null) {
-            Medicos medico = medicosRepository.findById(request.getMedico())
-                    .orElseThrow(() -> new NotFoundException("Médico não encontrado com ID: " + request.getMedico()));
-            usuariosSistema.setMedico(medico);
-        }
-        
-        if (request.getProfissionalSaude() != null) {
-            ProfissionaisSaude profissional = profissionaisSaudeRepository.findById(request.getProfissionalSaude())
-                    .orElseThrow(() -> new NotFoundException("Profissional de saúde não encontrado com ID: " + request.getProfissionalSaude()));
-            usuariosSistema.setProfissionalSaude(profissional);
-        }
-        
-        if (request.getPaciente() != null) {
-            Paciente paciente = pacienteRepository.findById(request.getPaciente())
-                    .orElseThrow(() -> new NotFoundException("Paciente não encontrado com ID: " + request.getPaciente()));
-            usuariosSistema.setPaciente(paciente);
-        }
+            UsuariosSistema usuariosSistema = usuariosSistemaMapper.fromRequest(request);
+            usuariosSistema.setActive(true);
+            
+            // Setar tenant
+            if (request.getTenantId() != null) {
+                Tenant tenant = tenantRepository.findById(request.getTenantId())
+                        .orElseThrow(() -> new NotFoundException("Tenant não encontrado com ID: " + request.getTenantId()));
+                usuariosSistema.setTenant(tenant);
+            }
+            
+            // Setar relacionamentos se fornecidos
+            if (request.getMedico() != null) {
+                Medicos medico = medicosRepository.findById(request.getMedico())
+                        .orElseThrow(() -> new NotFoundException("Médico não encontrado com ID: " + request.getMedico()));
+                usuariosSistema.setMedico(medico);
+            }
+            
+            if (request.getProfissionalSaude() != null) {
+                ProfissionaisSaude profissional = profissionaisSaudeRepository.findById(request.getProfissionalSaude())
+                        .orElseThrow(() -> new NotFoundException("Profissional de saúde não encontrado com ID: " + request.getProfissionalSaude()));
+                usuariosSistema.setProfissionalSaude(profissional);
+            }
+            
+            if (request.getPaciente() != null) {
+                Paciente paciente = pacienteRepository.findById(request.getPaciente())
+                        .orElseThrow(() -> new NotFoundException("Paciente não encontrado com ID: " + request.getPaciente()));
+                usuariosSistema.setPaciente(paciente);
+            }
 
-        UsuariosSistema usuariosSistemaSalvo = usuariosSistemaRepository.save(usuariosSistema);
-        log.info("UsuariosSistema criado com sucesso. ID: {}", usuariosSistemaSalvo.getId());
-        
-        // Criar vínculos com estabelecimentos (novo formato com papel)
-        if (request.getEstabelecimentos() != null && !request.getEstabelecimentos().isEmpty()) {
-            criarVinculosComPapel(usuariosSistemaSalvo, request.getEstabelecimentos());
-        } else if (request.getEstabelecimentosIds() != null && !request.getEstabelecimentosIds().isEmpty()) {
-            // Fallback para compatibilidade (deprecated)
-            criarVinculosEstabelecimentos(usuariosSistemaSalvo, request.getEstabelecimentosIds());
-        }
+            UsuariosSistema usuariosSistemaSalvo = usuariosSistemaRepository.save(usuariosSistema);
+            log.info("UsuariosSistema criado com sucesso. ID: {}", usuariosSistemaSalvo.getId());
+            
+            // Criar vínculos com estabelecimentos (novo formato com papel)
+            if (request.getEstabelecimentos() != null && !request.getEstabelecimentos().isEmpty()) {
+                criarVinculosComPapel(usuariosSistemaSalvo, request.getEstabelecimentos());
+            } else if (request.getEstabelecimentosIds() != null && !request.getEstabelecimentosIds().isEmpty()) {
+                // Fallback para compatibilidade (deprecated)
+                criarVinculosEstabelecimentos(usuariosSistemaSalvo, request.getEstabelecimentosIds());
+            }
 
-        return enrichResponseWithEntity(usuariosSistemaSalvo);
+            return enrichResponseWithEntity(usuariosSistemaSalvo);
+        } catch (BadRequestException | NotFoundException e) {
+            log.warn("Erro de validação ao criar UsuariosSistema. Request: {}. Erro: {}", request, e.getMessage());
+            throw e;
+        } catch (Exception e) {
+            log.error("Erro inesperado ao criar UsuariosSistema. Request: {}, Exception: {}", 
+                request, e.getClass().getName(), e);
+            throw e;
+        }
     }
 
     @Override
@@ -183,7 +192,7 @@ public class UsuariosSistemaServiceImpl implements UsuariosSistemaService {
             supabaseAuthService.deleteUser(userId);
             log.info("ETAPA 2: User deletado PERMANENTEMENTE do Supabase Auth. UserID: {}", userId);
         } catch (Exception e) {
-            log.error("Erro ao deletar User do Supabase Auth. UserID: {}", userId, e);
+            log.error("Erro ao deletar User do Supabase Auth. UserID: {}, Exception: {}", userId, e.getClass().getName(), e);
             // Não lançar exceção - UsuariosSistema já foi deletado
             log.warn("UsuariosSistema foi deletado mas User não foi removido do Supabase (pode não existir)");
         }
@@ -501,7 +510,8 @@ public class UsuariosSistemaServiceImpl implements UsuariosSistemaService {
                     log.warn("Email não encontrado no Supabase para userId: {}", usuario.getUserId());
                 }
             } catch (Exception e) {
-                log.error("Erro ao buscar email do Supabase para userId: {}", usuario.getUserId(), e);
+                log.error("Erro ao buscar email do Supabase para userId: {}, Exception: {}", 
+                    usuario.getUserId(), e.getClass().getName(), e);
             }
         }
         
