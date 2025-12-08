@@ -17,10 +17,11 @@ import com.upsaude.service.ResponsavelLegalService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.dao.DataAccessException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import jakarta.validation.ConstraintViolation;
+import org.hibernate.Hibernate;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -53,23 +54,52 @@ public class ResponsavelLegalServiceImpl implements ResponsavelLegalService {
             throw new BadRequestException("Nome do responsável legal é obrigatório");
         }
 
-        repository.findByPacienteId(request.getPaciente())
-                .ifPresent(d -> {
-                    throw new ConflictException("Responsável legal já existe para este paciente");
-                });
+        // Limpa CPF e telefone removendo caracteres não numéricos
+        String cpfLimpo = StringUtils.hasText(request.getCpf()) ? limparNumeros(request.getCpf()) : null;
+        String telefoneLimpo = StringUtils.hasText(request.getTelefone()) ? limparNumeros(request.getTelefone()) : null;
 
-        if (StringUtils.hasText(request.getCpf()) && !request.getCpf().matches("^\\d{11}$")) {
-            throw new BadRequestException("CPF deve conter exatamente 11 dígitos numéricos");
+        // Valida CPF após limpeza
+        if (StringUtils.hasText(cpfLimpo)) {
+            if (cpfLimpo.length() != 11) {
+                throw new BadRequestException("CPF deve conter exatamente 11 dígitos numéricos");
+            }
+        }
+
+        // Valida telefone após limpeza
+        if (StringUtils.hasText(telefoneLimpo)) {
+            if (telefoneLimpo.length() != 10 && telefoneLimpo.length() != 11) {
+                throw new BadRequestException("Telefone deve conter 10 ou 11 dígitos numéricos");
+            }
         }
 
         try {
             // Carrega o paciente para definir o relacionamento
-            Paciente paciente = pacienteRepository.findById(request.getPaciente())
-                    .orElseThrow(() -> new NotFoundException("Paciente não encontrado com ID: " + request.getPaciente()));
+            // Verifica primeiro se o paciente existe antes de outras validações
+            UUID pacienteId = request.getPaciente();
+            Paciente paciente = pacienteRepository.findById(pacienteId)
+                    .orElseThrow(() -> {
+                        log.warn("Tentativa de criar responsável legal para paciente inexistente. Paciente ID: {}", pacienteId);
+                        return new NotFoundException("Paciente não encontrado com ID: " + pacienteId + ". Verifique se o ID está correto e se o paciente foi cadastrado anteriormente.");
+                    });
+
+            // Verifica se o paciente está ativo
+            if (Boolean.FALSE.equals(paciente.getActive())) {
+                throw new BadRequestException("Não é possível criar responsável legal para um paciente inativo. ID do paciente: " + pacienteId);
+            }
+
+            // Verifica se já existe responsável legal para este paciente
+            repository.findByPacienteId(pacienteId)
+                    .ifPresent(d -> {
+                        throw new ConflictException("Responsável legal já existe para este paciente. ID do responsável existente: " + d.getId());
+                    });
 
             ResponsavelLegal entity = mapper.fromRequest(request);
             entity.setActive(true);
             entity.setPaciente(paciente); // Define o relacionamento manualmente
+            
+            // Aplica os valores limpos
+            entity.setCpf(cpfLimpo);
+            entity.setTelefone(telefoneLimpo);
             
             // Obtém o tenant do usuário autenticado (obrigatório para ResponsavelLegal que estende BaseEntity)
             Tenant tenant = obterTenantDoUsuarioAutenticado();
@@ -85,6 +115,31 @@ public class ResponsavelLegalServiceImpl implements ResponsavelLegalService {
         } catch (BadRequestException | ConflictException | NotFoundException e) {
             log.warn("Erro de validação ao criar responsável legal. Request: {}. Erro: {}", request, e.getMessage());
             throw e;
+        } catch (org.springframework.transaction.TransactionSystemException e) {
+            // Captura erros de validação do JPA/Hibernate que vêm dentro de TransactionSystemException
+            Throwable cause = e.getCause();
+            if (cause instanceof jakarta.persistence.RollbackException) {
+                Throwable rootCause = cause.getCause();
+                if (rootCause instanceof jakarta.validation.ConstraintViolationException) {
+                    jakarta.validation.ConstraintViolationException cve = (jakarta.validation.ConstraintViolationException) rootCause;
+                    StringBuilder mensagens = new StringBuilder("Erro de validação: ");
+                    for (ConstraintViolation<?> violation : cve.getConstraintViolations()) {
+                        mensagens.append(violation.getPropertyPath()).append(" - ").append(violation.getMessage()).append("; ");
+                    }
+                    log.warn("Erro de validação ao criar responsável legal. Request: {}. Erro: {}", request, mensagens.toString());
+                    throw new BadRequestException(mensagens.toString().trim());
+                }
+            }
+            log.error("Erro de transação ao criar responsável legal. Request: {}, Exception: {}", request, e.getClass().getName(), e);
+            throw new InternalServerErrorException("Erro ao persistir responsável legal", e);
+        } catch (jakarta.validation.ConstraintViolationException e) {
+            // Captura erros de validação do JPA/Hibernate diretamente
+            StringBuilder mensagens = new StringBuilder("Erro de validação: ");
+            for (ConstraintViolation<?> violation : e.getConstraintViolations()) {
+                mensagens.append(violation.getPropertyPath()).append(" - ").append(violation.getMessage()).append("; ");
+            }
+            log.warn("Erro de validação ao criar responsável legal. Request: {}. Erro: {}", request, mensagens.toString());
+            throw new BadRequestException(mensagens.toString().trim());
         } catch (DataAccessException e) {
             log.error("Erro de acesso a dados ao criar responsável legal. Request: {}, Exception: {}", request, e.getClass().getName(), e);
             throw new InternalServerErrorException("Erro ao persistir responsável legal", e);
@@ -95,6 +150,7 @@ public class ResponsavelLegalServiceImpl implements ResponsavelLegalService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public ResponsavelLegalResponse obterPorId(UUID id) {
         log.debug("Buscando responsável legal por ID: {}", id);
 
@@ -105,10 +161,16 @@ public class ResponsavelLegalServiceImpl implements ResponsavelLegalService {
         ResponsavelLegal entity = repository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Responsável legal não encontrado com ID: " + id));
 
+        // Inicializa o relacionamento lazy do paciente dentro da transação
+        if (entity.getPaciente() != null) {
+            Hibernate.initialize(entity.getPaciente());
+        }
+
         return mapper.toResponse(entity);
     }
 
     @Override
+    @Transactional(readOnly = true)
     public ResponsavelLegalResponse obterPorPacienteId(UUID pacienteId) {
         log.debug("Buscando responsável legal por paciente ID: {}", pacienteId);
 
@@ -119,14 +181,29 @@ public class ResponsavelLegalServiceImpl implements ResponsavelLegalService {
         ResponsavelLegal entity = repository.findByPacienteId(pacienteId)
                 .orElseThrow(() -> new NotFoundException("Responsável legal não encontrado para o paciente: " + pacienteId));
 
+        // Inicializa o relacionamento lazy do paciente dentro da transação
+        if (entity.getPaciente() != null) {
+            Hibernate.initialize(entity.getPaciente());
+        }
+
         return mapper.toResponse(entity);
     }
 
     @Override
+    @Transactional(readOnly = true)
     public Page<ResponsavelLegalResponse> listar(Pageable pageable) {
         log.debug("Listando responsáveis legais paginados");
 
         Page<ResponsavelLegal> entities = repository.findAll(pageable);
+        
+        // Inicializa o relacionamento lazy do paciente dentro da transação
+        // para evitar LazyInitializationException ao mapear para response
+        entities.getContent().forEach(entity -> {
+            if (entity.getPaciente() != null) {
+                Hibernate.initialize(entity.getPaciente());
+            }
+        });
+        
         return entities.map(mapper::toResponse);
     }
 
@@ -156,11 +233,25 @@ public class ResponsavelLegalServiceImpl implements ResponsavelLegalService {
                     });
         }
 
-        if (StringUtils.hasText(request.getCpf()) && !request.getCpf().matches("^\\d{11}$")) {
-            throw new BadRequestException("CPF deve conter exatamente 11 dígitos numéricos");
+        // Limpa CPF e telefone removendo caracteres não numéricos
+        String cpfLimpo = StringUtils.hasText(request.getCpf()) ? limparNumeros(request.getCpf()) : null;
+        String telefoneLimpo = StringUtils.hasText(request.getTelefone()) ? limparNumeros(request.getTelefone()) : null;
+
+        // Valida CPF após limpeza
+        if (StringUtils.hasText(cpfLimpo)) {
+            if (cpfLimpo.length() != 11) {
+                throw new BadRequestException("CPF deve conter exatamente 11 dígitos numéricos");
+            }
         }
 
-        atualizarDados(entity, request);
+        // Valida telefone após limpeza
+        if (StringUtils.hasText(telefoneLimpo)) {
+            if (telefoneLimpo.length() != 10 && telefoneLimpo.length() != 11) {
+                throw new BadRequestException("Telefone deve conter 10 ou 11 dígitos numéricos");
+            }
+        }
+
+        atualizarDados(entity, request, cpfLimpo, telefoneLimpo);
         ResponsavelLegal updated = repository.save(entity);
         log.info("Responsável legal atualizado. ID: {}", updated.getId());
 
@@ -189,15 +280,29 @@ public class ResponsavelLegalServiceImpl implements ResponsavelLegalService {
         log.info("Responsável legal excluído. ID: {}", id);
     }
 
-    private void atualizarDados(ResponsavelLegal entity, ResponsavelLegalRequest request) {
+    private void atualizarDados(ResponsavelLegal entity, ResponsavelLegalRequest request, String cpfLimpo, String telefoneLimpo) {
         ResponsavelLegal updated = mapper.fromRequest(request);
         
         entity.setNome(updated.getNome());
-        entity.setCpf(updated.getCpf());
-        entity.setTelefone(updated.getTelefone());
+        entity.setCpf(cpfLimpo);
+        entity.setTelefone(telefoneLimpo);
         entity.setTipoResponsavel(updated.getTipoResponsavel());
         entity.setAutorizacaoUsoDadosLGPD(updated.getAutorizacaoUsoDadosLGPD());
         entity.setAutorizacaoResponsavel(updated.getAutorizacaoResponsavel());
+    }
+
+    /**
+     * Remove todos os caracteres não numéricos de uma string.
+     * Útil para limpar CPF e telefone que podem vir com máscara.
+     *
+     * @param valor String com possível máscara
+     * @return String contendo apenas dígitos numéricos
+     */
+    private String limparNumeros(String valor) {
+        if (valor == null) {
+            return null;
+        }
+        return valor.replaceAll("\\D", "");
     }
 
     /**

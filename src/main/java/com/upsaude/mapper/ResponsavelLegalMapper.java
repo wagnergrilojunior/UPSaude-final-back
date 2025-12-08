@@ -55,6 +55,8 @@ public interface ResponsavelLegalMapper extends EntityMapper<ResponsavelLegal, R
 
     /**
      * Converte Entity para Response.
+     * Ignora o campo responsavelLegal do Paciente para evitar referência circular.
      */
+    @Mapping(target = "paciente.responsavelLegal", ignore = true)
     ResponsavelLegalResponse toResponse(ResponsavelLegal entity);
 }
