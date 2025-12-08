@@ -1,5 +1,6 @@
 package com.upsaude.api.response;
 
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.upsaude.enums.EscolaridadeEnum;
 import com.upsaude.enums.EstadoCivilEnum;
 import com.upsaude.enums.IdentidadeGeneroEnum;
@@ -10,6 +11,16 @@ import com.upsaude.enums.SexoEnum;
 import com.upsaude.enums.StatusPacienteEnum;
 import com.upsaude.enums.TipoAtendimentoPreferencialEnum;
 import com.upsaude.enums.TipoCnsEnum;
+import com.upsaude.util.converter.EscolaridadeEnumSerializer;
+import com.upsaude.util.converter.EstadoCivilEnumSerializer;
+import com.upsaude.util.converter.IdentidadeGeneroEnumSerializer;
+import com.upsaude.util.converter.NacionalidadeEnumSerializer;
+import com.upsaude.util.converter.OrientacaoSexualEnumSerializer;
+import com.upsaude.util.converter.RacaCorEnumSerializer;
+import com.upsaude.util.converter.SexoEnumSerializer;
+import com.upsaude.util.converter.StatusPacienteEnumSerializer;
+import com.upsaude.util.converter.TipoAtendimentoPreferencialEnumSerializer;
+import com.upsaude.util.converter.TipoCnsEnumSerializer;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
@@ -36,7 +47,11 @@ public class PacienteResponse {
     private String rg;
     private String cns;
     private LocalDate dataNascimento;
+    
+    @JsonSerialize(using = SexoEnumSerializer.class)
     private SexoEnum sexo;
+    
+    @JsonSerialize(using = EstadoCivilEnumSerializer.class)
     private EstadoCivilEnum estadoCivil;
     private String telefone;
     private String email;
@@ -49,28 +64,47 @@ public class PacienteResponse {
     private String numeroCarteirinha;
     private LocalDate dataValidadeCarteirinha;
     private String observacoes;
+    
+    @JsonSerialize(using = RacaCorEnumSerializer.class)
     private RacaCorEnum racaCor;
+    
+    @JsonSerialize(using = NacionalidadeEnumSerializer.class)
     private NacionalidadeEnum nacionalidade;
     private String paisNascimento;
     private String naturalidade;
     private String municipioNascimentoIbge;
+    
+    @JsonSerialize(using = EscolaridadeEnumSerializer.class)
     private EscolaridadeEnum escolaridade;
+    
     private String ocupacaoProfissao;
     private Boolean situacaoRua;
+    
+    @JsonSerialize(using = StatusPacienteEnumSerializer.class)
     private StatusPacienteEnum statusPaciente;
     private LocalDate dataObito;
     private String causaObitoCid10;
     private Boolean cartaoSusAtivo;
     private LocalDate dataAtualizacaoCns;
+    
+    @JsonSerialize(using = TipoAtendimentoPreferencialEnumSerializer.class)
     private TipoAtendimentoPreferencialEnum tipoAtendimentoPreferencial;
+    
     private String origemCadastro;
     private String nomeSocial;
+    
+    @JsonSerialize(using = IdentidadeGeneroEnumSerializer.class)
     private IdentidadeGeneroEnum identidadeGenero;
+    
+    @JsonSerialize(using = OrientacaoSexualEnumSerializer.class)
     private OrientacaoSexualEnum orientacaoSexual;
     private Boolean possuiDeficiencia;
     private String tipoDeficiencia;
     private Boolean cnsValidado;
+    
+    @JsonSerialize(using = TipoCnsEnumSerializer.class)
     private TipoCnsEnum tipoCns;
+    
     private Boolean acompanhadoPorEquipeEsf;
     
     @Builder.Default
