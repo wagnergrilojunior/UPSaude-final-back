@@ -114,7 +114,7 @@ public class RedisConfig {
         LettuceClientConfiguration clientConfig = LettuceClientConfiguration.builder()
             .clientOptions(clientOptions)
             .commandTimeout(Duration.ofSeconds(5)) // Timeout de comandos aumentado
-            .shutdownTimeout(Duration.ofSeconds(2)) // Tempo para fechar conexões
+            .shutdownTimeout(Duration.ofSeconds(2)) // Tempo para fechar conexõesa
             .build();
 
         LettuceConnectionFactory factory = new LettuceConnectionFactory(config, clientConfig);
@@ -122,20 +122,13 @@ public class RedisConfig {
         factory.setValidateConnection(false);
         factory.afterPropertiesSet();
         
-        // Tenta validar a conexão de forma assíncrona e loga o resultado
-        try {
-            var connection = factory.getConnection();
-            connection.ping();
-            connection.close();
-            log.info("✅ Redis conectado com sucesso - Host: {}, Port: {}, SSL: {}", 
-                redisHost, redisPort, sslEnabled);
-        } catch (Exception e) {
-            log.warn("⚠️  Redis não está disponível no momento - Host: {}, Port: {}, SSL: {}. " +
-                "A aplicação continuará sem cache. Erro: {}. " +
-                "Verifique se o Redis está rodando e se as configurações estão corretas.", 
-                redisHost, redisPort, sslEnabled, e.getMessage());
-            // Não lança exceção para não bloquear startup - aplicação funciona sem cache
-        }
+        // CORREÇÃO: Removido ping durante inicialização para evitar erros no Render
+        // O Redis pode estar em cold start e causar warnings/erros desnecessários
+        // A conexão será validada automaticamente quando necessário pelo Lettuce
+        // com autoReconnect=true e pingBeforeActivateConnection=true configurados
+        log.info("Redis ConnectionFactory configurado - Host: {}, Port: {}, SSL: {}. " +
+            "A conexão será validada automaticamente quando necessário.", 
+            redisHost, redisPort, sslEnabled);
         
         return factory;
     }

@@ -4,33 +4,27 @@ import io.micrometer.core.aop.TimedAspect;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.Timer;
 import io.micrometer.core.instrument.Counter;
-import io.micrometer.core.instrument.Gauge;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.actuate.autoconfigure.metrics.MeterRegistryCustomizer;
-import org.springframework.cache.CacheManager;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.context.event.ContextRefreshedEvent;
-import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.lang.NonNull;
-
-import javax.sql.DataSource;
-import java.sql.Connection;
-import java.sql.SQLException;
 
 /**
  * Configuração de métricas personalizadas para observabilidade.
  * 
  * Esta classe configura:
- * - Métricas do HikariCP (DataSource)
- * - Métricas do Redis (Cache)
  * - Métricas HTTP personalizadas
  * - Métricas da JVM
  * - Suporte a anotações @Timed, @Counted e @Observed
+ * 
+ * NOTA: Métricas do Redis/Cache são expostas automaticamente pelo Spring Boot Actuator
+ * quando habilitadas via application.properties. Não fazemos ping no Redis durante
+ * inicialização para evitar erros 500 no Actuator.
  * 
  * @author UPSaúde
  */
@@ -39,18 +33,6 @@ import java.sql.SQLException;
 public class MetricsConfig implements ApplicationListener<ContextRefreshedEvent> {
 
     private final MeterRegistry meterRegistry;
-    
-    // DataSource como opcional e lazy para evitar conexões durante inicialização
-    @Autowired(required = false)
-    @Lazy
-    private DataSource dataSource;
-    
-    // Dependências opcionais - podem ser null se não configuradas
-    @Autowired(required = false)
-    private CacheManager cacheManager;
-    
-    @Autowired(required = false)
-    private RedisConnectionFactory redisConnectionFactory;
     
     @Value("${spring.profiles.active:default}")
     private String activeProfile;
@@ -93,7 +75,9 @@ public class MetricsConfig implements ApplicationListener<ContextRefreshedEvent>
         if (event.getApplicationContext().getParent() == null) {
             try {
                 registerDataSourceMetrics();
-                registerCacheMetrics();
+                // registerCacheMetrics() removido - métricas de cache são expostas automaticamente
+                // pelo Spring Boot Actuator quando management.metrics.enable.cache=true
+                // Não precisamos fazer ping no Redis durante inicialização
                 log.info("Métricas personalizadas registradas com sucesso");
             } catch (Exception e) {
                 log.error("Erro ao registrar métricas personalizadas", e);
@@ -114,29 +98,15 @@ public class MetricsConfig implements ApplicationListener<ContextRefreshedEvent>
     }
 
     /**
-     * Registra métricas do Cache (Redis).
+     * Método removido: registerCacheMetrics()
+     * 
+     * As métricas de cache são expostas automaticamente pelo Spring Boot Actuator
+     * quando management.metrics.enable.cache=true está configurado.
+     * 
+     * Não precisamos fazer ping no Redis durante inicialização ou ao coletar métricas,
+     * pois isso pode causar erros 500 no endpoint /actuator/metrics se o Redis
+     * estiver lento ou indisponível.
      */
-    private void registerCacheMetrics() {
-        try {
-            if (cacheManager != null && redisConnectionFactory != null) {
-                // Métrica de disponibilidade do Redis
-                Gauge.builder("upsaude.cache.redis.available", redisConnectionFactory, factory -> {
-                    try {
-                        factory.getConnection().ping();
-                        return 1;
-                    } catch (Exception e) {
-                        return 0;
-                    }
-                })
-                .description("Disponibilidade do Redis (1 = disponível, 0 = indisponível)")
-                .register(meterRegistry);
-
-                log.debug("Métricas do Cache (Redis) registradas");
-            }
-        } catch (Exception e) {
-            log.warn("Não foi possível registrar métricas do Cache: {}", e.getMessage());
-        }
-    }
 
     /**
      * Cria um contador de requisições totais.
