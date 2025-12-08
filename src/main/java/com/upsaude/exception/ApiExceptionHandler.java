@@ -20,25 +20,38 @@ import java.util.Map;
  * Handler global para tratamento de exceções da API UPSaúde.
  * Captura exceções e retorna respostas JSON padronizadas.
  * 
- * IMPORTANTE: Não trata exceções de endpoints do Actuator.
- * O Actuator deve tratar seus próprios erros normalmente.
+ * IMPORTANTE: Não trata exceções de endpoints do Actuator ou /error.
+ * O Actuator usa /error como fallback quando ocorre exceção interna.
+ * Esses endpoints devem tratar seus próprios erros normalmente.
  */
 @RestControllerAdvice(basePackages = "com.upsaude.controller")
 public class ApiExceptionHandler {
 
     /**
-     * Verifica se o path é de um endpoint do Actuator.
-     * Endpoints do Actuator não devem ser tratados por este handler.
+     * Verifica se o path deve ser ignorado por este handler.
+     * Endpoints do Actuator e /error não devem ser tratados por este handler.
      * 
      * @param path caminho da requisição
-     * @return true se for endpoint do Actuator, false caso contrário
+     * @return true se deve ser ignorado, false caso contrário
      */
-    private boolean isActuatorEndpoint(String path) {
+    private boolean shouldIgnoreEndpoint(String path) {
         if (path == null) {
             return false;
         }
-        // Verifica se o path contém /actuator (com ou sem context-path /api)
-        return path.contains("/actuator/") || path.startsWith("/actuator");
+        // Ignora endpoints do Actuator (todas as variações possíveis)
+        boolean isActuator = path.startsWith("/api/actuator") ||
+                            path.startsWith("/actuator") ||
+                            path.contains("/actuator/") ||
+                            path.contains("actuator");
+        
+        // Ignora endpoint /error usado pelo Spring Boot para tratamento de erros
+        // O Actuator usa /error como fallback quando ocorre exceção interna
+        boolean isErrorEndpoint = path.equals("/error") ||
+                                 path.equals("/api/error") ||
+                                 path.startsWith("/error/") ||
+                                 path.startsWith("/api/error/");
+        
+        return isActuator || isErrorEndpoint;
     }
 
     /**
@@ -51,9 +64,9 @@ public class ApiExceptionHandler {
     @ExceptionHandler(BadRequestException.class)
     public ResponseEntity<Map<String, Object>> handleBadRequestException(
             BadRequestException ex, HttpServletRequest request) {
-        // Não trata exceções de endpoints do Actuator
-        if (isActuatorEndpoint(request.getRequestURI())) {
-            throw ex; // Re-lança para que o Actuator trate
+        // Não trata exceções de endpoints do Actuator ou /error
+        if (shouldIgnoreEndpoint(request.getRequestURI())) {
+            throw new RuntimeException("Actuator or error endpoint exception", ex);
         }
         return buildErrorResponse(
                 HttpStatus.BAD_REQUEST,
@@ -73,9 +86,9 @@ public class ApiExceptionHandler {
     @ExceptionHandler(UnauthorizedException.class)
     public ResponseEntity<Map<String, Object>> handleUnauthorizedException(
             UnauthorizedException ex, HttpServletRequest request) {
-        // Não trata exceções de endpoints do Actuator
-        if (isActuatorEndpoint(request.getRequestURI())) {
-            throw ex; // Re-lança para que o Actuator trate
+        // Não trata exceções de endpoints do Actuator ou /error
+        if (shouldIgnoreEndpoint(request.getRequestURI())) {
+            throw new RuntimeException("Actuator or error endpoint exception", ex);
         }
         return buildErrorResponse(
                 HttpStatus.UNAUTHORIZED,
@@ -95,9 +108,9 @@ public class ApiExceptionHandler {
     @ExceptionHandler(ForbiddenException.class)
     public ResponseEntity<Map<String, Object>> handleForbiddenException(
             ForbiddenException ex, HttpServletRequest request) {
-        // Não trata exceções de endpoints do Actuator
-        if (isActuatorEndpoint(request.getRequestURI())) {
-            throw ex; // Re-lança para que o Actuator trate
+        // Não trata exceções de endpoints do Actuator ou /error
+        if (shouldIgnoreEndpoint(request.getRequestURI())) {
+            throw new RuntimeException("Actuator or error endpoint exception", ex);
         }
         return buildErrorResponse(
                 HttpStatus.FORBIDDEN,
@@ -117,9 +130,9 @@ public class ApiExceptionHandler {
     @ExceptionHandler(NotFoundException.class)
     public ResponseEntity<Map<String, Object>> handleNotFoundException(
             NotFoundException ex, HttpServletRequest request) {
-        // Não trata exceções de endpoints do Actuator
-        if (isActuatorEndpoint(request.getRequestURI())) {
-            throw ex; // Re-lança para que o Actuator trate
+        // Não trata exceções de endpoints do Actuator ou /error
+        if (shouldIgnoreEndpoint(request.getRequestURI())) {
+            throw new RuntimeException("Actuator or error endpoint exception", ex);
         }
         return buildErrorResponse(
                 HttpStatus.NOT_FOUND,
@@ -139,9 +152,9 @@ public class ApiExceptionHandler {
     @ExceptionHandler(ConflictException.class)
     public ResponseEntity<Map<String, Object>> handleConflictException(
             ConflictException ex, HttpServletRequest request) {
-        // Não trata exceções de endpoints do Actuator
-        if (isActuatorEndpoint(request.getRequestURI())) {
-            throw ex; // Re-lança para que o Actuator trate
+        // Não trata exceções de endpoints do Actuator ou /error
+        if (shouldIgnoreEndpoint(request.getRequestURI())) {
+            throw new RuntimeException("Actuator or error endpoint exception", ex);
         }
         return buildErrorResponse(
                 HttpStatus.CONFLICT,
@@ -161,9 +174,9 @@ public class ApiExceptionHandler {
     @ExceptionHandler(UnprocessableEntityException.class)
     public ResponseEntity<Map<String, Object>> handleUnprocessableEntityException(
             UnprocessableEntityException ex, HttpServletRequest request) {
-        // Não trata exceções de endpoints do Actuator
-        if (isActuatorEndpoint(request.getRequestURI())) {
-            throw ex; // Re-lança para que o Actuator trate
+        // Não trata exceções de endpoints do Actuator ou /error
+        if (shouldIgnoreEndpoint(request.getRequestURI())) {
+            throw new RuntimeException("Actuator or error endpoint exception", ex);
         }
         return buildErrorResponse(
                 HttpStatus.UNPROCESSABLE_ENTITY,
@@ -183,9 +196,9 @@ public class ApiExceptionHandler {
     @ExceptionHandler(InternalServerErrorException.class)
     public ResponseEntity<Map<String, Object>> handleInternalServerErrorException(
             InternalServerErrorException ex, HttpServletRequest request) {
-        // Não trata exceções de endpoints do Actuator
-        if (isActuatorEndpoint(request.getRequestURI())) {
-            throw ex; // Re-lança para que o Actuator trate
+        // Não trata exceções de endpoints do Actuator ou /error
+        if (shouldIgnoreEndpoint(request.getRequestURI())) {
+            throw new RuntimeException("Actuator or error endpoint exception", ex);
         }
         return buildErrorResponse(
                 HttpStatus.INTERNAL_SERVER_ERROR,
@@ -205,8 +218,8 @@ public class ApiExceptionHandler {
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<Map<String, Object>> handleValidationException(
             MethodArgumentNotValidException ex, HttpServletRequest request) {
-        // Não trata exceções de endpoints do Actuator
-        if (isActuatorEndpoint(request.getRequestURI())) {
+        // Não trata exceções de endpoints do Actuator ou /error
+        if (shouldIgnoreEndpoint(request.getRequestURI())) {
             RuntimeException runtimeEx = new RuntimeException("Actuator endpoint exception", ex);
             throw runtimeEx; // Re-lança para que o Actuator trate
         }
@@ -239,8 +252,8 @@ public class ApiExceptionHandler {
     @ExceptionHandler({AuthenticationException.class, InsufficientAuthenticationException.class, AuthenticationCredentialsNotFoundException.class})
     public ResponseEntity<Map<String, Object>> handleAuthenticationException(
             Exception ex, HttpServletRequest request) {
-        // Não trata exceções de endpoints do Actuator
-        if (isActuatorEndpoint(request.getRequestURI())) {
+        // Não trata exceções de endpoints do Actuator ou /error
+        if (shouldIgnoreEndpoint(request.getRequestURI())) {
             throw new RuntimeException(ex); // Re-lança para que o Actuator trate
         }
         return buildErrorResponse(
@@ -261,9 +274,9 @@ public class ApiExceptionHandler {
     @ExceptionHandler(AccessDeniedException.class)
     public ResponseEntity<Map<String, Object>> handleAccessDeniedException(
             AccessDeniedException ex, HttpServletRequest request) {
-        // Não trata exceções de endpoints do Actuator
-        if (isActuatorEndpoint(request.getRequestURI())) {
-            throw ex; // Re-lança para que o Actuator trate
+        // Não trata exceções de endpoints do Actuator ou /error
+        if (shouldIgnoreEndpoint(request.getRequestURI())) {
+            throw new RuntimeException("Actuator or error endpoint exception", ex);
         }
         return buildErrorResponse(
                 HttpStatus.FORBIDDEN,
@@ -283,8 +296,8 @@ public class ApiExceptionHandler {
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Map<String, Object>> handleGenericException(
             Exception ex, HttpServletRequest request) {
-        // Não trata exceções de endpoints do Actuator
-        if (isActuatorEndpoint(request.getRequestURI())) {
+        // Não trata exceções de endpoints do Actuator ou /error
+        if (shouldIgnoreEndpoint(request.getRequestURI())) {
             RuntimeException runtimeEx = new RuntimeException("Actuator endpoint exception", ex);
             throw runtimeEx; // Re-lança para que o Actuator trate
         }

@@ -18,25 +18,38 @@ import java.util.Map;
  * Entry point customizado para tratamento de erros de autenticação.
  * Retorna 401 (Unauthorized) quando o usuário não está autenticado.
  * 
- * IMPORTANTE: Não trata erros de autenticação de endpoints do Actuator.
- * O Actuator deve tratar seus próprios erros normalmente.
+ * IMPORTANTE: Não trata erros de autenticação de endpoints do Actuator ou /error.
+ * O Actuator usa /error como fallback quando ocorre exceção interna.
+ * Esses endpoints devem tratar seus próprios erros normalmente.
  */
 @Slf4j
 @Component
 public class CustomAuthenticationEntryPoint implements AuthenticationEntryPoint {
 
     /**
-     * Verifica se o path é de um endpoint do Actuator.
+     * Verifica se o path deve ser ignorado por este handler.
+     * Endpoints do Actuator e /error não devem ser tratados por este handler.
      * 
      * @param path caminho da requisição
-     * @return true se for endpoint do Actuator, false caso contrário
+     * @return true se deve ser ignorado, false caso contrário
      */
-    private boolean isActuatorEndpoint(String path) {
+    private boolean shouldIgnoreEndpoint(String path) {
         if (path == null) {
             return false;
         }
-        // Verifica se o path contém /actuator (com ou sem context-path /api)
-        return path.contains("/actuator/") || path.startsWith("/actuator");
+        // Ignora endpoints do Actuator (todas as variações possíveis)
+        boolean isActuator = path.startsWith("/api/actuator") ||
+                            path.startsWith("/actuator") ||
+                            path.contains("/actuator/") ||
+                            path.contains("actuator");
+        
+        // Ignora endpoint /error usado pelo Spring Boot para tratamento de erros
+        boolean isErrorEndpoint = path.equals("/error") ||
+                                 path.equals("/api/error") ||
+                                 path.startsWith("/error/") ||
+                                 path.startsWith("/api/error/");
+        
+        return isActuator || isErrorEndpoint;
     }
 
     @Override
@@ -47,9 +60,9 @@ public class CustomAuthenticationEntryPoint implements AuthenticationEntryPoint 
         
         String path = request.getRequestURI();
         
-        // Não trata erros de autenticação de endpoints do Actuator
+        // Não trata erros de autenticação de endpoints do Actuator ou /error
         // Deixa o Spring Security tratar normalmente
-        if (isActuatorEndpoint(path)) {
+        if (shouldIgnoreEndpoint(path)) {
             response.sendError(HttpServletResponse.SC_UNAUTHORIZED, authException.getMessage());
             return;
         }
