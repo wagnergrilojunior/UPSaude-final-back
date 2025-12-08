@@ -42,7 +42,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     ) throws ServletException, IOException {
         
         String path = request.getRequestURI();
-        String method = request.getMethod();
         
         // Ignora endpoints públicos (não processa autenticação)
         if (isPublicEndpoint(path)) {
@@ -127,10 +126,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         }
         // Verifica se o path contém endpoints públicos
         // Funciona tanto com quanto sem o context-path prefixado
-        // Importante: apenas /v1/auth/login é público, não todos os endpoints de auth
+        // IMPORTANTE: Todos os endpoints do Actuator são públicos e ignorados pelo filtro JWT
         return path.contains("/v1/auth/login") ||
-               path.contains("/actuator/health") ||
-               path.contains("/actuator/info") ||
+               path.contains("/actuator/") ||  // Todos os endpoints do Actuator
+               path.startsWith("/actuator") ||  // Cobre casos sem barra final
                path.contains("/api-docs") ||
                path.contains("/swagger-ui");
     }
