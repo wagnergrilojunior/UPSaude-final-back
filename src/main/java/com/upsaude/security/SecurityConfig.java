@@ -51,9 +51,18 @@ public class SecurityConfig {
                 // Endpoints de teste do Redis - públicos para diagnóstico
                 .requestMatchers("/v1/test/redis/**").permitAll()
                 
-                // Endpoints do Actuator - públicos para monitoramento via Spring Boot Admin
+                // Endpoints do Actuator - públicos para monitoramento
                 // IMPORTANTE: Em produção, considere proteger estes endpoints com autenticação básica
-                .requestMatchers("/actuator/**").permitAll() // Permite todos os endpoints do Actuator para Spring Boot Admin
+                // Com context-path=/api, precisamos permitir ambas variações
+                .requestMatchers("/actuator/**").permitAll()
+                .requestMatchers("/api/actuator/**").permitAll()
+                
+                // Endpoint /error usado pelo Spring Boot para tratamento de erros
+                // O Actuator usa /error como fallback quando ocorre exceção interna
+                .requestMatchers("/error").permitAll()
+                .requestMatchers("/api/error").permitAll()
+                .requestMatchers("/error/**").permitAll()
+                .requestMatchers("/api/error/**").permitAll()
                 
                 // Swagger/OpenAPI - público para desenvolvimento
                 .requestMatchers("/api-docs/**").permitAll()

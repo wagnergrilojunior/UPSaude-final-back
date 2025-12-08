@@ -19,7 +19,7 @@ import org.springframework.web.servlet.HandlerInterceptor;
  * - Erros por endpoint
  * - Status codes
  * 
- * Essas métricas aparecem automaticamente no Spring Boot Admin.
+ * Essas métricas são expostas via Spring Boot Actuator.
  * 
  * @author UPSaude
  */
