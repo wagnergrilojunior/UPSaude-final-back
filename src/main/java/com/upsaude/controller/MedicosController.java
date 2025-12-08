@@ -56,7 +56,8 @@ public class MedicosController {
             log.warn("Falha ao criar médico — mensagem: {}, payload: {}", ex.getMessage(), request);
             throw ex;
         } catch (Exception ex) {
-            log.error("Erro inesperado ao criar médico — payload: {}", request, ex);
+            log.error("Erro inesperado ao criar médico — Path: /v1/medicos, Method: POST, payload: {}, Exception: {}", 
+                request, ex.getClass().getName(), ex);
             throw ex;
         }
     }
@@ -75,7 +76,8 @@ public class MedicosController {
             Page<MedicosResponse> response = medicosService.listar(pageable);
             return ResponseEntity.ok(response);
         } catch (Exception ex) {
-            log.error("Erro inesperado ao listar médicos — pageable: {}", pageable, ex);
+            log.error("Erro inesperado ao listar médicos — Path: /v1/medicos, Method: GET, pageable: {}, Exception: {}", 
+                pageable, ex.getClass().getName(), ex);
             throw ex;
         }
     }
@@ -99,7 +101,8 @@ public class MedicosController {
             log.warn("Médico não encontrado — ID: {}, mensagem: {}", id, ex.getMessage());
             throw ex;
         } catch (Exception ex) {
-            log.error("Erro inesperado ao obter médico por ID — ID: {}", id, ex);
+            log.error("Erro inesperado ao obter médico por ID — Path: /v1/medicos/{}, Method: GET, ID: {}, Exception: {}", 
+                id, id, ex.getClass().getName(), ex);
             throw ex;
         }
     }
@@ -126,7 +129,8 @@ public class MedicosController {
             log.warn("Falha ao atualizar médico — ID: {}, mensagem: {}, payload: {}", id, ex.getMessage(), request);
             throw ex;
         } catch (Exception ex) {
-            log.error("Erro inesperado ao atualizar médico — ID: {}, payload: {}", id, request, ex);
+            log.error("Erro inesperado ao atualizar médico — Path: /v1/medicos/{}, Method: PUT, ID: {}, payload: {}, Exception: {}", 
+                id, id, request, ex.getClass().getName(), ex);
             throw ex;
         }
     }
@@ -150,7 +154,8 @@ public class MedicosController {
             log.warn("Médico não encontrado para exclusão — ID: {}, mensagem: {}", id, ex.getMessage());
             throw ex;
         } catch (Exception ex) {
-            log.error("Erro inesperado ao excluir médico — ID: {}", id, ex);
+            log.error("Erro inesperado ao excluir médico — Path: /v1/medicos/{}, Method: DELETE, ID: {}, Exception: {}", 
+                id, id, ex.getClass().getName(), ex);
             throw ex;
         }
     }

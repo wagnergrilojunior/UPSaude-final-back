@@ -42,8 +42,11 @@ public class AlergiasServiceImpl implements AlergiasService {
             Alergias salvo = alergiasRepository.save(alergia);
             log.info("Alergia criada com sucesso. ID: {}", salvo.getId());
             return alergiasMapper.toResponse(salvo);
+        } catch (BadRequestException | NotFoundException e) {
+            log.warn("Erro de validação ao criar Alergia. Request: {}. Erro: {}", request, e.getMessage());
+            throw e;
         } catch (Exception ex) {
-            log.error("Erro ao criar Alergia — payload: {}. Exception: {}", request, ex.getMessage(), ex);
+            log.error("Erro inesperado ao criar Alergia — payload: {}, Exception: {}", request, ex.getClass().getName(), ex);
             throw ex;
         }
     }
@@ -65,7 +68,7 @@ public class AlergiasServiceImpl implements AlergiasService {
             log.warn("Alergia não encontrada — ID: {}", id);
             throw nf;
         } catch (Exception ex) {
-            log.error("Erro inesperado ao buscar Alergia por ID: {} — Exception: {}", id, ex.getMessage(), ex);
+            log.error("Erro inesperado ao buscar Alergia por ID: {}, Exception: {}", id, ex.getClass().getName(), ex);
             throw ex;
         }
     }
@@ -78,7 +81,7 @@ public class AlergiasServiceImpl implements AlergiasService {
             Page<Alergias> page = alergiasRepository.findAll(pageable);
             return page.map(alergiasMapper::toResponse);
         } catch (Exception ex) {
-            log.error("Erro ao listar alergias — pageable: {}. Exception: {}", pageable, ex.getMessage(), ex);
+            log.error("Erro ao listar alergias — pageable: {}, Exception: {}", pageable, ex.getClass().getName(), ex);
             throw ex;
         }
     }
@@ -108,8 +111,11 @@ public class AlergiasServiceImpl implements AlergiasService {
         } catch (NotFoundException nf) {
             log.warn("Tentativa de atualizar Alergia não existente — ID: {}", id);
             throw nf;
+        } catch (BadRequestException e) {
+            log.warn("Erro de validação ao atualizar Alergia. ID: {}, Request: {}. Erro: {}", id, request, e.getMessage());
+            throw e;
         } catch (Exception ex) {
-            log.error("Erro ao atualizar Alergia — ID: {}, payload: {}. Exception: {}", id, request, ex.getMessage(), ex);
+            log.error("Erro inesperado ao atualizar Alergia — ID: {}, payload: {}, Exception: {}", id, request, ex.getClass().getName(), ex);
             throw ex;
         }
     }
@@ -138,8 +144,11 @@ public class AlergiasServiceImpl implements AlergiasService {
         } catch (NotFoundException nf) {
             log.warn("Tentativa de excluir Alergia não existente — ID: {}", id);
             throw nf;
+        } catch (BadRequestException e) {
+            log.warn("Erro de validação ao excluir Alergia. ID: {}. Erro: {}", id, e.getMessage());
+            throw e;
         } catch (Exception ex) {
-            log.error("Erro ao excluir Alergia — ID: {}. Exception: {}", id, ex.getMessage(), ex);
+            log.error("Erro inesperado ao excluir Alergia — ID: {}, Exception: {}", id, ex.getClass().getName(), ex);
             throw ex;
         }
     }

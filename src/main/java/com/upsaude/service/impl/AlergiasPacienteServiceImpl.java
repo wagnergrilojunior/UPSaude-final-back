@@ -286,7 +286,7 @@ public class AlergiasPacienteServiceImpl implements AlergiasPacienteService {
                 log.warn("Não foi possível obter userId do contexto de autenticação");
             }
         } catch (Exception e) {
-            log.error("Erro ao obter tenant do usuário autenticado", e);
+            log.error("Erro ao obter tenant do usuário autenticado, Exception: {}", e.getClass().getName(), e);
         }
         return null;
     }

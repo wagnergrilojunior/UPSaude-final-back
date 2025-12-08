@@ -57,7 +57,8 @@ public class AlergiasPacienteController {
             log.warn("Falha ao criar alergia de paciente — mensagem: {}, payload: {}", ex.getMessage(), request);
             throw ex;
         } catch (Exception ex) {
-            log.error("Erro inesperado ao criar alergia de paciente — payload: {}", request, ex);
+            log.error("Erro inesperado ao criar alergia de paciente — Path: /v1/alergias-paciente, Method: POST, payload: {}, Exception: {}", 
+                request, ex.getClass().getName(), ex);
             throw ex;
         }
     }
@@ -81,7 +82,8 @@ public class AlergiasPacienteController {
             log.warn("Falha ao criar alergia de paciente simplificada — mensagem: {}, payload: {}", ex.getMessage(), request);
             throw ex;
         } catch (Exception ex) {
-            log.error("Erro inesperado ao criar alergia de paciente simplificada — payload: {}", request, ex);
+            log.error("Erro inesperado ao criar alergia de paciente simplificada — Path: /v1/alergias-paciente/simplificado, Method: POST, payload: {}, Exception: {}", 
+                request, ex.getClass().getName(), ex);
             throw ex;
         }
     }
@@ -100,7 +102,8 @@ public class AlergiasPacienteController {
             Page<AlergiasPacienteResponse> response = alergiasPacienteService.listar(pageable);
             return ResponseEntity.ok(response);
         } catch (Exception ex) {
-            log.error("Erro inesperado ao listar alergias de paciente — pageable: {}", pageable, ex);
+            log.error("Erro inesperado ao listar alergias de paciente — Path: /v1/alergias-paciente, Method: GET, pageable: {}, Exception: {}", 
+                pageable, ex.getClass().getName(), ex);
             throw ex;
         }
     }
@@ -124,7 +127,8 @@ public class AlergiasPacienteController {
             log.warn("Alergia de paciente não encontrada — ID: {}, mensagem: {}", id, ex.getMessage());
             throw ex;
         } catch (Exception ex) {
-            log.error("Erro inesperado ao obter alergia de paciente por ID — ID: {}", id, ex);
+            log.error("Erro inesperado ao obter alergia de paciente por ID — Path: /v1/alergias-paciente/{}, Method: GET, ID: {}, Exception: {}", 
+                id, id, ex.getClass().getName(), ex);
             throw ex;
         }
     }
@@ -151,7 +155,8 @@ public class AlergiasPacienteController {
             log.warn("Falha ao atualizar alergia de paciente — ID: {}, mensagem: {}, payload: {}", id, ex.getMessage(), request);
             throw ex;
         } catch (Exception ex) {
-            log.error("Erro inesperado ao atualizar alergia de paciente — ID: {}, payload: {}", id, request, ex);
+            log.error("Erro inesperado ao atualizar alergia de paciente — Path: /v1/alergias-paciente/{}, Method: PUT, ID: {}, payload: {}, Exception: {}", 
+                id, id, request, ex.getClass().getName(), ex);
             throw ex;
         }
     }
@@ -175,7 +180,8 @@ public class AlergiasPacienteController {
             log.warn("Alergia de paciente não encontrada para exclusão — ID: {}, mensagem: {}", id, ex.getMessage());
             throw ex;
         } catch (Exception ex) {
-            log.error("Erro inesperado ao excluir alergia de paciente — ID: {}", id, ex);
+            log.error("Erro inesperado ao excluir alergia de paciente — Path: /v1/alergias-paciente/{}, Method: DELETE, ID: {}, Exception: {}", 
+                id, id, ex.getClass().getName(), ex);
             throw ex;
         }
     }

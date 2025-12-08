@@ -66,10 +66,10 @@ public class MedicosServiceImpl implements MedicosService {
             log.warn("Erro de validação ao criar médico. Request: {}. Erro: {}", request, e.getMessage());
             throw e;
         } catch (DataAccessException e) {
-            log.error("Erro de acesso a dados ao criar médico. Request: {}", request, e);
+            log.error("Erro de acesso a dados ao criar médico. Request: {}, Exception: {}", request, e.getClass().getName(), e);
             throw new InternalServerErrorException("Erro ao persistir médico", e);
-        } catch (RuntimeException e) {
-            log.error("Erro inesperado ao criar médico. Request: {}", request, e);
+        } catch (Exception e) {
+            log.error("Erro inesperado ao criar médico. Request: {}, Exception: {}", request, e.getClass().getName(), e);
             throw e;
         }
     }
@@ -95,10 +95,10 @@ public class MedicosServiceImpl implements MedicosService {
             log.warn("Médico não encontrado. ID: {}", id);
             throw e;
         } catch (DataAccessException e) {
-            log.error("Erro de acesso a dados ao buscar médico. ID: {}", id, e);
+            log.error("Erro de acesso a dados ao buscar médico. ID: {}, Exception: {}", id, e.getClass().getName(), e);
             throw new InternalServerErrorException("Erro ao buscar médico", e);
-        } catch (RuntimeException e) {
-            log.error("Erro inesperado ao buscar médico. ID: {}", id, e);
+        } catch (Exception e) {
+            log.error("Erro inesperado ao buscar médico. ID: {}, Exception: {}", id, e.getClass().getName(), e);
             throw e;
         }
     }
@@ -114,10 +114,10 @@ public class MedicosServiceImpl implements MedicosService {
             log.debug("Listagem de médicos concluída. Total de elementos: {}", medicos.getTotalElements());
             return medicos.map(medicosMapper::toResponse);
         } catch (DataAccessException e) {
-            log.error("Erro de acesso a dados ao listar médicos. Pageable: {}", pageable, e);
+            log.error("Erro de acesso a dados ao listar médicos. Pageable: {}, Exception: {}", pageable, e.getClass().getName(), e);
             throw new InternalServerErrorException("Erro ao listar médicos", e);
-        } catch (RuntimeException e) {
-            log.error("Erro inesperado ao listar médicos. Pageable: {}", pageable, e);
+        } catch (Exception e) {
+            log.error("Erro inesperado ao listar médicos. Pageable: {}, Exception: {}", pageable, e.getClass().getName(), e);
             throw e;
         }
     }
@@ -160,10 +160,10 @@ public class MedicosServiceImpl implements MedicosService {
             log.warn("Erro de validação ao atualizar médico. ID: {}, Request: {}. Erro: {}", id, request, e.getMessage());
             throw e;
         } catch (DataAccessException e) {
-            log.error("Erro de acesso a dados ao atualizar médico. ID: {}, Request: {}", id, request, e);
+            log.error("Erro de acesso a dados ao atualizar médico. ID: {}, Request: {}, Exception: {}", id, request, e.getClass().getName(), e);
             throw new InternalServerErrorException("Erro ao atualizar médico", e);
-        } catch (RuntimeException e) {
-            log.error("Erro inesperado ao atualizar médico. ID: {}, Request: {}", id, request, e);
+        } catch (Exception e) {
+            log.error("Erro inesperado ao atualizar médico. ID: {}, Request: {}, Exception: {}", id, request, e.getClass().getName(), e);
             throw e;
         }
     }
@@ -198,10 +198,10 @@ public class MedicosServiceImpl implements MedicosService {
             log.warn("Erro de validação ao excluir médico. ID: {}. Erro: {}", id, e.getMessage());
             throw e;
         } catch (DataAccessException e) {
-            log.error("Erro de acesso a dados ao excluir médico. ID: {}", id, e);
+            log.error("Erro de acesso a dados ao excluir médico. ID: {}, Exception: {}", id, e.getClass().getName(), e);
             throw new InternalServerErrorException("Erro ao excluir médico", e);
-        } catch (RuntimeException e) {
-            log.error("Erro inesperado ao excluir médico. ID: {}", id, e);
+        } catch (Exception e) {
+            log.error("Erro inesperado ao excluir médico. ID: {}, Exception: {}", id, e.getClass().getName(), e);
             throw e;
         }
     }
