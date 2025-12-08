@@ -4,7 +4,6 @@ import com.upsaude.api.request.DadosSociodemograficosRequest;
 import com.upsaude.api.response.DadosSociodemograficosResponse;
 import com.upsaude.dto.DadosSociodemograficosDTO;
 import com.upsaude.entity.DadosSociodemograficos;
-import com.upsaude.entity.Paciente;
 import com.upsaude.mapper.config.MappingConfig;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -14,7 +13,7 @@ import org.mapstruct.MappingTarget;
  * Mapper para conversões de DadosSociodemograficos.
  * Entity ↔ DTO ↔ Request/Response
  */
-@Mapper(config = MappingConfig.class, uses = {PacienteMapper.class})
+@Mapper(config = MappingConfig.class)
 public interface DadosSociodemograficosMapper extends EntityMapper<DadosSociodemograficos, DadosSociodemograficosDTO> {
 
     /**
@@ -55,6 +54,9 @@ public interface DadosSociodemograficosMapper extends EntityMapper<DadosSociodem
 
     /**
      * Converte Entity para Response.
+     * O paciente é ignorado para evitar referência circular com PacienteResponse.
+     * O ID do paciente será mapeado manualmente no service se necessário.
      */
+    @Mapping(target = "paciente", ignore = true)
     DadosSociodemograficosResponse toResponse(DadosSociodemograficos entity);
 }

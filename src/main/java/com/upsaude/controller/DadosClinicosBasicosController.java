@@ -51,7 +51,8 @@ public class DadosClinicosBasicosController {
             log.warn("Falha ao criar dados clínicos básicos — mensagem: {}, payload: {}", ex.getMessage(), request);
             throw ex;
         } catch (Exception ex) {
-            log.error("Erro inesperado ao criar dados clínicos básicos — payload: {}", request, ex);
+            log.error("Erro inesperado ao criar dados clínicos básicos — Path: /v1/dados-clinicos-basicos, Method: POST, payload: {}, Exception: {}",
+                request, ex.getClass().getName(), ex);
             throw ex;
         }
     }
@@ -70,7 +71,8 @@ public class DadosClinicosBasicosController {
             Page<DadosClinicosBasicosResponse> response = service.listar(pageable);
             return ResponseEntity.ok(response);
         } catch (Exception ex) {
-            log.error("Erro inesperado ao listar dados clínicos básicos — pageable: {}", pageable, ex);
+            log.error("Erro inesperado ao listar dados clínicos básicos — Path: /v1/dados-clinicos-basicos, Method: GET, pageable: {}, Exception: {}",
+                pageable != null ? pageable.toString() : "null", ex.getClass().getName(), ex);
             throw ex;
         }
     }
@@ -94,7 +96,8 @@ public class DadosClinicosBasicosController {
             log.warn("Dados clínicos básicos não encontrados — ID: {}, mensagem: {}", id, ex.getMessage());
             throw ex;
         } catch (Exception ex) {
-            log.error("Erro inesperado ao obter dados clínicos básicos por ID — ID: {}", id, ex);
+            log.error("Erro inesperado ao obter dados clínicos básicos por ID — Path: /v1/dados-clinicos-basicos/{}, Method: GET, ID: {}, Exception: {}",
+                id.toString(), id, ex.getClass().getName(), ex);
             throw ex;
         }
     }
@@ -118,7 +121,8 @@ public class DadosClinicosBasicosController {
             log.warn("Dados clínicos básicos não encontrados para paciente — pacienteId: {}, mensagem: {}", pacienteId, ex.getMessage());
             throw ex;
         } catch (Exception ex) {
-            log.error("Erro inesperado ao obter dados clínicos básicos por paciente ID — pacienteId: {}", pacienteId, ex);
+            log.error("Erro inesperado ao obter dados clínicos básicos por paciente ID — Path: /v1/dados-clinicos-basicos/paciente/{}, Method: GET, pacienteId: {}, Exception: {}",
+                pacienteId.toString(), pacienteId, ex.getClass().getName(), ex);
             throw ex;
         }
     }
@@ -145,7 +149,8 @@ public class DadosClinicosBasicosController {
             log.warn("Falha ao atualizar dados clínicos básicos — ID: {}, mensagem: {}, payload: {}", id, ex.getMessage(), request);
             throw ex;
         } catch (Exception ex) {
-            log.error("Erro inesperado ao atualizar dados clínicos básicos — ID: {}, payload: {}", id, request, ex);
+            log.error("Erro inesperado ao atualizar dados clínicos básicos — Path: /v1/dados-clinicos-basicos/{}, Method: PUT, ID: {}, payload: {}, Exception: {}",
+                id.toString(), id, request, ex.getClass().getName(), ex);
             throw ex;
         }
     }
@@ -169,7 +174,8 @@ public class DadosClinicosBasicosController {
             log.warn("Dados clínicos básicos não encontrados para exclusão — ID: {}, mensagem: {}", id, ex.getMessage());
             throw ex;
         } catch (Exception ex) {
-            log.error("Erro inesperado ao excluir dados clínicos básicos — ID: {}", id, ex);
+            log.error("Erro inesperado ao excluir dados clínicos básicos — Path: /v1/dados-clinicos-basicos/{}, Method: DELETE, ID: {}, Exception: {}",
+                id.toString(), id, ex.getClass().getName(), ex);
             throw ex;
         }
     }

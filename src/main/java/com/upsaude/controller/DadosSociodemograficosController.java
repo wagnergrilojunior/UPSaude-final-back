@@ -51,7 +51,8 @@ public class DadosSociodemograficosController {
             log.warn("Falha ao criar dados sociodemográficos — mensagem: {}, payload: {}", ex.getMessage(), request);
             throw ex;
         } catch (Exception ex) {
-            log.error("Erro inesperado ao criar dados sociodemográficos — payload: {}", request, ex);
+            log.error("Erro inesperado ao criar dados sociodemográficos — Path: /v1/dados-sociodemograficos, Method: POST, payload: {}, Exception: {}",
+                request, ex.getClass().getName(), ex);
             throw ex;
         }
     }
@@ -70,7 +71,8 @@ public class DadosSociodemograficosController {
             Page<DadosSociodemograficosResponse> response = service.listar(pageable);
             return ResponseEntity.ok(response);
         } catch (Exception ex) {
-            log.error("Erro inesperado ao listar dados sociodemográficos — pageable: {}", pageable, ex);
+            log.error("Erro inesperado ao listar dados sociodemográficos — Path: /v1/dados-sociodemograficos, Method: GET, pageable: {}, Exception: {}",
+                pageable != null ? pageable.toString() : "null", ex.getClass().getName(), ex);
             throw ex;
         }
     }
@@ -94,7 +96,8 @@ public class DadosSociodemograficosController {
             log.warn("Dados sociodemográficos não encontrados — ID: {}, mensagem: {}", id, ex.getMessage());
             throw ex;
         } catch (Exception ex) {
-            log.error("Erro inesperado ao obter dados sociodemográficos por ID — ID: {}", id, ex);
+            log.error("Erro inesperado ao obter dados sociodemográficos por ID — Path: /v1/dados-sociodemograficos/{}, Method: GET, ID: {}, Exception: {}",
+                id.toString(), id, ex.getClass().getName(), ex);
             throw ex;
         }
     }
@@ -118,7 +121,8 @@ public class DadosSociodemograficosController {
             log.warn("Dados sociodemográficos não encontrados para paciente — pacienteId: {}, mensagem: {}", pacienteId, ex.getMessage());
             throw ex;
         } catch (Exception ex) {
-            log.error("Erro inesperado ao obter dados sociodemográficos por paciente ID — pacienteId: {}", pacienteId, ex);
+            log.error("Erro inesperado ao obter dados sociodemográficos por paciente ID — Path: /v1/dados-sociodemograficos/paciente/{}, Method: GET, pacienteId: {}, Exception: {}",
+                pacienteId.toString(), pacienteId, ex.getClass().getName(), ex);
             throw ex;
         }
     }
@@ -145,7 +149,8 @@ public class DadosSociodemograficosController {
             log.warn("Falha ao atualizar dados sociodemográficos — ID: {}, mensagem: {}, payload: {}", id, ex.getMessage(), request);
             throw ex;
         } catch (Exception ex) {
-            log.error("Erro inesperado ao atualizar dados sociodemográficos — ID: {}, payload: {}", id, request, ex);
+            log.error("Erro inesperado ao atualizar dados sociodemográficos — Path: /v1/dados-sociodemograficos/{}, Method: PUT, ID: {}, payload: {}, Exception: {}",
+                id.toString(), id, request, ex.getClass().getName(), ex);
             throw ex;
         }
     }
@@ -169,7 +174,8 @@ public class DadosSociodemograficosController {
             log.warn("Falha ao excluir dados sociodemográficos — ID: {}, mensagem: {}", id, ex.getMessage());
             throw ex;
         } catch (Exception ex) {
-            log.error("Erro inesperado ao excluir dados sociodemográficos — ID: {}", id, ex);
+            log.error("Erro inesperado ao excluir dados sociodemográficos — Path: /v1/dados-sociodemograficos/{}, Method: DELETE, ID: {}, Exception: {}",
+                id.toString(), id, ex.getClass().getName(), ex);
             throw ex;
         }
     }
