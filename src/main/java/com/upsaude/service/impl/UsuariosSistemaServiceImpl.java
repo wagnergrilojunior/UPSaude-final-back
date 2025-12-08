@@ -22,15 +22,16 @@ import com.upsaude.repository.UsuarioEstabelecimentoRepository;
 import com.upsaude.repository.UsuariosSistemaRepository;
 import com.upsaude.service.UsuariosSistemaService;
 import org.springframework.web.multipart.MultipartFile;
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.hibernate.Hibernate;
 import org.springframework.beans.BeanUtils;
 import org.springframework.data.domain.Page;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.UUID;
@@ -131,12 +132,25 @@ public class UsuariosSistemaServiceImpl implements UsuariosSistemaService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public Page<UsuariosSistemaResponse> listar(Pageable pageable) {
         log.debug("Listando UsuariosSistemas paginados. Página: {}, Tamanho: {}",
                 pageable.getPageNumber(), pageable.getPageSize());
 
-        Page<UsuariosSistema> usuariosSistemas = usuariosSistemaRepository.findAll(pageable);
-        return usuariosSistemas.map(us -> enrichResponse(usuariosSistemaMapper.toResponse(us)));
+        try {
+            Page<UsuariosSistema> usuariosSistemas = usuariosSistemaRepository.findAll(pageable);
+            
+            // Inicializa as coleções lazy dentro da transação para evitar LazyInitializationException
+            usuariosSistemas.getContent().forEach(us -> {
+                Hibernate.initialize(us.getEstabelecimentosVinculados());
+            });
+            
+            log.debug("Listagem de usuários do sistema concluída. Total de elementos: {}", usuariosSistemas.getTotalElements());
+            return usuariosSistemas.map(us -> enrichResponse(usuariosSistemaMapper.toResponse(us)));
+        } catch (Exception e) {
+            log.error("Erro inesperado ao listar usuários do sistema. Pageable: {}, Exception: {}", pageable, e.getClass().getName(), e);
+            throw e;
+        }
     }
 
     @Override
