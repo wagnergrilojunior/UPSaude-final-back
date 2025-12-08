@@ -57,16 +57,16 @@ import java.time.Duration;
 @Profile("!local")
 public class RedisConfig {
 
-    @Value("${spring.redis.host:localhost}")
+    @Value("${spring.data.redis.host:localhost}")
     private String redisHost;
 
-    @Value("${spring.redis.port:6379}")
+    @Value("${spring.data.redis.port:6379}")
     private int redisPort;
 
-    @Value("${spring.redis.password:}")
+    @Value("${spring.data.redis.password:}")
     private String redisPassword;
 
-    @Value("${spring.redis.ssl.enabled:false}")
+    @Value("${spring.data.redis.ssl.enabled:false}")
     private boolean sslEnabled;
 
     @Value("${spring.cache.redis.time-to-live:300000}")
@@ -94,27 +94,29 @@ public class RedisConfig {
             config.setPassword(redisPassword);
         }
 
-        // Configuração do cliente Lettuce com timeouts adequados
+        // Configuração do cliente Lettuce com timeouts adequados para Render
+        // CORREÇÃO: Timeouts aumentados e pingBeforeActivateConnection desabilitado
+        // para evitar problemas durante cold start do Redis no Render
         SocketOptions socketOptions = SocketOptions.builder()
-            .connectTimeout(Duration.ofSeconds(5)) // Timeout de conexão aumentado
+            .connectTimeout(Duration.ofSeconds(10)) // Timeout de conexão aumentado para Render
             .keepAlive(true) // Mantém conexão viva
             .build();
 
         TimeoutOptions timeoutOptions = TimeoutOptions.builder()
-            .fixedTimeout(Duration.ofSeconds(5)) // Timeout de comandos aumentado
+            .fixedTimeout(Duration.ofSeconds(10)) // Timeout de comandos aumentado para Render
             .build();
 
         ClientOptions clientOptions = ClientOptions.builder()
             .socketOptions(socketOptions)
             .timeoutOptions(timeoutOptions)
             .autoReconnect(true) // Reconecta automaticamente
-            .pingBeforeActivateConnection(true) // Valida conexão antes de usar
+            .pingBeforeActivateConnection(false) // CORREÇÃO: Desabilitado para evitar problemas no Render
             .build();
 
         LettuceClientConfiguration clientConfig = LettuceClientConfiguration.builder()
             .clientOptions(clientOptions)
-            .commandTimeout(Duration.ofSeconds(5)) // Timeout de comandos aumentado
-            .shutdownTimeout(Duration.ofSeconds(2)) // Tempo para fechar conexõesa
+            .commandTimeout(Duration.ofSeconds(10)) // Timeout de comandos aumentado para Render
+            .shutdownTimeout(Duration.ofSeconds(5)) // Tempo para fechar conexões aumentado
             .build();
 
         LettuceConnectionFactory factory = new LettuceConnectionFactory(config, clientConfig);
