@@ -17,10 +17,27 @@ import java.util.Map;
 /**
  * Entry point customizado para tratamento de erros de autenticação.
  * Retorna 401 (Unauthorized) quando o usuário não está autenticado.
+ * 
+ * IMPORTANTE: Não trata erros de autenticação de endpoints do Actuator.
+ * O Actuator deve tratar seus próprios erros normalmente.
  */
 @Slf4j
 @Component
 public class CustomAuthenticationEntryPoint implements AuthenticationEntryPoint {
+
+    /**
+     * Verifica se o path é de um endpoint do Actuator.
+     * 
+     * @param path caminho da requisição
+     * @return true se for endpoint do Actuator, false caso contrário
+     */
+    private boolean isActuatorEndpoint(String path) {
+        if (path == null) {
+            return false;
+        }
+        // Verifica se o path contém /actuator (com ou sem context-path /api)
+        return path.contains("/actuator/") || path.startsWith("/actuator");
+    }
 
     @Override
     public void commence(
@@ -28,8 +45,17 @@ public class CustomAuthenticationEntryPoint implements AuthenticationEntryPoint 
             HttpServletResponse response,
             AuthenticationException authException) throws IOException {
         
+        String path = request.getRequestURI();
+        
+        // Não trata erros de autenticação de endpoints do Actuator
+        // Deixa o Spring Security tratar normalmente
+        if (isActuatorEndpoint(path)) {
+            response.sendError(HttpServletResponse.SC_UNAUTHORIZED, authException.getMessage());
+            return;
+        }
+        
         log.warn("Acesso não autorizado para: {} - Método: {} - Erro: {}", 
-                request.getRequestURI(), request.getMethod(), authException.getMessage());
+                path, request.getMethod(), authException.getMessage());
         
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
         response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
@@ -39,7 +65,7 @@ public class CustomAuthenticationEntryPoint implements AuthenticationEntryPoint 
         body.put("status", HttpServletResponse.SC_UNAUTHORIZED);
         body.put("erro", "Não Autorizado");
         body.put("mensagem", "Token de autenticação inválido ou não fornecido");
-        body.put("path", request.getRequestURI());
+        body.put("path", path);
         
         ObjectMapper mapper = new ObjectMapper();
         mapper.writeValue(response.getOutputStream(), body);
