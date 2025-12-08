@@ -48,6 +48,9 @@ public class SecurityConfig {
                 // TODO: Remover após testes
                 .requestMatchers("/v1/alergias/**").permitAll()
                 
+                // Endpoints de teste do Redis - públicos para diagnóstico
+                .requestMatchers("/v1/test/redis/**").permitAll()
+                
                 // Endpoints do Actuator - públicos para monitoramento via Spring Boot Admin
                 // IMPORTANTE: Em produção, considere proteger estes endpoints com autenticação básica
                 .requestMatchers("/actuator/**").permitAll() // Permite todos os endpoints do Actuator para Spring Boot Admin

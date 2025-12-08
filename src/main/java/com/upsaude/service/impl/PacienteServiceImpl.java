@@ -29,6 +29,7 @@ import org.hibernate.Hibernate;
 import org.springframework.data.domain.Page;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.CachePut;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.Authentication;
@@ -82,10 +83,14 @@ public class PacienteServiceImpl implements PacienteService {
 
     /**
      * {@inheritDoc}
+     * 
+     * IMPORTANTE: Usa @CachePut para adicionar o paciente criado ao cache.
+     * Não usa @CacheEvict com allEntries=true para evitar limpar todo o cache desnecessariamente.
+     * O paciente criado será automaticamente adicionado ao cache com sua chave (ID).
      */
     @Override
     @Transactional
-    @CacheEvict(value = "paciente", allEntries = true)
+    @CachePut(value = "paciente", key = "#result.id")
     public PacienteResponse criar(PacienteRequest request) {
         log.debug("Criando novo paciente: {}", request.getNomeCompleto());
 
@@ -120,12 +125,14 @@ public class PacienteServiceImpl implements PacienteService {
         processarRelacionamentos(paciente, request);
 
         Paciente pacienteSalvo = pacienteRepository.save(paciente);
-        log.info("Paciente criado com sucesso. ID: {}", pacienteSalvo.getId());
+        log.info("Paciente criado com sucesso. ID: {} - Será adicionado ao cache automaticamente", pacienteSalvo.getId());
 
         // Processar listas de IDs de doenças, alergias, deficiências e medicações após salvar o paciente
         processarRelacionamentosPorId(pacienteSalvo, request);
 
-        return pacienteMapper.toResponse(pacienteSalvo);
+        PacienteResponse response = pacienteMapper.toResponse(pacienteSalvo);
+        log.debug("Paciente criado adicionado ao cache com chave: {}", response.getId());
+        return response;
     }
 
     /**
@@ -142,11 +149,15 @@ public class PacienteServiceImpl implements PacienteService {
     @Transactional(readOnly = true)
     @Cacheable(value = "paciente", key = "#id")
     public PacienteResponse obterPorId(UUID id) {
-        log.debug("Buscando paciente por ID: {} (cache miss)", id);
+        log.debug("Buscando paciente por ID: {} - Verificando cache primeiro", id);
         if (id == null) {
             throw new BadRequestException("ID do paciente é obrigatório");
         }
 
+        // Se chegou aqui, significa que não estava no cache (cache miss)
+        // O Spring Cache intercepta antes e só chama este método se não encontrar no cache
+        log.debug("Cache MISS para paciente ID: {} - Buscando no banco de dados", id);
+        
         Paciente paciente = pacienteRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Paciente não encontrado com ID: " + id));
 
@@ -302,12 +313,15 @@ public class PacienteServiceImpl implements PacienteService {
 
     /**
      * {@inheritDoc}
+     * 
+     * IMPORTANTE: Usa @CachePut para atualizar o cache com os dados atualizados.
+     * Isso garante que o cache sempre tenha os dados mais recentes após atualização.
      */
     @Override
     @Transactional
-    @CacheEvict(value = "paciente", key = "#id")
+    @CachePut(value = "paciente", key = "#id")
     public PacienteResponse atualizar(UUID id, PacienteRequest request) {
-        log.debug("Atualizando paciente. ID: {}", id);
+        log.debug("Atualizando paciente. ID: {} - Cache será atualizado automaticamente", id);
 
         if (id == null) {
             throw new BadRequestException("ID do paciente é obrigatório");
@@ -326,12 +340,14 @@ public class PacienteServiceImpl implements PacienteService {
         processarRelacionamentos(pacienteExistente, request);
 
         Paciente pacienteAtualizado = pacienteRepository.save(pacienteExistente);
-        log.info("Paciente atualizado com sucesso. ID: {}", pacienteAtualizado.getId());
+        log.info("Paciente atualizado com sucesso. ID: {} - Cache será atualizado automaticamente", pacienteAtualizado.getId());
 
         // Processar listas de IDs de doenças, alergias, deficiências e medicações após salvar o paciente
         processarRelacionamentosPorId(pacienteAtualizado, request);
 
-        return pacienteMapper.toResponse(pacienteAtualizado);
+        PacienteResponse response = pacienteMapper.toResponse(pacienteAtualizado);
+        log.debug("Paciente atualizado no cache com chave: {}", id);
+        return response;
     }
 
     /**
