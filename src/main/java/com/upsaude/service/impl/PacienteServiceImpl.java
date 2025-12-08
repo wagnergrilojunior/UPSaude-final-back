@@ -442,30 +442,21 @@ public class PacienteServiceImpl implements PacienteService {
 
     /**
      * Atualiza os dados do paciente com base no request.
+     * Usa o método updateFromRequest do mapper para atualizar todos os campos,
+     * incluindo tipoCns, identidadeGenero e orientacaoSexual.
      *
      * @param paciente paciente existente a ser atualizado
      * @param request dados atualizados
      */
     private void atualizarDadosPaciente(Paciente paciente, PacienteRequest request) {
-        Paciente pacienteAtualizado = pacienteMapper.fromRequest(request);
-
-        paciente.setNomeCompleto(pacienteAtualizado.getNomeCompleto());
-        paciente.setCpf(pacienteAtualizado.getCpf());
-        paciente.setRg(pacienteAtualizado.getRg());
-        paciente.setCns(pacienteAtualizado.getCns());
-        paciente.setDataNascimento(pacienteAtualizado.getDataNascimento());
-        paciente.setSexo(pacienteAtualizado.getSexo());
-        paciente.setEstadoCivil(pacienteAtualizado.getEstadoCivil());
-        paciente.setTelefone(pacienteAtualizado.getTelefone());
-        paciente.setEmail(pacienteAtualizado.getEmail());
-        paciente.setNomeMae(pacienteAtualizado.getNomeMae());
-        paciente.setNomePai(pacienteAtualizado.getNomePai());
-        paciente.setResponsavelNome(pacienteAtualizado.getResponsavelNome());
-        paciente.setResponsavelCpf(pacienteAtualizado.getResponsavelCpf());
-        paciente.setResponsavelTelefone(pacienteAtualizado.getResponsavelTelefone());
-        paciente.setNumeroCarteirinha(pacienteAtualizado.getNumeroCarteirinha());
-        paciente.setDataValidadeCarteirinha(pacienteAtualizado.getDataValidadeCarteirinha());
-        paciente.setObservacoes(pacienteAtualizado.getObservacoes());
+        // Usa o método updateFromRequest do mapper que atualiza todos os campos automaticamente
+        // Isso garante que todos os campos do request sejam atualizados, incluindo:
+        // - tipoCns
+        // - identidadeGenero
+        // - orientacaoSexual
+        // - e todos os outros campos do PacienteRequest
+        pacienteMapper.updateFromRequest(request, paciente);
+        
         // Relacionamentos serão tratados no método processarRelacionamentos
     }
 
