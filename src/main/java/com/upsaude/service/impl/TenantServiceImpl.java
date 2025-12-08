@@ -8,17 +8,21 @@ import com.upsaude.exception.NotFoundException;
 import com.upsaude.mapper.TenantMapper;
 import com.upsaude.repository.TenantRepository;
 import com.upsaude.service.TenantService;
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.hibernate.Hibernate;
 import org.springframework.beans.BeanUtils;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 /**
  * Implementação do serviço de gerenciamento de Tenant.
@@ -51,7 +55,7 @@ public class TenantServiceImpl implements TenantService {
     }
 
     @Override
-    @Transactional
+    @Transactional(readOnly = true)
     @Cacheable(value = "tenants", key = "#id")
     public TenantResponse obterPorId(UUID id) {
         log.debug("Buscando tenant por ID: {} (cache miss)", id);
@@ -62,17 +66,32 @@ public class TenantServiceImpl implements TenantService {
 
         Tenant tenant = tenantRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Tenant não encontrado com ID: " + id));
+        
+        // Inicializa a coleção lazy dentro da transação para evitar LazyInitializationException
+        Hibernate.initialize(tenant.getEnderecos());
 
         return tenantMapper.toResponse(tenant);
     }
 
     @Override
+    @Transactional(readOnly = true)
     public Page<TenantResponse> listar(Pageable pageable) {
         log.debug("Listando Tenants paginados. Página: {}, Tamanho: {}",
                 pageable.getPageNumber(), pageable.getPageSize());
 
         Page<Tenant> tenants = tenantRepository.findAll(pageable);
-        return tenants.map(tenantMapper::toResponse);
+        
+        // Inicializa as coleções lazy dentro da transação para evitar LazyInitializationException
+        tenants.getContent().forEach(tenant -> {
+            Hibernate.initialize(tenant.getEnderecos());
+        });
+        
+        // Mapeia dentro da transação para garantir que as coleções lazy estejam acessíveis
+        List<TenantResponse> responses = tenants.getContent().stream()
+                .map(tenantMapper::toResponse)
+                .collect(Collectors.toList());
+        
+        return new PageImpl<>(responses, tenants.getPageable(), tenants.getTotalElements());
     }
 
     @Override
