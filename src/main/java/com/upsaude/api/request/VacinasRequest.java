@@ -1,14 +1,20 @@
 package com.upsaude.api.request;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.upsaude.api.request.embeddable.CalendarioVacinalRequest;
 import com.upsaude.api.request.embeddable.ComposicaoVacinaRequest;
+import com.upsaude.api.request.embeddable.ComposicaoVacinaRequestDeserializer;
 import com.upsaude.api.request.embeddable.ConservacaoVacinaRequest;
 import com.upsaude.api.request.embeddable.ContraindicacoesVacinaRequest;
 import com.upsaude.api.request.embeddable.EficaciaVacinaRequest;
+import com.upsaude.api.request.embeddable.EficaciaVacinaRequestDeserializer;
 import com.upsaude.api.request.embeddable.EsquemaVacinalRequest;
+import com.upsaude.api.request.embeddable.ReacoesAdversasVacinaRequest;
+import com.upsaude.api.request.embeddable.ReacoesAdversasVacinaRequestDeserializer;
 import com.upsaude.api.request.embeddable.IdadeAplicacaoVacinaRequest;
 import com.upsaude.api.request.embeddable.IntegracaoGovernamentalVacinaRequest;
-import com.upsaude.api.request.embeddable.ReacoesAdversasVacinaRequest;
+import com.upsaude.api.request.embeddable.IntegracaoGovernamentalVacinaRequestDeserializer;
 import com.upsaude.enums.StatusAtivoEnum;
 import com.upsaude.enums.TipoVacinaEnum;
 import com.upsaude.enums.UnidadeMedidaEnum;
@@ -27,6 +33,7 @@ import lombok.Setter;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class VacinasRequest {
     @NotBlank(message = "Nome da vacina é obrigatório")
     @Size(max = 255, message = "Nome da vacina deve ter no máximo 255 caracteres")
@@ -59,8 +66,14 @@ public class VacinasRequest {
     private IdadeAplicacaoVacinaRequest idadeAplicacao;
     private ContraindicacoesVacinaRequest contraindicacoes;
     private ConservacaoVacinaRequest conservacao;
+    
+    @JsonDeserialize(using = ComposicaoVacinaRequestDeserializer.class)
     private ComposicaoVacinaRequest composicao;
+    
+    @JsonDeserialize(using = EficaciaVacinaRequestDeserializer.class)
     private EficaciaVacinaRequest eficacia;
+    
+    @JsonDeserialize(using = ReacoesAdversasVacinaRequestDeserializer.class)
     private ReacoesAdversasVacinaRequest reacoesAdversas;
     private CalendarioVacinalRequest calendario;
     private StatusAtivoEnum status;
@@ -70,5 +83,7 @@ public class VacinasRequest {
     private String descricao;
     private String indicacoes;
     private String observacoes;
+    
+    @JsonDeserialize(using = IntegracaoGovernamentalVacinaRequestDeserializer.class)
     private IntegracaoGovernamentalVacinaRequest integracaoGovernamental;
 }

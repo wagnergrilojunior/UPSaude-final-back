@@ -1,8 +1,10 @@
 package com.upsaude.api.response;
 
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.upsaude.enums.TipoEnderecoEnum;
 import com.upsaude.enums.TipoLogradouroEnum;
 import com.upsaude.enums.ZonaDomicilioEnum;
+import com.upsaude.util.converter.TipoLogradouroEnumSerializer;
 import java.time.OffsetDateTime;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
@@ -21,6 +23,8 @@ public class EnderecoResponse {
     private OffsetDateTime createdAt;
     private OffsetDateTime updatedAt;
     private Boolean active;
+    
+    @JsonSerialize(using = TipoLogradouroEnumSerializer.class)
     private TipoLogradouroEnum tipoLogradouro;
     private String logradouro;
     private String numero;

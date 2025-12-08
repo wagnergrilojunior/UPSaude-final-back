@@ -1,9 +1,11 @@
 package com.upsaude.api.request;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.upsaude.enums.TipoEnderecoEnum;
 import com.upsaude.enums.TipoLogradouroEnum;
 import com.upsaude.enums.ZonaDomicilioEnum;
+import com.upsaude.util.converter.TipoLogradouroEnumDeserializer;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
@@ -18,9 +20,10 @@ import lombok.Setter;
 @Setter
 @Builder
 @NoArgsConstructor
-@AllArgsConstructor
-@JsonIgnoreProperties(ignoreUnknown = true)
-public class EnderecoRequest {
+    @AllArgsConstructor
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    public class EnderecoRequest {
+    @JsonDeserialize(using = TipoLogradouroEnumDeserializer.class)
     private TipoLogradouroEnum tipoLogradouro;
     @Size(max = 200, message = "Logradouro deve ter no máximo 200 caracteres")
     private String logradouro;
