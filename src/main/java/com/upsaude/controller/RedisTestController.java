@@ -3,10 +3,11 @@ package com.upsaude.controller;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.Data;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
+import org.springframework.context.annotation.Profile;
 import org.springframework.data.redis.connection.RedisConnection;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.http.HttpStatus;
@@ -22,17 +23,26 @@ import java.util.UUID;
  * Controller de teste para verificar o funcionamento do Redis.
  * Permite testar conexão, operações de cache e obter estatísticas.
  * 
+ * IMPORTANTE: Este controller só está disponível quando o Redis está habilitado.
+ * No profile 'local', o Redis está desabilitado, então este controller não será carregado.
+ * 
  * @author UPSaúde
  */
 @RestController
 @RequestMapping("/v1/test/redis")
 @Tag(name = "Teste Redis", description = "Endpoints para testar e diagnosticar o Redis")
-@RequiredArgsConstructor
+@Profile("!local")
+@ConditionalOnBean(RedisConnectionFactory.class)
 @Slf4j
 public class RedisTestController {
 
     private final RedisConnectionFactory redisConnectionFactory;
     private final CacheManager cacheManager;
+
+    public RedisTestController(RedisConnectionFactory redisConnectionFactory, CacheManager cacheManager) {
+        this.redisConnectionFactory = redisConnectionFactory;
+        this.cacheManager = cacheManager;
+    }
 
     @GetMapping("/health")
     @Operation(summary = "Verificar saúde do Redis", description = "Testa a conexão com o Redis e retorna informações sobre o status")
