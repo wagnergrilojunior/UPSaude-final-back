@@ -3,7 +3,41 @@ package com.upsaude.config;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.upsaude.enums.EscolaridadeEnum;
+import com.upsaude.enums.EstadoCivilEnum;
+import com.upsaude.enums.IdentidadeGeneroEnum;
+import com.upsaude.enums.NacionalidadeEnum;
+import com.upsaude.enums.OrientacaoSexualEnum;
+import com.upsaude.enums.RacaCorEnum;
+import com.upsaude.enums.SexoEnum;
+import com.upsaude.enums.StatusPacienteEnum;
+import com.upsaude.enums.TipoAtendimentoPreferencialEnum;
+import com.upsaude.enums.TipoCnsEnum;
+import com.upsaude.enums.TipoLogradouroEnum;
+import com.upsaude.util.converter.EscolaridadeEnumDeserializer;
+import com.upsaude.util.converter.EscolaridadeEnumSerializer;
+import com.upsaude.util.converter.EstadoCivilEnumDeserializer;
+import com.upsaude.util.converter.EstadoCivilEnumSerializer;
+import com.upsaude.util.converter.IdentidadeGeneroEnumDeserializer;
+import com.upsaude.util.converter.IdentidadeGeneroEnumSerializer;
+import com.upsaude.util.converter.NacionalidadeEnumDeserializer;
+import com.upsaude.util.converter.NacionalidadeEnumSerializer;
+import com.upsaude.util.converter.OrientacaoSexualEnumDeserializer;
+import com.upsaude.util.converter.OrientacaoSexualEnumSerializer;
+import com.upsaude.util.converter.RacaCorEnumDeserializer;
+import com.upsaude.util.converter.RacaCorEnumSerializer;
+import com.upsaude.util.converter.SexoEnumDeserializer;
+import com.upsaude.util.converter.SexoEnumSerializer;
+import com.upsaude.util.converter.StatusPacienteEnumDeserializer;
+import com.upsaude.util.converter.StatusPacienteEnumSerializer;
+import com.upsaude.util.converter.TipoAtendimentoPreferencialEnumDeserializer;
+import com.upsaude.util.converter.TipoAtendimentoPreferencialEnumSerializer;
+import com.upsaude.util.converter.TipoCnsEnumDeserializer;
+import com.upsaude.util.converter.TipoCnsEnumSerializer;
+import com.upsaude.util.converter.TipoLogradouroEnumDeserializer;
+import com.upsaude.util.converter.TipoLogradouroEnumSerializer;
 import io.lettuce.core.ClientOptions;
 import io.lettuce.core.SocketOptions;
 import io.lettuce.core.TimeoutOptions;
@@ -151,6 +185,90 @@ public class RedisConfig {
         ObjectMapper redisObjectMapper = new ObjectMapper();
         redisObjectMapper.setVisibility(PropertyAccessor.ALL, JsonAutoDetect.Visibility.ANY);
         redisObjectMapper.registerModule(new JavaTimeModule());
+        
+        // ====================================================================================
+        // REGISTRO DE SERIALIZERS/DESERIALIZERS CUSTOMIZADOS PARA ENUMS
+        // ====================================================================================
+        // IMPORTANTE: Todos os enums que possuem serializers customizados (usando @JsonSerialize
+        // nas Responses) DEVEM ter seus serializers e deserializers registrados aqui.
+        //
+        // PROBLEMA RESOLVIDO: Sem esse registro, quando um enum é serializado com formato
+        // customizado (ex: "Feminino" via SexoEnumSerializer) e salvo no Redis, ao deserializar
+        // o Jackson tentaria usar o formato padrão (ex: "FEMININO"), causando erro:
+        // "Cannot deserialize value of type `SexoEnum` from String \"Feminino\""
+        //
+        // REGRA: Se um enum tem serializer customizado em uma Response que pode ser cacheada,
+        // ele DEVE ter serializer e deserializer registrados aqui.
+        //
+        // CHECKLIST ao criar novo serializer customizado:
+        // 1. Criar *EnumSerializer.java e *EnumDeserializer.java em util/converter
+        // 2. Adicionar @JsonSerialize(using = *EnumSerializer.class) na Response
+        // 3. Registrar serializer e deserializer neste método (abaixo)
+        // 4. Testar serialização/deserialização no Redis
+        //
+        // ENUMS COM @JsonValue: Enums que usam @JsonValue (ex: TipoUsuarioSistemaEnum) não
+        // precisam de registro aqui, pois o Jackson deserializa automaticamente usando valueOf().
+        //
+        // ENUMS SEM SERIALIZERS CUSTOMIZADOS: Enums sem serializers customizados usam o formato
+        // padrão (nome do enum) e não causam problemas, não precisam ser registrados aqui.
+        // ====================================================================================
+        SimpleModule enumModule = new SimpleModule("EnumModule");
+        
+        // SexoEnum
+        enumModule.addSerializer(SexoEnum.class, new SexoEnumSerializer());
+        enumModule.addDeserializer(SexoEnum.class, new SexoEnumDeserializer());
+        
+        // EstadoCivilEnum
+        enumModule.addSerializer(EstadoCivilEnum.class, new EstadoCivilEnumSerializer());
+        enumModule.addDeserializer(EstadoCivilEnum.class, new EstadoCivilEnumDeserializer());
+        
+        // EscolaridadeEnum
+        enumModule.addSerializer(EscolaridadeEnum.class, new EscolaridadeEnumSerializer());
+        enumModule.addDeserializer(EscolaridadeEnum.class, new EscolaridadeEnumDeserializer());
+        
+        // IdentidadeGeneroEnum
+        enumModule.addSerializer(IdentidadeGeneroEnum.class, new IdentidadeGeneroEnumSerializer());
+        enumModule.addDeserializer(IdentidadeGeneroEnum.class, new IdentidadeGeneroEnumDeserializer());
+        
+        // NacionalidadeEnum
+        enumModule.addSerializer(NacionalidadeEnum.class, new NacionalidadeEnumSerializer());
+        enumModule.addDeserializer(NacionalidadeEnum.class, new NacionalidadeEnumDeserializer());
+        
+        // OrientacaoSexualEnum
+        enumModule.addSerializer(OrientacaoSexualEnum.class, new OrientacaoSexualEnumSerializer());
+        enumModule.addDeserializer(OrientacaoSexualEnum.class, new OrientacaoSexualEnumDeserializer());
+        
+        // RacaCorEnum
+        enumModule.addSerializer(RacaCorEnum.class, new RacaCorEnumSerializer());
+        enumModule.addDeserializer(RacaCorEnum.class, new RacaCorEnumDeserializer());
+        
+        // StatusPacienteEnum
+        enumModule.addSerializer(StatusPacienteEnum.class, new StatusPacienteEnumSerializer());
+        enumModule.addDeserializer(StatusPacienteEnum.class, new StatusPacienteEnumDeserializer());
+        
+        // TipoAtendimentoPreferencialEnum
+        enumModule.addSerializer(TipoAtendimentoPreferencialEnum.class, new TipoAtendimentoPreferencialEnumSerializer());
+        enumModule.addDeserializer(TipoAtendimentoPreferencialEnum.class, new TipoAtendimentoPreferencialEnumDeserializer());
+        
+        // TipoCnsEnum
+        enumModule.addSerializer(TipoCnsEnum.class, new TipoCnsEnumSerializer());
+        enumModule.addDeserializer(TipoCnsEnum.class, new TipoCnsEnumDeserializer());
+        
+        // TipoLogradouroEnum
+        enumModule.addSerializer(TipoLogradouroEnum.class, new TipoLogradouroEnumSerializer());
+        enumModule.addDeserializer(TipoLogradouroEnum.class, new TipoLogradouroEnumDeserializer());
+        
+        // ====================================================================================
+        // FIM DO REGISTRO DE ENUMS
+        // 
+        // Total de enums registrados: 11
+        // 
+        // Para verificar se todos os serializers estão registrados, execute:
+        // find src/main/java/com/upsaude/util/converter -name "*EnumSerializer.java" | wc -l
+        // O número deve corresponder ao número de registros acima.
+        // ====================================================================================
+        
+        redisObjectMapper.registerModule(enumModule);
         redisObjectMapper.activateDefaultTyping(
             redisObjectMapper.getPolymorphicTypeValidator(),
             ObjectMapper.DefaultTyping.NON_FINAL
