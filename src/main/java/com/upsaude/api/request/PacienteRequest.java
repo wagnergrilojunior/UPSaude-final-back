@@ -1,6 +1,17 @@
 package com.upsaude.api.request;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.upsaude.util.converter.EscolaridadeEnumDeserializer;
+import com.upsaude.util.converter.EstadoCivilEnumDeserializer;
+import com.upsaude.util.converter.IdentidadeGeneroEnumDeserializer;
+import com.upsaude.util.converter.NacionalidadeEnumDeserializer;
+import com.upsaude.util.converter.OrientacaoSexualEnumDeserializer;
+import com.upsaude.util.converter.RacaCorEnumDeserializer;
+import com.upsaude.util.converter.SexoEnumDeserializer;
+import com.upsaude.util.converter.StatusPacienteEnumDeserializer;
+import com.upsaude.util.converter.TipoAtendimentoPreferencialEnumDeserializer;
+import com.upsaude.util.converter.TipoCnsEnumDeserializer;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
@@ -47,7 +58,9 @@ public class PacienteRequest {
     @Pattern(regexp = "^\\d{15}$", message = "CNS deve ter 15 dígitos")
     private String cns;
     private LocalDate dataNascimento;
+    @JsonDeserialize(using = SexoEnumDeserializer.class)
     private SexoEnum sexo;
+    @JsonDeserialize(using = EstadoCivilEnumDeserializer.class)
     private EstadoCivilEnum estadoCivil;
     private String telefone;
     private String email;
@@ -63,27 +76,35 @@ public class PacienteRequest {
     private String numeroCarteirinha;
     private LocalDate dataValidadeCarteirinha;
     private String observacoes;
+    @JsonDeserialize(using = RacaCorEnumDeserializer.class)
     private RacaCorEnum racaCor;
+    @JsonDeserialize(using = NacionalidadeEnumDeserializer.class)
     private NacionalidadeEnum nacionalidade;
     private String paisNascimento;
     private String naturalidade;
     private String municipioNascimentoIbge;
+    @JsonDeserialize(using = EscolaridadeEnumDeserializer.class)
     private EscolaridadeEnum escolaridade;
     private String ocupacaoProfissao;
     private Boolean situacaoRua;
+    @JsonDeserialize(using = StatusPacienteEnumDeserializer.class)
     private StatusPacienteEnum statusPaciente;
     private LocalDate dataObito;
     private String causaObitoCid10;
     private Boolean cartaoSusAtivo;
     private LocalDate dataAtualizacaoCns;
+    @JsonDeserialize(using = TipoAtendimentoPreferencialEnumDeserializer.class)
     private TipoAtendimentoPreferencialEnum tipoAtendimentoPreferencial;
     private String origemCadastro;
     private String nomeSocial;
+    @JsonDeserialize(using = IdentidadeGeneroEnumDeserializer.class)
     private IdentidadeGeneroEnum identidadeGenero;
+    @JsonDeserialize(using = OrientacaoSexualEnumDeserializer.class)
     private OrientacaoSexualEnum orientacaoSexual;
     private Boolean possuiDeficiencia;
     private String tipoDeficiencia;
     private Boolean cnsValidado;
+    @JsonDeserialize(using = TipoCnsEnumDeserializer.class)
     private TipoCnsEnum tipoCns;
     private Boolean acompanhadoPorEquipeEsf;
     @Builder.Default
