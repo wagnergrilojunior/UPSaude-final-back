@@ -46,7 +46,7 @@ import java.util.List;
        })
 @Data
 @EqualsAndHashCode(callSuper = true)
-public class Medicos extends BaseEntity {
+public class Medicos extends BaseEntityWithoutEstabelecimento {
 
     public Medicos() {
         this.dadosPessoais = new DadosPessoaisMedico();
