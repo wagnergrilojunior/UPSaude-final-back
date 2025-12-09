@@ -454,9 +454,10 @@ public class MedicosServiceImpl implements MedicosService {
 
         // ESTABELECIMENTOS (OneToMany via MedicoEstabelecimento) - Processar lista de IDs
         // O backend busca internamente os estabelecimentos pelos IDs e cria os vínculos
+        // IMPORTANTE: Para evitar erro com orphanRemoval, limpa a lista existente e adiciona novos elementos
+        // ao invés de criar uma nova lista
         if (request.getEstabelecimentos() != null && !request.getEstabelecimentos().isEmpty()) {
             log.debug("Processando {} estabelecimento(s) para o médico", request.getEstabelecimentos().size());
-            List<MedicoEstabelecimento> medicosEstabelecimentos = new ArrayList<>();
             
             // Remove duplicatas da lista de IDs antes de processar
             Set<UUID> estabelecimentosIdsUnicos = new LinkedHashSet<>(request.getEstabelecimentos());
@@ -470,6 +471,9 @@ public class MedicosServiceImpl implements MedicosService {
             if (tenant == null) {
                 throw new BadRequestException("Não foi possível obter tenant do usuário autenticado. É necessário estar autenticado para criar vínculos com estabelecimentos.");
             }
+            
+            // Limpa a lista existente (orphanRemoval vai remover os vínculos antigos)
+            medicos.getMedicosEstabelecimentos().clear();
             
             // Busca cada estabelecimento pelo ID e cria o vínculo
             for (UUID estabelecimentoId : estabelecimentosIdsUnicos) {
@@ -492,15 +496,16 @@ public class MedicosServiceImpl implements MedicosService {
                 medicoEstabelecimento.setDataInicio(OffsetDateTime.now()); // Data atual como padrão
                 medicoEstabelecimento.setTipoVinculo(TipoVinculoProfissionalEnum.CONTRATO); // Valor padrão
                 
-                medicosEstabelecimentos.add(medicoEstabelecimento);
+                // Adiciona à lista existente (não cria nova lista)
+                medicos.getMedicosEstabelecimentos().add(medicoEstabelecimento);
                 log.debug("Vínculo com estabelecimento {} criado para o médico", estabelecimentoId);
             }
             
-            medicos.setMedicosEstabelecimentos(medicosEstabelecimentos);
-            log.debug("{} estabelecimento(s) vinculado(s) ao médico com sucesso", medicosEstabelecimentos.size());
+            log.debug("{} estabelecimento(s) vinculado(s) ao médico com sucesso", medicos.getMedicosEstabelecimentos().size());
         } else {
             // Se não vier lista de estabelecimentos, limpa a lista existente
-            medicos.setMedicosEstabelecimentos(new ArrayList<>());
+            // Usa clear() ao invés de set para manter a mesma instância da coleção
+            medicos.getMedicosEstabelecimentos().clear();
             log.debug("Nenhum estabelecimento fornecido. Lista de vínculos será limpa.");
         }
         
