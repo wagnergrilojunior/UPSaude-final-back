@@ -1,5 +1,6 @@
 package com.upsaude.api.request;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.upsaude.enums.EscolaridadeEnum;
 import com.upsaude.enums.EstadoCivilEnum;
 import com.upsaude.enums.IdentidadeGeneroEnum;
@@ -9,6 +10,15 @@ import com.upsaude.enums.SexoEnum;
 import com.upsaude.enums.StatusAtivoEnum;
 import com.upsaude.enums.TipoDeficienciaEnum;
 import com.upsaude.enums.TipoProfissionalEnum;
+import com.upsaude.util.converter.EscolaridadeEnumDeserializer;
+import com.upsaude.util.converter.EstadoCivilEnumDeserializer;
+import com.upsaude.util.converter.IdentidadeGeneroEnumDeserializer;
+import com.upsaude.util.converter.NacionalidadeEnumDeserializer;
+import com.upsaude.util.converter.RacaCorEnumDeserializer;
+import com.upsaude.util.converter.SexoEnumDeserializer;
+import com.upsaude.util.converter.StatusAtivoEnumDeserializer;
+import com.upsaude.util.converter.TipoDeficienciaEnumDeserializer;
+import com.upsaude.util.converter.TipoProfissionalEnumDeserializer;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -39,11 +49,17 @@ public class ProfissionaisSaudeRequest {
     @Pattern(regexp = "^$|^\\d{11}$", message = "CPF deve ter 11 dígitos")
     private String cpf;
     private LocalDate dataNascimento;
+    @JsonDeserialize(using = SexoEnumDeserializer.class)
     private SexoEnum sexo;
+    @JsonDeserialize(using = EstadoCivilEnumDeserializer.class)
     private EstadoCivilEnum estadoCivil;
+    @JsonDeserialize(using = EscolaridadeEnumDeserializer.class)
     private EscolaridadeEnum escolaridade;
+    @JsonDeserialize(using = IdentidadeGeneroEnumDeserializer.class)
     private IdentidadeGeneroEnum identidadeGenero;
+    @JsonDeserialize(using = RacaCorEnumDeserializer.class)
     private RacaCorEnum racaCor;
+    @JsonDeserialize(using = TipoDeficienciaEnumDeserializer.class)
     private TipoDeficienciaEnum tipoDeficiencia;
     private String rg;
     private String orgaoEmissorRg;
@@ -60,7 +76,9 @@ public class ProfissionaisSaudeRequest {
     private String ufRegistro;
     private OffsetDateTime dataEmissaoRegistro;
     private OffsetDateTime dataValidadeRegistro;
+    @JsonDeserialize(using = StatusAtivoEnumDeserializer.class)
     private StatusAtivoEnum statusRegistro;
+    @JsonDeserialize(using = TipoProfissionalEnumDeserializer.class)
     private TipoProfissionalEnum tipoProfissional;
     private String cns;
     private String codigoCbo;

@@ -1,7 +1,10 @@
 package com.upsaude.api.request.embeddable;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.upsaude.enums.EstadoCivilEnum;
 import com.upsaude.enums.SexoEnum;
+import com.upsaude.util.converter.EstadoCivilEnumDeserializer;
+import com.upsaude.util.converter.SexoEnumDeserializer;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
@@ -24,10 +27,12 @@ public class DadosPessoaisMedicoRequest {
     @Pattern(regexp = "^$|^\\d{11}$", message = "CPF deve ter 11 dígitos")
     private String cpf;
     
+    @JsonDeserialize(using = SexoEnumDeserializer.class)
     private SexoEnum sexo;
     
     private LocalDate dataNascimento;
     
+    @JsonDeserialize(using = EstadoCivilEnumDeserializer.class)
     private EstadoCivilEnum estadoCivil;
     
     @Size(max = 20, message = "RG deve ter no máximo 20 caracteres")
