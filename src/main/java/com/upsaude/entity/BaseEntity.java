@@ -42,8 +42,13 @@ public abstract class BaseEntity {
     @JoinColumn(name = "tenant_id", nullable = false)
     private Tenant tenant;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "estabelecimento_id")
+    /**
+     * Relacionamento com Estabelecimento.
+     * Este campo é opcional e pode não existir em todas as tabelas que estendem BaseEntity.
+     * Classes que não têm esta coluna devem usar @AssociationOverride para remover o mapeamento.
+     */
+    @ManyToOne(fetch = FetchType.LAZY, optional = true)
+    @JoinColumn(name = "estabelecimento_id", nullable = true)
     private Estabelecimentos estabelecimento;
 
     @Column(name = "ativo", nullable = false)

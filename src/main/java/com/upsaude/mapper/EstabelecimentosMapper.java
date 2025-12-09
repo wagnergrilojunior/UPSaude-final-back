@@ -4,8 +4,6 @@ import com.upsaude.api.request.EstabelecimentosRequest;
 import com.upsaude.api.response.EstabelecimentosResponse;
 import com.upsaude.dto.EstabelecimentosDTO;
 import com.upsaude.entity.Estabelecimentos;
-import com.upsaude.entity.Endereco;
-import com.upsaude.entity.ProfissionaisSaude;
 import com.upsaude.mapper.config.MappingConfig;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;

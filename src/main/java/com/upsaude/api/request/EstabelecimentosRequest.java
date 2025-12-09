@@ -37,7 +37,15 @@ public class EstabelecimentosRequest {
     private String cnpj;
     private NaturezaJuridicaEnum naturezaJuridica;
     private String registroOficial;
+    
+    /**
+     * Endereço principal do estabelecimento.
+     * Pode ser fornecido como UUID (endereço existente) ou como objeto EnderecoRequest completo (novo endereço).
+     * Se fornecido como objeto completo, será usado findOrCreate para evitar duplicação.
+     */
     private UUID enderecoPrincipal;
+    private EnderecoRequest enderecoPrincipalCompleto;
+    
     private String telefone;
     private String telefoneSecundario;
     private String fax;
@@ -63,5 +71,4 @@ public class EstabelecimentosRequest {
     private Double latitude;
     private Double longitude;
     private String observacoes;
-    private String dadosComplementares;
 }

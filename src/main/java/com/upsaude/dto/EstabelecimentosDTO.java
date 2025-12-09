@@ -49,5 +49,4 @@ public class EstabelecimentosDTO {
     private Double latitude;
     private Double longitude;
     private String observacoes;
-    private String dadosComplementares;
 }
