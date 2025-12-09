@@ -1,6 +1,8 @@
 package com.upsaude.api.request.embeddable;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.upsaude.enums.StatusRegistroMedicoEnum;
+import com.upsaude.util.converter.StatusRegistroMedicoEnumDeserializer;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
@@ -25,6 +27,7 @@ public class RegistroProfissionalMedicoRequest {
     @Pattern(regexp = "^$|^[A-Z]{2}$", message = "UF do CRM deve ter exatamente 2 letras maiúsculas")
     private String crmUf;
     
+    @JsonDeserialize(using = StatusRegistroMedicoEnumDeserializer.class)
     private StatusRegistroMedicoEnum statusCrm;
     
     private LocalDate dataEmissaoCrm;
