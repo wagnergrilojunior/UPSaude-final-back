@@ -21,6 +21,7 @@ import com.upsaude.service.AlergiasPacienteService;
 import com.upsaude.service.DeficienciasPacienteService;
 import com.upsaude.service.DoencasPacienteService;
 import com.upsaude.service.MedicacaoPacienteService;
+import com.upsaude.service.EnderecoService;
 import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -73,6 +74,7 @@ public class PacienteServiceImpl implements PacienteService {
     private final DeficienciasPacienteService deficienciasPacienteService;
     private final DoencasPacienteService doencasPacienteService;
     private final MedicacaoPacienteService medicacaoPacienteService;
+    private final EnderecoService enderecoService;
     
     // Self-injection: injeta o próprio service (proxy) para evitar self-invocation
     // @Lazy evita dependência circular na inicialização
@@ -536,7 +538,7 @@ public class PacienteServiceImpl implements PacienteService {
             "Integração governamental"
         );
 
-        // ENDEREÇOS (OneToMany) - Criar endereços e associar ao paciente
+        // ENDEREÇOS (OneToMany) - Buscar endereços existentes ou criar novos para evitar duplicados
         if (request.getEnderecos() != null && !request.getEnderecos().isEmpty()) {
             // Obtém o tenant do usuário autenticado (obrigatório para Endereco que estende BaseEntity)
             Tenant tenant = obterTenantDoUsuarioAutenticado();
@@ -572,7 +574,10 @@ public class PacienteServiceImpl implements PacienteService {
                         endereco.setCidade(cidade);
                     }
                     
-                    enderecos.add(endereco);
+                    // Usa findOrCreate para evitar duplicados - busca endereço existente ou cria novo
+                    Endereco enderecoFinal = enderecoService.findOrCreate(endereco);
+                    enderecos.add(enderecoFinal);
+                    log.debug("Endereço processado. ID: {}", enderecoFinal.getId());
                 }
             }
             if (!enderecos.isEmpty()) {

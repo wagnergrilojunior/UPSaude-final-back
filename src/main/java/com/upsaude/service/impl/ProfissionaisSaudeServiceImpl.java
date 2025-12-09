@@ -3,12 +3,14 @@ package com.upsaude.service.impl;
 import com.upsaude.api.request.ProfissionaisSaudeRequest;
 import com.upsaude.api.response.ProfissionaisSaudeResponse;
 import com.upsaude.entity.EspecialidadesMedicas;
+import com.upsaude.entity.Endereco;
 import com.upsaude.entity.ProfissionaisSaude;
 import com.upsaude.exception.BadRequestException;
 import com.upsaude.exception.InternalServerErrorException;
 import com.upsaude.exception.NotFoundException;
 import com.upsaude.mapper.ProfissionaisSaudeMapper;
 import com.upsaude.repository.EspecialidadesMedicasRepository;
+import com.upsaude.repository.EnderecoRepository;
 import com.upsaude.repository.ProfissionaisSaudeRepository;
 import com.upsaude.service.ProfissionaisSaudeService;
 import lombok.RequiredArgsConstructor;
@@ -39,6 +41,7 @@ public class ProfissionaisSaudeServiceImpl implements ProfissionaisSaudeService 
     private final ProfissionaisSaudeRepository profissionaisSaudeRepository;
     private final ProfissionaisSaudeMapper profissionaisSaudeMapper;
     private final EspecialidadesMedicasRepository especialidadesMedicasRepository;
+    private final EnderecoRepository enderecoRepository;
 
     @Override
     @Transactional
@@ -57,6 +60,13 @@ public class ProfissionaisSaudeServiceImpl implements ProfissionaisSaudeService 
 
             ProfissionaisSaude profissional = profissionaisSaudeMapper.fromRequest(request);
             profissional.setActive(true);
+
+            // Processa endereço profissional se fornecido (Fase 2.3)
+            if (request.getEnderecoProfissional() != null) {
+                Endereco endereco = enderecoRepository.findById(request.getEnderecoProfissional())
+                        .orElseThrow(() -> new NotFoundException("Endereço profissional não encontrado com ID: " + request.getEnderecoProfissional()));
+                profissional.setEnderecoProfissional(endereco);
+            }
 
             ProfissionaisSaude profissionalSalvo = profissionaisSaudeRepository.save(profissional);
             log.info("Profissional de saúde criado com sucesso. ID: {}", profissionalSalvo.getId());
@@ -145,6 +155,14 @@ public class ProfissionaisSaudeServiceImpl implements ProfissionaisSaudeService 
 
             // Usa mapper do MapStruct que preserva campos de controle automaticamente
             profissionaisSaudeMapper.updateFromRequest(request, profissionalExistente);
+
+            // Processa endereço profissional se fornecido (Fase 2.3 e 6.1)
+            if (request.getEnderecoProfissional() != null) {
+                Endereco endereco = enderecoRepository.findById(request.getEnderecoProfissional())
+                        .orElseThrow(() -> new NotFoundException("Endereço profissional não encontrado com ID: " + request.getEnderecoProfissional()));
+                profissionalExistente.setEnderecoProfissional(endereco);
+            }
+            // Se endereço não foi fornecido, mantém o existente (não remove)
 
             ProfissionaisSaude profissionalAtualizado = profissionaisSaudeRepository.save(profissionalExistente);
             log.info("Profissional de saúde atualizado com sucesso. ID: {}", profissionalAtualizado.getId());

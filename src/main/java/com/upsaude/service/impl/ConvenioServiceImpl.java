@@ -3,12 +3,15 @@ package com.upsaude.service.impl;
 import com.upsaude.api.request.ConvenioRequest;
 import com.upsaude.api.response.ConvenioResponse;
 import com.upsaude.entity.Convenio;
+import com.upsaude.entity.Endereco;
 import com.upsaude.exception.BadRequestException;
 import com.upsaude.exception.InternalServerErrorException;
 import com.upsaude.exception.NotFoundException;
 import com.upsaude.mapper.ConvenioMapper;
 import com.upsaude.repository.ConvenioRepository;
+import com.upsaude.repository.EnderecoRepository;
 import com.upsaude.service.ConvenioService;
+import com.upsaude.service.EnderecoService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.CacheEvict;
@@ -33,6 +36,9 @@ public class ConvenioServiceImpl implements ConvenioService {
 
     private final ConvenioRepository convenioRepository;
     private final ConvenioMapper convenioMapper;
+    @SuppressWarnings("unused") // Será usado quando requests aceitarem objeto completo EnderecoRequest
+    private final EnderecoService enderecoService;
+    private final EnderecoRepository enderecoRepository;
 
     @Override
     @Transactional
@@ -50,6 +56,13 @@ public class ConvenioServiceImpl implements ConvenioService {
 
             Convenio convenio = convenioMapper.fromRequest(request);
             convenio.setActive(true);
+
+            // Processa endereço se fornecido (Fase 2.1)
+            if (request.getEndereco() != null) {
+                Endereco endereco = enderecoRepository.findById(request.getEndereco())
+                        .orElseThrow(() -> new NotFoundException("Endereço não encontrado com ID: " + request.getEndereco()));
+                convenio.setEndereco(endereco);
+            }
 
             Convenio convenioSalvo = convenioRepository.save(convenio);
             log.info("Convênio criado com sucesso. ID: {}", convenioSalvo.getId());
@@ -138,6 +151,16 @@ public class ConvenioServiceImpl implements ConvenioService {
 
             // Usa mapper do MapStruct que preserva campos de controle automaticamente
             convenioMapper.updateFromRequest(request, convenioExistente);
+
+            // Processa endereço se fornecido (Fase 2.1 e 6.1)
+            if (request.getEndereco() != null) {
+                Endereco endereco = enderecoRepository.findById(request.getEndereco())
+                        .orElseThrow(() -> new NotFoundException("Endereço não encontrado com ID: " + request.getEndereco()));
+                convenioExistente.setEndereco(endereco);
+            } else {
+                // Se endereço não foi fornecido no request, mantém o existente (não remove)
+                // O mapper já preserva o endereço existente devido ao ignore
+            }
 
             Convenio convenioAtualizado = convenioRepository.save(convenioExistente);
             log.info("Convênio atualizado com sucesso. ID: {}", convenioAtualizado.getId());
