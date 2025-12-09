@@ -4,6 +4,7 @@ import com.upsaude.api.request.ConvenioRequest;
 import com.upsaude.api.response.ConvenioResponse;
 import com.upsaude.entity.Convenio;
 import com.upsaude.entity.Endereco;
+import com.upsaude.entity.Tenant;
 import com.upsaude.exception.BadRequestException;
 import com.upsaude.exception.InternalServerErrorException;
 import com.upsaude.exception.NotFoundException;
@@ -63,6 +64,9 @@ public class ConvenioServiceImpl implements ConvenioService {
                         .orElseThrow(() -> new NotFoundException("Endereço não encontrado com ID: " + request.getEndereco()));
                 convenio.setEndereco(endereco);
             }
+
+            // Valida duplicidade antes de salvar (após o tenant ser setado)
+            validarDuplicidade(null, convenio, request);
 
             Convenio convenioSalvo = convenioRepository.save(convenio);
             log.info("Convênio criado com sucesso. ID: {}", convenioSalvo.getId());
@@ -149,6 +153,9 @@ public class ConvenioServiceImpl implements ConvenioService {
             Convenio convenioExistente = convenioRepository.findById(id)
                     .orElseThrow(() -> new NotFoundException("Convênio não encontrado com ID: " + id));
 
+            // Valida duplicidade antes de atualizar
+            validarDuplicidade(id, convenioExistente, request);
+
             // Usa mapper do MapStruct que preserva campos de controle automaticamente
             convenioMapper.updateFromRequest(request, convenioExistente);
 
@@ -222,6 +229,79 @@ public class ConvenioServiceImpl implements ConvenioService {
     private void validarDadosBasicos(ConvenioRequest request) {
         if (request == null) {
             throw new BadRequestException("Dados do convenio são obrigatórios");
+        }
+    }
+
+    /**
+     * Valida se já existe um convênio com o mesmo CNPJ, inscrição estadual ou código no mesmo tenant.
+     * 
+     * @param id ID do convênio sendo atualizado (null para criação)
+     * @param convenio objeto Convenio (usado para obter o tenant)
+     * @param request dados do convênio sendo cadastrado/atualizado
+     * @throws BadRequestException se já existe um convênio com o mesmo CNPJ, inscrição estadual ou código no tenant
+     */
+    private void validarDuplicidade(UUID id, Convenio convenio, ConvenioRequest request) {
+        if (request == null || convenio == null || convenio.getTenant() == null) {
+            return;
+        }
+
+        Tenant tenant = convenio.getTenant();
+
+        // Valida duplicidade do CNPJ (apenas se fornecido)
+        if (request.getCnpj() != null && !request.getCnpj().trim().isEmpty()) {
+            boolean cnpjDuplicado;
+            if (id == null) {
+                // Criação: verifica se existe qualquer registro com este CNPJ no tenant
+                cnpjDuplicado = convenioRepository.existsByCnpjAndTenant(request.getCnpj().trim(), tenant);
+            } else {
+                // Atualização: verifica se existe outro registro (diferente do atual) com este CNPJ no tenant
+                cnpjDuplicado = convenioRepository.existsByCnpjAndTenantAndIdNot(request.getCnpj().trim(), tenant, id);
+            }
+
+            if (cnpjDuplicado) {
+                log.warn("Tentativa de cadastrar/atualizar convênio com CNPJ duplicado. CNPJ: {}, Tenant: {}", request.getCnpj(), tenant.getId());
+                throw new BadRequestException(
+                    String.format("Já existe um convênio cadastrado com o CNPJ '%s' no banco de dados", request.getCnpj())
+                );
+            }
+        }
+
+        // Valida duplicidade da inscrição estadual (apenas se fornecido)
+        if (request.getInscricaoEstadual() != null && !request.getInscricaoEstadual().trim().isEmpty()) {
+            boolean inscricaoDuplicada;
+            if (id == null) {
+                // Criação: verifica se existe qualquer registro com esta inscrição estadual no tenant
+                inscricaoDuplicada = convenioRepository.existsByInscricaoEstadualAndTenant(request.getInscricaoEstadual().trim(), tenant);
+            } else {
+                // Atualização: verifica se existe outro registro (diferente do atual) com esta inscrição estadual no tenant
+                inscricaoDuplicada = convenioRepository.existsByInscricaoEstadualAndTenantAndIdNot(request.getInscricaoEstadual().trim(), tenant, id);
+            }
+
+            if (inscricaoDuplicada) {
+                log.warn("Tentativa de cadastrar/atualizar convênio com inscrição estadual duplicada. Inscrição: {}, Tenant: {}", request.getInscricaoEstadual(), tenant.getId());
+                throw new BadRequestException(
+                    String.format("Já existe um convênio cadastrado com a inscrição estadual '%s' no banco de dados", request.getInscricaoEstadual())
+                );
+            }
+        }
+
+        // Valida duplicidade do código (apenas se fornecido)
+        if (request.getCodigo() != null && !request.getCodigo().trim().isEmpty()) {
+            boolean codigoDuplicado;
+            if (id == null) {
+                // Criação: verifica se existe qualquer registro com este código no tenant
+                codigoDuplicado = convenioRepository.existsByCodigoAndTenant(request.getCodigo().trim(), tenant);
+            } else {
+                // Atualização: verifica se existe outro registro (diferente do atual) com este código no tenant
+                codigoDuplicado = convenioRepository.existsByCodigoAndTenantAndIdNot(request.getCodigo().trim(), tenant, id);
+            }
+
+            if (codigoDuplicado) {
+                log.warn("Tentativa de cadastrar/atualizar convênio com código duplicado. Código: {}, Tenant: {}", request.getCodigo(), tenant.getId());
+                throw new BadRequestException(
+                    String.format("Já existe um convênio cadastrado com o código '%s' no banco de dados", request.getCodigo())
+                );
+            }
         }
     }
 

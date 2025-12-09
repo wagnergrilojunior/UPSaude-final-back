@@ -3,12 +3,11 @@ package com.upsaude.service.impl;
 import com.upsaude.api.request.CatalogoExamesRequest;
 import com.upsaude.api.response.CatalogoExamesResponse;
 import com.upsaude.entity.CatalogoExames;
-import com.upsaude.entity.Estabelecimentos;
+import com.upsaude.entity.Tenant;
 import com.upsaude.exception.BadRequestException;
 import com.upsaude.exception.NotFoundException;
 import com.upsaude.mapper.CatalogoExamesMapper;
 import com.upsaude.repository.CatalogoExamesRepository;
-import com.upsaude.repository.EstabelecimentosRepository;
 import com.upsaude.service.CatalogoExamesService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -34,7 +33,6 @@ public class CatalogoExamesServiceImpl implements CatalogoExamesService {
 
     private final CatalogoExamesRepository catalogoExamesRepository;
     private final CatalogoExamesMapper catalogoExamesMapper;
-    private final EstabelecimentosRepository estabelecimentosRepository;
 
     @Override
     @Transactional
@@ -46,6 +44,9 @@ public class CatalogoExamesServiceImpl implements CatalogoExamesService {
 
         CatalogoExames exame = catalogoExamesMapper.fromRequest(request);
         exame.setActive(true);
+
+        // Valida duplicidade antes de salvar (após o tenant ser setado)
+        validarDuplicidade(null, exame, request);
 
         CatalogoExames exameSalvo = catalogoExamesRepository.save(exame);
         log.info("Exame criado no catálogo com sucesso. ID: {}", exameSalvo.getId());
@@ -92,6 +93,9 @@ public class CatalogoExamesServiceImpl implements CatalogoExamesService {
         CatalogoExames exameExistente = catalogoExamesRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Exame não encontrado no catálogo com ID: " + id));
 
+        // Valida duplicidade antes de atualizar
+        validarDuplicidade(id, exameExistente, request);
+
         atualizarDadosExame(exameExistente, request);
 
         CatalogoExames exameAtualizado = catalogoExamesRepository.save(exameExistente);
@@ -125,6 +129,60 @@ public class CatalogoExamesServiceImpl implements CatalogoExamesService {
     private void validarDadosBasicos(CatalogoExamesRequest request) {
         if (request == null) {
             throw new BadRequestException("Dados do exame são obrigatórios");
+        }
+    }
+
+    /**
+     * Valida se já existe um exame no catálogo com o mesmo nome ou código no mesmo tenant.
+     * 
+     * @param id ID do exame sendo atualizado (null para criação)
+     * @param exame objeto CatalogoExames (usado para obter o tenant)
+     * @param request dados do exame sendo cadastrado/atualizado
+     * @throws BadRequestException se já existe um exame com o mesmo nome ou código no tenant
+     */
+    private void validarDuplicidade(UUID id, CatalogoExames exame, CatalogoExamesRequest request) {
+        if (request == null || exame == null || exame.getTenant() == null) {
+            return;
+        }
+
+        Tenant tenant = exame.getTenant();
+
+        // Valida duplicidade do nome
+        if (request.getNome() != null && !request.getNome().trim().isEmpty()) {
+            boolean nomeDuplicado;
+            if (id == null) {
+                // Criação: verifica se existe qualquer registro com este nome no tenant
+                nomeDuplicado = catalogoExamesRepository.existsByNomeAndTenant(request.getNome().trim(), tenant);
+            } else {
+                // Atualização: verifica se existe outro registro (diferente do atual) com este nome no tenant
+                nomeDuplicado = catalogoExamesRepository.existsByNomeAndTenantAndIdNot(request.getNome().trim(), tenant, id);
+            }
+
+            if (nomeDuplicado) {
+                log.warn("Tentativa de cadastrar/atualizar exame no catálogo com nome duplicado. Nome: {}, Tenant: {}", request.getNome(), tenant.getId());
+                throw new BadRequestException(
+                    String.format("Já existe um exame cadastrado no catálogo com o nome '%s' no banco de dados", request.getNome())
+                );
+            }
+        }
+
+        // Valida duplicidade do código (apenas se fornecido)
+        if (request.getCodigo() != null && !request.getCodigo().trim().isEmpty()) {
+            boolean codigoDuplicado;
+            if (id == null) {
+                // Criação: verifica se existe qualquer registro com este código no tenant
+                codigoDuplicado = catalogoExamesRepository.existsByCodigoAndTenant(request.getCodigo().trim(), tenant);
+            } else {
+                // Atualização: verifica se existe outro registro (diferente do atual) com este código no tenant
+                codigoDuplicado = catalogoExamesRepository.existsByCodigoAndTenantAndIdNot(request.getCodigo().trim(), tenant, id);
+            }
+
+            if (codigoDuplicado) {
+                log.warn("Tentativa de cadastrar/atualizar exame no catálogo com código duplicado. Código: {}, Tenant: {}", request.getCodigo(), tenant.getId());
+                throw new BadRequestException(
+                    String.format("Já existe um exame cadastrado no catálogo com o código '%s' no banco de dados", request.getCodigo())
+                );
+            }
         }
     }
 

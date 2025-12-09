@@ -40,6 +40,7 @@ public class DeficienciasServiceImpl implements DeficienciasService {
         log.debug("Criando nova deficiência");
 
         validarDadosBasicos(request);
+        validarDuplicidade(null, request);
 
         Deficiencias deficiencias = deficienciasMapper.fromRequest(request);
         deficiencias.setActive(true);
@@ -90,6 +91,8 @@ public class DeficienciasServiceImpl implements DeficienciasService {
         Deficiencias deficienciasExistente = deficienciasRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Deficiência não encontrada com ID: " + id));
 
+        validarDuplicidade(id, request);
+
         atualizarDadosDeficiencias(deficienciasExistente, request);
 
         Deficiencias deficienciasAtualizado = deficienciasRepository.save(deficienciasExistente);
@@ -128,6 +131,38 @@ public class DeficienciasServiceImpl implements DeficienciasService {
             throw new BadRequestException("Nome da deficiência é obrigatório");
         }
         // permanente e acompanhamentoContinuo não fazem parte do Request
+    }
+
+    /**
+     * Valida se já existe uma deficiência com o mesmo nome no banco de dados.
+     * 
+     * @param id ID da deficiência sendo atualizada (null para criação)
+     * @param request dados da deficiência sendo cadastrada/atualizada
+     * @throws BadRequestException se já existe uma deficiência com o mesmo nome
+     */
+    private void validarDuplicidade(UUID id, DeficienciasRequest request) {
+        if (request == null) {
+            return;
+        }
+
+        // Valida duplicidade do nome
+        if (request.getNome() != null && !request.getNome().trim().isEmpty()) {
+            boolean nomeDuplicado;
+            if (id == null) {
+                // Criação: verifica se existe qualquer registro com este nome
+                nomeDuplicado = deficienciasRepository.existsByNome(request.getNome().trim());
+            } else {
+                // Atualização: verifica se existe outro registro (diferente do atual) com este nome
+                nomeDuplicado = deficienciasRepository.existsByNomeAndIdNot(request.getNome().trim(), id);
+            }
+
+            if (nomeDuplicado) {
+                log.warn("Tentativa de cadastrar/atualizar deficiência com nome duplicado. Nome: {}", request.getNome());
+                throw new BadRequestException(
+                    String.format("Já existe uma deficiência cadastrada com o nome '%s' no banco de dados", request.getNome())
+                );
+            }
+        }
     }
 
     private void atualizarDadosDeficiencias(Deficiencias deficiencias, DeficienciasRequest request) {

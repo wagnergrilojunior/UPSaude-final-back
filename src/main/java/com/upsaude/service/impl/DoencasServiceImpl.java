@@ -58,6 +58,7 @@ public class DoencasServiceImpl implements DoencasService {
 
         try {
             validarDadosBasicos(request);
+            validarDuplicidade(null, request);
 
             Doencas doenca = doencasMapper.fromRequest(request);
 
@@ -203,6 +204,8 @@ public class DoencasServiceImpl implements DoencasService {
             Doencas doencaExistente = doencasRepository.findById(id)
                     .orElseThrow(() -> new NotFoundException("Doença não encontrada com ID: " + id));
 
+            validarDuplicidade(id, request);
+
             atualizarDadosDoenca(doencaExistente, request);
 
             Doencas doencaAtualizada = doencasRepository.save(doencaExistente);
@@ -268,6 +271,57 @@ public class DoencasServiceImpl implements DoencasService {
         }
         if (request.getNome() == null || request.getNome().trim().isEmpty()) {
             throw new BadRequestException("Nome da doença é obrigatório");
+        }
+    }
+
+    /**
+     * Valida se já existe uma doença com o mesmo nome ou código interno no banco de dados.
+     * 
+     * @param id ID da doença sendo atualizada (null para criação)
+     * @param request dados da doença sendo cadastrada/atualizada
+     * @throws BadRequestException se já existe uma doença com o mesmo nome ou código interno
+     */
+    private void validarDuplicidade(UUID id, DoencasRequest request) {
+        if (request == null) {
+            return;
+        }
+
+        // Valida duplicidade do nome
+        if (request.getNome() != null && !request.getNome().trim().isEmpty()) {
+            boolean nomeDuplicado;
+            if (id == null) {
+                // Criação: verifica se existe qualquer registro com este nome
+                nomeDuplicado = doencasRepository.existsByNome(request.getNome().trim());
+            } else {
+                // Atualização: verifica se existe outro registro (diferente do atual) com este nome
+                nomeDuplicado = doencasRepository.existsByNomeAndIdNot(request.getNome().trim(), id);
+            }
+
+            if (nomeDuplicado) {
+                log.warn("Tentativa de cadastrar/atualizar doença com nome duplicado. Nome: {}", request.getNome());
+                throw new BadRequestException(
+                    String.format("Já existe uma doença cadastrada com o nome '%s' no banco de dados", request.getNome())
+                );
+            }
+        }
+
+        // Valida duplicidade do código interno (apenas se fornecido)
+        if (request.getCodigoInterno() != null && !request.getCodigoInterno().trim().isEmpty()) {
+            boolean codigoDuplicado;
+            if (id == null) {
+                // Criação: verifica se existe qualquer registro com este código interno
+                codigoDuplicado = doencasRepository.existsByCodigoInterno(request.getCodigoInterno().trim());
+            } else {
+                // Atualização: verifica se existe outro registro (diferente do atual) com este código interno
+                codigoDuplicado = doencasRepository.existsByCodigoInternoAndIdNot(request.getCodigoInterno().trim(), id);
+            }
+
+            if (codigoDuplicado) {
+                log.warn("Tentativa de cadastrar/atualizar doença com código interno duplicado. Código: {}", request.getCodigoInterno());
+                throw new BadRequestException(
+                    String.format("Já existe uma doença cadastrada com o código interno '%s' no banco de dados", request.getCodigoInterno())
+                );
+            }
         }
     }
 

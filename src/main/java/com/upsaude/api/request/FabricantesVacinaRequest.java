@@ -1,7 +1,5 @@
 package com.upsaude.api.request;
 
-import java.time.OffsetDateTime;
-import java.util.UUID;
 import lombok.*;
 
 @Data
@@ -14,7 +12,7 @@ public class FabricantesVacinaRequest {
     private String pais;
     private String estado;
     private String cidade;
-    private UUID endereco;
+    private EnderecoRequest endereco;
     private String telefone;
     private String email;
     private String site;

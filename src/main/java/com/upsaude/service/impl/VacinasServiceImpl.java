@@ -47,6 +47,7 @@ public class VacinasServiceImpl implements VacinasService {
 
         try {
             validarDadosBasicos(request);
+            validarDuplicidade(null, request);
 
             Vacinas vacinas = vacinasMapper.fromRequest(request);
             vacinas.setActive(true);
@@ -136,6 +137,8 @@ public class VacinasServiceImpl implements VacinasService {
             Vacinas vacinasExistente = vacinasRepository.findById(id)
                     .orElseThrow(() -> new NotFoundException("Vacina não encontrada com ID: " + id));
 
+            validarDuplicidade(id, request);
+
             // Usa mapper do MapStruct que preserva campos de controle automaticamente
             vacinasMapper.updateFromRequest(request, vacinasExistente);
 
@@ -199,6 +202,57 @@ public class VacinasServiceImpl implements VacinasService {
     private void validarDadosBasicos(VacinasRequest request) {
         if (request == null) {
             throw new BadRequestException("Dados do vacinas são obrigatórios");
+        }
+    }
+
+    /**
+     * Valida se já existe uma vacina com o mesmo nome ou código interno no banco de dados.
+     * 
+     * @param id ID da vacina sendo atualizada (null para criação)
+     * @param request dados da vacina sendo cadastrada/atualizada
+     * @throws BadRequestException se já existe uma vacina com o mesmo nome ou código interno
+     */
+    private void validarDuplicidade(UUID id, VacinasRequest request) {
+        if (request == null) {
+            return;
+        }
+
+        // Valida duplicidade do nome
+        if (request.getNome() != null && !request.getNome().trim().isEmpty()) {
+            boolean nomeDuplicado;
+            if (id == null) {
+                // Criação: verifica se existe qualquer registro com este nome
+                nomeDuplicado = vacinasRepository.existsByNome(request.getNome().trim());
+            } else {
+                // Atualização: verifica se existe outro registro (diferente do atual) com este nome
+                nomeDuplicado = vacinasRepository.existsByNomeAndIdNot(request.getNome().trim(), id);
+            }
+
+            if (nomeDuplicado) {
+                log.warn("Tentativa de cadastrar/atualizar vacina com nome duplicado. Nome: {}", request.getNome());
+                throw new BadRequestException(
+                    String.format("Já existe uma vacina cadastrada com o nome '%s' no banco de dados", request.getNome())
+                );
+            }
+        }
+
+        // Valida duplicidade do código interno (apenas se fornecido)
+        if (request.getCodigoInterno() != null && !request.getCodigoInterno().trim().isEmpty()) {
+            boolean codigoDuplicado;
+            if (id == null) {
+                // Criação: verifica se existe qualquer registro com este código interno
+                codigoDuplicado = vacinasRepository.existsByCodigoInterno(request.getCodigoInterno().trim());
+            } else {
+                // Atualização: verifica se existe outro registro (diferente do atual) com este código interno
+                codigoDuplicado = vacinasRepository.existsByCodigoInternoAndIdNot(request.getCodigoInterno().trim(), id);
+            }
+
+            if (codigoDuplicado) {
+                log.warn("Tentativa de cadastrar/atualizar vacina com código interno duplicado. Código: {}", request.getCodigoInterno());
+                throw new BadRequestException(
+                    String.format("Já existe uma vacina cadastrada com o código interno '%s' no banco de dados", request.getCodigoInterno())
+                );
+            }
         }
     }
 

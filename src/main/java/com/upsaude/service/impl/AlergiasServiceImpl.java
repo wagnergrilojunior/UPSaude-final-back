@@ -37,6 +37,8 @@ public class AlergiasServiceImpl implements AlergiasService {
         }
 
         try {
+            validarDuplicidade(null, request);
+
             Alergias alergia = alergiasMapper.fromRequest(request);
             alergia.setActive(true);
             Alergias salvo = alergiasRepository.save(alergia);
@@ -103,6 +105,8 @@ public class AlergiasServiceImpl implements AlergiasService {
             Alergias existente = alergiasRepository.findById(id)
                     .orElseThrow(() -> new NotFoundException("Alergia não encontrada com ID: " + id));
 
+            validarDuplicidade(id, request);
+
             alergiasMapper.updateFromRequest(request, existente);
 
             Alergias atualizado = alergiasRepository.save(existente);
@@ -150,6 +154,57 @@ public class AlergiasServiceImpl implements AlergiasService {
         } catch (Exception ex) {
             log.error("Erro inesperado ao excluir Alergia — ID: {}, Exception: {}", id, ex.getClass().getName(), ex);
             throw ex;
+        }
+    }
+
+    /**
+     * Valida se já existe uma alergia com o mesmo nome ou código interno no banco de dados.
+     * 
+     * @param id ID da alergia sendo atualizada (null para criação)
+     * @param request dados da alergia sendo cadastrada/atualizada
+     * @throws BadRequestException se já existe uma alergia com o mesmo nome ou código interno
+     */
+    private void validarDuplicidade(UUID id, AlergiasRequest request) {
+        if (request == null) {
+            return;
+        }
+
+        // Valida duplicidade do nome
+        if (request.getNome() != null && !request.getNome().trim().isEmpty()) {
+            boolean nomeDuplicado;
+            if (id == null) {
+                // Criação: verifica se existe qualquer registro com este nome
+                nomeDuplicado = alergiasRepository.existsByNome(request.getNome().trim());
+            } else {
+                // Atualização: verifica se existe outro registro (diferente do atual) com este nome
+                nomeDuplicado = alergiasRepository.existsByNomeAndIdNot(request.getNome().trim(), id);
+            }
+
+            if (nomeDuplicado) {
+                log.warn("Tentativa de cadastrar/atualizar alergia com nome duplicado. Nome: {}", request.getNome());
+                throw new BadRequestException(
+                    String.format("Já existe uma alergia cadastrada com o nome '%s' no banco de dados", request.getNome())
+                );
+            }
+        }
+
+        // Valida duplicidade do código interno (apenas se fornecido)
+        if (request.getCodigoInterno() != null && !request.getCodigoInterno().trim().isEmpty()) {
+            boolean codigoDuplicado;
+            if (id == null) {
+                // Criação: verifica se existe qualquer registro com este código interno
+                codigoDuplicado = alergiasRepository.existsByCodigoInterno(request.getCodigoInterno().trim());
+            } else {
+                // Atualização: verifica se existe outro registro (diferente do atual) com este código interno
+                codigoDuplicado = alergiasRepository.existsByCodigoInternoAndIdNot(request.getCodigoInterno().trim(), id);
+            }
+
+            if (codigoDuplicado) {
+                log.warn("Tentativa de cadastrar/atualizar alergia com código interno duplicado. Código: {}", request.getCodigoInterno());
+                throw new BadRequestException(
+                    String.format("Já existe uma alergia cadastrada com o código interno '%s' no banco de dados", request.getCodigoInterno())
+                );
+            }
         }
     }
 }

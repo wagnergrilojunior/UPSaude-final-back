@@ -40,6 +40,7 @@ public class FabricantesMedicamentoServiceImpl implements FabricantesMedicamento
         log.debug("Criando novo fabricantesmedicamento");
 
         validarDadosBasicos(request);
+        validarDuplicidade(null, request);
 
         FabricantesMedicamento fabricantesMedicamento = fabricantesMedicamentoMapper.fromRequest(request);
         fabricantesMedicamento.setActive(true);
@@ -89,6 +90,8 @@ public class FabricantesMedicamentoServiceImpl implements FabricantesMedicamento
         FabricantesMedicamento fabricantesMedicamentoExistente = fabricantesMedicamentoRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("FabricantesMedicamento não encontrado com ID: " + id));
 
+        validarDuplicidade(id, request);
+
         atualizarDadosFabricantesMedicamento(fabricantesMedicamentoExistente, request);
 
         FabricantesMedicamento fabricantesMedicamentoAtualizado = fabricantesMedicamentoRepository.save(fabricantesMedicamentoExistente);
@@ -122,6 +125,38 @@ public class FabricantesMedicamentoServiceImpl implements FabricantesMedicamento
     private void validarDadosBasicos(FabricantesMedicamentoRequest request) {
         if (request == null) {
             throw new BadRequestException("Dados do fabricantesmedicamento são obrigatórios");
+        }
+    }
+
+    /**
+     * Valida se já existe um fabricante de medicamento com o mesmo nome no banco de dados.
+     * 
+     * @param id ID do fabricante de medicamento sendo atualizado (null para criação)
+     * @param request dados do fabricante de medicamento sendo cadastrado/atualizado
+     * @throws BadRequestException se já existe um fabricante de medicamento com o mesmo nome
+     */
+    private void validarDuplicidade(UUID id, FabricantesMedicamentoRequest request) {
+        if (request == null) {
+            return;
+        }
+
+        // Valida duplicidade do nome
+        if (request.getNome() != null && !request.getNome().trim().isEmpty()) {
+            boolean nomeDuplicado;
+            if (id == null) {
+                // Criação: verifica se existe qualquer registro com este nome
+                nomeDuplicado = fabricantesMedicamentoRepository.existsByNome(request.getNome().trim());
+            } else {
+                // Atualização: verifica se existe outro registro (diferente do atual) com este nome
+                nomeDuplicado = fabricantesMedicamentoRepository.existsByNomeAndIdNot(request.getNome().trim(), id);
+            }
+
+            if (nomeDuplicado) {
+                log.warn("Tentativa de cadastrar/atualizar fabricante de medicamento com nome duplicado. Nome: {}", request.getNome());
+                throw new BadRequestException(
+                    String.format("Já existe um fabricante de medicamento cadastrado com o nome '%s' no banco de dados", request.getNome())
+                );
+            }
         }
     }
 
