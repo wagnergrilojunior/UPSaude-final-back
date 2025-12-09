@@ -244,9 +244,6 @@ public class Estabelecimentos extends BaseEntityWithoutEstabelecimento {
     @Column(name = "observacoes", columnDefinition = "TEXT")
     private String observacoes;
 
-    @Column(name = "dados_complementares", columnDefinition = "jsonb")
-    private String dadosComplementares;
-
     // ========== MÉTODOS DE CICLO DE VIDA ==========
 
     /**
