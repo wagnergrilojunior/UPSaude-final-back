@@ -36,6 +36,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
+import java.time.LocalDate;
+import java.time.Period;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -137,6 +139,7 @@ public class PacienteServiceImpl implements PacienteService {
             processarRelacionamentosPorId(pacienteSalvo, request);
 
             PacienteResponse response = pacienteMapper.toResponse(pacienteSalvo);
+            calcularIdade(response);
             log.debug("Paciente criado adicionado ao cache com chave: {}", response.getId());
             return response;
         } catch (BadRequestException | NotFoundException e) {
@@ -222,7 +225,9 @@ public class PacienteServiceImpl implements PacienteService {
             });
         }
 
-        return pacienteMapper.toResponse(paciente);
+        PacienteResponse response = pacienteMapper.toResponse(paciente);
+        calcularIdade(response);
+        return response;
     }
 
 
@@ -363,7 +368,11 @@ public class PacienteServiceImpl implements PacienteService {
             Hibernate.initialize(paciente.getMedicacoes());
         });
         
-        return pacientes.map(pacienteMapper::toResponse);
+        return pacientes.map(paciente -> {
+            PacienteResponse response = pacienteMapper.toResponse(paciente);
+            calcularIdade(response);
+            return response;
+        });
     }
 
     /**
@@ -423,6 +432,7 @@ public class PacienteServiceImpl implements PacienteService {
         processarRelacionamentosPorId(pacienteAtualizado, request);
 
         PacienteResponse response = pacienteMapper.toResponse(pacienteAtualizado);
+        calcularIdade(response);
         log.debug("Paciente atualizado no cache com chave: {}", id);
         return response;
     }
@@ -838,6 +848,28 @@ public class PacienteServiceImpl implements PacienteService {
             T entidade = repository.findById(uuid)
                     .orElseThrow(() -> new NotFoundException(nomeEntidade + " não encontrado com ID: " + uuid));
             sincronizador.accept(entidade);
+        }
+    }
+
+    /**
+     * Calcula a idade do paciente baseada na data de nascimento.
+     * A idade é calculada como a diferença em anos entre a data de nascimento e a data atual.
+     * Se a data de nascimento não estiver disponível, a idade será null.
+     *
+     * @param response PacienteResponse que terá a idade calculada
+     */
+    private void calcularIdade(PacienteResponse response) {
+        if (response == null) {
+            return;
+        }
+        
+        if (response.getDataNascimento() != null) {
+            LocalDate dataNascimento = response.getDataNascimento();
+            LocalDate hoje = LocalDate.now();
+            int idade = Period.between(dataNascimento, hoje).getYears();
+            response.setIdade(idade);
+        } else {
+            response.setIdade(null);
         }
     }
 

@@ -47,6 +47,7 @@ public class PacienteResponse {
     private String rg;
     private String cns;
     private LocalDate dataNascimento;
+    private Integer idade;
     
     @JsonSerialize(using = SexoEnumSerializer.class)
     private SexoEnum sexo;
