@@ -1,16 +1,22 @@
 package com.upsaude.service.impl;
 
+import com.upsaude.api.request.EnderecoRequest;
 import com.upsaude.api.request.MedicosRequest;
 import com.upsaude.api.response.MedicosResponse;
+import com.upsaude.entity.Endereco;
 import com.upsaude.entity.EspecialidadesMedicas;
 import com.upsaude.entity.Medicos;
 import com.upsaude.entity.Tenant;
 import com.upsaude.exception.BadRequestException;
 import com.upsaude.exception.InternalServerErrorException;
 import com.upsaude.exception.NotFoundException;
+import com.upsaude.mapper.EnderecoMapper;
 import com.upsaude.mapper.MedicosMapper;
+import com.upsaude.repository.CidadesRepository;
 import com.upsaude.repository.EspecialidadesMedicasRepository;
+import com.upsaude.repository.EstadosRepository;
 import com.upsaude.repository.MedicosRepository;
+import com.upsaude.service.EnderecoService;
 import com.upsaude.service.MedicosService;
 import com.upsaude.service.TenantService;
 import lombok.RequiredArgsConstructor;
@@ -24,7 +30,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
+import java.util.ArrayList;
+import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 
 /**
@@ -42,6 +52,10 @@ public class MedicosServiceImpl implements MedicosService {
     private final MedicosMapper medicosMapper;
     private final EspecialidadesMedicasRepository especialidadesMedicasRepository;
     private final TenantService tenantService;
+    private final EnderecoService enderecoService;
+    private final EnderecoMapper enderecoMapper;
+    private final EstadosRepository estadosRepository;
+    private final CidadesRepository cidadesRepository;
 
     @Override
     @Transactional
@@ -119,6 +133,16 @@ public class MedicosServiceImpl implements MedicosService {
         }
     }
 
+    /**
+     * {@inheritDoc}
+     * 
+     * OTIMIZAÇÃO: Usa EntityGraph para carregar todos os relacionamentos necessários
+     * em uma única query, evitando o problema N+1 queries.
+     * O método findAll() do repository já está configurado com @EntityGraph que carrega:
+     * - especialidades (lista de especialidades)
+     * - enderecos
+     * - medicosEstabelecimentos
+     */
     @Override
     @Transactional(readOnly = true)
     public Page<MedicosResponse> listar(Pageable pageable) {
@@ -126,6 +150,8 @@ public class MedicosServiceImpl implements MedicosService {
                 pageable.getPageNumber(), pageable.getPageSize());
 
         try {
+            // Busca médicos paginados com especialidade carregada via EntityGraph
+            // O EntityGraph garante que o relacionamento especialidade seja carregado em uma única query
             Page<Medicos> medicos = medicosRepository.findAll(pageable);
             log.debug("Listagem de médicos concluída. Total de elementos: {}", medicos.getTotalElements());
             return medicos.map(medicosMapper::toResponse);
@@ -323,7 +349,7 @@ public class MedicosServiceImpl implements MedicosService {
      * gerencia automaticamente a ordem de salvamento e integridade referencial.
      *
      * Responsabilidades deste método:
-     * 1. Buscar entidades relacionadas existentes (apenas validação)
+     * 1. Buscar entidades relacionadas existentes (validação e busca)
      * 2. Atribuir as referências
      * 3. O JPA/Hibernate cuida do resto (ordem, persistência, cascade)
      *
@@ -333,19 +359,93 @@ public class MedicosServiceImpl implements MedicosService {
     private void processarRelacionamentos(Medicos medicos, MedicosRequest request) {
         log.debug("Processando relacionamentos do médico");
 
-        // ESPECIALIDADE (ManyToOne) - Buscar entidade existente
-        // Não usa cascade pois especialidades são entidades independentes compartilhadas
-        if (request.getEspecialidade() != null) {
-            EspecialidadesMedicas especialidade = especialidadesMedicasRepository
-                    .findById(request.getEspecialidade())
-                    .orElseThrow(() -> new NotFoundException(
-                            "Especialidade médica não encontrada com ID: " + request.getEspecialidade()));
-            medicos.setEspecialidade(especialidade);
+        // LISTA DE ESPECIALIDADES (ManyToMany) - Processar lista de IDs
+        // O backend busca internamente as especialidades pelos IDs e faz o vínculo correto
+        if (request.getEspecialidades() != null && !request.getEspecialidades().isEmpty()) {
+            log.debug("Processando {} especialidade(s) para o médico", request.getEspecialidades().size());
+            List<EspecialidadesMedicas> especialidades = new ArrayList<>();
+            
+            // Remove duplicatas da lista de IDs antes de processar
+            // Usa LinkedHashSet para manter ordem e remover duplicatas
+            Set<UUID> especialidadesIdsUnicos = new LinkedHashSet<>(request.getEspecialidades());
+            
+            if (especialidadesIdsUnicos.size() != request.getEspecialidades().size()) {
+                log.warn("Lista de especialidades contém IDs duplicados. Removendo duplicatas.");
+            }
+            
+            // Busca cada especialidade pelo ID e valida existência
+            for (UUID especialidadeId : especialidadesIdsUnicos) {
+                if (especialidadeId == null) {
+                    log.warn("ID de especialidade nulo encontrado na lista. Ignorando.");
+                    continue;
+                }
+                
+                EspecialidadesMedicas especialidade = especialidadesMedicasRepository
+                        .findById(especialidadeId)
+                        .orElseThrow(() -> new NotFoundException(
+                                "Especialidade médica não encontrada com ID: " + especialidadeId));
+                especialidades.add(especialidade);
+                log.debug("Especialidade {} associada ao médico", especialidadeId);
+            }
+            
+            medicos.setEspecialidades(especialidades);
+            log.debug("{} especialidade(s) associada(s) ao médico com sucesso", especialidades.size());
         } else {
-            medicos.setEspecialidade(null);
+            // Se não vier lista de especialidades, limpa a lista existente
+            medicos.setEspecialidades(new ArrayList<>());
+            log.debug("Nenhuma especialidade fornecida. Lista de especialidades será limpa.");
         }
 
-        // VÍNCULOS E ENDEREÇOS são gerenciados com cascade automático pelo JPA
+        // ENDEREÇOS (OneToMany) - Processar lista de endereços
+        if (request.getEnderecos() != null && !request.getEnderecos().isEmpty()) {
+            log.debug("Processando {} endereço(s) para o médico", request.getEnderecos().size());
+            
+            // Obtém o tenant do usuário autenticado (obrigatório para Endereco que estende BaseEntity)
+            Tenant tenant = tenantService.obterTenantDoUsuarioAutenticado();
+            if (tenant == null) {
+                throw new BadRequestException("Não foi possível obter tenant do usuário autenticado. É necessário estar autenticado para criar endereços.");
+            }
+            
+            List<Endereco> enderecos = new ArrayList<>();
+            for (EnderecoRequest enderecoRequest : request.getEnderecos()) {
+                // Só processa endereço se tiver logradouro ou número
+                if (enderecoRequest.getLogradouro() != null || enderecoRequest.getNumero() != null) {
+                    Endereco endereco = enderecoMapper.fromRequest(enderecoRequest);
+                    endereco.setActive(true);
+                    
+                    // Define o tenant do endereço (obrigatório para BaseEntity)
+                    endereco.setTenant(tenant);
+                    
+                    // Garante valores padrão para campos obrigatórios
+                    if (endereco.getSemNumero() == null) {
+                        endereco.setSemNumero(false);
+                    }
+                    
+                    // Processa relacionamentos estado e cidade (opcionais)
+                    if (enderecoRequest.getEstado() != null) {
+                        endereco.setEstado(estadosRepository.findById(enderecoRequest.getEstado())
+                                .orElseThrow(() -> new NotFoundException("Estado não encontrado com ID: " + enderecoRequest.getEstado())));
+                    }
+
+                    if (enderecoRequest.getCidade() != null) {
+                        endereco.setCidade(cidadesRepository.findById(enderecoRequest.getCidade())
+                                .orElseThrow(() -> new NotFoundException("Cidade não encontrada com ID: " + enderecoRequest.getCidade())));
+                    }
+                    
+                    // Usa findOrCreate para evitar duplicados - busca endereço existente ou cria novo
+                    Endereco enderecoFinal = enderecoService.findOrCreate(endereco);
+                    enderecos.add(enderecoFinal);
+                    log.debug("Endereço processado. ID: {}", enderecoFinal.getId());
+                }
+            }
+            
+            if (!enderecos.isEmpty()) {
+                medicos.setEnderecos(enderecos);
+                log.debug("{} endereço(s) processado(s) para associação ao médico", enderecos.size());
+            }
+        }
+
+        // VÍNCULOS são gerenciados com cascade automático pelo JPA
         // Se necessário adicionar/remover vínculos, isso deve ser feito através de endpoints específicos
         
         log.debug("Relacionamentos processados. JPA gerenciará persistência automaticamente.");

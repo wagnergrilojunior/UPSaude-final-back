@@ -12,7 +12,9 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinTable;
-import jakarta.persistence.ManyToOne;
+import jakarta.persistence.ManyToMany;
+import jakarta.persistence.NamedAttributeNode;
+import jakarta.persistence.NamedEntityGraph;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
@@ -41,9 +43,16 @@ import java.util.List;
        indexes = {
            @Index(name = "idx_medicos_crm", columnList = "crm"),
            @Index(name = "idx_medicos_crm_uf", columnList = "crm_uf"),
-           @Index(name = "idx_medicos_nome", columnList = "nome_completo"),
-           @Index(name = "idx_medicos_especialidade", columnList = "especialidade_id")
+           @Index(name = "idx_medicos_nome", columnList = "nome_completo")
        })
+@NamedEntityGraph(
+    name = "Medicos.listagemCompleta",
+    attributeNodes = {
+        @NamedAttributeNode("especialidades"),
+        @NamedAttributeNode("enderecos"),
+        @NamedAttributeNode("medicosEstabelecimentos")
+    }
+)
 @Data
 @EqualsAndHashCode(callSuper = true)
 public class Medicos extends BaseEntityWithoutEstabelecimento {
@@ -55,17 +64,28 @@ public class Medicos extends BaseEntityWithoutEstabelecimento {
         this.contato = new ContatoMedico();
         this.enderecos = new ArrayList<>();
         this.medicosEstabelecimentos = new ArrayList<>();
+        this.especialidades = new ArrayList<>();
     }
 
     // ========== RELACIONAMENTOS ==========
 
     /**
-     * Especialidade médica principal do médico.
-     * Relacionamento ManyToOne - não usa cascade pois especialidades são entidades independentes.
+     * Lista de especialidades médicas do médico.
+     * Relacionamento ManyToMany - permite que um médico tenha múltiplas especialidades.
+     * Usa JoinTable para gerenciar o relacionamento bidirecional.
      */
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "especialidade_id")
-    private EspecialidadesMedicas especialidade;
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(
+        name = "medicos_especialidades",
+        schema = "public",
+        joinColumns = @JoinColumn(name = "medico_id"),
+        inverseJoinColumns = @JoinColumn(name = "especialidade_id"),
+        indexes = {
+            @Index(name = "idx_medicos_especialidades_medico", columnList = "medico_id"),
+            @Index(name = "idx_medicos_especialidades_especialidade", columnList = "especialidade_id")
+        }
+    )
+    private List<EspecialidadesMedicas> especialidades = new ArrayList<>();
 
     // ========== IDENTIFICAÇÃO BÁSICA ==========
 
@@ -149,6 +169,40 @@ public class Medicos extends BaseEntityWithoutEstabelecimento {
         if (medicosEstabelecimentos == null) {
             medicosEstabelecimentos = new ArrayList<>();
         }
+        if (especialidades == null) {
+            especialidades = new ArrayList<>();
+        }
+    }
+
+    // ========== MÉTODOS UTILITÁRIOS - ESPECIALIDADES ==========
+
+    /**
+     * Adiciona uma especialidade à lista de especialidades do médico.
+     *
+     * @param especialidade A especialidade a ser adicionada
+     */
+    public void addEspecialidade(EspecialidadesMedicas especialidade) {
+        if (especialidade == null) {
+            return;
+        }
+        if (especialidades == null) {
+            especialidades = new ArrayList<>();
+        }
+        if (!especialidades.contains(especialidade)) {
+            especialidades.add(especialidade);
+        }
+    }
+
+    /**
+     * Remove uma especialidade da lista de especialidades do médico.
+     *
+     * @param especialidade A especialidade a ser removida
+     */
+    public void removeEspecialidade(EspecialidadesMedicas especialidade) {
+        if (especialidade == null || especialidades == null) {
+            return;
+        }
+        especialidades.remove(especialidade);
     }
 
     // ========== MÉTODOS UTILITÁRIOS - MEDICOS ESTABELECIMENTOS ==========

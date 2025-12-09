@@ -38,7 +38,7 @@ public interface MedicosMapper extends EntityMapper<Medicos, MedicosDTO> {
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
     @Mapping(target = "active", ignore = true)
-    @Mapping(target = "especialidade", ignore = true)
+    @Mapping(target = "especialidades", ignore = true)
     @Mapping(target = "enderecos", ignore = true)
     @Mapping(target = "medicosEstabelecimentos", ignore = true)
     Medicos fromRequest(MedicosRequest request);
@@ -52,7 +52,7 @@ public interface MedicosMapper extends EntityMapper<Medicos, MedicosDTO> {
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
     @Mapping(target = "active", ignore = true)
-    @Mapping(target = "especialidade", ignore = true)
+    @Mapping(target = "especialidades", ignore = true)
     @Mapping(target = "enderecos", ignore = true)
     @Mapping(target = "medicosEstabelecimentos", ignore = true)
     void updateFromRequest(MedicosRequest request, @MappingTarget Medicos entity);
