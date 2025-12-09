@@ -68,8 +68,20 @@ public class UsuariosSistemaServiceImpl implements UsuariosSistemaService {
         try {
             // Validação de dados básicos é feita automaticamente pelo Bean Validation no Request
             
+            // Validar se userId existe na tabela auth.users quando fornecido
+            if (request.getUserId() != null) {
+                User user = userRepository.findById(request.getUserId())
+                        .orElseThrow(() -> new NotFoundException("User não encontrado com ID: " + request.getUserId()));
+                
+                // Validar se o email do request corresponde ao email do user encontrado
+                if (request.getEmail() != null && user.getEmail() != null && 
+                    !user.getEmail().equalsIgnoreCase(request.getEmail())) {
+                    throw new BadRequestException("O email informado não corresponde ao userId fornecido. Email do userId: " + user.getEmail());
+                }
+            }
+            
             // Validações de duplicatas antes de criar
-            validarEmailUnico(null, request.getEmail());
+            validarEmailUnico(null, request.getEmail(), request.getUserId());
             validarUsernameUnico(null, request.getUsername());
 
             UsuariosSistema usuariosSistema = usuariosSistemaMapper.fromRequest(request);
@@ -174,7 +186,7 @@ public class UsuariosSistemaServiceImpl implements UsuariosSistemaService {
                 .orElseThrow(() -> new NotFoundException("UsuariosSistema não encontrado com ID: " + id));
 
         // Validações de duplicatas antes de atualizar
-        validarEmailUnico(id, request.getEmail());
+        validarEmailUnico(id, request.getEmail(), request.getUserId());
         validarUsernameUnico(id, request.getUsername());
 
         atualizarDadosUsuariosSistema(usuariosSistemaExistente, request);
@@ -228,12 +240,14 @@ public class UsuariosSistemaServiceImpl implements UsuariosSistemaService {
 
     /**
      * Valida se o email é único no sistema (tabela User).
+     * Permite cadastro quando o email existe em auth.users mas ainda não existe em usuarios_sistema.
      *
      * @param usuariosSistemaId ID do UsuariosSistema atual (null se for criação)
      * @param email email a ser validado
+     * @param userId userId do request (pode ser null)
      * @throws BadRequestException se já existir outro usuário com o mesmo email
      */
-    private void validarEmailUnico(UUID usuariosSistemaId, String email) {
+    private void validarEmailUnico(UUID usuariosSistemaId, String email, UUID userId) {
         if (!StringUtils.hasText(email)) {
             return;
         }
@@ -253,8 +267,32 @@ public class UsuariosSistemaServiceImpl implements UsuariosSistemaService {
                     throw new BadRequestException("Já existe um usuário cadastrado com o email: " + email);
                 }
             } else {
-                // Se for criação, sempre lança exceção se encontrar email
-                throw new BadRequestException("Já existe um usuário cadastrado com o email: " + email);
+                // Se for criação, verificar se já existe registro na tabela usuarios_sistema
+                if (userId != null) {
+                    // Verificar se já existe um registro na tabela usuarios_sistema com esse userId
+                    Optional<UsuariosSistema> usuariosSistemaExistente = usuariosSistemaRepository.findByUserId(userId);
+                    if (usuariosSistemaExistente.isPresent()) {
+                        throw new BadRequestException("Já existe um usuário do sistema cadastrado com este userId: " + userId);
+                    }
+                    
+                    // Verificar se o userId do request corresponde ao userId do email encontrado em auth.users
+                    if (!userEncontrado.getId().equals(userId)) {
+                        throw new BadRequestException("O email informado pertence a outro usuário. Email: " + email);
+                    }
+                    
+                    // Se chegou aqui, o email existe em auth.users, corresponde ao userId passado,
+                    // e ainda não existe em usuarios_sistema - permitir o cadastro
+                    log.debug("Email {} existe em auth.users e corresponde ao userId {}, mas ainda não existe em usuarios_sistema. Permitindo cadastro.", email, userId);
+                } else {
+                    // Se não tem userId no request, verificar se já existe em usuarios_sistema pelo userId do email encontrado
+                    Optional<UsuariosSistema> usuariosSistemaExistente = usuariosSistemaRepository.findByUserId(userEncontrado.getId());
+                    if (usuariosSistemaExistente.isPresent()) {
+                        throw new BadRequestException("Já existe um usuário cadastrado com o email: " + email);
+                    }
+                    
+                    // Se não existe em usuarios_sistema, permitir o cadastro (caso onde userId será setado depois)
+                    log.debug("Email {} existe em auth.users mas não existe em usuarios_sistema. Permitindo cadastro.", email);
+                }
             }
         }
     }
