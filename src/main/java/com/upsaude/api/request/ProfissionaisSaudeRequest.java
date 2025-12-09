@@ -67,7 +67,14 @@ public class ProfissionaisSaudeRequest {
     private String email;
     private String telefoneInstitucional;
     private String emailInstitucional;
+    
+    /**
+     * Endereço profissional do profissional de saúde.
+     * Pode ser fornecido como UUID (endereço existente) ou como objeto EnderecoRequest completo (novo endereço).
+     * Se fornecido como objeto completo, será usado findOrCreate para evitar duplicação.
+     */
     private UUID enderecoProfissional;
+    private EnderecoRequest enderecoProfissionalCompleto;
     
     @Builder.Default
     private List<UUID> especialidades = new ArrayList<>();

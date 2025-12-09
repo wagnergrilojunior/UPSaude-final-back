@@ -82,4 +82,80 @@ public interface ProfissionaisSaudeRepository extends JpaRepository<Profissionai
      * @return Optional contendo o profissional encontrado, se existir
      */
     java.util.Optional<ProfissionaisSaude> findByCpf(String cpf);
+
+    /**
+     * Verifica se já existe profissional com o email informado.
+     *
+     * @param email email do profissional
+     * @return true se já existe, false caso contrário
+     */
+    boolean existsByEmail(String email);
+
+    /**
+     * Verifica se já existe profissional com o email informado, excluindo um ID específico.
+     * Útil para validação em atualizações.
+     *
+     * @param email email do profissional
+     * @param id ID do profissional a ser excluído da verificação
+     * @return true se já existe outro profissional com o email, false caso contrário
+     */
+    boolean existsByEmailAndIdNot(String email, UUID id);
+
+    /**
+     * Verifica se já existe profissional com o RG informado.
+     *
+     * @param rg RG do profissional
+     * @return true se já existe, false caso contrário
+     */
+    boolean existsByRg(String rg);
+
+    /**
+     * Verifica se já existe profissional com o RG informado, excluindo um ID específico.
+     * Útil para validação em atualizações.
+     *
+     * @param rg RG do profissional
+     * @param id ID do profissional a ser excluído da verificação
+     * @return true se já existe outro profissional com o RG, false caso contrário
+     */
+    boolean existsByRgAndIdNot(String rg, UUID id);
+
+    /**
+     * Verifica se já existe profissional com o CNS informado.
+     *
+     * @param cns CNS do profissional
+     * @return true se já existe, false caso contrário
+     */
+    boolean existsByCns(String cns);
+
+    /**
+     * Verifica se já existe profissional com o CNS informado, excluindo um ID específico.
+     * Útil para validação em atualizações.
+     *
+     * @param cns CNS do profissional
+     * @param id ID do profissional a ser excluído da verificação
+     * @return true se já existe outro profissional com o CNS, false caso contrário
+     */
+    boolean existsByCnsAndIdNot(String cns, UUID id);
+
+    /**
+     * Verifica se já existe profissional com o CPF informado, excluindo um ID específico.
+     * Útil para validação em atualizações.
+     *
+     * @param cpf CPF do profissional
+     * @param id ID do profissional a ser excluído da verificação
+     * @return true se já existe outro profissional com o CPF, false caso contrário
+     */
+    boolean existsByCpfAndIdNot(String cpf, UUID id);
+
+    /**
+     * Busca profissional por registro profissional, conselho e UF.
+     * Útil para validação de unicidade em atualizações.
+     *
+     * @param registroProfissional número do registro profissional
+     * @param conselhoId ID do conselho
+     * @param ufRegistro UF do registro
+     * @return Optional contendo o profissional encontrado, se existir
+     */
+    java.util.Optional<ProfissionaisSaude> findByRegistroProfissionalAndConselhoIdAndUfRegistro(
+            String registroProfissional, UUID conselhoId, String ufRegistro);
 }
