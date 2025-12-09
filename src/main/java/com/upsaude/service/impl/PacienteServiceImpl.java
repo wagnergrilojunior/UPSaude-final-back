@@ -347,6 +347,16 @@ public class PacienteServiceImpl implements PacienteService {
 
     /**
      * {@inheritDoc}
+     * 
+     * OTIMIZAÇÃO: Usa EntityGraph para carregar todos os relacionamentos necessários
+     * em uma única query, evitando o problema N+1 queries.
+     * O método findAll() do repository já está configurado com @EntityGraph que carrega:
+     * - convenio
+     * - enderecos
+     * - doencas
+     * - alergias
+     * - deficiencias
+     * - medicacoes
      */
     @Override
     @Transactional(readOnly = true)
@@ -354,19 +364,9 @@ public class PacienteServiceImpl implements PacienteService {
         log.debug("Listando pacientes paginados. Página: {}, Tamanho: {}", 
                 pageable.getPageNumber(), pageable.getPageSize());
 
-        // Busca pacientes paginados
+        // Busca pacientes paginados com relacionamentos carregados via EntityGraph
+        // O EntityGraph garante que todos os relacionamentos sejam carregados em uma única query
         Page<Paciente> pacientes = pacienteRepository.findAll(pageable);
-        
-        // Inicializa as coleções lazy dentro da transação para evitar LazyInitializationException
-        // Isso força o Hibernate a carregar os endereços antes de fechar a sessão
-        pacientes.getContent().forEach(paciente -> {
-            Hibernate.initialize(paciente.getEnderecos());
-            // Inicializa outras coleções lazy se necessário
-            Hibernate.initialize(paciente.getDoencas());
-            Hibernate.initialize(paciente.getAlergias());
-            Hibernate.initialize(paciente.getDeficiencias());
-            Hibernate.initialize(paciente.getMedicacoes());
-        });
         
         return pacientes.map(paciente -> {
             PacienteResponse response = pacienteMapper.toResponse(paciente);

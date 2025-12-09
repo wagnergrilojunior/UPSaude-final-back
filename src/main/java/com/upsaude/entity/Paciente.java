@@ -65,6 +65,17 @@ import java.util.List;
            @Index(name = "idx_pacientes_cns_validado", columnList = "cns_validado"),
            @Index(name = "idx_pacientes_acompanhado_esf", columnList = "acompanhado_por_equipe_esf")
        })
+@NamedEntityGraph(
+    name = "Paciente.listagemCompleta",
+    attributeNodes = {
+        @NamedAttributeNode("convenio"),
+        @NamedAttributeNode("enderecos"),
+        @NamedAttributeNode("doencas"),
+        @NamedAttributeNode("alergias"),
+        @NamedAttributeNode("deficiencias"),
+        @NamedAttributeNode("medicacoes")
+    }
+)
 @Data
 @EqualsAndHashCode(callSuper = true)
 public class Paciente extends BaseEntityWithoutTenant {

@@ -24,7 +24,15 @@ public class MedicosResponse {
     private OffsetDateTime createdAt;
     private OffsetDateTime updatedAt;
     private Boolean active;
-    private EspecialidadesMedicasResponse especialidade;
+    
+    /**
+     * Lista completa de especialidades médicas do médico.
+     * Retorna os objetos completos de especialidades (não apenas IDs).
+     * Permite que um médico tenha múltiplas especialidades.
+     */
+    @Builder.Default
+    private List<EspecialidadesMedicasResponse> especialidades = new ArrayList<>();
+    
     private String nomeCompleto;
     private DadosPessoaisMedicoResponse dadosPessoais;
     private RegistroProfissionalMedicoResponse registroProfissional;

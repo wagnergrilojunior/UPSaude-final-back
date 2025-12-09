@@ -5,9 +5,11 @@ import java.util.UUID;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import org.springframework.lang.NonNull;
 
 import com.upsaude.entity.Medicos;
 import com.upsaude.entity.Tenant;
@@ -88,4 +90,28 @@ public interface MedicosRepository extends JpaRepository<Medicos, UUID> {
     // Page<Medicos> findByEstabelecimentoIdAndTenant(@Param("estabelecimentoId") UUID estabelecimentoId, 
     //                                                 @Param("tenant") Tenant tenant, 
     //                                                 Pageable pageable);
+
+    /**
+     * Busca médicos paginados com relacionamentos carregados usando EntityGraph.
+     * Otimiza a query carregando todos os relacionamentos necessários em uma única query,
+     * evitando o problema N+1 queries.
+     * 
+     * IMPORTANTE: Este método usa o EntityGraph "Medicos.listagemCompleta" que carrega:
+     * - especialidades (lista de especialidades)
+     * - enderecos
+     * - medicosEstabelecimentos
+     * 
+     * Isso reduz significativamente o número de queries SQL executadas.
+     *
+     * @param pageable informações de paginação
+     * @return página de médicos com relacionamentos carregados
+     */
+    @Override
+    @EntityGraph(attributePaths = {
+        "especialidades",
+        "enderecos",
+        "medicosEstabelecimentos"
+    })
+    @NonNull
+    Page<Medicos> findAll(@NonNull Pageable pageable);
 }
