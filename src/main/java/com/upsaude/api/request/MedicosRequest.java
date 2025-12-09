@@ -56,6 +56,17 @@ public class MedicosRequest {
     @Builder.Default
     private List<EnderecoRequest> enderecos = new ArrayList<>();
     
+    /**
+     * Lista de IDs dos estabelecimentos onde o médico atua.
+     * Permite que um médico tenha vínculos com múltiplos estabelecimentos.
+     * O backend é responsável por buscar os estabelecimentos e criar os vínculos corretos.
+     * 
+     * IMPORTANTE: Apenas IDs devem ser enviados. O backend fará a busca interna
+     * dos estabelecimentos e criará os objetos MedicoEstabelecimento com valores padrão.
+     */
+    @Builder.Default
+    private List<UUID> estabelecimentos = new ArrayList<>();
+    
     @Size(max = 1000, message = "Observações deve ter no máximo 1000 caracteres")
     private String observacoes;
 }
