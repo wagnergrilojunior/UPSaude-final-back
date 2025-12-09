@@ -71,7 +71,7 @@ public class ProfissionaisSaudeServiceImpl implements ProfissionaisSaudeService 
         }
 
         try {
-            validarDadosBasicos(request);
+            // Validação de dados básicos é feita automaticamente pelo Bean Validation no Request
             validarUnicidadeParaCriacao(request);
 
             ProfissionaisSaude profissional = profissionaisSaudeMapper.fromRequest(request);
@@ -185,7 +185,7 @@ public class ProfissionaisSaudeServiceImpl implements ProfissionaisSaudeService 
         }
 
         try {
-            validarDadosBasicos(request);
+            // Validação de dados básicos é feita automaticamente pelo Bean Validation no Request
 
             ProfissionaisSaude profissionalExistente = profissionaisSaudeRepository.findById(id)
                     .orElseThrow(() -> new NotFoundException("Profissional de saúde não encontrado com ID: " + id));
@@ -283,25 +283,9 @@ public class ProfissionaisSaudeServiceImpl implements ProfissionaisSaudeService 
         }
     }
 
-    private void validarDadosBasicos(ProfissionaisSaudeRequest request) {
-        if (request == null) {
-            throw new BadRequestException("Dados do profissional de saúde são obrigatórios");
-        }
-
-        // Validar dados regulatórios
-        if (request.getDataValidadeRegistro() != null && request.getDataEmissaoRegistro() != null) {
-            if (request.getDataValidadeRegistro().isBefore(request.getDataEmissaoRegistro())) {
-                throw new BadRequestException("Data de validade do registro não pode ser anterior à data de emissão");
-            }
-        }
-
-        // Validar que profissional com registro suspenso ou inativo não pode ser vinculado
-        if (request.getStatusRegistro() != null && 
-            (request.getStatusRegistro() == com.upsaude.enums.StatusAtivoEnum.SUSPENSO || 
-             request.getStatusRegistro() == com.upsaude.enums.StatusAtivoEnum.INATIVO)) {
-            log.warn("Profissional sendo cadastrado com status de registro: {}", request.getStatusRegistro());
-        }
-    }
+    // Validações de dados básicos foram movidas para o Request usando Bean Validation
+    // (@NotNull, @NotBlank, @Pattern, etc). Isso garante validação automática no Controller
+    // e retorno de erro 400 padronizado via ApiExceptionHandler.
 
     /**
      * Valida unicidade dos campos únicos para criação de novo profissional.

@@ -42,7 +42,7 @@ public class PreNatalServiceImpl implements PreNatalService {
     public PreNatalResponse criar(PreNatalRequest request) {
         log.debug("Criando novo pré-natal");
 
-        validarDadosBasicos(request);
+        // Validação de dados básicos é feita automaticamente pelo Bean Validation no Request
 
         PreNatal preNatal = preNatalMapper.fromRequest(request);
         preNatal.setActive(true);
@@ -115,7 +115,7 @@ public class PreNatalServiceImpl implements PreNatalService {
             throw new BadRequestException("ID do pré-natal é obrigatório");
         }
 
-        validarDadosBasicos(request);
+        // Validação de dados básicos é feita automaticamente pelo Bean Validation no Request
 
         PreNatal preNatalExistente = preNatalRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Pré-natal não encontrado com ID: " + id));
@@ -150,14 +150,9 @@ public class PreNatalServiceImpl implements PreNatalService {
         log.info("Pré-natal excluído (desativado) com sucesso. ID: {}", id);
     }
 
-    private void validarDadosBasicos(PreNatalRequest request) {
-        if (request == null) {
-            throw new BadRequestException("Dados do pré-natal são obrigatórios");
-        }
-        if (request.getPaciente() == null) {
-            throw new BadRequestException("Paciente é obrigatório");
-        }
-    }
+    // Validações de dados básicos foram movidas para o Request usando Bean Validation
+    // (@NotNull, @NotBlank, @Pattern, etc). Isso garante validação automática no Controller
+    // e retorno de erro 400 padronizado via ApiExceptionHandler.
 
     private void atualizarDadosPreNatal(PreNatal preNatal, PreNatalRequest request) {
         PreNatal preNatalAtualizado = preNatalMapper.fromRequest(request);

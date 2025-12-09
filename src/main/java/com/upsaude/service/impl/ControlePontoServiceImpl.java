@@ -56,7 +56,7 @@ public class ControlePontoServiceImpl implements ControlePontoService {
         }
 
         try {
-            validarDadosBasicos(request);
+            // Validação de dados básicos é feita automaticamente pelo Bean Validation no Request
 
             ControlePonto controlePonto = controlePontoMapper.fromRequest(request);
 
@@ -284,7 +284,7 @@ public class ControlePontoServiceImpl implements ControlePontoService {
         }
 
         try {
-            validarDadosBasicos(request);
+            // Validação de dados básicos é feita automaticamente pelo Bean Validation no Request
 
             ControlePonto controlePontoExistente = controlePontoRepository.findById(id)
                     .orElseThrow(() -> new NotFoundException("Registro de ponto não encontrado com ID: " + id));
@@ -362,23 +362,9 @@ public class ControlePontoServiceImpl implements ControlePontoService {
         }
     }
 
-    private void validarDadosBasicos(ControlePontoRequest request) {
-        if (request == null) {
-            throw new BadRequestException("Dados do registro de ponto são obrigatórios");
-        }
-        if (request.getDataHora() == null) {
-            throw new BadRequestException("Data e hora do ponto são obrigatórias");
-        }
-        if (request.getDataPonto() == null) {
-            throw new BadRequestException("Data do ponto é obrigatória");
-        }
-        if (request.getTipoPonto() == null) {
-            throw new BadRequestException("Tipo de ponto é obrigatório");
-        }
-        if (request.getProfissional() == null && request.getMedico() == null) {
-            throw new BadRequestException("ID do profissional ou médico é obrigatório");
-        }
-    }
+    // Validações de dados básicos foram movidas para o Request usando Bean Validation
+    // (@NotNull, @NotBlank, @Pattern, etc). Isso garante validação automática no Controller
+    // e retorno de erro 400 padronizado via ApiExceptionHandler.
 
     // Método removido - agora usa controlePontoMapper.updateFromRequest diretamente
     // O MapStruct já preserva campos de controle automaticamente

@@ -39,7 +39,7 @@ public class TratamentosProcedimentosServiceImpl implements TratamentosProcedime
     public TratamentosProcedimentosResponse criar(TratamentosProcedimentosRequest request) {
         log.debug("Criando novo tratamentosprocedimentos");
 
-        validarDadosBasicos(request);
+        // Validação de dados básicos é feita automaticamente pelo Bean Validation no Request
 
         TratamentosProcedimentos tratamentosProcedimentos = tratamentosProcedimentosMapper.fromRequest(request);
         tratamentosProcedimentos.setActive(true);
@@ -84,7 +84,7 @@ public class TratamentosProcedimentosServiceImpl implements TratamentosProcedime
             throw new BadRequestException("ID do tratamentosprocedimentos é obrigatório");
         }
 
-        validarDadosBasicos(request);
+        // Validação de dados básicos é feita automaticamente pelo Bean Validation no Request
 
         TratamentosProcedimentos tratamentosProcedimentosExistente = tratamentosProcedimentosRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("TratamentosProcedimentos não encontrado com ID: " + id));
@@ -119,11 +119,9 @@ public class TratamentosProcedimentosServiceImpl implements TratamentosProcedime
         log.info("TratamentosProcedimentos excluído (desativado) com sucesso. ID: {}", id);
     }
 
-    private void validarDadosBasicos(TratamentosProcedimentosRequest request) {
-        if (request == null) {
-            throw new BadRequestException("Dados do tratamentosprocedimentos são obrigatórios");
-        }
-    }
+    // Validações de dados básicos foram movidas para o Request usando Bean Validation
+    // (@NotNull, @NotBlank, @Pattern, etc). Isso garante validação automática no Controller
+    // e retorno de erro 400 padronizado via ApiExceptionHandler.
 
         private void atualizarDadosTratamentosProcedimentos(TratamentosProcedimentos tratamentosProcedimentos, TratamentosProcedimentosRequest request) {
         TratamentosProcedimentos tratamentosProcedimentosAtualizado = tratamentosProcedimentosMapper.fromRequest(request);

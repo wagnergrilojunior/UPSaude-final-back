@@ -41,7 +41,7 @@ public class PlanejamentoFamiliarServiceImpl implements PlanejamentoFamiliarServ
     public PlanejamentoFamiliarResponse criar(PlanejamentoFamiliarRequest request) {
         log.debug("Criando novo planejamento familiar");
 
-        validarDadosBasicos(request);
+        // Validação de dados básicos é feita automaticamente pelo Bean Validation no Request
 
         PlanejamentoFamiliar planejamentoFamiliar = planejamentoFamiliarMapper.fromRequest(request);
         planejamentoFamiliar.setActive(true);
@@ -113,7 +113,7 @@ public class PlanejamentoFamiliarServiceImpl implements PlanejamentoFamiliarServ
             throw new BadRequestException("ID do planejamento familiar é obrigatório");
         }
 
-        validarDadosBasicos(request);
+        // Validação de dados básicos é feita automaticamente pelo Bean Validation no Request
 
         PlanejamentoFamiliar planejamentoExistente = planejamentoFamiliarRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Planejamento familiar não encontrado com ID: " + id));
@@ -148,14 +148,9 @@ public class PlanejamentoFamiliarServiceImpl implements PlanejamentoFamiliarServ
         log.info("Planejamento familiar excluído (desativado) com sucesso. ID: {}", id);
     }
 
-    private void validarDadosBasicos(PlanejamentoFamiliarRequest request) {
-        if (request == null) {
-            throw new BadRequestException("Dados do planejamento familiar são obrigatórios");
-        }
-        if (request.getPaciente() == null) {
-            throw new BadRequestException("Paciente é obrigatório");
-        }
-    }
+    // Validações de dados básicos foram movidas para o Request usando Bean Validation
+    // (@NotNull, @NotBlank, @Pattern, etc). Isso garante validação automática no Controller
+    // e retorno de erro 400 padronizado via ApiExceptionHandler.
 
     private void atualizarDadosPlanejamentoFamiliar(PlanejamentoFamiliar planejamento, PlanejamentoFamiliarRequest request) {
         PlanejamentoFamiliar planejamentoAtualizado = planejamentoFamiliarMapper.fromRequest(request);

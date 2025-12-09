@@ -95,7 +95,7 @@ public class PacienteServiceImpl implements PacienteService {
         log.debug("Criando novo paciente: {}", request != null ? request.getNomeCompleto() : "null");
 
         try {
-            validarDadosBasicos(request);
+            // Validação de dados básicos é feita automaticamente pelo Bean Validation no Request
             
             // Validações de duplicatas antes de criar
             validarCpfUnico(null, request.getCpf());
@@ -400,7 +400,7 @@ public class PacienteServiceImpl implements PacienteService {
             throw new BadRequestException("ID do paciente é obrigatório");
         }
 
-        validarDadosBasicos(request);
+        // Validação de dados básicos é feita automaticamente pelo Bean Validation no Request
 
         Paciente pacienteExistente = pacienteRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Paciente não encontrado com ID: " + id));
@@ -452,33 +452,9 @@ public class PacienteServiceImpl implements PacienteService {
         log.info("Paciente excluído (desativado) com sucesso. ID: {}", id);
     }
 
-    /**
-     * Valida os dados básicos do paciente.
-     *
-     * @param request dados do paciente a serem validados
-     * @throws BadRequestException se os dados forem inválidos
-     */
-    private void validarDadosBasicos(PacienteRequest request) {
-        if (request == null) {
-            throw new BadRequestException("Dados do paciente são obrigatórios");
-        }
-
-        if (!StringUtils.hasText(request.getNomeCompleto())) {
-            throw new BadRequestException("Nome completo é obrigatório");
-        }
-
-        if (request.getNomeCompleto().length() > 255) {
-            throw new BadRequestException("Nome completo deve ter no máximo 255 caracteres");
-        }
-
-        if (StringUtils.hasText(request.getCpf()) && !request.getCpf().matches("^\\d{11}$")) {
-            throw new BadRequestException("CPF deve conter exatamente 11 dígitos numéricos");
-        }
-
-        if (StringUtils.hasText(request.getCns()) && !request.getCns().matches("^\\d{15}$")) {
-            throw new BadRequestException("CNS deve conter exatamente 15 dígitos numéricos");
-        }
-    }
+    // Validações de dados básicos foram movidas para o Request usando Bean Validation
+    // (@NotNull, @NotBlank, @Pattern, etc). Isso garante validação automática no Controller
+    // e retorno de erro 400 padronizado via ApiExceptionHandler.
 
     /**
      * Valida se o CPF é único no sistema.

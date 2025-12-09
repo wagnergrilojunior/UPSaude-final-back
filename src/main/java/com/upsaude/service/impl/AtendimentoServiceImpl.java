@@ -77,7 +77,7 @@ public class AtendimentoServiceImpl implements AtendimentoService {
         }
 
         try {
-            validarDadosBasicos(request);
+            // Validação de dados básicos é feita automaticamente pelo Bean Validation no Request
 
             Atendimento atendimento = atendimentoMapper.fromRequest(request);
 
@@ -273,7 +273,7 @@ public class AtendimentoServiceImpl implements AtendimentoService {
         }
 
         try {
-            validarDadosBasicos(request);
+            // Validação de dados básicos é feita automaticamente pelo Bean Validation no Request
 
             Atendimento atendimentoExistente = atendimentoRepository.findById(id)
                     .orElseThrow(() -> new NotFoundException("Atendimento não encontrado com ID: " + id));
@@ -337,20 +337,9 @@ public class AtendimentoServiceImpl implements AtendimentoService {
         }
     }
 
-    private void validarDadosBasicos(AtendimentoRequest request) {
-        if (request == null) {
-            throw new BadRequestException("Dados do atendimento são obrigatórios");
-        }
-        if (request.getPaciente() == null) {
-            throw new BadRequestException("ID do paciente é obrigatório");
-        }
-        if (request.getProfissional() == null) {
-            throw new BadRequestException("ID do profissional de saúde é obrigatório");
-        }
-        if (request.getInformacoes() == null || request.getInformacoes().getDataHora() == null) {
-            throw new BadRequestException("Data e hora do atendimento são obrigatórias");
-        }
-    }
+    // Validações de dados básicos foram movidas para o Request usando Bean Validation
+    // (@NotNull, @NotBlank, @Pattern, etc). Isso garante validação automática no Controller
+    // e retorno de erro 400 padronizado via ApiExceptionHandler.
 
     private void atualizarDadosAtendimento(Atendimento atendimento, AtendimentoRequest request) {
         // Atualiza informações básicas usando mapper

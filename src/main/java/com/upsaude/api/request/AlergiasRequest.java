@@ -3,6 +3,7 @@ package com.upsaude.api.request;
 import com.upsaude.api.request.embeddable.ClassificacaoAlergiaRequest;
 import com.upsaude.api.request.embeddable.PrevencaoTratamentoAlergiaRequest;
 import com.upsaude.api.request.embeddable.ReacoesAlergiaRequest;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
@@ -27,11 +28,21 @@ public class AlergiasRequest {
     @Size(max = 50, message = "Código interno deve ter no máximo 50 caracteres")
     private String codigoInterno;
     
+    @Valid
     private ClassificacaoAlergiaRequest classificacao;
+    
+    @Valid
     private ReacoesAlergiaRequest reacoes;
+    
+    @Valid
     private PrevencaoTratamentoAlergiaRequest prevencaoTratamento;
     
+    @Size(max = 1000, message = "Descrição deve ter no máximo 1000 caracteres")
     private String descricao;
+    
+    @Size(max = 1000, message = "Substâncias relacionadas deve ter no máximo 1000 caracteres")
     private String substanciasRelacionadas;
+    
+    @Size(max = 1000, message = "Observações deve ter no máximo 1000 caracteres")
     private String observacoes;
 }

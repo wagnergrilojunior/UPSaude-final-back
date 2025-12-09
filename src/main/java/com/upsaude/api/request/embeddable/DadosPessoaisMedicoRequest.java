@@ -21,7 +21,7 @@ public class DadosPessoaisMedicoRequest {
     @Size(max = 255, message = "Nome social deve ter no máximo 255 caracteres")
     private String nomeSocial;
     
-    @Pattern(regexp = "^\\d{11}$", message = "CPF deve ter 11 dígitos")
+    @Pattern(regexp = "^$|^\\d{11}$", message = "CPF deve ter 11 dígitos")
     private String cpf;
     
     private SexoEnum sexo;
@@ -36,6 +36,7 @@ public class DadosPessoaisMedicoRequest {
     @Size(max = 10, message = "Órgão emissor RG deve ter no máximo 10 caracteres")
     private String orgaoEmissorRg;
     
+    @Pattern(regexp = "^$|^[A-Z]{2}$", message = "UF emissor RG deve ter exatamente 2 letras maiúsculas")
     @Size(max = 2, message = "UF emissor RG deve ter 2 caracteres")
     private String ufEmissorRg;
     

@@ -9,6 +9,8 @@ import com.upsaude.enums.SexoEnum;
 import com.upsaude.enums.StatusAtivoEnum;
 import com.upsaude.enums.TipoDeficienciaEnum;
 import com.upsaude.enums.TipoProfissionalEnum;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
@@ -33,7 +35,8 @@ public class ProfissionaisSaudeRequest {
     @NotBlank(message = "Nome completo é obrigatório")
     @Size(max = 255, message = "Nome completo deve ter no máximo 255 caracteres")
     private String nomeCompleto;
-    @Pattern(regexp = "^\\d{11}$", message = "CPF deve ter 11 dígitos")
+    
+    @Pattern(regexp = "^$|^\\d{11}$", message = "CPF deve ter 11 dígitos")
     private String cpf;
     private LocalDate dataNascimento;
     private SexoEnum sexo;
@@ -63,9 +66,18 @@ public class ProfissionaisSaudeRequest {
     private String codigoCbo;
     private String descricaoCbo;
     private String codigoOcupacional;
+    @Pattern(regexp = "^$|^\\d{10,11}$", message = "Telefone deve ter 10 ou 11 dígitos")
     private String telefone;
+    
+    @Email(message = "Email inválido")
+    @Size(max = 255, message = "Email deve ter no máximo 255 caracteres")
     private String email;
+    
+    @Pattern(regexp = "^$|^\\d{10,11}$", message = "Telefone institucional deve ter 10 ou 11 dígitos")
     private String telefoneInstitucional;
+    
+    @Email(message = "Email institucional inválido")
+    @Size(max = 255, message = "Email institucional deve ter no máximo 255 caracteres")
     private String emailInstitucional;
     
     /**
@@ -74,10 +86,13 @@ public class ProfissionaisSaudeRequest {
      * Se fornecido como objeto completo, será usado findOrCreate para evitar duplicação.
      */
     private UUID enderecoProfissional;
+    
+    @Valid
     private EnderecoRequest enderecoProfissionalCompleto;
     
     @Builder.Default
     private List<UUID> especialidades = new ArrayList<>();
     
+    @Size(max = 1000, message = "Observações deve ter no máximo 1000 caracteres")
     private String observacoes;
 }

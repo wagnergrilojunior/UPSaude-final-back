@@ -8,6 +8,7 @@ import com.upsaude.api.request.embeddable.RegistroANSConvenioRequest;
 import com.upsaude.enums.ModalidadeConvenioEnum;
 import com.upsaude.enums.StatusAtivoEnum;
 import com.upsaude.enums.TipoConvenioEnum;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
@@ -36,7 +37,7 @@ public class ConvenioRequest {
     @Size(max = 50, message = "Código deve ter no máximo 50 caracteres")
     private String codigo;
     
-    @Pattern(regexp = "^\\d{14}$", message = "CNPJ deve ter 14 dígitos")
+    @Pattern(regexp = "^$|^\\d{14}$", message = "CNPJ deve ter 14 dígitos")
     private String cnpj;
     
     @Size(max = 20, message = "Inscrição estadual deve ter no máximo 20 caracteres")
@@ -51,12 +52,20 @@ public class ConvenioRequest {
     @NotNull(message = "Modalidade de convênio é obrigatória")
     private ModalidadeConvenioEnum modalidade;
     
+    @Size(max = 100, message = "Categoria deve ter no máximo 100 caracteres")
     private String categoria;
     private UUID endereco;
     
+    @Valid
     private ContatoConvenioRequest contato;
+    
+    @Valid
     private RegistroANSConvenioRequest registroAns;
+    
+    @Valid
     private CoberturaConvenioRequest cobertura;
+    
+    @Valid
     private InformacoesFinanceirasConvenioRequest informacoesFinanceiras;
     
     private StatusAtivoEnum status;
@@ -65,10 +74,22 @@ public class ConvenioRequest {
     private LocalDate dataDesativacao;
     private Integer quantidadeEstabelecimentosCredenciados;
     private Integer quantidadeProfissionaisCredenciados;
+    
+    @Size(max = 500, message = "Contrato deve ter no máximo 500 caracteres")
     private String contrato;
+    
+    @Size(max = 500, message = "Tabela de preços deve ter no máximo 500 caracteres")
     private String tabelaPrecos;
+    
+    @Size(max = 500, message = "Manual do convênio deve ter no máximo 500 caracteres")
     private String manualConvenio;
+    
+    @Size(max = 1000, message = "Descrição deve ter no máximo 1000 caracteres")
     private String descricao;
+    
+    @Size(max = 1000, message = "Observações deve ter no máximo 1000 caracteres")
     private String observacoes;
+    
+    @Valid
     private IntegracaoGovernamentalConvenioRequest integracaoGovernamental;
 }

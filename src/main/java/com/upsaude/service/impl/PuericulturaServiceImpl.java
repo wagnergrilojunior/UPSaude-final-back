@@ -41,7 +41,7 @@ public class PuericulturaServiceImpl implements PuericulturaService {
     public PuericulturaResponse criar(PuericulturaRequest request) {
         log.debug("Criando nova puericultura");
 
-        validarDadosBasicos(request);
+        // Validação de dados básicos é feita automaticamente pelo Bean Validation no Request
 
         Puericultura puericultura = puericulturaMapper.fromRequest(request);
         puericultura.setActive(true);
@@ -113,7 +113,7 @@ public class PuericulturaServiceImpl implements PuericulturaService {
             throw new BadRequestException("ID da puericultura é obrigatório");
         }
 
-        validarDadosBasicos(request);
+        // Validação de dados básicos é feita automaticamente pelo Bean Validation no Request
 
         Puericultura puericulturaExistente = puericulturaRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Puericultura não encontrada com ID: " + id));
@@ -148,14 +148,9 @@ public class PuericulturaServiceImpl implements PuericulturaService {
         log.info("Puericultura excluída (desativada) com sucesso. ID: {}", id);
     }
 
-    private void validarDadosBasicos(PuericulturaRequest request) {
-        if (request == null) {
-            throw new BadRequestException("Dados da puericultura são obrigatórios");
-        }
-        if (request.getPaciente() == null) {
-            throw new BadRequestException("Paciente é obrigatório");
-        }
-    }
+    // Validações de dados básicos foram movidas para o Request usando Bean Validation
+    // (@NotNull, @NotBlank, @Pattern, etc). Isso garante validação automática no Controller
+    // e retorno de erro 400 padronizado via ApiExceptionHandler.
 
     private void atualizarDadosPuericultura(Puericultura puericultura, PuericulturaRequest request) {
         Puericultura puericulturaAtualizada = puericulturaMapper.fromRequest(request);

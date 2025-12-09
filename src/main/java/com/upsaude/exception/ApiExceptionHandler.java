@@ -223,10 +223,11 @@ public class ApiExceptionHandler {
 
     /**
      * Trata exceções de validação do Spring (MethodArgumentNotValidException).
+     * Retorna erro 400 padronizado com lista de erros de validação.
      *
      * @param ex exceção lançada
      * @param request requisição HTTP
-     * @return resposta JSON com detalhes do erro
+     * @return resposta JSON com detalhes do erro no formato padronizado
      */
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<Map<String, Object>> handleValidationException(
@@ -237,20 +238,24 @@ public class ApiExceptionHandler {
             throw runtimeEx; // Re-lança para que o Actuator trate
         }
         
-        Map<String, String> erros = new HashMap<>();
-        ex.getBindingResult().getAllErrors().forEach((error) -> {
-            String campo = ((FieldError) error).getField();
-            String mensagem = error.getDefaultMessage();
-            erros.put(campo, mensagem);
-        });
+        // Constrói lista de erros no formato padronizado: [{"campo": "...", "mensagem": "..."}]
+        List<Map<String, String>> erros = ex.getBindingResult().getAllErrors().stream()
+                .map(error -> {
+                    Map<String, String> erro = new HashMap<>();
+                    String campo = error instanceof FieldError 
+                            ? ((FieldError) error).getField() 
+                            : error.getObjectName();
+                    String mensagem = error.getDefaultMessage();
+                    erro.put("campo", campo);
+                    erro.put("mensagem", mensagem != null ? mensagem : "Erro de validação");
+                    return erro;
+                })
+                .collect(Collectors.toList());
 
         Map<String, Object> resposta = new HashMap<>();
-        resposta.put("timestamp", LocalDateTime.now());
         resposta.put("status", HttpStatus.BAD_REQUEST.value());
-        resposta.put("erro", "Erro de Validação");
-        resposta.put("mensagem", "Dados inválidos fornecidos");
-        resposta.put("erros", erros);
-        resposta.put("path", request.getRequestURI());
+        resposta.put("message", "Erro de validação");
+        resposta.put("errors", erros);
 
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(resposta);
     }

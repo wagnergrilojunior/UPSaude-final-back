@@ -43,7 +43,7 @@ public class MedicaoClinicaServiceImpl implements MedicaoClinicaService {
     public MedicaoClinicaResponse criar(MedicaoClinicaRequest request) {
         log.debug("Criando nova medição clínica para paciente: {}", request.getPaciente());
 
-        validarDadosBasicos(request);
+        // Validação de dados básicos é feita automaticamente pelo Bean Validation no Request
 
         MedicaoClinica medicaoClinica = medicaoClinicaMapper.fromRequest(request);
 
@@ -110,7 +110,7 @@ public class MedicaoClinicaServiceImpl implements MedicaoClinicaService {
             throw new BadRequestException("ID da medição clínica é obrigatório");
         }
 
-        validarDadosBasicos(request);
+        // Validação de dados básicos é feita automaticamente pelo Bean Validation no Request
 
         MedicaoClinica medicaoClinicaExistente = medicaoClinicaRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Medição clínica não encontrada com ID: " + id));
@@ -148,17 +148,9 @@ public class MedicaoClinicaServiceImpl implements MedicaoClinicaService {
         log.info("Medição clínica excluída (desativada) com sucesso. ID: {}", id);
     }
 
-    private void validarDadosBasicos(MedicaoClinicaRequest request) {
-        if (request == null) {
-            throw new BadRequestException("Dados da medição clínica são obrigatórios");
-        }
-        if (request.getPaciente() == null) {
-            throw new BadRequestException("ID do paciente é obrigatório");
-        }
-        if (request.getDataHora() == null) {
-            throw new BadRequestException("Data e hora da medição são obrigatórias");
-        }
-    }
+    // Validações de dados básicos foram movidas para o Request usando Bean Validation
+    // (@NotNull, @NotBlank, @Pattern, etc). Isso garante validação automática no Controller
+    // e retorno de erro 400 padronizado via ApiExceptionHandler.
 
     private void atualizarDadosMedicaoClinica(MedicaoClinica medicaoClinica, MedicaoClinicaRequest request) {
         // Atualiza data/hora

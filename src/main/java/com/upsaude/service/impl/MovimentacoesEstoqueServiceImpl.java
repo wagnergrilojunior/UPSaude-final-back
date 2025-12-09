@@ -39,7 +39,7 @@ public class MovimentacoesEstoqueServiceImpl implements MovimentacoesEstoqueServ
     public MovimentacoesEstoqueResponse criar(MovimentacoesEstoqueRequest request) {
         log.debug("Criando novo movimentacoesestoque");
 
-        validarDadosBasicos(request);
+        // Validação de dados básicos é feita automaticamente pelo Bean Validation no Request
 
         MovimentacoesEstoque movimentacoesEstoque = movimentacoesEstoqueMapper.fromRequest(request);
         movimentacoesEstoque.setActive(true);
@@ -84,7 +84,7 @@ public class MovimentacoesEstoqueServiceImpl implements MovimentacoesEstoqueServ
             throw new BadRequestException("ID do movimentacoesestoque é obrigatório");
         }
 
-        validarDadosBasicos(request);
+        // Validação de dados básicos é feita automaticamente pelo Bean Validation no Request
 
         MovimentacoesEstoque movimentacoesEstoqueExistente = movimentacoesEstoqueRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("MovimentacoesEstoque não encontrado com ID: " + id));
@@ -119,11 +119,9 @@ public class MovimentacoesEstoqueServiceImpl implements MovimentacoesEstoqueServ
         log.info("MovimentacoesEstoque excluído (desativado) com sucesso. ID: {}", id);
     }
 
-    private void validarDadosBasicos(MovimentacoesEstoqueRequest request) {
-        if (request == null) {
-            throw new BadRequestException("Dados do movimentacoesestoque são obrigatórios");
-        }
-    }
+    // Validações de dados básicos foram movidas para o Request usando Bean Validation
+    // (@NotNull, @NotBlank, @Pattern, etc). Isso garante validação automática no Controller
+    // e retorno de erro 400 padronizado via ApiExceptionHandler.
 
         private void atualizarDadosMovimentacoesEstoque(MovimentacoesEstoque movimentacoesEstoque, MovimentacoesEstoqueRequest request) {
         MovimentacoesEstoque movimentacoesEstoqueAtualizado = movimentacoesEstoqueMapper.fromRequest(request);

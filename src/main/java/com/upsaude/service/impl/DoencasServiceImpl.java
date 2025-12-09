@@ -57,7 +57,7 @@ public class DoencasServiceImpl implements DoencasService {
         }
 
         try {
-            validarDadosBasicos(request);
+            // Validação de dados básicos é feita automaticamente pelo Bean Validation no Request
             validarDuplicidade(null, request);
 
             Doencas doenca = doencasMapper.fromRequest(request);
@@ -199,7 +199,7 @@ public class DoencasServiceImpl implements DoencasService {
         }
 
         try {
-            validarDadosBasicos(request);
+            // Validação de dados básicos é feita automaticamente pelo Bean Validation no Request
 
             Doencas doencaExistente = doencasRepository.findById(id)
                     .orElseThrow(() -> new NotFoundException("Doença não encontrada com ID: " + id));
@@ -265,14 +265,9 @@ public class DoencasServiceImpl implements DoencasService {
         }
     }
 
-    private void validarDadosBasicos(DoencasRequest request) {
-        if (request == null) {
-            throw new BadRequestException("Dados da doença são obrigatórios");
-        }
-        if (request.getNome() == null || request.getNome().trim().isEmpty()) {
-            throw new BadRequestException("Nome da doença é obrigatório");
-        }
-    }
+    // Validações de dados básicos foram movidas para o Request usando Bean Validation
+    // (@NotNull, @NotBlank, @Pattern, etc). Isso garante validação automática no Controller
+    // e retorno de erro 400 padronizado via ApiExceptionHandler.
 
     /**
      * Valida se já existe uma doença com o mesmo nome ou código interno no banco de dados.

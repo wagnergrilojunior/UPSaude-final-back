@@ -39,7 +39,7 @@ public class ConselhosProfissionaisServiceImpl implements ConselhosProfissionais
     public ConselhosProfissionaisResponse criar(ConselhosProfissionaisRequest request) {
         log.debug("Criando novo conselhosprofissionais");
 
-        validarDadosBasicos(request);
+        // Validação de dados básicos é feita automaticamente pelo Bean Validation no Request
 
         ConselhosProfissionais conselhosProfissionais = conselhosProfissionaisMapper.fromRequest(request);
         conselhosProfissionais.setActive(true);
@@ -85,7 +85,7 @@ public class ConselhosProfissionaisServiceImpl implements ConselhosProfissionais
             throw new BadRequestException("ID do conselhosprofissionais é obrigatório");
         }
 
-        validarDadosBasicos(request);
+        // Validação de dados básicos é feita automaticamente pelo Bean Validation no Request
 
         ConselhosProfissionais conselhosProfissionaisExistente = conselhosProfissionaisRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("ConselhosProfissionais não encontrado com ID: " + id));
@@ -120,11 +120,9 @@ public class ConselhosProfissionaisServiceImpl implements ConselhosProfissionais
         log.info("ConselhosProfissionais excluído (desativado) com sucesso. ID: {}", id);
     }
 
-    private void validarDadosBasicos(ConselhosProfissionaisRequest request) {
-        if (request == null) {
-            throw new BadRequestException("Dados do conselhosprofissionais são obrigatórios");
-        }
-    }
+    // Validações de dados básicos foram movidas para o Request usando Bean Validation
+    // (@NotNull, @NotBlank, @Pattern, etc). Isso garante validação automática no Controller
+    // e retorno de erro 400 padronizado via ApiExceptionHandler.
 
     private void atualizarDadosConselhosProfissionais(ConselhosProfissionais conselhosProfissionais, ConselhosProfissionaisRequest request) {
         ConselhosProfissionais conselhosProfissionaisAtualizado = conselhosProfissionaisMapper.fromRequest(request);

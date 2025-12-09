@@ -43,7 +43,7 @@ public class CatalogoProcedimentosServiceImpl implements CatalogoProcedimentosSe
     public CatalogoProcedimentosResponse criar(CatalogoProcedimentosRequest request) {
         log.debug("Criando novo procedimento no catálogo");
 
-        validarDadosBasicos(request);
+        // Validação de dados básicos é feita automaticamente pelo Bean Validation no Request
 
         CatalogoProcedimentos procedimento = catalogoProcedimentosMapper.fromRequest(request);
         procedimento.setActive(true);
@@ -91,7 +91,7 @@ public class CatalogoProcedimentosServiceImpl implements CatalogoProcedimentosSe
             throw new BadRequestException("ID do procedimento é obrigatório");
         }
 
-        validarDadosBasicos(request);
+        // Validação de dados básicos é feita automaticamente pelo Bean Validation no Request
 
         CatalogoProcedimentos procedimentoExistente = catalogoProcedimentosRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Procedimento não encontrado no catálogo com ID: " + id));
@@ -129,11 +129,9 @@ public class CatalogoProcedimentosServiceImpl implements CatalogoProcedimentosSe
         log.info("Procedimento excluído (desativado) do catálogo com sucesso. ID: {}", id);
     }
 
-    private void validarDadosBasicos(CatalogoProcedimentosRequest request) {
-        if (request == null) {
-            throw new BadRequestException("Dados do procedimento são obrigatórios");
-        }
-    }
+        // Validações de dados básicos foram movidas para o Request usando Bean Validation
+    // (@NotNull, @NotBlank, @Pattern, etc). Isso garante validação automática no Controller
+    // e retorno de erro 400 padronizado via ApiExceptionHandler.
 
     /**
      * Valida se já existe um procedimento no catálogo com o mesmo nome ou código no mesmo tenant.

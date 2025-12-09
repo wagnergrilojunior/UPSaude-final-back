@@ -66,7 +66,7 @@ public class UsuariosSistemaServiceImpl implements UsuariosSistemaService {
         log.debug("Criando novo usuariossistema");
 
         try {
-            validarDadosBasicos(request);
+            // Validação de dados básicos é feita automaticamente pelo Bean Validation no Request
             
             // Validações de duplicatas antes de criar
             validarEmailUnico(null, request.getEmail());
@@ -168,7 +168,7 @@ public class UsuariosSistemaServiceImpl implements UsuariosSistemaService {
             throw new BadRequestException("ID do usuariossistema é obrigatório");
         }
 
-        validarDadosBasicos(request);
+        // Validação de dados básicos é feita automaticamente pelo Bean Validation no Request
 
         UsuariosSistema usuariosSistemaExistente = usuariosSistemaRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("UsuariosSistema não encontrado com ID: " + id));
@@ -222,19 +222,9 @@ public class UsuariosSistemaServiceImpl implements UsuariosSistemaService {
         }
     }
 
-    private void validarDadosBasicos(UsuariosSistemaRequest request) {
-        if (request == null) {
-            throw new BadRequestException("Dados do usuariossistema são obrigatórios");
-        }
-        if (request.getUserId() == null) {
-            throw new BadRequestException("ID do usuário Supabase é obrigatório");
-        }
-        if (request.getAdminTenant() == null) {
-            throw new BadRequestException("Campo adminTenant é obrigatório");
-        }
-        // Se não for admin do tenant, deve ter pelo menos um vínculo com estabelecimento
-        // (validação será feita no controller ao criar vínculos)
-    }
+    // Validações de dados básicos foram movidas para o Request usando Bean Validation
+    // (@NotNull, @NotBlank, @Pattern, etc). Isso garante validação automática no Controller
+    // e retorno de erro 400 padronizado via ApiExceptionHandler.
 
     /**
      * Valida se o email é único no sistema (tabela User).

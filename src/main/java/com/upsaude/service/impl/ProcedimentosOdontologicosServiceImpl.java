@@ -39,7 +39,7 @@ public class ProcedimentosOdontologicosServiceImpl implements ProcedimentosOdont
     public ProcedimentosOdontologicosResponse criar(ProcedimentosOdontologicosRequest request) {
         log.debug("Criando novo procedimentosodontologicos");
 
-        validarDadosBasicos(request);
+        // Validação de dados básicos é feita automaticamente pelo Bean Validation no Request
 
         ProcedimentosOdontologicos procedimentosOdontologicos = procedimentosOdontologicosMapper.fromRequest(request);
         procedimentosOdontologicos.setActive(true);
@@ -84,7 +84,7 @@ public class ProcedimentosOdontologicosServiceImpl implements ProcedimentosOdont
             throw new BadRequestException("ID do procedimentosodontologicos é obrigatório");
         }
 
-        validarDadosBasicos(request);
+        // Validação de dados básicos é feita automaticamente pelo Bean Validation no Request
 
         ProcedimentosOdontologicos procedimentosOdontologicosExistente = procedimentosOdontologicosRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("ProcedimentosOdontologicos não encontrado com ID: " + id));
@@ -119,11 +119,9 @@ public class ProcedimentosOdontologicosServiceImpl implements ProcedimentosOdont
         log.info("ProcedimentosOdontologicos excluído (desativado) com sucesso. ID: {}", id);
     }
 
-    private void validarDadosBasicos(ProcedimentosOdontologicosRequest request) {
-        if (request == null) {
-            throw new BadRequestException("Dados do procedimentosodontologicos são obrigatórios");
-        }
-    }
+    // Validações de dados básicos foram movidas para o Request usando Bean Validation
+    // (@NotNull, @NotBlank, @Pattern, etc). Isso garante validação automática no Controller
+    // e retorno de erro 400 padronizado via ApiExceptionHandler.
 
         private void atualizarDadosProcedimentosOdontologicos(ProcedimentosOdontologicos procedimentosOdontologicos, ProcedimentosOdontologicosRequest request) {
         ProcedimentosOdontologicos procedimentosOdontologicosAtualizado = procedimentosOdontologicosMapper.fromRequest(request);

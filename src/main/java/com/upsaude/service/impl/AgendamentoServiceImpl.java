@@ -63,7 +63,7 @@ public class AgendamentoServiceImpl implements AgendamentoService {
         }
 
         try {
-            validarDadosBasicos(request);
+            // Validação de dados básicos é feita automaticamente pelo Bean Validation no Request
             verificarConflitosHorario(request);
 
             Agendamento agendamento = agendamentoMapper.fromRequest(request);
@@ -401,7 +401,7 @@ public class AgendamentoServiceImpl implements AgendamentoService {
         }
 
         try {
-            validarDadosBasicos(request);
+            // Validação de dados básicos é feita automaticamente pelo Bean Validation no Request
 
             Agendamento agendamentoExistente = agendamentoRepository.findById(id)
                     .orElseThrow(() -> new NotFoundException("Agendamento não encontrado com ID: " + id));
@@ -591,23 +591,9 @@ public class AgendamentoServiceImpl implements AgendamentoService {
         }
     }
 
-    private void validarDadosBasicos(AgendamentoRequest request) {
-        if (request == null) {
-            throw new BadRequestException("Dados do agendamento são obrigatórios");
-        }
-        if (request.getPaciente() == null) {
-            throw new BadRequestException("ID do paciente é obrigatório");
-        }
-        if (request.getProfissional() == null) {
-            throw new BadRequestException("ID do profissional é obrigatório");
-        }
-        if (request.getDataHora() == null) {
-            throw new BadRequestException("Data e hora do agendamento são obrigatórias");
-        }
-        if (request.getStatus() == null) {
-            throw new BadRequestException("Status do agendamento é obrigatório");
-        }
-    }
+    // Validações de dados básicos foram movidas para o Request usando Bean Validation
+    // (@NotNull, @NotBlank, @Pattern, etc). Isso garante validação automática no Controller
+    // e retorno de erro 400 padronizado via ApiExceptionHandler.
 
     private void verificarConflitosHorario(AgendamentoRequest request) {
         if (request.getProfissional() != null && request.getDataHora() != null && request.getDataHoraFim() != null) {

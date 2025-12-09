@@ -39,7 +39,7 @@ public class FabricantesEquipamentoServiceImpl implements FabricantesEquipamento
     public FabricantesEquipamentoResponse criar(FabricantesEquipamentoRequest request) {
         log.debug("Criando novo fabricante de equipamento");
 
-        validarDadosBasicos(request);
+        // Validação de dados básicos é feita automaticamente pelo Bean Validation no Request
         validarDuplicidade(null, request);
 
         FabricantesEquipamento fabricantesEquipamento = fabricantesEquipamentoMapper.fromRequest(request);
@@ -85,7 +85,7 @@ public class FabricantesEquipamentoServiceImpl implements FabricantesEquipamento
             throw new BadRequestException("ID do fabricante de equipamento é obrigatório");
         }
 
-        validarDadosBasicos(request);
+        // Validação de dados básicos é feita automaticamente pelo Bean Validation no Request
 
         FabricantesEquipamento fabricantesEquipamentoExistente = fabricantesEquipamentoRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Fabricante de equipamento não encontrado com ID: " + id));
@@ -122,11 +122,9 @@ public class FabricantesEquipamentoServiceImpl implements FabricantesEquipamento
         log.info("Fabricante de equipamento excluído (desativado) com sucesso. ID: {}", id);
     }
 
-    private void validarDadosBasicos(FabricantesEquipamentoRequest request) {
-        if (request == null) {
-            throw new BadRequestException("Dados do fabricante de equipamento são obrigatórios");
-        }
-    }
+        // Validações de dados básicos foram movidas para o Request usando Bean Validation
+    // (@NotNull, @NotBlank, @Pattern, etc). Isso garante validação automática no Controller
+    // e retorno de erro 400 padronizado via ApiExceptionHandler.
 
     /**
      * Valida se já existe um fabricante de equipamento com o mesmo nome ou CNPJ no banco de dados.

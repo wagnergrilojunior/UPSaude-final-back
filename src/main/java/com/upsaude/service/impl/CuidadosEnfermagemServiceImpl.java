@@ -39,7 +39,7 @@ public class CuidadosEnfermagemServiceImpl implements CuidadosEnfermagemService 
     public CuidadosEnfermagemResponse criar(CuidadosEnfermagemRequest request) {
         log.debug("Criando novo cuidado de enfermagem");
 
-        validarDadosBasicos(request);
+        // Validação de dados básicos é feita automaticamente pelo Bean Validation no Request
 
         CuidadosEnfermagem cuidadosEnfermagem = cuidadosEnfermagemMapper.fromRequest(request);
         cuidadosEnfermagem.setActive(true);
@@ -107,7 +107,7 @@ public class CuidadosEnfermagemServiceImpl implements CuidadosEnfermagemService 
             throw new BadRequestException("ID do cuidado de enfermagem é obrigatório");
         }
 
-        validarDadosBasicos(request);
+        // Validação de dados básicos é feita automaticamente pelo Bean Validation no Request
 
         CuidadosEnfermagem cuidadosExistente = cuidadosEnfermagemRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Cuidado de enfermagem não encontrado com ID: " + id));
@@ -142,20 +142,10 @@ public class CuidadosEnfermagemServiceImpl implements CuidadosEnfermagemService 
         log.info("Cuidado de enfermagem excluído (desativado) com sucesso. ID: {}", id);
     }
 
-    private void validarDadosBasicos(CuidadosEnfermagemRequest request) {
-        if (request == null) {
-            throw new BadRequestException("Dados do cuidado de enfermagem são obrigatórios");
-        }
-        if (request.getPaciente() == null) {
-            throw new BadRequestException("Paciente é obrigatório");
-        }
-        if (request.getProfissional() == null) {
-            throw new BadRequestException("Profissional é obrigatório");
-        }
-        if (request.getTipoCuidado() == null) {
-            throw new BadRequestException("Tipo de cuidado é obrigatório");
-        }
-    }
+    // Validações de dados básicos foram movidas para o Request usando Bean Validation
+    // (@NotNull, @NotBlank, @Pattern, etc). Isso garante validação automática no Controller
+    // e retorno de erro 400 padronizado via ApiExceptionHandler.
+    // Os campos 'paciente', 'profissional' e 'tipoCuidado' já têm @NotNull no Request.
 
     private void atualizarDadosCuidadosEnfermagem(CuidadosEnfermagem cuidados, CuidadosEnfermagemRequest request) {
         CuidadosEnfermagem cuidadosAtualizado = cuidadosEnfermagemMapper.fromRequest(request);

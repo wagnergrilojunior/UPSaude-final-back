@@ -47,7 +47,7 @@ public class TenantServiceImpl implements TenantService {
     public TenantResponse criar(TenantRequest request) {
         log.debug("Criando novo tenant");
 
-        validarDadosBasicos(request);
+        // Validação de dados básicos é feita automaticamente pelo Bean Validation no Request
 
         Tenant tenant = tenantMapper.fromRequest(request);
         tenant.setActive(true);
@@ -108,7 +108,7 @@ public class TenantServiceImpl implements TenantService {
             throw new BadRequestException("ID do tenant é obrigatório");
         }
 
-        validarDadosBasicos(request);
+        // Validação de dados básicos é feita automaticamente pelo Bean Validation no Request
 
         Tenant tenantExistente = tenantRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Tenant não encontrado com ID: " + id));
@@ -143,11 +143,9 @@ public class TenantServiceImpl implements TenantService {
         log.info("Tenant excluído (desativado) com sucesso. ID: {}", id);
     }
 
-    private void validarDadosBasicos(TenantRequest request) {
-        if (request == null) {
-            throw new BadRequestException("Dados do tenant são obrigatórios");
-        }
-    }
+        // Validações de dados básicos foram movidas para o Request usando Bean Validation
+    // (@NotNull, @NotBlank, @Pattern, etc). Isso garante validação automática no Controller
+    // e retorno de erro 400 padronizado via ApiExceptionHandler.
 
         private void atualizarDadosTenant(Tenant tenant, TenantRequest request) {
         Tenant tenantAtualizado = tenantMapper.fromRequest(request);

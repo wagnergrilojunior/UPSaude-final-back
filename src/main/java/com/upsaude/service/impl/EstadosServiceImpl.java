@@ -46,7 +46,7 @@ public class EstadosServiceImpl implements EstadosService {
         }
 
         try {
-            validarDadosBasicos(request);
+            // Validação de dados básicos é feita automaticamente pelo Bean Validation no Request
 
             Estados estados = estadosMapper.fromRequest(request);
             estados.setActive(true);
@@ -131,7 +131,7 @@ public class EstadosServiceImpl implements EstadosService {
         }
 
         try {
-            validarDadosBasicos(request);
+            // Validação de dados básicos é feita automaticamente pelo Bean Validation no Request
 
             Estados estadosExistente = estadosRepository.findById(id)
                     .orElseThrow(() -> new NotFoundException("Estado não encontrado com ID: " + id));
@@ -196,11 +196,9 @@ public class EstadosServiceImpl implements EstadosService {
         }
     }
 
-    private void validarDadosBasicos(EstadosRequest request) {
-        if (request == null) {
-            throw new BadRequestException("Dados do estados são obrigatórios");
-        }
-    }
+        // Validações de dados básicos foram movidas para o Request usando Bean Validation
+    // (@NotNull, @NotBlank, @Pattern, etc). Isso garante validação automática no Controller
+    // e retorno de erro 400 padronizado via ApiExceptionHandler.
 
     // Método removido - agora usa estadosMapper.updateFromRequest diretamente
     // O MapStruct já preserva campos de controle automaticamente

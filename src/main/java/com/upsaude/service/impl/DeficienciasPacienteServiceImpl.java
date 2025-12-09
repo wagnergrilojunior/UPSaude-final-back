@@ -48,7 +48,7 @@ public class DeficienciasPacienteServiceImpl implements DeficienciasPacienteServ
     public DeficienciasPacienteResponse criar(DeficienciasPacienteRequest request) {
         log.debug("Criando nova ligação paciente-deficiência");
 
-        validarDadosBasicos(request);
+        // Validação de dados básicos é feita automaticamente pelo Bean Validation no Request
 
         DeficienciasPaciente deficienciasPaciente = deficienciasPacienteMapper.fromRequest(request);
         
@@ -153,7 +153,7 @@ public class DeficienciasPacienteServiceImpl implements DeficienciasPacienteServ
             throw new BadRequestException("ID da ligação paciente-deficiência é obrigatório");
         }
 
-        validarDadosBasicos(request);
+        // Validação de dados básicos é feita automaticamente pelo Bean Validation no Request
 
         DeficienciasPaciente deficienciasPacienteExistente = deficienciasPacienteRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Ligação paciente-deficiência não encontrada com ID: " + id));
@@ -188,17 +188,9 @@ public class DeficienciasPacienteServiceImpl implements DeficienciasPacienteServ
         log.info("Ligação paciente-deficiência excluída (desativada) com sucesso. ID: {}", id);
     }
 
-    private void validarDadosBasicos(DeficienciasPacienteRequest request) {
-        if (request == null) {
-            throw new BadRequestException("Dados da ligação paciente-deficiência são obrigatórios");
-        }
-        if (request.getPaciente() == null) {
-            throw new BadRequestException("ID do paciente é obrigatório");
-        }
-        if (request.getDeficiencia() == null) {
-            throw new BadRequestException("ID da deficiência é obrigatório");
-        }
-    }
+    // Validações de dados básicos foram movidas para o Request usando Bean Validation
+    // (@NotNull, @NotBlank, @Pattern, etc). Isso garante validação automática no Controller
+    // e retorno de erro 400 padronizado via ApiExceptionHandler.
 
     private void atualizarDadosDeficienciasPaciente(DeficienciasPaciente deficienciasPaciente, DeficienciasPacienteRequest request) {
         // Atualiza campos simples

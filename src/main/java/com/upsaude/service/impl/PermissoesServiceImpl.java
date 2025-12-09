@@ -39,7 +39,7 @@ public class PermissoesServiceImpl implements PermissoesService {
     public PermissoesResponse criar(PermissoesRequest request) {
         log.debug("Criando novo permissoes");
 
-        validarDadosBasicos(request);
+        // Validação de dados básicos é feita automaticamente pelo Bean Validation no Request
 
         Permissoes permissoes = permissoesMapper.fromRequest(request);
         permissoes.setActive(true);
@@ -84,7 +84,7 @@ public class PermissoesServiceImpl implements PermissoesService {
             throw new BadRequestException("ID do permissoes é obrigatório");
         }
 
-        validarDadosBasicos(request);
+        // Validação de dados básicos é feita automaticamente pelo Bean Validation no Request
 
         Permissoes permissoesExistente = permissoesRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Permissoes não encontrado com ID: " + id));
@@ -119,11 +119,9 @@ public class PermissoesServiceImpl implements PermissoesService {
         log.info("Permissoes excluído (desativado) com sucesso. ID: {}", id);
     }
 
-    private void validarDadosBasicos(PermissoesRequest request) {
-        if (request == null) {
-            throw new BadRequestException("Dados do permissoes são obrigatórios");
-        }
-    }
+    // Validações de dados básicos foram movidas para o Request usando Bean Validation
+    // (@NotNull, @NotBlank, @Pattern, etc). Isso garante validação automática no Controller
+    // e retorno de erro 400 padronizado via ApiExceptionHandler.
 
         private void atualizarDadosPermissoes(Permissoes permissoes, PermissoesRequest request) {
         Permissoes permissoesAtualizado = permissoesMapper.fromRequest(request);

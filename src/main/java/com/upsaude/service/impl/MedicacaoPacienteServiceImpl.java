@@ -53,7 +53,7 @@ public class MedicacaoPacienteServiceImpl implements MedicacaoPacienteService {
     public MedicacaoPacienteResponse criar(MedicacaoPacienteRequest request) {
         log.debug("Criando nova ligação paciente-medicação");
 
-        validarDadosBasicos(request);
+        // Validação de dados básicos é feita automaticamente pelo Bean Validation no Request
 
         MedicacaoPaciente medicacaoPaciente = medicacaoPacienteMapper.fromRequest(request);
         
@@ -175,7 +175,7 @@ public class MedicacaoPacienteServiceImpl implements MedicacaoPacienteService {
             throw new BadRequestException("ID da ligação paciente-medicação é obrigatório");
         }
 
-        validarDadosBasicos(request);
+        // Validação de dados básicos é feita automaticamente pelo Bean Validation no Request
 
         MedicacaoPaciente medicacaoPacienteExistente = medicacaoPacienteRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Ligação paciente-medicação não encontrada com ID: " + id));
@@ -210,17 +210,9 @@ public class MedicacaoPacienteServiceImpl implements MedicacaoPacienteService {
         log.info("Ligação paciente-medicação excluída (desativada) com sucesso. ID: {}", id);
     }
 
-    private void validarDadosBasicos(MedicacaoPacienteRequest request) {
-        if (request == null) {
-            throw new BadRequestException("Dados da ligação paciente-medicação são obrigatórios");
-        }
-        if (request.getPaciente() == null) {
-            throw new BadRequestException("ID do paciente é obrigatório");
-        }
-        if (request.getMedicacao() == null) {
-            throw new BadRequestException("ID da medicação é obrigatório");
-        }
-    }
+    // Validações de dados básicos foram movidas para o Request usando Bean Validation
+    // (@NotNull, @NotBlank, @Pattern, etc). Isso garante validação automática no Controller
+    // e retorno de erro 400 padronizado via ApiExceptionHandler.
 
     private void atualizarDadosMedicacaoPaciente(MedicacaoPaciente medicacaoPaciente, MedicacaoPacienteRequest request) {
         // Atualiza campos simples

@@ -57,7 +57,7 @@ public class EquipeSaudeServiceImpl implements EquipeSaudeService {
         }
 
         try {
-            validarDadosBasicos(request);
+            // Validação de dados básicos é feita automaticamente pelo Bean Validation no Request
 
             // Valida se já existe equipe com mesmo INE no estabelecimento
             if (equipeSaudeRepository.findByIneAndEstabelecimentoId(request.getIne(), request.getEstabelecimento()).isPresent()) {
@@ -209,7 +209,7 @@ public class EquipeSaudeServiceImpl implements EquipeSaudeService {
         }
 
         try {
-            validarDadosBasicos(request);
+            // Validação de dados básicos é feita automaticamente pelo Bean Validation no Request
 
             EquipeSaude equipeExistente = equipeSaudeRepository.findById(id)
                     .orElseThrow(() -> new NotFoundException("Equipe de saúde não encontrada com ID: " + id));
@@ -289,29 +289,9 @@ public class EquipeSaudeServiceImpl implements EquipeSaudeService {
         }
     }
 
-    private void validarDadosBasicos(EquipeSaudeRequest request) {
-        if (request == null) {
-            throw new BadRequestException("Dados da equipe são obrigatórios");
-        }
-        if (request.getIne() == null || request.getIne().trim().isEmpty()) {
-            throw new BadRequestException("INE é obrigatório");
-        }
-        if (request.getNomeReferencia() == null || request.getNomeReferencia().trim().isEmpty()) {
-            throw new BadRequestException("Nome de referência é obrigatório");
-        }
-        if (request.getTipoEquipe() == null) {
-            throw new BadRequestException("Tipo de equipe é obrigatório");
-        }
-        if (request.getEstabelecimento() == null) {
-            throw new BadRequestException("Estabelecimento é obrigatório");
-        }
-        if (request.getDataAtivacao() == null) {
-            throw new BadRequestException("Data de ativação é obrigatória");
-        }
-        if (request.getStatus() == null) {
-            throw new BadRequestException("Status é obrigatório");
-        }
-    }
+    // Validações de dados básicos foram movidas para o Request usando Bean Validation
+    // (@NotNull, @NotBlank, @Pattern, etc). Isso garante validação automática no Controller
+    // e retorno de erro 400 padronizado via ApiExceptionHandler.
 
     // Método removido - agora usa equipeSaudeMapper.updateFromRequest diretamente
     // O MapStruct já preserva campos de controle automaticamente

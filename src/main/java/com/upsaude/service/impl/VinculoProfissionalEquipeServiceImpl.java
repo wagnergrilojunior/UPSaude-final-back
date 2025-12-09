@@ -47,7 +47,7 @@ public class VinculoProfissionalEquipeServiceImpl implements VinculoProfissional
     public VinculoProfissionalEquipeResponse criar(VinculoProfissionalEquipeRequest request) {
         log.debug("Criando novo vínculo de profissional com equipe");
 
-        validarDadosBasicos(request);
+        // Validação de dados básicos é feita automaticamente pelo Bean Validation no Request
         validarIntegridade(request, null);
 
         ProfissionaisSaude profissional = profissionaisSaudeRepository.findById(request.getProfissional())
@@ -163,7 +163,7 @@ public class VinculoProfissionalEquipeServiceImpl implements VinculoProfissional
             throw new BadRequestException("ID do vínculo é obrigatório");
         }
 
-        validarDadosBasicos(request);
+        // Validação de dados básicos é feita automaticamente pelo Bean Validation no Request
         validarIntegridade(request, id);
 
         VinculoProfissionalEquipe vinculoExistente = vinculoRepository.findById(id)
@@ -215,14 +215,9 @@ public class VinculoProfissionalEquipeServiceImpl implements VinculoProfissional
         log.info("Vínculo de profissional com equipe excluído (desativado) com sucesso. ID: {}", id);
     }
 
-    private void validarDadosBasicos(VinculoProfissionalEquipeRequest request) {
-        if (request == null) {
-            throw new BadRequestException("Dados do vínculo são obrigatórios");
-        }
-        if (request.getDataFim() != null && request.getDataFim().isBefore(request.getDataInicio())) {
-            throw new BadRequestException("A data de fim do vínculo não pode ser anterior à data de início.");
-        }
-    }
+    // Validações de dados básicos foram movidas para o Request usando Bean Validation
+    // (@NotNull, @NotBlank, @Pattern, etc). Isso garante validação automática no Controller
+    // e retorno de erro 400 padronizado via ApiExceptionHandler.
 
     private void validarIntegridade(VinculoProfissionalEquipeRequest request, UUID currentId) {
         // Valida se já existe vínculo ativo entre o profissional e a equipe

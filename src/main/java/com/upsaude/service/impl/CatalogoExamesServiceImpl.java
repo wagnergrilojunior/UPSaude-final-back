@@ -40,7 +40,7 @@ public class CatalogoExamesServiceImpl implements CatalogoExamesService {
     public CatalogoExamesResponse criar(CatalogoExamesRequest request) {
         log.debug("Criando novo exame no catálogo");
 
-        validarDadosBasicos(request);
+        // Validação de dados básicos é feita automaticamente pelo Bean Validation no Request
 
         CatalogoExames exame = catalogoExamesMapper.fromRequest(request);
         exame.setActive(true);
@@ -88,7 +88,7 @@ public class CatalogoExamesServiceImpl implements CatalogoExamesService {
             throw new BadRequestException("ID do exame é obrigatório");
         }
 
-        validarDadosBasicos(request);
+        // Validação de dados básicos é feita automaticamente pelo Bean Validation no Request
 
         CatalogoExames exameExistente = catalogoExamesRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Exame não encontrado no catálogo com ID: " + id));
@@ -126,11 +126,9 @@ public class CatalogoExamesServiceImpl implements CatalogoExamesService {
         log.info("Exame excluído (desativado) do catálogo com sucesso. ID: {}", id);
     }
 
-    private void validarDadosBasicos(CatalogoExamesRequest request) {
-        if (request == null) {
-            throw new BadRequestException("Dados do exame são obrigatórios");
-        }
-    }
+    // Validações de dados básicos foram movidas para o Request usando Bean Validation
+    // (@NotNull, @NotBlank, @Pattern, etc). Isso garante validação automática no Controller
+    // e retorno de erro 400 padronizado via ApiExceptionHandler.
 
     /**
      * Valida se já existe um exame no catálogo com o mesmo nome ou código no mesmo tenant.

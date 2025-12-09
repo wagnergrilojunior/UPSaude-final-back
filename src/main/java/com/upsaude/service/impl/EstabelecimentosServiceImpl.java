@@ -65,7 +65,7 @@ public class EstabelecimentosServiceImpl implements EstabelecimentosService {
         }
 
         try {
-            validarDadosBasicos(request);
+            // Validação de dados básicos é feita automaticamente pelo Bean Validation no Request
             
             // Valida CNPJ duplicado
             validarCnpjDuplicado(request.getCnpj(), null);
@@ -175,7 +175,7 @@ public class EstabelecimentosServiceImpl implements EstabelecimentosService {
         }
 
         try {
-            validarDadosBasicos(request);
+            // Validação de dados básicos é feita automaticamente pelo Bean Validation no Request
 
             Estabelecimentos estabelecimentoExistente = estabelecimentosRepository.findById(id)
                     .orElseThrow(() -> new NotFoundException("Estabelecimento não encontrado com ID: " + id));
@@ -263,17 +263,9 @@ public class EstabelecimentosServiceImpl implements EstabelecimentosService {
         }
     }
 
-    private void validarDadosBasicos(EstabelecimentosRequest request) {
-        if (request == null) {
-            throw new BadRequestException("Dados do estabelecimento são obrigatórios");
-        }
-        if (request.getNome() == null || request.getNome().trim().isEmpty()) {
-            throw new BadRequestException("Nome do estabelecimento é obrigatório");
-        }
-        if (request.getTipo() == null) {
-            throw new BadRequestException("Tipo do estabelecimento é obrigatório");
-        }
-    }
+    // Validações de dados básicos foram movidas para o Request usando Bean Validation
+    // (@NotNull, @NotBlank, @Pattern, etc). Isso garante validação automática no Controller
+    // e retorno de erro 400 padronizado via ApiExceptionHandler.
 
     /**
      * Processa o endereço principal do estabelecimento.

@@ -3,6 +3,8 @@ package com.upsaude.api.request;
 import com.upsaude.enums.NaturezaJuridicaEnum;
 import com.upsaude.enums.StatusFuncionamentoEnum;
 import com.upsaude.enums.TipoEstabelecimentoEnum;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
@@ -33,9 +35,12 @@ public class EstabelecimentosRequest {
     @Size(max = 7, message = "Código CNES deve ter no máximo 7 caracteres")
     private String codigoCnes;
     
-    @Pattern(regexp = "^\\d{14}$", message = "CNPJ deve ter 14 dígitos")
+    @Pattern(regexp = "^$|^\\d{14}$", message = "CNPJ deve ter 14 dígitos")
     private String cnpj;
+    
     private NaturezaJuridicaEnum naturezaJuridica;
+    
+    @Size(max = 50, message = "Registro oficial deve ter no máximo 50 caracteres")
     private String registroOficial;
     
     /**
@@ -44,16 +49,31 @@ public class EstabelecimentosRequest {
      * Se fornecido como objeto completo, será usado findOrCreate para evitar duplicação.
      */
     private UUID enderecoPrincipal;
+    
+    @Valid
     private EnderecoRequest enderecoPrincipalCompleto;
     
+    @Pattern(regexp = "^$|^\\d{10,11}$", message = "Telefone deve ter 10 ou 11 dígitos")
     private String telefone;
+    
+    @Pattern(regexp = "^$|^\\d{10,11}$", message = "Telefone secundário deve ter 10 ou 11 dígitos")
     private String telefoneSecundario;
+    
+    @Pattern(regexp = "^$|^\\d{10,11}$", message = "Fax deve ter 10 ou 11 dígitos")
     private String fax;
+    
+    @Email(message = "Email inválido")
+    @Size(max = 255, message = "Email deve ter no máximo 255 caracteres")
     private String email;
+    
+    @Size(max = 255, message = "Site deve ter no máximo 255 caracteres")
     private String site;
     private UUID responsavelTecnico;
     private UUID responsavelAdministrativo;
+    @Size(max = 255, message = "Nome do responsável legal deve ter no máximo 255 caracteres")
     private String responsavelLegalNome;
+    
+    @Pattern(regexp = "^$|^\\d{11}$", message = "CPF do responsável legal deve ter 11 dígitos")
     private String responsavelLegalCpf;
     private StatusFuncionamentoEnum statusFuncionamento;
     private OffsetDateTime dataAbertura;
@@ -70,5 +90,6 @@ public class EstabelecimentosRequest {
     private Double areaTotalMetrosQuadrados;
     private Double latitude;
     private Double longitude;
+    @Size(max = 1000, message = "Observações deve ter no máximo 1000 caracteres")
     private String observacoes;
 }

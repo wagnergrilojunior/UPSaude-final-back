@@ -39,7 +39,7 @@ public class FabricantesMedicamentoServiceImpl implements FabricantesMedicamento
     public FabricantesMedicamentoResponse criar(FabricantesMedicamentoRequest request) {
         log.debug("Criando novo fabricantesmedicamento");
 
-        validarDadosBasicos(request);
+        // Validação de dados básicos é feita automaticamente pelo Bean Validation no Request
         validarDuplicidade(null, request);
 
         FabricantesMedicamento fabricantesMedicamento = fabricantesMedicamentoMapper.fromRequest(request);
@@ -85,7 +85,7 @@ public class FabricantesMedicamentoServiceImpl implements FabricantesMedicamento
             throw new BadRequestException("ID do fabricantesmedicamento é obrigatório");
         }
 
-        validarDadosBasicos(request);
+        // Validação de dados básicos é feita automaticamente pelo Bean Validation no Request
 
         FabricantesMedicamento fabricantesMedicamentoExistente = fabricantesMedicamentoRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("FabricantesMedicamento não encontrado com ID: " + id));
@@ -122,11 +122,9 @@ public class FabricantesMedicamentoServiceImpl implements FabricantesMedicamento
         log.info("FabricantesMedicamento excluído (desativado) com sucesso. ID: {}", id);
     }
 
-    private void validarDadosBasicos(FabricantesMedicamentoRequest request) {
-        if (request == null) {
-            throw new BadRequestException("Dados do fabricantesmedicamento são obrigatórios");
-        }
-    }
+        // Validações de dados básicos foram movidas para o Request usando Bean Validation
+    // (@NotNull, @NotBlank, @Pattern, etc). Isso garante validação automática no Controller
+    // e retorno de erro 400 padronizado via ApiExceptionHandler.
 
     /**
      * Valida se já existe um fabricante de medicamento com o mesmo nome no banco de dados.

@@ -55,7 +55,7 @@ public class MedicosServiceImpl implements MedicosService {
         }
 
         try {
-            validarDadosBasicos(request);
+            // Validação de dados básicos é feita automaticamente pelo Bean Validation no Request
 
             // Obtém o tenant do usuário autenticado (obrigatório para BaseEntityWithoutEstabelecimento)
             Tenant tenant = tenantService.obterTenantDoUsuarioAutenticado();
@@ -154,7 +154,7 @@ public class MedicosServiceImpl implements MedicosService {
         }
 
         try {
-            validarDadosBasicos(request);
+            // Validação de dados básicos é feita automaticamente pelo Bean Validation no Request
 
             Medicos medicosExistente = medicosRepository.findById(id)
                     .orElseThrow(() -> new NotFoundException("Médico não encontrado com ID: " + id));
@@ -232,11 +232,9 @@ public class MedicosServiceImpl implements MedicosService {
         }
     }
 
-    private void validarDadosBasicos(MedicosRequest request) {
-        if (request == null) {
-            throw new BadRequestException("Dados do médico são obrigatórios");
-        }
-    }
+    // Validações de dados básicos foram movidas para o Request usando Bean Validation
+    // (@NotNull, @NotBlank, @Pattern, etc). Isso garante validação automática no Controller
+    // e retorno de erro 400 padronizado via ApiExceptionHandler.
 
     /**
      * Valida se o CRM já está cadastrado para outro médico no mesmo tenant.

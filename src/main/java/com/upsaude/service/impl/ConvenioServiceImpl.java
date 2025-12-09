@@ -53,7 +53,7 @@ public class ConvenioServiceImpl implements ConvenioService {
         }
 
         try {
-            validarDadosBasicos(request);
+            // Validação de dados básicos é feita automaticamente pelo Bean Validation no Request
 
             Convenio convenio = convenioMapper.fromRequest(request);
             convenio.setActive(true);
@@ -148,7 +148,7 @@ public class ConvenioServiceImpl implements ConvenioService {
         }
 
         try {
-            validarDadosBasicos(request);
+            // Validação de dados básicos é feita automaticamente pelo Bean Validation no Request
 
             Convenio convenioExistente = convenioRepository.findById(id)
                     .orElseThrow(() -> new NotFoundException("Convênio não encontrado com ID: " + id));
@@ -226,11 +226,9 @@ public class ConvenioServiceImpl implements ConvenioService {
         }
     }
 
-    private void validarDadosBasicos(ConvenioRequest request) {
-        if (request == null) {
-            throw new BadRequestException("Dados do convenio são obrigatórios");
-        }
-    }
+    // Validações de dados básicos foram movidas para o Request usando Bean Validation
+    // (@NotNull, @NotBlank, @Pattern, etc). Isso garante validação automática no Controller
+    // e retorno de erro 400 padronizado via ApiExceptionHandler.
 
     /**
      * Valida se já existe um convênio com o mesmo CNPJ, inscrição estadual ou código no mesmo tenant.

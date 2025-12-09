@@ -36,7 +36,12 @@ public class ExamesRequest {
     private UUID estabelecimentoRealizador;
     private UUID profissionalResponsavel;
     private UUID medicoResponsavel;
+    @Size(max = 5000, message = "Resultados deve ter no máximo 5000 caracteres")
     private String resultados;
+    
+    @Size(max = 5000, message = "Laudo deve ter no máximo 5000 caracteres")
     private String laudo;
+    
+    @Size(max = 1000, message = "Observações deve ter no máximo 1000 caracteres")
     private String observacoes;
 }

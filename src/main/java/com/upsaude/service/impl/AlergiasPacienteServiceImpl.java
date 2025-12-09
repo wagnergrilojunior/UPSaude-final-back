@@ -51,7 +51,7 @@ public class AlergiasPacienteServiceImpl implements AlergiasPacienteService {
     public AlergiasPacienteResponse criar(AlergiasPacienteRequest request) {
         log.debug("Criando novo alergiaspaciente");
 
-        validarDadosBasicos(request);
+        // Validação de dados básicos é feita automaticamente pelo Bean Validation no Request
 
         AlergiasPaciente alergiasPaciente = alergiasPacienteMapper.fromRequest(request);
         
@@ -173,7 +173,7 @@ public class AlergiasPacienteServiceImpl implements AlergiasPacienteService {
             throw new BadRequestException("ID do alergiaspaciente é obrigatório");
         }
 
-        validarDadosBasicos(request);
+        // Validação de dados básicos é feita automaticamente pelo Bean Validation no Request
 
         AlergiasPaciente alergiasPacienteExistente = alergiasPacienteRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("AlergiasPaciente não encontrado com ID: " + id));
@@ -208,11 +208,9 @@ public class AlergiasPacienteServiceImpl implements AlergiasPacienteService {
         log.info("AlergiasPaciente excluído (desativado) com sucesso. ID: {}", id);
     }
 
-    private void validarDadosBasicos(AlergiasPacienteRequest request) {
-        if (request == null) {
-            throw new BadRequestException("Dados do alergiaspaciente são obrigatórios");
-        }
-    }
+        // Validações de dados básicos foram movidas para o Request usando Bean Validation
+    // (@NotNull, @NotBlank, @Pattern, etc). Isso garante validação automática no Controller
+    // e retorno de erro 400 padronizado via ApiExceptionHandler.
 
         private void atualizarDadosAlergiasPaciente(AlergiasPaciente alergiasPaciente, AlergiasPacienteRequest request) {
         AlergiasPaciente alergiasPacienteAtualizado = alergiasPacienteMapper.fromRequest(request);
