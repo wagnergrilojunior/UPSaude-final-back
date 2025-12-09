@@ -3,13 +3,12 @@ package com.upsaude.service.impl;
 import com.upsaude.api.request.CatalogoProcedimentosRequest;
 import com.upsaude.api.response.CatalogoProcedimentosResponse;
 import com.upsaude.entity.CatalogoProcedimentos;
-import com.upsaude.entity.Estabelecimentos;
 import com.upsaude.entity.Tenant;
 import com.upsaude.exception.BadRequestException;
 import com.upsaude.exception.NotFoundException;
 import com.upsaude.mapper.CatalogoProcedimentosMapper;
 import com.upsaude.repository.CatalogoProcedimentosRepository;
-import com.upsaude.repository.EstabelecimentosRepository;
+import com.upsaude.repository.UsuariosSistemaRepository;
 import com.upsaude.service.CatalogoProcedimentosService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -19,6 +18,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.util.UUID;
@@ -35,7 +36,7 @@ public class CatalogoProcedimentosServiceImpl implements CatalogoProcedimentosSe
 
     private final CatalogoProcedimentosRepository catalogoProcedimentosRepository;
     private final CatalogoProcedimentosMapper catalogoProcedimentosMapper;
-    private final EstabelecimentosRepository estabelecimentosRepository;
+    private final UsuariosSistemaRepository usuariosSistemaRepository;
 
     @Override
     @Transactional
@@ -47,6 +48,10 @@ public class CatalogoProcedimentosServiceImpl implements CatalogoProcedimentosSe
 
         CatalogoProcedimentos procedimento = catalogoProcedimentosMapper.fromRequest(request);
         procedimento.setActive(true);
+
+        // Define o tenant do usuário autenticado
+        Tenant tenant = obterTenantDoUsuarioAutenticado();
+        procedimento.setTenant(tenant);
 
         // Valida duplicidade antes de salvar (após o tenant ser setado)
         validarDuplicidade(null, procedimento, request);
@@ -207,6 +212,31 @@ public class CatalogoProcedimentosServiceImpl implements CatalogoProcedimentosSe
         procedimento.setActive(activeOriginal);
         procedimento.setCreatedAt(createdAtOriginal);
         // Estabelecimento não faz parte do Request
+    }
+
+    /**
+     * Obtém o tenant do usuário autenticado.
+     * 
+     * @return Tenant do usuário autenticado
+     * @throws NotFoundException se o usuário não estiver autenticado ou não tiver tenant associado
+     */
+    private Tenant obterTenantDoUsuarioAutenticado() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        
+        if (authentication == null || !authentication.isAuthenticated()) {
+            log.warn("Tentativa de criar procedimento sem autenticação");
+            throw new BadRequestException("Usuário não autenticado");
+        }
+
+        try {
+            UUID userId = UUID.fromString(authentication.getName());
+            return usuariosSistemaRepository.findByUserId(userId)
+                    .map(usuario -> usuario.getTenant())
+                    .orElseThrow(() -> new NotFoundException("Usuário não encontrado ou sem tenant associado"));
+        } catch (IllegalArgumentException e) {
+            log.error("Erro ao converter userId para UUID: {}", authentication.getName(), e);
+            throw new BadRequestException("ID do usuário inválido");
+        }
     }
 }
 
