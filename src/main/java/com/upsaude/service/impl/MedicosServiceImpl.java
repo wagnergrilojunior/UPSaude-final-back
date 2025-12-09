@@ -4,6 +4,7 @@ import com.upsaude.api.request.MedicosRequest;
 import com.upsaude.api.response.MedicosResponse;
 import com.upsaude.entity.EspecialidadesMedicas;
 import com.upsaude.entity.Medicos;
+import com.upsaude.entity.Tenant;
 import com.upsaude.exception.BadRequestException;
 import com.upsaude.exception.InternalServerErrorException;
 import com.upsaude.exception.NotFoundException;
@@ -11,6 +12,7 @@ import com.upsaude.mapper.MedicosMapper;
 import com.upsaude.repository.EspecialidadesMedicasRepository;
 import com.upsaude.repository.MedicosRepository;
 import com.upsaude.service.MedicosService;
+import com.upsaude.service.TenantService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.CacheEvict;
@@ -20,7 +22,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 
+import java.util.Optional;
 import java.util.UUID;
 
 /**
@@ -37,6 +41,7 @@ public class MedicosServiceImpl implements MedicosService {
     private final MedicosRepository medicosRepository;
     private final MedicosMapper medicosMapper;
     private final EspecialidadesMedicasRepository especialidadesMedicasRepository;
+    private final TenantService tenantService;
 
     @Override
     @Transactional
@@ -52,8 +57,19 @@ public class MedicosServiceImpl implements MedicosService {
         try {
             validarDadosBasicos(request);
 
+            // Obtém o tenant do usuário autenticado (obrigatório para BaseEntityWithoutEstabelecimento)
+            Tenant tenant = tenantService.obterTenantDoUsuarioAutenticado();
+            if (tenant == null) {
+                throw new BadRequestException("Não foi possível obter tenant do usuário autenticado. É necessário estar autenticado para criar médicos.");
+            }
+
+            // Validações de duplicatas antes de criar
+            validarCrmUnicoPorTenant(null, request, tenant);
+            validarCpfUnicoPorTenant(null, request, tenant);
+
             Medicos medicos = medicosMapper.fromRequest(request);
             medicos.setActive(true);
+            medicos.setTenant(tenant);
 
             // Processar relacionamentos - JPA gerencia a persistência automaticamente
             processarRelacionamentos(medicos, request);
@@ -143,6 +159,16 @@ public class MedicosServiceImpl implements MedicosService {
             Medicos medicosExistente = medicosRepository.findById(id)
                     .orElseThrow(() -> new NotFoundException("Médico não encontrado com ID: " + id));
 
+            // Obtém o tenant do médico existente para validações
+            Tenant tenant = medicosExistente.getTenant();
+            if (tenant == null) {
+                throw new BadRequestException("Médico não possui tenant associado. Não é possível atualizar.");
+            }
+
+            // Validações de duplicatas antes de atualizar
+            validarCrmUnicoPorTenant(id, request, tenant);
+            validarCpfUnicoPorTenant(id, request, tenant);
+
             // Usa mapper do MapStruct que preserva campos de controle automaticamente
             medicosMapper.updateFromRequest(request, medicosExistente);
             
@@ -209,6 +235,84 @@ public class MedicosServiceImpl implements MedicosService {
     private void validarDadosBasicos(MedicosRequest request) {
         if (request == null) {
             throw new BadRequestException("Dados do médico são obrigatórios");
+        }
+    }
+
+    /**
+     * Valida se o CRM já está cadastrado para outro médico no mesmo tenant.
+     * 
+     * @param medicoId ID do médico sendo atualizado (null se for criação)
+     * @param request dados do request com CRM e UF
+     * @param tenant tenant do médico
+     * @throws BadRequestException se já existir outro médico com o mesmo CRM/UF no tenant
+     */
+    private void validarCrmUnicoPorTenant(UUID medicoId, MedicosRequest request, Tenant tenant) {
+        if (request == null || request.getRegistroProfissional() == null) {
+            return;
+        }
+
+        String crm = request.getRegistroProfissional().getCrm();
+        String crmUf = request.getRegistroProfissional().getCrmUf();
+
+        if (!StringUtils.hasText(crm) || !StringUtils.hasText(crmUf)) {
+            return;
+        }
+
+        Optional<Medicos> medicoExistente = medicosRepository
+                .findByRegistroProfissionalCrmAndRegistroProfissionalCrmUfAndTenant(crm, crmUf, tenant);
+
+        if (medicoExistente.isPresent()) {
+            Medicos medicoEncontrado = medicoExistente.get();
+
+            // Se for atualização, verifica se o CRM pertence a outro médico
+            if (medicoId != null && !medicoEncontrado.getId().equals(medicoId)) {
+                throw new BadRequestException(
+                        String.format("Já existe um médico cadastrado com CRM %s/%s neste tenant.", crm, crmUf));
+            }
+
+            // Se for criação, sempre lança exceção se encontrar CRM
+            if (medicoId == null) {
+                throw new BadRequestException(
+                        String.format("Já existe um médico cadastrado com CRM %s/%s neste tenant.", crm, crmUf));
+            }
+        }
+    }
+
+    /**
+     * Valida se o CPF já está cadastrado para outro médico no mesmo tenant.
+     * 
+     * @param medicoId ID do médico sendo atualizado (null se for criação)
+     * @param request dados do request com CPF
+     * @param tenant tenant do médico
+     * @throws BadRequestException se já existir outro médico com o mesmo CPF no tenant
+     */
+    private void validarCpfUnicoPorTenant(UUID medicoId, MedicosRequest request, Tenant tenant) {
+        if (request == null || request.getDadosPessoais() == null) {
+            return;
+        }
+
+        String cpf = request.getDadosPessoais().getCpf();
+
+        if (!StringUtils.hasText(cpf)) {
+            return;
+        }
+
+        Optional<Medicos> medicoExistente = medicosRepository.findByDadosPessoaisCpfAndTenant(cpf, tenant);
+
+        if (medicoExistente.isPresent()) {
+            Medicos medicoEncontrado = medicoExistente.get();
+
+            // Se for atualização, verifica se o CPF pertence a outro médico
+            if (medicoId != null && !medicoEncontrado.getId().equals(medicoId)) {
+                throw new BadRequestException(
+                        String.format("Já existe um médico cadastrado com CPF %s neste tenant.", cpf));
+            }
+
+            // Se for criação, sempre lança exceção se encontrar CPF
+            if (medicoId == null) {
+                throw new BadRequestException(
+                        String.format("Já existe um médico cadastrado com CPF %s neste tenant.", cpf));
+            }
         }
     }
 

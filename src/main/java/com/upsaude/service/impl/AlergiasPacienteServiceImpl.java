@@ -14,8 +14,8 @@ import com.upsaude.repository.AlergiasPacienteRepository;
 import com.upsaude.repository.AlergiasRepository;
 import com.upsaude.repository.PacienteRepository;
 import com.upsaude.repository.TenantRepository;
-import com.upsaude.repository.UsuariosSistemaRepository;
 import com.upsaude.service.AlergiasPacienteService;
+import com.upsaude.service.TenantService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -24,8 +24,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Pageable;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.util.UUID;
@@ -44,8 +42,8 @@ public class AlergiasPacienteServiceImpl implements AlergiasPacienteService {
     private final AlergiasPacienteMapper alergiasPacienteMapper;
     private final PacienteRepository pacienteRepository;
     private final AlergiasRepository alergiasRepository;
-    private final UsuariosSistemaRepository usuariosSistemaRepository;
     private final TenantRepository tenantRepository;
+    private final TenantService tenantService;
 
     @Override
     @Transactional
@@ -71,7 +69,7 @@ public class AlergiasPacienteServiceImpl implements AlergiasPacienteService {
         }
         
         // Obtém o tenant do usuário autenticado (obrigatório para AlergiasPaciente que estende BaseEntity)
-        Tenant tenant = obterTenantDoUsuarioAutenticado();
+        Tenant tenant = tenantService.obterTenantDoUsuarioAutenticado();
         if (tenant == null) {
             throw new BadRequestException("Não foi possível obter tenant do usuário autenticado. É necessário estar autenticado para criar relacionamentos de alergias.");
         }
@@ -235,59 +233,4 @@ public class AlergiasPacienteServiceImpl implements AlergiasPacienteService {
         alergiasPaciente.setCreatedAt(createdAtOriginal);
     }
 
-    /**
-     * Obtém o tenant do usuário autenticado.
-     * 
-     * @return Tenant do usuário autenticado ou null se não encontrado
-     */
-    private Tenant obterTenantDoUsuarioAutenticado() {
-        try {
-            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-            if (authentication == null || !authentication.isAuthenticated()) {
-                log.warn("Usuário não autenticado. Não é possível obter tenant.");
-                return null;
-            }
-
-            // Obtém o userId do token JWT
-            UUID userId = null;
-            Object details = authentication.getDetails();
-            if (details instanceof com.upsaude.integration.supabase.SupabaseAuthResponse.User) {
-                com.upsaude.integration.supabase.SupabaseAuthResponse.User user = 
-                    (com.upsaude.integration.supabase.SupabaseAuthResponse.User) details;
-                userId = user.getId();
-                log.debug("UserId obtido do SupabaseAuthResponse.User: {}", userId);
-            } else if (authentication.getPrincipal() instanceof String) {
-                try {
-                    userId = UUID.fromString(authentication.getPrincipal().toString());
-                    log.debug("UserId obtido do Principal (String): {}", userId);
-                } catch (IllegalArgumentException e) {
-                    log.warn("Principal não é um UUID válido: {}", authentication.getPrincipal());
-                    return null;
-                }
-            } else {
-                log.warn("Tipo de Principal não reconhecido: {}", authentication.getPrincipal() != null ? authentication.getPrincipal().getClass().getName() : "null");
-            }
-
-            if (userId != null) {
-                java.util.Optional<com.upsaude.entity.UsuariosSistema> usuarioOpt = usuariosSistemaRepository.findByUserId(userId);
-                if (usuarioOpt.isPresent()) {
-                    com.upsaude.entity.UsuariosSistema usuario = usuarioOpt.get();
-                    Tenant tenant = usuario.getTenant();
-                    if (tenant != null) {
-                        log.debug("Tenant obtido com sucesso: {} (ID: {})", tenant.getNome(), tenant.getId());
-                        return tenant;
-                    } else {
-                        log.warn("Usuário encontrado mas sem tenant associado. UserId: {}", userId);
-                    }
-                } else {
-                    log.warn("Usuário não encontrado no sistema. UserId: {}", userId);
-                }
-            } else {
-                log.warn("Não foi possível obter userId do contexto de autenticação");
-            }
-        } catch (Exception e) {
-            log.error("Erro ao obter tenant do usuário autenticado, Exception: {}", e.getClass().getName(), e);
-        }
-        return null;
-    }
 }

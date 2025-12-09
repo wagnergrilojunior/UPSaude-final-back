@@ -39,7 +39,31 @@ import java.util.List;
            @UniqueConstraint(name = "uk_pacientes_email", columnNames = {"email"})
        },
        indexes = {
-           @Index(name = "idx_pacientes_cpf", columnList = "cpf")
+           // Índices simples para campos frequentemente usados em buscas
+           @Index(name = "idx_pacientes_cpf", columnList = "cpf"),
+           @Index(name = "idx_pacientes_email", columnList = "email"),
+           @Index(name = "idx_pacientes_cns", columnList = "cns"),
+           @Index(name = "idx_pacientes_rg", columnList = "rg"),
+           @Index(name = "idx_pacientes_nome_completo", columnList = "nome_completo"),
+           @Index(name = "idx_pacientes_data_nascimento", columnList = "data_nascimento"),
+           @Index(name = "idx_pacientes_status_paciente", columnList = "status_paciente"),
+           @Index(name = "idx_pacientes_ativo", columnList = "ativo"),
+           @Index(name = "idx_pacientes_convenio", columnList = "convenio_id"),
+           @Index(name = "idx_pacientes_criado_em", columnList = "criado_em"),
+           @Index(name = "idx_pacientes_atualizado_em", columnList = "atualizado_em"),
+           
+           // Índices compostos para queries comuns
+           @Index(name = "idx_pacientes_ativo_nome", columnList = "ativo, nome_completo"),
+           @Index(name = "idx_pacientes_status_ativo", columnList = "status_paciente, ativo"),
+           @Index(name = "idx_pacientes_ativo_criado_em", columnList = "ativo, criado_em"),
+           @Index(name = "idx_pacientes_ativo_data_nascimento", columnList = "ativo, data_nascimento"),
+           
+           // Índices para campos booleanos frequentemente filtrados
+           @Index(name = "idx_pacientes_situacao_rua", columnList = "situacao_rua"),
+           @Index(name = "idx_pacientes_cartao_sus_ativo", columnList = "cartao_sus_ativo"),
+           @Index(name = "idx_pacientes_possui_deficiencia", columnList = "possui_deficiencia"),
+           @Index(name = "idx_pacientes_cns_validado", columnList = "cns_validado"),
+           @Index(name = "idx_pacientes_acompanhado_esf", columnList = "acompanhado_por_equipe_esf")
        })
 @Data
 @EqualsAndHashCode(callSuper = true)
