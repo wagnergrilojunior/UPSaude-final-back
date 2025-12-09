@@ -39,7 +39,7 @@ public class PerfisUsuariosServiceImpl implements PerfisUsuariosService {
     public PerfisUsuariosResponse criar(PerfisUsuariosRequest request) {
         log.debug("Criando novo perfisusuarios");
 
-        validarDadosBasicos(request);
+        // Validação de dados básicos é feita automaticamente pelo Bean Validation no Request
 
         PerfisUsuarios perfisUsuarios = perfisUsuariosMapper.fromRequest(request);
         perfisUsuarios.setActive(true);
@@ -84,7 +84,7 @@ public class PerfisUsuariosServiceImpl implements PerfisUsuariosService {
             throw new BadRequestException("ID do perfisusuarios é obrigatório");
         }
 
-        validarDadosBasicos(request);
+        // Validação de dados básicos é feita automaticamente pelo Bean Validation no Request
 
         PerfisUsuarios perfisUsuariosExistente = perfisUsuariosRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("PerfisUsuarios não encontrado com ID: " + id));
@@ -119,11 +119,9 @@ public class PerfisUsuariosServiceImpl implements PerfisUsuariosService {
         log.info("PerfisUsuarios excluído (desativado) com sucesso. ID: {}", id);
     }
 
-    private void validarDadosBasicos(PerfisUsuariosRequest request) {
-        if (request == null) {
-            throw new BadRequestException("Dados do perfisusuarios são obrigatórios");
-        }
-    }
+    // Validações de dados básicos foram movidas para o Request usando Bean Validation
+    // (@NotNull, @NotBlank, @Pattern, etc). Isso garante validação automática no Controller
+    // e retorno de erro 400 padronizado via ApiExceptionHandler.
 
         private void atualizarDadosPerfisUsuarios(PerfisUsuarios perfisUsuarios, PerfisUsuariosRequest request) {
         PerfisUsuarios perfisUsuariosAtualizado = perfisUsuariosMapper.fromRequest(request);

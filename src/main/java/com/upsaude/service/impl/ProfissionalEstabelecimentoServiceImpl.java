@@ -45,7 +45,7 @@ public class ProfissionalEstabelecimentoServiceImpl implements ProfissionalEstab
     public ProfissionalEstabelecimentoResponse criar(ProfissionalEstabelecimentoRequest request) {
         log.debug("Criando novo vínculo de profissional com estabelecimento");
 
-        validarDadosBasicos(request);
+        // Validação de dados básicos é feita automaticamente pelo Bean Validation no Request
 
         // Valida se já existe vínculo ativo entre o profissional e o estabelecimento
         if (profissionalEstabelecimentoRepository
@@ -160,7 +160,7 @@ public class ProfissionalEstabelecimentoServiceImpl implements ProfissionalEstab
             throw new BadRequestException("ID do vínculo é obrigatório");
         }
 
-        validarDadosBasicos(request);
+        // Validação de dados básicos é feita automaticamente pelo Bean Validation no Request
 
         ProfissionalEstabelecimento vinculoExistente = profissionalEstabelecimentoRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Vínculo não encontrado com ID: " + id));
@@ -195,19 +195,9 @@ public class ProfissionalEstabelecimentoServiceImpl implements ProfissionalEstab
         log.info("Vínculo excluído (desativado) com sucesso. ID: {}", id);
     }
 
-    private void validarDadosBasicos(ProfissionalEstabelecimentoRequest request) {
-        if (request == null) {
-            throw new BadRequestException("Dados do vínculo são obrigatórios");
-        }
-
-        if (request.getDataInicio() == null) {
-            throw new BadRequestException("Data de início do vínculo é obrigatória");
-        }
-
-        if (request.getDataFim() != null && request.getDataFim().isBefore(request.getDataInicio())) {
-            throw new BadRequestException("Data de fim do vínculo não pode ser anterior à data de início");
-        }
-    }
+    // Validações de dados básicos foram movidas para o Request usando Bean Validation
+    // (@NotNull, @NotBlank, @Pattern, etc). Isso garante validação automática no Controller
+    // e retorno de erro 400 padronizado via ApiExceptionHandler.
 
     private void atualizarDadosVinculo(ProfissionalEstabelecimento vinculo, ProfissionalEstabelecimentoRequest request) {
         ProfissionalEstabelecimento vinculoAtualizado = profissionalEstabelecimentoMapper.fromRequest(request);

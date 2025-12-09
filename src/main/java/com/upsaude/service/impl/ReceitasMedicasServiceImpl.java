@@ -54,7 +54,7 @@ public class ReceitasMedicasServiceImpl implements ReceitasMedicasService {
     public ReceitasMedicasResponse criar(ReceitasMedicasRequest request) {
         log.debug("Criando novo receitasmedicas");
 
-        validarDadosBasicos(request);
+        // Validação de dados básicos é feita automaticamente pelo Bean Validation no Request
 
         ReceitasMedicas receitasMedicas = receitasMedicasMapper.fromRequest(request);
 
@@ -132,7 +132,7 @@ public class ReceitasMedicasServiceImpl implements ReceitasMedicasService {
             throw new BadRequestException("ID do receitasmedicas é obrigatório");
         }
 
-        validarDadosBasicos(request);
+        // Validação de dados básicos é feita automaticamente pelo Bean Validation no Request
 
         ReceitasMedicas receitasMedicasExistente = receitasMedicasRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("ReceitasMedicas não encontrado com ID: " + id));
@@ -167,33 +167,10 @@ public class ReceitasMedicasServiceImpl implements ReceitasMedicasService {
         log.info("ReceitasMedicas excluído (desativado) com sucesso. ID: {}", id);
     }
 
-    private void validarDadosBasicos(ReceitasMedicasRequest request) {
-        if (request == null) {
-            throw new BadRequestException("Dados do receitasmedicas são obrigatórios");
-        }
-        // estabelecimento não faz parte do Request
-        if (request.getMedico() == null) {
-            throw new BadRequestException("ID do médico é obrigatório");
-        }
-        if (request.getPaciente() == null) {
-            throw new BadRequestException("ID do paciente é obrigatório");
-        }
-        if (request.getNumeroReceita() == null || request.getNumeroReceita().trim().isEmpty()) {
-            throw new BadRequestException("Número da receita é obrigatório");
-        }
-        if (request.getDataPrescricao() == null) {
-            throw new BadRequestException("Data de prescrição é obrigatória");
-        }
-        if (request.getDataValidade() == null) {
-            throw new BadRequestException("Data de validade é obrigatória");
-        }
-        if (request.getUsoContinuo() == null) {
-            throw new BadRequestException("Indicação de uso contínuo é obrigatória");
-        }
-        if (request.getStatus() == null) {
-            throw new BadRequestException("Status é obrigatório");
-        }
-    }
+    // Validações de dados básicos foram movidas para o Request usando Bean Validation
+    // (@NotNull, @NotBlank, @Pattern, etc). Isso garante validação automática no Controller
+    // e retorno de erro 400 padronizado via ApiExceptionHandler.
+    // Todos os campos obrigatórios já têm @NotNull/@NotBlank no Request.
 
     private void atualizarDadosReceitasMedicas(ReceitasMedicas receitasMedicas, ReceitasMedicasRequest request) {
         // Atualiza médico se fornecido

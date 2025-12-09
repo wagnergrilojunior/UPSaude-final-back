@@ -7,7 +7,9 @@ import com.upsaude.api.request.embeddable.EncaminhamentoConsultaRequest;
 import com.upsaude.api.request.embeddable.ExamesSolicitadosConsultaRequest;
 import com.upsaude.api.request.embeddable.InformacoesConsultaRequest;
 import com.upsaude.api.request.embeddable.PrescricaoConsultaRequest;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -29,15 +31,32 @@ public class ConsultasRequest {
     private UUID especialidade;
     private UUID convenio;
     
+    @Valid
     private InformacoesConsultaRequest informacoes;
+    
+    @Valid
     private AnamneseConsultaRequest anamnese;
+    
+    @Valid
     private DiagnosticoConsultaRequest diagnostico;
+    
+    @Valid
     private PrescricaoConsultaRequest prescricao;
+    
+    @Valid
     private ExamesSolicitadosConsultaRequest examesSolicitados;
+    
+    @Valid
     private EncaminhamentoConsultaRequest encaminhamento;
+    
+    @Valid
     private AtestadoConsultaRequest atestado;
     
     private UUID cidPrincipal;
+    
+    @Size(max = 1000, message = "Observações deve ter no máximo 1000 caracteres")
     private String observacoes;
+    
+    @Size(max = 1000, message = "Observações internas deve ter no máximo 1000 caracteres")
     private String observacoesInternas;
 }

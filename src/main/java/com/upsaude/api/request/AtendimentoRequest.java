@@ -5,7 +5,9 @@ import com.upsaude.api.request.embeddable.ClassificacaoRiscoAtendimentoRequest;
 import com.upsaude.api.request.embeddable.DiagnosticoAtendimentoRequest;
 import com.upsaude.api.request.embeddable.InformacoesAtendimentoRequest;
 import com.upsaude.api.request.embeddable.ProcedimentosRealizadosAtendimentoRequest;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -29,13 +31,26 @@ public class AtendimentoRequest {
     private UUID equipeSaude;
     private UUID convenio;
     
+    @Valid
     private InformacoesAtendimentoRequest informacoes;
+    
+    @Valid
     private AnamneseAtendimentoRequest anamnese;
+    
+    @Valid
     private DiagnosticoAtendimentoRequest diagnostico;
+    
+    @Valid
     private ProcedimentosRealizadosAtendimentoRequest procedimentosRealizados;
+    
+    @Valid
     private ClassificacaoRiscoAtendimentoRequest classificacaoRisco;
     
     private UUID cidPrincipal;
+    
+    @Size(max = 1000, message = "Anotações deve ter no máximo 1000 caracteres")
     private String anotacoes;
+    
+    @Size(max = 1000, message = "Observações internas deve ter no máximo 1000 caracteres")
     private String observacoesInternas;
 }

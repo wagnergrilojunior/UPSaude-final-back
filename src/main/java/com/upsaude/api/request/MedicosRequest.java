@@ -4,6 +4,7 @@ import com.upsaude.api.request.embeddable.ContatoMedicoRequest;
 import com.upsaude.api.request.embeddable.DadosPessoaisMedicoRequest;
 import com.upsaude.api.request.embeddable.FormacaoMedicoRequest;
 import com.upsaude.api.request.embeddable.RegistroProfissionalMedicoRequest;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import java.util.UUID;
@@ -25,10 +26,18 @@ public class MedicosRequest {
     @Size(max = 255, message = "Nome completo deve ter no máximo 255 caracteres")
     private String nomeCompleto;
     
+    @Valid
     private DadosPessoaisMedicoRequest dadosPessoais;
+    
+    @Valid
     private RegistroProfissionalMedicoRequest registroProfissional;
+    
+    @Valid
     private FormacaoMedicoRequest formacao;
+    
+    @Valid
     private ContatoMedicoRequest contato;
     
+    @Size(max = 1000, message = "Observações deve ter no máximo 1000 caracteres")
     private String observacoes;
 }

@@ -46,7 +46,7 @@ public class VacinasServiceImpl implements VacinasService {
         }
 
         try {
-            validarDadosBasicos(request);
+            // Validação de dados básicos é feita automaticamente pelo Bean Validation no Request
             validarDuplicidade(null, request);
 
             Vacinas vacinas = vacinasMapper.fromRequest(request);
@@ -132,7 +132,7 @@ public class VacinasServiceImpl implements VacinasService {
         }
 
         try {
-            validarDadosBasicos(request);
+            // Validação de dados básicos é feita automaticamente pelo Bean Validation no Request
 
             Vacinas vacinasExistente = vacinasRepository.findById(id)
                     .orElseThrow(() -> new NotFoundException("Vacina não encontrada com ID: " + id));
@@ -199,11 +199,9 @@ public class VacinasServiceImpl implements VacinasService {
         }
     }
 
-    private void validarDadosBasicos(VacinasRequest request) {
-        if (request == null) {
-            throw new BadRequestException("Dados do vacinas são obrigatórios");
-        }
-    }
+        // Validações de dados básicos foram movidas para o Request usando Bean Validation
+    // (@NotNull, @NotBlank, @Pattern, etc). Isso garante validação automática no Controller
+    // e retorno de erro 400 padronizado via ApiExceptionHandler.
 
     /**
      * Valida se já existe uma vacina com o mesmo nome ou código interno no banco de dados.

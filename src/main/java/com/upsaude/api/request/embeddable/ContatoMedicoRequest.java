@@ -15,13 +15,13 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ContatoMedicoRequest {
-    @Pattern(regexp = "^\\d{10,11}$", message = "Telefone deve ter 10 ou 11 dígitos")
+    @Pattern(regexp = "^$|^\\d{10,11}$", message = "Telefone deve ter 10 ou 11 dígitos")
     private String telefone;
     
-    @Pattern(regexp = "^\\d{10,11}$", message = "Telefone celular deve ter 10 ou 11 dígitos")
+    @Pattern(regexp = "^$|^\\d{10,11}$", message = "Telefone celular deve ter 10 ou 11 dígitos")
     private String telefoneCelular;
     
-    @Pattern(regexp = "^\\d{10,11}$", message = "WhatsApp deve ter 10 ou 11 dígitos")
+    @Pattern(regexp = "^$|^\\d{10,11}$", message = "WhatsApp deve ter 10 ou 11 dígitos")
     private String whatsapp;
     
     @Email(message = "Email inválido")

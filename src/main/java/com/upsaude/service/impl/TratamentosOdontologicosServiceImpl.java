@@ -39,7 +39,7 @@ public class TratamentosOdontologicosServiceImpl implements TratamentosOdontolog
     public TratamentosOdontologicosResponse criar(TratamentosOdontologicosRequest request) {
         log.debug("Criando novo tratamentosodontologicos");
 
-        validarDadosBasicos(request);
+        // Validação de dados básicos é feita automaticamente pelo Bean Validation no Request
 
         TratamentosOdontologicos tratamentosOdontologicos = tratamentosOdontologicosMapper.fromRequest(request);
         tratamentosOdontologicos.setActive(true);
@@ -84,7 +84,7 @@ public class TratamentosOdontologicosServiceImpl implements TratamentosOdontolog
             throw new BadRequestException("ID do tratamentosodontologicos é obrigatório");
         }
 
-        validarDadosBasicos(request);
+        // Validação de dados básicos é feita automaticamente pelo Bean Validation no Request
 
         TratamentosOdontologicos tratamentosOdontologicosExistente = tratamentosOdontologicosRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("TratamentosOdontologicos não encontrado com ID: " + id));
@@ -119,11 +119,9 @@ public class TratamentosOdontologicosServiceImpl implements TratamentosOdontolog
         log.info("TratamentosOdontologicos excluído (desativado) com sucesso. ID: {}", id);
     }
 
-    private void validarDadosBasicos(TratamentosOdontologicosRequest request) {
-        if (request == null) {
-            throw new BadRequestException("Dados do tratamentosodontologicos são obrigatórios");
-        }
-    }
+    // Validações de dados básicos foram movidas para o Request usando Bean Validation
+    // (@NotNull, @NotBlank, @Pattern, etc). Isso garante validação automática no Controller
+    // e retorno de erro 400 padronizado via ApiExceptionHandler.
 
         private void atualizarDadosTratamentosOdontologicos(TratamentosOdontologicos tratamentosOdontologicos, TratamentosOdontologicosRequest request) {
         TratamentosOdontologicos tratamentosOdontologicosAtualizado = tratamentosOdontologicosMapper.fromRequest(request);

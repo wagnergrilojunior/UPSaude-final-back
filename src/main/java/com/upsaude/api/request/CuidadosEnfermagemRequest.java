@@ -1,6 +1,8 @@
 package com.upsaude.api.request;
 
 import com.upsaude.enums.TipoCuidadoEnfermagemEnum;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 import java.util.UUID;
@@ -11,9 +13,14 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 public class CuidadosEnfermagemRequest {
+    @NotNull(message = "Paciente é obrigatório")
     private UUID paciente;
+    
+    @NotNull(message = "Profissional é obrigatório")
     private UUID profissional;
     private UUID atendimento;
+    
+    @NotNull(message = "Tipo de cuidado é obrigatório")
     private TipoCuidadoEnfermagemEnum tipoCuidado;
     private String descricaoProcedimento;
     private OffsetDateTime dataHora;

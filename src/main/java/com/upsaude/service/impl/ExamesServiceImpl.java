@@ -45,8 +45,7 @@ public class ExamesServiceImpl implements ExamesService {
     public ExamesResponse criar(ExamesRequest request) {
         log.debug("Criando novo exames");
 
-        validarDadosBasicos(request);
-
+        // Validação de dados básicos é feita automaticamente pelo Bean Validation no Request
         Exames exames = examesMapper.fromRequest(request);
 
         // Carrega e define o estabelecimento
@@ -116,8 +115,7 @@ public class ExamesServiceImpl implements ExamesService {
             throw new BadRequestException("ID do exames é obrigatório");
         }
 
-        validarDadosBasicos(request);
-
+        // Validação de dados básicos é feita automaticamente pelo Bean Validation no Request
         Exames examesExistente = examesRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Exames não encontrado com ID: " + id));
 
@@ -151,17 +149,9 @@ public class ExamesServiceImpl implements ExamesService {
         log.info("Exames excluído (desativado) com sucesso. ID: {}", id);
     }
 
-    private void validarDadosBasicos(ExamesRequest request) {
-        if (request == null) {
-            throw new BadRequestException("Dados do exames são obrigatórios");
-        }
-        if (request.getEstabelecimentoRealizador() == null) {
-            throw new BadRequestException("ID do estabelecimento é obrigatório");
-        }
-        if (request.getPaciente() == null) {
-            throw new BadRequestException("ID do paciente é obrigatório");
-        }
-    }
+    // Validações de dados básicos foram movidas para o Request usando Bean Validation
+    // (@NotNull, @NotBlank, etc). Isso garante validação automática no Controller
+    // e retorno de erro 400 padronizado via ApiExceptionHandler.
 
         private void atualizarDadosExames(Exames exames, ExamesRequest request) {
         // Atualiza estabelecimento se fornecido

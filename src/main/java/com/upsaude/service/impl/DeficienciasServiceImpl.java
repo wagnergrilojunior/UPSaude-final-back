@@ -39,7 +39,7 @@ public class DeficienciasServiceImpl implements DeficienciasService {
     public DeficienciasResponse criar(DeficienciasRequest request) {
         log.debug("Criando nova deficiência");
 
-        validarDadosBasicos(request);
+        // Validação de dados básicos é feita automaticamente pelo Bean Validation no Request
         validarDuplicidade(null, request);
 
         Deficiencias deficiencias = deficienciasMapper.fromRequest(request);
@@ -86,7 +86,7 @@ public class DeficienciasServiceImpl implements DeficienciasService {
             throw new BadRequestException("ID da deficiência é obrigatório");
         }
 
-        validarDadosBasicos(request);
+        // Validação de dados básicos é feita automaticamente pelo Bean Validation no Request
 
         Deficiencias deficienciasExistente = deficienciasRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Deficiência não encontrada com ID: " + id));
@@ -123,15 +123,9 @@ public class DeficienciasServiceImpl implements DeficienciasService {
         log.info("Deficiência excluída (desativada) com sucesso. ID: {}", id);
     }
 
-    private void validarDadosBasicos(DeficienciasRequest request) {
-        if (request == null) {
-            throw new BadRequestException("Dados da deficiência são obrigatórios");
-        }
-        if (request.getNome() == null || request.getNome().trim().isEmpty()) {
-            throw new BadRequestException("Nome da deficiência é obrigatório");
-        }
-        // permanente e acompanhamentoContinuo não fazem parte do Request
-    }
+    // Validações de dados básicos foram movidas para o Request usando Bean Validation
+    // (@NotNull, @NotBlank, @Pattern, etc). Isso garante validação automática no Controller
+    // e retorno de erro 400 padronizado via ApiExceptionHandler.
 
     /**
      * Valida se já existe uma deficiência com o mesmo nome no banco de dados.

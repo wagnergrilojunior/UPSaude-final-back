@@ -19,6 +19,7 @@ import com.upsaude.enums.StatusAtivoEnum;
 import com.upsaude.enums.TipoVacinaEnum;
 import com.upsaude.enums.UnidadeMedidaEnum;
 import com.upsaude.enums.ViaAdministracaoEnum;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import java.util.UUID;
@@ -62,28 +63,54 @@ public class VacinasRequest {
     private ViaAdministracaoEnum viaAdministracao;
     private UnidadeMedidaEnum unidadeMedida;
     
+    @Valid
     private EsquemaVacinalRequest esquemaVacinal;
+    
+    @Valid
     private IdadeAplicacaoVacinaRequest idadeAplicacao;
+    
+    @Valid
     private ContraindicacoesVacinaRequest contraindicacoes;
+    
+    @Valid
     private ConservacaoVacinaRequest conservacao;
     
+    @Valid
     @JsonDeserialize(using = ComposicaoVacinaRequestDeserializer.class)
     private ComposicaoVacinaRequest composicao;
     
+    @Valid
     @JsonDeserialize(using = EficaciaVacinaRequestDeserializer.class)
     private EficaciaVacinaRequest eficacia;
     
+    @Valid
     @JsonDeserialize(using = ReacoesAdversasVacinaRequestDeserializer.class)
     private ReacoesAdversasVacinaRequest reacoesAdversas;
+    
+    @Valid
     private CalendarioVacinalRequest calendario;
+    
     private StatusAtivoEnum status;
+    
+    @Size(max = 5000, message = "Bula deve ter no máximo 5000 caracteres")
     private String bula;
+    
+    @Size(max = 5000, message = "Ficha técnica deve ter no máximo 5000 caracteres")
     private String fichaTecnica;
+    
+    @Size(max = 5000, message = "Manual de uso deve ter no máximo 5000 caracteres")
     private String manualUso;
+    
+    @Size(max = 1000, message = "Descrição deve ter no máximo 1000 caracteres")
     private String descricao;
+    
+    @Size(max = 1000, message = "Indicações deve ter no máximo 1000 caracteres")
     private String indicacoes;
+    
+    @Size(max = 1000, message = "Observações deve ter no máximo 1000 caracteres")
     private String observacoes;
     
+    @Valid
     @JsonDeserialize(using = IntegracaoGovernamentalVacinaRequestDeserializer.class)
     private IntegracaoGovernamentalVacinaRequest integracaoGovernamental;
 }

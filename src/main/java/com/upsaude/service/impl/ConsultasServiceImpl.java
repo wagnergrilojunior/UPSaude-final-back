@@ -49,7 +49,7 @@ public class ConsultasServiceImpl implements ConsultasService {
         }
 
         try {
-            validarDadosBasicos(request);
+            // Validação de dados básicos é feita automaticamente pelo Bean Validation no Request
 
             Consultas consulta = consultasMapper.fromRequest(request);
             consulta.setActive(true);
@@ -158,7 +158,7 @@ public class ConsultasServiceImpl implements ConsultasService {
         }
 
         try {
-            validarDadosBasicos(request);
+            // Validação de dados básicos é feita automaticamente pelo Bean Validation no Request
 
             Consultas consultaExistente = consultasRepository.findById(id)
                     .orElseThrow(() -> new NotFoundException("Consulta não encontrada com ID: " + id));
@@ -222,20 +222,10 @@ public class ConsultasServiceImpl implements ConsultasService {
         }
     }
 
-    private void validarDadosBasicos(ConsultasRequest request) {
-        if (request == null) {
-            throw new BadRequestException("Dados da consulta são obrigatórios");
-        }
-        if (request.getPaciente() == null) {
-            throw new BadRequestException("ID do paciente é obrigatório");
-        }
-        if (request.getInformacoes() == null) {
-            throw new BadRequestException("Informações da consulta são obrigatórias");
-        }
-        if (request.getInformacoes().getDataConsulta() == null) {
-            throw new BadRequestException("Data da consulta é obrigatória");
-        }
-    }
+    // Validações de dados básicos foram movidas para o Request usando Bean Validation
+    // (@NotNull, @NotBlank, @Pattern, etc). Isso garante validação automática no Controller
+    // e retorno de erro 400 padronizado via ApiExceptionHandler.
+    // O campo 'paciente' já tem @NotNull e 'informacoes' já tem @Valid no Request.
 
     private void atualizarDadosConsulta(Consultas consulta, ConsultasRequest request) {
         Consultas consultaAtualizada = consultasMapper.fromRequest(request);

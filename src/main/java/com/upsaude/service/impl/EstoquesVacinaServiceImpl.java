@@ -39,7 +39,7 @@ public class EstoquesVacinaServiceImpl implements EstoquesVacinaService {
     public EstoquesVacinaResponse criar(EstoquesVacinaRequest request) {
         log.debug("Criando novo estoquesvacina");
 
-        validarDadosBasicos(request);
+        // Validação de dados básicos é feita automaticamente pelo Bean Validation no Request
 
         EstoquesVacina estoquesVacina = estoquesVacinaMapper.fromRequest(request);
         estoquesVacina.setActive(true);
@@ -84,7 +84,7 @@ public class EstoquesVacinaServiceImpl implements EstoquesVacinaService {
             throw new BadRequestException("ID do estoquesvacina é obrigatório");
         }
 
-        validarDadosBasicos(request);
+        // Validação de dados básicos é feita automaticamente pelo Bean Validation no Request
 
         EstoquesVacina estoquesVacinaExistente = estoquesVacinaRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("EstoquesVacina não encontrado com ID: " + id));
@@ -119,11 +119,9 @@ public class EstoquesVacinaServiceImpl implements EstoquesVacinaService {
         log.info("EstoquesVacina excluído (desativado) com sucesso. ID: {}", id);
     }
 
-    private void validarDadosBasicos(EstoquesVacinaRequest request) {
-        if (request == null) {
-            throw new BadRequestException("Dados do estoquesvacina são obrigatórios");
-        }
-    }
+    // Validações de dados básicos foram movidas para o Request usando Bean Validation
+    // (@NotNull, @NotBlank, @Pattern, etc). Isso garante validação automática no Controller
+    // e retorno de erro 400 padronizado via ApiExceptionHandler.
 
         private void atualizarDadosEstoquesVacina(EstoquesVacina estoquesVacina, EstoquesVacinaRequest request) {
         EstoquesVacina estoquesVacinaAtualizado = estoquesVacinaMapper.fromRequest(request);

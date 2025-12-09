@@ -48,7 +48,7 @@ public class DispensacoesMedicamentosServiceImpl implements DispensacoesMedicame
     public DispensacoesMedicamentosResponse criar(DispensacoesMedicamentosRequest request) {
         log.debug("Criando novo dispensacoesmedicamentos");
 
-        validarDadosBasicos(request);
+        // Validação de dados básicos é feita automaticamente pelo Bean Validation no Request
 
         DispensacoesMedicamentos dispensacoesMedicamentos = dispensacoesMedicamentosMapper.fromRequest(request);
 
@@ -117,7 +117,7 @@ public class DispensacoesMedicamentosServiceImpl implements DispensacoesMedicame
             throw new BadRequestException("ID do dispensacoesmedicamentos é obrigatório");
         }
 
-        validarDadosBasicos(request);
+        // Validação de dados básicos é feita automaticamente pelo Bean Validation no Request
 
         DispensacoesMedicamentos dispensacoesMedicamentosExistente = dispensacoesMedicamentosRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("DispensacoesMedicamentos não encontrado com ID: " + id));
@@ -152,17 +152,9 @@ public class DispensacoesMedicamentosServiceImpl implements DispensacoesMedicame
         log.info("DispensacoesMedicamentos excluído (desativado) com sucesso. ID: {}", id);
     }
 
-    private void validarDadosBasicos(DispensacoesMedicamentosRequest request) {
-        if (request == null) {
-            throw new BadRequestException("Dados do dispensacoesmedicamentos são obrigatórios");
-        }
-        if (request.getPaciente() == null) {
-            throw new BadRequestException("ID do paciente é obrigatório");
-        }
-        if (request.getMedicacao() == null) {
-            throw new BadRequestException("ID do medicamento é obrigatório");
-        }
-    }
+    // Validações de dados básicos foram movidas para o Request usando Bean Validation
+    // (@NotNull, @NotBlank, @Pattern, etc). Isso garante validação automática no Controller
+    // e retorno de erro 400 padronizado via ApiExceptionHandler.
 
     private void atualizarDadosDispensacoesMedicamentos(DispensacoesMedicamentos dispensacoesMedicamentos, DispensacoesMedicamentosRequest request) {
         // Atualiza paciente se fornecido

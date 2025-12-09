@@ -51,7 +51,7 @@ public class MedicacaoServiceImpl implements MedicacaoService {
         }
 
         try {
-            validarDadosBasicos(request);
+            // Validação de dados básicos é feita automaticamente pelo Bean Validation no Request
 
             Medicacao medicacao = medicacaoMapper.fromRequest(request);
             medicacao.setActive(true);
@@ -139,7 +139,7 @@ public class MedicacaoServiceImpl implements MedicacaoService {
         }
 
         try {
-            validarDadosBasicos(request);
+            // Validação de dados básicos é feita automaticamente pelo Bean Validation no Request
 
             Medicacao medicacaoExistente = medicacaoRepository.findById(id)
                     .orElseThrow(() -> new NotFoundException("Medicação não encontrada com ID: " + id));
@@ -204,13 +204,9 @@ public class MedicacaoServiceImpl implements MedicacaoService {
         }
     }
 
-    private void validarDadosBasicos(MedicacaoRequest request) {
-        if (request == null) {
-            throw new BadRequestException("Dados da medicação são obrigatórios");
-        }
-        // Removidas validações obrigatórias: identificação, princípio ativo, nome comercial, dosagem e administração
-        // Esses campos são opcionais pois nem sempre o paciente tem essas informações
-    }
+    // Validações de dados básicos foram movidas para o Request usando Bean Validation
+    // (@NotNull, @NotBlank, @Pattern, etc). Isso garante validação automática no Controller
+    // e retorno de erro 400 padronizado via ApiExceptionHandler.
 
     /**
      * Garante que campos obrigatórios do banco de dados tenham valores padrão

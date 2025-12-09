@@ -39,7 +39,7 @@ public class AcaoPromocaoPrevencaoServiceImpl implements AcaoPromocaoPrevencaoSe
     public AcaoPromocaoPrevencaoResponse criar(AcaoPromocaoPrevencaoRequest request) {
         log.debug("Criando nova ação de promoção e prevenção");
 
-        validarDadosBasicos(request);
+        // Validação de dados básicos é feita automaticamente pelo Bean Validation no Request
 
         AcaoPromocaoPrevencao acaoPromocaoPrevencao = acaoPromocaoPrevencaoMapper.fromRequest(request);
         acaoPromocaoPrevencao.setActive(true);
@@ -123,7 +123,7 @@ public class AcaoPromocaoPrevencaoServiceImpl implements AcaoPromocaoPrevencaoSe
             throw new BadRequestException("ID da ação de promoção e prevenção é obrigatório");
         }
 
-        validarDadosBasicos(request);
+        // Validação de dados básicos é feita automaticamente pelo Bean Validation no Request
 
         AcaoPromocaoPrevencao acaoExistente = acaoPromocaoPrevencaoRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Ação de promoção e prevenção não encontrada com ID: " + id));
@@ -158,23 +158,10 @@ public class AcaoPromocaoPrevencaoServiceImpl implements AcaoPromocaoPrevencaoSe
         log.info("Ação de promoção e prevenção excluída (desativada) com sucesso. ID: {}", id);
     }
 
-    private void validarDadosBasicos(AcaoPromocaoPrevencaoRequest request) {
-        if (request == null) {
-            throw new BadRequestException("Dados da ação de promoção e prevenção são obrigatórios");
-        }
-        if (request.getProfissionalResponsavel() == null) {
-            throw new BadRequestException("Profissional responsável é obrigatório");
-        }
-        if (request.getTipoAcao() == null) {
-            throw new BadRequestException("Tipo de ação é obrigatório");
-        }
-        if (request.getNome() == null || request.getNome().isBlank()) {
-            throw new BadRequestException("Nome é obrigatório");
-        }
-        if (request.getDataInicio() == null) {
-            throw new BadRequestException("Data de início é obrigatória");
-        }
-    }
+    // Validações de dados básicos foram movidas para o Request usando Bean Validation
+    // (@NotNull, @NotBlank, @Pattern, etc). Isso garante validação automática no Controller
+    // e retorno de erro 400 padronizado via ApiExceptionHandler.
+    // Os campos 'profissionalResponsavel', 'nome' e 'dataInicio' já têm @NotNull/@NotBlank no Request.
 
     private void atualizarDadosAcaoPromocaoPrevencao(AcaoPromocaoPrevencao acao, AcaoPromocaoPrevencaoRequest request) {
         AcaoPromocaoPrevencao acaoAtualizada = acaoPromocaoPrevencaoMapper.fromRequest(request);

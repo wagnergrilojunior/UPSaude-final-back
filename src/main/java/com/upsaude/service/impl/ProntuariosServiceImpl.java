@@ -45,7 +45,7 @@ public class ProntuariosServiceImpl implements ProntuariosService {
     public ProntuariosResponse criar(ProntuariosRequest request) {
         log.debug("Criando novo prontuarios");
 
-        validarDadosBasicos(request);
+        // Validação de dados básicos é feita automaticamente pelo Bean Validation no Request
 
         Prontuarios prontuarios = prontuariosMapper.fromRequest(request);
 
@@ -109,7 +109,7 @@ public class ProntuariosServiceImpl implements ProntuariosService {
             throw new BadRequestException("ID do prontuarios é obrigatório");
         }
 
-        validarDadosBasicos(request);
+        // Validação de dados básicos é feita automaticamente pelo Bean Validation no Request
 
         Prontuarios prontuariosExistente = prontuariosRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Prontuarios não encontrado com ID: " + id));
@@ -144,15 +144,10 @@ public class ProntuariosServiceImpl implements ProntuariosService {
         log.info("Prontuarios excluído (desativado) com sucesso. ID: {}", id);
     }
 
-    private void validarDadosBasicos(ProntuariosRequest request) {
-        if (request == null) {
-            throw new BadRequestException("Dados do prontuarios são obrigatórios");
-        }
-        // estabelecimento não faz parte do Request
-        if (request.getPaciente() == null) {
-            throw new BadRequestException("ID do paciente é obrigatório");
-        }
-    }
+    // Validações de dados básicos foram movidas para o Request usando Bean Validation
+    // (@NotNull, @NotBlank, @Pattern, etc). Isso garante validação automática no Controller
+    // e retorno de erro 400 padronizado via ApiExceptionHandler.
+    // O campo 'paciente' já tem @NotNull no Request.
 
     private void atualizarDadosProntuarios(Prontuarios prontuarios, ProntuariosRequest request) {
         // estabelecimento não faz parte do Request

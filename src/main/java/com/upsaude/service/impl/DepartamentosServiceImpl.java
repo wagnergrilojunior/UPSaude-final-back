@@ -46,7 +46,7 @@ public class DepartamentosServiceImpl implements DepartamentosService {
         }
 
         try {
-            validarDadosBasicos(request);
+            // Validação de dados básicos é feita automaticamente pelo Bean Validation no Request
 
             Departamentos departamentos = departamentosMapper.fromRequest(request);
             departamentos.setActive(true);
@@ -131,7 +131,7 @@ public class DepartamentosServiceImpl implements DepartamentosService {
         }
 
         try {
-            validarDadosBasicos(request);
+            // Validação de dados básicos é feita automaticamente pelo Bean Validation no Request
 
             Departamentos departamentosExistente = departamentosRepository.findById(id)
                     .orElseThrow(() -> new NotFoundException("Departamento não encontrado com ID: " + id));
@@ -196,11 +196,9 @@ public class DepartamentosServiceImpl implements DepartamentosService {
         }
     }
 
-    private void validarDadosBasicos(DepartamentosRequest request) {
-        if (request == null) {
-            throw new BadRequestException("Dados do departamentos são obrigatórios");
-        }
-    }
+    // Validações de dados básicos foram movidas para o Request usando Bean Validation
+    // (@NotNull, @NotBlank, @Pattern, etc). Isso garante validação automática no Controller
+    // e retorno de erro 400 padronizado via ApiExceptionHandler.
 
     // Método removido - agora usa departamentosMapper.updateFromRequest diretamente
     // O MapStruct já preserva campos de controle automaticamente

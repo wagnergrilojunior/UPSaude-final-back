@@ -46,7 +46,7 @@ public class CidDoencasServiceImpl implements CidDoencasService {
         }
 
         try {
-            validarDadosBasicos(request);
+            // Validação de dados básicos é feita automaticamente pelo Bean Validation no Request
 
             CidDoencas cidDoencas = cidDoencasMapper.fromRequest(request);
             cidDoencas.setActive(true);
@@ -131,7 +131,7 @@ public class CidDoencasServiceImpl implements CidDoencasService {
         }
 
         try {
-            validarDadosBasicos(request);
+            // Validação de dados básicos é feita automaticamente pelo Bean Validation no Request
 
             CidDoencas cidDoencasExistente = cidDoencasRepository.findById(id)
                     .orElseThrow(() -> new NotFoundException("CID de doença não encontrado com ID: " + id));
@@ -196,11 +196,9 @@ public class CidDoencasServiceImpl implements CidDoencasService {
         }
     }
 
-    private void validarDadosBasicos(CidDoencasRequest request) {
-        if (request == null) {
-            throw new BadRequestException("Dados do ciddoencas são obrigatórios");
-        }
-    }
+        // Validações de dados básicos foram movidas para o Request usando Bean Validation
+    // (@NotNull, @NotBlank, @Pattern, etc). Isso garante validação automática no Controller
+    // e retorno de erro 400 padronizado via ApiExceptionHandler.
 
     // Método removido - agora usa cidDoencasMapper.updateFromRequest diretamente
     // O MapStruct já preserva campos de controle automaticamente

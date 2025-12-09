@@ -1,6 +1,7 @@
 package com.upsaude.api.request;
 
 import com.upsaude.api.request.embeddable.ClassificacaoEspecialidadeMedicaRequest;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
@@ -25,10 +26,18 @@ public class EspecialidadesMedicasRequest {
     @Size(max = 255, message = "Nome científico deve ter no máximo 255 caracteres")
     private String nomeCientifico;
     
+    @Valid
     private ClassificacaoEspecialidadeMedicaRequest classificacao;
     
+    @Size(max = 1000, message = "Descrição deve ter no máximo 1000 caracteres")
     private String descricao;
+    
+    @Size(max = 1000, message = "Área de atuação deve ter no máximo 1000 caracteres")
     private String areaAtuacaoDescricao;
+    
+    @Size(max = 1000, message = "Requisitos de formação deve ter no máximo 1000 caracteres")
     private String requisitosFormacao;
+    
+    @Size(max = 1000, message = "Observações deve ter no máximo 1000 caracteres")
     private String observacoes;
 }

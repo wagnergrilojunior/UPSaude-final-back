@@ -39,7 +39,7 @@ public class MedicacoesContinuasServiceImpl implements MedicacoesContinuasServic
     public MedicacoesContinuasResponse criar(MedicacoesContinuasRequest request) {
         log.debug("Criando novo medicacoescontinuas");
 
-        validarDadosBasicos(request);
+        // Validação de dados básicos é feita automaticamente pelo Bean Validation no Request
 
         MedicacoesContinuas medicacoesContinuas = medicacoesContinuasMapper.fromRequest(request);
         medicacoesContinuas.setActive(true);
@@ -84,7 +84,7 @@ public class MedicacoesContinuasServiceImpl implements MedicacoesContinuasServic
             throw new BadRequestException("ID do medicacoescontinuas é obrigatório");
         }
 
-        validarDadosBasicos(request);
+        // Validação de dados básicos é feita automaticamente pelo Bean Validation no Request
 
         MedicacoesContinuas medicacoesContinuasExistente = medicacoesContinuasRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("MedicacoesContinuas não encontrado com ID: " + id));
@@ -119,11 +119,9 @@ public class MedicacoesContinuasServiceImpl implements MedicacoesContinuasServic
         log.info("MedicacoesContinuas excluído (desativado) com sucesso. ID: {}", id);
     }
 
-    private void validarDadosBasicos(MedicacoesContinuasRequest request) {
-        if (request == null) {
-            throw new BadRequestException("Dados do medicacoescontinuas são obrigatórios");
-        }
-    }
+    // Validações de dados básicos foram movidas para o Request usando Bean Validation
+    // (@NotNull, @NotBlank, @Pattern, etc). Isso garante validação automática no Controller
+    // e retorno de erro 400 padronizado via ApiExceptionHandler.
 
     private void atualizarDadosMedicacoesContinuas(MedicacoesContinuas medicacoesContinuas, MedicacoesContinuasRequest request) {
         MedicacoesContinuas medicacoesContinuasAtualizado = medicacoesContinuasMapper.fromRequest(request);

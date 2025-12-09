@@ -39,7 +39,7 @@ public class LogsAuditoriaServiceImpl implements LogsAuditoriaService {
     public LogsAuditoriaResponse criar(LogsAuditoriaRequest request) {
         log.debug("Criando novo logsauditoria");
 
-        validarDadosBasicos(request);
+        // Validação de dados básicos é feita automaticamente pelo Bean Validation no Request
 
         LogsAuditoria logsAuditoria = logsAuditoriaMapper.fromRequest(request);
         logsAuditoria.setActive(true);
@@ -84,7 +84,7 @@ public class LogsAuditoriaServiceImpl implements LogsAuditoriaService {
             throw new BadRequestException("ID do logsauditoria é obrigatório");
         }
 
-        validarDadosBasicos(request);
+        // Validação de dados básicos é feita automaticamente pelo Bean Validation no Request
 
         LogsAuditoria logsAuditoriaExistente = logsAuditoriaRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("LogsAuditoria não encontrado com ID: " + id));
@@ -119,11 +119,9 @@ public class LogsAuditoriaServiceImpl implements LogsAuditoriaService {
         log.info("LogsAuditoria excluído (desativado) com sucesso. ID: {}", id);
     }
 
-    private void validarDadosBasicos(LogsAuditoriaRequest request) {
-        if (request == null) {
-            throw new BadRequestException("Dados do logsauditoria são obrigatórios");
-        }
-    }
+    // Validações de dados básicos foram movidas para o Request usando Bean Validation
+    // (@NotNull, @NotBlank, @Pattern, etc). Isso garante validação automática no Controller
+    // e retorno de erro 400 padronizado via ApiExceptionHandler.
 
         private void atualizarDadosLogsAuditoria(LogsAuditoria logsAuditoria, LogsAuditoriaRequest request) {
         LogsAuditoria logsAuditoriaAtualizado = logsAuditoriaMapper.fromRequest(request);

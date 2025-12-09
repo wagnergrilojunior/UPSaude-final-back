@@ -53,7 +53,7 @@ public class EnderecoServiceImpl implements EnderecoService {
         }
 
         try {
-            validarDadosBasicos(request);
+            // Validação de dados básicos é feita automaticamente pelo Bean Validation no Request
 
             // Converte request para entity
             Endereco endereco = enderecoMapper.fromRequest(request);
@@ -159,7 +159,7 @@ public class EnderecoServiceImpl implements EnderecoService {
         }
 
         try {
-            validarDadosBasicos(request);
+            // Validação de dados básicos é feita automaticamente pelo Bean Validation no Request
 
             Endereco enderecoExistente = enderecoRepository.findById(id)
                     .orElseThrow(() -> new NotFoundException("Endereço não encontrado com ID: " + id));
@@ -353,11 +353,9 @@ public class EnderecoServiceImpl implements EnderecoService {
         return cep.trim().replaceAll("[^\\d]", "");
     }
 
-    private void validarDadosBasicos(EnderecoRequest request) {
-        if (request == null) {
-            throw new BadRequestException("Dados do endereco são obrigatórios");
-        }
-    }
+        // Validações de dados básicos foram movidas para o Request usando Bean Validation
+    // (@NotNull, @NotBlank, @Pattern, etc). Isso garante validação automática no Controller
+    // e retorno de erro 400 padronizado via ApiExceptionHandler.
 
     // Método removido - agora usa enderecoMapper.updateFromRequest diretamente
     // O MapStruct já preserva campos de controle automaticamente

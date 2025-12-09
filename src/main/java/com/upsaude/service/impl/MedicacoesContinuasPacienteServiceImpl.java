@@ -39,7 +39,7 @@ public class MedicacoesContinuasPacienteServiceImpl implements MedicacoesContinu
     public MedicacoesContinuasPacienteResponse criar(MedicacoesContinuasPacienteRequest request) {
         log.debug("Criando novo medicacoescontinuaspaciente");
 
-        validarDadosBasicos(request);
+        // Validação de dados básicos é feita automaticamente pelo Bean Validation no Request
 
         MedicacoesContinuasPaciente medicacoesContinuasPaciente = medicacoesContinuasPacienteMapper.fromRequest(request);
         medicacoesContinuasPaciente.setActive(true);
@@ -84,7 +84,7 @@ public class MedicacoesContinuasPacienteServiceImpl implements MedicacoesContinu
             throw new BadRequestException("ID do medicacoescontinuaspaciente é obrigatório");
         }
 
-        validarDadosBasicos(request);
+        // Validação de dados básicos é feita automaticamente pelo Bean Validation no Request
 
         MedicacoesContinuasPaciente medicacoesContinuasPacienteExistente = medicacoesContinuasPacienteRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("MedicacoesContinuasPaciente não encontrado com ID: " + id));
@@ -119,11 +119,9 @@ public class MedicacoesContinuasPacienteServiceImpl implements MedicacoesContinu
         log.info("MedicacoesContinuasPaciente excluído (desativado) com sucesso. ID: {}", id);
     }
 
-    private void validarDadosBasicos(MedicacoesContinuasPacienteRequest request) {
-        if (request == null) {
-            throw new BadRequestException("Dados do medicacoescontinuaspaciente são obrigatórios");
-        }
-    }
+    // Validações de dados básicos foram movidas para o Request usando Bean Validation
+    // (@NotNull, @NotBlank, @Pattern, etc). Isso garante validação automática no Controller
+    // e retorno de erro 400 padronizado via ApiExceptionHandler.
 
         private void atualizarDadosMedicacoesContinuasPaciente(MedicacoesContinuasPaciente medicacoesContinuasPaciente, MedicacoesContinuasPacienteRequest request) {
         MedicacoesContinuasPaciente medicacoesContinuasPacienteAtualizado = medicacoesContinuasPacienteMapper.fromRequest(request);

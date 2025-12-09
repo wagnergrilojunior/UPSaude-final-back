@@ -22,7 +22,7 @@ public class RegistroProfissionalMedicoRequest {
     @Pattern(regexp = "^\\d{4,10}$", message = "CRM deve ter entre 4 e 10 dígitos")
     private String crm;
     
-    @Pattern(regexp = "^[A-Z]{2}$", message = "UF do CRM deve ter 2 letras maiúsculas")
+    @Pattern(regexp = "^$|^[A-Z]{2}$", message = "UF do CRM deve ter exatamente 2 letras maiúsculas")
     private String crmUf;
     
     private StatusRegistroMedicoEnum statusCrm;

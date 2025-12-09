@@ -59,7 +59,7 @@ public class DoencasPacienteServiceImpl implements DoencasPacienteService {
     public DoencasPacienteResponse criar(DoencasPacienteRequest request) {
         log.debug("Criando novo registro de doença do paciente");
 
-        validarDadosBasicos(request);
+        // Validação de dados básicos é feita automaticamente pelo Bean Validation no Request
 
         DoencasPaciente doencasPaciente = doencasPacienteMapper.fromRequest(request);
 
@@ -211,7 +211,7 @@ public class DoencasPacienteServiceImpl implements DoencasPacienteService {
             throw new BadRequestException("ID do registro é obrigatório");
         }
 
-        validarDadosBasicos(request);
+        // Validação de dados básicos é feita automaticamente pelo Bean Validation no Request
 
         DoencasPaciente doencasPacienteExistente = doencasPacienteRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Registro de doença do paciente não encontrado com ID: " + id));
@@ -246,14 +246,9 @@ public class DoencasPacienteServiceImpl implements DoencasPacienteService {
         log.info("Registro de doença do paciente excluído (desativado) com sucesso. ID: {}", id);
     }
 
-    private void validarDadosBasicos(DoencasPacienteRequest request) {
-        if (request == null) {
-            throw new BadRequestException("Dados do registro são obrigatórios");
-        }
-        // Removidas validações obrigatórias: paciente e doença
-        // Esses campos são opcionais pois nem sempre o paciente tem doenças cadastradas
-        // Se paciente ou doença forem fornecidos, serão validados no momento do relacionamento
-    }
+    // Validações de dados básicos foram movidas para o Request usando Bean Validation
+    // (@NotNull, @NotBlank, @Pattern, etc). Isso garante validação automática no Controller
+    // e retorno de erro 400 padronizado via ApiExceptionHandler.
 
     private void atualizarDadosDoencasPaciente(DoencasPaciente doencasPaciente, DoencasPacienteRequest request) {
         // Atualiza embeddables usando mappers
