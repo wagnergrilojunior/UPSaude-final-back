@@ -23,6 +23,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Optional;
 import java.util.UUID;
 
 /**
@@ -54,6 +55,7 @@ public class EnderecoServiceImpl implements EnderecoService {
         try {
             validarDadosBasicos(request);
 
+            // Converte request para entity
             Endereco endereco = enderecoMapper.fromRequest(request);
             endereco.setActive(true);
 
@@ -75,8 +77,10 @@ public class EnderecoServiceImpl implements EnderecoService {
                 endereco.setCidade(cidade);
             }
 
-            Endereco enderecoSalvo = enderecoRepository.save(endereco);
-            log.info("Endereço criado com sucesso. ID: {}", enderecoSalvo.getId());
+            // Usa findOrCreate para evitar duplicados (Fase 1.2)
+            Endereco enderecoSalvo = findOrCreate(endereco);
+            log.info("Endereço processado. ID: {} - {}", enderecoSalvo.getId(), 
+                    enderecoSalvo.getId().equals(endereco.getId()) ? "Novo endereço criado" : "Endereço existente reutilizado");
 
             return enderecoMapper.toResponse(enderecoSalvo);
         } catch (BadRequestException | NotFoundException e) {
@@ -240,6 +244,113 @@ public class EnderecoServiceImpl implements EnderecoService {
             log.error("Erro inesperado ao excluir endereço. ID: {}", id, e);
             throw e;
         }
+    }
+
+    @Override
+    @Transactional
+    public Endereco findOrCreate(Endereco endereco) {
+        log.debug("Buscando endereço existente ou criando novo. Logradouro: {}, Número: {}, Bairro: {}, CEP: {}",
+                endereco.getLogradouro(), endereco.getNumero(), endereco.getBairro(), endereco.getCep());
+
+        if (endereco == null) {
+            log.warn("Tentativa de buscar/criar endereço com objeto nulo");
+            throw new BadRequestException("Endereço não pode ser nulo");
+        }
+
+        try {
+            // Normaliza dados antes de buscar (Fase 7.1)
+            String logradouroNormalizado = normalizarString(endereco.getLogradouro());
+            String numeroNormalizado = normalizarNumero(endereco.getNumero());
+            String bairroNormalizado = normalizarString(endereco.getBairro());
+            String cepNormalizado = normalizarCep(endereco.getCep());
+
+            // Busca endereço existente pelos campos principais (case-insensitive)
+            UUID cidadeId = endereco.getCidade() != null ? endereco.getCidade().getId() : null;
+            UUID estadoId = endereco.getEstado() != null ? endereco.getEstado().getId() : null;
+
+            Optional<Endereco> enderecoExistente = enderecoRepository.findByFields(
+                    endereco.getTipoLogradouro(),
+                    logradouroNormalizado,
+                    numeroNormalizado,
+                    bairroNormalizado,
+                    cepNormalizado,
+                    cidadeId,
+                    estadoId
+            );
+
+            if (enderecoExistente.isPresent()) {
+                Endereco encontrado = enderecoExistente.get();
+                log.info("Endereço existente encontrado. ID: {} - Reutilizando endereço existente", encontrado.getId());
+                return encontrado;
+            }
+
+            // Não encontrou endereço existente, cria novo
+            // Aplica normalizações no endereço antes de salvar
+            endereco.setLogradouro(logradouroNormalizado);
+            endereco.setNumero(numeroNormalizado);
+            endereco.setBairro(bairroNormalizado);
+            endereco.setCep(cepNormalizado);
+
+            // Garante valores padrão para campos obrigatórios
+            if (endereco.getSemNumero() == null) {
+                endereco.setSemNumero(false);
+            }
+            if (endereco.getActive() == null) {
+                endereco.setActive(true);
+            }
+
+            Endereco enderecoSalvo = enderecoRepository.save(endereco);
+            log.info("Novo endereço criado. ID: {}", enderecoSalvo.getId());
+            return enderecoSalvo;
+        } catch (BadRequestException e) {
+            log.warn("Erro de validação ao buscar/criar endereço. Erro: {}", e.getMessage());
+            throw e;
+        } catch (DataAccessException e) {
+            log.error("Erro de acesso a dados ao buscar/criar endereço", e);
+            throw new InternalServerErrorException("Erro ao buscar/criar endereço", e);
+        } catch (RuntimeException e) {
+            log.error("Erro inesperado ao buscar/criar endereço", e);
+            throw e;
+        }
+    }
+
+    /**
+     * Normaliza string removendo espaços extras e convertendo para lowercase para comparação.
+     *
+     * @param str string a ser normalizada
+     * @return string normalizada ou null se entrada for null
+     */
+    private String normalizarString(String str) {
+        if (str == null) {
+            return null;
+        }
+        return str.trim();
+    }
+
+    /**
+     * Normaliza número de endereço removendo caracteres especiais e espaços.
+     *
+     * @param numero número a ser normalizado
+     * @return número normalizado ou null se entrada for null
+     */
+    private String normalizarNumero(String numero) {
+        if (numero == null) {
+            return null;
+        }
+        return numero.trim().replaceAll("[^\\d]", "");
+    }
+
+    /**
+     * Normaliza CEP removendo caracteres especiais e espaços.
+     *
+     * @param cep CEP a ser normalizado
+     * @return CEP normalizado ou null se entrada for null
+     */
+    private String normalizarCep(String cep) {
+        if (cep == null) {
+            return null;
+        }
+        return cep.trim().replaceAll("[^\\d]", "");
     }
 
     private void validarDadosBasicos(EnderecoRequest request) {

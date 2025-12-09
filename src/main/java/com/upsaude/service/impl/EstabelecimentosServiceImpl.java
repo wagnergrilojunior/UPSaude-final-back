@@ -56,7 +56,9 @@ public class EstabelecimentosServiceImpl implements EstabelecimentosService {
 
             Estabelecimentos estabelecimento = estabelecimentosMapper.fromRequest(request);
             
-            // Carrega e valida endereço principal
+            // Carrega e valida endereço principal (Fase 2.4)
+            // NOTA: Request envia UUID. Se no futuro precisar aceitar objeto completo EnderecoRequest,
+            // converter para Endereco e usar enderecoService.findOrCreate() para evitar duplicados
             if (request.getEnderecoPrincipal() != null) {
                 Endereco enderecoPrincipal = enderecoRepository.findById(request.getEnderecoPrincipal())
                         .orElseThrow(() -> new NotFoundException("Endereço principal não encontrado com ID: " + request.getEnderecoPrincipal()));
@@ -167,7 +169,9 @@ public class EstabelecimentosServiceImpl implements EstabelecimentosService {
             // Usa mapper do MapStruct que preserva campos de controle automaticamente
             estabelecimentosMapper.updateFromRequest(request, estabelecimentoExistente);
             
-            // Atualiza relacionamentos manualmente (endereço principal, responsáveis)
+            // Atualiza relacionamentos manualmente (endereço principal, responsáveis) (Fase 2.4 e 6.1)
+            // NOTA: Request envia UUID. Se no futuro precisar aceitar objeto completo EnderecoRequest,
+            // converter para Endereco e usar enderecoService.findOrCreate() para evitar duplicados
             if (request.getEnderecoPrincipal() != null) {
                 Endereco enderecoPrincipal = enderecoRepository.findById(request.getEnderecoPrincipal())
                         .orElseThrow(() -> new NotFoundException("Endereço principal não encontrado com ID: " + request.getEnderecoPrincipal()));

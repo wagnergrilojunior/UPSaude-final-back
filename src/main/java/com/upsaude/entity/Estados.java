@@ -24,7 +24,7 @@ public class Estados extends BaseEntityWithoutTenant {
     @Column(name = "nome", length = 100, nullable = false)
     private String nome;
 
-    @Column(name = "codigo_ibge", length = 10)
+    @Column(name = "codigo_ibge", length = 20)
     private String codigoIbge;
 }
 

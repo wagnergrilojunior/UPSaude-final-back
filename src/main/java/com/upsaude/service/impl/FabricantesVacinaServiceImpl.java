@@ -3,10 +3,12 @@ package com.upsaude.service.impl;
 import com.upsaude.api.request.FabricantesVacinaRequest;
 import com.upsaude.api.response.FabricantesVacinaResponse;
 import com.upsaude.entity.FabricantesVacina;
+import com.upsaude.entity.Endereco;
 import com.upsaude.exception.BadRequestException;
 import com.upsaude.exception.NotFoundException;
 import com.upsaude.mapper.FabricantesVacinaMapper;
 import com.upsaude.repository.FabricantesVacinaRepository;
+import com.upsaude.repository.EnderecoRepository;
 import com.upsaude.service.FabricantesVacinaService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -32,6 +34,7 @@ public class FabricantesVacinaServiceImpl implements FabricantesVacinaService {
 
     private final FabricantesVacinaRepository fabricantesVacinaRepository;
     private final FabricantesVacinaMapper fabricantesVacinaMapper;
+    private final EnderecoRepository enderecoRepository;
 
     @Override
     @Transactional
@@ -43,6 +46,13 @@ public class FabricantesVacinaServiceImpl implements FabricantesVacinaService {
 
         FabricantesVacina fabricantesVacina = fabricantesVacinaMapper.fromRequest(request);
         fabricantesVacina.setActive(true);
+
+        // Processa endereço se fornecido (Fase 2.2)
+        if (request.getEndereco() != null) {
+            Endereco endereco = enderecoRepository.findById(request.getEndereco())
+                    .orElseThrow(() -> new NotFoundException("Endereço não encontrado com ID: " + request.getEndereco()));
+            fabricantesVacina.setEndereco(endereco);
+        }
 
         FabricantesVacina fabricantesVacinaSalvo = fabricantesVacinaRepository.save(fabricantesVacina);
         log.info("FabricantesVacina criado com sucesso. ID: {}", fabricantesVacinaSalvo.getId());
@@ -90,6 +100,14 @@ public class FabricantesVacinaServiceImpl implements FabricantesVacinaService {
                 .orElseThrow(() -> new NotFoundException("FabricantesVacina não encontrado com ID: " + id));
 
         atualizarDadosFabricantesVacina(fabricantesVacinaExistente, request);
+
+        // Processa endereço se fornecido (Fase 2.2 e 6.1)
+        if (request.getEndereco() != null) {
+            Endereco endereco = enderecoRepository.findById(request.getEndereco())
+                    .orElseThrow(() -> new NotFoundException("Endereço não encontrado com ID: " + request.getEndereco()));
+            fabricantesVacinaExistente.setEndereco(endereco);
+        }
+        // Se endereço não foi fornecido, mantém o existente (não remove)
 
         FabricantesVacina fabricantesVacinaAtualizado = fabricantesVacinaRepository.save(fabricantesVacinaExistente);
         log.info("FabricantesVacina atualizado com sucesso. ID: {}", fabricantesVacinaAtualizado.getId());
