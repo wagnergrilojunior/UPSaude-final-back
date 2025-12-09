@@ -32,5 +32,43 @@ public interface FabricantesEquipamentoRepository extends JpaRepository<Fabrican
      * Busca todos os fabricantes, ordenados por nome.
      */
     Page<FabricantesEquipamento> findAllByOrderByNomeAsc(Pageable pageable);
+
+    /**
+     * Verifica se existe um fabricante de equipamento com o nome informado.
+     * Usado para validar duplicatas antes de cadastrar ou atualizar.
+     *
+     * @param nome nome do fabricante de equipamento
+     * @return true se existe um fabricante de equipamento com este nome, false caso contrário
+     */
+    boolean existsByNome(String nome);
+
+    /**
+     * Verifica se existe um fabricante de equipamento com o nome informado, excluindo o registro com o ID especificado.
+     * Usado para validar duplicatas durante atualização.
+     *
+     * @param nome nome do fabricante de equipamento
+     * @param id ID do fabricante de equipamento a ser excluído da verificação
+     * @return true se existe outro fabricante de equipamento com este nome, false caso contrário
+     */
+    boolean existsByNomeAndIdNot(String nome, UUID id);
+
+    /**
+     * Verifica se existe um fabricante de equipamento com o CNPJ informado.
+     * Usado para validar duplicatas antes de cadastrar ou atualizar.
+     *
+     * @param cnpj CNPJ do fabricante de equipamento
+     * @return true se existe um fabricante de equipamento com este CNPJ, false caso contrário
+     */
+    boolean existsByCnpj(String cnpj);
+
+    /**
+     * Verifica se existe um fabricante de equipamento com o CNPJ informado, excluindo o registro com o ID especificado.
+     * Usado para validar duplicatas durante atualização.
+     *
+     * @param cnpj CNPJ do fabricante de equipamento
+     * @param id ID do fabricante de equipamento a ser excluído da verificação
+     * @return true se existe outro fabricante de equipamento com este CNPJ, false caso contrário
+     */
+    boolean existsByCnpjAndIdNot(String cnpj, UUID id);
 }
 

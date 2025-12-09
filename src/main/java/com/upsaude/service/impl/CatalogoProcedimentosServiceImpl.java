@@ -4,6 +4,7 @@ import com.upsaude.api.request.CatalogoProcedimentosRequest;
 import com.upsaude.api.response.CatalogoProcedimentosResponse;
 import com.upsaude.entity.CatalogoProcedimentos;
 import com.upsaude.entity.Estabelecimentos;
+import com.upsaude.entity.Tenant;
 import com.upsaude.exception.BadRequestException;
 import com.upsaude.exception.NotFoundException;
 import com.upsaude.mapper.CatalogoProcedimentosMapper;
@@ -46,6 +47,9 @@ public class CatalogoProcedimentosServiceImpl implements CatalogoProcedimentosSe
 
         CatalogoProcedimentos procedimento = catalogoProcedimentosMapper.fromRequest(request);
         procedimento.setActive(true);
+
+        // Valida duplicidade antes de salvar (após o tenant ser setado)
+        validarDuplicidade(null, procedimento, request);
 
         CatalogoProcedimentos procedimentoSalvo = catalogoProcedimentosRepository.save(procedimento);
         log.info("Procedimento criado no catálogo com sucesso. ID: {}", procedimentoSalvo.getId());
@@ -92,6 +96,9 @@ public class CatalogoProcedimentosServiceImpl implements CatalogoProcedimentosSe
         CatalogoProcedimentos procedimentoExistente = catalogoProcedimentosRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Procedimento não encontrado no catálogo com ID: " + id));
 
+        // Valida duplicidade antes de atualizar
+        validarDuplicidade(id, procedimentoExistente, request);
+
         atualizarDadosProcedimento(procedimentoExistente, request);
 
         CatalogoProcedimentos procedimentoAtualizado = catalogoProcedimentosRepository.save(procedimentoExistente);
@@ -125,6 +132,60 @@ public class CatalogoProcedimentosServiceImpl implements CatalogoProcedimentosSe
     private void validarDadosBasicos(CatalogoProcedimentosRequest request) {
         if (request == null) {
             throw new BadRequestException("Dados do procedimento são obrigatórios");
+        }
+    }
+
+    /**
+     * Valida se já existe um procedimento no catálogo com o mesmo nome ou código no mesmo tenant.
+     * 
+     * @param id ID do procedimento sendo atualizado (null para criação)
+     * @param procedimento objeto CatalogoProcedimentos (usado para obter o tenant)
+     * @param request dados do procedimento sendo cadastrado/atualizado
+     * @throws BadRequestException se já existe um procedimento com o mesmo nome ou código no tenant
+     */
+    private void validarDuplicidade(UUID id, CatalogoProcedimentos procedimento, CatalogoProcedimentosRequest request) {
+        if (request == null || procedimento == null || procedimento.getTenant() == null) {
+            return;
+        }
+
+        Tenant tenant = procedimento.getTenant();
+
+        // Valida duplicidade do nome
+        if (request.getNome() != null && !request.getNome().trim().isEmpty()) {
+            boolean nomeDuplicado;
+            if (id == null) {
+                // Criação: verifica se existe qualquer registro com este nome no tenant
+                nomeDuplicado = catalogoProcedimentosRepository.existsByNomeAndTenant(request.getNome().trim(), tenant);
+            } else {
+                // Atualização: verifica se existe outro registro (diferente do atual) com este nome no tenant
+                nomeDuplicado = catalogoProcedimentosRepository.existsByNomeAndTenantAndIdNot(request.getNome().trim(), tenant, id);
+            }
+
+            if (nomeDuplicado) {
+                log.warn("Tentativa de cadastrar/atualizar procedimento no catálogo com nome duplicado. Nome: {}, Tenant: {}", request.getNome(), tenant.getId());
+                throw new BadRequestException(
+                    String.format("Já existe um procedimento cadastrado no catálogo com o nome '%s' no banco de dados", request.getNome())
+                );
+            }
+        }
+
+        // Valida duplicidade do código (apenas se fornecido)
+        if (request.getCodigo() != null && !request.getCodigo().trim().isEmpty()) {
+            boolean codigoDuplicado;
+            if (id == null) {
+                // Criação: verifica se existe qualquer registro com este código no tenant
+                codigoDuplicado = catalogoProcedimentosRepository.existsByCodigoAndTenant(request.getCodigo().trim(), tenant);
+            } else {
+                // Atualização: verifica se existe outro registro (diferente do atual) com este código no tenant
+                codigoDuplicado = catalogoProcedimentosRepository.existsByCodigoAndTenantAndIdNot(request.getCodigo().trim(), tenant, id);
+            }
+
+            if (codigoDuplicado) {
+                log.warn("Tentativa de cadastrar/atualizar procedimento no catálogo com código duplicado. Código: {}, Tenant: {}", request.getCodigo(), tenant.getId());
+                throw new BadRequestException(
+                    String.format("Já existe um procedimento cadastrado no catálogo com o código '%s' no banco de dados", request.getCodigo())
+                );
+            }
         }
     }
 
