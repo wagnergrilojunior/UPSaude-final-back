@@ -48,9 +48,9 @@ import java.util.List;
 @NamedEntityGraph(
     name = "Medicos.listagemCompleta",
     attributeNodes = {
-        @NamedAttributeNode("especialidades"),
-        @NamedAttributeNode("enderecos"),
-        @NamedAttributeNode("medicosEstabelecimentos")
+        @NamedAttributeNode("especialidades")
+        // enderecos e medicosEstabelecimentos são carregados via batch fetching
+        // (hibernate.default_batch_fetch_size) para evitar MultipleBagFetchException
     }
 )
 @Data

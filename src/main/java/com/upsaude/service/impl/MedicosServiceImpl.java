@@ -150,8 +150,9 @@ public class MedicosServiceImpl implements MedicosService {
                 pageable.getPageNumber(), pageable.getPageSize());
 
         try {
-            // Busca médicos paginados com especialidade carregada via EntityGraph
-            // O EntityGraph garante que o relacionamento especialidade seja carregado em uma única query
+            // Busca médicos paginados com especialidades carregadas via EntityGraph
+            // enderecos e medicosEstabelecimentos são carregados via batch fetching
+            // (hibernate.default_batch_fetch_size) para evitar MultipleBagFetchException
             Page<Medicos> medicos = medicosRepository.findAll(pageable);
             log.debug("Listagem de médicos concluída. Total de elementos: {}", medicos.getTotalElements());
             return medicos.map(medicosMapper::toResponse);

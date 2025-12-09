@@ -93,24 +93,23 @@ public interface MedicosRepository extends JpaRepository<Medicos, UUID> {
 
     /**
      * Busca médicos paginados com relacionamentos carregados usando EntityGraph.
-     * Otimiza a query carregando todos os relacionamentos necessários em uma única query,
-     * evitando o problema N+1 queries.
+     * Otimiza a query carregando relacionamentos necessários, evitando o problema N+1 queries.
      * 
-     * IMPORTANTE: Este método usa o EntityGraph "Medicos.listagemCompleta" que carrega:
-     * - especialidades (lista de especialidades)
-     * - enderecos
-     * - medicosEstabelecimentos
+     * IMPORTANTE: 
+     * - especialidades: carregado via EntityGraph (fetch join)
+     * - enderecos e medicosEstabelecimentos: carregados via batch fetching 
+     *   (hibernate.default_batch_fetch_size) para evitar MultipleBagFetchException
      * 
-     * Isso reduz significativamente o número de queries SQL executadas.
+     * O Hibernate não permite fazer fetch de múltiplas coleções List simultaneamente.
+     * Por isso, apenas especialidades é carregado via EntityGraph, e os outros são
+     * carregados via batch fetching quando necessário.
      *
      * @param pageable informações de paginação
      * @return página de médicos com relacionamentos carregados
      */
     @Override
     @EntityGraph(attributePaths = {
-        "especialidades",
-        "enderecos",
-        "medicosEstabelecimentos"
+        "especialidades"
     })
     @NonNull
     Page<Medicos> findAll(@NonNull Pageable pageable);
