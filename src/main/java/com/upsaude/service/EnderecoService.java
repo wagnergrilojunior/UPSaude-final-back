@@ -47,7 +47,7 @@ import java.util.UUID;
  * - Se endereço vem com UUID diferente: buscar novo endereço por ID
  * - Se endereço vem como objeto completo: usar findOrCreate
  * - Se endereço não vem no request: manter endereço existente (não remover)
- * 
+ *
  * @author UPSaúde
  */
 public interface EnderecoService {

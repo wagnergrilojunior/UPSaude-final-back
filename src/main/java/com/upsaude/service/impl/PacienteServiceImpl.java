@@ -11,7 +11,6 @@ import com.upsaude.api.response.PacienteSimplificadoResponse;
 import com.upsaude.entity.*;
 import com.upsaude.enums.StatusPacienteEnum;
 import com.upsaude.exception.BadRequestException;
-import com.upsaude.exception.ConflictException;
 import com.upsaude.exception.NotFoundException;
 import com.upsaude.mapper.PacienteMapper;
 import com.upsaude.mapper.EnderecoMapper;
@@ -22,6 +21,7 @@ import com.upsaude.service.DeficienciasPacienteService;
 import com.upsaude.service.DoencasPacienteService;
 import com.upsaude.service.MedicacaoPacienteService;
 import com.upsaude.service.EnderecoService;
+import com.upsaude.service.TenantService;
 import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -33,8 +33,6 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Pageable;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
@@ -59,7 +57,6 @@ public class PacienteServiceImpl implements PacienteService {
     private final EnderecoMapper enderecoMapper;
     private final EstadosRepository estadosRepository;
     private final CidadesRepository cidadesRepository;
-    private final UsuariosSistemaRepository usuariosSistemaRepository;
     
     // Repositories para entidades relacionadas
     private final ConvenioRepository convenioRepository;
@@ -75,6 +72,7 @@ public class PacienteServiceImpl implements PacienteService {
     private final DoencasPacienteService doencasPacienteService;
     private final MedicacaoPacienteService medicacaoPacienteService;
     private final EnderecoService enderecoService;
+    private final TenantService tenantService;
     
     // Self-injection: injeta o próprio service (proxy) para evitar self-invocation
     // @Lazy evita dependência circular na inicialização
@@ -98,7 +96,12 @@ public class PacienteServiceImpl implements PacienteService {
 
         try {
             validarDadosBasicos(request);
-            validarCPFUnico(null, request.getCpf());
+            
+            // Validações de duplicatas antes de criar
+            validarCpfUnico(null, request.getCpf());
+            validarEmailUnico(null, request.getEmail());
+            validarCnsUnico(null, request.getCns());
+            validarRgUnico(null, request.getRg());
 
             Paciente paciente = pacienteMapper.fromRequest(request);
             paciente.setActive(true);
@@ -136,7 +139,7 @@ public class PacienteServiceImpl implements PacienteService {
             PacienteResponse response = pacienteMapper.toResponse(pacienteSalvo);
             log.debug("Paciente criado adicionado ao cache com chave: {}", response.getId());
             return response;
-        } catch (BadRequestException | ConflictException | NotFoundException e) {
+        } catch (BadRequestException | NotFoundException e) {
             log.warn("Erro de validação ao criar paciente. Request: {}. Erro: {}", request, e.getMessage());
             throw e;
         } catch (Exception e) {
@@ -230,6 +233,10 @@ public class PacienteServiceImpl implements PacienteService {
      * @param paciente entidade Paciente a ser convertida
      * @return PacienteSimplificadoResponse com dados básicos
      */
+    /**
+     * Converte entidade Paciente para resposta simplificada.
+     * Usado quando já temos a entidade carregada.
+     */
     private PacienteSimplificadoResponse converterParaSimplificado(Paciente paciente) {
         return PacienteSimplificadoResponse.builder()
                 .id(paciente.getId())
@@ -280,6 +287,60 @@ public class PacienteServiceImpl implements PacienteService {
     }
 
     /**
+     * Converte projeção otimizada para resposta simplificada.
+     * Usado na listagem para melhor performance, evitando carregar relacionamentos lazy.
+     */
+    private PacienteSimplificadoResponse converterProjecaoParaSimplificado(
+            com.upsaude.repository.projection.PacienteSimplificadoProjection projecao) {
+        return PacienteSimplificadoResponse.builder()
+                .id(projecao.getId())
+                .createdAt(projecao.getCreatedAt())
+                .updatedAt(projecao.getUpdatedAt())
+                .active(projecao.getActive())
+                .nomeCompleto(projecao.getNomeCompleto())
+                .cpf(projecao.getCpf())
+                .rg(projecao.getRg())
+                .cns(projecao.getCns())
+                .dataNascimento(projecao.getDataNascimento())
+                .sexo(projecao.getSexo())
+                .estadoCivil(projecao.getEstadoCivil())
+                .telefone(projecao.getTelefone())
+                .email(projecao.getEmail())
+                .nomeMae(projecao.getNomeMae())
+                .nomePai(projecao.getNomePai())
+                .responsavelNome(projecao.getResponsavelNome())
+                .responsavelCpf(projecao.getResponsavelCpf())
+                .responsavelTelefone(projecao.getResponsavelTelefone())
+                .numeroCarteirinha(projecao.getNumeroCarteirinha())
+                .dataValidadeCarteirinha(projecao.getDataValidadeCarteirinha())
+                .observacoes(projecao.getObservacoes())
+                .racaCor(projecao.getRacaCor())
+                .nacionalidade(projecao.getNacionalidade())
+                .paisNascimento(projecao.getPaisNascimento())
+                .naturalidade(projecao.getNaturalidade())
+                .municipioNascimentoIbge(projecao.getMunicipioNascimentoIbge())
+                .escolaridade(projecao.getEscolaridade())
+                .ocupacaoProfissao(projecao.getOcupacaoProfissao())
+                .situacaoRua(projecao.getSituacaoRua())
+                .statusPaciente(projecao.getStatusPaciente())
+                .dataObito(projecao.getDataObito())
+                .causaObitoCid10(projecao.getCausaObitoCid10())
+                .cartaoSusAtivo(projecao.getCartaoSusAtivo())
+                .dataAtualizacaoCns(projecao.getDataAtualizacaoCns())
+                .tipoAtendimentoPreferencial(projecao.getTipoAtendimentoPreferencial())
+                .origemCadastro(projecao.getOrigemCadastro())
+                .nomeSocial(projecao.getNomeSocial())
+                .identidadeGenero(projecao.getIdentidadeGenero())
+                .orientacaoSexual(projecao.getOrientacaoSexual())
+                .possuiDeficiencia(projecao.getPossuiDeficiencia())
+                .tipoDeficiencia(projecao.getTipoDeficiencia())
+                .cnsValidado(projecao.getCnsValidado())
+                .tipoCns(projecao.getTipoCns())
+                .acompanhadoPorEquipeEsf(projecao.getAcompanhadoPorEquipeEsf())
+                .build();
+    }
+
+    /**
      * {@inheritDoc}
      */
     @Override
@@ -314,11 +375,13 @@ public class PacienteServiceImpl implements PacienteService {
         log.debug("Listando pacientes simplificados paginados. Página: {}, Tamanho: {}", 
                 pageable.getPageNumber(), pageable.getPageSize());
 
-        // Busca pacientes paginados sem inicializar relacionamentos lazy
-        Page<Paciente> pacientes = pacienteRepository.findAll(pageable);
+        // Usa projeção otimizada que seleciona apenas os campos necessários
+        // sem carregar relacionamentos lazy, melhorando significativamente a performance
+        Page<com.upsaude.repository.projection.PacienteSimplificadoProjection> projecoes = 
+                pacienteRepository.findAllSimplificado(pageable);
         
-        // Converte para resposta simplificada sem carregar relacionamentos
-        return pacientes.map(this::converterParaSimplificado);
+        // Converte projeção para resposta simplificada
+        return projecoes.map(this::converterProjecaoParaSimplificado);
     }
 
     /**
@@ -342,7 +405,11 @@ public class PacienteServiceImpl implements PacienteService {
         Paciente pacienteExistente = pacienteRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Paciente não encontrado com ID: " + id));
 
-        validarCPFUnico(id, request.getCpf());
+        // Validações de duplicatas antes de atualizar
+        validarCpfUnico(id, request.getCpf());
+        validarEmailUnico(id, request.getEmail());
+        validarCnsUnico(id, request.getCns());
+        validarRgUnico(id, request.getRg());
 
         atualizarDadosPaciente(pacienteExistente, request);
         
@@ -418,9 +485,9 @@ public class PacienteServiceImpl implements PacienteService {
      *
      * @param pacienteId ID do paciente atual (null se for criação)
      * @param cpf CPF a ser validado
-     * @throws ConflictException se já existir outro paciente com o mesmo CPF
+     * @throws BadRequestException se já existir outro paciente com o mesmo CPF
      */
-    private void validarCPFUnico(UUID pacienteId, String cpf) {
+    private void validarCpfUnico(UUID pacienteId, String cpf) {
         if (!StringUtils.hasText(cpf)) {
             return;
         }
@@ -432,12 +499,99 @@ public class PacienteServiceImpl implements PacienteService {
 
             // Se for atualização, verifica se o CPF pertence a outro paciente
             if (pacienteId != null && !pacienteEncontrado.getId().equals(pacienteId)) {
-                throw new ConflictException("Já existe um paciente cadastrado com o CPF: " + cpf);
+                throw new BadRequestException("Já existe um paciente cadastrado com o CPF: " + cpf);
             }
 
             // Se for criação, sempre lança exceção se encontrar CPF
             if (pacienteId == null) {
-                throw new ConflictException("Já existe um paciente cadastrado com o CPF: " + cpf);
+                throw new BadRequestException("Já existe um paciente cadastrado com o CPF: " + cpf);
+            }
+        }
+    }
+
+    /**
+     * Valida se o email é único no sistema.
+     *
+     * @param pacienteId ID do paciente atual (null se for criação)
+     * @param email email a ser validado
+     * @throws BadRequestException se já existir outro paciente com o mesmo email
+     */
+    private void validarEmailUnico(UUID pacienteId, String email) {
+        if (!StringUtils.hasText(email)) {
+            return;
+        }
+
+        Optional<Paciente> pacienteExistente = pacienteRepository.findByEmail(email);
+
+        if (pacienteExistente.isPresent()) {
+            Paciente pacienteEncontrado = pacienteExistente.get();
+
+            // Se for atualização, verifica se o email pertence a outro paciente
+            if (pacienteId != null && !pacienteEncontrado.getId().equals(pacienteId)) {
+                throw new BadRequestException("Já existe um paciente cadastrado com o email: " + email);
+            }
+
+            // Se for criação, sempre lança exceção se encontrar email
+            if (pacienteId == null) {
+                throw new BadRequestException("Já existe um paciente cadastrado com o email: " + email);
+            }
+        }
+    }
+
+    /**
+     * Valida se o CNS (Cartão Nacional de Saúde) é único no sistema.
+     *
+     * @param pacienteId ID do paciente atual (null se for criação)
+     * @param cns CNS a ser validado
+     * @throws BadRequestException se já existir outro paciente com o mesmo CNS
+     */
+    private void validarCnsUnico(UUID pacienteId, String cns) {
+        if (!StringUtils.hasText(cns)) {
+            return;
+        }
+
+        Optional<Paciente> pacienteExistente = pacienteRepository.findByCns(cns);
+
+        if (pacienteExistente.isPresent()) {
+            Paciente pacienteEncontrado = pacienteExistente.get();
+
+            // Se for atualização, verifica se o CNS pertence a outro paciente
+            if (pacienteId != null && !pacienteEncontrado.getId().equals(pacienteId)) {
+                throw new BadRequestException("Já existe um paciente cadastrado com o CNS: " + cns);
+            }
+
+            // Se for criação, sempre lança exceção se encontrar CNS
+            if (pacienteId == null) {
+                throw new BadRequestException("Já existe um paciente cadastrado com o CNS: " + cns);
+            }
+        }
+    }
+
+    /**
+     * Valida se o RG é único no sistema.
+     *
+     * @param pacienteId ID do paciente atual (null se for criação)
+     * @param rg RG a ser validado
+     * @throws BadRequestException se já existir outro paciente com o mesmo RG
+     */
+    private void validarRgUnico(UUID pacienteId, String rg) {
+        if (!StringUtils.hasText(rg)) {
+            return;
+        }
+
+        Optional<Paciente> pacienteExistente = pacienteRepository.findByRg(rg);
+
+        if (pacienteExistente.isPresent()) {
+            Paciente pacienteEncontrado = pacienteExistente.get();
+
+            // Se for atualização, verifica se o RG pertence a outro paciente
+            if (pacienteId != null && !pacienteEncontrado.getId().equals(pacienteId)) {
+                throw new BadRequestException("Já existe um paciente cadastrado com o RG: " + rg);
+            }
+
+            // Se for criação, sempre lança exceção se encontrar RG
+            if (pacienteId == null) {
+                throw new BadRequestException("Já existe um paciente cadastrado com o RG: " + rg);
             }
         }
     }
@@ -541,7 +695,7 @@ public class PacienteServiceImpl implements PacienteService {
         // ENDEREÇOS (OneToMany) - Buscar endereços existentes ou criar novos para evitar duplicados
         if (request.getEnderecos() != null && !request.getEnderecos().isEmpty()) {
             // Obtém o tenant do usuário autenticado (obrigatório para Endereco que estende BaseEntity)
-            Tenant tenant = obterTenantDoUsuarioAutenticado();
+            Tenant tenant = tenantService.obterTenantDoUsuarioAutenticado();
             if (tenant == null) {
                 throw new BadRequestException("Não foi possível obter tenant do usuário autenticado. É necessário estar autenticado para criar endereços.");
             }
@@ -600,7 +754,7 @@ public class PacienteServiceImpl implements PacienteService {
         log.debug("Processando relacionamentos por ID do paciente: {}", paciente.getId());
 
         // Obtém o tenant do usuário autenticado (obrigatório para os relacionamentos)
-        Tenant tenant = obterTenantDoUsuarioAutenticado();
+        Tenant tenant = tenantService.obterTenantDoUsuarioAutenticado();
         if (tenant == null) {
             throw new BadRequestException("Não foi possível obter tenant do usuário autenticado. É necessário estar autenticado para criar relacionamentos.");
         }
@@ -711,60 +865,5 @@ public class PacienteServiceImpl implements PacienteService {
         }
     }
 
-    /**
-     * Obtém o tenant do usuário autenticado.
-     * 
-     * @return Tenant do usuário autenticado ou null se não encontrado
-     */
-    private Tenant obterTenantDoUsuarioAutenticado() {
-        try {
-            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-            if (authentication == null || !authentication.isAuthenticated()) {
-                log.warn("Usuário não autenticado. Não é possível obter tenant.");
-                return null;
-            }
-
-            // Obtém o userId do token JWT
-            UUID userId = null;
-            Object details = authentication.getDetails();
-            if (details instanceof com.upsaude.integration.supabase.SupabaseAuthResponse.User) {
-                com.upsaude.integration.supabase.SupabaseAuthResponse.User user = 
-                    (com.upsaude.integration.supabase.SupabaseAuthResponse.User) details;
-                userId = user.getId();
-                log.debug("UserId obtido do SupabaseAuthResponse.User: {}", userId);
-            } else if (authentication.getPrincipal() instanceof String) {
-                try {
-                    userId = UUID.fromString(authentication.getPrincipal().toString());
-                    log.debug("UserId obtido do Principal (String): {}", userId);
-                } catch (IllegalArgumentException e) {
-                    log.warn("Principal não é um UUID válido: {}", authentication.getPrincipal());
-                    return null;
-                }
-            } else {
-                log.warn("Tipo de Principal não reconhecido: {}", authentication.getPrincipal() != null ? authentication.getPrincipal().getClass().getName() : "null");
-            }
-
-            if (userId != null) {
-                java.util.Optional<com.upsaude.entity.UsuariosSistema> usuarioOpt = usuariosSistemaRepository.findByUserId(userId);
-                if (usuarioOpt.isPresent()) {
-                    com.upsaude.entity.UsuariosSistema usuario = usuarioOpt.get();
-                    Tenant tenant = usuario.getTenant();
-                    if (tenant != null) {
-                        log.debug("Tenant obtido com sucesso: {} (ID: {})", tenant.getNome(), tenant.getId());
-                        return tenant;
-                    } else {
-                        log.warn("Usuário encontrado mas sem tenant associado. UserId: {}", userId);
-                    }
-                } else {
-                    log.warn("Usuário não encontrado no sistema. UserId: {}", userId);
-                }
-            } else {
-                log.warn("Não foi possível obter userId do contexto de autenticação");
-            }
-        } catch (Exception e) {
-            log.error("Erro ao obter tenant do usuário autenticado, Exception: {}", e.getClass().getName(), e);
-        }
-        return null;
-    }
 }
 

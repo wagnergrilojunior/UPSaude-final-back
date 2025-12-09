@@ -7,6 +7,7 @@ import com.upsaude.entity.Medicos;
 import com.upsaude.entity.Paciente;
 import com.upsaude.entity.ProfissionaisSaude;
 import com.upsaude.entity.Tenant;
+import com.upsaude.entity.User;
 import com.upsaude.entity.UsuarioEstabelecimento;
 import com.upsaude.entity.UsuariosSistema;
 import com.upsaude.exception.BadRequestException;
@@ -18,6 +19,7 @@ import com.upsaude.repository.MedicosRepository;
 import com.upsaude.repository.PacienteRepository;
 import com.upsaude.repository.ProfissionaisSaudeRepository;
 import com.upsaude.repository.TenantRepository;
+import com.upsaude.repository.UserRepository;
 import com.upsaude.repository.UsuarioEstabelecimentoRepository;
 import com.upsaude.repository.UsuariosSistemaRepository;
 import com.upsaude.service.UsuariosSistemaService;
@@ -25,15 +27,14 @@ import org.springframework.web.multipart.MultipartFile;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.hibernate.Hibernate;
-import org.springframework.beans.BeanUtils;
 import org.springframework.data.domain.Page;
-import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -55,6 +56,7 @@ public class UsuariosSistemaServiceImpl implements UsuariosSistemaService {
     private final MedicosRepository medicosRepository;
     private final ProfissionaisSaudeRepository profissionaisSaudeRepository;
     private final PacienteRepository pacienteRepository;
+    private final UserRepository userRepository;
     private final SupabaseStorageService supabaseStorageService;
     private final com.upsaude.integration.supabase.SupabaseAuthService supabaseAuthService;
 
@@ -65,6 +67,10 @@ public class UsuariosSistemaServiceImpl implements UsuariosSistemaService {
 
         try {
             validarDadosBasicos(request);
+            
+            // Validações de duplicatas antes de criar
+            validarEmailUnico(null, request.getEmail());
+            validarUsernameUnico(null, request.getUsername());
 
             UsuariosSistema usuariosSistema = usuariosSistemaMapper.fromRequest(request);
             usuariosSistema.setActive(true);
@@ -167,6 +173,10 @@ public class UsuariosSistemaServiceImpl implements UsuariosSistemaService {
         UsuariosSistema usuariosSistemaExistente = usuariosSistemaRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("UsuariosSistema não encontrado com ID: " + id));
 
+        // Validações de duplicatas antes de atualizar
+        validarEmailUnico(id, request.getEmail());
+        validarUsernameUnico(id, request.getUsername());
+
         atualizarDadosUsuariosSistema(usuariosSistemaExistente, request);
 
         UsuariosSistema usuariosSistemaAtualizado = usuariosSistemaRepository.save(usuariosSistemaExistente);
@@ -224,6 +234,68 @@ public class UsuariosSistemaServiceImpl implements UsuariosSistemaService {
         }
         // Se não for admin do tenant, deve ter pelo menos um vínculo com estabelecimento
         // (validação será feita no controller ao criar vínculos)
+    }
+
+    /**
+     * Valida se o email é único no sistema (tabela User).
+     *
+     * @param usuariosSistemaId ID do UsuariosSistema atual (null se for criação)
+     * @param email email a ser validado
+     * @throws BadRequestException se já existir outro usuário com o mesmo email
+     */
+    private void validarEmailUnico(UUID usuariosSistemaId, String email) {
+        if (!StringUtils.hasText(email)) {
+            return;
+        }
+
+        Optional<User> userExistente = userRepository.findByEmail(email);
+
+        if (userExistente.isPresent()) {
+            User userEncontrado = userExistente.get();
+
+            // Se for atualização, verifica se o email pertence a outro usuário
+            if (usuariosSistemaId != null) {
+                UsuariosSistema usuariosSistemaExistente = usuariosSistemaRepository.findById(usuariosSistemaId)
+                        .orElseThrow(() -> new NotFoundException("UsuariosSistema não encontrado com ID: " + usuariosSistemaId));
+                
+                // Se o email pertence a outro User (não ao User deste UsuariosSistema), lança exceção
+                if (!userEncontrado.getId().equals(usuariosSistemaExistente.getUserId())) {
+                    throw new BadRequestException("Já existe um usuário cadastrado com o email: " + email);
+                }
+            } else {
+                // Se for criação, sempre lança exceção se encontrar email
+                throw new BadRequestException("Já existe um usuário cadastrado com o email: " + email);
+            }
+        }
+    }
+
+    /**
+     * Valida se o username é único no sistema (tabela UsuariosSistema).
+     *
+     * @param usuariosSistemaId ID do UsuariosSistema atual (null se for criação)
+     * @param username username a ser validado
+     * @throws BadRequestException se já existir outro usuário do sistema com o mesmo username
+     */
+    private void validarUsernameUnico(UUID usuariosSistemaId, String username) {
+        if (!StringUtils.hasText(username)) {
+            return;
+        }
+
+        Optional<UsuariosSistema> usuariosSistemaExistente = usuariosSistemaRepository.findByUsername(username);
+
+        if (usuariosSistemaExistente.isPresent()) {
+            UsuariosSistema usuarioEncontrado = usuariosSistemaExistente.get();
+
+            // Se for atualização, verifica se o username pertence a outro UsuariosSistema
+            if (usuariosSistemaId != null && !usuarioEncontrado.getId().equals(usuariosSistemaId)) {
+                throw new BadRequestException("Já existe um usuário cadastrado com o username: " + username);
+            }
+
+            // Se for criação, sempre lança exceção se encontrar username
+            if (usuariosSistemaId == null) {
+                throw new BadRequestException("Já existe um usuário cadastrado com o username: " + username);
+            }
+        }
     }
 
     private void atualizarDadosUsuariosSistema(UsuariosSistema usuariosSistema, UsuariosSistemaRequest request) {

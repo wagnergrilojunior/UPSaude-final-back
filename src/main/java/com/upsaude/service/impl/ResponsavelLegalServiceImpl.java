@@ -12,8 +12,8 @@ import com.upsaude.exception.NotFoundException;
 import com.upsaude.mapper.ResponsavelLegalMapper;
 import com.upsaude.repository.PacienteRepository;
 import com.upsaude.repository.ResponsavelLegalRepository;
-import com.upsaude.repository.UsuariosSistemaRepository;
 import com.upsaude.service.ResponsavelLegalService;
+import com.upsaude.service.TenantService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.CacheEvict;
@@ -22,8 +22,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import jakarta.validation.ConstraintViolation;
 import org.hibernate.Hibernate;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
@@ -38,7 +36,7 @@ public class ResponsavelLegalServiceImpl implements ResponsavelLegalService {
     private final ResponsavelLegalRepository repository;
     private final ResponsavelLegalMapper mapper;
     private final PacienteRepository pacienteRepository;
-    private final UsuariosSistemaRepository usuariosSistemaRepository;
+    private final TenantService tenantService;
 
     @Override
     @Transactional
@@ -61,7 +59,7 @@ public class ResponsavelLegalServiceImpl implements ResponsavelLegalService {
         // Valida CPF após limpeza
         if (StringUtils.hasText(cpfLimpo)) {
             if (cpfLimpo.length() != 11) {
-                throw new BadRequestException("CPF deve conter exatamente 11 dígitos numéricos");
+            throw new BadRequestException("CPF deve conter exatamente 11 dígitos numéricos");
             }
         }
 
@@ -102,7 +100,7 @@ public class ResponsavelLegalServiceImpl implements ResponsavelLegalService {
             entity.setTelefone(telefoneLimpo);
             
             // Obtém o tenant do usuário autenticado (obrigatório para ResponsavelLegal que estende BaseEntity)
-            Tenant tenant = obterTenantDoUsuarioAutenticado();
+            Tenant tenant = tenantService.obterTenantDoUsuarioAutenticado();
             if (tenant == null) {
                 throw new BadRequestException("Não foi possível obter tenant do usuário autenticado. É necessário estar autenticado para criar responsável legal.");
             }
@@ -240,8 +238,8 @@ public class ResponsavelLegalServiceImpl implements ResponsavelLegalService {
         // Valida CPF após limpeza
         if (StringUtils.hasText(cpfLimpo)) {
             if (cpfLimpo.length() != 11) {
-                throw new BadRequestException("CPF deve conter exatamente 11 dígitos numéricos");
-            }
+            throw new BadRequestException("CPF deve conter exatamente 11 dígitos numéricos");
+        }
         }
 
         // Valida telefone após limpeza
@@ -300,65 +298,10 @@ public class ResponsavelLegalServiceImpl implements ResponsavelLegalService {
      */
     private String limparNumeros(String valor) {
         if (valor == null) {
-            return null;
-        }
-        return valor.replaceAll("\\D", "");
-    }
-
-    /**
-     * Obtém o tenant do usuário autenticado.
-     * 
-     * @return Tenant do usuário autenticado ou null se não encontrado
-     */
-    private Tenant obterTenantDoUsuarioAutenticado() {
-        try {
-            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-            if (authentication == null || !authentication.isAuthenticated()) {
-                log.warn("Usuário não autenticado. Não é possível obter tenant.");
-                return null;
-            }
-
-            // Obtém o userId do token JWT
-            UUID userId = null;
-            Object details = authentication.getDetails();
-            if (details instanceof com.upsaude.integration.supabase.SupabaseAuthResponse.User) {
-                com.upsaude.integration.supabase.SupabaseAuthResponse.User user = 
-                    (com.upsaude.integration.supabase.SupabaseAuthResponse.User) details;
-                userId = user.getId();
-                log.debug("UserId obtido do SupabaseAuthResponse.User: {}", userId);
-            } else if (authentication.getPrincipal() instanceof String) {
-                try {
-                    userId = UUID.fromString(authentication.getPrincipal().toString());
-                    log.debug("UserId obtido do Principal (String): {}", userId);
-                } catch (IllegalArgumentException e) {
-                    log.warn("Principal não é um UUID válido: {}", authentication.getPrincipal());
                     return null;
                 }
-            } else {
-                log.warn("Tipo de Principal não reconhecido: {}", authentication.getPrincipal() != null ? authentication.getPrincipal().getClass().getName() : "null");
-            }
-
-            if (userId != null) {
-                java.util.Optional<com.upsaude.entity.UsuariosSistema> usuarioOpt = usuariosSistemaRepository.findByUserId(userId);
-                if (usuarioOpt.isPresent()) {
-                    com.upsaude.entity.UsuariosSistema usuario = usuarioOpt.get();
-                    Tenant tenant = usuario.getTenant();
-                    if (tenant != null) {
-                        log.debug("Tenant obtido com sucesso: {} (ID: {})", tenant.getNome(), tenant.getId());
-                        return tenant;
-                    } else {
-                        log.warn("Usuário encontrado mas sem tenant associado. UserId: {}", userId);
-                    }
-                } else {
-                    log.warn("Usuário não encontrado no sistema. UserId: {}", userId);
+        return valor.replaceAll("\\D", "");
                 }
-            } else {
-                log.warn("Não foi possível obter userId do contexto de autenticação");
-            }
-        } catch (Exception e) {
-            log.error("Erro ao obter tenant do usuário autenticado, Exception: {}", e.getClass().getName(), e);
-        }
-        return null;
-    }
+
 }
 
