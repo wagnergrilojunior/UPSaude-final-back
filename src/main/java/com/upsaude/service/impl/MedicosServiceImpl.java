@@ -5,8 +5,11 @@ import com.upsaude.api.request.MedicosRequest;
 import com.upsaude.api.response.MedicosResponse;
 import com.upsaude.entity.Endereco;
 import com.upsaude.entity.EspecialidadesMedicas;
+import com.upsaude.entity.Estabelecimentos;
+import com.upsaude.entity.MedicoEstabelecimento;
 import com.upsaude.entity.Medicos;
 import com.upsaude.entity.Tenant;
+import com.upsaude.enums.TipoVinculoProfissionalEnum;
 import com.upsaude.exception.BadRequestException;
 import com.upsaude.exception.InternalServerErrorException;
 import com.upsaude.exception.NotFoundException;
@@ -14,6 +17,7 @@ import com.upsaude.mapper.EnderecoMapper;
 import com.upsaude.mapper.MedicosMapper;
 import com.upsaude.repository.CidadesRepository;
 import com.upsaude.repository.EspecialidadesMedicasRepository;
+import com.upsaude.repository.EstabelecimentosRepository;
 import com.upsaude.repository.EstadosRepository;
 import com.upsaude.repository.MedicosRepository;
 import com.upsaude.service.EnderecoService;
@@ -30,6 +34,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
+import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -51,6 +56,7 @@ public class MedicosServiceImpl implements MedicosService {
     private final MedicosRepository medicosRepository;
     private final MedicosMapper medicosMapper;
     private final EspecialidadesMedicasRepository especialidadesMedicasRepository;
+    private final EstabelecimentosRepository estabelecimentosRepository;
     private final TenantService tenantService;
     private final EnderecoService enderecoService;
     private final EnderecoMapper enderecoMapper;
@@ -446,8 +452,62 @@ public class MedicosServiceImpl implements MedicosService {
             }
         }
 
-        // VÍNCULOS são gerenciados com cascade automático pelo JPA
-        // Se necessário adicionar/remover vínculos, isso deve ser feito através de endpoints específicos
+        // ESTABELECIMENTOS (OneToMany via MedicoEstabelecimento) - Processar lista de IDs
+        // O backend busca internamente os estabelecimentos pelos IDs e cria os vínculos
+        // IMPORTANTE: Para evitar erro com orphanRemoval, limpa a lista existente e adiciona novos elementos
+        // ao invés de criar uma nova lista
+        if (request.getEstabelecimentos() != null && !request.getEstabelecimentos().isEmpty()) {
+            log.debug("Processando {} estabelecimento(s) para o médico", request.getEstabelecimentos().size());
+            
+            // Remove duplicatas da lista de IDs antes de processar
+            Set<UUID> estabelecimentosIdsUnicos = new LinkedHashSet<>(request.getEstabelecimentos());
+            
+            if (estabelecimentosIdsUnicos.size() != request.getEstabelecimentos().size()) {
+                log.warn("Lista de estabelecimentos contém IDs duplicados. Removendo duplicatas.");
+            }
+            
+            // Obtém o tenant do usuário autenticado (obrigatório para MedicoEstabelecimento que estende BaseEntity)
+            Tenant tenant = tenantService.obterTenantDoUsuarioAutenticado();
+            if (tenant == null) {
+                throw new BadRequestException("Não foi possível obter tenant do usuário autenticado. É necessário estar autenticado para criar vínculos com estabelecimentos.");
+            }
+            
+            // Limpa a lista existente (orphanRemoval vai remover os vínculos antigos)
+            medicos.getMedicosEstabelecimentos().clear();
+            
+            // Busca cada estabelecimento pelo ID e cria o vínculo
+            for (UUID estabelecimentoId : estabelecimentosIdsUnicos) {
+                if (estabelecimentoId == null) {
+                    log.warn("ID de estabelecimento nulo encontrado na lista. Ignorando.");
+                    continue;
+                }
+                
+                Estabelecimentos estabelecimento = estabelecimentosRepository
+                        .findById(estabelecimentoId)
+                        .orElseThrow(() -> new NotFoundException(
+                                "Estabelecimento não encontrado com ID: " + estabelecimentoId));
+                
+                // Cria o vínculo com valores padrão
+                MedicoEstabelecimento medicoEstabelecimento = new MedicoEstabelecimento();
+                medicoEstabelecimento.setMedico(medicos);
+                medicoEstabelecimento.setEstabelecimento(estabelecimento);
+                medicoEstabelecimento.setTenant(tenant);
+                medicoEstabelecimento.setActive(true);
+                medicoEstabelecimento.setDataInicio(OffsetDateTime.now()); // Data atual como padrão
+                medicoEstabelecimento.setTipoVinculo(TipoVinculoProfissionalEnum.CONTRATO); // Valor padrão
+                
+                // Adiciona à lista existente (não cria nova lista)
+                medicos.getMedicosEstabelecimentos().add(medicoEstabelecimento);
+                log.debug("Vínculo com estabelecimento {} criado para o médico", estabelecimentoId);
+            }
+            
+            log.debug("{} estabelecimento(s) vinculado(s) ao médico com sucesso", medicos.getMedicosEstabelecimentos().size());
+        } else {
+            // Se não vier lista de estabelecimentos, limpa a lista existente
+            // Usa clear() ao invés de set para manter a mesma instância da coleção
+            medicos.getMedicosEstabelecimentos().clear();
+            log.debug("Nenhum estabelecimento fornecido. Lista de vínculos será limpa.");
+        }
         
         log.debug("Relacionamentos processados. JPA gerenciará persistência automaticamente.");
     }

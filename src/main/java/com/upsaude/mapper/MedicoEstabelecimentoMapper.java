@@ -15,7 +15,7 @@ import org.mapstruct.MappingTarget;
  * Mapper para conversões de MedicoEstabelecimento.
  * Entity ↔ DTO ↔ Request/Response
  */
-@Mapper(config = MappingConfig.class, uses = {EstabelecimentosMapper.class, MedicosMapper.class})
+@Mapper(config = MappingConfig.class, uses = {EstabelecimentosMapper.class})
 public interface MedicoEstabelecimentoMapper extends EntityMapper<MedicoEstabelecimento, MedicoEstabelecimentoDTO> {
 
     /**
@@ -58,6 +58,9 @@ public interface MedicoEstabelecimentoMapper extends EntityMapper<MedicoEstabele
 
     /**
      * Converte Entity para Response.
+     * IMPORTANTE: O campo 'medico' é ignorado para evitar referência circular
+     * quando mapeado a partir de MedicosResponse.
      */
+    @Mapping(target = "medico", ignore = true)
     MedicoEstabelecimentoResponse toResponse(MedicoEstabelecimento entity);
 }

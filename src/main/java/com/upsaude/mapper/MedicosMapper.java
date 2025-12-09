@@ -14,7 +14,7 @@ import org.mapstruct.MappingTarget;
  * Mapper para conversões de Medicos.
  * Entity ↔ DTO ↔ Request/Response
  */
-@Mapper(config = MappingConfig.class, uses = {EspecialidadesMedicasMapper.class, com.upsaude.mapper.embeddable.DadosPessoaisMedicoMapper.class, com.upsaude.mapper.embeddable.RegistroProfissionalMedicoMapper.class, com.upsaude.mapper.embeddable.FormacaoMedicoMapper.class, com.upsaude.mapper.embeddable.ContatoMedicoMapper.class})
+@Mapper(config = MappingConfig.class, uses = {EspecialidadesMedicasMapper.class, MedicoEstabelecimentoMapper.class, com.upsaude.mapper.embeddable.DadosPessoaisMedicoMapper.class, com.upsaude.mapper.embeddable.RegistroProfissionalMedicoMapper.class, com.upsaude.mapper.embeddable.FormacaoMedicoMapper.class, com.upsaude.mapper.embeddable.ContatoMedicoMapper.class})
 public interface MedicosMapper extends EntityMapper<Medicos, MedicosDTO> {
 
     /**
