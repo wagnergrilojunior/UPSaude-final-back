@@ -4,6 +4,7 @@ import com.upsaude.api.request.CidDoencasRequest;
 import com.upsaude.api.response.CidDoencasResponse;
 import com.upsaude.entity.CidDoencas;
 import com.upsaude.exception.BadRequestException;
+import com.upsaude.exception.ConflictException;
 import com.upsaude.exception.InternalServerErrorException;
 import com.upsaude.exception.NotFoundException;
 import com.upsaude.mapper.CidDoencasMapper;
@@ -48,6 +49,12 @@ public class CidDoencasServiceImpl implements CidDoencasService {
         try {
             // Validação de dados básicos é feita automaticamente pelo Bean Validation no Request
 
+            // Validação de duplicidade de código
+            if (request.getCodigo() != null && cidDoencasRepository.findByCodigo(request.getCodigo()).isPresent()) {
+                log.warn("Tentativa de criar CID de doença com código duplicado: {}", request.getCodigo());
+                throw new ConflictException("Já existe um CID de doença com o código: " + request.getCodigo());
+            }
+
             CidDoencas cidDoencas = cidDoencasMapper.fromRequest(request);
             cidDoencas.setActive(true);
 
@@ -55,7 +62,7 @@ public class CidDoencasServiceImpl implements CidDoencasService {
             log.info("CID de doença criado com sucesso. ID: {}", cidDoencasSalvo.getId());
 
             return cidDoencasMapper.toResponse(cidDoencasSalvo);
-        } catch (BadRequestException e) {
+        } catch (BadRequestException | ConflictException e) {
             log.warn("Erro de validação ao criar CID de doença. Request: {}. Erro: {}", request, e.getMessage());
             throw e;
         } catch (DataAccessException e) {
@@ -136,6 +143,14 @@ public class CidDoencasServiceImpl implements CidDoencasService {
             CidDoencas cidDoencasExistente = cidDoencasRepository.findById(id)
                     .orElseThrow(() -> new NotFoundException("CID de doença não encontrado com ID: " + id));
 
+            // Validação de duplicidade de código (se o código foi alterado)
+            if (request.getCodigo() != null && !request.getCodigo().equals(cidDoencasExistente.getCodigo())) {
+                if (cidDoencasRepository.existsByCodigoAndIdNot(request.getCodigo(), id)) {
+                    log.warn("Tentativa de atualizar CID de doença com código duplicado: {}. ID: {}", request.getCodigo(), id);
+                    throw new ConflictException("Já existe outro CID de doença com o código: " + request.getCodigo());
+                }
+            }
+
             // Usa mapper do MapStruct que preserva campos de controle automaticamente
             cidDoencasMapper.updateFromRequest(request, cidDoencasExistente);
 
@@ -146,7 +161,7 @@ public class CidDoencasServiceImpl implements CidDoencasService {
         } catch (NotFoundException e) {
             log.warn("Tentativa de atualizar CID de doença não existente. ID: {}", id);
             throw e;
-        } catch (BadRequestException e) {
+        } catch (BadRequestException | ConflictException e) {
             log.warn("Erro de validação ao atualizar CID de doença. ID: {}, Request: {}. Erro: {}", id, request, e.getMessage());
             throw e;
         } catch (DataAccessException e) {
