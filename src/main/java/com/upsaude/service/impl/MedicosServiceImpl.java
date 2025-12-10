@@ -19,6 +19,7 @@ import com.upsaude.repository.CidadesRepository;
 import com.upsaude.repository.EspecialidadesMedicasRepository;
 import com.upsaude.repository.EstabelecimentosRepository;
 import com.upsaude.repository.EstadosRepository;
+import com.upsaude.repository.MedicoEstabelecimentoRepository;
 import com.upsaude.repository.MedicosRepository;
 import com.upsaude.service.EnderecoService;
 import com.upsaude.service.MedicosService;
@@ -57,6 +58,7 @@ public class MedicosServiceImpl implements MedicosService {
     private final MedicosMapper medicosMapper;
     private final EspecialidadesMedicasRepository especialidadesMedicasRepository;
     private final EstabelecimentosRepository estabelecimentosRepository;
+    private final MedicoEstabelecimentoRepository medicoEstabelecimentoRepository;
     private final TenantService tenantService;
     private final EnderecoService enderecoService;
     private final EnderecoMapper enderecoMapper;
@@ -453,9 +455,8 @@ public class MedicosServiceImpl implements MedicosService {
         }
 
         // ESTABELECIMENTOS (OneToMany via MedicoEstabelecimento) - Processar lista de IDs
-        // O backend busca internamente os estabelecimentos pelos IDs e cria os vínculos
-        // IMPORTANTE: Para evitar erro com orphanRemoval, limpa a lista existente e adiciona novos elementos
-        // ao invés de criar uma nova lista
+        // O backend busca internamente os estabelecimentos pelos IDs e cria/atualiza os vínculos
+        // IMPORTANTE: Verifica vínculos existentes antes de criar novos para evitar violação de constraint de unicidade
         if (request.getEstabelecimentos() != null && !request.getEstabelecimentos().isEmpty()) {
             log.debug("Processando {} estabelecimento(s) para o médico", request.getEstabelecimentos().size());
             
@@ -472,10 +473,15 @@ public class MedicosServiceImpl implements MedicosService {
                 throw new BadRequestException("Não foi possível obter tenant do usuário autenticado. É necessário estar autenticado para criar vínculos com estabelecimentos.");
             }
             
-            // Limpa a lista existente (orphanRemoval vai remover os vínculos antigos)
-            medicos.getMedicosEstabelecimentos().clear();
+            // Coleta IDs dos estabelecimentos que devem ser mantidos
+            Set<UUID> estabelecimentosParaManter = new LinkedHashSet<>(estabelecimentosIdsUnicos);
             
-            // Busca cada estabelecimento pelo ID e cria o vínculo
+            // Remove vínculos que não estão mais na lista (orphanRemoval vai remover do banco)
+            medicos.getMedicosEstabelecimentos().removeIf(vinculo -> 
+                !estabelecimentosParaManter.contains(vinculo.getEstabelecimento().getId())
+            );
+            
+            // Busca cada estabelecimento pelo ID e cria ou atualiza o vínculo
             for (UUID estabelecimentoId : estabelecimentosIdsUnicos) {
                 if (estabelecimentoId == null) {
                     log.warn("ID de estabelecimento nulo encontrado na lista. Ignorando.");
@@ -487,18 +493,55 @@ public class MedicosServiceImpl implements MedicosService {
                         .orElseThrow(() -> new NotFoundException(
                                 "Estabelecimento não encontrado com ID: " + estabelecimentoId));
                 
-                // Cria o vínculo com valores padrão
-                MedicoEstabelecimento medicoEstabelecimento = new MedicoEstabelecimento();
-                medicoEstabelecimento.setMedico(medicos);
-                medicoEstabelecimento.setEstabelecimento(estabelecimento);
-                medicoEstabelecimento.setTenant(tenant);
-                medicoEstabelecimento.setActive(true);
-                medicoEstabelecimento.setDataInicio(OffsetDateTime.now()); // Data atual como padrão
-                medicoEstabelecimento.setTipoVinculo(TipoVinculoProfissionalEnum.CONTRATO); // Valor padrão
+                // Verifica se já existe vínculo para este médico e estabelecimento
+                MedicoEstabelecimento medicoEstabelecimento = null;
                 
-                // Adiciona à lista existente (não cria nova lista)
-                medicos.getMedicosEstabelecimentos().add(medicoEstabelecimento);
-                log.debug("Vínculo com estabelecimento {} criado para o médico", estabelecimentoId);
+                // Primeiro tenta encontrar na lista atual (pode estar gerenciado pelo Hibernate)
+                for (MedicoEstabelecimento vinculoExistente : medicos.getMedicosEstabelecimentos()) {
+                    if (vinculoExistente.getEstabelecimento().getId().equals(estabelecimentoId)) {
+                        medicoEstabelecimento = vinculoExistente;
+                        log.debug("Vínculo existente encontrado para estabelecimento {}", estabelecimentoId);
+                        break;
+                    }
+                }
+                
+                // Se não encontrou na lista, tenta buscar no banco (pode estar desanexado)
+                if (medicoEstabelecimento == null && medicos.getId() != null) {
+                    Optional<MedicoEstabelecimento> vinculoBanco = medicoEstabelecimentoRepository
+                            .findByMedicoIdAndEstabelecimentoId(medicos.getId(), estabelecimentoId);
+                    
+                    if (vinculoBanco.isPresent()) {
+                        medicoEstabelecimento = vinculoBanco.get();
+                        // Garante que o vínculo está na lista do médico
+                        if (!medicos.getMedicosEstabelecimentos().contains(medicoEstabelecimento)) {
+                            medicos.getMedicosEstabelecimentos().add(medicoEstabelecimento);
+                        }
+                        log.debug("Vínculo encontrado no banco para estabelecimento {}", estabelecimentoId);
+                    }
+                }
+                
+                // Se não existe vínculo, cria um novo
+                if (medicoEstabelecimento == null) {
+                    medicoEstabelecimento = new MedicoEstabelecimento();
+                    medicoEstabelecimento.setMedico(medicos);
+                    medicoEstabelecimento.setEstabelecimento(estabelecimento);
+                    medicoEstabelecimento.setTenant(tenant);
+                    medicoEstabelecimento.setActive(true);
+                    medicoEstabelecimento.setDataInicio(OffsetDateTime.now()); // Data atual como padrão
+                    medicoEstabelecimento.setTipoVinculo(TipoVinculoProfissionalEnum.CONTRATO); // Valor padrão
+                    
+                    // Adiciona à lista existente
+                    medicos.getMedicosEstabelecimentos().add(medicoEstabelecimento);
+                    log.debug("Novo vínculo criado para estabelecimento {}", estabelecimentoId);
+                } else {
+                    // Se já existe, apenas garante que está ativo e atualiza data se necessário
+                    medicoEstabelecimento.setActive(true);
+                    if (medicoEstabelecimento.getDataFim() != null) {
+                        // Se tinha data de fim, remove para reativar o vínculo
+                        medicoEstabelecimento.setDataFim(null);
+                        log.debug("Vínculo reativado para estabelecimento {}", estabelecimentoId);
+                    }
+                }
             }
             
             log.debug("{} estabelecimento(s) vinculado(s) ao médico com sucesso", medicos.getMedicosEstabelecimentos().size());
