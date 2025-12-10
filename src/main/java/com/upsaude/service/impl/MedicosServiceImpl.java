@@ -29,6 +29,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.dao.DataAccessException;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -93,6 +94,35 @@ public class MedicosServiceImpl implements MedicosService {
             medicos.setActive(true);
             medicos.setTenant(tenant);
 
+            // Garantir que embeddables sejam inicializados corretamente se não vierem no request
+            if (medicos.getDadosPessoais() == null) {
+                medicos.setDadosPessoais(new com.upsaude.entity.embeddable.DadosPessoaisMedico());
+            }
+            if (medicos.getRegistroProfissional() == null) {
+                medicos.setRegistroProfissional(new com.upsaude.entity.embeddable.RegistroProfissionalMedico());
+            }
+            if (medicos.getFormacao() == null) {
+                medicos.setFormacao(new com.upsaude.entity.embeddable.FormacaoMedico());
+            }
+            if (medicos.getContato() == null) {
+                medicos.setContato(new com.upsaude.entity.embeddable.ContatoMedico());
+            }
+
+            // Garantir que CRM vazio seja NULL para evitar violação de constraint única
+            if (medicos.getRegistroProfissional() != null) {
+                if (!StringUtils.hasText(medicos.getRegistroProfissional().getCrm())) {
+                    medicos.getRegistroProfissional().setCrm(null);
+                }
+                if (!StringUtils.hasText(medicos.getRegistroProfissional().getCrmUf())) {
+                    medicos.getRegistroProfissional().setCrmUf(null);
+                }
+            }
+            
+            // Garantir que tituloEspecialista não seja null
+            if (medicos.getFormacao() != null && medicos.getFormacao().getTituloEspecialista() == null) {
+                medicos.getFormacao().setTituloEspecialista(false);
+            }
+
             // Processar relacionamentos - JPA gerencia a persistência automaticamente
             processarRelacionamentos(medicos, request);
 
@@ -103,6 +133,11 @@ public class MedicosServiceImpl implements MedicosService {
         } catch (BadRequestException | NotFoundException e) {
             log.warn("Erro de validação ao criar Medico. Erro: {}", e.getMessage());
             throw e;
+        } catch (DataIntegrityViolationException e) {
+            log.warn("Erro de integridade de dados ao criar Medico. Exception: {}", e.getClass().getSimpleName(), e);
+            // Converte DataIntegrityViolationException em BadRequestException
+            // O ApiExceptionHandler vai tratar e retornar 400
+            throw new BadRequestException("Erro de integridade de dados: " + e.getMessage(), e);
         } catch (DataAccessException e) {
             log.error("Erro de acesso a dados ao criar Medico. Exception: {}", e.getClass().getSimpleName(), e);
             throw new InternalServerErrorException("Erro ao persistir Medico", e);
@@ -206,6 +241,16 @@ public class MedicosServiceImpl implements MedicosService {
 
             // Usa mapper do MapStruct que preserva campos de controle automaticamente
             medicosMapper.updateFromRequest(request, medicosExistente);
+            
+            // Garantir que CRM vazio seja NULL para evitar violação de constraint única
+            if (medicosExistente.getRegistroProfissional() != null) {
+                if (!StringUtils.hasText(medicosExistente.getRegistroProfissional().getCrm())) {
+                    medicosExistente.getRegistroProfissional().setCrm(null);
+                }
+                if (!StringUtils.hasText(medicosExistente.getRegistroProfissional().getCrmUf())) {
+                    medicosExistente.getRegistroProfissional().setCrmUf(null);
+                }
+            }
             
             // Processar relacionamentos - JPA gerencia a persistência automaticamente
             processarRelacionamentos(medicosExistente, request);

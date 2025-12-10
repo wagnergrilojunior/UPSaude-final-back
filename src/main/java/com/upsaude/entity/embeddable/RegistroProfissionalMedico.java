@@ -25,10 +25,8 @@ import java.time.LocalDate;
 public class RegistroProfissionalMedico {
 
     public RegistroProfissionalMedico() {
-        this.crm = "";
-        this.crmUf = "";
-        this.crmComplementar = "";
-        this.observacoesCrm = "";
+        // Campos inicializados como null para evitar violação de constraint única
+        // quando CRM/UF estão vazios
     }
 
     @Pattern(regexp = "^\\d{4,10}$", message = "CRM deve ter entre 4 e 10 dígitos")
