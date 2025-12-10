@@ -147,11 +147,19 @@ public class RedisConfig {
             .pingBeforeActivateConnection(false) // CORREÇÃO: Desabilitado para evitar problemas no Render
             .build();
 
-        LettuceClientConfiguration clientConfig = LettuceClientConfiguration.builder()
-            .clientOptions(clientOptions)
-            .commandTimeout(Duration.ofSeconds(10)) // Timeout de comandos aumentado para Render
-            .shutdownTimeout(Duration.ofSeconds(5)) // Tempo para fechar conexões aumentado
-            .build();
+        // Configuração do cliente Lettuce com suporte a SSL para Upstash
+        LettuceClientConfiguration.LettuceClientConfigurationBuilder clientConfigBuilder = 
+            LettuceClientConfiguration.builder()
+                .clientOptions(clientOptions)
+                .commandTimeout(Duration.ofSeconds(10)) // Timeout de comandos aumentado para Render
+                .shutdownTimeout(Duration.ofSeconds(5)); // Tempo para fechar conexões aumentado
+        
+        // Habilita SSL/TLS se configurado (necessário para Upstash)
+        if (sslEnabled) {
+            clientConfigBuilder.useSsl();
+        }
+        
+        LettuceClientConfiguration clientConfig = clientConfigBuilder.build();
 
         LettuceConnectionFactory factory = new LettuceConnectionFactory(config, clientConfig);
         // Não valida no startup para não bloquear, mas valida quando usar
