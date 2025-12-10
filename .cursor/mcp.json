@@ -1,0 +1,14 @@
+{
+  "mcpServers": {
+    "upsaude-back-mcp": {
+      "command": "node",
+      "args": [
+        "tools/upsaude-back-mcp/build/index.js"
+      ],
+      "cwd": "/Users/wagnergrilo/Desktop/WGB/sistemas/UPSaude/code/UPSaude-back",
+      "env": {
+        "UPSAUDE_PROJECT_ROOT": "/Users/wagnergrilo/Desktop/WGB/sistemas/UPSaude/code/UPSaude-back"
+      }
+    }
+  }
+}

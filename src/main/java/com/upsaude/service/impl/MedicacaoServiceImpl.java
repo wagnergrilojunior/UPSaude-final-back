@@ -12,6 +12,8 @@ import com.upsaude.exception.BadRequestException;
 import com.upsaude.exception.InternalServerErrorException;
 import com.upsaude.exception.NotFoundException;
 import com.upsaude.mapper.MedicacaoMapper;
+import com.upsaude.entity.FabricantesMedicamento;
+import com.upsaude.repository.FabricantesMedicamentoRepository;
 import com.upsaude.repository.MedicacaoRepository;
 import com.upsaude.service.MedicacaoService;
 import lombok.RequiredArgsConstructor;
@@ -38,6 +40,7 @@ public class MedicacaoServiceImpl implements MedicacaoService {
 
     private final MedicacaoRepository medicacaoRepository;
     private final MedicacaoMapper medicacaoMapper;
+    private final FabricantesMedicamentoRepository fabricantesMedicamentoRepository;
 
     @Override
     @Transactional
@@ -55,6 +58,13 @@ public class MedicacaoServiceImpl implements MedicacaoService {
 
             Medicacao medicacao = medicacaoMapper.fromRequest(request);
             medicacao.setActive(true);
+
+            // Carrega e define relacionamento com fabricante se fornecido
+            if (request.getFabricanteEntity() != null) {
+                FabricantesMedicamento fabricante = fabricantesMedicamentoRepository.findById(request.getFabricanteEntity())
+                        .orElseThrow(() -> new NotFoundException("Fabricante não encontrado com ID: " + request.getFabricanteEntity()));
+                medicacao.setFabricanteEntity(fabricante);
+            }
 
             // Garante que campos obrigatórios tenham valores padrão se não fornecidos
             garantirValoresPadrao(medicacao);
@@ -146,6 +156,16 @@ public class MedicacaoServiceImpl implements MedicacaoService {
 
             // Usa mapper do MapStruct que preserva campos de controle automaticamente
             medicacaoMapper.updateFromRequest(request, medicacaoExistente);
+
+            // Carrega e define relacionamento com fabricante se fornecido
+            if (request.getFabricanteEntity() != null) {
+                FabricantesMedicamento fabricante = fabricantesMedicamentoRepository.findById(request.getFabricanteEntity())
+                        .orElseThrow(() -> new NotFoundException("Fabricante não encontrado com ID: " + request.getFabricanteEntity()));
+                medicacaoExistente.setFabricanteEntity(fabricante);
+            } else {
+                // Se não fornecido, remove o relacionamento (define como null)
+                medicacaoExistente.setFabricanteEntity(null);
+            }
 
             Medicacao medicacaoAtualizado = medicacaoRepository.save(medicacaoExistente);
             log.info("Medicação atualizada com sucesso. ID: {}", medicacaoAtualizado.getId());

@@ -4,6 +4,7 @@ import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -56,7 +57,7 @@ public class TratamentosOdontologicos extends BaseEntity {
     @Column(name = "observacoes", columnDefinition = "TEXT")
     private String observacoes;
 
-    @OneToMany(mappedBy = "tratamento", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "tratamento", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     private List<TratamentosProcedimentos> procedimentos = new ArrayList<>();
 
     // ========== MÉTODOS DE CICLO DE VIDA ==========

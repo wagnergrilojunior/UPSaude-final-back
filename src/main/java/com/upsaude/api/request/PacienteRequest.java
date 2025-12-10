@@ -1,5 +1,6 @@
 package com.upsaude.api.request;
 
+import com.upsaude.api.request.EnderecoRequest;
 import com.upsaude.enums.EstadoCivilEnum;
 import com.upsaude.enums.SexoEnum;
 import lombok.AllArgsConstructor;
@@ -14,6 +15,7 @@ import java.util.UUID;
 @Data
 @Builder
 @NoArgsConstructor
+@AllArgsConstructor
 public class PacienteRequest {
     private String nomeCompleto;
     private String cpf;
@@ -33,10 +35,21 @@ public class PacienteRequest {
     private String contatoJson;
     private String informacoesAdicionaisJson;
     private UUID convenioId;
+    private UUID convenio;
     private String numeroCarteirinha;
     private LocalDate dataValidadeCarteirinha;
     private String observacoes;
     private UUID estabelecimentoId;
     private List<UUID> enderecosIds;
+    private List<EnderecoRequest> enderecos;
+    private List<UUID> deficiencias;
+    private List<UUID> medicacoes;
+    private List<UUID> alergias;
+    private List<UUID> doencas;
+    private UUID dadosSociodemograficos;
+    private UUID dadosClinicosBasicos;
+    private UUID responsavelLegal;
+    private UUID lgpdConsentimento;
+    private UUID integracaoGov;
 }
 

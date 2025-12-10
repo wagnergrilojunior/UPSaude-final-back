@@ -1,0 +1,31 @@
+{
+  "name": "upsaude-back-mcp",
+  "version": "1.0.0",
+  "description": "MCP Server para UPSaude Backend",
+  "type": "module",
+  "main": "build/index.js",
+  "bin": {
+    "upsaude-back-mcp": "./build/index.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "start": "node build/index.js"
+  },
+  "keywords": [
+    "mcp",
+    "model-context-protocol"
+  ],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.0.4",
+    "fast-glob": "^3.3.2",
+    "yaml": "^2.8.2",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.0",
+    "typescript": "^5.3.3"
+  }
+}
