@@ -8,6 +8,7 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.AuthenticationCredentialsNotFoundException;
 import org.springframework.security.authentication.InsufficientAuthenticationException;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -387,6 +388,69 @@ public class ApiExceptionHandler {
         
         log.warn("Erro de tipo de argumento - Path: {}, Method: {}, Parâmetro: {}, Valor: {}, Tipo esperado: {}", 
             request.getRequestURI(), request.getMethod(), nomeParametro, valorRecebido, tipoEsperado);
+        
+        return buildErrorResponse(
+                HttpStatus.BAD_REQUEST,
+                "Requisição Inválida",
+                mensagemErro,
+                request.getRequestURI()
+        );
+    }
+
+    /**
+     * Trata exceções de violação de integridade de dados (DataIntegrityViolationException).
+     * Converte erros de constraint do banco em BadRequestException (400) quando apropriado.
+     * Exemplos: violação de constraint única, foreign key, etc.
+     *
+     * @param ex exceção lançada
+     * @param request requisição HTTP
+     * @return resposta JSON com detalhes do erro no formato padronizado
+     */
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ResponseEntity<Map<String, Object>> handleDataIntegrityViolationException(
+            DataIntegrityViolationException ex, HttpServletRequest request) {
+        // Não trata exceções de endpoints do Actuator ou /error
+        if (shouldIgnoreEndpoint(request.getRequestURI())) {
+            RuntimeException runtimeEx = new RuntimeException("Actuator endpoint exception", ex);
+            throw runtimeEx; // Re-lança para que o Actuator trate
+        }
+        
+        // Extrai mensagem de erro mais amigável
+        String mensagemErro = ex.getMessage();
+        Throwable causa = ex.getCause();
+        
+        // Tenta extrair mensagem mais específica da causa
+        if (causa != null && causa.getMessage() != null) {
+            String causaMsg = causa.getMessage();
+            
+            // Trata violação de constraint única
+            if (causaMsg.contains("duplicate key value violates unique constraint")) {
+                if (causaMsg.contains("uk_medicos_crm_uf_tenant")) {
+                    mensagemErro = "Já existe um médico cadastrado com o mesmo CRM e UF neste tenant. CRM e UF não podem estar vazios quando informados.";
+                } else if (causaMsg.contains("uk_medicos_cpf_tenant")) {
+                    mensagemErro = "Já existe um médico cadastrado com o mesmo CPF neste tenant.";
+                } else {
+                    mensagemErro = "Violação de constraint única: já existe um registro com os mesmos valores.";
+                }
+            } else if (causaMsg.contains("violates foreign key constraint")) {
+                mensagemErro = "Referência inválida: o registro referenciado não existe.";
+            } else if (causaMsg.contains("violates not-null constraint")) {
+                mensagemErro = "Campo obrigatório não pode ser nulo.";
+            } else {
+                // Usa mensagem da causa se for mais específica
+                if (causaMsg.length() < 200) {
+                    mensagemErro = causaMsg;
+                }
+            }
+        }
+        
+        // Se não conseguir extrair mensagem útil, usa mensagem padrão
+        if (mensagemErro == null || mensagemErro.trim().isEmpty() || mensagemErro.equals(ex.getMessage())) {
+            mensagemErro = "Violação de integridade de dados. Verifique se os dados enviados não conflitam com registros existentes.";
+        }
+        
+        log.warn("Erro de integridade de dados - Path: {}, Method: {}, Message: {}", 
+            request.getRequestURI(), request.getMethod(), mensagemErro);
         
         return buildErrorResponse(
                 HttpStatus.BAD_REQUEST,

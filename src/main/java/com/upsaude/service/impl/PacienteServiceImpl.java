@@ -520,8 +520,9 @@ public class PacienteServiceImpl implements PacienteService {
             throw new BadRequestException("Paciente já está inativo");
         }
 
-        paciente.setActive(false);
-        pacienteRepository.save(paciente);
+        // paciente.setActive(false);
+        // pacienteRepository.save(paciente);
+        pacienteRepository.delete(paciente);
         log.info("Paciente excluído (desativado) com sucesso. ID: {}", id);
     }
 
