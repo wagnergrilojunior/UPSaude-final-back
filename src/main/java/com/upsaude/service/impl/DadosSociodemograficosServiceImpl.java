@@ -84,10 +84,10 @@ public class DadosSociodemograficosServiceImpl implements DadosSociodemograficos
             log.warn("Erro de validação ao criar dados sociodemográficos. Request: {}. Erro: {}", request, e.getMessage());
             throw e;
         } catch (DataAccessException e) {
-            log.error("Erro de acesso a dados ao criar dados sociodemográficos. Request: {}, Exception: {}", request, e.getClass().getName(), e);
-            throw new InternalServerErrorException("Erro ao persistir dados sociodemográficos", e);
-        } catch (Exception e) {
-            log.error("Erro inesperado ao criar dados sociodemográficos. Request: {}, Exception: {}", request, e.getClass().getName(), e);
+            log.error("Erro de acesso a dados ao criar DadosSociodemograficos. Exception: {}", e.getClass().getSimpleName(), e);
+            throw new InternalServerErrorException("Erro ao persistir DadosSociodemograficos", e);
+        } catch (RuntimeException e) {
+            log.error("Erro inesperado ao criar DadosSociodemograficos. Exception: {}", e.getClass().getSimpleName(), e);
             throw e;
         }
     }
@@ -115,10 +115,10 @@ public class DadosSociodemograficosServiceImpl implements DadosSociodemograficos
             log.warn("Dados sociodemográficos não encontrados. ID: {}", id);
             throw e;
         } catch (DataAccessException e) {
-            log.error("Erro de acesso a dados ao buscar dados sociodemográficos. ID: {}, Exception: {}", id, e.getClass().getName(), e);
-            throw new InternalServerErrorException("Erro ao buscar dados sociodemográficos", e);
-        } catch (Exception e) {
-            log.error("Erro inesperado ao buscar dados sociodemográficos. ID: {}, Exception: {}", id, e.getClass().getName(), e);
+            log.error("Erro de acesso a dados ao buscar DadosSociodemograficos. ID: {}, Exception: {}", id, e.getClass().getSimpleName(), e);
+            throw new InternalServerErrorException("Erro ao buscar DadosSociodemograficos", e);
+        } catch (RuntimeException e) {
+            log.error("Erro inesperado ao buscar DadosSociodemograficos. ID: {}, Exception: {}", id, e.getClass().getSimpleName(), e);
             throw e;
         }
     }
@@ -146,10 +146,10 @@ public class DadosSociodemograficosServiceImpl implements DadosSociodemograficos
             log.warn("Dados sociodemográficos não encontrados para paciente. Paciente ID: {}", pacienteId);
             throw e;
         } catch (DataAccessException e) {
-            log.error("Erro de acesso a dados ao buscar dados sociodemográficos por paciente. Paciente ID: {}, Exception: {}", pacienteId, e.getClass().getName(), e);
-            throw new InternalServerErrorException("Erro ao buscar dados sociodemográficos do paciente", e);
-        } catch (Exception e) {
-            log.error("Erro inesperado ao buscar dados sociodemográficos por paciente. Paciente ID: {}, Exception: {}", pacienteId, e.getClass().getName(), e);
+            log.error("Erro de acesso a dados ao buscar DadosSociodemograficos por paciente. Paciente ID: {}, Exception: {}", pacienteId, e.getClass().getSimpleName(), e);
+            throw new InternalServerErrorException("Erro ao buscar DadosSociodemograficos do paciente", e);
+        } catch (RuntimeException e) {
+            log.error("Erro inesperado ao buscar DadosSociodemograficos por paciente. Paciente ID: {}, Exception: {}", pacienteId, e.getClass().getSimpleName(), e);
             throw e;
         }
     }
@@ -170,10 +170,10 @@ public class DadosSociodemograficosServiceImpl implements DadosSociodemograficos
                 return response;
             });
         } catch (DataAccessException e) {
-            log.error("Erro de acesso a dados ao listar dados sociodemográficos. Pageable: {}, Exception: {}", pageable, e.getClass().getName(), e);
-            throw new InternalServerErrorException("Erro ao listar dados sociodemográficos", e);
-        } catch (Exception e) {
-            log.error("Erro inesperado ao listar dados sociodemográficos. Pageable: {}, Exception: {}", pageable, e.getClass().getName(), e);
+            log.error("Erro de acesso a dados ao listar DadosSociodemograficos. Exception: {}", e.getClass().getSimpleName(), e);
+            throw new InternalServerErrorException("Erro ao listar DadosSociodemograficos", e);
+        } catch (RuntimeException e) {
+            log.error("Erro inesperado ao listar DadosSociodemograficos. Exception: {}", e.getClass().getSimpleName(), e);
             throw e;
         }
     }
@@ -227,10 +227,10 @@ public class DadosSociodemograficosServiceImpl implements DadosSociodemograficos
             log.warn("Erro de validação ao atualizar dados sociodemográficos. ID: {}, Request: {}. Erro: {}", id, request, e.getMessage());
             throw e;
         } catch (DataAccessException e) {
-            log.error("Erro de acesso a dados ao atualizar dados sociodemográficos. ID: {}, Request: {}, Exception: {}", id, request, e.getClass().getName(), e);
-            throw new InternalServerErrorException("Erro ao atualizar dados sociodemográficos", e);
-        } catch (Exception e) {
-            log.error("Erro inesperado ao atualizar dados sociodemográficos. ID: {}, Request: {}, Exception: {}", id, request, e.getClass().getName(), e);
+            log.error("Erro de acesso a dados ao atualizar DadosSociodemograficos. ID: {}, Exception: {}", id, e.getClass().getSimpleName(), e);
+            throw new InternalServerErrorException("Erro ao atualizar DadosSociodemograficos", e);
+        } catch (RuntimeException e) {
+            log.error("Erro inesperado ao atualizar DadosSociodemograficos. ID: {}, Exception: {}", id, e.getClass().getSimpleName(), e);
             throw e;
         }
     }
@@ -265,28 +265,17 @@ public class DadosSociodemograficosServiceImpl implements DadosSociodemograficos
             log.warn("Erro de validação ao excluir dados sociodemográficos. ID: {}. Erro: {}", id, e.getMessage());
             throw e;
         } catch (DataAccessException e) {
-            log.error("Erro de acesso a dados ao excluir dados sociodemográficos. ID: {}, Exception: {}", id, e.getClass().getName(), e);
-            throw new InternalServerErrorException("Erro ao excluir dados sociodemográficos", e);
-        } catch (Exception e) {
-            log.error("Erro inesperado ao excluir dados sociodemográficos. ID: {}, Exception: {}", id, e.getClass().getName(), e);
+            log.error("Erro de acesso a dados ao excluir DadosSociodemograficos. ID: {}, Exception: {}", id, e.getClass().getSimpleName(), e);
+            throw new InternalServerErrorException("Erro ao excluir DadosSociodemograficos", e);
+        } catch (RuntimeException e) {
+            log.error("Erro inesperado ao excluir DadosSociodemograficos. ID: {}, Exception: {}", id, e.getClass().getSimpleName(), e);
             throw e;
         }
     }
 
     private void atualizarDados(DadosSociodemograficos entity, DadosSociodemograficosRequest request) {
-        DadosSociodemograficos updated = mapper.fromRequest(request);
-        
-        entity.setRacaCor(updated.getRacaCor());
-        entity.setNacionalidade(updated.getNacionalidade());
-        entity.setPaisNascimento(updated.getPaisNascimento());
-        entity.setNaturalidade(updated.getNaturalidade());
-        entity.setMunicipioNascimentoIbge(updated.getMunicipioNascimentoIbge());
-        entity.setEscolaridade(updated.getEscolaridade());
-        entity.setOcupacaoProfissao(updated.getOcupacaoProfissao());
-        entity.setSituacaoRua(updated.getSituacaoRua());
-        entity.setTempoSituacaoRua(updated.getTempoSituacaoRua());
-        entity.setCondicaoMoradia(updated.getCondicaoMoradia());
-        entity.setSituacaoFamiliar(updated.getSituacaoFamiliar());
+        // Usar mapper para atualizar campos básicos
+        mapper.updateFromRequest(request, entity);
     }
 
     /**

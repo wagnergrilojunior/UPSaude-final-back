@@ -139,10 +139,10 @@ public class ResponsavelLegalServiceImpl implements ResponsavelLegalService {
             log.warn("Erro de validação ao criar responsável legal. Request: {}. Erro: {}", request, mensagens.toString());
             throw new BadRequestException(mensagens.toString().trim());
         } catch (DataAccessException e) {
-            log.error("Erro de acesso a dados ao criar responsável legal. Request: {}, Exception: {}", request, e.getClass().getName(), e);
-            throw new InternalServerErrorException("Erro ao persistir responsável legal", e);
-        } catch (Exception e) {
-            log.error("Erro inesperado ao criar responsável legal. Request: {}, Exception: {}", request, e.getClass().getName(), e);
+            log.error("Erro de acesso a dados ao criar ResponsavelLegal. Exception: {}", e.getClass().getSimpleName(), e);
+            throw new InternalServerErrorException("Erro ao persistir ResponsavelLegal", e);
+        } catch (RuntimeException e) {
+            log.error("Erro inesperado ao criar ResponsavelLegal. Exception: {}", e.getClass().getSimpleName(), e);
             throw e;
         }
     }
@@ -279,14 +279,12 @@ public class ResponsavelLegalServiceImpl implements ResponsavelLegalService {
     }
 
     private void atualizarDados(ResponsavelLegal entity, ResponsavelLegalRequest request, String cpfLimpo, String telefoneLimpo) {
-        ResponsavelLegal updated = mapper.fromRequest(request);
+        // Usar mapper para atualizar campos básicos
+        mapper.updateFromRequest(request, entity);
         
-        entity.setNome(updated.getNome());
+        // Aplica valores limpos de CPF e telefone após o mapeamento
         entity.setCpf(cpfLimpo);
         entity.setTelefone(telefoneLimpo);
-        entity.setTipoResponsavel(updated.getTipoResponsavel());
-        entity.setAutorizacaoUsoDadosLGPD(updated.getAutorizacaoUsoDadosLGPD());
-        entity.setAutorizacaoResponsavel(updated.getAutorizacaoResponsavel());
     }
 
     /**

@@ -11,7 +11,9 @@ import com.upsaude.api.request.AlergiasRequest;
 import com.upsaude.api.response.AlergiasResponse;
 import com.upsaude.entity.Alergias;
 import com.upsaude.exception.BadRequestException;
+import com.upsaude.exception.InternalServerErrorException;
 import com.upsaude.exception.NotFoundException;
+import org.springframework.dao.DataAccessException;
 import com.upsaude.mapper.AlergiasMapper;
 import com.upsaude.repository.AlergiasRepository;
 import com.upsaude.service.AlergiasService;
@@ -27,6 +29,57 @@ public class AlergiasServiceImpl implements AlergiasService {
     private final AlergiasRepository alergiasRepository;
     private final AlergiasMapper alergiasMapper;
 
+    /**
+     * Sanitiza os campos de texto do request removendo caracteres de controle inválidos.
+     * 
+     * @param request request a ser sanitizado
+     */
+    private void sanitizarRequest(AlergiasRequest request) {
+        if (request == null) {
+            return;
+        }
+        
+        if (request.getNome() != null) {
+            String nomeSanitizado = sanitizarString(request.getNome());
+            if (nomeSanitizado != null && !nomeSanitizado.trim().isEmpty()) {
+                request.setNome(nomeSanitizado.trim());
+            }
+        }
+        
+        if (request.getNomeCientifico() != null) {
+            String nomeCientificoSanitizado = sanitizarString(request.getNomeCientifico());
+            if (nomeCientificoSanitizado != null && !nomeCientificoSanitizado.trim().isEmpty()) {
+                request.setNomeCientifico(nomeCientificoSanitizado.trim());
+            } else if (nomeCientificoSanitizado != null && nomeCientificoSanitizado.trim().isEmpty()) {
+                request.setNomeCientifico(null);
+            }
+        }
+        
+        if (request.getCodigoInterno() != null) {
+            String codigoSanitizado = sanitizarString(request.getCodigoInterno());
+            if (codigoSanitizado != null && !codigoSanitizado.trim().isEmpty()) {
+                request.setCodigoInterno(codigoSanitizado.trim());
+            } else if (codigoSanitizado != null && codigoSanitizado.trim().isEmpty()) {
+                request.setCodigoInterno(null);
+            }
+        }
+        
+        if (request.getDescricao() != null) {
+            String descricaoSanitizada = sanitizarString(request.getDescricao());
+            request.setDescricao(descricaoSanitizada);
+        }
+        
+        if (request.getSubstanciasRelacionadas() != null) {
+            String substanciasSanitizadas = sanitizarString(request.getSubstanciasRelacionadas());
+            request.setSubstanciasRelacionadas(substanciasSanitizadas);
+        }
+        
+        if (request.getObservacoes() != null) {
+            String observacoesSanitizadas = sanitizarString(request.getObservacoes());
+            request.setObservacoes(observacoesSanitizadas);
+        }
+    }
+
     @Override
     @Transactional
     public AlergiasResponse criar(AlergiasRequest request) {
@@ -37,6 +90,14 @@ public class AlergiasServiceImpl implements AlergiasService {
         }
 
         try {
+            // Sanitiza o request antes de validar e processar
+            sanitizarRequest(request);
+            
+            // Valida se o nome ainda é válido após sanitização
+            if (request.getNome() == null || request.getNome().trim().isEmpty()) {
+                throw new BadRequestException("Nome da alergia é obrigatório e não pode conter apenas caracteres de controle inválidos");
+            }
+            
             validarDuplicidade(null, request);
 
             Alergias alergia = alergiasMapper.fromRequest(request);
@@ -45,11 +106,11 @@ public class AlergiasServiceImpl implements AlergiasService {
             log.info("Alergia criada com sucesso. ID: {}", salvo.getId());
             return alergiasMapper.toResponse(salvo);
         } catch (BadRequestException | NotFoundException e) {
-            log.warn("Erro de validação ao criar Alergia. Request: {}. Erro: {}", request, e.getMessage());
+            log.warn("Erro de validação ao criar Alergia. Erro: {}", e.getMessage());
             throw e;
-        } catch (Exception ex) {
-            log.error("Erro inesperado ao criar Alergia — payload: {}, Exception: {}", request, ex.getClass().getName(), ex);
-            throw ex;
+        } catch (RuntimeException e) {
+            log.error("Erro inesperado ao criar Alergia. Exception: {}", e.getClass().getSimpleName(), e);
+            throw e;
         }
     }
 
@@ -66,12 +127,15 @@ public class AlergiasServiceImpl implements AlergiasService {
             Alergias alergia = alergiasRepository.findById(id)
                     .orElseThrow(() -> new NotFoundException("Alergia não encontrada com ID: " + id));
             return alergiasMapper.toResponse(alergia);
-        } catch (NotFoundException nf) {
-            log.warn("Alergia não encontrada — ID: {}", id);
-            throw nf;
-        } catch (Exception ex) {
-            log.error("Erro inesperado ao buscar Alergia por ID: {}, Exception: {}", id, ex.getClass().getName(), ex);
-            throw ex;
+        } catch (NotFoundException e) {
+            log.warn("Alergia não encontrada. ID: {}", id);
+            throw e;
+        } catch (DataAccessException e) {
+            log.error("Erro de acesso a dados ao buscar Alergia. ID: {}, Exception: {}", id, e.getClass().getSimpleName(), e);
+            throw new InternalServerErrorException("Erro ao buscar Alergia", e);
+        } catch (RuntimeException e) {
+            log.error("Erro inesperado ao buscar Alergia. ID: {}, Exception: {}", id, e.getClass().getSimpleName(), e);
+            throw e;
         }
     }
 
@@ -81,10 +145,14 @@ public class AlergiasServiceImpl implements AlergiasService {
         log.debug("Listando alergias — page: {}, size: {}", pageable.getPageNumber(), pageable.getPageSize());
         try {
             Page<Alergias> page = alergiasRepository.findAll(pageable);
+            log.debug("Listagem de alergias concluída. Total de elementos: {}", page.getTotalElements());
             return page.map(alergiasMapper::toResponse);
-        } catch (Exception ex) {
-            log.error("Erro ao listar alergias — pageable: {}, Exception: {}", pageable, ex.getClass().getName(), ex);
-            throw ex;
+        } catch (DataAccessException e) {
+            log.error("Erro de acesso a dados ao listar Alergias. Exception: {}", e.getClass().getSimpleName(), e);
+            throw new InternalServerErrorException("Erro ao listar Alergias", e);
+        } catch (RuntimeException e) {
+            log.error("Erro inesperado ao listar Alergias. Exception: {}", e.getClass().getSimpleName(), e);
+            throw e;
         }
     }
 
@@ -105,6 +173,14 @@ public class AlergiasServiceImpl implements AlergiasService {
             Alergias existente = alergiasRepository.findById(id)
                     .orElseThrow(() -> new NotFoundException("Alergia não encontrada com ID: " + id));
 
+            // Sanitiza o request antes de validar e processar
+            sanitizarRequest(request);
+            
+            // Valida se o nome ainda é válido após sanitização
+            if (request.getNome() == null || request.getNome().trim().isEmpty()) {
+                throw new BadRequestException("Nome da alergia é obrigatório e não pode conter apenas caracteres de controle inválidos");
+            }
+
             validarDuplicidade(id, request);
 
             alergiasMapper.updateFromRequest(request, existente);
@@ -112,15 +188,18 @@ public class AlergiasServiceImpl implements AlergiasService {
             Alergias atualizado = alergiasRepository.save(existente);
             log.info("Alergia atualizada com sucesso. ID: {}", atualizado.getId());
             return alergiasMapper.toResponse(atualizado);
-        } catch (NotFoundException nf) {
-            log.warn("Tentativa de atualizar Alergia não existente — ID: {}", id);
-            throw nf;
-        } catch (BadRequestException e) {
-            log.warn("Erro de validação ao atualizar Alergia. ID: {}, Request: {}. Erro: {}", id, request, e.getMessage());
+        } catch (NotFoundException e) {
+            log.warn("Tentativa de atualizar Alergia não existente. ID: {}", id);
             throw e;
-        } catch (Exception ex) {
-            log.error("Erro inesperado ao atualizar Alergia — ID: {}, payload: {}, Exception: {}", id, request, ex.getClass().getName(), ex);
-            throw ex;
+        } catch (BadRequestException e) {
+            log.warn("Erro de validação ao atualizar Alergia. ID: {}, Erro: {}", id, e.getMessage());
+            throw e;
+        } catch (DataAccessException e) {
+            log.error("Erro de acesso a dados ao atualizar Alergia. ID: {}, Exception: {}", id, e.getClass().getSimpleName(), e);
+            throw new InternalServerErrorException("Erro ao atualizar Alergia", e);
+        } catch (RuntimeException e) {
+            log.error("Erro inesperado ao atualizar Alergia. ID: {}, Exception: {}", id, e.getClass().getSimpleName(), e);
+            throw e;
         }
     }
 
@@ -145,16 +224,34 @@ public class AlergiasServiceImpl implements AlergiasService {
             existente.setActive(false);
             alergiasRepository.save(existente);
             log.info("Alergia desativada com sucesso. ID: {}", id);
-        } catch (NotFoundException nf) {
-            log.warn("Tentativa de excluir Alergia não existente — ID: {}", id);
-            throw nf;
-        } catch (BadRequestException e) {
-            log.warn("Erro de validação ao excluir Alergia. ID: {}. Erro: {}", id, e.getMessage());
+        } catch (NotFoundException e) {
+            log.warn("Tentativa de excluir Alergia não existente. ID: {}", id);
             throw e;
-        } catch (Exception ex) {
-            log.error("Erro inesperado ao excluir Alergia — ID: {}, Exception: {}", id, ex.getClass().getName(), ex);
-            throw ex;
+        } catch (BadRequestException e) {
+            log.warn("Erro de validação ao excluir Alergia. ID: {}, Erro: {}", id, e.getMessage());
+            throw e;
+        } catch (DataAccessException e) {
+            log.error("Erro de acesso a dados ao excluir Alergia. ID: {}, Exception: {}", id, e.getClass().getSimpleName(), e);
+            throw new InternalServerErrorException("Erro ao excluir Alergia", e);
+        } catch (RuntimeException e) {
+            log.error("Erro inesperado ao excluir Alergia. ID: {}, Exception: {}", id, e.getClass().getSimpleName(), e);
+            throw e;
         }
+    }
+
+    /**
+     * Sanitiza uma string removendo caracteres de controle que podem causar problemas no banco de dados.
+     * Remove caracteres de controle (0x00-0x1F) exceto tabulação (0x09), quebra de linha (0x0A) e retorno de carro (0x0D).
+     * 
+     * @param str string a ser sanitizada
+     * @return string sanitizada ou null se a entrada for null
+     */
+    private String sanitizarString(String str) {
+        if (str == null) {
+            return null;
+        }
+        // Remove caracteres de controle (0x00-0x1F) exceto tab (\t=0x09), newline (\n=0x0A) e carriage return (\r=0x0D)
+        return str.replaceAll("[\\x00-\\x08\\x0B\\x0C\\x0E-\\x1F]", "");
     }
 
     /**
@@ -171,13 +268,20 @@ public class AlergiasServiceImpl implements AlergiasService {
 
         // Valida duplicidade do nome
         if (request.getNome() != null && !request.getNome().trim().isEmpty()) {
+            // Sanitiza o nome antes de validar duplicidade para evitar erros com caracteres de controle
+            String nomeSanitizado = sanitizarString(request.getNome().trim());
+            if (nomeSanitizado == null || nomeSanitizado.isEmpty()) {
+                log.warn("Nome da alergia contém apenas caracteres de controle inválidos");
+                throw new BadRequestException("Nome da alergia não pode conter apenas caracteres de controle inválidos");
+            }
+            
             boolean nomeDuplicado;
             if (id == null) {
                 // Criação: verifica se existe qualquer registro com este nome
-                nomeDuplicado = alergiasRepository.existsByNome(request.getNome().trim());
+                nomeDuplicado = alergiasRepository.existsByNome(nomeSanitizado);
             } else {
                 // Atualização: verifica se existe outro registro (diferente do atual) com este nome
-                nomeDuplicado = alergiasRepository.existsByNomeAndIdNot(request.getNome().trim(), id);
+                nomeDuplicado = alergiasRepository.existsByNomeAndIdNot(nomeSanitizado, id);
             }
 
             if (nomeDuplicado) {
@@ -190,13 +294,20 @@ public class AlergiasServiceImpl implements AlergiasService {
 
         // Valida duplicidade do código interno (apenas se fornecido)
         if (request.getCodigoInterno() != null && !request.getCodigoInterno().trim().isEmpty()) {
+            // Sanitiza o código interno antes de validar duplicidade
+            String codigoSanitizado = sanitizarString(request.getCodigoInterno().trim());
+            if (codigoSanitizado == null || codigoSanitizado.isEmpty()) {
+                log.warn("Código interno da alergia contém apenas caracteres de controle inválidos");
+                throw new BadRequestException("Código interno não pode conter apenas caracteres de controle inválidos");
+            }
+            
             boolean codigoDuplicado;
             if (id == null) {
                 // Criação: verifica se existe qualquer registro com este código interno
-                codigoDuplicado = alergiasRepository.existsByCodigoInterno(request.getCodigoInterno().trim());
+                codigoDuplicado = alergiasRepository.existsByCodigoInterno(codigoSanitizado);
             } else {
                 // Atualização: verifica se existe outro registro (diferente do atual) com este código interno
-                codigoDuplicado = alergiasRepository.existsByCodigoInternoAndIdNot(request.getCodigoInterno().trim(), id);
+                codigoDuplicado = alergiasRepository.existsByCodigoInternoAndIdNot(codigoSanitizado, id);
             }
 
             if (codigoDuplicado) {

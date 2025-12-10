@@ -8,10 +8,9 @@ import com.upsaude.exception.NotFoundException;
 import com.upsaude.mapper.LogsAuditoriaMapper;
 import com.upsaude.repository.LogsAuditoriaRepository;
 import com.upsaude.service.LogsAuditoriaService;
-import jakarta.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.BeanUtils;
 import org.springframework.data.domain.Page;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
@@ -37,7 +36,12 @@ public class LogsAuditoriaServiceImpl implements LogsAuditoriaService {
     @Transactional
     @CacheEvict(value = "logsauditoria", allEntries = true)
     public LogsAuditoriaResponse criar(LogsAuditoriaRequest request) {
-        log.debug("Criando novo logsauditoria");
+        log.debug("Criando novo LogsAuditoria");
+        
+        if (request == null) {
+            log.warn("Request nulo recebido para criação de LogsAuditoria");
+            throw new BadRequestException("Dados do log de auditoria são obrigatórios");
+        }
 
         // Validação de dados básicos é feita automaticamente pelo Bean Validation no Request
 
@@ -51,26 +55,31 @@ public class LogsAuditoriaServiceImpl implements LogsAuditoriaService {
     }
 
     @Override
-    @Transactional
+    @Transactional(readOnly = true)
     @Cacheable(value = "logsauditoria", key = "#id")
     public LogsAuditoriaResponse obterPorId(UUID id) {
-        log.debug("Buscando logsauditoria por ID: {} (cache miss)", id);
+        log.debug("Buscando LogsAuditoria por ID: {} (cache miss)", id);
+        
         if (id == null) {
-            throw new BadRequestException("ID do logsauditoria é obrigatório");
+            log.warn("ID nulo recebido para busca de LogsAuditoria");
+            throw new BadRequestException("ID do log de auditoria é obrigatório");
         }
 
         LogsAuditoria logsAuditoria = logsAuditoriaRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("LogsAuditoria não encontrado com ID: " + id));
 
+        log.debug("LogsAuditoria encontrado. ID: {}", id);
         return logsAuditoriaMapper.toResponse(logsAuditoria);
     }
 
     @Override
+    @Transactional(readOnly = true)
     public Page<LogsAuditoriaResponse> listar(Pageable pageable) {
         log.debug("Listando LogsAuditorias paginados. Página: {}, Tamanho: {}",
                 pageable.getPageNumber(), pageable.getPageSize());
 
         Page<LogsAuditoria> logsAuditorias = logsAuditoriaRepository.findAll(pageable);
+        log.debug("Listagem de LogsAuditorias concluída. Total de elementos: {}", logsAuditorias.getTotalElements());
         return logsAuditorias.map(logsAuditoriaMapper::toResponse);
     }
 
@@ -78,10 +87,16 @@ public class LogsAuditoriaServiceImpl implements LogsAuditoriaService {
     @Transactional
     @CacheEvict(value = "logsauditoria", key = "#id")
     public LogsAuditoriaResponse atualizar(UUID id, LogsAuditoriaRequest request) {
-        log.debug("Atualizando logsauditoria. ID: {}", id);
+        log.debug("Atualizando LogsAuditoria. ID: {}", id);
 
         if (id == null) {
-            throw new BadRequestException("ID do logsauditoria é obrigatório");
+            log.warn("ID nulo recebido para atualização de LogsAuditoria");
+            throw new BadRequestException("ID do log de auditoria é obrigatório");
+        }
+        
+        if (request == null) {
+            log.warn("Request nulo recebido para atualização de LogsAuditoria. ID: {}", id);
+            throw new BadRequestException("Dados do log de auditoria são obrigatórios");
         }
 
         // Validação de dados básicos é feita automaticamente pelo Bean Validation no Request
@@ -101,16 +116,18 @@ public class LogsAuditoriaServiceImpl implements LogsAuditoriaService {
     @Transactional
     @CacheEvict(value = "logsauditoria", key = "#id")
     public void excluir(UUID id) {
-        log.debug("Excluindo logsauditoria. ID: {}", id);
+        log.debug("Excluindo LogsAuditoria. ID: {}", id);
 
         if (id == null) {
-            throw new BadRequestException("ID do logsauditoria é obrigatório");
+            log.warn("ID nulo recebido para exclusão de LogsAuditoria");
+            throw new BadRequestException("ID do log de auditoria é obrigatório");
         }
 
         LogsAuditoria logsAuditoria = logsAuditoriaRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("LogsAuditoria não encontrado com ID: " + id));
 
         if (Boolean.FALSE.equals(logsAuditoria.getActive())) {
+            log.warn("Tentativa de excluir LogsAuditoria já inativo. ID: {}", id);
             throw new BadRequestException("LogsAuditoria já está inativo");
         }
 
@@ -123,22 +140,8 @@ public class LogsAuditoriaServiceImpl implements LogsAuditoriaService {
     // (@NotNull, @NotBlank, @Pattern, etc). Isso garante validação automática no Controller
     // e retorno de erro 400 padronizado via ApiExceptionHandler.
 
-        private void atualizarDadosLogsAuditoria(LogsAuditoria logsAuditoria, LogsAuditoriaRequest request) {
-        LogsAuditoria logsAuditoriaAtualizado = logsAuditoriaMapper.fromRequest(request);
-        
-        // Preserva campos de controle
-        java.util.UUID idOriginal = logsAuditoria.getId();
-        com.upsaude.entity.Tenant tenantOriginal = logsAuditoria.getTenant();
-        Boolean activeOriginal = logsAuditoria.getActive();
-        java.time.OffsetDateTime createdAtOriginal = logsAuditoria.getCreatedAt();
-        
-        // Copia todas as propriedades do objeto atualizado
-        BeanUtils.copyProperties(logsAuditoriaAtualizado, logsAuditoria);
-        
-        // Restaura campos de controle
-        logsAuditoria.setId(idOriginal);
-        logsAuditoria.setTenant(tenantOriginal);
-        logsAuditoria.setActive(activeOriginal);
-        logsAuditoria.setCreatedAt(createdAtOriginal);
+    private void atualizarDadosLogsAuditoria(LogsAuditoria logsAuditoria, LogsAuditoriaRequest request) {
+        // Usar mapper para atualizar campos básicos
+        logsAuditoriaMapper.updateFromRequest(request, logsAuditoria);
     }
 }

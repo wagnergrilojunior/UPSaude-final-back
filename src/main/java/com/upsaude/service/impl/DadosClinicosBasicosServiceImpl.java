@@ -84,10 +84,10 @@ public class DadosClinicosBasicosServiceImpl implements DadosClinicosBasicosServ
             log.warn("Erro de validação ao criar dados clínicos básicos. Request: {}. Erro: {}", request, e.getMessage());
             throw e;
         } catch (DataAccessException e) {
-            log.error("Erro de acesso a dados ao criar dados clínicos básicos. Request: {}, Exception: {}", request, e.getClass().getName(), e);
-            throw new InternalServerErrorException("Erro ao persistir dados clínicos básicos", e);
-        } catch (Exception e) {
-            log.error("Erro inesperado ao criar dados clínicos básicos. Request: {}, Exception: {}", request, e.getClass().getName(), e);
+            log.error("Erro de acesso a dados ao criar DadosClinicosBasicos. Exception: {}", e.getClass().getSimpleName(), e);
+            throw new InternalServerErrorException("Erro ao persistir DadosClinicosBasicos", e);
+        } catch (RuntimeException e) {
+            log.error("Erro inesperado ao criar DadosClinicosBasicos. Exception: {}", e.getClass().getSimpleName(), e);
             throw e;
         }
     }
@@ -115,10 +115,10 @@ public class DadosClinicosBasicosServiceImpl implements DadosClinicosBasicosServ
             log.warn("Dados clínicos básicos não encontrados. ID: {}", id);
             throw e;
         } catch (DataAccessException e) {
-            log.error("Erro de acesso a dados ao buscar dados clínicos básicos. ID: {}, Exception: {}", id, e.getClass().getName(), e);
-            throw new InternalServerErrorException("Erro ao buscar dados clínicos básicos", e);
-        } catch (Exception e) {
-            log.error("Erro inesperado ao buscar dados clínicos básicos. ID: {}, Exception: {}", id, e.getClass().getName(), e);
+            log.error("Erro de acesso a dados ao buscar DadosClinicosBasicos. ID: {}, Exception: {}", id, e.getClass().getSimpleName(), e);
+            throw new InternalServerErrorException("Erro ao buscar DadosClinicosBasicos", e);
+        } catch (RuntimeException e) {
+            log.error("Erro inesperado ao buscar DadosClinicosBasicos. ID: {}, Exception: {}", id, e.getClass().getSimpleName(), e);
             throw e;
         }
     }
@@ -146,10 +146,10 @@ public class DadosClinicosBasicosServiceImpl implements DadosClinicosBasicosServ
             log.warn("Dados clínicos básicos não encontrados para paciente. Paciente ID: {}", pacienteId);
             throw e;
         } catch (DataAccessException e) {
-            log.error("Erro de acesso a dados ao buscar dados clínicos básicos por paciente. Paciente ID: {}, Exception: {}", pacienteId, e.getClass().getName(), e);
-            throw new InternalServerErrorException("Erro ao buscar dados clínicos básicos do paciente", e);
-        } catch (Exception e) {
-            log.error("Erro inesperado ao buscar dados clínicos básicos por paciente. Paciente ID: {}, Exception: {}", pacienteId, e.getClass().getName(), e);
+            log.error("Erro de acesso a dados ao buscar DadosClinicosBasicos por paciente. Paciente ID: {}, Exception: {}", pacienteId, e.getClass().getSimpleName(), e);
+            throw new InternalServerErrorException("Erro ao buscar DadosClinicosBasicos do paciente", e);
+        } catch (RuntimeException e) {
+            log.error("Erro inesperado ao buscar DadosClinicosBasicos por paciente. Paciente ID: {}, Exception: {}", pacienteId, e.getClass().getSimpleName(), e);
             throw e;
         }
     }
@@ -170,10 +170,10 @@ public class DadosClinicosBasicosServiceImpl implements DadosClinicosBasicosServ
                 return response;
             });
         } catch (DataAccessException e) {
-            log.error("Erro de acesso a dados ao listar dados clínicos básicos. Pageable: {}, Exception: {}", pageable, e.getClass().getName(), e);
-            throw new InternalServerErrorException("Erro ao listar dados clínicos básicos", e);
-        } catch (Exception e) {
-            log.error("Erro inesperado ao listar dados clínicos básicos. Pageable: {}, Exception: {}", pageable, e.getClass().getName(), e);
+            log.error("Erro de acesso a dados ao listar DadosClinicosBasicos. Exception: {}", e.getClass().getSimpleName(), e);
+            throw new InternalServerErrorException("Erro ao listar DadosClinicosBasicos", e);
+        } catch (RuntimeException e) {
+            log.error("Erro inesperado ao listar DadosClinicosBasicos. Exception: {}", e.getClass().getSimpleName(), e);
             throw e;
         }
     }
@@ -229,10 +229,10 @@ public class DadosClinicosBasicosServiceImpl implements DadosClinicosBasicosServ
             log.warn("Erro de validação ao atualizar dados clínicos básicos. ID: {}, Request: {}. Erro: {}", id, request, e.getMessage());
             throw e;
         } catch (DataAccessException e) {
-            log.error("Erro de acesso a dados ao atualizar dados clínicos básicos. ID: {}, Request: {}, Exception: {}", id, request, e.getClass().getName(), e);
-            throw new InternalServerErrorException("Erro ao atualizar dados clínicos básicos", e);
-        } catch (Exception e) {
-            log.error("Erro inesperado ao atualizar dados clínicos básicos. ID: {}, Request: {}, Exception: {}", id, request, e.getClass().getName(), e);
+            log.error("Erro de acesso a dados ao atualizar DadosClinicosBasicos. ID: {}, Exception: {}", id, e.getClass().getSimpleName(), e);
+            throw new InternalServerErrorException("Erro ao atualizar DadosClinicosBasicos", e);
+        } catch (RuntimeException e) {
+            log.error("Erro inesperado ao atualizar DadosClinicosBasicos. ID: {}, Exception: {}", id, e.getClass().getSimpleName(), e);
             throw e;
         }
     }
@@ -267,10 +267,10 @@ public class DadosClinicosBasicosServiceImpl implements DadosClinicosBasicosServ
             log.warn("Erro de validação ao excluir dados clínicos básicos. ID: {}. Erro: {}", id, e.getMessage());
             throw e;
         } catch (DataAccessException e) {
-            log.error("Erro de acesso a dados ao excluir dados clínicos básicos. ID: {}, Exception: {}", id, e.getClass().getName(), e);
-            throw new InternalServerErrorException("Erro ao excluir dados clínicos básicos", e);
-        } catch (Exception e) {
-            log.error("Erro inesperado ao excluir dados clínicos básicos. ID: {}, Exception: {}", id, e.getClass().getName(), e);
+            log.error("Erro de acesso a dados ao excluir DadosClinicosBasicos. ID: {}, Exception: {}", id, e.getClass().getSimpleName(), e);
+            throw new InternalServerErrorException("Erro ao excluir DadosClinicosBasicos", e);
+        } catch (RuntimeException e) {
+            log.error("Erro inesperado ao excluir DadosClinicosBasicos. ID: {}, Exception: {}", id, e.getClass().getSimpleName(), e);
             throw e;
         }
     }

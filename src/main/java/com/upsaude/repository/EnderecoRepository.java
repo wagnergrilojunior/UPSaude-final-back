@@ -1,5 +1,6 @@
 package com.upsaude.repository;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -83,4 +84,47 @@ public interface EnderecoRepository extends JpaRepository<Endereco, UUID> {
             @Param("cidadeId") UUID cidadeId,
             @Param("estadoId") UUID estadoId
     );
+    
+    /**
+     * Busca endereços existentes pelos campos principais usando comparação case-insensitive.
+     * Retorna lista para tratar casos onde há múltiplos resultados.
+     * 
+     * @param tipoLogradouro tipo do logradouro (pode ser null)
+     * @param logradouro logradouro normalizado (pode ser null)
+     * @param numero número normalizado (pode ser null)
+     * @param bairro bairro normalizado (pode ser null)
+     * @param cep CEP normalizado (pode ser null)
+     * @param cidadeId ID da cidade (pode ser null)
+     * @param estadoId ID do estado (pode ser null)
+     * @return lista de endereços encontrados
+     */
+    @Query(value = "SELECT e.* FROM enderecos e WHERE " +
+           "(:tipoLogradouro IS NULL OR e.tipo_logradouro = CAST(:tipoLogradouro AS integer)) AND " +
+           "(:logradouro IS NULL OR (e.logradouro IS NOT NULL AND LOWER(CAST(e.logradouro AS text)) = LOWER(:logradouro))) AND " +
+           "(:numero IS NULL OR (e.numero IS NOT NULL AND LOWER(CAST(e.numero AS text)) = LOWER(:numero))) AND " +
+           "(:bairro IS NULL OR (e.bairro IS NOT NULL AND LOWER(CAST(e.bairro AS text)) = LOWER(:bairro))) AND " +
+           "(:cep IS NULL OR (e.cep IS NOT NULL AND LOWER(CAST(e.cep AS text)) = LOWER(:cep))) AND " +
+           "(:cidadeId IS NULL OR (e.cidade_id IS NOT NULL AND e.cidade_id::text = :cidadeId)) AND " +
+           "(:estadoId IS NULL OR (e.estado_id IS NOT NULL AND e.estado_id::text = :estadoId)) AND " +
+           "e.ativo = true", nativeQuery = true)
+    List<Endereco> findByFieldsList(
+            @Param("tipoLogradouro") String tipoLogradouro,
+            @Param("logradouro") String logradouro,
+            @Param("numero") String numero,
+            @Param("bairro") String bairro,
+            @Param("cep") String cep,
+            @Param("cidadeId") String cidadeId,
+            @Param("estadoId") String estadoId
+    );
+    
+    /**
+     * Verifica quantas associações um endereço tem com pacientes.
+     * Usado para detectar se um endereço já está associado a outro paciente
+     * (devido à constraint única pacientes_enderecos_endereco_id_key).
+     *
+     * @param enderecoId ID do endereço
+     * @return número de associações do endereço com pacientes
+     */
+    @Query(value = "SELECT COUNT(*) FROM pacientes_enderecos WHERE endereco_id = :enderecoId", nativeQuery = true)
+    Long countAssociacoesPaciente(@Param("enderecoId") UUID enderecoId);
 }

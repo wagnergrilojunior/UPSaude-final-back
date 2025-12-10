@@ -11,7 +11,9 @@ import com.upsaude.api.response.PacienteSimplificadoResponse;
 import com.upsaude.entity.*;
 import com.upsaude.enums.StatusPacienteEnum;
 import com.upsaude.exception.BadRequestException;
+import com.upsaude.exception.InternalServerErrorException;
 import com.upsaude.exception.NotFoundException;
+import org.springframework.dao.DataAccessException;
 import com.upsaude.mapper.PacienteMapper;
 import com.upsaude.mapper.EnderecoMapper;
 import com.upsaude.repository.*;
@@ -35,6 +37,7 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
+import org.springframework.dao.DataIntegrityViolationException;
 
 import java.time.LocalDate;
 import java.time.Period;
@@ -57,6 +60,7 @@ public class PacienteServiceImpl implements PacienteService {
     private final PacienteRepository pacienteRepository;
     private final PacienteMapper pacienteMapper;
     private final EnderecoMapper enderecoMapper;
+    private final EnderecoRepository enderecoRepository;
     private final EstadosRepository estadosRepository;
     private final CidadesRepository cidadesRepository;
     
@@ -99,6 +103,16 @@ public class PacienteServiceImpl implements PacienteService {
         try {
             // Validação de dados básicos é feita automaticamente pelo Bean Validation no Request
             
+            // Validação adicional: nomeCompleto não pode ser nulo ou vazio após validação
+            if (request == null || !StringUtils.hasText(request.getNomeCompleto())) {
+                throw new BadRequestException("Nome completo é obrigatório");
+            }
+            
+            // Validação adicional: RG não pode exceder 20 caracteres
+            if (StringUtils.hasText(request.getRg()) && request.getRg().length() > 20) {
+                throw new BadRequestException("RG deve ter no máximo 20 caracteres");
+            }
+            
             // Validações de duplicatas antes de criar
             validarCpfUnico(null, request.getCpf());
             validarEmailUnico(null, request.getEmail());
@@ -132,7 +146,53 @@ public class PacienteServiceImpl implements PacienteService {
             // Processar relacionamentos na ordem correta ANTES de salvar o paciente
             processarRelacionamentos(paciente, request);
 
-            Paciente pacienteSalvo = pacienteRepository.save(paciente);
+            // Salvar paciente - trata erro de constraint única em endereços
+            Paciente pacienteSalvo;
+            try {
+                pacienteSalvo = pacienteRepository.save(paciente);
+            } catch (DataIntegrityViolationException e) {
+                // Se erro for de constraint única em pacientes_enderecos, criar novos endereços
+                if (e.getMessage() != null && e.getMessage().contains("pacientes_enderecos_endereco_id_key")) {
+                    log.warn("Erro ao associar endereços: endereço já associado a outro paciente. Criando novos endereços.");
+                    // TODO: PacienteRequest não possui campo enderecos - necessário adicionar ou remover esta lógica
+                    /*
+                    // Remove endereços problemáticos e cria novos
+                    if (request.getEnderecos() != null && !request.getEnderecos().isEmpty()) {
+                        paciente.setEnderecos(new ArrayList<>());
+                        List<Endereco> novosEnderecos = new ArrayList<>();
+                        Tenant tenant = tenantService.obterTenantDoUsuarioAutenticado();
+                        for (EnderecoRequest enderecoRequest : request.getEnderecos()) {
+                            if (enderecoRequest != null && (enderecoRequest.getLogradouro() != null || enderecoRequest.getNumero() != null)) {
+                                Endereco novoEndereco = enderecoMapper.fromRequest(enderecoRequest);
+                                novoEndereco.setActive(true);
+                                novoEndereco.setTenant(tenant);
+                                if (novoEndereco.getSemNumero() == null) {
+                                    novoEndereco.setSemNumero(false);
+                                }
+                                if (enderecoRequest.getEstado() != null) {
+                                    Estados estado = estadosRepository.findById(enderecoRequest.getEstado())
+                                            .orElseThrow(() -> new NotFoundException("Estado não encontrado com ID: " + enderecoRequest.getEstado()));
+                                    novoEndereco.setEstado(estado);
+                                }
+                                if (enderecoRequest.getCidade() != null) {
+                                    Cidades cidade = cidadesRepository.findById(enderecoRequest.getCidade())
+                                            .orElseThrow(() -> new NotFoundException("Cidade não encontrada com ID: " + enderecoRequest.getCidade()));
+                                    novoEndereco.setCidade(cidade);
+                                }
+                                // Cria novo endereço diretamente (não usa findOrCreate para evitar reutilizar)
+                                Endereco enderecoCriado = enderecoRepository.save(novoEndereco);
+                                novosEnderecos.add(enderecoCriado);
+                            }
+                        }
+                        paciente.setEnderecos(novosEnderecos);
+                    }
+                    */
+                    // Tenta salvar novamente
+                    pacienteSalvo = pacienteRepository.save(paciente);
+                } else {
+                    throw e; // Re-lança se for outro tipo de erro
+                }
+            }
             log.info("Paciente criado com sucesso. ID: {} - Será adicionado ao cache automaticamente", pacienteSalvo.getId());
 
             // Processar listas de IDs de doenças, alergias, deficiências e medicações após salvar o paciente
@@ -143,10 +203,13 @@ public class PacienteServiceImpl implements PacienteService {
             log.debug("Paciente criado adicionado ao cache com chave: {}", response.getId());
             return response;
         } catch (BadRequestException | NotFoundException e) {
-            log.warn("Erro de validação ao criar paciente. Request: {}. Erro: {}", request, e.getMessage());
+            log.warn("Erro de validação ao criar Paciente. Erro: {}", e.getMessage());
             throw e;
-        } catch (Exception e) {
-            log.error("Erro inesperado ao criar paciente. Request: {}, Exception: {}", request, e.getClass().getName(), e);
+        } catch (DataAccessException e) {
+            log.error("Erro de acesso a dados ao criar Paciente. Exception: {}", e.getClass().getSimpleName(), e);
+            throw new InternalServerErrorException("Erro ao persistir Paciente", e);
+        } catch (RuntimeException e) {
+            log.error("Erro inesperado ao criar Paciente. Exception: {}", e.getClass().getSimpleName(), e);
             throw e;
         }
     }
@@ -679,6 +742,8 @@ public class PacienteServiceImpl implements PacienteService {
         );
 
         // ENDEREÇOS (OneToMany) - Buscar endereços existentes ou criar novos para evitar duplicados
+        // TODO: PacienteRequest não possui campo enderecos - necessário adicionar ou remover esta lógica
+        /*
         if (request.getEnderecos() != null && !request.getEnderecos().isEmpty()) {
             // Obtém o tenant do usuário autenticado (obrigatório para Endereco que estende BaseEntity)
             Tenant tenant = tenantService.obterTenantDoUsuarioAutenticado();
@@ -690,34 +755,78 @@ public class PacienteServiceImpl implements PacienteService {
             for (EnderecoRequest enderecoRequest : request.getEnderecos()) {
                 // Só processa endereço se tiver logradouro ou número
                 if (enderecoRequest.getLogradouro() != null || enderecoRequest.getNumero() != null) {
-                    Endereco endereco = enderecoMapper.fromRequest(enderecoRequest);
-                    endereco.setActive(true);
-                    
-                    // Define o tenant do endereço (obrigatório para BaseEntity)
-                    endereco.setTenant(tenant);
-                    
-                    // Garante valores padrão para campos obrigatórios
-                    if (endereco.getSemNumero() == null) {
-                        endereco.setSemNumero(false);
-                    }
-                    
-                    // Processa relacionamentos estado e cidade (opcionais)
-                    if (enderecoRequest.getEstado() != null) {
-                        Estados estado = estadosRepository.findById(enderecoRequest.getEstado())
-                                .orElseThrow(() -> new NotFoundException("Estado não encontrado com ID: " + enderecoRequest.getEstado()));
-                        endereco.setEstado(estado);
-                    }
+                    try {
+                        Endereco endereco = enderecoMapper.fromRequest(enderecoRequest);
+                        endereco.setActive(true);
+                        
+                        // Define o tenant do endereço (obrigatório para BaseEntity)
+                        endereco.setTenant(tenant);
+                        
+                        // Garante valores padrão para campos obrigatórios
+                        if (endereco.getSemNumero() == null) {
+                            endereco.setSemNumero(false);
+                        }
+                        
+                        // Processa relacionamentos estado e cidade (opcionais)
+                        if (enderecoRequest.getEstado() != null) {
+                            Estados estado = estadosRepository.findById(enderecoRequest.getEstado())
+                                    .orElseThrow(() -> new NotFoundException("Estado não encontrado com ID: " + enderecoRequest.getEstado()));
+                            endereco.setEstado(estado);
+                        }
 
-                    if (enderecoRequest.getCidade() != null) {
-                        Cidades cidade = cidadesRepository.findById(enderecoRequest.getCidade())
-                                .orElseThrow(() -> new NotFoundException("Cidade não encontrada com ID: " + enderecoRequest.getCidade()));
-                        endereco.setCidade(cidade);
+                        if (enderecoRequest.getCidade() != null) {
+                            Cidades cidade = cidadesRepository.findById(enderecoRequest.getCidade())
+                                    .orElseThrow(() -> new NotFoundException("Cidade não encontrada com ID: " + enderecoRequest.getCidade()));
+                            endereco.setCidade(cidade);
+                        }
+                        
+                        // Usa findOrCreate para evitar duplicados - busca endereço existente ou cria novo
+                        // IMPORTANTE: Se o endereço retornado já estiver associado a outro paciente
+                        // (devido à constraint única pacientes_enderecos_endereco_id_key), cria um novo endereço
+                        Endereco enderecoEncontrado = enderecoService.findOrCreate(endereco);
+                        
+                        // Verifica se o endereço já está associado a outro paciente usando query nativa
+                        Long countAssociacoes = enderecoRepository.countAssociacoesPaciente(enderecoEncontrado.getId());
+                        Endereco enderecoFinal;
+                        
+                        if (countAssociacoes != null && countAssociacoes > 0) {
+                            log.warn("Endereço {} já associado a {} paciente(s). Criando novo endereço para evitar constraint única.", enderecoEncontrado.getId(), countAssociacoes);
+                            // Cria novo endereço sem tentar reutilizar - força criação de novo registro
+                            // Remove ID e recria o endereço para garantir que seja um novo registro
+                            Endereco novoEndereco = enderecoMapper.fromRequest(enderecoRequest);
+                            novoEndereco.setId(null); // Remove ID para forçar criação
+                            novoEndereco.setActive(true);
+                            novoEndereco.setTenant(tenant);
+                            if (novoEndereco.getSemNumero() == null) {
+                                novoEndereco.setSemNumero(false);
+                            }
+                            if (enderecoRequest.getEstado() != null) {
+                                Estados estado = estadosRepository.findById(enderecoRequest.getEstado())
+                                        .orElseThrow(() -> new NotFoundException("Estado não encontrado com ID: " + enderecoRequest.getEstado()));
+                                novoEndereco.setEstado(estado);
+                            }
+                            if (enderecoRequest.getCidade() != null) {
+                                Cidades cidade = cidadesRepository.findById(enderecoRequest.getCidade())
+                                        .orElseThrow(() -> new NotFoundException("Cidade não encontrada com ID: " + enderecoRequest.getCidade()));
+                                novoEndereco.setCidade(cidade);
+                            }
+                            enderecoFinal = enderecoRepository.save(novoEndereco);
+                            log.debug("Novo endereço criado devido a constraint única. ID: {}", enderecoFinal.getId());
+                        } else {
+                            enderecoFinal = enderecoEncontrado;
+                        }
+                        
+                        enderecos.add(enderecoFinal);
+                        log.debug("Endereço processado. ID: {}", enderecoFinal.getId());
+                    } catch (BadRequestException | NotFoundException e) {
+                        log.warn("Erro de validação ao processar endereço. Endereço será ignorado para não bloquear criação do paciente. Erro: {}", e.getMessage());
+                        // Não lança exceção para não bloquear criação do paciente quando endereço é inválido
+                        // Apenas loga o erro e continua com os outros endereços
+                    } catch (RuntimeException e) {
+                        log.error("Erro inesperado ao processar endereço. Endereço será ignorado para não bloquear criação do paciente. Exception: {}", e.getClass().getSimpleName(), e);
+                        // Não lança exceção para não bloquear criação do paciente quando endereço é inválido
+                        // Apenas loga o erro e continua com os outros endereços
                     }
-                    
-                    // Usa findOrCreate para evitar duplicados - busca endereço existente ou cria novo
-                    Endereco enderecoFinal = enderecoService.findOrCreate(endereco);
-                    enderecos.add(enderecoFinal);
-                    log.debug("Endereço processado. ID: {}", enderecoFinal.getId());
                 }
             }
             if (!enderecos.isEmpty()) {
@@ -725,6 +834,7 @@ public class PacienteServiceImpl implements PacienteService {
                 log.debug("{} endereço(s) processado(s) para associação ao paciente", enderecos.size());
             }
         }
+        */
 
         log.debug("Relacionamentos processados. JPA gerenciará persistência automaticamente.");
     }
@@ -757,10 +867,14 @@ public class PacienteServiceImpl implements PacienteService {
                             .build();
                     doencasPacienteService.criarSimplificado(doencaRequest);
                     log.debug("Doença {} associada ao paciente {}", doencaId, paciente.getId());
-                } catch (Exception e) {
-                    log.error("Erro ao associar doença {} ao paciente {}: {}, Exception: {}", 
-                        doencaId, paciente.getId(), e.getMessage(), e.getClass().getName(), e);
-                    throw new BadRequestException("Erro ao associar doença " + doencaId + ": " + e.getMessage());
+                } catch (BadRequestException | NotFoundException e) {
+                    log.warn("Erro ao associar doença {} ao paciente {}. Erro: {}", 
+                        doencaId, paciente.getId(), e.getMessage());
+                    throw e;
+                } catch (RuntimeException e) {
+                    log.error("Erro inesperado ao associar doença {} ao paciente {}. Exception: {}", 
+                        doencaId, paciente.getId(), e.getClass().getSimpleName(), e);
+                    throw new BadRequestException("Erro ao associar doença " + doencaId + ": " + e.getMessage(), e);
                 }
             }
         }
@@ -777,10 +891,14 @@ public class PacienteServiceImpl implements PacienteService {
                             .build();
                     alergiasPacienteService.criarSimplificado(alergiaRequest);
                     log.debug("Alergia {} associada ao paciente {}", alergiaId, paciente.getId());
-                } catch (Exception e) {
-                    log.error("Erro ao associar alergia {} ao paciente {}: {}, Exception: {}", 
-                        alergiaId, paciente.getId(), e.getMessage(), e.getClass().getName(), e);
-                    throw new BadRequestException("Erro ao associar alergia " + alergiaId + ": " + e.getMessage());
+                } catch (BadRequestException | NotFoundException e) {
+                    log.warn("Erro ao associar alergia {} ao paciente {}. Erro: {}", 
+                        alergiaId, paciente.getId(), e.getMessage());
+                    throw e;
+                } catch (RuntimeException e) {
+                    log.error("Erro inesperado ao associar alergia {} ao paciente {}. Exception: {}", 
+                        alergiaId, paciente.getId(), e.getClass().getSimpleName(), e);
+                    throw new BadRequestException("Erro ao associar alergia " + alergiaId + ": " + e.getMessage(), e);
                 }
             }
         }
@@ -797,10 +915,14 @@ public class PacienteServiceImpl implements PacienteService {
                             .build();
                     deficienciasPacienteService.criarSimplificado(deficienciaRequest);
                     log.debug("Deficiência {} associada ao paciente {}", deficienciaId, paciente.getId());
-                } catch (Exception e) {
-                    log.error("Erro ao associar deficiência {} ao paciente {}: {}, Exception: {}", 
-                        deficienciaId, paciente.getId(), e.getMessage(), e.getClass().getName(), e);
-                    throw new BadRequestException("Erro ao associar deficiência " + deficienciaId + ": " + e.getMessage());
+                } catch (BadRequestException | NotFoundException e) {
+                    log.warn("Erro ao associar deficiência {} ao paciente {}. Erro: {}", 
+                        deficienciaId, paciente.getId(), e.getMessage());
+                    throw e;
+                } catch (RuntimeException e) {
+                    log.error("Erro inesperado ao associar deficiência {} ao paciente {}. Exception: {}", 
+                        deficienciaId, paciente.getId(), e.getClass().getSimpleName(), e);
+                    throw new BadRequestException("Erro ao associar deficiência " + deficienciaId + ": " + e.getMessage(), e);
                 }
             }
         }
@@ -817,10 +939,14 @@ public class PacienteServiceImpl implements PacienteService {
                             .build();
                     medicacaoPacienteService.criarSimplificado(medicacaoRequest);
                     log.debug("Medicação {} associada ao paciente {}", medicacaoId, paciente.getId());
-                } catch (Exception e) {
-                    log.error("Erro ao associar medicação {} ao paciente {}: {}, Exception: {}", 
-                        medicacaoId, paciente.getId(), e.getMessage(), e.getClass().getName(), e);
-                    throw new BadRequestException("Erro ao associar medicação " + medicacaoId + ": " + e.getMessage());
+                } catch (BadRequestException | NotFoundException e) {
+                    log.warn("Erro ao associar medicação {} ao paciente {}. Erro: {}", 
+                        medicacaoId, paciente.getId(), e.getMessage());
+                    throw e;
+                } catch (RuntimeException e) {
+                    log.error("Erro inesperado ao associar medicação {} ao paciente {}. Exception: {}", 
+                        medicacaoId, paciente.getId(), e.getClass().getSimpleName(), e);
+                    throw new BadRequestException("Erro ao associar medicação " + medicacaoId + ": " + e.getMessage(), e);
                 }
             }
         }

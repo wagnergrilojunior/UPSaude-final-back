@@ -39,4 +39,14 @@ public interface EstabelecimentosRepository extends JpaRepository<Estabeleciment
      * @return Optional contendo o estabelecimento encontrado, se existir
      */
     Optional<Estabelecimentos> findByCnpjAndTenant(String cnpj, Tenant tenant);
+
+    /**
+     * Busca um estabelecimento por código CNES e tenant.
+     * Usado para validar duplicatas antes de cadastrar ou atualizar.
+     *
+     * @param codigoCnes código CNES do estabelecimento
+     * @param tenant tenant do estabelecimento
+     * @return Optional contendo o estabelecimento encontrado, se existir
+     */
+    Optional<Estabelecimentos> findByCodigoCnesAndTenant(String codigoCnes, Tenant tenant);
 }

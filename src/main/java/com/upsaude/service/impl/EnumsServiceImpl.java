@@ -3,6 +3,8 @@ package com.upsaude.service.impl;
 import com.upsaude.api.response.EnumInfoResponse;
 import com.upsaude.api.response.EnumItemResponse;
 import com.upsaude.api.response.EnumsResponse;
+import com.upsaude.exception.BadRequestException;
+import com.upsaude.exception.InternalServerErrorException;
 import com.upsaude.service.EnumsService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -53,8 +55,8 @@ public class EnumsServiceImpl implements EnumsService {
                     .build();
 
         } catch (Exception e) {
-            log.error("Erro ao listar enums: {}", e.getMessage(), e);
-            throw new RuntimeException("Erro ao listar enums do sistema", e);
+            log.error("Erro inesperado ao listar enums do sistema. Exception: {}", e.getClass().getSimpleName(), e);
+            throw new InternalServerErrorException("Erro ao listar enums do sistema", e);
         }
     }
 
@@ -305,7 +307,8 @@ public class EnumsServiceImpl implements EnumsService {
         log.debug("Buscando enum por nome: {}", nomeEnum);
 
         if (nomeEnum == null || nomeEnum.trim().isEmpty()) {
-            throw new IllegalArgumentException("Nome do enum não pode ser vazio");
+            log.warn("Tentativa de buscar enum com nome vazio");
+            throw new BadRequestException("Nome do enum não pode ser vazio");
         }
 
         // Normaliza o nome (remove espaços, garante que termina com Enum se necessário)
@@ -319,14 +322,18 @@ public class EnumsServiceImpl implements EnumsService {
             if (enumClass.isEnum()) {
                 return processarEnum(enumClass);
             } else {
-                throw new IllegalArgumentException("Classe encontrada não é um enum: " + nomeNormalizado);
+                log.warn("Classe encontrada não é um enum. Nome: {}", nomeNormalizado);
+                throw new BadRequestException("Classe encontrada não é um enum: " + nomeNormalizado);
             }
         } catch (ClassNotFoundException e) {
-            log.warn("Enum não encontrado: {}", nomeNormalizado);
-            throw new IllegalArgumentException("Enum não encontrado: " + nomeNormalizado);
+            log.warn("Enum não encontrado. Nome: {}", nomeNormalizado);
+            throw new BadRequestException("Enum não encontrado: " + nomeNormalizado);
+        } catch (BadRequestException e) {
+            log.warn("Erro de validação ao buscar enum. Nome: {}, Erro: {}", nomeNormalizado, e.getMessage());
+            throw e;
         } catch (Exception e) {
-            log.error("Erro ao buscar enum {}: {}", nomeNormalizado, e.getMessage(), e);
-            throw new RuntimeException("Erro ao buscar enum: " + nomeNormalizado, e);
+            log.error("Erro inesperado ao buscar enum. Nome: {}, Exception: {}", nomeNormalizado, e.getClass().getSimpleName(), e);
+            throw new InternalServerErrorException("Erro ao buscar enum: " + nomeNormalizado, e);
         }
     }
 }
