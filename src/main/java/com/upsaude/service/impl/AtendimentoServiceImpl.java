@@ -27,7 +27,9 @@ import com.upsaude.repository.CidDoencasRepository;
 import com.upsaude.repository.EspecialidadesMedicasRepository;
 import com.upsaude.repository.EquipeSaudeRepository;
 import com.upsaude.repository.ConvenioRepository;
+import com.upsaude.entity.Tenant;
 import com.upsaude.service.AtendimentoService;
+import com.upsaude.service.TenantService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.CacheEvict;
@@ -64,6 +66,7 @@ public class AtendimentoServiceImpl implements AtendimentoService {
     private final EspecialidadesMedicasRepository especialidadesMedicasRepository;
     private final EquipeSaudeRepository equipeSaudeRepository;
     private final ConvenioRepository convenioRepository;
+    private final TenantService tenantService;
 
     @Override
     @Transactional
@@ -118,6 +121,10 @@ public class AtendimentoServiceImpl implements AtendimentoService {
                         .orElseThrow(() -> new NotFoundException("CID não encontrado com ID: " + request.getCidPrincipal()));
                 atendimento.setCidPrincipal(cidPrincipal);
             }
+
+            // Define o tenant do usuário autenticado
+            Tenant tenant = tenantService.obterTenantDoUsuarioAutenticado();
+            atendimento.setTenant(tenant);
 
             atendimento.setActive(true);
 
