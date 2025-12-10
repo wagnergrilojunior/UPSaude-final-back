@@ -1,5 +1,7 @@
 package com.upsaude.api.request.embeddable;
 
+import jakarta.validation.constraints.DecimalMax;
+import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
@@ -16,8 +18,12 @@ import java.math.BigDecimal;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ConservacaoArmazenamentoMedicamentoRequest {
+    @DecimalMin(value = "-100.00", message = "Temperatura mínima de conservação deve ser maior ou igual a -100°C")
+    @DecimalMax(value = "100.00", message = "Temperatura máxima de conservação deve ser menor ou igual a 100°C")
     private BigDecimal temperaturaConservacaoMin;
     
+    @DecimalMin(value = "-100.00", message = "Temperatura mínima de conservação deve ser maior ou igual a -100°C")
+    @DecimalMax(value = "100.00", message = "Temperatura máxima de conservação deve ser menor ou igual a 100°C")
     private BigDecimal temperaturaConservacaoMax;
     
     @NotNull(message = "Proteger luz é obrigatório")

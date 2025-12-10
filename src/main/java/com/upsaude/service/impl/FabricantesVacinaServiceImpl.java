@@ -16,10 +16,9 @@ import com.upsaude.repository.EnderecoRepository;
 import com.upsaude.repository.CidadesRepository;
 import com.upsaude.repository.EstadosRepository;
 import com.upsaude.service.FabricantesVacinaService;
-import jakarta.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.BeanUtils;
 import org.springframework.data.domain.Page;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
@@ -49,7 +48,12 @@ public class FabricantesVacinaServiceImpl implements FabricantesVacinaService {
     @Transactional
     @CacheEvict(value = "fabricantesvacina", allEntries = true)
     public FabricantesVacinaResponse criar(FabricantesVacinaRequest request) {
-        log.debug("Criando novo fabricantesvacina");
+        log.debug("Criando novo FabricantesVacina");
+        
+        if (request == null) {
+            log.warn("Request nulo recebido para criação de FabricantesVacina");
+            throw new BadRequestException("Dados do fabricante de vacina são obrigatórios");
+        }
 
         // Validação de dados básicos é feita automaticamente pelo Bean Validation no Request
         validarDuplicidade(null, request);
@@ -70,26 +74,31 @@ public class FabricantesVacinaServiceImpl implements FabricantesVacinaService {
     }
 
     @Override
-    @Transactional
+    @Transactional(readOnly = true)
     @Cacheable(value = "fabricantesvacina", key = "#id")
     public FabricantesVacinaResponse obterPorId(UUID id) {
-        log.debug("Buscando fabricantesvacina por ID: {} (cache miss)", id);
+        log.debug("Buscando FabricantesVacina por ID: {} (cache miss)", id);
+        
         if (id == null) {
-            throw new BadRequestException("ID do fabricantesvacina é obrigatório");
+            log.warn("ID nulo recebido para busca de FabricantesVacina");
+            throw new BadRequestException("ID do fabricante de vacina é obrigatório");
         }
 
         FabricantesVacina fabricantesVacina = fabricantesVacinaRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("FabricantesVacina não encontrado com ID: " + id));
 
+        log.debug("FabricantesVacina encontrado. ID: {}", id);
         return fabricantesVacinaMapper.toResponse(fabricantesVacina);
     }
 
     @Override
+    @Transactional(readOnly = true)
     public Page<FabricantesVacinaResponse> listar(Pageable pageable) {
         log.debug("Listando FabricantesVacinas paginados. Página: {}, Tamanho: {}",
                 pageable.getPageNumber(), pageable.getPageSize());
 
         Page<FabricantesVacina> fabricantesVacinas = fabricantesVacinaRepository.findAll(pageable);
+        log.debug("Listagem de FabricantesVacinas concluída. Total de elementos: {}", fabricantesVacinas.getTotalElements());
         return fabricantesVacinas.map(fabricantesVacinaMapper::toResponse);
     }
 
@@ -97,10 +106,16 @@ public class FabricantesVacinaServiceImpl implements FabricantesVacinaService {
     @Transactional
     @CacheEvict(value = "fabricantesvacina", key = "#id")
     public FabricantesVacinaResponse atualizar(UUID id, FabricantesVacinaRequest request) {
-        log.debug("Atualizando fabricantesvacina. ID: {}", id);
+        log.debug("Atualizando FabricantesVacina. ID: {}", id);
 
         if (id == null) {
-            throw new BadRequestException("ID do fabricantesvacina é obrigatório");
+            log.warn("ID nulo recebido para atualização de FabricantesVacina");
+            throw new BadRequestException("ID do fabricante de vacina é obrigatório");
+        }
+        
+        if (request == null) {
+            log.warn("Request nulo recebido para atualização de FabricantesVacina. ID: {}", id);
+            throw new BadRequestException("Dados do fabricante de vacina são obrigatórios");
         }
 
         // Validação de dados básicos é feita automaticamente pelo Bean Validation no Request
@@ -129,16 +144,18 @@ public class FabricantesVacinaServiceImpl implements FabricantesVacinaService {
     @Transactional
     @CacheEvict(value = "fabricantesvacina", key = "#id")
     public void excluir(UUID id) {
-        log.debug("Excluindo fabricantesvacina. ID: {}", id);
+        log.debug("Excluindo FabricantesVacina. ID: {}", id);
 
         if (id == null) {
-            throw new BadRequestException("ID do fabricantesvacina é obrigatório");
+            log.warn("ID nulo recebido para exclusão de FabricantesVacina");
+            throw new BadRequestException("ID do fabricante de vacina é obrigatório");
         }
 
         FabricantesVacina fabricantesVacina = fabricantesVacinaRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("FabricantesVacina não encontrado com ID: " + id));
 
         if (Boolean.FALSE.equals(fabricantesVacina.getActive())) {
+            log.warn("Tentativa de excluir FabricantesVacina já inativo. ID: {}", id);
             throw new BadRequestException("FabricantesVacina já está inativo");
         }
 
@@ -203,20 +220,8 @@ public class FabricantesVacinaServiceImpl implements FabricantesVacinaService {
     }
 
     private void atualizarDadosFabricantesVacina(FabricantesVacina fabricantesVacina, FabricantesVacinaRequest request) {
-        FabricantesVacina fabricantesVacinaAtualizado = fabricantesVacinaMapper.fromRequest(request);
-        
-        // Preserva campos de controle
-        java.util.UUID idOriginal = fabricantesVacina.getId();
-        Boolean activeOriginal = fabricantesVacina.getActive();
-        java.time.OffsetDateTime createdAtOriginal = fabricantesVacina.getCreatedAt();
-        
-        // Copia todas as propriedades do objeto atualizado
-        BeanUtils.copyProperties(fabricantesVacinaAtualizado, fabricantesVacina);
-        
-        // Restaura campos de controle
-        fabricantesVacina.setId(idOriginal);
-        fabricantesVacina.setActive(activeOriginal);
-        fabricantesVacina.setCreatedAt(createdAtOriginal);
+        // Usar mapper para atualizar campos básicos
+        fabricantesVacinaMapper.updateFromRequest(request, fabricantesVacina);
     }
 
     /**
@@ -294,8 +299,8 @@ public class FabricantesVacinaServiceImpl implements FabricantesVacinaService {
         } catch (NotFoundException e) {
             log.warn("Erro ao processar endereço. Erro: {}", e.getMessage());
             throw e;
-        } catch (Exception e) {
-            log.error("Erro inesperado ao processar endereço", e);
+        } catch (RuntimeException e) {
+            log.error("Erro inesperado ao processar endereço. Exception: {}", e.getClass().getSimpleName(), e);
             throw new InternalServerErrorException("Erro ao processar endereço", e);
         }
     }

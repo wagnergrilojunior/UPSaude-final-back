@@ -1,5 +1,7 @@
 package com.upsaude.api.request;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.upsaude.api.request.embeddable.AnamneseAtendimentoRequest;
 import com.upsaude.api.request.embeddable.ClassificacaoRiscoAtendimentoRequest;
 import com.upsaude.api.request.embeddable.DiagnosticoAtendimentoRequest;
@@ -20,16 +22,25 @@ import lombok.Setter;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@JsonIgnoreProperties(ignoreUnknown = true)
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class AtendimentoRequest {
+    // ========== CAMPOS OBRIGATÓRIOS ==========
+    
     @NotNull(message = "Paciente é obrigatório")
     private UUID paciente;
     
     @NotNull(message = "Profissional de saúde é obrigatório")
     private UUID profissional;
     
+    // ========== IDs DE RELACIONAMENTO ==========
+    
     private UUID especialidade;
     private UUID equipeSaude;
     private UUID convenio;
+    private UUID cidPrincipal;
+    
+    // ========== OBJETOS EMBEDDABLE ==========
     
     @Valid
     private InformacoesAtendimentoRequest informacoes;
@@ -46,7 +57,7 @@ public class AtendimentoRequest {
     @Valid
     private ClassificacaoRiscoAtendimentoRequest classificacaoRisco;
     
-    private UUID cidPrincipal;
+    // ========== CAMPOS TEXTUAIS LONGOS ==========
     
     @Size(max = 1000, message = "Anotações deve ter no máximo 1000 caracteres")
     private String anotacoes;

@@ -2,6 +2,8 @@ package com.upsaude.api.request.embeddable;
 
 import com.upsaude.enums.UnidadeMedidaEnum;
 import com.upsaude.enums.ViaAdministracaoEnum;
+import jakarta.validation.constraints.DecimalMax;
+import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
@@ -26,6 +28,8 @@ public class DosagemAdministracaoMedicamentoRequest {
     
     private ViaAdministracaoEnum viaAdministracao;
     
+    @DecimalMin(value = "0.00", message = "Concentração deve ser maior ou igual a 0")
+    @DecimalMax(value = "99999.99", message = "Concentração deve ser menor ou igual a 99999.99")
     private BigDecimal concentracao;
     
     @Size(max = 50, message = "Unidade concentração deve ter no máximo 50 caracteres")

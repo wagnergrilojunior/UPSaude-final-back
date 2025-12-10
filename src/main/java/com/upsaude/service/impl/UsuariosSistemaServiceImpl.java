@@ -11,7 +11,9 @@ import com.upsaude.entity.User;
 import com.upsaude.entity.UsuarioEstabelecimento;
 import com.upsaude.entity.UsuariosSistema;
 import com.upsaude.exception.BadRequestException;
+import com.upsaude.exception.InternalServerErrorException;
 import com.upsaude.exception.NotFoundException;
+import org.springframework.dao.DataAccessException;
 import com.upsaude.integration.supabase.SupabaseStorageService;
 import com.upsaude.mapper.UsuariosSistemaMapper;
 import com.upsaude.repository.EstabelecimentosRepository;
@@ -126,11 +128,13 @@ public class UsuariosSistemaServiceImpl implements UsuariosSistemaService {
 
             return enrichResponseWithEntity(usuariosSistemaSalvo);
         } catch (BadRequestException | NotFoundException e) {
-            log.warn("Erro de validação ao criar UsuariosSistema. Request: {}. Erro: {}", request, e.getMessage());
+            log.warn("Erro de validação ao criar UsuariosSistema. Erro: {}", e.getMessage());
             throw e;
-        } catch (Exception e) {
-            log.error("Erro inesperado ao criar UsuariosSistema. Request: {}, Exception: {}", 
-                request, e.getClass().getName(), e);
+        } catch (DataAccessException e) {
+            log.error("Erro de acesso a dados ao criar UsuariosSistema. Exception: {}", e.getClass().getSimpleName(), e);
+            throw new InternalServerErrorException("Erro ao persistir UsuariosSistema", e);
+        } catch (RuntimeException e) {
+            log.error("Erro inesperado ao criar UsuariosSistema. Exception: {}", e.getClass().getSimpleName(), e);
             throw e;
         }
     }
@@ -165,8 +169,11 @@ public class UsuariosSistemaServiceImpl implements UsuariosSistemaService {
             
             log.debug("Listagem de usuários do sistema concluída. Total de elementos: {}", usuariosSistemas.getTotalElements());
             return usuariosSistemas.map(us -> enrichResponse(usuariosSistemaMapper.toResponse(us)));
-        } catch (Exception e) {
-            log.error("Erro inesperado ao listar usuários do sistema. Pageable: {}, Exception: {}", pageable, e.getClass().getName(), e);
+        } catch (DataAccessException e) {
+            log.error("Erro de acesso a dados ao listar UsuariosSistema. Exception: {}", e.getClass().getSimpleName(), e);
+            throw new InternalServerErrorException("Erro ao listar UsuariosSistema", e);
+        } catch (RuntimeException e) {
+            log.error("Erro inesperado ao listar UsuariosSistema. Exception: {}", e.getClass().getSimpleName(), e);
             throw e;
         }
     }
@@ -327,28 +334,8 @@ public class UsuariosSistemaServiceImpl implements UsuariosSistemaService {
     }
 
     private void atualizarDadosUsuariosSistema(UsuariosSistema usuariosSistema, UsuariosSistemaRequest request) {
-        // Atualizar campos diretamente sem usar BeanUtils.copyProperties
-        // Isso evita problemas com coleções gerenciadas pelo JPA (cascade="all-delete-orphan")
-        
-        if (request.getNomeExibicao() != null) {
-            usuariosSistema.setNomeExibicao(request.getNomeExibicao());
-        }
-        
-        if (request.getUsername() != null) {
-            usuariosSistema.setUsername(request.getUsername());
-        }
-        
-        if (request.getFotoUrl() != null) {
-            usuariosSistema.setFotoUrl(request.getFotoUrl());
-        }
-        
-        if (request.getAdminTenant() != null) {
-            usuariosSistema.setAdminTenant(request.getAdminTenant());
-        }
-        
-        if (request.getTipoVinculo() != null) {
-            usuariosSistema.setTipoVinculo(request.getTipoVinculo());
-        }
+        // Usar mapper para atualizar campos básicos
+        usuariosSistemaMapper.updateFromRequest(request, usuariosSistema);
         
         // Atualizar tenant se fornecido
         if (request.getTenantId() != null) {
@@ -623,9 +610,10 @@ public class UsuariosSistemaServiceImpl implements UsuariosSistemaService {
                 } else {
                     log.warn("Email não encontrado no Supabase para userId: {}", usuario.getUserId());
                 }
-            } catch (Exception e) {
+            } catch (RuntimeException e) {
                 log.error("Erro ao buscar email do Supabase para userId: {}, Exception: {}", 
-                    usuario.getUserId(), e.getClass().getName(), e);
+                    usuario.getUserId(), e.getClass().getSimpleName(), e);
+                // Não relançar - email é opcional no response
             }
         }
         

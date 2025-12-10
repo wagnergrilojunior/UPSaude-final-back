@@ -12,7 +12,6 @@ import com.upsaude.service.TenantService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.hibernate.Hibernate;
-import org.springframework.beans.BeanUtils;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
@@ -45,7 +44,12 @@ public class TenantServiceImpl implements TenantService {
     @Transactional
     @CacheEvict(value = "tenants", allEntries = true)
     public TenantResponse criar(TenantRequest request) {
-        log.debug("Criando novo tenant");
+        log.debug("Criando novo Tenant");
+        
+        if (request == null) {
+            log.warn("Request nulo recebido para criação de Tenant");
+            throw new BadRequestException("Dados do tenant são obrigatórios");
+        }
 
         // Validação de dados básicos é feita automaticamente pelo Bean Validation no Request
 
@@ -102,10 +106,16 @@ public class TenantServiceImpl implements TenantService {
     @Transactional
     @CacheEvict(value = "tenants", key = "#id")
     public TenantResponse atualizar(UUID id, TenantRequest request) {
-        log.debug("Atualizando tenant. ID: {}", id);
+        log.debug("Atualizando Tenant. ID: {}", id);
 
         if (id == null) {
+            log.warn("ID nulo recebido para atualização de Tenant");
             throw new BadRequestException("ID do tenant é obrigatório");
+        }
+        
+        if (request == null) {
+            log.warn("Request nulo recebido para atualização de Tenant. ID: {}", id);
+            throw new BadRequestException("Dados do tenant são obrigatórios");
         }
 
         // Validação de dados básicos é feita automaticamente pelo Bean Validation no Request
@@ -125,9 +135,10 @@ public class TenantServiceImpl implements TenantService {
     @Transactional
     @CacheEvict(value = "tenants", key = "#id")
     public void excluir(UUID id) {
-        log.debug("Excluindo tenant. ID: {}", id);
+        log.debug("Excluindo Tenant. ID: {}", id);
 
         if (id == null) {
+            log.warn("ID nulo recebido para exclusão de Tenant");
             throw new BadRequestException("ID do tenant é obrigatório");
         }
 
@@ -135,6 +146,7 @@ public class TenantServiceImpl implements TenantService {
                 .orElseThrow(() -> new NotFoundException("Tenant não encontrado com ID: " + id));
 
         if (Boolean.FALSE.equals(tenant.getActive())) {
+            log.warn("Tentativa de excluir Tenant já inativo. ID: {}", id);
             throw new BadRequestException("Tenant já está inativo");
         }
 
@@ -147,23 +159,9 @@ public class TenantServiceImpl implements TenantService {
     // (@NotNull, @NotBlank, @Pattern, etc). Isso garante validação automática no Controller
     // e retorno de erro 400 padronizado via ApiExceptionHandler.
 
-        private void atualizarDadosTenant(Tenant tenant, TenantRequest request) {
-        Tenant tenantAtualizado = tenantMapper.fromRequest(request);
-        
-        // Preserva campos de controle
-        java.util.UUID idOriginal = tenant.getId();
-        com.upsaude.entity.Tenant tenantOriginal = tenant.getTenant();
-        Boolean activeOriginal = tenant.getActive();
-        java.time.OffsetDateTime createdAtOriginal = tenant.getCreatedAt();
-        
-        // Copia todas as propriedades do objeto atualizado
-        BeanUtils.copyProperties(tenantAtualizado, tenant);
-        
-        // Restaura campos de controle
-        tenant.setId(idOriginal);
-        tenant.setTenant(tenantOriginal);
-        tenant.setActive(activeOriginal);
-        tenant.setCreatedAt(createdAtOriginal);
+    private void atualizarDadosTenant(Tenant tenant, TenantRequest request) {
+        // Usar mapper para atualizar campos básicos
+        tenantMapper.updateFromRequest(request, tenant);
     }
 
     @Override

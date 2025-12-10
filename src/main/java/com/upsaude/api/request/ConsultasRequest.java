@@ -1,5 +1,7 @@
 package com.upsaude.api.request;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.upsaude.api.request.embeddable.AnamneseConsultaRequest;
 import com.upsaude.api.request.embeddable.AtestadoConsultaRequest;
 import com.upsaude.api.request.embeddable.DiagnosticoConsultaRequest;
@@ -22,14 +24,23 @@ import lombok.Setter;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@JsonIgnoreProperties(ignoreUnknown = true)
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class ConsultasRequest {
+    // ========== CAMPOS OBRIGATÓRIOS ==========
+    
     @NotNull(message = "Paciente é obrigatório")
     private UUID paciente;
+    
+    // ========== IDs DE RELACIONAMENTO ==========
     
     private UUID medico;
     private UUID profissionalSaude;
     private UUID especialidade;
     private UUID convenio;
+    private UUID cidPrincipal;
+    
+    // ========== OBJETOS EMBEDDABLE ==========
     
     @Valid
     private InformacoesConsultaRequest informacoes;
@@ -52,7 +63,7 @@ public class ConsultasRequest {
     @Valid
     private AtestadoConsultaRequest atestado;
     
-    private UUID cidPrincipal;
+    // ========== CAMPOS TEXTUAIS LONGOS ==========
     
     @Size(max = 1000, message = "Observações deve ter no máximo 1000 caracteres")
     private String observacoes;

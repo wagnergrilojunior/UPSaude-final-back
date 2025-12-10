@@ -1,14 +1,17 @@
 package com.upsaude.api.request;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.upsaude.api.request.embeddable.ContatoMedicoRequest;
 import com.upsaude.api.request.embeddable.DadosPessoaisMedicoRequest;
 import com.upsaude.api.request.embeddable.FormacaoMedicoRequest;
 import com.upsaude.api.request.embeddable.RegistroProfissionalMedicoRequest;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -21,9 +24,20 @@ import lombok.Setter;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@JsonIgnoreProperties(ignoreUnknown = true)
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class MedicosRequest {
+    // ========== CAMPOS OBRIGATÓRIOS ==========
+    
+    @NotBlank(message = "Nome completo é obrigatório")
+    @Pattern(regexp = "^[\\p{L}0-9 .'-]+$", message = "Caracteres inválidos no nome completo")
+    @Size(max = 255, message = "Nome completo deve ter no máximo 255 caracteres")
+    private String nomeCompleto;
+    
+    // ========== COLETES DE RELACIONAMENTO (SET) ==========
+    
     /**
-     * Lista de IDs das especialidades médicas do médico.
+     * IDs das especialidades médicas do médico.
      * Permite que um médico tenha múltiplas especialidades.
      * O backend é responsável por buscar as especialidades e fazer o vínculo correto.
      * 
@@ -31,11 +45,20 @@ public class MedicosRequest {
      * das especialidades e criará o relacionamento ManyToMany.
      */
     @Builder.Default
-    private List<UUID> especialidades = new ArrayList<>();
+    private Set<UUID> especialidades = new HashSet<>();
     
-    @NotBlank(message = "Nome completo é obrigatório")
-    @Size(max = 255, message = "Nome completo deve ter no máximo 255 caracteres")
-    private String nomeCompleto;
+    /**
+     * IDs dos estabelecimentos onde o médico atua.
+     * Permite que um médico tenha vínculos com múltiplos estabelecimentos.
+     * O backend é responsável por buscar os estabelecimentos e criar os vínculos corretos.
+     * 
+     * IMPORTANTE: Apenas IDs devem ser enviados. O backend fará a busca interna
+     * dos estabelecimentos e criará os objetos MedicoEstabelecimento com valores padrão.
+     */
+    @Builder.Default
+    private Set<UUID> estabelecimentos = new HashSet<>();
+    
+    // ========== OBJETOS EMBEDDABLE ==========
     
     @Valid
     private DadosPessoaisMedicoRequest dadosPessoais;
@@ -49,23 +72,7 @@ public class MedicosRequest {
     @Valid
     private ContatoMedicoRequest contato;
     
-    /**
-     * Lista de endereços do médico (consultório, residência, etc).
-     */
-    @Valid
-    @Builder.Default
-    private List<EnderecoRequest> enderecos = new ArrayList<>();
-    
-    /**
-     * Lista de IDs dos estabelecimentos onde o médico atua.
-     * Permite que um médico tenha vínculos com múltiplos estabelecimentos.
-     * O backend é responsável por buscar os estabelecimentos e criar os vínculos corretos.
-     * 
-     * IMPORTANTE: Apenas IDs devem ser enviados. O backend fará a busca interna
-     * dos estabelecimentos e criará os objetos MedicoEstabelecimento com valores padrão.
-     */
-    @Builder.Default
-    private List<UUID> estabelecimentos = new ArrayList<>();
+    // ========== CAMPOS TEXTUAIS LONGOS ==========
     
     @Size(max = 1000, message = "Observações deve ter no máximo 1000 caracteres")
     private String observacoes;

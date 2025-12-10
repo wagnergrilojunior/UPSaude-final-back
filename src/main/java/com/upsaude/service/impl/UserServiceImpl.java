@@ -4,12 +4,13 @@ import com.upsaude.api.request.UserRequest;
 import com.upsaude.api.response.UserResponse;
 import com.upsaude.dto.UserDTO;
 import com.upsaude.entity.User;
+import com.upsaude.exception.BadRequestException;
+import com.upsaude.exception.NotFoundException;
 import com.upsaude.integration.supabase.SupabaseAuthResponse;
 import com.upsaude.integration.supabase.SupabaseAuthService;
 import com.upsaude.mapper.UserMapper;
 import com.upsaude.repository.UserRepository;
 import com.upsaude.service.UserService;
-import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.CacheEvict;
@@ -38,7 +39,7 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     public UserResponse criar(UserRequest request) {
-        log.info("Criando novo usuário no Supabase Auth via service_role key");
+        log.debug("Criando novo usuário no Supabase Auth via service_role key");
         
         // Senha padrão temporária (deve ser alterada pelo usuário no primeiro login)
         String senhaTemporaria = "Temp@123456";
@@ -64,10 +65,15 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional(readOnly = true)
     public UserResponse obterPorId(UUID id) {
-        log.info("Buscando user por ID: {}", id);
+        log.debug("Buscando user por ID: {}", id);
+        
+        if (id == null) {
+            log.warn("ID nulo recebido para busca de User");
+            throw new BadRequestException("ID do usuário é obrigatório");
+        }
         
         User user = userRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("User não encontrado com ID: " + id));
+                .orElseThrow(() -> new NotFoundException("User não encontrado com ID: " + id));
         
         return userMapper.toResponse(user);
     }
@@ -75,7 +81,7 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional(readOnly = true)
     public Page<UserResponse> listar(Pageable pageable) {
-        log.info("Listando users - página: {}, tamanho: {}", pageable.getPageNumber(), pageable.getPageSize());
+        log.debug("Listando users - página: {}, tamanho: {}", pageable.getPageNumber(), pageable.getPageSize());
         
         Page<User> users = userRepository.findAll(pageable);
         return users.map(userMapper::toResponse);
@@ -84,7 +90,17 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     public UserResponse atualizar(UUID id, UserRequest request) {
-        log.info("Atualizando usuário no Supabase Auth via API: {}", id);
+        log.debug("Atualizando usuário no Supabase Auth via API: {}", id);
+        
+        if (id == null) {
+            log.warn("ID nulo recebido para atualização de User");
+            throw new BadRequestException("ID do usuário é obrigatório");
+        }
+        
+        if (request == null) {
+            log.warn("Request nulo recebido para atualização de User. ID: {}", id);
+            throw new BadRequestException("Dados do usuário são obrigatórios");
+        }
         
         // Atualizar usuário via API do Supabase Auth (service_role)
         // Inclui senha se foi fornecida, caso contrário mantém a senha atual
@@ -97,7 +113,7 @@ public class UserServiceImpl implements UserService {
         
         SupabaseAuthResponse.User supabaseUser = supabaseAuthService.updateUser(id, request.getEmail(), senha);
         
-        log.info("Usuário atualizado no Supabase Auth com sucesso: {}", id);
+        log.info("User atualizado com sucesso. ID: {}", id);
         
         // Montar response com os dados atualizados
         UserResponse response = UserResponse.builder()

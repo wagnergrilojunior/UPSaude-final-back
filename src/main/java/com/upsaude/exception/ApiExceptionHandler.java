@@ -8,10 +8,12 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.AuthenticationCredentialsNotFoundException;
 import org.springframework.security.authentication.InsufficientAuthenticationException;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 import java.time.LocalDateTime;
 import java.util.Arrays;
@@ -222,6 +224,54 @@ public class ApiExceptionHandler {
     }
 
     /**
+     * Trata exceções de deserialização JSON (HttpMessageNotReadableException).
+     * Retorna erro 400 quando há problemas na leitura/parsing do JSON.
+     * Exemplos: tipos incorretos, enums inválidos, UUIDs malformados, campos extras não reconhecidos.
+     *
+     * @param ex exceção lançada
+     * @param request requisição HTTP
+     * @return resposta JSON com detalhes do erro no formato padronizado
+     */
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ResponseEntity<Map<String, Object>> handleHttpMessageNotReadableException(
+            HttpMessageNotReadableException ex, HttpServletRequest request) {
+        // Não trata exceções de endpoints do Actuator ou /error
+        if (shouldIgnoreEndpoint(request.getRequestURI())) {
+            RuntimeException runtimeEx = new RuntimeException("Actuator endpoint exception", ex);
+            throw runtimeEx; // Re-lança para que o Actuator trate
+        }
+        
+        // Extrai mensagem de erro mais amigável
+        String mensagemErro = ex.getMessage();
+        if (mensagemErro != null && mensagemErro.contains("JSON parse error:")) {
+            // Tenta extrair apenas a parte relevante da mensagem
+            int index = mensagemErro.indexOf("JSON parse error:");
+            if (index >= 0) {
+                mensagemErro = mensagemErro.substring(index);
+                // Remove detalhes técnicos muito longos
+                if (mensagemErro.length() > 200) {
+                    mensagemErro = mensagemErro.substring(0, 200) + "...";
+                }
+            }
+        }
+        
+        // Se não conseguir extrair mensagem útil, usa mensagem padrão
+        if (mensagemErro == null || mensagemErro.trim().isEmpty()) {
+            mensagemErro = "Erro ao processar JSON da requisição. Verifique os tipos de dados e formatos enviados.";
+        }
+        
+        log.warn("Erro de deserialização JSON - Path: {}, Method: {}, Message: {}", 
+            request.getRequestURI(), request.getMethod(), mensagemErro);
+        
+        return buildErrorResponse(
+                HttpStatus.BAD_REQUEST,
+                "Requisição Inválida",
+                mensagemErro,
+                request.getRequestURI()
+        );
+    }
+
+    /**
      * Trata exceções de validação do Spring (MethodArgumentNotValidException).
      * Retorna erro 400 padronizado com lista de erros de validação.
      *
@@ -300,6 +350,48 @@ public class ApiExceptionHandler {
                 HttpStatus.FORBIDDEN,
                 "Acesso Proibido",
                 "Você não tem permissão para acessar este recurso",
+                request.getRequestURI()
+        );
+    }
+
+    /**
+     * Trata exceções de tipo de argumento inválido (MethodArgumentTypeMismatchException).
+     * Retorna erro 400 quando há problemas na conversão de tipos de parâmetros de path/query.
+     * Exemplos: UUIDs malformados, tipos incorretos.
+     *
+     * @param ex exceção lançada
+     * @param request requisição HTTP
+     * @return resposta JSON com detalhes do erro no formato padronizado
+     */
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    public ResponseEntity<Map<String, Object>> handleMethodArgumentTypeMismatchException(
+            MethodArgumentTypeMismatchException ex, HttpServletRequest request) {
+        // Não trata exceções de endpoints do Actuator ou /error
+        if (shouldIgnoreEndpoint(request.getRequestURI())) {
+            RuntimeException runtimeEx = new RuntimeException("Actuator endpoint exception", ex);
+            throw runtimeEx; // Re-lança para que o Actuator trate
+        }
+        
+        // Extrai mensagem de erro mais amigável
+        String mensagemErro = ex.getMessage();
+        String nomeParametro = ex.getName();
+        String valorRecebido = ex.getValue() != null ? ex.getValue().toString() : "null";
+        String tipoEsperado = ex.getRequiredType() != null ? ex.getRequiredType().getSimpleName() : "desconhecido";
+        
+        // Mensagem personalizada para UUIDs inválidos
+        if (tipoEsperado.equals("UUID")) {
+            mensagemErro = String.format("ID inválido: '%s'. O ID deve ser um UUID válido no formato xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx", valorRecebido);
+        } else {
+            mensagemErro = String.format("Parâmetro '%s' com valor '%s' não pode ser convertido para %s", nomeParametro, valorRecebido, tipoEsperado);
+        }
+        
+        log.warn("Erro de tipo de argumento - Path: {}, Method: {}, Parâmetro: {}, Valor: {}, Tipo esperado: {}", 
+            request.getRequestURI(), request.getMethod(), nomeParametro, valorRecebido, tipoEsperado);
+        
+        return buildErrorResponse(
+                HttpStatus.BAD_REQUEST,
+                "Requisição Inválida",
+                mensagemErro,
                 request.getRequestURI()
         );
     }

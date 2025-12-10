@@ -228,23 +228,11 @@ public class ConsultasServiceImpl implements ConsultasService {
     // O campo 'paciente' já tem @NotNull e 'informacoes' já tem @Valid no Request.
 
     private void atualizarDadosConsulta(Consultas consulta, ConsultasRequest request) {
-        Consultas consultaAtualizada = consultasMapper.fromRequest(request);
-
-        consulta.setPaciente(consultaAtualizada.getPaciente());
-        consulta.setMedico(consultaAtualizada.getMedico());
-        consulta.setProfissionalSaude(consultaAtualizada.getProfissionalSaude());
-        consulta.setEspecialidade(consultaAtualizada.getEspecialidade());
-        consulta.setConvenio(consultaAtualizada.getConvenio());
-        consulta.setCidPrincipal(consultaAtualizada.getCidPrincipal());
-        consulta.setInformacoes(consultaAtualizada.getInformacoes());
-        consulta.setAnamnese(consultaAtualizada.getAnamnese());
-        consulta.setDiagnostico(consultaAtualizada.getDiagnostico());
-        consulta.setPrescricao(consultaAtualizada.getPrescricao());
-        consulta.setExamesSolicitados(consultaAtualizada.getExamesSolicitados());
-        consulta.setEncaminhamento(consultaAtualizada.getEncaminhamento());
-        consulta.setAtestado(consultaAtualizada.getAtestado());
-        consulta.setObservacoes(consultaAtualizada.getObservacoes());
-        consulta.setObservacoesInternas(consultaAtualizada.getObservacoesInternas());
+        // Usar mapper para atualizar campos básicos
+        consultasMapper.updateFromRequest(request, consulta);
+        
+        // Processar relacionamentos que são ignorados pelo mapper
+        // (relacionamentos são tratados manualmente quando necessário)
     }
 }
 

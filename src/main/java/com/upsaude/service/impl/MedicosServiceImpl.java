@@ -101,13 +101,13 @@ public class MedicosServiceImpl implements MedicosService {
 
             return medicosMapper.toResponse(medicosSalvo);
         } catch (BadRequestException | NotFoundException e) {
-            log.warn("Erro de validação ao criar médico. Request: {}. Erro: {}", request, e.getMessage());
+            log.warn("Erro de validação ao criar Medico. Erro: {}", e.getMessage());
             throw e;
         } catch (DataAccessException e) {
-            log.error("Erro de acesso a dados ao criar médico. Request: {}, Exception: {}", request, e.getClass().getName(), e);
-            throw new InternalServerErrorException("Erro ao persistir médico", e);
-        } catch (Exception e) {
-            log.error("Erro inesperado ao criar médico. Request: {}, Exception: {}", request, e.getClass().getName(), e);
+            log.error("Erro de acesso a dados ao criar Medico. Exception: {}", e.getClass().getSimpleName(), e);
+            throw new InternalServerErrorException("Erro ao persistir Medico", e);
+        } catch (RuntimeException e) {
+            log.error("Erro inesperado ao criar Medico. Exception: {}", e.getClass().getSimpleName(), e);
             throw e;
         }
     }
@@ -130,13 +130,13 @@ public class MedicosServiceImpl implements MedicosService {
             log.debug("Médico encontrado. ID: {}", id);
             return medicosMapper.toResponse(medicos);
         } catch (NotFoundException e) {
-            log.warn("Médico não encontrado. ID: {}", id);
+            log.warn("Medico não encontrado. ID: {}", id);
             throw e;
         } catch (DataAccessException e) {
-            log.error("Erro de acesso a dados ao buscar médico. ID: {}, Exception: {}", id, e.getClass().getName(), e);
-            throw new InternalServerErrorException("Erro ao buscar médico", e);
-        } catch (Exception e) {
-            log.error("Erro inesperado ao buscar médico. ID: {}, Exception: {}", id, e.getClass().getName(), e);
+            log.error("Erro de acesso a dados ao buscar Medico. ID: {}, Exception: {}", id, e.getClass().getSimpleName(), e);
+            throw new InternalServerErrorException("Erro ao buscar Medico", e);
+        } catch (RuntimeException e) {
+            log.error("Erro inesperado ao buscar Medico. ID: {}, Exception: {}", id, e.getClass().getSimpleName(), e);
             throw e;
         }
     }
@@ -165,10 +165,10 @@ public class MedicosServiceImpl implements MedicosService {
             log.debug("Listagem de médicos concluída. Total de elementos: {}", medicos.getTotalElements());
             return medicos.map(medicosMapper::toResponse);
         } catch (DataAccessException e) {
-            log.error("Erro de acesso a dados ao listar médicos. Pageable: {}, Exception: {}", pageable, e.getClass().getName(), e);
-            throw new InternalServerErrorException("Erro ao listar médicos", e);
-        } catch (Exception e) {
-            log.error("Erro inesperado ao listar médicos. Pageable: {}, Exception: {}", pageable, e.getClass().getName(), e);
+            log.error("Erro de acesso a dados ao listar Medicos. Exception: {}", e.getClass().getSimpleName(), e);
+            throw new InternalServerErrorException("Erro ao listar Medicos", e);
+        } catch (RuntimeException e) {
+            log.error("Erro inesperado ao listar Medicos. Exception: {}", e.getClass().getSimpleName(), e);
             throw e;
         }
     }
@@ -215,16 +215,16 @@ public class MedicosServiceImpl implements MedicosService {
 
             return medicosMapper.toResponse(medicosAtualizado);
         } catch (NotFoundException e) {
-            log.warn("Tentativa de atualizar médico não existente. ID: {}", id);
+            log.warn("Tentativa de atualizar Medico não existente. ID: {}", id);
             throw e;
         } catch (BadRequestException e) {
-            log.warn("Erro de validação ao atualizar médico. ID: {}, Request: {}. Erro: {}", id, request, e.getMessage());
+            log.warn("Erro de validação ao atualizar Medico. ID: {}, Erro: {}", id, e.getMessage());
             throw e;
         } catch (DataAccessException e) {
-            log.error("Erro de acesso a dados ao atualizar médico. ID: {}, Request: {}, Exception: {}", id, request, e.getClass().getName(), e);
-            throw new InternalServerErrorException("Erro ao atualizar médico", e);
-        } catch (Exception e) {
-            log.error("Erro inesperado ao atualizar médico. ID: {}, Request: {}, Exception: {}", id, request, e.getClass().getName(), e);
+            log.error("Erro de acesso a dados ao atualizar Medico. ID: {}, Exception: {}", id, e.getClass().getSimpleName(), e);
+            throw new InternalServerErrorException("Erro ao atualizar Medico", e);
+        } catch (RuntimeException e) {
+            log.error("Erro inesperado ao atualizar Medico. ID: {}, Exception: {}", id, e.getClass().getSimpleName(), e);
             throw e;
         }
     }
@@ -253,16 +253,16 @@ public class MedicosServiceImpl implements MedicosService {
             medicosRepository.save(medicos);
             log.info("Médico excluído (desativado) com sucesso. ID: {}", id);
         } catch (NotFoundException e) {
-            log.warn("Tentativa de excluir médico não existente. ID: {}", id);
+            log.warn("Tentativa de excluir Medico não existente. ID: {}", id);
             throw e;
         } catch (BadRequestException e) {
-            log.warn("Erro de validação ao excluir médico. ID: {}. Erro: {}", id, e.getMessage());
+            log.warn("Erro de validação ao excluir Medico. ID: {}, Erro: {}", id, e.getMessage());
             throw e;
         } catch (DataAccessException e) {
-            log.error("Erro de acesso a dados ao excluir médico. ID: {}, Exception: {}", id, e.getClass().getName(), e);
-            throw new InternalServerErrorException("Erro ao excluir médico", e);
-        } catch (Exception e) {
-            log.error("Erro inesperado ao excluir médico. ID: {}, Exception: {}", id, e.getClass().getName(), e);
+            log.error("Erro de acesso a dados ao excluir Medico. ID: {}, Exception: {}", id, e.getClass().getSimpleName(), e);
+            throw new InternalServerErrorException("Erro ao excluir Medico", e);
+        } catch (RuntimeException e) {
+            log.error("Erro inesperado ao excluir Medico. ID: {}, Exception: {}", id, e.getClass().getSimpleName(), e);
             throw e;
         }
     }
@@ -406,6 +406,8 @@ public class MedicosServiceImpl implements MedicosService {
         }
 
         // ENDEREÇOS (OneToMany) - Processar lista de endereços
+        // TODO: MedicosRequest não possui campo enderecos - necessário adicionar ou remover esta lógica
+        /*
         if (request.getEnderecos() != null && !request.getEnderecos().isEmpty()) {
             log.debug("Processando {} endereço(s) para o médico", request.getEnderecos().size());
             
@@ -453,6 +455,7 @@ public class MedicosServiceImpl implements MedicosService {
                 log.debug("{} endereço(s) processado(s) para associação ao médico", enderecos.size());
             }
         }
+        */
 
         // ESTABELECIMENTOS (OneToMany via MedicoEstabelecimento) - Processar lista de IDs
         // O backend busca internamente os estabelecimentos pelos IDs e cria/atualiza os vínculos
