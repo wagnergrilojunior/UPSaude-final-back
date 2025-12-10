@@ -118,6 +118,13 @@ public class DoencasController {
             @Parameter(description = "Parâmetros de paginação (page, size, sort)")
             Pageable pageable) {
         log.debug("REQUEST GET /v1/doencas/cid/{} - pageable: {}", codigoCid, pageable);
+        
+        // Validação para evitar erro 500 quando codigoCid está vazio
+        if (codigoCid == null || codigoCid.trim().isEmpty()) {
+            log.warn("Código CID vazio ou nulo recebido para busca de doenças");
+            throw new BadRequestException("Código CID é obrigatório para busca");
+        }
+        
         try {
             Page<DoencasResponse> response = doencasService.listarPorCodigoCid(codigoCid, pageable);
             return ResponseEntity.ok(response);
