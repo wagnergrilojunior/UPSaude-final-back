@@ -1,0 +1,9 @@
+{
+  "request": "public class {{EntityName}}Request { }",
+  "response": "public class {{EntityName}}Response { }",
+  "dto": "public class {{EntityName}}DTO { }",
+  "mapper": "public interface {{EntityName}}Mapper { {{EntityName}} toEntity({{EntityName}}DTO dto); {{EntityName}}DTO toDTO({{EntityName}} entity); }",
+  "repository": "public interface {{EntityName}}Repository extends JpaRepository<{{EntityName}}, Long> { }",
+  "service": "public class {{EntityName}}Service { }",
+  "controller": "@RestController\n@RequestMapping(\"/api/{{entityNamePluralLowercase}}\")\npublic class {{EntityName}}Controller { }"
+}

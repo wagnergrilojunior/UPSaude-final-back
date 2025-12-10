@@ -21,9 +21,6 @@ import com.upsaude.util.converter.StatusPacienteEnumConverter;
 import com.upsaude.util.converter.TipoAtendimentoPreferencialEnumConverter;
 import com.upsaude.util.converter.TipoCnsEnumConverter;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Pattern;
-import jakarta.validation.constraints.Size;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -91,19 +88,15 @@ public class Paciente extends BaseEntityWithoutTenant {
         this.medicacoes = new ArrayList<>();
     }
 
-    @NotBlank(message = "Nome completo é obrigatório")
-    @Size(max = 255, message = "Nome completo deve ter no máximo 255 caracteres")
     @Column(name = "nome_completo", nullable = false, length = 255)
     private String nomeCompleto;
 
-    @Pattern(regexp = "^\\d{11}$", message = "CPF deve ter 11 dígitos")
     @Column(name = "cpf", length = 11)
     private String cpf;
 
     @Column(name = "rg", length = 20)
     private String rg;
 
-    @Pattern(regexp = "^\\d{15}$", message = "CNS deve ter 15 dígitos")
     @Column(name = "cns", length = 15)
     private String cns;
 
@@ -133,11 +126,9 @@ public class Paciente extends BaseEntityWithoutTenant {
     @Column(name = "responsavel_nome", length = 255)
     private String responsavelNome;
 
-    @Pattern(regexp = "^\\d{11}$", message = "CPF do responsável deve ter 11 dígitos")
     @Column(name = "responsavel_cpf", length = 11)
     private String responsavelCpf;
 
-    @Pattern(regexp = "^\\d{10,11}$", message = "Telefone do responsável deve ter 10 ou 11 dígitos")
     @Column(name = "responsavel_telefone", length = 20)
     private String responsavelTelefone;
 
@@ -180,17 +171,14 @@ public class Paciente extends BaseEntityWithoutTenant {
     private NacionalidadeEnum nacionalidade;
 
     /** País de nascimento */
-    @Size(max = 100, message = "País de nascimento deve ter no máximo 100 caracteres")
     @Column(name = "pais_nascimento", length = 100)
     private String paisNascimento;
 
     /** Naturalidade (cidade de nascimento) */
-    @Size(max = 100, message = "Naturalidade deve ter no máximo 100 caracteres")
     @Column(name = "naturalidade", length = 100)
     private String naturalidade;
 
     /** Código IBGE do município de nascimento */
-    @Size(max = 7, message = "Código IBGE do município deve ter no máximo 7 caracteres")
     @Column(name = "municipio_nascimento_ibge", length = 7)
     private String municipioNascimentoIbge;
 
@@ -200,7 +188,6 @@ public class Paciente extends BaseEntityWithoutTenant {
     private EscolaridadeEnum escolaridade;
 
     /** Ocupação/Profissão do paciente */
-    @Size(max = 150, message = "Ocupação/Profissão deve ter no máximo 150 caracteres")
     @Column(name = "ocupacao_profissao", length = 150)
     private String ocupacaoProfissao;
 
@@ -218,7 +205,6 @@ public class Paciente extends BaseEntityWithoutTenant {
     private LocalDate dataObito;
 
     /** CID-10 da causa do óbito */
-    @Size(max = 10, message = "CID-10 da causa do óbito deve ter no máximo 10 caracteres")
     @Column(name = "causa_obito_cid10", length = 10)
     private String causaObitoCid10;
 
@@ -236,11 +222,9 @@ public class Paciente extends BaseEntityWithoutTenant {
     private TipoAtendimentoPreferencialEnum tipoAtendimentoPreferencial;
 
     /** Origem do cadastro (e-SUS, SISAB, etc.) */
-    @Size(max = 30, message = "Origem do cadastro deve ter no máximo 30 caracteres")
     @Column(name = "origem_cadastro", length = 30)
     private String origemCadastro;
 
-    @Size(max = 255, message = "Nome social deve ter no máximo 255 caracteres")
     @Column(name = "nome_social", length = 255)
     private String nomeSocial;
 
@@ -255,7 +239,6 @@ public class Paciente extends BaseEntityWithoutTenant {
     @Column(name = "possui_deficiencia", nullable = false)
     private Boolean possuiDeficiencia = false;
 
-    @Size(max = 255, message = "Tipo de deficiência deve ter no máximo 255 caracteres")
     @Column(name = "tipo_deficiencia", length = 255)
     private String tipoDeficiencia;
 
