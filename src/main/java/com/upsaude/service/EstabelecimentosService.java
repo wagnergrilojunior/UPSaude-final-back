@@ -7,11 +7,6 @@ import org.springframework.data.domain.Pageable;
 
 import java.util.UUID;
 
-/**
- * Interface de serviço para operações CRUD relacionadas a Estabelecimentos.
- *
- * @author UPSaúde
- */
 public interface EstabelecimentosService {
 
     EstabelecimentosResponse criar(EstabelecimentosRequest request);
@@ -24,4 +19,3 @@ public interface EstabelecimentosService {
 
     void excluir(UUID id);
 }
-

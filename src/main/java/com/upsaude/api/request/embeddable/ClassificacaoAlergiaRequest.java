@@ -19,20 +19,20 @@ import lombok.Setter;
 public class ClassificacaoAlergiaRequest {
     @JsonDeserialize(using = TipoAlergiaEnumDeserializer.class)
     private TipoAlergiaEnum tipoAlergia;
-    
+
     @Size(max = 100, message = "Categoria deve ter no máximo 100 caracteres")
     private String categoria;
-    
+
     @Size(max = 100, message = "Subcategoria deve ter no máximo 100 caracteres")
     private String subcategoria;
-    
+
     @Size(max = 50, message = "Código CID deve ter no máximo 50 caracteres")
     private String codigoCid;
-    
+
     @NotNull(message = "Alergia comum é obrigatória")
     @Builder.Default
     private Boolean alergiaComum = false;
-    
+
     @NotNull(message = "Alergia grave é obrigatória")
     @Builder.Default
     private Boolean alergiaGrave = false;

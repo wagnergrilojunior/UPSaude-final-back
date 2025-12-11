@@ -3,12 +3,6 @@ package com.upsaude.enums;
 import java.util.Arrays;
 import java.util.Locale;
 
-/**
- * Enum para tipos de controle de medicamentos.
- * Baseado em portarias da ANVISA e legislação brasileira.
- *
- * @author UPSaúde
- */
 public enum TipoControleMedicamentoEnum {
     LIVRE(1, "Livre Comercialização"),
     RECEITA_SIMPLES(2, "Receita Simples"),
@@ -69,4 +63,3 @@ public enum TipoControleMedicamentoEnum {
                 .orElse(null);
     }
 }
-

@@ -13,12 +13,6 @@ import lombok.EqualsAndHashCode;
 
 import java.math.BigDecimal;
 
-/**
- * Entidade que representa um procedimento realizado durante uma cirurgia.
- * Permite registrar múltiplos procedimentos em uma mesma cirurgia.
- *
- * @author UPSaúde
- */
 @Entity
 @Table(name = "procedimentos_cirurgicos", schema = "public",
        indexes = {
@@ -29,26 +23,20 @@ import java.math.BigDecimal;
 @EqualsAndHashCode(callSuper = true)
 public class ProcedimentoCirurgico extends BaseEntity {
 
-    // ========== RELACIONAMENTOS ==========
-
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "cirurgia_id", nullable = false)
     @NotNull(message = "Cirurgia é obrigatória")
     private Cirurgia cirurgia;
-
-    // ========== DADOS DO PROCEDIMENTO ==========
 
     @Column(name = "descricao", nullable = false, columnDefinition = "TEXT")
     @NotNull(message = "Descrição do procedimento é obrigatória")
     private String descricao;
 
     @Column(name = "codigo_procedimento", length = 50)
-    private String codigoProcedimento; // Código do procedimento (TUSS, SUS, etc.)
+    private String codigoProcedimento;
 
     @Column(name = "nome_procedimento", length = 500)
-    private String nomeProcedimento; // Nome oficial do procedimento
-
-    // ========== QUANTIDADE E VALOR ==========
+    private String nomeProcedimento;
 
     @Column(name = "quantidade", nullable = false)
     @NotNull(message = "Quantidade é obrigatória")
@@ -58,16 +46,11 @@ public class ProcedimentoCirurgico extends BaseEntity {
     private BigDecimal valorUnitario;
 
     @Column(name = "valor_total", precision = 10, scale = 2)
-    private BigDecimal valorTotal; // valor_unitario * quantidade
-
-    // ========== LADO (para procedimentos bilaterais) ==========
+    private BigDecimal valorTotal;
 
     @Column(name = "lado", length = 20)
-    private String lado; // Esquerdo, Direito, Bilateral, etc.
-
-    // ========== OBSERVAÇÕES ==========
+    private String lado;
 
     @Column(name = "observacoes", columnDefinition = "TEXT")
     private String observacoes;
 }
-

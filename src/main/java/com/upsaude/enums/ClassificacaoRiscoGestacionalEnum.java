@@ -3,12 +3,6 @@ package com.upsaude.enums;
 import java.util.Arrays;
 import java.util.Locale;
 
-/**
- * Enum para classificação de risco gestacional no pré-natal.
- * Baseado nos critérios do Ministério da Saúde para estratificação de risco.
- *
- * @author UPSaúde
- */
 public enum ClassificacaoRiscoGestacionalEnum {
     RISCO_HABITUAL(1, "Risco Habitual"),
     ALTO_RISCO(2, "Alto Risco"),
@@ -48,4 +42,3 @@ public enum ClassificacaoRiscoGestacionalEnum {
                 .orElse(null);
     }
 }
-

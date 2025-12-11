@@ -8,11 +8,6 @@ import org.springframework.data.domain.Pageable;
 import java.util.List;
 import java.util.UUID;
 
-/**
- * Interface de serviço para operações relacionadas a Planejamento Familiar.
- *
- * @author UPSaúde
- */
 public interface PlanejamentoFamiliarService {
 
     PlanejamentoFamiliarResponse criar(PlanejamentoFamiliarRequest request);
@@ -31,4 +26,3 @@ public interface PlanejamentoFamiliarService {
 
     void excluir(UUID id);
 }
-

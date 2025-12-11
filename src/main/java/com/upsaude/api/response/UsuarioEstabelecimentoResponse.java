@@ -21,9 +21,8 @@ public class UsuarioEstabelecimentoResponse {
     private Boolean active;
     private UsuariosSistemaResponse usuario;
     private EstabelecimentosResponse estabelecimento;
-    
-    // Campos simplificados para uso em listas
+
     private UUID estabelecimentoId;
     private String estabelecimentoNome;
-    private TipoUsuarioSistemaEnum tipoUsuario; // Papel do usuário neste estabelecimento
+    private TipoUsuarioSistemaEnum tipoUsuario;
 }

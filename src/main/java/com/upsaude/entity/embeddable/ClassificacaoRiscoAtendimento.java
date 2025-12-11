@@ -7,11 +7,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 
-/**
- * Classe embeddable para classificação de risco do atendimento.
- *
- * @author UPSaúde
- */
 @Embeddable
 @Data
 @Builder
@@ -28,21 +23,20 @@ public class ClassificacaoRiscoAtendimento {
 
     @Size(max = 50, message = "Classificação de risco deve ter no máximo 50 caracteres")
     @Column(name = "classificacao_risco", length = 50)
-    private String classificacaoRisco; // Ex: Vermelho, Laranja, Amarelo, Verde, Azul (protocolo Manchester)
+    private String classificacaoRisco;
 
     @Size(max = 50, message = "Prioridade deve ter no máximo 50 caracteres")
     @Column(name = "prioridade", length = 50)
-    private String prioridade; // Ex: Emergência, Urgência, Pouco Urgente, Não Urgente
+    private String prioridade;
 
     @Column(name = "gravidade", length = 50)
-    private String gravidade; // Ex: Leve, Moderada, Grave, Muito Grave, Crítica
+    private String gravidade;
 
     @Column(name = "necessita_observacao", nullable = false)
     @Builder.Default
-    private Boolean necessitaObservacao = false; // Se necessita observação após o atendimento
+    private Boolean necessitaObservacao = false;
 
     @Column(name = "necessita_internacao", nullable = false)
     @Builder.Default
-    private Boolean necessitaInternacao = false; // Se necessita internação
+    private Boolean necessitaInternacao = false;
 }
-

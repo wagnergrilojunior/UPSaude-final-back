@@ -20,11 +20,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.UUID;
 
-/**
- * Implementação do serviço de gerenciamento de Deficiências.
- *
- * @author UPSaúde
- */
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -39,7 +34,6 @@ public class DeficienciasServiceImpl implements DeficienciasService {
     public DeficienciasResponse criar(DeficienciasRequest request) {
         log.debug("Criando nova deficiência");
 
-        // Validação de dados básicos é feita automaticamente pelo Bean Validation no Request
         validarDuplicidade(null, request);
 
         Deficiencias deficiencias = deficienciasMapper.fromRequest(request);
@@ -86,8 +80,6 @@ public class DeficienciasServiceImpl implements DeficienciasService {
             throw new BadRequestException("ID da deficiência é obrigatório");
         }
 
-        // Validação de dados básicos é feita automaticamente pelo Bean Validation no Request
-
         Deficiencias deficienciasExistente = deficienciasRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Deficiência não encontrada com ID: " + id));
 
@@ -123,30 +115,18 @@ public class DeficienciasServiceImpl implements DeficienciasService {
         log.info("Deficiência excluída (desativada) com sucesso. ID: {}", id);
     }
 
-    // Validações de dados básicos foram movidas para o Request usando Bean Validation
-    // (@NotNull, @NotBlank, @Pattern, etc). Isso garante validação automática no Controller
-    // e retorno de erro 400 padronizado via ApiExceptionHandler.
-
-    /**
-     * Valida se já existe uma deficiência com o mesmo nome no banco de dados.
-     * 
-     * @param id ID da deficiência sendo atualizada (null para criação)
-     * @param request dados da deficiência sendo cadastrada/atualizada
-     * @throws BadRequestException se já existe uma deficiência com o mesmo nome
-     */
     private void validarDuplicidade(UUID id, DeficienciasRequest request) {
         if (request == null) {
             return;
         }
 
-        // Valida duplicidade do nome
         if (request.getNome() != null && !request.getNome().trim().isEmpty()) {
             boolean nomeDuplicado;
             if (id == null) {
-                // Criação: verifica se existe qualquer registro com este nome
+
                 nomeDuplicado = deficienciasRepository.existsByNome(request.getNome().trim());
             } else {
-                // Atualização: verifica se existe outro registro (diferente do atual) com este nome
+
                 nomeDuplicado = deficienciasRepository.existsByNomeAndIdNot(request.getNome().trim(), id);
             }
 
@@ -161,19 +141,15 @@ public class DeficienciasServiceImpl implements DeficienciasService {
 
     private void atualizarDadosDeficiencias(Deficiencias deficiencias, DeficienciasRequest request) {
         Deficiencias deficienciasAtualizado = deficienciasMapper.fromRequest(request);
-        
-        // Preserva campos de controle
+
         UUID idOriginal = deficiencias.getId();
         Boolean activeOriginal = deficiencias.getActive();
         java.time.OffsetDateTime createdAtOriginal = deficiencias.getCreatedAt();
-        
-        // Copia todas as propriedades do objeto atualizado
+
         BeanUtils.copyProperties(deficienciasAtualizado, deficiencias);
-        
-        // Restaura campos de controle
+
         deficiencias.setId(idOriginal);
         deficiencias.setActive(activeOriginal);
         deficiencias.setCreatedAt(createdAtOriginal);
     }
 }
-

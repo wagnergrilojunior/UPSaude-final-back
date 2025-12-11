@@ -20,11 +20,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.UUID;
 
-/**
- * Implementação do serviço de gerenciamento de ConselhosProfissionais.
- *
- * @author UPSaúde
- */
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -38,8 +33,6 @@ public class ConselhosProfissionaisServiceImpl implements ConselhosProfissionais
     @CacheEvict(value = "conselhosprofissionais", allEntries = true)
     public ConselhosProfissionaisResponse criar(ConselhosProfissionaisRequest request) {
         log.debug("Criando novo conselhosprofissionais");
-
-        // Validação de dados básicos é feita automaticamente pelo Bean Validation no Request
 
         ConselhosProfissionais conselhosProfissionais = conselhosProfissionaisMapper.fromRequest(request);
         conselhosProfissionais.setActive(true);
@@ -85,8 +78,6 @@ public class ConselhosProfissionaisServiceImpl implements ConselhosProfissionais
             throw new BadRequestException("ID do conselhosprofissionais é obrigatório");
         }
 
-        // Validação de dados básicos é feita automaticamente pelo Bean Validation no Request
-
         ConselhosProfissionais conselhosProfissionaisExistente = conselhosProfissionaisRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("ConselhosProfissionais não encontrado com ID: " + id));
 
@@ -120,22 +111,15 @@ public class ConselhosProfissionaisServiceImpl implements ConselhosProfissionais
         log.info("ConselhosProfissionais excluído (desativado) com sucesso. ID: {}", id);
     }
 
-    // Validações de dados básicos foram movidas para o Request usando Bean Validation
-    // (@NotNull, @NotBlank, @Pattern, etc). Isso garante validação automática no Controller
-    // e retorno de erro 400 padronizado via ApiExceptionHandler.
-
     private void atualizarDadosConselhosProfissionais(ConselhosProfissionais conselhosProfissionais, ConselhosProfissionaisRequest request) {
         ConselhosProfissionais conselhosProfissionaisAtualizado = conselhosProfissionaisMapper.fromRequest(request);
-        
-        // Preserva campos de controle
+
         java.util.UUID idOriginal = conselhosProfissionais.getId();
         Boolean activeOriginal = conselhosProfissionais.getActive();
         java.time.OffsetDateTime createdAtOriginal = conselhosProfissionais.getCreatedAt();
-        
-        // Copia todas as propriedades do objeto atualizado
+
         BeanUtils.copyProperties(conselhosProfissionaisAtualizado, conselhosProfissionais);
-        
-        // Restaura campos de controle
+
         conselhosProfissionais.setId(idOriginal);
         conselhosProfissionais.setActive(activeOriginal);
         conselhosProfissionais.setCreatedAt(createdAtOriginal);

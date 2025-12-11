@@ -3,12 +3,6 @@ package com.upsaude.enums;
 import java.util.Arrays;
 import java.util.Locale;
 
-/**
- * Enum para classificação de tipos de falta.
- * Baseado em padrões de sistemas de gestão de recursos humanos.
- *
- * @author UPSaúde
- */
 public enum TipoFaltaEnum {
     FALTA_JUSTIFICADA(1, "Falta Justificada"),
     FALTA_NAO_JUSTIFICADA(2, "Falta Não Justificada"),
@@ -58,4 +52,3 @@ public enum TipoFaltaEnum {
                 .orElse(null);
     }
 }
-

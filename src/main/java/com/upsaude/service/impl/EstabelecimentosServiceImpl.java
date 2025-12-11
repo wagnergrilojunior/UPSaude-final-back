@@ -35,11 +35,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.UUID;
 
-/**
- * Implementação do serviço de gerenciamento de Estabelecimentos.
- *
- * @author UPSaúde
- */
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -60,42 +55,36 @@ public class EstabelecimentosServiceImpl implements EstabelecimentosService {
     @CacheEvict(value = "estabelecimentos", allEntries = true)
     public EstabelecimentosResponse criar(EstabelecimentosRequest request) {
         log.debug("Criando novo estabelecimento. Request: {}", request);
-        
+
         if (request == null) {
             log.warn("Tentativa de criar estabelecimento com request nulo");
             throw new BadRequestException("Dados do estabelecimento são obrigatórios");
         }
 
         try {
-            // Validação de dados básicos é feita automaticamente pelo Bean Validation no Request
-            
-            // Valida CNPJ duplicado
+
             validarCnpjDuplicado(request.getCnpj(), null);
-            
-            // Valida CNES duplicado
+
             validarCnesDuplicado(request.getCodigoCnes(), null);
 
             Estabelecimentos estabelecimento = estabelecimentosMapper.fromRequest(request);
-            
-            // Define o tenant do usuário autenticado
+
             Tenant tenant = tenantService.obterTenantDoUsuarioAutenticado();
             if (tenant == null) {
                 log.error("Tenant não encontrado para usuário autenticado");
                 throw new BadRequestException("Tenant não encontrado. Verifique a autenticação do usuário.");
             }
             estabelecimento.setTenant(tenant);
-            
-            // Processa endereço principal usando findOrCreate para evitar duplicação
+
             processarEnderecoPrincipal(request, estabelecimento, tenant);
 
-            // Carrega e valida responsável técnico
             if (request.getResponsavelTecnico() != null) {
                 try {
                     ProfissionaisSaude responsavelTecnico = profissionaisSaudeRepository.findById(request.getResponsavelTecnico())
                             .orElseThrow(() -> new NotFoundException("Responsável técnico não encontrado com ID: " + request.getResponsavelTecnico()));
-                    // Valida se o profissional pertence ao mesmo tenant
+
                     if (responsavelTecnico.getTenant() != null && !responsavelTecnico.getTenant().getId().equals(tenant.getId())) {
-                        log.warn("Tentativa de associar responsável técnico de outro tenant. ID: {}, Tenant responsável: {}, Tenant atual: {}", 
+                        log.warn("Tentativa de associar responsável técnico de outro tenant. ID: {}, Tenant responsável: {}, Tenant atual: {}",
                                 request.getResponsavelTecnico(), responsavelTecnico.getTenant().getId(), tenant.getId());
                         throw new BadRequestException("Responsável técnico não pertence ao mesmo tenant");
                     }
@@ -106,14 +95,13 @@ public class EstabelecimentosServiceImpl implements EstabelecimentosService {
                 }
             }
 
-            // Carrega e valida responsável administrativo
             if (request.getResponsavelAdministrativo() != null) {
                 try {
                     ProfissionaisSaude responsavelAdmin = profissionaisSaudeRepository.findById(request.getResponsavelAdministrativo())
                             .orElseThrow(() -> new NotFoundException("Responsável administrativo não encontrado com ID: " + request.getResponsavelAdministrativo()));
-                    // Valida se o profissional pertence ao mesmo tenant
+
                     if (responsavelAdmin.getTenant() != null && !responsavelAdmin.getTenant().getId().equals(tenant.getId())) {
-                        log.warn("Tentativa de associar responsável administrativo de outro tenant. ID: {}, Tenant responsável: {}, Tenant atual: {}", 
+                        log.warn("Tentativa de associar responsável administrativo de outro tenant. ID: {}, Tenant responsável: {}, Tenant atual: {}",
                                 request.getResponsavelAdministrativo(), responsavelAdmin.getTenant().getId(), tenant.getId());
                         throw new BadRequestException("Responsável administrativo não pertence ao mesmo tenant");
                     }
@@ -147,7 +135,7 @@ public class EstabelecimentosServiceImpl implements EstabelecimentosService {
     @Cacheable(value = "estabelecimentos", key = "#id")
     public EstabelecimentosResponse obterPorId(UUID id) {
         log.debug("Buscando estabelecimento por ID: {} (cache miss)", id);
-        
+
         if (id == null) {
             log.warn("ID nulo recebido para busca de estabelecimento");
             throw new BadRequestException("ID do estabelecimento é obrigatório");
@@ -206,21 +194,16 @@ public class EstabelecimentosServiceImpl implements EstabelecimentosService {
         }
 
         try {
-            // Validação de dados básicos é feita automaticamente pelo Bean Validation no Request
 
             Estabelecimentos estabelecimentoExistente = estabelecimentosRepository.findById(id)
                     .orElseThrow(() -> new NotFoundException("Estabelecimento não encontrado com ID: " + id));
-            
-            // Valida CNPJ duplicado (exceto para o próprio estabelecimento sendo atualizado)
+
             validarCnpjDuplicado(request.getCnpj(), id);
-            
-            // Valida CNES duplicado (exceto para o próprio estabelecimento sendo atualizado)
+
             validarCnesDuplicado(request.getCodigoCnes(), id);
 
-            // Usa mapper do MapStruct que preserva campos de controle automaticamente
             estabelecimentosMapper.updateFromRequest(request, estabelecimentoExistente);
-            
-            // Processa endereço principal usando findOrCreate para evitar duplicação
+
             Tenant tenant = tenantService.obterTenantDoUsuarioAutenticado();
             if (tenant == null) {
                 log.error("Tenant não encontrado para usuário autenticado durante atualização");
@@ -232,9 +215,9 @@ public class EstabelecimentosServiceImpl implements EstabelecimentosService {
                 try {
                     ProfissionaisSaude responsavelTecnico = profissionaisSaudeRepository.findById(request.getResponsavelTecnico())
                             .orElseThrow(() -> new NotFoundException("Responsável técnico não encontrado com ID: " + request.getResponsavelTecnico()));
-                    // Valida se o profissional pertence ao mesmo tenant
+
                     if (responsavelTecnico.getTenant() != null && !responsavelTecnico.getTenant().getId().equals(tenant.getId())) {
-                        log.warn("Tentativa de associar responsável técnico de outro tenant. ID: {}, Tenant responsável: {}, Tenant atual: {}", 
+                        log.warn("Tentativa de associar responsável técnico de outro tenant. ID: {}, Tenant responsável: {}, Tenant atual: {}",
                                 request.getResponsavelTecnico(), responsavelTecnico.getTenant().getId(), tenant.getId());
                         throw new BadRequestException("Responsável técnico não pertence ao mesmo tenant");
                     }
@@ -251,9 +234,9 @@ public class EstabelecimentosServiceImpl implements EstabelecimentosService {
                 try {
                     ProfissionaisSaude responsavelAdmin = profissionaisSaudeRepository.findById(request.getResponsavelAdministrativo())
                             .orElseThrow(() -> new NotFoundException("Responsável administrativo não encontrado com ID: " + request.getResponsavelAdministrativo()));
-                    // Valida se o profissional pertence ao mesmo tenant
+
                     if (responsavelAdmin.getTenant() != null && !responsavelAdmin.getTenant().getId().equals(tenant.getId())) {
-                        log.warn("Tentativa de associar responsável administrativo de outro tenant. ID: {}, Tenant responsável: {}, Tenant atual: {}", 
+                        log.warn("Tentativa de associar responsável administrativo de outro tenant. ID: {}, Tenant responsável: {}, Tenant atual: {}",
                                 request.getResponsavelAdministrativo(), responsavelAdmin.getTenant().getId(), tenant.getId());
                         throw new BadRequestException("Responsável administrativo não pertence ao mesmo tenant");
                     }
@@ -323,61 +306,43 @@ public class EstabelecimentosServiceImpl implements EstabelecimentosService {
         }
     }
 
-    // Validações de dados básicos foram movidas para o Request usando Bean Validation
-    // (@NotNull, @NotBlank, @Pattern, etc). Isso garante validação automática no Controller
-    // e retorno de erro 400 padronizado via ApiExceptionHandler.
-
-    /**
-     * Processa o endereço principal do estabelecimento.
-     * Se fornecido como UUID, busca o endereço existente.
-     * Se fornecido como objeto completo EnderecoRequest, usa findOrCreate para evitar duplicação.
-     * 
-     * @param request request com dados do estabelecimento
-     * @param estabelecimento estabelecimento a ser atualizado
-     * @param tenant tenant do estabelecimento
-     */
     private void processarEnderecoPrincipal(EstabelecimentosRequest request, Estabelecimentos estabelecimento, Tenant tenant) {
-        // Prioriza objeto completo sobre UUID
+
         if (request.getEnderecoPrincipalCompleto() != null) {
             log.debug("Processando endereço principal como objeto completo. Usando findOrCreate para evitar duplicação");
-            
-            // Valida se o objeto endereço tem pelo menos algum campo preenchido
+
             EnderecoRequest enderecoRequest = request.getEnderecoPrincipalCompleto();
             boolean temCamposPreenchidos = (enderecoRequest.getLogradouro() != null && !enderecoRequest.getLogradouro().trim().isEmpty()) ||
                                           (enderecoRequest.getCep() != null && !enderecoRequest.getCep().trim().isEmpty()) ||
                                           (enderecoRequest.getCidade() != null) ||
                                           (enderecoRequest.getEstado() != null);
-            
+
             if (!temCamposPreenchidos) {
                 log.warn("Endereço principal completo fornecido mas sem campos preenchidos. Ignorando endereço.");
                 estabelecimento.setEnderecoPrincipal(null);
                 return;
             }
-            
-            // Converte EnderecoRequest para Endereco
+
             Endereco endereco = enderecoMapper.fromRequest(enderecoRequest);
             endereco.setActive(true);
             endereco.setTenant(tenant);
-            
-            // Garante valores padrão
+
             if (endereco.getSemNumero() == null) {
                 endereco.setSemNumero(false);
             }
-            
-            // Processa relacionamentos estado e cidade
+
             if (enderecoRequest.getEstado() != null) {
                 Estados estado = estadosRepository.findById(enderecoRequest.getEstado())
                         .orElseThrow(() -> new NotFoundException("Estado não encontrado com ID: " + enderecoRequest.getEstado()));
                 endereco.setEstado(estado);
             }
-            
+
             if (enderecoRequest.getCidade() != null) {
                 Cidades cidade = cidadesRepository.findById(enderecoRequest.getCidade())
                         .orElseThrow(() -> new NotFoundException("Cidade não encontrada com ID: " + enderecoRequest.getCidade()));
                 endereco.setCidade(cidade);
             }
-            
-            // Garante que pelo menos logradouro ou CEP estejam preenchidos antes de chamar findOrCreate
+
             if ((endereco.getLogradouro() == null || endereco.getLogradouro().trim().isEmpty()) &&
                 (endereco.getCep() == null || endereco.getCep().trim().isEmpty())) {
                 log.warn("Endereço sem logradouro nem CEP. Criando novo endereço sem buscar duplicados.");
@@ -386,28 +351,25 @@ public class EstabelecimentosServiceImpl implements EstabelecimentosService {
                 log.info("Novo endereço criado sem busca de duplicados. ID: {}", enderecoSalvo.getId());
                 return;
             }
-            
-            // Usa findOrCreate para evitar duplicação
-            // Salva o ID antes de chamar findOrCreate para verificar se foi criado novo ou encontrado existente
+
             UUID idAntes = endereco.getId();
             Endereco enderecoProcessado = enderecoService.findOrCreate(endereco);
             estabelecimento.setEnderecoPrincipal(enderecoProcessado);
-            
-            // Verifica se foi criado novo endereço ou reutilizado existente
+
             boolean foiCriadoNovo = idAntes == null && enderecoProcessado.getId() != null;
-            log.info("Endereço principal processado. ID: {} - {}", 
+            log.info("Endereço principal processado. ID: {} - {}",
                     enderecoProcessado.getId(),
                     foiCriadoNovo ? "Novo endereço criado" : "Endereço existente reutilizado");
-            
+
         } else if (request.getEnderecoPrincipal() != null) {
-            // Se fornecido apenas UUID, busca endereço existente
+
             log.debug("Processando endereço principal como UUID: {}", request.getEnderecoPrincipal());
             try {
                 Endereco enderecoPrincipal = enderecoRepository.findById(request.getEnderecoPrincipal())
                         .orElseThrow(() -> new NotFoundException("Endereço principal não encontrado com ID: " + request.getEnderecoPrincipal()));
-                // Valida se o endereço pertence ao mesmo tenant
+
                 if (enderecoPrincipal.getTenant() != null && !enderecoPrincipal.getTenant().getId().equals(tenant.getId())) {
-                    log.warn("Tentativa de associar endereço de outro tenant. ID: {}, Tenant endereço: {}, Tenant atual: {}", 
+                    log.warn("Tentativa de associar endereço de outro tenant. ID: {}, Tenant endereço: {}, Tenant atual: {}",
                             request.getEnderecoPrincipal(), enderecoPrincipal.getTenant().getId(), tenant.getId());
                     throw new BadRequestException("Endereço principal não pertence ao mesmo tenant");
                 }
@@ -417,20 +379,13 @@ public class EstabelecimentosServiceImpl implements EstabelecimentosService {
                 throw e;
             }
         } else {
-            // Se não fornecido, remove o endereço (apenas na atualização)
+
             estabelecimento.setEnderecoPrincipal(null);
         }
     }
 
-    /**
-     * Valida se o CNPJ já está cadastrado para outro estabelecimento no mesmo tenant.
-     * 
-     * @param cnpj CNPJ a ser validado
-     * @param idExcluir ID do estabelecimento a ser excluído da validação (usado na atualização)
-     * @throws ConflictException se o CNPJ já estiver cadastrado
-     */
     private void validarCnpjDuplicado(String cnpj, UUID idExcluir) {
-        // Se CNPJ não foi informado, não precisa validar
+
         if (cnpj == null || cnpj.trim().isEmpty()) {
             return;
         }
@@ -440,29 +395,22 @@ public class EstabelecimentosServiceImpl implements EstabelecimentosService {
             log.error("Tenant não encontrado durante validação de CNPJ");
             throw new BadRequestException("Tenant não encontrado. Verifique a autenticação do usuário.");
         }
-        
+
         estabelecimentosRepository.findByCnpjAndTenant(cnpj, tenant)
                 .ifPresent(estabelecimentoExistente -> {
-                    // Se estiver atualizando, permite se for o mesmo estabelecimento
+
                     if (idExcluir != null && estabelecimentoExistente.getId().equals(idExcluir)) {
                         return;
                     }
-                    
-                    log.warn("Tentativa de cadastrar estabelecimento com CNPJ já existente. CNPJ: {}, Tenant: {}", 
+
+                    log.warn("Tentativa de cadastrar estabelecimento com CNPJ já existente. CNPJ: {}, Tenant: {}",
                             cnpj, tenant.getId());
                     throw new ConflictException("Já existe um estabelecimento cadastrado com o CNPJ informado: " + cnpj);
                 });
     }
 
-    /**
-     * Valida se o código CNES já está cadastrado para outro estabelecimento no mesmo tenant.
-     * 
-     * @param codigoCnes código CNES a ser validado
-     * @param idExcluir ID do estabelecimento a ser excluído da validação (usado na atualização)
-     * @throws ConflictException se o CNES já estiver cadastrado
-     */
     private void validarCnesDuplicado(String codigoCnes, UUID idExcluir) {
-        // Se CNES não foi informado, não precisa validar
+
         if (codigoCnes == null || codigoCnes.trim().isEmpty()) {
             return;
         }
@@ -472,22 +420,18 @@ public class EstabelecimentosServiceImpl implements EstabelecimentosService {
             log.error("Tenant não encontrado durante validação de CNES");
             throw new BadRequestException("Tenant não encontrado. Verifique a autenticação do usuário.");
         }
-        
+
         estabelecimentosRepository.findByCodigoCnesAndTenant(codigoCnes, tenant)
                 .ifPresent(estabelecimentoExistente -> {
-                    // Se estiver atualizando, permite se for o mesmo estabelecimento
+
                     if (idExcluir != null && estabelecimentoExistente.getId().equals(idExcluir)) {
                         return;
                     }
-                    
-                    log.warn("Tentativa de cadastrar estabelecimento com código CNES já existente. CNES: {}, Tenant: {}", 
+
+                    log.warn("Tentativa de cadastrar estabelecimento com código CNES já existente. CNES: {}, Tenant: {}",
                             codigoCnes, tenant.getId());
                     throw new ConflictException("Já existe um estabelecimento cadastrado com o código CNES informado: " + codigoCnes);
                 });
     }
 
-    // Método removido - agora usa estabelecimentosMapper.updateFromRequest diretamente
-    // O MapStruct já preserva campos de controle automaticamente
-    // A lógica de atualização de relacionamentos (endereço principal, responsáveis) foi movida para o método atualizar
 }
-

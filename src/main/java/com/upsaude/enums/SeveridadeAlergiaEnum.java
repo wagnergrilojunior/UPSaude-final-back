@@ -3,9 +3,6 @@ package com.upsaude.enums;
 import java.util.Arrays;
 import java.util.Locale;
 
-/**
- * Enum para classificação de severidade de alergia conforme padrão médico.
- */
 public enum SeveridadeAlergiaEnum {
     LEVE(1, "Leve"),
     MODERADA(2, "Moderada"),
@@ -45,4 +42,3 @@ public enum SeveridadeAlergiaEnum {
                 .orElse(null);
     }
 }
-

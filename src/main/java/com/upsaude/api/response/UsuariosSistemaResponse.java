@@ -26,23 +26,21 @@ public class UsuariosSistemaResponse {
     private MedicosResponse medico;
     private PacienteResponse paciente;
     private Boolean adminTenant;
-    private String tipoVinculo; // MEDICO, PROFISSIONAL, PACIENTE, OUTROS
+    private String tipoVinculo;
     private String nomeExibicao;
     private String username;
     private String email;
     private String fotoUrl;
-    
-    // Informações do Tenant/Organização
+
     private UUID tenantId;
     private String tenantNome;
     private String tenantSlug;
-    
-    // Tipo de usuário (baseado em vínculos) - ENUM
+
     private TipoUsuarioSistemaEnum tipoUsuario;
-    
+
     @Builder.Default
     private List<EstabelecimentoVinculoSimples> estabelecimentosVinculados = new ArrayList<>();
-    
+
     @Getter
     @Setter
     @Builder
@@ -52,7 +50,7 @@ public class UsuariosSistemaResponse {
         private UUID id;
         private UUID estabelecimentoId;
         private String estabelecimentoNome;
-        private TipoUsuarioSistemaEnum tipoUsuario; // Papel do usuário neste estabelecimento
+        private TipoUsuarioSistemaEnum tipoUsuario;
         private Boolean active;
     }
 }

@@ -12,41 +12,12 @@ import com.upsaude.entity.Estabelecimentos;
 import com.upsaude.entity.Tenant;
 
 public interface EstabelecimentosRepository extends JpaRepository<Estabelecimentos, UUID> {
-    
-    /**
-     * Busca todos os estabelecimentos de um tenant.
-     *
-     * @param tenant tenant
-     * @return lista de estabelecimentos do tenant
-     */
+
     List<Estabelecimentos> findByTenant(Tenant tenant);
 
-    /**
-     * Busca todos os estabelecimentos de um tenant, paginados.
-     *
-     * @param tenant tenant
-     * @param pageable informações de paginação
-     * @return página de estabelecimentos do tenant
-     */
     Page<Estabelecimentos> findByTenant(Tenant tenant, Pageable pageable);
 
-    /**
-     * Busca um estabelecimento por CNPJ e tenant.
-     * Usado para validar duplicatas antes de cadastrar ou atualizar.
-     *
-     * @param cnpj CNPJ do estabelecimento
-     * @param tenant tenant do estabelecimento
-     * @return Optional contendo o estabelecimento encontrado, se existir
-     */
     Optional<Estabelecimentos> findByCnpjAndTenant(String cnpj, Tenant tenant);
 
-    /**
-     * Busca um estabelecimento por código CNES e tenant.
-     * Usado para validar duplicatas antes de cadastrar ou atualizar.
-     *
-     * @param codigoCnes código CNES do estabelecimento
-     * @param tenant tenant do estabelecimento
-     * @return Optional contendo o estabelecimento encontrado, se existir
-     */
     Optional<Estabelecimentos> findByCodigoCnesAndTenant(String codigoCnes, Tenant tenant);
 }

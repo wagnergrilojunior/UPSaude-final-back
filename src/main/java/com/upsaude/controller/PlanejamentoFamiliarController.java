@@ -25,11 +25,6 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.UUID;
 
-/**
- * Controlador REST para operações relacionadas a Planejamento Familiar.
- *
- * @author UPSaúde
- */
 @RestController
 @RequestMapping("/v1/planejamento-familiar")
 @Tag(name = "Planejamento Familiar", description = "API para gerenciamento de planejamento familiar e reprodutivo")

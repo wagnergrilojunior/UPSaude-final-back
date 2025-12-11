@@ -4,12 +4,6 @@ import com.upsaude.enums.TipoVinculoProfissionalEnum;
 import jakarta.persistence.AttributeConverter;
 import jakarta.persistence.Converter;
 
-/**
- * Converter para TipoVinculoProfissionalEnum.
- * Converte entre o enum e o código Integer no banco de dados.
- *
- * @author UPSaúde
- */
 @Converter(autoApply = false)
 public class TipoVinculoProfissionalEnumConverter implements AttributeConverter<TipoVinculoProfissionalEnum, Integer> {
 
@@ -29,4 +23,3 @@ public class TipoVinculoProfissionalEnumConverter implements AttributeConverter<
         return TipoVinculoProfissionalEnum.fromCodigo(dbData);
     }
 }
-

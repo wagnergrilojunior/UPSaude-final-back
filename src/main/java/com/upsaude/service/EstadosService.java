@@ -7,11 +7,6 @@ import org.springframework.data.domain.Pageable;
 
 import java.util.UUID;
 
-/**
- * Interface de serviço para operações CRUD relacionadas a Estados.
- *
- * @author UPSaúde
- */
 public interface EstadosService {
 
     EstadosResponse criar(EstadosRequest request);

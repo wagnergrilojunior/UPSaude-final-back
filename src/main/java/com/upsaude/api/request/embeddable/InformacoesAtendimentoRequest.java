@@ -23,30 +23,30 @@ import java.time.OffsetDateTime;
 public class InformacoesAtendimentoRequest {
     @NotNull(message = "Data e hora do atendimento são obrigatórias")
     private OffsetDateTime dataHora;
-    
+
     private OffsetDateTime dataAgendamento;
-    
+
     private OffsetDateTime dataInicio;
-    
+
     private OffsetDateTime dataFim;
-    
+
     private Integer duracaoMinutos;
-    
+
     private Integer duracaoRealMinutos;
-    
+
     @JsonDeserialize(using = TipoAtendimentoEnumDeserializer.class)
     private TipoAtendimentoEnum tipoAtendimento;
-    
+
     @NotNull(message = "Status do atendimento é obrigatório")
     @Builder.Default
     @JsonDeserialize(using = StatusAtendimentoEnumDeserializer.class)
     private StatusAtendimentoEnum statusAtendimento = StatusAtendimentoEnum.AGENDADO;
-    
+
     private String motivo;
-    
+
     @Size(max = 255, message = "Local do atendimento deve ter no máximo 255 caracteres")
     private String localAtendimento;
-    
+
     @Size(max = 50, message = "Número do atendimento deve ter no máximo 50 caracteres")
     private String numeroAtendimento;
 }

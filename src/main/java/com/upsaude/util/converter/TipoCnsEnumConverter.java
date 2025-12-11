@@ -23,4 +23,3 @@ public class TipoCnsEnumConverter implements AttributeConverter<TipoCnsEnum, Int
         return TipoCnsEnum.fromCodigo(dbData);
     }
 }
-

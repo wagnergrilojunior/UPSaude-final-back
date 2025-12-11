@@ -21,11 +21,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.UUID;
 
-/**
- * Implementação do serviço de gerenciamento de Departamentos.
- *
- * @author UPSaúde
- */
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -39,14 +34,13 @@ public class DepartamentosServiceImpl implements DepartamentosService {
     @CacheEvict(value = "departamentos", allEntries = true)
     public DepartamentosResponse criar(DepartamentosRequest request) {
         log.debug("Criando novo departamento. Request: {}", request);
-        
+
         if (request == null) {
             log.warn("Tentativa de criar departamento com request nulo");
             throw new BadRequestException("Dados do departamento são obrigatórios");
         }
 
         try {
-            // Validação de dados básicos é feita automaticamente pelo Bean Validation no Request
 
             Departamentos departamentos = departamentosMapper.fromRequest(request);
             departamentos.setActive(true);
@@ -72,7 +66,7 @@ public class DepartamentosServiceImpl implements DepartamentosService {
     @Cacheable(value = "departamentos", key = "#id")
     public DepartamentosResponse obterPorId(UUID id) {
         log.debug("Buscando departamento por ID: {} (cache miss)", id);
-        
+
         if (id == null) {
             log.warn("ID nulo recebido para busca de departamento");
             throw new BadRequestException("ID do departamento é obrigatório");
@@ -131,12 +125,10 @@ public class DepartamentosServiceImpl implements DepartamentosService {
         }
 
         try {
-            // Validação de dados básicos é feita automaticamente pelo Bean Validation no Request
 
             Departamentos departamentosExistente = departamentosRepository.findById(id)
                     .orElseThrow(() -> new NotFoundException("Departamento não encontrado com ID: " + id));
 
-            // Usa mapper do MapStruct que preserva campos de controle automaticamente
             departamentosMapper.updateFromRequest(request, departamentosExistente);
 
             Departamentos departamentosAtualizado = departamentosRepository.save(departamentosExistente);
@@ -196,10 +188,4 @@ public class DepartamentosServiceImpl implements DepartamentosService {
         }
     }
 
-    // Validações de dados básicos foram movidas para o Request usando Bean Validation
-    // (@NotNull, @NotBlank, @Pattern, etc). Isso garante validação automática no Controller
-    // e retorno de erro 400 padronizado via ApiExceptionHandler.
-
-    // Método removido - agora usa departamentosMapper.updateFromRequest diretamente
-    // O MapStruct já preserva campos de controle automaticamente
 }

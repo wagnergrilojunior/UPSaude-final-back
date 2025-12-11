@@ -20,11 +20,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.UUID;
 
-/**
- * Implementação do serviço de gerenciamento de VisitasDomiciliares.
- *
- * @author UPSaúde
- */
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -38,8 +33,6 @@ public class VisitasDomiciliaresServiceImpl implements VisitasDomiciliaresServic
     @CacheEvict(value = "visitasdomiciliares", allEntries = true)
     public VisitasDomiciliaresResponse criar(VisitasDomiciliaresRequest request) {
         log.debug("Criando novo visitasdomiciliares");
-
-        // Validação de dados básicos é feita automaticamente pelo Bean Validation no Request
 
         VisitasDomiciliares visitasDomiciliares = visitasDomiciliaresMapper.fromRequest(request);
         visitasDomiciliares.setActive(true);
@@ -84,8 +77,6 @@ public class VisitasDomiciliaresServiceImpl implements VisitasDomiciliaresServic
             throw new BadRequestException("ID do visitasdomiciliares é obrigatório");
         }
 
-        // Validação de dados básicos é feita automaticamente pelo Bean Validation no Request
-
         VisitasDomiciliares visitasDomiciliaresExistente = visitasDomiciliaresRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("VisitasDomiciliares não encontrado com ID: " + id));
 
@@ -119,23 +110,16 @@ public class VisitasDomiciliaresServiceImpl implements VisitasDomiciliaresServic
         log.info("VisitasDomiciliares excluído (desativado) com sucesso. ID: {}", id);
     }
 
-    // Validações de dados básicos foram movidas para o Request usando Bean Validation
-    // (@NotNull, @NotBlank, @Pattern, etc). Isso garante validação automática no Controller
-    // e retorno de erro 400 padronizado via ApiExceptionHandler.
-
         private void atualizarDadosVisitasDomiciliares(VisitasDomiciliares visitasDomiciliares, VisitasDomiciliaresRequest request) {
         VisitasDomiciliares visitasDomiciliaresAtualizado = visitasDomiciliaresMapper.fromRequest(request);
-        
-        // Preserva campos de controle
+
         java.util.UUID idOriginal = visitasDomiciliares.getId();
         com.upsaude.entity.Tenant tenantOriginal = visitasDomiciliares.getTenant();
         Boolean activeOriginal = visitasDomiciliares.getActive();
         java.time.OffsetDateTime createdAtOriginal = visitasDomiciliares.getCreatedAt();
-        
-        // Copia todas as propriedades do objeto atualizado
+
         BeanUtils.copyProperties(visitasDomiciliaresAtualizado, visitasDomiciliares);
-        
-        // Restaura campos de controle
+
         visitasDomiciliares.setId(idOriginal);
         visitasDomiciliares.setTenant(tenantOriginal);
         visitasDomiciliares.setActive(activeOriginal);

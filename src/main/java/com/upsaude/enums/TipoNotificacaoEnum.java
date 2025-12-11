@@ -3,12 +3,6 @@ package com.upsaude.enums;
 import java.util.Arrays;
 import java.util.Locale;
 
-/**
- * Enum para classificação de tipos de notificação.
- * Baseado em padrões de sistemas de gestão de notificações em saúde.
- *
- * @author UPSaúde
- */
 public enum TipoNotificacaoEnum {
     AGENDAMENTO_CRIADO(1, "Agendamento Criado"),
     AGENDAMENTO_CONFIRMADO(2, "Agendamento Confirmado"),
@@ -59,4 +53,3 @@ public enum TipoNotificacaoEnum {
                 .orElse(null);
     }
 }
-

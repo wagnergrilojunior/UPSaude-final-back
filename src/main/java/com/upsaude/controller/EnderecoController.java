@@ -24,11 +24,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
 
-/**
- * Controlador REST para operações relacionadas a Endereços.
- *
- * @author UPSaúde
- */
 @RestController
 @RequestMapping("/v1/enderecos")
 @Tag(name = "Endereços", description = "API para gerenciamento de Endereços")

@@ -41,7 +41,7 @@ public class DadosClinicosBasicosServiceImpl implements DadosClinicosBasicosServ
     @CacheEvict(value = "dadosclinicosbasicos", allEntries = true)
     public DadosClinicosBasicosResponse criar(DadosClinicosBasicosRequest request) {
         log.debug("Criando dados clínicos básicos. Request: {}", request);
-        
+
         if (request == null) {
             log.warn("Tentativa de criar dados clínicos básicos com request nulo");
             throw new BadRequestException("Dados clínicos básicos são obrigatórios");
@@ -58,15 +58,13 @@ public class DadosClinicosBasicosServiceImpl implements DadosClinicosBasicosServ
                         throw new ConflictException("Dados clínicos básicos já existem para este paciente");
                     });
 
-            // Carrega o paciente para definir o relacionamento
             Paciente paciente = pacienteRepository.findById(request.getPaciente())
                     .orElseThrow(() -> new NotFoundException("Paciente não encontrado com ID: " + request.getPaciente()));
 
             DadosClinicosBasicos entity = mapper.fromRequest(request);
             entity.setActive(true);
-            entity.setPaciente(paciente); // Define o relacionamento manualmente
-            
-            // Obtém o tenant do usuário autenticado (obrigatório para DadosClinicosBasicos que estende BaseEntity)
+            entity.setPaciente(paciente);
+
             Tenant tenant = tenantService.obterTenantDoUsuarioAutenticado();
             if (tenant == null) {
                 throw new BadRequestException("Não foi possível obter tenant do usuário autenticado. É necessário estar autenticado para criar dados clínicos básicos.");
@@ -77,7 +75,7 @@ public class DadosClinicosBasicosServiceImpl implements DadosClinicosBasicosServ
             log.info("Dados clínicos básicos criados. ID: {}", saved.getId());
 
             DadosClinicosBasicosResponse response = mapper.toResponse(saved);
-            // Mapeia apenas o ID do paciente para evitar referência circular
+
             response.setPaciente(createPacienteResponseMinimal(saved.getPaciente()));
             return response;
         } catch (BadRequestException | ConflictException | NotFoundException e) {
@@ -96,7 +94,7 @@ public class DadosClinicosBasicosServiceImpl implements DadosClinicosBasicosServ
     @Transactional(readOnly = true)
     public DadosClinicosBasicosResponse obterPorId(UUID id) {
         log.debug("Buscando dados clínicos básicos por ID: {}", id);
-        
+
         if (id == null) {
             log.warn("ID nulo recebido para busca de dados clínicos básicos");
             throw new BadRequestException("ID é obrigatório");
@@ -108,7 +106,7 @@ public class DadosClinicosBasicosServiceImpl implements DadosClinicosBasicosServ
 
             log.debug("Dados clínicos básicos encontrados. ID: {}", id);
             DadosClinicosBasicosResponse response = mapper.toResponse(entity);
-            // Mapeia apenas o ID do paciente para evitar referência circular
+
             response.setPaciente(createPacienteResponseMinimal(entity.getPaciente()));
             return response;
         } catch (NotFoundException e) {
@@ -127,7 +125,7 @@ public class DadosClinicosBasicosServiceImpl implements DadosClinicosBasicosServ
     @Transactional(readOnly = true)
     public DadosClinicosBasicosResponse obterPorPacienteId(UUID pacienteId) {
         log.debug("Buscando dados clínicos básicos por paciente ID: {}", pacienteId);
-        
+
         if (pacienteId == null) {
             log.warn("ID de paciente nulo recebido para busca de dados clínicos básicos");
             throw new BadRequestException("ID do paciente é obrigatório");
@@ -139,7 +137,7 @@ public class DadosClinicosBasicosServiceImpl implements DadosClinicosBasicosServ
 
             log.debug("Dados clínicos básicos encontrados para paciente. Paciente ID: {}", pacienteId);
             DadosClinicosBasicosResponse response = mapper.toResponse(entity);
-            // Mapeia apenas o ID do paciente para evitar referência circular
+
             response.setPaciente(createPacienteResponseMinimal(entity.getPaciente()));
             return response;
         } catch (NotFoundException e) {
@@ -165,7 +163,7 @@ public class DadosClinicosBasicosServiceImpl implements DadosClinicosBasicosServ
             log.debug("Listagem de dados clínicos básicos concluída. Total de elementos: {}", entities.getTotalElements());
             return entities.map(entity -> {
                 DadosClinicosBasicosResponse response = mapper.toResponse(entity);
-                // Mapeia apenas o ID do paciente para evitar referência circular
+
                 response.setPaciente(createPacienteResponseMinimal(entity.getPaciente()));
                 return response;
             });
@@ -205,21 +203,19 @@ public class DadosClinicosBasicosServiceImpl implements DadosClinicosBasicosServ
                                 throw new ConflictException("Dados clínicos básicos já existem para este paciente");
                             }
                         });
-                
-                // Carrega o novo paciente para atualizar o relacionamento
+
                 Paciente paciente = pacienteRepository.findById(request.getPaciente())
                         .orElseThrow(() -> new NotFoundException("Paciente não encontrado com ID: " + request.getPaciente()));
                 entity.setPaciente(paciente);
             }
 
-            // Usa mapper do MapStruct que preserva campos de controle automaticamente
             mapper.updateFromRequest(request, entity);
-            
+
             DadosClinicosBasicos updated = repository.save(entity);
             log.info("Dados clínicos básicos atualizados. ID: {}", updated.getId());
 
             DadosClinicosBasicosResponse response = mapper.toResponse(updated);
-            // Mapeia apenas o ID do paciente para evitar referência circular
+
             response.setPaciente(createPacienteResponseMinimal(updated.getPaciente()));
             return response;
         } catch (NotFoundException e) {
@@ -275,12 +271,6 @@ public class DadosClinicosBasicosServiceImpl implements DadosClinicosBasicosServ
         }
     }
 
-    /**
-     * Cria um PacienteResponse mínimo apenas com o ID para evitar referência circular.
-     * 
-     * @param paciente Entidade Paciente
-     * @return PacienteResponse com apenas o ID preenchido
-     */
     private PacienteResponse createPacienteResponseMinimal(Paciente paciente) {
         if (paciente == null) {
             return null;
@@ -290,4 +280,3 @@ public class DadosClinicosBasicosServiceImpl implements DadosClinicosBasicosServ
         return response;
     }
 }
-

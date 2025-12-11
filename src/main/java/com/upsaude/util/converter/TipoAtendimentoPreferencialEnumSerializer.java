@@ -6,10 +6,6 @@ import com.fasterxml.jackson.databind.SerializerProvider;
 import com.upsaude.enums.TipoAtendimentoPreferencialEnum;
 import java.io.IOException;
 
-/**
- * Serializador customizado para TipoAtendimentoPreferencialEnum.
- * Retorna a descrição do enum ao invés do nome.
- */
 public class TipoAtendimentoPreferencialEnumSerializer extends JsonSerializer<TipoAtendimentoPreferencialEnum> {
 
     @Override

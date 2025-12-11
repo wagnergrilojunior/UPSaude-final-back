@@ -20,11 +20,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.UUID;
 
-/**
- * Implementação do serviço de gerenciamento de Ação de Promoção e Prevenção.
- *
- * @author UPSaúde
- */
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -38,8 +33,6 @@ public class AcaoPromocaoPrevencaoServiceImpl implements AcaoPromocaoPrevencaoSe
     @CacheEvict(value = "acaopromocaoprevencao", allEntries = true)
     public AcaoPromocaoPrevencaoResponse criar(AcaoPromocaoPrevencaoRequest request) {
         log.debug("Criando nova ação de promoção e prevenção");
-
-        // Validação de dados básicos é feita automaticamente pelo Bean Validation no Request
 
         AcaoPromocaoPrevencao acaoPromocaoPrevencao = acaoPromocaoPrevencaoMapper.fromRequest(request);
         acaoPromocaoPrevencao.setActive(true);
@@ -123,8 +116,6 @@ public class AcaoPromocaoPrevencaoServiceImpl implements AcaoPromocaoPrevencaoSe
             throw new BadRequestException("ID da ação de promoção e prevenção é obrigatório");
         }
 
-        // Validação de dados básicos é feita automaticamente pelo Bean Validation no Request
-
         AcaoPromocaoPrevencao acaoExistente = acaoPromocaoPrevencaoRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Ação de promoção e prevenção não encontrada com ID: " + id));
 
@@ -158,11 +149,6 @@ public class AcaoPromocaoPrevencaoServiceImpl implements AcaoPromocaoPrevencaoSe
         log.info("Ação de promoção e prevenção excluída (desativada) com sucesso. ID: {}", id);
     }
 
-    // Validações de dados básicos foram movidas para o Request usando Bean Validation
-    // (@NotNull, @NotBlank, @Pattern, etc). Isso garante validação automática no Controller
-    // e retorno de erro 400 padronizado via ApiExceptionHandler.
-    // Os campos 'profissionalResponsavel', 'nome' e 'dataInicio' já têm @NotNull/@NotBlank no Request.
-
     private void atualizarDadosAcaoPromocaoPrevencao(AcaoPromocaoPrevencao acao, AcaoPromocaoPrevencaoRequest request) {
         AcaoPromocaoPrevencao acaoAtualizada = acaoPromocaoPrevencaoMapper.fromRequest(request);
 
@@ -179,4 +165,3 @@ public class AcaoPromocaoPrevencaoServiceImpl implements AcaoPromocaoPrevencaoSe
         acao.setCreatedAt(createdAtOriginal);
     }
 }
-

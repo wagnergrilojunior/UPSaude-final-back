@@ -20,11 +20,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.UUID;
 
-/**
- * Implementação do serviço de gerenciamento de ProcedimentosOdontologicos.
- *
- * @author UPSaúde
- */
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -38,8 +33,6 @@ public class ProcedimentosOdontologicosServiceImpl implements ProcedimentosOdont
     @CacheEvict(value = "procedimentosodontologicos", allEntries = true)
     public ProcedimentosOdontologicosResponse criar(ProcedimentosOdontologicosRequest request) {
         log.debug("Criando novo procedimentosodontologicos");
-
-        // Validação de dados básicos é feita automaticamente pelo Bean Validation no Request
 
         ProcedimentosOdontologicos procedimentosOdontologicos = procedimentosOdontologicosMapper.fromRequest(request);
         procedimentosOdontologicos.setActive(true);
@@ -84,8 +77,6 @@ public class ProcedimentosOdontologicosServiceImpl implements ProcedimentosOdont
             throw new BadRequestException("ID do procedimentosodontologicos é obrigatório");
         }
 
-        // Validação de dados básicos é feita automaticamente pelo Bean Validation no Request
-
         ProcedimentosOdontologicos procedimentosOdontologicosExistente = procedimentosOdontologicosRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("ProcedimentosOdontologicos não encontrado com ID: " + id));
 
@@ -119,23 +110,16 @@ public class ProcedimentosOdontologicosServiceImpl implements ProcedimentosOdont
         log.info("ProcedimentosOdontologicos excluído (desativado) com sucesso. ID: {}", id);
     }
 
-    // Validações de dados básicos foram movidas para o Request usando Bean Validation
-    // (@NotNull, @NotBlank, @Pattern, etc). Isso garante validação automática no Controller
-    // e retorno de erro 400 padronizado via ApiExceptionHandler.
-
         private void atualizarDadosProcedimentosOdontologicos(ProcedimentosOdontologicos procedimentosOdontologicos, ProcedimentosOdontologicosRequest request) {
         ProcedimentosOdontologicos procedimentosOdontologicosAtualizado = procedimentosOdontologicosMapper.fromRequest(request);
-        
-        // Preserva campos de controle
+
         java.util.UUID idOriginal = procedimentosOdontologicos.getId();
         com.upsaude.entity.Tenant tenantOriginal = procedimentosOdontologicos.getTenant();
         Boolean activeOriginal = procedimentosOdontologicos.getActive();
         java.time.OffsetDateTime createdAtOriginal = procedimentosOdontologicos.getCreatedAt();
-        
-        // Copia todas as propriedades do objeto atualizado
+
         BeanUtils.copyProperties(procedimentosOdontologicosAtualizado, procedimentosOdontologicos);
-        
-        // Restaura campos de controle
+
         procedimentosOdontologicos.setId(idOriginal);
         procedimentosOdontologicos.setTenant(tenantOriginal);
         procedimentosOdontologicos.setActive(activeOriginal);

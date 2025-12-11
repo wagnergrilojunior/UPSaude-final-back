@@ -14,12 +14,6 @@ import lombok.EqualsAndHashCode;
 
 import java.math.BigDecimal;
 
-/**
- * Entidade que representa um membro da equipe cirúrgica.
- * Permite registrar todos os profissionais que participaram da cirurgia.
- *
- * @author UPSaúde
- */
 @Entity
 @Table(name = "equipe_cirurgica", schema = "public",
        indexes = {
@@ -30,8 +24,6 @@ import java.math.BigDecimal;
 @Data
 @EqualsAndHashCode(callSuper = true)
 public class EquipeCirurgica extends BaseEntity {
-
-    // ========== RELACIONAMENTOS ==========
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "cirurgia_id", nullable = false)
@@ -45,37 +37,28 @@ public class EquipeCirurgica extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "medico_id")
-    private Medicos medico; // Opcional: médico específico
-
-    // ========== FUNÇÃO NA CIRURGIA ==========
+    private Medicos medico;
 
     @Column(name = "funcao", nullable = false, length = 100)
     @NotNull(message = "Função na cirurgia é obrigatória")
     @Size(max = 100, message = "Função deve ter no máximo 100 caracteres")
-    private String funcao; // Ex: Cirurgião Principal, Assistente, Anestesista, Enfermeiro, etc.
+    private String funcao;
 
     @Column(name = "eh_principal")
-    private Boolean ehPrincipal; // Se é o profissional principal na função
-
-    // ========== REMUNERAÇÃO ==========
+    private Boolean ehPrincipal;
 
     @Column(name = "valor_participacao", precision = 10, scale = 2)
-    private BigDecimal valorParticipacao; // Valor recebido pela participação
+    private BigDecimal valorParticipacao;
 
     @Column(name = "percentual_participacao", precision = 5, scale = 2)
-    private BigDecimal percentualParticipacao; // Percentual de participação no valor total
-
-    // ========== HORÁRIOS DE PARTICIPAÇÃO ==========
+    private BigDecimal percentualParticipacao;
 
     @Column(name = "data_hora_entrada")
-    private java.time.OffsetDateTime dataHoraEntrada; // Quando entrou na cirurgia
+    private java.time.OffsetDateTime dataHoraEntrada;
 
     @Column(name = "data_hora_saida")
-    private java.time.OffsetDateTime dataHoraSaida; // Quando saiu da cirurgia
-
-    // ========== OBSERVAÇÕES ==========
+    private java.time.OffsetDateTime dataHoraSaida;
 
     @Column(name = "observacoes", columnDefinition = "TEXT")
     private String observacoes;
 }
-

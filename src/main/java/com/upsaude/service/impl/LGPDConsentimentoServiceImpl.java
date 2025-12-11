@@ -141,11 +141,10 @@ public class LGPDConsentimentoServiceImpl implements LGPDConsentimentoService {
 
     private void atualizarDados(LGPDConsentimento entity, LGPDConsentimentoRequest request) {
         LGPDConsentimento updated = mapper.fromRequest(request);
-        
+
         entity.setAutorizacaoUsoDados(updated.getAutorizacaoUsoDados());
         entity.setAutorizacaoContatoWhatsApp(updated.getAutorizacaoContatoWhatsApp());
         entity.setAutorizacaoContatoEmail(updated.getAutorizacaoContatoEmail());
         entity.setDataConsentimento(updated.getDataConsentimento());
     }
 }
-

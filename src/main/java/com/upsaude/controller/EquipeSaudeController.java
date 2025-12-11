@@ -25,11 +25,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
 
-/**
- * Controlador REST para operações relacionadas a Equipes de Saúde.
- *
- * @author UPSaúde
- */
 @RestController
 @RequestMapping("/v1/equipes-saude")
 @Tag(name = "Equipes de Saúde", description = "API para gerenciamento de Equipes de Saúde")

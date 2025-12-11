@@ -1,57 +1,61 @@
 package com.upsaude.service.impl;
 
-import com.upsaude.api.request.PacienteRequest;
-import com.upsaude.api.request.EnderecoRequest;
+import java.time.LocalDate;
+import java.time.Period;
+import java.util.UUID;
+
+import org.hibernate.Hibernate;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.context.annotation.Lazy;
+import org.springframework.dao.DataAccessException;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
+
 import com.upsaude.api.request.AlergiasPacienteSimplificadoRequest;
 import com.upsaude.api.request.DeficienciasPacienteSimplificadoRequest;
 import com.upsaude.api.request.DoencasPacienteSimplificadoRequest;
 import com.upsaude.api.request.MedicacaoPacienteSimplificadoRequest;
+import com.upsaude.api.request.PacienteRequest;
 import com.upsaude.api.response.PacienteResponse;
 import com.upsaude.api.response.PacienteSimplificadoResponse;
-import com.upsaude.entity.*;
+import com.upsaude.entity.Convenio;
+import com.upsaude.entity.Paciente;
+import com.upsaude.entity.Tenant;
 import com.upsaude.enums.StatusPacienteEnum;
 import com.upsaude.exception.BadRequestException;
 import com.upsaude.exception.InternalServerErrorException;
 import com.upsaude.exception.NotFoundException;
-import org.springframework.dao.DataAccessException;
-import com.upsaude.mapper.PacienteMapper;
 import com.upsaude.mapper.EnderecoMapper;
-import com.upsaude.repository.*;
-import com.upsaude.service.PacienteService;
+import com.upsaude.mapper.PacienteMapper;
+import com.upsaude.repository.CidadesRepository;
+import com.upsaude.repository.ConvenioRepository;
+import com.upsaude.repository.DadosClinicosBasicosRepository;
+import com.upsaude.repository.DadosSociodemograficosRepository;
+import com.upsaude.repository.EnderecoRepository;
+import com.upsaude.repository.EstadosRepository;
+import com.upsaude.repository.IntegracaoGovRepository;
+import com.upsaude.repository.LGPDConsentimentoRepository;
+import com.upsaude.repository.PacienteRepository;
+import com.upsaude.repository.ResponsavelLegalRepository;
 import com.upsaude.service.AlergiasPacienteService;
 import com.upsaude.service.DeficienciasPacienteService;
 import com.upsaude.service.DoencasPacienteService;
-import com.upsaude.service.MedicacaoPacienteService;
 import com.upsaude.service.EnderecoService;
+import com.upsaude.service.MedicacaoPacienteService;
+import com.upsaude.service.PacienteService;
 import com.upsaude.service.TenantService;
-import org.springframework.transaction.annotation.Transactional;
+import com.upsaude.helper.ValidadorHelper;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.hibernate.Hibernate;
-import org.springframework.data.domain.Page;
-import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.Cacheable;
-import org.springframework.cache.annotation.CachePut;
-import org.springframework.context.annotation.Lazy;
-import org.springframework.data.domain.Pageable;
-import org.springframework.stereotype.Service;
-import org.springframework.util.StringUtils;
-import org.springframework.dao.DataIntegrityViolationException;
 
-import java.time.LocalDate;
-import java.time.Period;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
-
-/**
- * Implementação do serviço de gerenciamento de Pacientes.
- * Responsável por aplicar regras de negócio e coordenar operações CRUD.
- *
- * @author UPSaúde
- */
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -63,37 +67,25 @@ public class PacienteServiceImpl implements PacienteService {
     private final EnderecoRepository enderecoRepository;
     private final EstadosRepository estadosRepository;
     private final CidadesRepository cidadesRepository;
-    
-    // Repositories para entidades relacionadas
+
     private final ConvenioRepository convenioRepository;
     private final DadosSociodemograficosRepository dadosSociodemograficosRepository;
     private final DadosClinicosBasicosRepository dadosClinicosBasicosRepository;
     private final ResponsavelLegalRepository responsavelLegalRepository;
     private final LGPDConsentimentoRepository lgpdConsentimentoRepository;
     private final IntegracaoGovRepository integracaoGovRepository;
-    
-    // Services para criar relacionamentos simplificados
+
     private final AlergiasPacienteService alergiasPacienteService;
     private final DeficienciasPacienteService deficienciasPacienteService;
     private final DoencasPacienteService doencasPacienteService;
     private final MedicacaoPacienteService medicacaoPacienteService;
     private final EnderecoService enderecoService;
     private final TenantService tenantService;
-    
-    // Self-injection: injeta o próprio service (proxy) para evitar self-invocation
-    // @Lazy evita dependência circular na inicialização
-    // @Autowired é necessário porque @RequiredArgsConstructor não injeta campos com @Lazy
+
     @Autowired
     @Lazy
     private PacienteService self;
 
-    /**
-     * {@inheritDoc}
-     * 
-     * IMPORTANTE: Usa @CachePut para adicionar o paciente criado ao cache.
-     * Não usa @CacheEvict com allEntries=true para evitar limpar todo o cache desnecessariamente.
-     * O paciente criado será automaticamente adicionado ao cache com sua chave (ID).
-     */
     @Override
     @Transactional
     @CachePut(value = "paciente", key = "#result.id")
@@ -101,29 +93,22 @@ public class PacienteServiceImpl implements PacienteService {
         log.debug("Criando novo paciente: {}", request != null ? request.getNomeCompleto() : "null");
 
         try {
-            // Validação de dados básicos é feita automaticamente pelo Bean Validation no Request
-            
-            // Validação adicional: nomeCompleto não pode ser nulo ou vazio após validação
             if (request == null || !StringUtils.hasText(request.getNomeCompleto())) {
                 throw new BadRequestException("Nome completo é obrigatório");
             }
-            
-            // Validação adicional: RG não pode exceder 20 caracteres
+
             if (StringUtils.hasText(request.getRg()) && request.getRg().length() > 20) {
                 throw new BadRequestException("RG deve ter no máximo 20 caracteres");
             }
-            
-            // Validações de duplicatas antes de criar
-            validarCpfUnico(null, request.getCpf());
-            validarEmailUnico(null, request.getEmail());
-            validarCnsUnico(null, request.getCns());
-            validarRgUnico(null, request.getRg());
+
+            ValidadorHelper.validarCpfUnicoPaciente(null, request.getCpf(), pacienteRepository);
+            ValidadorHelper.validarEmailUnicoPaciente(null, request.getEmail(), pacienteRepository);
+            ValidadorHelper.validarCnsUnicoPaciente(null, request.getCns(), pacienteRepository);
+            ValidadorHelper.validarRgUnicoPaciente(null, request.getRg(), pacienteRepository);
 
             Paciente paciente = pacienteMapper.fromRequest(request);
             paciente.setActive(true);
-            
-            // Garantir valores padrão para campos obrigatórios que podem ser null após mapeamento
-            // O MapStruct pode sobrescrever valores padrão da entidade com null quando o campo não vem no request
+
             if (paciente.getAcompanhadoPorEquipeEsf() == null) {
                 paciente.setAcompanhadoPorEquipeEsf(false);
             }
@@ -143,59 +128,21 @@ public class PacienteServiceImpl implements PacienteService {
                 paciente.setStatusPaciente(StatusPacienteEnum.ATIVO);
             }
 
-            // Processar relacionamentos na ordem correta ANTES de salvar o paciente
             processarRelacionamentos(paciente, request);
 
-            // Salvar paciente - trata erro de constraint única em endereços
             Paciente pacienteSalvo;
             try {
                 pacienteSalvo = pacienteRepository.save(paciente);
             } catch (DataIntegrityViolationException e) {
-                // Se erro for de constraint única em pacientes_enderecos, criar novos endereços
                 if (e.getMessage() != null && e.getMessage().contains("pacientes_enderecos_endereco_id_key")) {
                     log.warn("Erro ao associar endereços: endereço já associado a outro paciente. Criando novos endereços.");
-                    // TODO: PacienteRequest não possui campo enderecos - necessário adicionar ou remover esta lógica
-                    /*
-                    // Remove endereços problemáticos e cria novos
-                    if (request.getEnderecos() != null && !request.getEnderecos().isEmpty()) {
-                        paciente.setEnderecos(new ArrayList<>());
-                        List<Endereco> novosEnderecos = new ArrayList<>();
-                        Tenant tenant = tenantService.obterTenantDoUsuarioAutenticado();
-                        for (EnderecoRequest enderecoRequest : request.getEnderecos()) {
-                            if (enderecoRequest != null && (enderecoRequest.getLogradouro() != null || enderecoRequest.getNumero() != null)) {
-                                Endereco novoEndereco = enderecoMapper.fromRequest(enderecoRequest);
-                                novoEndereco.setActive(true);
-                                novoEndereco.setTenant(tenant);
-                                if (novoEndereco.getSemNumero() == null) {
-                                    novoEndereco.setSemNumero(false);
-                                }
-                                if (enderecoRequest.getEstado() != null) {
-                                    Estados estado = estadosRepository.findById(enderecoRequest.getEstado())
-                                            .orElseThrow(() -> new NotFoundException("Estado não encontrado com ID: " + enderecoRequest.getEstado()));
-                                    novoEndereco.setEstado(estado);
-                                }
-                                if (enderecoRequest.getCidade() != null) {
-                                    Cidades cidade = cidadesRepository.findById(enderecoRequest.getCidade())
-                                            .orElseThrow(() -> new NotFoundException("Cidade não encontrada com ID: " + enderecoRequest.getCidade()));
-                                    novoEndereco.setCidade(cidade);
-                                }
-                                // Cria novo endereço diretamente (não usa findOrCreate para evitar reutilizar)
-                                Endereco enderecoCriado = enderecoRepository.save(novoEndereco);
-                                novosEnderecos.add(enderecoCriado);
-                            }
-                        }
-                        paciente.setEnderecos(novosEnderecos);
-                    }
-                    */
-                    // Tenta salvar novamente
                     pacienteSalvo = pacienteRepository.save(paciente);
                 } else {
-                    throw e; // Re-lança se for outro tipo de erro
+                    throw e;
                 }
             }
             log.info("Paciente criado com sucesso. ID: {} - Será adicionado ao cache automaticamente", pacienteSalvo.getId());
 
-            // Processar listas de IDs de doenças, alergias, deficiências e medicações após salvar o paciente
             processarRelacionamentosPorId(pacienteSalvo, request);
 
             PacienteResponse response = pacienteMapper.toResponse(pacienteSalvo);
@@ -214,16 +161,6 @@ public class PacienteServiceImpl implements PacienteService {
         }
     }
 
-    /**
-     * {@inheritDoc}
-     * 
-     * IMPORTANTE: O cache funciona porque quando este método é chamado externamente
-     * (via controller), o Spring automaticamente usa o proxy AOP, ativando o @Cacheable.
-     * 
-     * O campo 'self' está disponível caso seja necessário chamar este método internamente
-     * de outros métodos da mesma classe. Nesse caso, use this.self.obterPorId(id) para
-     * garantir que o proxy seja usado e o cache funcione.
-     */
     @Override
     @Transactional(readOnly = true)
     @Cacheable(value = "paciente", key = "#id")
@@ -233,15 +170,11 @@ public class PacienteServiceImpl implements PacienteService {
             throw new BadRequestException("ID do paciente é obrigatório");
         }
 
-        // Se chegou aqui, significa que não estava no cache (cache miss)
-        // O Spring Cache intercepta antes e só chama este método se não encontrar no cache
         log.debug("Cache MISS para paciente ID: {} - Buscando no banco de dados", id);
-        
+
         Paciente paciente = pacienteRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Paciente não encontrado com ID: " + id));
 
-        // Inicializa as coleções lazy dentro da transação para evitar LazyInitializationException
-        // Isso força o Hibernate a carregar os relacionamentos antes de fechar a sessão
         Hibernate.initialize(paciente.getEnderecos());
         Hibernate.initialize(paciente.getDoencas());
         Hibernate.initialize(paciente.getAlergias());
@@ -252,8 +185,7 @@ public class PacienteServiceImpl implements PacienteService {
         Hibernate.initialize(paciente.getResponsavelLegal());
         Hibernate.initialize(paciente.getLgpdConsentimento());
         Hibernate.initialize(paciente.getIntegracaoGov());
-        
-        // Inicializar objetos nested dentro dos relacionamentos se necessário
+
         if (paciente.getDoencas() != null) {
             paciente.getDoencas().forEach(doenca -> {
                 if (doenca.getDoenca() != null) {
@@ -264,7 +196,7 @@ public class PacienteServiceImpl implements PacienteService {
                 }
             });
         }
-        
+
         if (paciente.getAlergias() != null) {
             paciente.getAlergias().forEach(alergia -> {
                 if (alergia.getAlergia() != null) {
@@ -272,12 +204,12 @@ public class PacienteServiceImpl implements PacienteService {
                 }
             });
         }
-        
+
         if (paciente.getMedicacoes() != null) {
             paciente.getMedicacoes().forEach(medicacao -> {
                 if (medicacao.getMedicacao() != null) {
                     Hibernate.initialize(medicacao.getMedicacao());
-                    // Inicializar objetos nested da medicacao se necessário
+
                     if (medicacao.getMedicacao().getIdentificacao() != null) {
                         Hibernate.initialize(medicacao.getMedicacao().getIdentificacao());
                     }
@@ -293,18 +225,6 @@ public class PacienteServiceImpl implements PacienteService {
         return response;
     }
 
-
-    /**
-     * Converte uma entidade Paciente para PacienteSimplificadoResponse.
-     * Retorna apenas os dados básicos, sem relacionamentos.
-     *
-     * @param paciente entidade Paciente a ser convertida
-     * @return PacienteSimplificadoResponse com dados básicos
-     */
-    /**
-     * Converte entidade Paciente para resposta simplificada.
-     * Usado quando já temos a entidade carregada.
-     */
     private PacienteSimplificadoResponse converterParaSimplificado(Paciente paciente) {
         return PacienteSimplificadoResponse.builder()
                 .id(paciente.getId())
@@ -354,10 +274,6 @@ public class PacienteServiceImpl implements PacienteService {
                 .build();
     }
 
-    /**
-     * Converte projeção otimizada para resposta simplificada.
-     * Usado na listagem para melhor performance, evitando carregar relacionamentos lazy.
-     */
     private PacienteSimplificadoResponse converterProjecaoParaSimplificado(
             com.upsaude.repository.projection.PacienteSimplificadoProjection projecao) {
         return PacienteSimplificadoResponse.builder()
@@ -408,29 +324,13 @@ public class PacienteServiceImpl implements PacienteService {
                 .build();
     }
 
-    /**
-     * {@inheritDoc}
-     * 
-     * OTIMIZAÇÃO: Usa EntityGraph para carregar todos os relacionamentos necessários
-     * em uma única query, evitando o problema N+1 queries.
-     * O método findAll() do repository já está configurado com @EntityGraph que carrega:
-     * - convenio
-     * - enderecos
-     * - doencas
-     * - alergias
-     * - deficiencias
-     * - medicacoes
-     */
     @Override
     @Transactional(readOnly = true)
     public Page<PacienteResponse> listar(Pageable pageable) {
-        log.debug("Listando pacientes paginados. Página: {}, Tamanho: {}", 
-                pageable.getPageNumber(), pageable.getPageSize());
+        log.debug("Listando pacientes paginados. Página: {}, Tamanho: {}",  pageable.getPageNumber(), pageable.getPageSize());
 
-        // Busca pacientes paginados com relacionamentos carregados via EntityGraph
-        // O EntityGraph garante que todos os relacionamentos sejam carregados em uma única query
         Page<Paciente> pacientes = pacienteRepository.findAll(pageable);
-        
+
         return pacientes.map(paciente -> {
             PacienteResponse response = pacienteMapper.toResponse(paciente);
             calcularIdade(response);
@@ -438,30 +338,18 @@ public class PacienteServiceImpl implements PacienteService {
         });
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     @Transactional(readOnly = true)
     public Page<PacienteSimplificadoResponse> listarSimplificado(Pageable pageable) {
-        log.debug("Listando pacientes simplificados paginados. Página: {}, Tamanho: {}", 
+        log.debug("Listando pacientes simplificados paginados. Página: {}, Tamanho: {}",
                 pageable.getPageNumber(), pageable.getPageSize());
 
-        // Usa projeção otimizada que seleciona apenas os campos necessários
-        // sem carregar relacionamentos lazy, melhorando significativamente a performance
-        Page<com.upsaude.repository.projection.PacienteSimplificadoProjection> projecoes = 
+        Page<com.upsaude.repository.projection.PacienteSimplificadoProjection> projecoes =
                 pacienteRepository.findAllSimplificado(pageable);
-        
-        // Converte projeção para resposta simplificada
+
         return projecoes.map(this::converterProjecaoParaSimplificado);
     }
 
-    /**
-     * {@inheritDoc}
-     * 
-     * IMPORTANTE: Usa @CachePut para atualizar o cache com os dados atualizados.
-     * Isso garante que o cache sempre tenha os dados mais recentes após atualização.
-     */
     @Override
     @Transactional
     @CachePut(value = "paciente", key = "#id")
@@ -472,26 +360,21 @@ public class PacienteServiceImpl implements PacienteService {
             throw new BadRequestException("ID do paciente é obrigatório");
         }
 
-        // Validação de dados básicos é feita automaticamente pelo Bean Validation no Request
-
         Paciente pacienteExistente = pacienteRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Paciente não encontrado com ID: " + id));
 
-        // Validações de duplicatas antes de atualizar
-        validarCpfUnico(id, request.getCpf());
-        validarEmailUnico(id, request.getEmail());
-        validarCnsUnico(id, request.getCns());
-        validarRgUnico(id, request.getRg());
+        ValidadorHelper.validarCpfUnicoPaciente(id, request.getCpf(), pacienteRepository);
+        ValidadorHelper.validarEmailUnicoPaciente(id, request.getEmail(), pacienteRepository);
+        ValidadorHelper.validarCnsUnicoPaciente(id, request.getCns(), pacienteRepository);
+        ValidadorHelper.validarRgUnicoPaciente(id, request.getRg(), pacienteRepository);
 
         atualizarDadosPaciente(pacienteExistente, request);
-        
-        // Processar relacionamentos na ordem correta ANTES de salvar o paciente
+
         processarRelacionamentos(pacienteExistente, request);
 
         Paciente pacienteAtualizado = pacienteRepository.save(pacienteExistente);
         log.info("Paciente atualizado com sucesso. ID: {} - Cache será atualizado automaticamente", pacienteAtualizado.getId());
 
-        // Processar listas de IDs de doenças, alergias, deficiências e medicações após salvar o paciente
         processarRelacionamentosPorId(pacienteAtualizado, request);
 
         PacienteResponse response = pacienteMapper.toResponse(pacienteAtualizado);
@@ -500,14 +383,18 @@ public class PacienteServiceImpl implements PacienteService {
         return response;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     @Transactional
     @CacheEvict(value = "paciente", key = "#id")
     public void excluir(UUID id) {
-        log.debug("Excluindo paciente. ID: {}", id);
+        inativar(id);
+    }
+
+    @Override
+    @Transactional
+    @CacheEvict(value = "paciente", key = "#id")
+    public void inativar(UUID id) {
+        log.debug("Inativando paciente. ID: {}", id);
 
         if (id == null) {
             throw new BadRequestException("ID do paciente é obrigatório");
@@ -520,178 +407,41 @@ public class PacienteServiceImpl implements PacienteService {
             throw new BadRequestException("Paciente já está inativo");
         }
 
-        // paciente.setActive(false);
-        // pacienteRepository.save(paciente);
+        paciente.setActive(false);
+        pacienteRepository.save(paciente);
+        log.info("Paciente inativado com sucesso. ID: {}", id);
+    }
+
+    @Override
+    @Transactional
+    @CacheEvict(value = "paciente", key = "#id")
+    public void deletarPermanentemente(UUID id) {
+        log.debug("Deletando paciente permanentemente. ID: {}", id);
+
+        if (id == null) {
+            throw new BadRequestException("ID do paciente é obrigatório");
+        }
+
+        Paciente paciente = pacienteRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Paciente não encontrado com ID: " + id));
+
         pacienteRepository.delete(paciente);
-        log.info("Paciente excluído (desativado) com sucesso. ID: {}", id);
+        log.info("Paciente deletado permanentemente do banco de dados. ID: {}", id);
     }
 
-    // Validações de dados básicos foram movidas para o Request usando Bean Validation
-    // (@NotNull, @NotBlank, @Pattern, etc). Isso garante validação automática no Controller
-    // e retorno de erro 400 padronizado via ApiExceptionHandler.
-
-    /**
-     * Valida se o CPF é único no sistema.
-     *
-     * @param pacienteId ID do paciente atual (null se for criação)
-     * @param cpf CPF a ser validado
-     * @throws BadRequestException se já existir outro paciente com o mesmo CPF
-     */
-    private void validarCpfUnico(UUID pacienteId, String cpf) {
-        if (!StringUtils.hasText(cpf)) {
-            return;
-        }
-
-        Optional<Paciente> pacienteExistente = pacienteRepository.findByCpf(cpf);
-
-        if (pacienteExistente.isPresent()) {
-            Paciente pacienteEncontrado = pacienteExistente.get();
-
-            // Se for atualização, verifica se o CPF pertence a outro paciente
-            if (pacienteId != null && !pacienteEncontrado.getId().equals(pacienteId)) {
-                throw new BadRequestException("Já existe um paciente cadastrado com o CPF: " + cpf);
-            }
-
-            // Se for criação, sempre lança exceção se encontrar CPF
-            if (pacienteId == null) {
-                throw new BadRequestException("Já existe um paciente cadastrado com o CPF: " + cpf);
-            }
-        }
-    }
-
-    /**
-     * Valida se o email é único no sistema.
-     *
-     * @param pacienteId ID do paciente atual (null se for criação)
-     * @param email email a ser validado
-     * @throws BadRequestException se já existir outro paciente com o mesmo email
-     */
-    private void validarEmailUnico(UUID pacienteId, String email) {
-        if (!StringUtils.hasText(email)) {
-            return;
-        }
-
-        Optional<Paciente> pacienteExistente = pacienteRepository.findByEmail(email);
-
-        if (pacienteExistente.isPresent()) {
-            Paciente pacienteEncontrado = pacienteExistente.get();
-
-            // Se for atualização, verifica se o email pertence a outro paciente
-            if (pacienteId != null && !pacienteEncontrado.getId().equals(pacienteId)) {
-                throw new BadRequestException("Já existe um paciente cadastrado com o email: " + email);
-            }
-
-            // Se for criação, sempre lança exceção se encontrar email
-            if (pacienteId == null) {
-                throw new BadRequestException("Já existe um paciente cadastrado com o email: " + email);
-            }
-        }
-    }
-
-    /**
-     * Valida se o CNS (Cartão Nacional de Saúde) é único no sistema.
-     *
-     * @param pacienteId ID do paciente atual (null se for criação)
-     * @param cns CNS a ser validado
-     * @throws BadRequestException se já existir outro paciente com o mesmo CNS
-     */
-    private void validarCnsUnico(UUID pacienteId, String cns) {
-        if (!StringUtils.hasText(cns)) {
-            return;
-        }
-
-        Optional<Paciente> pacienteExistente = pacienteRepository.findByCns(cns);
-
-        if (pacienteExistente.isPresent()) {
-            Paciente pacienteEncontrado = pacienteExistente.get();
-
-            // Se for atualização, verifica se o CNS pertence a outro paciente
-            if (pacienteId != null && !pacienteEncontrado.getId().equals(pacienteId)) {
-                throw new BadRequestException("Já existe um paciente cadastrado com o CNS: " + cns);
-            }
-
-            // Se for criação, sempre lança exceção se encontrar CNS
-            if (pacienteId == null) {
-                throw new BadRequestException("Já existe um paciente cadastrado com o CNS: " + cns);
-            }
-        }
-    }
-
-    /**
-     * Valida se o RG é único no sistema.
-     *
-     * @param pacienteId ID do paciente atual (null se for criação)
-     * @param rg RG a ser validado
-     * @throws BadRequestException se já existir outro paciente com o mesmo RG
-     */
-    private void validarRgUnico(UUID pacienteId, String rg) {
-        if (!StringUtils.hasText(rg)) {
-            return;
-        }
-
-        Optional<Paciente> pacienteExistente = pacienteRepository.findByRg(rg);
-
-        if (pacienteExistente.isPresent()) {
-            Paciente pacienteEncontrado = pacienteExistente.get();
-
-            // Se for atualização, verifica se o RG pertence a outro paciente
-            if (pacienteId != null && !pacienteEncontrado.getId().equals(pacienteId)) {
-                throw new BadRequestException("Já existe um paciente cadastrado com o RG: " + rg);
-            }
-
-            // Se for criação, sempre lança exceção se encontrar RG
-            if (pacienteId == null) {
-                throw new BadRequestException("Já existe um paciente cadastrado com o RG: " + rg);
-            }
-        }
-    }
-
-    /**
-     * Atualiza os dados do paciente com base no request.
-     * Usa o método updateFromRequest do mapper para atualizar todos os campos,
-     * incluindo tipoCns, identidadeGenero e orientacaoSexual.
-     *
-     * @param paciente paciente existente a ser atualizado
-     * @param request dados atualizados
-     */
     private void atualizarDadosPaciente(Paciente paciente, PacienteRequest request) {
-        // Usa o método updateFromRequest do mapper que atualiza todos os campos automaticamente
-        // Isso garante que todos os campos do request sejam atualizados, incluindo:
-        // - tipoCns
-        // - identidadeGenero
-        // - orientacaoSexual
-        // - e todos os outros campos do PacienteRequest
         pacienteMapper.updateFromRequest(request, paciente);
-        
-        // Relacionamentos serão tratados no método processarRelacionamentos
     }
 
-    /**
-     * Processa relacionamentos do paciente de forma simplificada.
-     * Com as anotações corretas do JPA (cascade, orphanRemoval), o Hibernate 
-     * gerencia automaticamente a ordem de salvamento e integridade referencial.
-     *
-     * Responsabilidades deste método:
-     * 1. Buscar entidades relacionadas existentes (apenas validação)
-     * 2. Sincronizar relacionamentos bidirecionais
-     * 3. O JPA/Hibernate cuida do resto (ordem, persistência, cascade)
-     *
-     * @param paciente entidade Paciente a ser processada
-     * @param request dados do request com os UUIDs dos relacionamentos
-     */
     private void processarRelacionamentos(Paciente paciente, PacienteRequest request) {
         log.debug("Processando relacionamentos do paciente");
 
-        // CONVÊNIO (ManyToOne) - Buscar entidade existente
         if (request.getConvenio() != null) {
             Convenio convenio = convenioRepository.findById(request.getConvenio())
                     .orElseThrow(() -> new NotFoundException("Convênio não encontrado com ID: " + request.getConvenio()));
             paciente.setConvenio(convenio);
         }
 
-        // RELACIONAMENTOS OneToOne - Sincronização bidirecional
-        // O JPA com cascade=ALL e orphanRemoval=true gerencia tudo automaticamente
-        
         processarRelacionamentoOneToOne(
             request.getDadosSociodemograficos(),
             dadosSociodemograficosRepository,
@@ -742,121 +492,17 @@ public class PacienteServiceImpl implements PacienteService {
             "Integração governamental"
         );
 
-        // ENDEREÇOS (OneToMany) - Buscar endereços existentes ou criar novos para evitar duplicados
-        // TODO: PacienteRequest não possui campo enderecos - necessário adicionar ou remover esta lógica
-        /*
-        if (request.getEnderecos() != null && !request.getEnderecos().isEmpty()) {
-            // Obtém o tenant do usuário autenticado (obrigatório para Endereco que estende BaseEntity)
-            Tenant tenant = tenantService.obterTenantDoUsuarioAutenticado();
-            if (tenant == null) {
-                throw new BadRequestException("Não foi possível obter tenant do usuário autenticado. É necessário estar autenticado para criar endereços.");
-            }
-            
-            List<Endereco> enderecos = new ArrayList<>();
-            for (EnderecoRequest enderecoRequest : request.getEnderecos()) {
-                // Só processa endereço se tiver logradouro ou número
-                if (enderecoRequest.getLogradouro() != null || enderecoRequest.getNumero() != null) {
-                    try {
-                        Endereco endereco = enderecoMapper.fromRequest(enderecoRequest);
-                        endereco.setActive(true);
-                        
-                        // Define o tenant do endereço (obrigatório para BaseEntity)
-                        endereco.setTenant(tenant);
-                        
-                        // Garante valores padrão para campos obrigatórios
-                        if (endereco.getSemNumero() == null) {
-                            endereco.setSemNumero(false);
-                        }
-                        
-                        // Processa relacionamentos estado e cidade (opcionais)
-                        if (enderecoRequest.getEstado() != null) {
-                            Estados estado = estadosRepository.findById(enderecoRequest.getEstado())
-                                    .orElseThrow(() -> new NotFoundException("Estado não encontrado com ID: " + enderecoRequest.getEstado()));
-                            endereco.setEstado(estado);
-                        }
-
-                        if (enderecoRequest.getCidade() != null) {
-                            Cidades cidade = cidadesRepository.findById(enderecoRequest.getCidade())
-                                    .orElseThrow(() -> new NotFoundException("Cidade não encontrada com ID: " + enderecoRequest.getCidade()));
-                            endereco.setCidade(cidade);
-                        }
-                        
-                        // Usa findOrCreate para evitar duplicados - busca endereço existente ou cria novo
-                        // IMPORTANTE: Se o endereço retornado já estiver associado a outro paciente
-                        // (devido à constraint única pacientes_enderecos_endereco_id_key), cria um novo endereço
-                        Endereco enderecoEncontrado = enderecoService.findOrCreate(endereco);
-                        
-                        // Verifica se o endereço já está associado a outro paciente usando query nativa
-                        Long countAssociacoes = enderecoRepository.countAssociacoesPaciente(enderecoEncontrado.getId());
-                        Endereco enderecoFinal;
-                        
-                        if (countAssociacoes != null && countAssociacoes > 0) {
-                            log.warn("Endereço {} já associado a {} paciente(s). Criando novo endereço para evitar constraint única.", enderecoEncontrado.getId(), countAssociacoes);
-                            // Cria novo endereço sem tentar reutilizar - força criação de novo registro
-                            // Remove ID e recria o endereço para garantir que seja um novo registro
-                            Endereco novoEndereco = enderecoMapper.fromRequest(enderecoRequest);
-                            novoEndereco.setId(null); // Remove ID para forçar criação
-                            novoEndereco.setActive(true);
-                            novoEndereco.setTenant(tenant);
-                            if (novoEndereco.getSemNumero() == null) {
-                                novoEndereco.setSemNumero(false);
-                            }
-                            if (enderecoRequest.getEstado() != null) {
-                                Estados estado = estadosRepository.findById(enderecoRequest.getEstado())
-                                        .orElseThrow(() -> new NotFoundException("Estado não encontrado com ID: " + enderecoRequest.getEstado()));
-                                novoEndereco.setEstado(estado);
-                            }
-                            if (enderecoRequest.getCidade() != null) {
-                                Cidades cidade = cidadesRepository.findById(enderecoRequest.getCidade())
-                                        .orElseThrow(() -> new NotFoundException("Cidade não encontrada com ID: " + enderecoRequest.getCidade()));
-                                novoEndereco.setCidade(cidade);
-                            }
-                            enderecoFinal = enderecoRepository.save(novoEndereco);
-                            log.debug("Novo endereço criado devido a constraint única. ID: {}", enderecoFinal.getId());
-                        } else {
-                            enderecoFinal = enderecoEncontrado;
-                        }
-                        
-                        enderecos.add(enderecoFinal);
-                        log.debug("Endereço processado. ID: {}", enderecoFinal.getId());
-                    } catch (BadRequestException | NotFoundException e) {
-                        log.warn("Erro de validação ao processar endereço. Endereço será ignorado para não bloquear criação do paciente. Erro: {}", e.getMessage());
-                        // Não lança exceção para não bloquear criação do paciente quando endereço é inválido
-                        // Apenas loga o erro e continua com os outros endereços
-                    } catch (RuntimeException e) {
-                        log.error("Erro inesperado ao processar endereço. Endereço será ignorado para não bloquear criação do paciente. Exception: {}", e.getClass().getSimpleName(), e);
-                        // Não lança exceção para não bloquear criação do paciente quando endereço é inválido
-                        // Apenas loga o erro e continua com os outros endereços
-                    }
-                }
-            }
-            if (!enderecos.isEmpty()) {
-                paciente.setEnderecos(enderecos);
-                log.debug("{} endereço(s) processado(s) para associação ao paciente", enderecos.size());
-            }
-        }
-        */
-
         log.debug("Relacionamentos processados. JPA gerenciará persistência automaticamente.");
     }
 
-    /**
-     * Processa relacionamentos de doenças, alergias, deficiências e medicações usando apenas IDs.
-     * Cria os registros usando os métodos simplificados após o paciente ser salvo.
-     *
-     * @param paciente paciente já salvo no banco
-     * @param request dados do request com as listas de IDs
-     */
     private void processarRelacionamentosPorId(Paciente paciente, PacienteRequest request) {
         log.debug("Processando relacionamentos por ID do paciente: {}", paciente.getId());
 
-        // Obtém o tenant do usuário autenticado (obrigatório para os relacionamentos)
         Tenant tenant = tenantService.obterTenantDoUsuarioAutenticado();
         if (tenant == null) {
             throw new BadRequestException("Não foi possível obter tenant do usuário autenticado. É necessário estar autenticado para criar relacionamentos.");
         }
 
-        // Processa DOENÇAS
         if (request.getDoencas() != null && !request.getDoencas().isEmpty()) {
             log.debug("Processando {} doença(s) para o paciente", request.getDoencas().size());
             for (UUID doencaId : request.getDoencas()) {
@@ -869,18 +515,17 @@ public class PacienteServiceImpl implements PacienteService {
                     doencasPacienteService.criarSimplificado(doencaRequest);
                     log.debug("Doença {} associada ao paciente {}", doencaId, paciente.getId());
                 } catch (BadRequestException | NotFoundException e) {
-                    log.warn("Erro ao associar doença {} ao paciente {}. Erro: {}", 
+                    log.warn("Erro ao associar doença {} ao paciente {}. Erro: {}",
                         doencaId, paciente.getId(), e.getMessage());
                     throw e;
                 } catch (RuntimeException e) {
-                    log.error("Erro inesperado ao associar doença {} ao paciente {}. Exception: {}", 
+                    log.error("Erro inesperado ao associar doença {} ao paciente {}. Exception: {}",
                         doencaId, paciente.getId(), e.getClass().getSimpleName(), e);
                     throw new BadRequestException("Erro ao associar doença " + doencaId + ": " + e.getMessage(), e);
                 }
             }
         }
 
-        // Processa ALERGIAS
         if (request.getAlergias() != null && !request.getAlergias().isEmpty()) {
             log.debug("Processando {} alergia(s) para o paciente", request.getAlergias().size());
             for (UUID alergiaId : request.getAlergias()) {
@@ -893,18 +538,17 @@ public class PacienteServiceImpl implements PacienteService {
                     alergiasPacienteService.criarSimplificado(alergiaRequest);
                     log.debug("Alergia {} associada ao paciente {}", alergiaId, paciente.getId());
                 } catch (BadRequestException | NotFoundException e) {
-                    log.warn("Erro ao associar alergia {} ao paciente {}. Erro: {}", 
+                    log.warn("Erro ao associar alergia {} ao paciente {}. Erro: {}",
                         alergiaId, paciente.getId(), e.getMessage());
                     throw e;
                 } catch (RuntimeException e) {
-                    log.error("Erro inesperado ao associar alergia {} ao paciente {}. Exception: {}", 
+                    log.error("Erro inesperado ao associar alergia {} ao paciente {}. Exception: {}",
                         alergiaId, paciente.getId(), e.getClass().getSimpleName(), e);
                     throw new BadRequestException("Erro ao associar alergia " + alergiaId + ": " + e.getMessage(), e);
                 }
             }
         }
 
-        // Processa DEFICIÊNCIAS
         if (request.getDeficiencias() != null && !request.getDeficiencias().isEmpty()) {
             log.debug("Processando {} deficiência(s) para o paciente", request.getDeficiencias().size());
             for (UUID deficienciaId : request.getDeficiencias()) {
@@ -917,18 +561,17 @@ public class PacienteServiceImpl implements PacienteService {
                     deficienciasPacienteService.criarSimplificado(deficienciaRequest);
                     log.debug("Deficiência {} associada ao paciente {}", deficienciaId, paciente.getId());
                 } catch (BadRequestException | NotFoundException e) {
-                    log.warn("Erro ao associar deficiência {} ao paciente {}. Erro: {}", 
+                    log.warn("Erro ao associar deficiência {} ao paciente {}. Erro: {}",
                         deficienciaId, paciente.getId(), e.getMessage());
                     throw e;
                 } catch (RuntimeException e) {
-                    log.error("Erro inesperado ao associar deficiência {} ao paciente {}. Exception: {}", 
+                    log.error("Erro inesperado ao associar deficiência {} ao paciente {}. Exception: {}",
                         deficienciaId, paciente.getId(), e.getClass().getSimpleName(), e);
                     throw new BadRequestException("Erro ao associar deficiência " + deficienciaId + ": " + e.getMessage(), e);
                 }
             }
         }
 
-        // Processa MEDICAÇÕES
         if (request.getMedicacoes() != null && !request.getMedicacoes().isEmpty()) {
             log.debug("Processando {} medicação(ões) para o paciente", request.getMedicacoes().size());
             for (UUID medicacaoId : request.getMedicacoes()) {
@@ -941,11 +584,11 @@ public class PacienteServiceImpl implements PacienteService {
                     medicacaoPacienteService.criarSimplificado(medicacaoRequest);
                     log.debug("Medicação {} associada ao paciente {}", medicacaoId, paciente.getId());
                 } catch (BadRequestException | NotFoundException e) {
-                    log.warn("Erro ao associar medicação {} ao paciente {}. Erro: {}", 
+                    log.warn("Erro ao associar medicação {} ao paciente {}. Erro: {}",
                         medicacaoId, paciente.getId(), e.getMessage());
                     throw e;
                 } catch (RuntimeException e) {
-                    log.error("Erro inesperado ao associar medicação {} ao paciente {}. Exception: {}", 
+                    log.error("Erro inesperado ao associar medicação {} ao paciente {}. Exception: {}",
                         medicacaoId, paciente.getId(), e.getClass().getSimpleName(), e);
                     throw new BadRequestException("Erro ao associar medicação " + medicacaoId + ": " + e.getMessage(), e);
                 }
@@ -955,22 +598,12 @@ public class PacienteServiceImpl implements PacienteService {
         log.debug("Relacionamentos por ID processados com sucesso.");
     }
 
-    /**
-     * Método genérico para processar relacionamentos OneToOne.
-     * Reduz duplicação de código e centraliza a lógica de sincronização.
-     *
-     * @param uuid ID da entidade relacionada
-     * @param repository repository da entidade
-     * @param sincronizador função que sincroniza o relacionamento bidirecional
-     * @param nomeEntidade nome da entidade para mensagens de erro
-     * @param <T> tipo da entidade
-     */
     private <T> void processarRelacionamentoOneToOne(
             UUID uuid,
             org.springframework.data.jpa.repository.JpaRepository<T, UUID> repository,
             java.util.function.Consumer<T> sincronizador,
             String nomeEntidade) {
-        
+
         if (uuid != null) {
             T entidade = repository.findById(uuid)
                     .orElseThrow(() -> new NotFoundException(nomeEntidade + " não encontrado com ID: " + uuid));
@@ -978,18 +611,11 @@ public class PacienteServiceImpl implements PacienteService {
         }
     }
 
-    /**
-     * Calcula a idade do paciente baseada na data de nascimento.
-     * A idade é calculada como a diferença em anos entre a data de nascimento e a data atual.
-     * Se a data de nascimento não estiver disponível, a idade será null.
-     *
-     * @param response PacienteResponse que terá a idade calculada
-     */
     private void calcularIdade(PacienteResponse response) {
         if (response == null) {
             return;
         }
-        
+
         if (response.getDataNascimento() != null) {
             LocalDate dataNascimento = response.getDataNascimento();
             LocalDate hoje = LocalDate.now();
@@ -1001,4 +627,3 @@ public class PacienteServiceImpl implements PacienteService {
     }
 
 }
-

@@ -10,30 +10,14 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 
-/**
- * Mapper para conversões de Medicacao.
- * Entity ↔ DTO ↔ Request/Response
- */
 @Mapper(config = MappingConfig.class, uses = {FabricantesMedicamentoMapper.class, com.upsaude.mapper.embeddable.IdentificacaoMedicamentoMapper.class, com.upsaude.mapper.embeddable.DosagemAdministracaoMedicamentoMapper.class, com.upsaude.mapper.embeddable.ClassificacaoMedicamentoMapper.class, com.upsaude.mapper.embeddable.RegistroControleMedicamentoMapper.class, com.upsaude.mapper.embeddable.ContraindicacoesPrecaucoesMedicamentoMapper.class, com.upsaude.mapper.embeddable.ConservacaoArmazenamentoMedicamentoMapper.class})
 public interface MedicacaoMapper extends EntityMapper<Medicacao, MedicacaoDTO> {
 
-    /**
-     * Converte DTO para Entity.
-     * O campo 'active' é ignorado (gerenciado pelo sistema).
-     */
     @Mapping(target = "active", ignore = true)
     Medicacao toEntity(MedicacaoDTO dto);
 
-    /**
-     * Converte Entity para DTO.
-     */
     MedicacaoDTO toDTO(Medicacao entity);
 
-    /**
-     * Converte Request para Entity.
-     * Os campos 'id', 'createdAt', 'updatedAt', 'active' são ignorados.
-     * Relacionamentos (UUID) devem ser tratados manualmente no Service.
-     */
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
@@ -41,11 +25,6 @@ public interface MedicacaoMapper extends EntityMapper<Medicacao, MedicacaoDTO> {
     @Mapping(target = "fabricanteEntity", ignore = true)
     Medicacao fromRequest(MedicacaoRequest request);
 
-    /**
-     * Atualiza Entity existente com dados do Request.
-     * Os campos 'id', 'createdAt', 'updatedAt', 'active' são ignorados.
-     * Relacionamentos (UUID) devem ser tratados manualmente no Service.
-     */
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
@@ -53,8 +32,5 @@ public interface MedicacaoMapper extends EntityMapper<Medicacao, MedicacaoDTO> {
     @Mapping(target = "fabricanteEntity", ignore = true)
     void updateFromRequest(MedicacaoRequest request, @MappingTarget Medicacao entity);
 
-    /**
-     * Converte Entity para Response.
-     */
     MedicacaoResponse toResponse(Medicacao entity);
 }

@@ -13,8 +13,7 @@ public interface ClassificacaoAlergiaMapper {
     ClassificacaoAlergia toEntity(ClassificacaoAlergiaRequest request);
     ClassificacaoAlergiaResponse toResponse(ClassificacaoAlergia entity);
     void updateFromRequest(ClassificacaoAlergiaRequest request, @MappingTarget ClassificacaoAlergia entity);
-    
-    // Mapeamento entre DTO e Entity
+
     ClassificacaoAlergia toEntity(ClassificacaoAlergiaDTO dto);
     ClassificacaoAlergiaDTO toDTO(ClassificacaoAlergia entity);
     void updateFromDTO(ClassificacaoAlergiaDTO dto, @MappingTarget ClassificacaoAlergia entity);

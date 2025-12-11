@@ -19,14 +19,6 @@ import jakarta.persistence.Table;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
-/**
- * Entidade que representa um catálogo de medicamentos conforme padrão SUS/SIGTAP.
- * Armazena informações completas sobre medicamentos para sistemas de prontuário eletrônico.
- * Baseado em padrões da ANVISA, SUS e sistemas de saúde.
- * Não possui relação com Tenant por ser uma entidade de referência global.
- *
- * @author UPSaúde
- */
 @Entity
 @Table(name = "medicacoes", schema = "public",
        indexes = {
@@ -50,52 +42,36 @@ public class Medicacao extends BaseEntityWithoutTenant {
         this.conservacaoArmazenamento = new ConservacaoArmazenamentoMedicamento();
     }
 
-    // ========== RELACIONAMENTOS ==========
-
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "fabricante_id")
-    private FabricantesMedicamento fabricanteEntity; // Relacionamento com entidade FabricantesMedicamento
-
-    // ========== IDENTIFICAÇÃO ==========
+    private FabricantesMedicamento fabricanteEntity;
 
     @Embedded
     private IdentificacaoMedicamento identificacao;
 
-    // ========== DOSAGEM E ADMINISTRAÇÃO ==========
-
     @Embedded
     private DosagemAdministracaoMedicamento dosagemAdministracao;
-
-    // ========== CLASSIFICAÇÃO ==========
 
     @Embedded
     private ClassificacaoMedicamento classificacao;
 
-    // ========== REGISTRO E CONTROLE ==========
-
     @Embedded
     private RegistroControleMedicamento registroControle;
-
-    // ========== CONTRAINDICAÇÕES E PRECAUÇÕES ==========
 
     @Embedded
     private ContraindicacoesPrecaucoesMedicamento contraindicacoesPrecaucoes;
 
-    // ========== CONSERVAÇÃO E ARMAZENAMENTO ==========
-
     @Embedded
     private ConservacaoArmazenamentoMedicamento conservacaoArmazenamento;
 
-    // ========== DESCRIÇÃO E OBSERVAÇÕES ==========
-
     @Column(name = "descricao", columnDefinition = "TEXT")
-    private String descricao; // Descrição geral do medicamento
+    private String descricao;
 
     @Column(name = "indicacoes", columnDefinition = "TEXT")
-    private String indicacoes; // Indicações de uso
+    private String indicacoes;
 
     @Column(name = "observacoes", columnDefinition = "TEXT")
-    private String observacoes; // Observações gerais
+    private String observacoes;
 
     @PrePersist
     @PreUpdate

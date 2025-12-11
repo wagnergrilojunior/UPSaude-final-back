@@ -9,7 +9,7 @@ import java.io.IOException;
 public class NacionalidadeEnumDeserializer extends JsonDeserializer<NacionalidadeEnum> {
     @Override
     public NacionalidadeEnum deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
-        // Se for número inteiro, tenta usar como código
+
         if (p.getCurrentToken().isNumeric()) {
             Integer codigo = p.getIntValue();
             NacionalidadeEnum result = NacionalidadeEnum.fromCodigo(codigo);
@@ -17,16 +17,14 @@ public class NacionalidadeEnumDeserializer extends JsonDeserializer<Nacionalidad
                 return result;
             }
         }
-        
-        // Se for string, tenta converter
+
         String value = p.getValueAsString();
         if (value == null || value.trim().isEmpty()) {
             return null;
         }
-        
+
         String strValue = value.trim();
-        
-        // Tenta como número (código) se for string numérica
+
         try {
             Integer codigo = Integer.parseInt(strValue);
             NacionalidadeEnum result = NacionalidadeEnum.fromCodigo(codigo);
@@ -34,20 +32,18 @@ public class NacionalidadeEnumDeserializer extends JsonDeserializer<Nacionalidad
                 return result;
             }
         } catch (NumberFormatException e) {
-            // Não é número, continua para tentar como string
+
         }
-        
-        // Tenta por descrição
+
         NacionalidadeEnum result = NacionalidadeEnum.fromDescricao(strValue);
         if (result != null) {
             return result;
         }
-        
-        // Tenta por nome do enum (case-insensitive)
+
         try {
             return NacionalidadeEnum.valueOf(strValue.toUpperCase());
         } catch (IllegalArgumentException e) {
-            // Se não encontrar, retorna null (não lança exceção)
+
             return null;
         }
     }

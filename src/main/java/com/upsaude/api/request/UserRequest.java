@@ -17,11 +17,10 @@ public class UserRequest {
     @Email(message = "Email inválido")
     @Size(max = 255, message = "Email deve ter no máximo 255 caracteres")
     private String email;
-    
+
     @Size(max = 255, message = "Role deve ter no máximo 255 caracteres")
     private String role;
-    
+
     @Size(max = 255, message = "Senha deve ter no máximo 255 caracteres")
     private String senha;
 }
-

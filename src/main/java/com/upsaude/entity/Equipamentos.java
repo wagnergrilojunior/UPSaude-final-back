@@ -23,13 +23,6 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 
-/**
- * Entidade que representa um catálogo de equipamentos médicos.
- * Armazena informações completas sobre equipamentos para sistemas de gestão de saúde.
- * Baseado em padrões CNES e ANVISA.
- *
- * @author UPSaúde
- */
 @Entity
 @Table(name = "equipamentos", schema = "public",
        uniqueConstraints = {
@@ -46,8 +39,6 @@ import java.time.OffsetDateTime;
 @Data
 @EqualsAndHashCode(callSuper = true)
 public class Equipamentos extends BaseEntity {
-
-    // ========== IDENTIFICAÇÃO BÁSICA ==========
 
     @NotBlank(message = "Nome do equipamento é obrigatório")
     @Size(max = 255, message = "Nome do equipamento deve ter no máximo 255 caracteres")
@@ -70,8 +61,6 @@ public class Equipamentos extends BaseEntity {
     @Column(name = "registro_anvisa", length = 50, unique = true)
     private String registroAnvisa;
 
-    // ========== CLASSIFICAÇÃO ==========
-
     @Convert(converter = TipoEquipamentoEnumConverter.class)
     @Column(name = "tipo", nullable = false)
     @NotNull(message = "Tipo de equipamento é obrigatório")
@@ -87,9 +76,7 @@ public class Equipamentos extends BaseEntity {
 
     @Size(max = 50, message = "Classe de risco deve ter no máximo 50 caracteres")
     @Column(name = "classe_risco", length = 50)
-    private String classeRisco; // Classe de risco ANVISA (I, II, III, IV)
-
-    // ========== FABRICANTE ==========
+    private String classeRisco;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "fabricante_id")
@@ -103,44 +90,40 @@ public class Equipamentos extends BaseEntity {
     @Column(name = "versao", length = 50)
     private String versao;
 
-    // ========== ESPECIFICAÇÕES TÉCNICAS ==========
-
     @Column(name = "potencia", precision = 10, scale = 2)
-    private BigDecimal potencia; // em Watts ou outra unidade
+    private BigDecimal potencia;
 
     @Size(max = 50, message = "Unidade de potência deve ter no máximo 50 caracteres")
     @Column(name = "unidade_potencia", length = 50)
     private String unidadePotencia;
 
     @Column(name = "peso", precision = 10, scale = 2)
-    private BigDecimal peso; // em kg
+    private BigDecimal peso;
 
     @Column(name = "altura", precision = 10, scale = 2)
-    private BigDecimal altura; // em cm
+    private BigDecimal altura;
 
     @Column(name = "largura", precision = 10, scale = 2)
-    private BigDecimal largura; // em cm
+    private BigDecimal largura;
 
     @Column(name = "profundidade", precision = 10, scale = 2)
-    private BigDecimal profundidade; // em cm
+    private BigDecimal profundidade;
 
     @Size(max = 50, message = "Tensão elétrica deve ter no máximo 50 caracteres")
     @Column(name = "tensao_eletrica", length = 50)
-    private String tensaoEletrica; // Ex: 110V, 220V, 110V/220V
+    private String tensaoEletrica;
 
     @Size(max = 50, message = "Frequência deve ter no máximo 50 caracteres")
     @Column(name = "frequencia", length = 50)
-    private String frequencia; // Ex: 60Hz
+    private String frequencia;
 
     @Size(max = 50, message = "Corrente deve ter no máximo 50 caracteres")
     @Column(name = "corrente", length = 50)
-    private String corrente; // em Amperes
+    private String corrente;
 
     @Size(max = 100, message = "Tipo de alimentação deve ter no máximo 100 caracteres")
     @Column(name = "tipo_alimentacao", length = 100)
-    private String tipoAlimentacao; // Ex: Elétrica, Bateria, Mista
-
-    // ========== CERTIFICAÇÕES E REGISTROS ==========
+    private String tipoAlimentacao;
 
     @Size(max = 50, message = "Certificação ISO deve ter no máximo 50 caracteres")
     @Column(name = "certificacao_iso", length = 50)
@@ -160,8 +143,6 @@ public class Equipamentos extends BaseEntity {
     @Column(name = "data_validade_certificacao")
     private LocalDate dataValidadeCertificacao;
 
-    // ========== MANUTENÇÃO E CALIBRAÇÃO ==========
-
     @Column(name = "requer_calibracao", nullable = false)
     private Boolean requerCalibracao = false;
 
@@ -177,8 +158,6 @@ public class Equipamentos extends BaseEntity {
     @Size(max = 100, message = "Tipo de manutenção deve ter no máximo 100 caracteres")
     @Column(name = "tipo_manutencao", length = 100)
     private String tipoManutencao;
-
-    // ========== INFORMAÇÕES DE AQUISIÇÃO ==========
 
     @Column(name = "valor_aquisicao", precision = 12, scale = 2)
     private BigDecimal valorAquisicao;
@@ -198,8 +177,6 @@ public class Equipamentos extends BaseEntity {
     @Column(name = "numero_contrato", length = 50)
     private String numeroContrato;
 
-    // ========== GARANTIA ==========
-
     @Column(name = "tempo_garantia_meses")
     private Integer tempoGarantiaMeses;
 
@@ -213,8 +190,6 @@ public class Equipamentos extends BaseEntity {
     @Column(name = "condicoes_garantia", length = 255)
     private String condicoesGarantia;
 
-    // ========== STATUS E DISPONIBILIDADE ==========
-
     @Convert(converter = StatusAtivoEnumConverter.class)
     @Column(name = "status", nullable = false)
     @NotNull(message = "Status é obrigatório")
@@ -223,21 +198,17 @@ public class Equipamentos extends BaseEntity {
     @Column(name = "disponivel_uso", nullable = false)
     private Boolean disponivelUso = true;
 
-    // ========== DOCUMENTAÇÃO ==========
-
     @Size(max = 255, message = "Manual técnico deve ter no máximo 255 caracteres")
     @Column(name = "manual_tecnico", length = 255)
-    private String manualTecnico; // URL ou caminho do arquivo
+    private String manualTecnico;
 
     @Size(max = 255, message = "Manual do usuário deve ter no máximo 255 caracteres")
     @Column(name = "manual_usuario", length = 255)
-    private String manualUsuario; // URL ou caminho do arquivo
+    private String manualUsuario;
 
     @Size(max = 255, message = "Ficha técnica deve ter no máximo 255 caracteres")
     @Column(name = "ficha_tecnica", length = 255)
-    private String fichaTecnica; // URL ou caminho do arquivo
-
-    // ========== DESCRIÇÃO E OBSERVAÇÕES ==========
+    private String fichaTecnica;
 
     @Column(name = "descricao", columnDefinition = "TEXT")
     private String descricao;
@@ -246,10 +217,9 @@ public class Equipamentos extends BaseEntity {
     private String caracteristicas;
 
     @Column(name = "aplicacoes", columnDefinition = "TEXT")
-    private String aplicacoes; // Aplicações clínicas do equipamento
+    private String aplicacoes;
 
     @Column(name = "observacoes", columnDefinition = "TEXT")
     private String observacoes;
 
 }
-

@@ -20,11 +20,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.UUID;
 
-/**
- * Implementação do serviço de gerenciamento de Vacinacoes.
- *
- * @author UPSaúde
- */
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -38,8 +33,6 @@ public class VacinacoesServiceImpl implements VacinacoesService {
     @CacheEvict(value = "vacinacoes", allEntries = true)
     public VacinacoesResponse criar(VacinacoesRequest request) {
         log.debug("Criando novo vacinacoes");
-
-        // Validação de dados básicos é feita automaticamente pelo Bean Validation no Request
 
         Vacinacoes vacinacoes = vacinacoesMapper.fromRequest(request);
         vacinacoes.setActive(true);
@@ -84,8 +77,6 @@ public class VacinacoesServiceImpl implements VacinacoesService {
             throw new BadRequestException("ID do vacinacoes é obrigatório");
         }
 
-        // Validação de dados básicos é feita automaticamente pelo Bean Validation no Request
-
         Vacinacoes vacinacoesExistente = vacinacoesRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Vacinacoes não encontrado com ID: " + id));
 
@@ -119,23 +110,16 @@ public class VacinacoesServiceImpl implements VacinacoesService {
         log.info("Vacinacoes excluído (desativado) com sucesso. ID: {}", id);
     }
 
-    // Validações de dados básicos foram movidas para o Request usando Bean Validation
-    // (@NotNull, @NotBlank, @Pattern, etc). Isso garante validação automática no Controller
-    // e retorno de erro 400 padronizado via ApiExceptionHandler.
-
         private void atualizarDadosVacinacoes(Vacinacoes vacinacoes, VacinacoesRequest request) {
         Vacinacoes vacinacoesAtualizado = vacinacoesMapper.fromRequest(request);
-        
-        // Preserva campos de controle
+
         java.util.UUID idOriginal = vacinacoes.getId();
         com.upsaude.entity.Tenant tenantOriginal = vacinacoes.getTenant();
         Boolean activeOriginal = vacinacoes.getActive();
         java.time.OffsetDateTime createdAtOriginal = vacinacoes.getCreatedAt();
-        
-        // Copia todas as propriedades do objeto atualizado
+
         BeanUtils.copyProperties(vacinacoesAtualizado, vacinacoes);
-        
-        // Restaura campos de controle
+
         vacinacoes.setId(idOriginal);
         vacinacoes.setTenant(tenantOriginal);
         vacinacoes.setActive(activeOriginal);

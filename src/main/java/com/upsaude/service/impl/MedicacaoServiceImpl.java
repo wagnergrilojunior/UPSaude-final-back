@@ -28,11 +28,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.UUID;
 
-/**
- * Implementação do serviço de gerenciamento de Medicações.
- *
- * @author UPSaúde
- */
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -47,26 +42,23 @@ public class MedicacaoServiceImpl implements MedicacaoService {
     @CacheEvict(value = "medicacao", allEntries = true)
     public MedicacaoResponse criar(MedicacaoRequest request) {
         log.debug("Criando nova medicação. Request: {}", request);
-        
+
         if (request == null) {
             log.warn("Tentativa de criar medicação com request nulo");
             throw new BadRequestException("Dados da medicação são obrigatórios");
         }
 
         try {
-            // Validação de dados básicos é feita automaticamente pelo Bean Validation no Request
 
             Medicacao medicacao = medicacaoMapper.fromRequest(request);
             medicacao.setActive(true);
 
-            // Carrega e define relacionamento com fabricante se fornecido
             if (request.getFabricanteEntity() != null) {
                 FabricantesMedicamento fabricante = fabricantesMedicamentoRepository.findById(request.getFabricanteEntity())
                         .orElseThrow(() -> new NotFoundException("Fabricante não encontrado com ID: " + request.getFabricanteEntity()));
                 medicacao.setFabricanteEntity(fabricante);
             }
 
-            // Garante que campos obrigatórios tenham valores padrão se não fornecidos
             garantirValoresPadrao(medicacao);
 
             Medicacao medicacaoSalvo = medicacaoRepository.save(medicacao);
@@ -90,7 +82,7 @@ public class MedicacaoServiceImpl implements MedicacaoService {
     @Cacheable(value = "medicacao", key = "#id")
     public MedicacaoResponse obterPorId(UUID id) {
         log.debug("Buscando medicação por ID: {} (cache miss)", id);
-        
+
         if (id == null) {
             log.warn("ID nulo recebido para busca de medicação");
             throw new BadRequestException("ID da medicação é obrigatório");
@@ -149,21 +141,18 @@ public class MedicacaoServiceImpl implements MedicacaoService {
         }
 
         try {
-            // Validação de dados básicos é feita automaticamente pelo Bean Validation no Request
 
             Medicacao medicacaoExistente = medicacaoRepository.findById(id)
                     .orElseThrow(() -> new NotFoundException("Medicação não encontrada com ID: " + id));
 
-            // Usa mapper do MapStruct que preserva campos de controle automaticamente
             medicacaoMapper.updateFromRequest(request, medicacaoExistente);
 
-            // Carrega e define relacionamento com fabricante se fornecido
             if (request.getFabricanteEntity() != null) {
                 FabricantesMedicamento fabricante = fabricantesMedicamentoRepository.findById(request.getFabricanteEntity())
                         .orElseThrow(() -> new NotFoundException("Fabricante não encontrado com ID: " + request.getFabricanteEntity()));
                 medicacaoExistente.setFabricanteEntity(fabricante);
             } else {
-                // Se não fornecido, remove o relacionamento (define como null)
+
                 medicacaoExistente.setFabricanteEntity(null);
             }
 
@@ -224,16 +213,8 @@ public class MedicacaoServiceImpl implements MedicacaoService {
         }
     }
 
-    // Validações de dados básicos foram movidas para o Request usando Bean Validation
-    // (@NotNull, @NotBlank, @Pattern, etc). Isso garante validação automática no Controller
-    // e retorno de erro 400 padronizado via ApiExceptionHandler.
-
-    /**
-     * Garante que campos obrigatórios do banco de dados tenham valores padrão
-     * quando não são fornecidos no request.
-     */
     private void garantirValoresPadrao(Medicacao medicacao) {
-        // Inicializa IdentificacaoMedicamento com valores padrão se não fornecido
+
         if (medicacao.getIdentificacao() == null) {
             medicacao.setIdentificacao(IdentificacaoMedicamento.builder()
                     .principioAtivo("Não informado")
@@ -249,7 +230,6 @@ public class MedicacaoServiceImpl implements MedicacaoService {
             }
         }
 
-        // Inicializa DosagemAdministracaoMedicamento com valores padrão se não fornecido
         if (medicacao.getDosagemAdministracao() == null) {
             medicacao.setDosagemAdministracao(DosagemAdministracaoMedicamento.builder()
                     .dosagem("Não informado")
@@ -261,7 +241,6 @@ public class MedicacaoServiceImpl implements MedicacaoService {
             }
         }
 
-        // Inicializa ContraindicacoesPrecaucoesMedicamento com valores padrão se não fornecido
         if (medicacao.getContraindicacoesPrecaucoes() == null) {
             medicacao.setContraindicacoesPrecaucoes(ContraindicacoesPrecaucoesMedicamento.builder()
                     .gestantePode(false)
@@ -285,7 +264,6 @@ public class MedicacaoServiceImpl implements MedicacaoService {
             }
         }
 
-        // Inicializa ConservacaoArmazenamentoMedicamento com valores padrão se não fornecido
         if (medicacao.getConservacaoArmazenamento() == null) {
             medicacao.setConservacaoArmazenamento(ConservacaoArmazenamentoMedicamento.builder()
                     .protegerLuz(false)
@@ -301,7 +279,6 @@ public class MedicacaoServiceImpl implements MedicacaoService {
             }
         }
 
-        // Inicializa RegistroControleMedicamento com valores padrão se não fornecido
         if (medicacao.getRegistroControle() == null) {
             medicacao.setRegistroControle(RegistroControleMedicamento.builder()
                     .controlado(false)
@@ -330,7 +307,4 @@ public class MedicacaoServiceImpl implements MedicacaoService {
         }
     }
 
-    // Método removido - agora usa medicacaoMapper.updateFromRequest diretamente
-    // O MapStruct já preserva campos de controle automaticamente
 }
-

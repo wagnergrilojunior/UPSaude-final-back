@@ -32,11 +32,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.UUID;
 
-/**
- * Implementação do serviço de gerenciamento de DoencasPaciente.
- *
- * @author UPSaúde
- */
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -59,11 +54,8 @@ public class DoencasPacienteServiceImpl implements DoencasPacienteService {
     public DoencasPacienteResponse criar(DoencasPacienteRequest request) {
         log.debug("Criando novo registro de doença do paciente");
 
-        // Validação de dados básicos é feita automaticamente pelo Bean Validation no Request
-
         DoencasPaciente doencasPaciente = doencasPacienteMapper.fromRequest(request);
 
-        // Carrega e define relacionamentos se fornecidos (opcionais)
         if (request.getPaciente() != null) {
             Paciente paciente = pacienteRepository.findById(request.getPaciente())
                     .orElseThrow(() -> new NotFoundException("Paciente não encontrado com ID: " + request.getPaciente()));
@@ -76,17 +68,12 @@ public class DoencasPacienteServiceImpl implements DoencasPacienteService {
             doencasPaciente.setDoenca(doenca);
         }
 
-        // Paciente não possui estabelecimento nem tenant
-        // O estabelecimento e tenant devem ser definidos de outra forma se necessário
-
-        // Carrega CID principal se fornecido
         if (request.getCidPrincipal() != null) {
             CidDoencas cidPrincipal = cidDoencasRepository.findById(request.getCidPrincipal())
                     .orElseThrow(() -> new NotFoundException("CID não encontrado com ID: " + request.getCidPrincipal()));
             doencasPaciente.setCidPrincipal(cidPrincipal);
         }
 
-        // Obtém o tenant do usuário autenticado (obrigatório para DoencasPaciente que estende BaseEntity)
         Tenant tenant = tenantService.obterTenantDoUsuarioAutenticado();
         if (tenant == null) {
             throw new BadRequestException("Não foi possível obter tenant do usuário autenticado. É necessário estar autenticado para criar relacionamentos de doenças.");
@@ -105,7 +92,7 @@ public class DoencasPacienteServiceImpl implements DoencasPacienteService {
     @Transactional
     @CacheEvict(value = "doencaspaciente", allEntries = true)
     public DoencasPacienteResponse criarSimplificado(DoencasPacienteSimplificadoRequest request) {
-        log.debug("Criando novo registro de doença do paciente simplificado - Paciente: {}, Tenant: {}, Doença: {}", 
+        log.debug("Criando novo registro de doença do paciente simplificado - Paciente: {}, Tenant: {}, Doença: {}",
                 request.getPaciente(), request.getTenant(), request.getDoenca());
 
         if (request == null) {
@@ -124,26 +111,20 @@ public class DoencasPacienteServiceImpl implements DoencasPacienteService {
             throw new BadRequestException("ID da doença é obrigatório");
         }
 
-        // Busca paciente
         Paciente paciente = pacienteRepository.findById(request.getPaciente())
                 .orElseThrow(() -> new NotFoundException("Paciente não encontrado com ID: " + request.getPaciente()));
 
-        // Busca tenant
         Tenant tenant = tenantRepository.findById(request.getTenant())
                 .orElseThrow(() -> new NotFoundException("Tenant não encontrado com ID: " + request.getTenant()));
 
-        // Busca doença
         Doencas doenca = doencasRepository.findById(request.getDoenca())
                 .orElseThrow(() -> new NotFoundException("Doença não encontrada com ID: " + request.getDoenca()));
 
-        // Cria nova entidade com valores padrão
         DoencasPaciente doencasPaciente = new DoencasPaciente();
         doencasPaciente.setPaciente(paciente);
         doencasPaciente.setTenant(tenant);
         doencasPaciente.setDoenca(doenca);
         doencasPaciente.setActive(true);
-        // diagnostico, acompanhamento e tratamentoAtual são inicializados no construtor
-        // observacoes e cidPrincipal ficam null
 
         DoencasPaciente doencasPacienteSalvo = doencasPacienteRepository.save(doencasPaciente);
         log.info("Registro de doença do paciente criado com sucesso (simplificado). ID: {}", doencasPacienteSalvo.getId());
@@ -211,8 +192,6 @@ public class DoencasPacienteServiceImpl implements DoencasPacienteService {
             throw new BadRequestException("ID do registro é obrigatório");
         }
 
-        // Validação de dados básicos é feita automaticamente pelo Bean Validation no Request
-
         DoencasPaciente doencasPacienteExistente = doencasPacienteRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Registro de doença do paciente não encontrado com ID: " + id));
 
@@ -246,12 +225,8 @@ public class DoencasPacienteServiceImpl implements DoencasPacienteService {
         log.info("Registro de doença do paciente excluído (desativado) com sucesso. ID: {}", id);
     }
 
-    // Validações de dados básicos foram movidas para o Request usando Bean Validation
-    // (@NotNull, @NotBlank, @Pattern, etc). Isso garante validação automática no Controller
-    // e retorno de erro 400 padronizado via ApiExceptionHandler.
-
     private void atualizarDadosDoencasPaciente(DoencasPaciente doencasPaciente, DoencasPacienteRequest request) {
-        // Atualiza embeddables usando mappers
+
         if (request.getDiagnostico() != null) {
             if (doencasPaciente.getDiagnostico() == null) {
                 doencasPaciente.setDiagnostico(diagnosticoDoencaPacienteMapper.toEntity(request.getDiagnostico()));
@@ -277,7 +252,6 @@ public class DoencasPacienteServiceImpl implements DoencasPacienteService {
             doencasPaciente.setObservacoes(request.getObservacoes());
         }
 
-        // Atualiza relacionamentos se fornecidos
         if (request.getCidPrincipal() != null) {
             CidDoencas cidPrincipal = cidDoencasRepository.findById(request.getCidPrincipal())
                     .orElseThrow(() -> new NotFoundException("CID não encontrado com ID: " + request.getCidPrincipal()));
@@ -286,4 +260,3 @@ public class DoencasPacienteServiceImpl implements DoencasPacienteService {
     }
 
 }
-

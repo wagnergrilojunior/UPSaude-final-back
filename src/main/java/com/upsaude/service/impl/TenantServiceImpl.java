@@ -26,11 +26,6 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-/**
- * Implementação do serviço de gerenciamento de Tenant.
- *
- * @author UPSaúde
- */
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -45,13 +40,11 @@ public class TenantServiceImpl implements TenantService {
     @CacheEvict(value = "tenants", allEntries = true)
     public TenantResponse criar(TenantRequest request) {
         log.debug("Criando novo Tenant");
-        
+
         if (request == null) {
             log.warn("Request nulo recebido para criação de Tenant");
             throw new BadRequestException("Dados do tenant são obrigatórios");
         }
-
-        // Validação de dados básicos é feita automaticamente pelo Bean Validation no Request
 
         Tenant tenant = tenantMapper.fromRequest(request);
         tenant.setActive(true);
@@ -74,8 +67,7 @@ public class TenantServiceImpl implements TenantService {
 
         Tenant tenant = tenantRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Tenant não encontrado com ID: " + id));
-        
-        // Inicializa a coleção lazy dentro da transação para evitar LazyInitializationException
+
         Hibernate.initialize(tenant.getEnderecos());
 
         return tenantMapper.toResponse(tenant);
@@ -88,17 +80,15 @@ public class TenantServiceImpl implements TenantService {
                 pageable.getPageNumber(), pageable.getPageSize());
 
         Page<Tenant> tenants = tenantRepository.findAll(pageable);
-        
-        // Inicializa as coleções lazy dentro da transação para evitar LazyInitializationException
+
         tenants.getContent().forEach(tenant -> {
             Hibernate.initialize(tenant.getEnderecos());
         });
-        
-        // Mapeia dentro da transação para garantir que as coleções lazy estejam acessíveis
+
         List<TenantResponse> responses = tenants.getContent().stream()
                 .map(tenantMapper::toResponse)
                 .collect(Collectors.toList());
-        
+
         return new PageImpl<>(responses, tenants.getPageable(), tenants.getTotalElements());
     }
 
@@ -112,13 +102,11 @@ public class TenantServiceImpl implements TenantService {
             log.warn("ID nulo recebido para atualização de Tenant");
             throw new BadRequestException("ID do tenant é obrigatório");
         }
-        
+
         if (request == null) {
             log.warn("Request nulo recebido para atualização de Tenant. ID: {}", id);
             throw new BadRequestException("Dados do tenant são obrigatórios");
         }
-
-        // Validação de dados básicos é feita automaticamente pelo Bean Validation no Request
 
         Tenant tenantExistente = tenantRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Tenant não encontrado com ID: " + id));
@@ -155,12 +143,8 @@ public class TenantServiceImpl implements TenantService {
         log.info("Tenant excluído (desativado) com sucesso. ID: {}", id);
     }
 
-        // Validações de dados básicos foram movidas para o Request usando Bean Validation
-    // (@NotNull, @NotBlank, @Pattern, etc). Isso garante validação automática no Controller
-    // e retorno de erro 400 padronizado via ApiExceptionHandler.
-
     private void atualizarDadosTenant(Tenant tenant, TenantRequest request) {
-        // Usar mapper para atualizar campos básicos
+
         tenantMapper.updateFromRequest(request, tenant);
     }
 
@@ -173,11 +157,10 @@ public class TenantServiceImpl implements TenantService {
                 return null;
             }
 
-            // Obtém o userId do token JWT
             UUID userId = null;
             Object details = authentication.getDetails();
             if (details instanceof com.upsaude.integration.supabase.SupabaseAuthResponse.User) {
-                com.upsaude.integration.supabase.SupabaseAuthResponse.User user = 
+                com.upsaude.integration.supabase.SupabaseAuthResponse.User user =
                     (com.upsaude.integration.supabase.SupabaseAuthResponse.User) details;
                 userId = user.getId();
                 log.debug("UserId obtido do SupabaseAuthResponse.User: {}", userId);

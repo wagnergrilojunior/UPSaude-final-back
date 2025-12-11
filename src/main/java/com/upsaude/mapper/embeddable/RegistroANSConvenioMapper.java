@@ -14,7 +14,6 @@ public interface RegistroANSConvenioMapper {
     RegistroANSConvenioResponse toResponse(RegistroANSConvenio entity);
     void updateFromRequest(RegistroANSConvenioRequest request, @MappingTarget RegistroANSConvenio entity);
 
-    // Mapeamento entre DTO e Entity
     RegistroANSConvenio toEntity(com.upsaude.dto.embeddable.RegistroANSConvenioDTO dto);
     com.upsaude.dto.embeddable.RegistroANSConvenioDTO toDTO(RegistroANSConvenio entity);
     void updateFromDTO(com.upsaude.dto.embeddable.RegistroANSConvenioDTO dto, @MappingTarget RegistroANSConvenio entity);

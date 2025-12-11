@@ -23,4 +23,3 @@ public class ZonaDomicilioEnumConverter implements AttributeConverter<ZonaDomici
         return ZonaDomicilioEnum.fromCodigo(dbData);
     }
 }
-

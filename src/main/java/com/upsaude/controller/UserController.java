@@ -24,11 +24,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
 
-/**
- * Controlador REST para operações relacionadas a Users.
- *
- * @author UPSaúde
- */
 @RestController
 @RequestMapping("/v1/users")
 @Tag(name = "Users", description = "API para gerenciamento de Users")

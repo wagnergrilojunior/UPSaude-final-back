@@ -3,11 +3,6 @@ package com.upsaude.enums;
 import java.util.Arrays;
 import java.util.Locale;
 
-/**
- * Enum para status de manutenção de equipamentos médicos.
- *
- * @author UPSaúde
- */
 public enum StatusManutencaoEnum {
     OPERACIONAL(1, "Operacional"),
     MANUTENCAO_PREVENTIVA(2, "Em Manutenção Preventiva"),
@@ -51,4 +46,3 @@ public enum StatusManutencaoEnum {
                 .orElse(null);
     }
 }
-

@@ -18,10 +18,10 @@ import lombok.Setter;
 public class AlergiasPacienteSimplificadoRequest {
     @NotNull(message = "Paciente é obrigatório")
     private UUID paciente;
-    
+
     @NotNull(message = "Tenant é obrigatório")
     private UUID tenant;
-    
+
     @NotNull(message = "Alergia é obrigatória")
     private UUID alergia;
 }

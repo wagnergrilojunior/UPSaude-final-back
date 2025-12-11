@@ -8,11 +8,6 @@ import org.springframework.data.domain.Pageable;
 
 import java.util.UUID;
 
-/**
- * Interface de serviço para operações CRUD relacionadas a Vínculos de Profissionais com Estabelecimentos.
- *
- * @author UPSaúde
- */
 public interface ProfissionalEstabelecimentoService {
 
     ProfissionalEstabelecimentoResponse criar(ProfissionalEstabelecimentoRequest request);
@@ -31,4 +26,3 @@ public interface ProfissionalEstabelecimentoService {
 
     void excluir(UUID id);
 }
-

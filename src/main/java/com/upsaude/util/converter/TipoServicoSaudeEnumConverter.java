@@ -23,4 +23,3 @@ public class TipoServicoSaudeEnumConverter implements AttributeConverter<TipoSer
         return TipoServicoSaudeEnum.fromCodigo(dbData);
     }
 }
-

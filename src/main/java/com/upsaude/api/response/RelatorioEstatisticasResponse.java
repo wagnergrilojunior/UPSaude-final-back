@@ -26,4 +26,3 @@ public class RelatorioEstatisticasResponse {
     private Map<String, Long> atendimentosPorProfissional;
     private Map<String, BigDecimal> indicadoresSaude;
 }
-

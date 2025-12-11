@@ -18,12 +18,6 @@ import lombok.EqualsAndHashCode;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 
-/**
- * Entidade que representa o acompanhamento de planejamento familiar.
- * Armazena informações sobre métodos contraceptivos e planejamento reprodutivo.
- *
- * @author UPSaúde
- */
 @Entity
 @Table(name = "planejamento_familiar", schema = "public",
        indexes = {
@@ -34,8 +28,6 @@ import java.time.OffsetDateTime;
 @Data
 @EqualsAndHashCode(callSuper = true)
 public class PlanejamentoFamiliar extends BaseEntity {
-
-    // ========== RELACIONAMENTOS ==========
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "paciente_id", nullable = false)
@@ -49,8 +41,6 @@ public class PlanejamentoFamiliar extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "equipe_saude_id")
     private EquipeSaude equipeSaude;
-
-    // ========== MÉTODO CONTRACEPTIVO ATUAL ==========
 
     @Convert(converter = TipoMetodoContraceptivoEnumConverter.class)
     @Column(name = "metodo_atual")
@@ -70,8 +60,6 @@ public class PlanejamentoFamiliar extends BaseEntity {
     @Column(name = "motivo_troca_metodo", columnDefinition = "TEXT")
     private String motivoTrocaMetodo;
 
-    // ========== HISTÓRICO OBSTÉTRICO ==========
-
     @Column(name = "numero_gestacoes")
     private Integer numeroGestacoes;
 
@@ -90,19 +78,15 @@ public class PlanejamentoFamiliar extends BaseEntity {
     @Column(name = "ultima_gestacao_planejada")
     private Boolean ultimaGestacaoPlanejada;
 
-    // ========== DESEJO REPRODUTIVO ==========
-
     @Column(name = "deseja_engravidar")
     private Boolean desejaEngravidar;
 
     @Column(name = "prazo_desejo_gestacao")
     @Size(max = 50, message = "Prazo deve ter no máximo 50 caracteres")
-    private String prazoDesejoGestacao; // Imediato, 1 ano, 2-5 anos, Nunca
+    private String prazoDesejoGestacao;
 
     @Column(name = "deseja_metodo_definitivo")
     private Boolean desejaMetodoDefinitivo;
-
-    // ========== CRITÉRIOS DE ELEGIBILIDADE ==========
 
     @Column(name = "tem_contraindicacoes")
     private Boolean temContraindicacoes;
@@ -119,24 +103,20 @@ public class PlanejamentoFamiliar extends BaseEntity {
     @Column(name = "alergias", columnDefinition = "TEXT")
     private String alergias;
 
-    // ========== DADOS MENSTRUAIS ==========
-
     @Column(name = "ciclo_menstrual_regular")
     private Boolean cicloMenstrualRegular;
 
     @Column(name = "duracao_ciclo")
-    private Integer duracaoCiclo; // em dias
+    private Integer duracaoCiclo;
 
     @Column(name = "data_ultima_menstruacao")
     private LocalDate dataUltimaMenstruacao;
 
     @Column(name = "dismenorreia")
-    private Boolean dismenorreia; // Cólica menstrual
+    private Boolean dismenorreia;
 
     @Column(name = "sangramento_irregular")
     private Boolean sangramentoIrregular;
-
-    // ========== ACOMPANHAMENTO ==========
 
     @Column(name = "data_inicio_acompanhamento")
     private LocalDate dataInicioAcompanhamento;
@@ -150,15 +130,11 @@ public class PlanejamentoFamiliar extends BaseEntity {
     @Column(name = "data_proxima_dispensacao")
     private LocalDate dataProximaDispensacao;
 
-    // ========== PARA DIU ==========
-
     @Column(name = "data_insercao_diu")
     private LocalDate dataInsercaoDiu;
 
     @Column(name = "data_validade_diu")
     private LocalDate dataValidadeDiu;
-
-    // ========== PARA MÉTODOS CIRÚRGICOS ==========
 
     @Column(name = "data_cirurgia")
     private LocalDate dataCirurgia;
@@ -171,9 +147,7 @@ public class PlanejamentoFamiliar extends BaseEntity {
     private Boolean documentacaoCompleta;
 
     @Column(name = "prazo_minimo_cumprido")
-    private Boolean prazoMinimoCumprido; // 60 dias entre manifestação e cirurgia
-
-    // ========== ORIENTAÇÕES REALIZADAS ==========
+    private Boolean prazoMinimoCumprido;
 
     @Column(name = "orientacao_metodos_realizada")
     private Boolean orientacaoMetodosRealizada;
@@ -187,9 +161,6 @@ public class PlanejamentoFamiliar extends BaseEntity {
     @Column(name = "data_consentimento")
     private LocalDate dataConsentimento;
 
-    // ========== OBSERVAÇÕES ==========
-
     @Column(name = "observacoes", columnDefinition = "TEXT")
     private String observacoes;
 }
-

@@ -24,11 +24,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
 
-/**
- * Controlador REST para operações relacionadas a Receitas Médicas.
- *
- * @author UPSaúde
- */
 @RestController
 @RequestMapping("/v1/receitas-medicas")
 @Tag(name = "Receitas Médicas", description = "API para gerenciamento de Receitas Médicas")

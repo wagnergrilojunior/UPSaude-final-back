@@ -23,11 +23,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.UUID;
 
-/**
- * Implementação do serviço de gerenciamento de Consultas (Agendamentos).
- *
- * @author UPSaúde
- */
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -42,14 +37,13 @@ public class ConsultasServiceImpl implements ConsultasService {
     @CacheEvict(value = "consultas", allEntries = true)
     public ConsultasResponse criar(ConsultasRequest request) {
         log.debug("Criando nova consulta. Request: {}", request);
-        
+
         if (request == null) {
             log.warn("Tentativa de criar consulta com request nulo");
             throw new BadRequestException("Dados da consulta são obrigatórios");
         }
 
         try {
-            // Validação de dados básicos é feita automaticamente pelo Bean Validation no Request
 
             Consultas consulta = consultasMapper.fromRequest(request);
             consulta.setActive(true);
@@ -75,7 +69,7 @@ public class ConsultasServiceImpl implements ConsultasService {
     @Cacheable(value = "consultas", key = "#id")
     public ConsultasResponse obterPorId(UUID id) {
         log.debug("Buscando consulta por ID: {} (cache miss)", id);
-        
+
         if (id == null) {
             log.warn("ID nulo recebido para busca de consulta");
             throw new BadRequestException("ID da consulta é obrigatório");
@@ -158,7 +152,6 @@ public class ConsultasServiceImpl implements ConsultasService {
         }
 
         try {
-            // Validação de dados básicos é feita automaticamente pelo Bean Validation no Request
 
             Consultas consultaExistente = consultasRepository.findById(id)
                     .orElseThrow(() -> new NotFoundException("Consulta não encontrada com ID: " + id));
@@ -222,17 +215,9 @@ public class ConsultasServiceImpl implements ConsultasService {
         }
     }
 
-    // Validações de dados básicos foram movidas para o Request usando Bean Validation
-    // (@NotNull, @NotBlank, @Pattern, etc). Isso garante validação automática no Controller
-    // e retorno de erro 400 padronizado via ApiExceptionHandler.
-    // O campo 'paciente' já tem @NotNull e 'informacoes' já tem @Valid no Request.
-
     private void atualizarDadosConsulta(Consultas consulta, ConsultasRequest request) {
-        // Usar mapper para atualizar campos básicos
+
         consultasMapper.updateFromRequest(request, consulta);
-        
-        // Processar relacionamentos que são ignorados pelo mapper
-        // (relacionamentos são tratados manualmente quando necessário)
+
     }
 }
-

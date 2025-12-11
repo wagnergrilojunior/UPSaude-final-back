@@ -9,30 +9,14 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 
-/**
- * Mapper para conversões de Paciente.
- * Entity ↔ DTO ↔ Request/Response
- */
 @Mapper(config = MappingConfig.class, uses = {ConvenioMapper.class, DadosClinicosBasicosMapper.class, DadosSociodemograficosMapper.class, IntegracaoGovMapper.class, LGPDConsentimentoMapper.class, ResponsavelLegalMapper.class, DoencasPacienteMapper.class, AlergiasPacienteMapper.class, DeficienciasPacienteMapper.class, MedicacaoPacienteMapper.class})
 public interface PacienteMapper extends EntityMapper<Paciente, PacienteDTO> {
 
-    /**
-     * Converte DTO para Entity.
-     * O campo 'active' é ignorado (gerenciado pelo sistema).
-     */
     @Mapping(target = "active", ignore = true)
     Paciente toEntity(PacienteDTO dto);
 
-    /**
-     * Converte Entity para DTO.
-     */
     PacienteDTO toDTO(Paciente entity);
 
-    /**
-     * Converte Request para Entity.
-     * Os campos 'id', 'createdAt', 'updatedAt', 'active' são ignorados.
-     * Relacionamentos (UUID) e listas devem ser tratados manualmente no Service.
-     */
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
@@ -50,11 +34,6 @@ public interface PacienteMapper extends EntityMapper<Paciente, PacienteDTO> {
     @Mapping(target = "medicacoes", ignore = true)
     Paciente fromRequest(PacienteRequest request);
 
-    /**
-     * Atualiza Entity existente com dados do Request.
-     * Os campos 'id', 'createdAt', 'updatedAt', 'active' são ignorados.
-     * Relacionamentos (UUID) e listas devem ser tratados manualmente no Service.
-     */
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
@@ -72,8 +51,5 @@ public interface PacienteMapper extends EntityMapper<Paciente, PacienteDTO> {
     @Mapping(target = "medicacoes", ignore = true)
     void updateFromRequest(PacienteRequest request, @MappingTarget Paciente entity);
 
-    /**
-     * Converte Entity para Response.
-     */
     PacienteResponse toResponse(Paciente entity);
 }

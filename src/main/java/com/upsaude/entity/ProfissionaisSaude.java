@@ -48,12 +48,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-/**
- * Entidade que representa um profissional de saúde.
- * Armazena dados completos para registro profissional e compatibilidade com regulamentação de saúde pública.
- *
- * @author UPSaúde
- */
 @Entity
 @Table(name = "profissionais_saude", schema = "public",
        uniqueConstraints = {
@@ -71,15 +65,10 @@ import java.util.Set;
 @EqualsAndHashCode(callSuper = true)
 public class ProfissionaisSaude extends BaseEntity {
 
-    /**
-     * Construtor padrão que inicializa as coleções para evitar NullPointerException.
-     */
     public ProfissionaisSaude() {
         this.especialidades = new ArrayList<>();
         this.historicoHabilitacao = new HashSet<>();
     }
-
-    // ========== DADOS PESSOAIS ==========
 
     @Column(name = "nome_completo", nullable = false, length = 255)
     @NotBlank(message = "Nome completo é obrigatório")
@@ -120,8 +109,6 @@ public class ProfissionaisSaude extends BaseEntity {
     @Column(name = "tipo_deficiencia")
     private TipoDeficienciaEnum tipoDeficiencia;
 
-    // ========== DOCUMENTO DE IDENTIDADE ADICIONAL ==========
-
     @Column(name = "rg", length = 20)
     @Size(max = 20, message = "RG deve ter no máximo 20 caracteres")
     private String rg;
@@ -137,17 +124,13 @@ public class ProfissionaisSaude extends BaseEntity {
     @Column(name = "data_emissao_rg")
     private LocalDate dataEmissaoRg;
 
-    // ========== DADOS COMPLEMENTARES ==========
-
     @Convert(converter = NacionalidadeEnumConverter.class)
     @Column(name = "nacionalidade")
     private NacionalidadeEnum nacionalidade;
 
     @Column(name = "naturalidade", length = 100)
     @Size(max = 100, message = "Naturalidade deve ter no máximo 100 caracteres")
-    private String naturalidade; // Cidade de nascimento
-
-    // ========== REGISTRO PROFISSIONAL ==========
+    private String naturalidade;
 
     @Column(name = "registro_profissional", nullable = false, length = 20)
     @NotBlank(message = "Registro profissional é obrigatório")
@@ -173,18 +156,10 @@ public class ProfissionaisSaude extends BaseEntity {
     @Column(name = "status_registro")
     private StatusAtivoEnum statusRegistro;
 
-    // ========== TIPO PROFISSIONAL ==========
-
     @Convert(converter = TipoProfissionalEnumConverter.class)
     @Column(name = "tipo_profissional")
     private TipoProfissionalEnum tipoProfissional;
 
-    // ========== ESPECIALIDADES ==========
-
-    /**
-     * Especialidades do profissional de saúde.
-     * ManyToMany com cascade PERSIST/MERGE para associações.
-     */
     @ManyToMany(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinTable(
         name = "profissionais_saude_especialidades",
@@ -194,29 +169,21 @@ public class ProfissionaisSaude extends BaseEntity {
     )
     private List<EspecialidadesMedicas> especialidades = new ArrayList<>();
 
-    // ========== IDENTIFICADORES NACIONAIS ==========
-
     @Column(name = "cns", length = 15)
     @Size(max = 15, message = "CNS deve ter no máximo 15 caracteres")
-    private String cns; // Cartão Nacional de Saúde
-
-    // ========== CLASSIFICAÇÃO BRASILEIRA DE OCUPAÇÕES (CBO) ==========
+    private String cns;
 
     @Column(name = "codigo_cbo", length = 10)
     @Size(max = 10, message = "Código CBO deve ter no máximo 10 caracteres")
-    private String codigoCbo; // Código segundo a Classificação Brasileira de Ocupações
+    private String codigoCbo;
 
     @Column(name = "descricao_cbo", length = 255)
     @Size(max = 255, message = "Descrição CBO deve ter no máximo 255 caracteres")
-    private String descricaoCbo; // Descrição da ocupação segundo CBO
-
-    // ========== CÓDIGO OCUPACIONAL / FUNÇÃO ATUAL ==========
+    private String descricaoCbo;
 
     @Column(name = "codigo_ocupacional", length = 50)
     @Size(max = 50, message = "Código ocupacional deve ter no máximo 50 caracteres")
-    private String codigoOcupacional; // Código ocupacional/função atual dentro da unidade (se diferente da especialidade)
-
-    // ========== CONTATO PESSOAL ==========
+    private String codigoOcupacional;
 
     @Column(name = "telefone", length = 20)
     @Pattern(regexp = "^\\d{10,11}$", message = "Telefone deve ter 10 ou 11 dígitos")
@@ -227,8 +194,6 @@ public class ProfissionaisSaude extends BaseEntity {
     @Size(max = 255, message = "Email deve ter no máximo 255 caracteres")
     private String email;
 
-    // ========== CONTATO INSTITUCIONAL ==========
-
     @Column(name = "telefone_institucional", length = 20)
     @Pattern(regexp = "^\\d{10,11}$", message = "Telefone institucional deve ter 10 ou 11 dígitos")
     private String telefoneInstitucional;
@@ -238,32 +203,16 @@ public class ProfissionaisSaude extends BaseEntity {
     @Size(max = 255, message = "Email institucional deve ter no máximo 255 caracteres")
     private String emailInstitucional;
 
-    // ========== ENDEREÇO PROFISSIONAL ==========
-
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "endereco_profissional_id")
     private Endereco enderecoProfissional;
 
-    // ========== HISTÓRICO DE HABILITAÇÃO ==========
-
-    /**
-     * Histórico de habilitações e certificações do profissional.
-     * OneToMany bidirecional com cascade completo - JPA gerencia automaticamente.
-     */
     @OneToMany(mappedBy = "profissional", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<HistoricoHabilitacaoProfissional> historicoHabilitacao = new HashSet<>();
-
-    // ========== OBSERVAÇÕES ==========
 
     @Column(name = "observacoes", columnDefinition = "TEXT")
     private String observacoes;
 
-    // ========== MÉTODOS DE CICLO DE VIDA ==========
-
-    /**
-     * Garante que as coleções não sejam nulas antes de persistir ou atualizar.
-     * Recria as coleções se estiverem nulas.
-     */
     @PrePersist
     @PreUpdate
     public void validateCollections() {
@@ -275,14 +224,6 @@ public class ProfissionaisSaude extends BaseEntity {
         }
     }
 
-    // ========== MÉTODOS UTILITÁRIOS - HISTÓRICO HABILITAÇÃO ==========
-
-    /**
-     * Adiciona um histórico de habilitação com sincronização bidirecional.
-     * Garante que o histórico também referencia este profissional.
-     *
-     * @param historico O histórico a ser adicionado
-     */
     public void addHistoricoHabilitacao(HistoricoHabilitacaoProfissional historico) {
         if (historico == null) {
             return;
@@ -296,12 +237,6 @@ public class ProfissionaisSaude extends BaseEntity {
         }
     }
 
-    /**
-     * Remove um histórico de habilitação com sincronização bidirecional.
-     * Remove a referência do histórico para este profissional.
-     *
-     * @param historico O histórico a ser removido
-     */
     public void removeHistoricoHabilitacao(HistoricoHabilitacaoProfissional historico) {
         if (historico == null || historicoHabilitacao == null) {
             return;

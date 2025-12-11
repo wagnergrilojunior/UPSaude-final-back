@@ -14,7 +14,6 @@ public interface ConservacaoArmazenamentoMedicamentoMapper {
     ConservacaoArmazenamentoMedicamentoResponse toResponse(ConservacaoArmazenamentoMedicamento entity);
     void updateFromRequest(ConservacaoArmazenamentoMedicamentoRequest request, @MappingTarget ConservacaoArmazenamentoMedicamento entity);
 
-    // Mapeamento entre DTO e Entity
     ConservacaoArmazenamentoMedicamento toEntity(com.upsaude.dto.embeddable.ConservacaoArmazenamentoMedicamentoDTO dto);
     com.upsaude.dto.embeddable.ConservacaoArmazenamentoMedicamentoDTO toDTO(ConservacaoArmazenamentoMedicamento entity);
     void updateFromDTO(com.upsaude.dto.embeddable.ConservacaoArmazenamentoMedicamentoDTO dto, @MappingTarget ConservacaoArmazenamentoMedicamento entity);

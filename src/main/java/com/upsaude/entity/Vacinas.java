@@ -35,13 +35,6 @@ import jakarta.validation.constraints.Size;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
-/**
- * Entidade que representa um catálogo de vacinas.
- * Armazena informações completas sobre vacinas para sistemas de gestão de saúde.
- * Baseado em padrões do PNI (Programa Nacional de Imunizações) e ANVISA.
- *
- * @author UPSaúde
- */
 @Entity
 @Table(name = "vacinas", schema = "public",
        uniqueConstraints = {
@@ -72,8 +65,6 @@ public class Vacinas extends BaseEntityWithoutTenant {
         this.integracaoGovernamental = new IntegracaoGovernamentalVacina();
     }
 
-    // ========== IDENTIFICAÇÃO BÁSICA ==========
-
     @NotBlank(message = "Nome da vacina é obrigatório")
     @Size(max = 255, message = "Nome da vacina deve ter no máximo 255 caracteres")
     @Column(name = "nome", nullable = false, length = 255)
@@ -89,17 +80,15 @@ public class Vacinas extends BaseEntityWithoutTenant {
 
     @Size(max = 20, message = "Código PNI deve ter no máximo 20 caracteres")
     @Column(name = "codigo_pni", length = 20, unique = true)
-    private String codigoPni; // Código do Programa Nacional de Imunizações
+    private String codigoPni;
 
     @Size(max = 20, message = "Código SUS deve ter no máximo 20 caracteres")
     @Column(name = "codigo_sus", length = 20, unique = true)
-    private String codigoSus; // Código do Sistema Único de Saúde
+    private String codigoSus;
 
     @Size(max = 50, message = "Registro ANVISA deve ter no máximo 50 caracteres")
     @Column(name = "registro_anvisa", length = 50)
     private String registroAnvisa;
-
-    // ========== CLASSIFICAÇÃO ==========
 
     @Convert(converter = TipoVacinaEnumConverter.class)
     @Column(name = "tipo", nullable = false)
@@ -108,13 +97,11 @@ public class Vacinas extends BaseEntityWithoutTenant {
 
     @Size(max = 100, message = "Categoria deve ter no máximo 100 caracteres")
     @Column(name = "categoria", length = 100)
-    private String categoria; // Ex: Rotina, Campanha, Especial
+    private String categoria;
 
     @Size(max = 100, message = "Grupo alvo deve ter no máximo 100 caracteres")
     @Column(name = "grupo_alvo", length = 100)
-    private String grupoAlvo; // Ex: Crianças, Adultos, Idosos, Gestantes
-
-    // ========== FABRICANTE ==========
+    private String grupoAlvo;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "fabricante_id")
@@ -122,9 +109,7 @@ public class Vacinas extends BaseEntityWithoutTenant {
 
     @Size(max = 50, message = "Lote padrão deve ter no máximo 50 caracteres")
     @Column(name = "lote_padrao", length = 50)
-    private String lotePadrao; // Lote de referência (não confundir com lote específico do estoque)
-
-    // ========== ADMINISTRAÇÃO ==========
+    private String lotePadrao;
 
     @Convert(converter = ViaAdministracaoEnumConverter.class)
     @Column(name = "via_administracao", nullable = false)
@@ -133,12 +118,10 @@ public class Vacinas extends BaseEntityWithoutTenant {
 
     @Convert(converter = UnidadeMedidaEnumConverter.class)
     @Column(name = "unidade_medida")
-    private UnidadeMedidaEnum unidadeMedida; // Unidade de medida da dose
+    private UnidadeMedidaEnum unidadeMedida;
 
     @Embedded
     private EsquemaVacinal esquemaVacinal;
-
-    // ========== IDADE E CONTRAINDICAÇÕES ==========
 
     @Embedded
     private IdadeAplicacaoVacina idadeAplicacao;
@@ -146,32 +129,20 @@ public class Vacinas extends BaseEntityWithoutTenant {
     @Embedded
     private ContraindicacoesVacina contraindicacoes;
 
-    // ========== CONSERVAÇÃO E ARMAZENAMENTO ==========
-
     @Embedded
     private ConservacaoVacina conservacao;
-
-    // ========== COMPOSIÇÃO E TECNOLOGIA ==========
 
     @Embedded
     private ComposicaoVacina composicao;
 
-    // ========== EFICÁCIA E PROTEÇÃO ==========
-
     @Embedded
     private EficaciaVacina eficacia;
-
-    // ========== REAÇÕES ADVERSAS ==========
 
     @Embedded
     private ReacoesAdversasVacina reacoesAdversas;
 
-    // ========== CALENDÁRIO VACINAL ==========
-
     @Embedded
     private CalendarioVacinal calendario;
-
-    // ========== STATUS E DISPONIBILIDADE ==========
 
     @Convert(converter = StatusAtivoEnumConverter.class)
     @Column(name = "status", nullable = false)
@@ -181,32 +152,26 @@ public class Vacinas extends BaseEntityWithoutTenant {
     @Column(name = "disponivel_uso", nullable = false)
     private Boolean disponivelUso = true;
 
-    // ========== DOCUMENTAÇÃO ==========
-
     @Size(max = 255, message = "Bula deve ter no máximo 255 caracteres")
     @Column(name = "bula", length = 255)
-    private String bula; // URL ou caminho da bula
+    private String bula;
 
     @Size(max = 255, message = "Ficha técnica deve ter no máximo 255 caracteres")
     @Column(name = "ficha_tecnica", length = 255)
-    private String fichaTecnica; // URL ou caminho da ficha técnica
+    private String fichaTecnica;
 
     @Size(max = 255, message = "Manual de uso deve ter no máximo 255 caracteres")
     @Column(name = "manual_uso", length = 255)
-    private String manualUso; // URL ou caminho do manual de uso
-
-    // ========== DESCRIÇÃO E OBSERVAÇÕES ==========
+    private String manualUso;
 
     @Column(name = "descricao", columnDefinition = "TEXT")
     private String descricao;
 
     @Column(name = "indicacoes", columnDefinition = "TEXT")
-    private String indicacoes; // Indicações de uso
+    private String indicacoes;
 
     @Column(name = "observacoes", columnDefinition = "TEXT")
     private String observacoes;
-
-    // ========== INTEGRAÇÃO COM SISTEMAS GOVERNAMENTAIS ==========
 
     @Embedded
     private IntegracaoGovernamentalVacina integracaoGovernamental;

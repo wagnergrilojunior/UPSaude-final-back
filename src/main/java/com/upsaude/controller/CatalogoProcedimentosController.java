@@ -24,11 +24,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
 
-/**
- * Controlador REST para operações relacionadas a Catálogo de Procedimentos.
- *
- * @author UPSaúde
- */
 @RestController
 @RequestMapping("/v1/catalogo-procedimentos")
 @Tag(name = "Catálogo de Procedimentos", description = "API para gerenciamento de Catálogo de Procedimentos")
@@ -155,4 +150,3 @@ public class CatalogoProcedimentosController {
         }
     }
 }
-

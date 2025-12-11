@@ -51,9 +51,9 @@ public class AcaoPromocaoPrevencaoResponse {
     private String parcerias;
     private LocalDate dataInicioExecucao;
     private LocalDate dataConclusao;
-    
+
     @Builder.Default
     private List<ProfissionaisSaudeResponse> profissionaisParticipantes = new ArrayList<>();
-    
+
     private String observacoes;
 }

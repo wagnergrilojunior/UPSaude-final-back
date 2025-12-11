@@ -11,30 +11,14 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 
-/**
- * Mapper para conversões de Falta.
- * Entity ↔ DTO ↔ Request/Response
- */
 @Mapper(config = MappingConfig.class, uses = {MedicosMapper.class, ProfissionaisSaudeMapper.class})
 public interface FaltaMapper extends EntityMapper<Falta, FaltaDTO> {
 
-    /**
-     * Converte DTO para Entity.
-     * O campo 'active' é ignorado (gerenciado pelo sistema).
-     */
     @Mapping(target = "active", ignore = true)
     Falta toEntity(FaltaDTO dto);
 
-    /**
-     * Converte Entity para DTO.
-     */
     FaltaDTO toDTO(Falta entity);
 
-    /**
-     * Converte Request para Entity.
-     * Os campos 'id', 'createdAt', 'updatedAt', 'active' são ignorados.
-     * Relacionamentos (UUID) devem ser tratados manualmente no Service.
-     */
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
@@ -43,11 +27,6 @@ public interface FaltaMapper extends EntityMapper<Falta, FaltaDTO> {
     @Mapping(target = "profissional", ignore = true)
     Falta fromRequest(FaltaRequest request);
 
-    /**
-     * Atualiza Entity existente com dados do Request.
-     * Os campos 'id', 'createdAt', 'updatedAt', 'active' são ignorados.
-     * Relacionamentos (UUID) devem ser tratados manualmente no Service.
-     */
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
@@ -56,8 +35,5 @@ public interface FaltaMapper extends EntityMapper<Falta, FaltaDTO> {
     @Mapping(target = "profissional", ignore = true)
     void updateFromRequest(FaltaRequest request, @MappingTarget Falta entity);
 
-    /**
-     * Converte Entity para Response.
-     */
     FaltaResponse toResponse(Falta entity);
 }

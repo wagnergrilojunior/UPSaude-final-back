@@ -19,13 +19,6 @@ import jakarta.validation.constraints.Size;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
-/**
- * Entidade que representa um catálogo de doenças.
- * Armazena informações completas sobre doenças para sistemas de gestão de saúde.
- * Baseado em padrões da OMS, CID-10 e sistemas de saúde pública.
- *
- * @author UPSaúde
- */
 @Entity
 @Table(name = "doencas", schema = "public",
        indexes = {
@@ -44,8 +37,6 @@ public class Doencas extends BaseEntityWithoutTenant {
         this.epidemiologia = new EpidemiologiaDoenca();
     }
 
-    // ========== IDENTIFICAÇÃO BÁSICA ==========
-
     @NotBlank(message = "Nome da doença é obrigatório")
     @Size(max = 255, message = "Nome deve ter no máximo 255 caracteres")
     @Column(name = "nome", nullable = false, length = 255)
@@ -53,57 +44,45 @@ public class Doencas extends BaseEntityWithoutTenant {
 
     @Size(max = 255, message = "Nome científico deve ter no máximo 255 caracteres")
     @Column(name = "nome_cientifico", length = 255)
-    private String nomeCientifico; // Nome científico da doença
+    private String nomeCientifico;
 
     @Size(max = 50, message = "Código interno deve ter no máximo 50 caracteres")
     @Column(name = "codigo_interno", length = 50)
-    private String codigoInterno; // Código interno do sistema
-
-    // ========== CLASSIFICAÇÃO ==========
+    private String codigoInterno;
 
     @Embedded
     private ClassificacaoDoenca classificacao;
 
     @Column(name = "cronica", nullable = false)
-    private Boolean cronica = false; // Indica se a doença é crônica
-
-    // ========== RELACIONAMENTO COM CID ==========
+    private Boolean cronica = false;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "cid_principal_id")
-    private CidDoencas cidPrincipal; // CID principal relacionado
-
-    // ========== SINTOMAS ==========
+    private CidDoencas cidPrincipal;
 
     @Embedded
     private SintomasDoenca sintomas;
 
-    // ========== TRATAMENTO PADRÃO ==========
-
     @Embedded
     private TratamentoPadraoDoenca tratamentoPadrao;
-
-    // ========== EPIDEMIOLOGIA ==========
 
     @Embedded
     private EpidemiologiaDoenca epidemiologia;
 
-    // ========== DESCRIÇÃO E OBSERVAÇÕES ==========
-
     @Column(name = "descricao", columnDefinition = "TEXT")
-    private String descricao; // Descrição geral da doença
+    private String descricao;
 
     @Column(name = "causas", columnDefinition = "TEXT")
-    private String causas; // Causas conhecidas da doença
+    private String causas;
 
     @Column(name = "fisiopatologia", columnDefinition = "TEXT")
-    private String fisiopatologia; // Fisiopatologia da doença
+    private String fisiopatologia;
 
     @Column(name = "prognostico", columnDefinition = "TEXT")
-    private String prognostico; // Prognóstico geral
+    private String prognostico;
 
     @Column(name = "observacoes", columnDefinition = "TEXT")
-    private String observacoes; // Observações gerais
+    private String observacoes;
 
     @PrePersist
     @PreUpdate
@@ -122,4 +101,3 @@ public class Doencas extends BaseEntityWithoutTenant {
         }
     }
 }
-

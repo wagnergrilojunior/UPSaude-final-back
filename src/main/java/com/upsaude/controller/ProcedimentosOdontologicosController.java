@@ -24,11 +24,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
 
-/**
- * Controlador REST para operações relacionadas a Procedimentos Odontológicos.
- *
- * @author UPSaúde
- */
 @RestController
 @RequestMapping("/v1/procedimentos-odontologicos")
 @Tag(name = "Procedimentos Odontológicos", description = "API para gerenciamento de Procedimentos Odontológicos")
@@ -155,4 +150,3 @@ public class ProcedimentosOdontologicosController {
         }
     }
 }
-

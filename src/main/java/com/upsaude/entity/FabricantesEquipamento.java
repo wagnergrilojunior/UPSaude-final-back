@@ -9,12 +9,6 @@ import jakarta.validation.constraints.Size;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
-/**
- * Entidade que representa um fabricante de equipamentos médicos.
- * Permite cadastrar fabricantes para referência em equipamentos.
- *
- * @author UPSaúde
- */
 @Entity
 @Table(name = "fabricantes_equipamento", schema = "public",
        indexes = {
@@ -69,4 +63,3 @@ public class FabricantesEquipamento extends BaseEntityWithoutTenant {
     @Column(name = "observacoes", columnDefinition = "TEXT")
     private String observacoes;
 }
-

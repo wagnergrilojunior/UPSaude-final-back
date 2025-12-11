@@ -16,12 +16,6 @@ import lombok.EqualsAndHashCode;
 
 import java.time.OffsetDateTime;
 
-/**
- * Entidade que representa plantões de profissionais de saúde.
- * Armazena informações sobre plantões agendados e realizados.
- *
- * @author UPSaúde
- */
 @Entity
 @Table(name = "plantoes", schema = "public",
        indexes = {
@@ -35,8 +29,6 @@ import java.time.OffsetDateTime;
 @EqualsAndHashCode(callSuper = true)
 public class Plantao extends BaseEntity {
 
-    // ========== RELACIONAMENTOS ==========
-
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "profissional_id", nullable = false)
     @NotNull(message = "Profissional de saúde é obrigatório")
@@ -44,16 +36,14 @@ public class Plantao extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "medico_id")
-    private Medicos medico; // Opcional: para médicos específicos
-
-    // ========== DADOS DO PLANTAO ==========
+    private Medicos medico;
 
     @Column(name = "data_hora_inicio", nullable = false)
     @NotNull(message = "Data e hora de início do plantão são obrigatórias")
     private OffsetDateTime dataHoraInicio;
 
     @Column(name = "data_hora_fim")
-    private OffsetDateTime dataHoraFim; // Pode ser null se ainda não finalizado
+    private OffsetDateTime dataHoraFim;
 
     @Column(name = "data_hora_fim_previsto", nullable = false)
     @NotNull(message = "Data e hora prevista de fim do plantão é obrigatória")
@@ -64,32 +54,26 @@ public class Plantao extends BaseEntity {
     @NotNull(message = "Tipo de plantão é obrigatório")
     private TipoPlantaoEnum tipoPlantao;
 
-    // ========== INFORMAÇÕES DE LOCALIZAÇÃO ==========
-
     @Column(name = "setor", length = 255)
-    private String setor; // Setor/unidade onde será realizado o plantão
+    private String setor;
 
     @Column(name = "leito_inicio")
-    private Integer leitoInicio; // Número do primeiro leito (se aplicável)
+    private Integer leitoInicio;
 
     @Column(name = "leito_fim")
-    private Integer leitoFim; // Número do último leito (se aplicável)
-
-    // ========== REMUNERAÇÃO E VALORES ==========
+    private Integer leitoFim;
 
     @Column(name = "valor_plantao", precision = 10, scale = 2)
-    private java.math.BigDecimal valorPlantao; // Valor acordado do plantão
+    private java.math.BigDecimal valorPlantao;
 
     @Column(name = "tem_hora_extra")
-    private Boolean temHoraExtra; // Se terá horas extras
+    private Boolean temHoraExtra;
 
     @Column(name = "valor_hora_extra", precision = 10, scale = 2)
     private java.math.BigDecimal valorHoraExtra;
 
-    // ========== STATUS E CONTROLE ==========
-
     @Column(name = "confirmado")
-    private Boolean confirmado; // Se o profissional confirmou o plantão
+    private Boolean confirmado;
 
     @Column(name = "data_confirmacao")
     private OffsetDateTime dataConfirmacao;
@@ -103,9 +87,6 @@ public class Plantao extends BaseEntity {
     @Column(name = "motivo_cancelamento", columnDefinition = "TEXT")
     private String motivoCancelamento;
 
-    // ========== OBSERVAÇÕES ==========
-
     @Column(name = "observacoes", columnDefinition = "TEXT")
     private String observacoes;
 }
-

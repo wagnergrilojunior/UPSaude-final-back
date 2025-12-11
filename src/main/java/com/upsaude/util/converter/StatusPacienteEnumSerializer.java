@@ -6,10 +6,6 @@ import com.fasterxml.jackson.databind.SerializerProvider;
 import com.upsaude.enums.StatusPacienteEnum;
 import java.io.IOException;
 
-/**
- * Serializador customizado para StatusPacienteEnum.
- * Retorna a descrição do enum ao invés do nome.
- */
 public class StatusPacienteEnumSerializer extends JsonSerializer<StatusPacienteEnum> {
 
     @Override

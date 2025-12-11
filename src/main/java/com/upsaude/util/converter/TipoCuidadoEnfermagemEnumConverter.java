@@ -23,4 +23,3 @@ public class TipoCuidadoEnfermagemEnumConverter implements AttributeConverter<Ti
         return TipoCuidadoEnfermagemEnum.fromCodigo(dbData);
     }
 }
-

@@ -18,13 +18,13 @@ import java.time.OffsetDateTime;
 public class IntegracaoGovernamentalVacinaRequest {
     @Size(max = 50, message = "Código SI PNI deve ter no máximo 50 caracteres")
     private String codigoSiPni;
-    
+
     @Size(max = 50, message = "Código e-SUS deve ter no máximo 50 caracteres")
     private String codigoESus;
-    
+
     @NotNull(message = "Sincronizar PNI é obrigatório")
     @Builder.Default
     private Boolean sincronizarPni = false;
-    
+
     private OffsetDateTime ultimaSincronizacaoPni;
 }

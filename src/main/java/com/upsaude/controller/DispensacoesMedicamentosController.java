@@ -24,11 +24,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
 
-/**
- * Controlador REST para operações relacionadas a Dispensações de Medicamentos.
- *
- * @author UPSaúde
- */
 @RestController
 @RequestMapping("/v1/dispensacoes-medicamentos")
 @Tag(name = "Dispensações de Medicamentos", description = "API para gerenciamento de Dispensações de Medicamentos")

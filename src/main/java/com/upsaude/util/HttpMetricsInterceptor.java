@@ -12,16 +12,6 @@ import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
 
-/**
- * Interceptor HTTP para coletar métricas personalizadas de requisições.
- * 
- * Este interceptor registra:
- * - Total de requisições
- * - Requisições falhadas (4xx, 5xx)
- * - Latência das requisições
- * 
- * @author UPSaúde
- */
 @Slf4j
 @Component
 @RequiredArgsConstructor
@@ -32,18 +22,17 @@ public class HttpMetricsInterceptor implements HandlerInterceptor {
 
     @Override
     public boolean preHandle(@NonNull HttpServletRequest request, @NonNull HttpServletResponse response, @NonNull Object handler) {
-        // Inicia o timer para medir latência
+
         Timer.Sample sample = Timer.start(meterRegistry);
         request.setAttribute(TIMER_ATTRIBUTE, sample);
-        
-        // Incrementa contador de requisições totais
+
         Counter.builder("upsaude.http.requests.total")
             .description("Total de requisições HTTP recebidas")
             .tag("method", request.getMethod())
             .tag("uri", getUriTag(request))
             .register(meterRegistry)
             .increment();
-        
+
         return true;
     }
 
@@ -53,11 +42,10 @@ public class HttpMetricsInterceptor implements HandlerInterceptor {
             @NonNull HttpServletResponse response,
             @NonNull Object handler,
             @Nullable Exception ex) {
-        
-        // Obtém o timer iniciado no preHandle
+
         Timer.Sample sample = (Timer.Sample) request.getAttribute(TIMER_ATTRIBUTE);
         if (sample != null) {
-            // Para o timer e registra a latência
+
             sample.stop(Timer.builder("upsaude.http.requests.latency")
                 .description("Latência das requisições HTTP")
                 .tag("method", request.getMethod())
@@ -66,7 +54,6 @@ public class HttpMetricsInterceptor implements HandlerInterceptor {
                 .register(meterRegistry));
         }
 
-        // Registra requisições falhadas (4xx e 5xx)
         int status = response.getStatus();
         if (status >= 400 && status < 500) {
             Counter.builder("upsaude.http.requests.failed")
@@ -88,7 +75,6 @@ public class HttpMetricsInterceptor implements HandlerInterceptor {
                 .increment();
         }
 
-        // Registra exceções não tratadas
         if (ex != null) {
             Counter.builder("upsaude.http.requests.exceptions")
                 .description("Total de exceções não tratadas em requisições HTTP")
@@ -100,25 +86,17 @@ public class HttpMetricsInterceptor implements HandlerInterceptor {
         }
     }
 
-    /**
-     * Extrai uma tag URI limpa para métricas.
-     * Remove IDs e parâmetros para evitar cardinalidade alta.
-     */
     private String getUriTag(HttpServletRequest request) {
         String uri = request.getRequestURI();
-        
-        // Remove o context-path se presente
+
         String contextPath = request.getContextPath();
         if (uri.startsWith(contextPath)) {
             uri = uri.substring(contextPath.length());
         }
-        
-        // Substitui IDs por placeholders para reduzir cardinalidade
-        // Exemplo: /api/v1/pacientes/123 -> /api/v1/pacientes/{id}
+
         uri = uri.replaceAll("/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}", "/{id}");
         uri = uri.replaceAll("/\\d+", "/{id}");
-        
+
         return uri;
     }
 }
-

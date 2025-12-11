@@ -51,7 +51,7 @@ public class AlergiasController {
             log.warn("Falha ao criar alergia — mensagem: {}, payload: {}", ex.getMessage(), request);
             throw ex;
         } catch (Exception ex) {
-            log.error("Erro inesperado ao criar alergia — Path: /v1/alergias, Method: POST, payload: {}, Exception: {}", 
+            log.error("Erro inesperado ao criar alergia — Path: /v1/alergias, Method: POST, payload: {}, Exception: {}",
                 request, ex.getClass().getName(), ex);
             throw ex;
         }
@@ -72,7 +72,7 @@ public class AlergiasController {
             Page<AlergiasResponse> response = alergiasService.listar(pageable);
             return ResponseEntity.ok(response);
         } catch (Exception ex) {
-            log.error("Erro inesperado ao listar alergias — Path: /v1/alergias, Method: GET, pageable: {}, Exception: {}", 
+            log.error("Erro inesperado ao listar alergias — Path: /v1/alergias, Method: GET, pageable: {}, Exception: {}",
                 pageable, ex.getClass().getName(), ex);
             throw ex;
         }
@@ -97,7 +97,7 @@ public class AlergiasController {
             log.warn("Alergia não encontrada — ID: {}", id);
             throw ex;
         } catch (Exception ex) {
-            log.error("Erro inesperado ao buscar alergia — Path: /v1/alergias/{}, Method: GET, ID: {}, Exception: {}", 
+            log.error("Erro inesperado ao buscar alergia — Path: /v1/alergias/{}, Method: GET, ID: {}, Exception: {}",
                 id, id, ex.getClass().getName(), ex);
             throw ex;
         }
@@ -125,7 +125,7 @@ public class AlergiasController {
             log.warn("Falha ao atualizar alergia — id: {}, mensagem: {}", id, ex.getMessage());
             throw ex;
         } catch (Exception ex) {
-            log.error("Erro inesperado ao atualizar alergia — Path: /v1/alergias/{}, Method: PUT, ID: {}, payload: {}, Exception: {}", 
+            log.error("Erro inesperado ao atualizar alergia — Path: /v1/alergias/{}, Method: PUT, ID: {}, payload: {}, Exception: {}",
                 id, id, request, ex.getClass().getName(), ex);
             throw ex;
         }
@@ -150,7 +150,7 @@ public class AlergiasController {
             log.warn("Falha ao excluir alergia — id: {}, mensagem: {}", id, ex.getMessage());
             throw ex;
         } catch (Exception ex) {
-            log.error("Erro inesperado ao excluir alergia — Path: /v1/alergias/{}, Method: DELETE, ID: {}, Exception: {}", 
+            log.error("Erro inesperado ao excluir alergia — Path: /v1/alergias/{}, Method: DELETE, ID: {}, Exception: {}",
                 id, id, ex.getClass().getName(), ex);
             throw ex;
         }

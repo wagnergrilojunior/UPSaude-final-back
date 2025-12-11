@@ -19,7 +19,7 @@ public class TemplateNotificacaoRequest {
     private String descricao;
     @JsonDeserialize(using = TipoNotificacaoEnumDeserializer.class)
     private TipoNotificacaoEnum tipoNotificacao;
-    
+
     @JsonDeserialize(using = CanalNotificacaoEnumDeserializer.class)
     private CanalNotificacaoEnum canal;
     private String assunto;

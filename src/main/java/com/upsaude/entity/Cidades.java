@@ -9,12 +9,6 @@ import jakarta.persistence.Table;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
-/**
- * Entidade que representa uma Cidade.
- * Não possui relação com Tenant por ser uma entidade de referência.
- *
- * @author UPSaúde
- */
 @Entity
 @Table(name = "cidades", schema = "public")
 @Data
@@ -37,4 +31,3 @@ public class Cidades extends BaseEntityWithoutTenant {
     @JoinColumn(name = "estado_id", nullable = false)
     private Estados estado;
 }
-

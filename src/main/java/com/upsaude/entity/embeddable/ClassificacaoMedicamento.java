@@ -12,11 +12,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 
-/**
- * Classe embeddable para classificação do medicamento.
- *
- * @author UPSaúde
- */
 @Embeddable
 @Data
 @Builder
@@ -39,7 +34,7 @@ public class ClassificacaoMedicamento {
 
     @Size(max = 100, message = "Categoria deve ter no máximo 100 caracteres")
     @Column(name = "categoria", length = 100)
-    private String categoria; // Ex: Genérico, Similar, Referência, Biossimilar
+    private String categoria;
 
     @Size(max = 100, message = "Subcategoria deve ter no máximo 100 caracteres")
     @Column(name = "subcategoria", length = 100)
@@ -47,6 +42,5 @@ public class ClassificacaoMedicamento {
 
     @Size(max = 50, message = "Código ATC deve ter no máximo 50 caracteres")
     @Column(name = "codigo_atc", length = 50)
-    private String codigoAtc; // Código ATC (Anatomical Therapeutic Chemical)
+    private String codigoAtc;
 }
-

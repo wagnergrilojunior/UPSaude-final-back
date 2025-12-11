@@ -23,31 +23,31 @@ import java.time.LocalDate;
 public class DadosPessoaisMedicoRequest {
     @Size(max = 255, message = "Nome social deve ter no máximo 255 caracteres")
     private String nomeSocial;
-    
+
     @Pattern(regexp = "^$|^\\d{11}$", message = "CPF deve ter 11 dígitos")
     private String cpf;
-    
+
     @JsonDeserialize(using = SexoEnumDeserializer.class)
     private SexoEnum sexo;
-    
+
     private LocalDate dataNascimento;
-    
+
     @JsonDeserialize(using = EstadoCivilEnumDeserializer.class)
     private EstadoCivilEnum estadoCivil;
-    
+
     @Size(max = 20, message = "RG deve ter no máximo 20 caracteres")
     private String rg;
-    
+
     @Size(max = 10, message = "Órgão emissor RG deve ter no máximo 10 caracteres")
     private String orgaoEmissorRg;
-    
+
     @Pattern(regexp = "^$|^[A-Z]{2}$", message = "UF emissor RG deve ter exatamente 2 letras maiúsculas")
     @Size(max = 2, message = "UF emissor RG deve ter 2 caracteres")
     private String ufEmissorRg;
-    
+
     @Size(max = 20, message = "Nacionalidade deve ter no máximo 20 caracteres")
     private String nacionalidade;
-    
+
     @Size(max = 50, message = "Naturalidade deve ter no máximo 50 caracteres")
     private String naturalidade;
 }

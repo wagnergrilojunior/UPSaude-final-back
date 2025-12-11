@@ -13,12 +13,6 @@ import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
-/**
- * Entidade que representa um exame realizado.
- * Armazena informações completas sobre exames laboratoriais, de imagem, etc.
- *
- * @author UPSaúde
- */
 @Entity
 @Table(name = "exames", schema = "public",
        indexes = {
@@ -40,59 +34,59 @@ public class Exames extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "catalogo_exame_id")
-    private CatalogoExames catalogoExame; // Referência ao catálogo de exames
+    private CatalogoExames catalogoExame;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "atendimento_id")
-    private Atendimento atendimento; // Vínculo com atendimento (se aplicável)
+    private Atendimento atendimento;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "consulta_id")
-    private Consultas consulta; // Vínculo com consulta (se aplicável)
+    private Consultas consulta;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "profissional_solicitante_id")
-    private ProfissionaisSaude profissionalSolicitante; // Profissional que solicitou o exame
+    private ProfissionaisSaude profissionalSolicitante;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "medico_solicitante_id")
-    private Medicos medicoSolicitante; // Médico que solicitou o exame
+    private Medicos medicoSolicitante;
 
     @Column(name = "tipo_exame", length = 100)
-    private String tipoExame; // Mantido para compatibilidade
+    private String tipoExame;
 
     @Column(name = "nome_exame", length = 255)
-    private String nomeExame; // Nome do exame
+    private String nomeExame;
 
     @Column(name = "data_solicitacao")
-    private OffsetDateTime dataSolicitacao; // Data em que o exame foi solicitado
+    private OffsetDateTime dataSolicitacao;
 
     @Column(name = "data_exame")
-    private OffsetDateTime dataExame; // Data em que o exame foi realizado
+    private OffsetDateTime dataExame;
 
     @Column(name = "data_resultado")
-    private OffsetDateTime dataResultado; // Data em que o resultado ficou disponível
+    private OffsetDateTime dataResultado;
 
     @Column(name = "unidade_laboratorio", length = 255)
-    private String unidadeLaboratorio; // Unidade/laboratório onde foi realizado
+    private String unidadeLaboratorio;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "estabelecimento_realizador_id")
-    private Estabelecimentos estabelecimentoRealizador; // Estabelecimento que realizou o exame
+    private Estabelecimentos estabelecimentoRealizador;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "profissional_responsavel_id")
-    private ProfissionaisSaude profissionalResponsavel; // Profissional responsável pelo exame/laudo
+    private ProfissionaisSaude profissionalResponsavel;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "medico_responsavel_id")
-    private Medicos medicoResponsavel; // Médico responsável pelo laudo
+    private Medicos medicoResponsavel;
 
     @Column(name = "resultados", columnDefinition = "jsonb")
-    private String resultados; // Resultados do exame em JSON
+    private String resultados;
 
     @Column(name = "laudo", columnDefinition = "TEXT")
-    private String laudo; // Laudo do exame
+    private String laudo;
 
     @Column(name = "observacoes", columnDefinition = "TEXT")
     private String observacoes;

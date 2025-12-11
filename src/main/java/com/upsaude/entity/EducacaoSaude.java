@@ -24,12 +24,6 @@ import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Entidade que representa uma ação de educação em saúde.
- * Armazena informações sobre atividades educativas realizadas na unidade de saúde ou comunidade.
- *
- * @author UPSaúde
- */
 @Entity
 @Table(name = "educacao_saude", schema = "public",
        indexes = {
@@ -41,15 +35,10 @@ import java.util.List;
 @EqualsAndHashCode(callSuper = true)
 public class EducacaoSaude extends BaseEntity {
 
-    /**
-     * Construtor padrão que inicializa as coleções para evitar NullPointerException.
-     */
     public EducacaoSaude() {
         this.participantes = new ArrayList<>();
         this.profissionaisParticipantes = new ArrayList<>();
     }
-
-    // ========== RELACIONAMENTOS ==========
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "profissional_responsavel_id", nullable = false)
@@ -60,7 +49,6 @@ public class EducacaoSaude extends BaseEntity {
     @JoinColumn(name = "equipe_saude_id")
     private EquipeSaude equipeSaude;
 
-    /** Participantes da atividade (quando são pacientes cadastrados) */
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
         name = "educacao_saude_participantes",
@@ -70,7 +58,6 @@ public class EducacaoSaude extends BaseEntity {
     )
     private List<Paciente> participantes = new ArrayList<>();
 
-    /** Profissionais que participaram da atividade */
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
         name = "educacao_saude_profissionais",
@@ -80,14 +67,10 @@ public class EducacaoSaude extends BaseEntity {
     )
     private List<ProfissionaisSaude> profissionaisParticipantes = new ArrayList<>();
 
-    // ========== TIPO DE ATIVIDADE ==========
-
     @Convert(converter = TipoEducacaoSaudeEnumConverter.class)
     @Column(name = "tipo_atividade", nullable = false)
     @NotNull(message = "Tipo de atividade é obrigatório")
     private TipoEducacaoSaudeEnum tipoAtividade;
-
-    // ========== INFORMAÇÕES DA ATIVIDADE ==========
 
     @Size(max = 255, message = "Título deve ter no máximo 255 caracteres")
     @Column(name = "titulo", nullable = false, length = 255)
@@ -110,8 +93,6 @@ public class EducacaoSaude extends BaseEntity {
     @Column(name = "recursos_utilizados", columnDefinition = "TEXT")
     private String recursosUtilizados;
 
-    // ========== LOCAL E HORÁRIO ==========
-
     @Column(name = "data_hora_inicio", nullable = false)
     @NotNull(message = "Data e hora de início são obrigatórios")
     private OffsetDateTime dataHoraInicio;
@@ -131,8 +112,6 @@ public class EducacaoSaude extends BaseEntity {
     @Column(name = "endereco", length = 500)
     private String endereco;
 
-    // ========== PÚBLICO-ALVO ==========
-
     @Size(max = 255, message = "Público-alvo deve ter no máximo 255 caracteres")
     @Column(name = "publico_alvo", length = 255)
     private String publicoAlvo;
@@ -143,8 +122,6 @@ public class EducacaoSaude extends BaseEntity {
     @Column(name = "faixa_etaria_fim")
     private Integer faixaEtariaFim;
 
-    // ========== PARTICIPAÇÃO ==========
-
     @Column(name = "numero_participantes_previsto")
     @Min(value = 0, message = "Número previsto não pode ser negativo")
     private Integer numeroParticipantesPrevisto;
@@ -154,9 +131,7 @@ public class EducacaoSaude extends BaseEntity {
     private Integer numeroParticipantesPresente;
 
     @Column(name = "lista_presenca_externa", columnDefinition = "TEXT")
-    private String listaPresencaExterna; // Para participantes não cadastrados
-
-    // ========== AVALIAÇÃO ==========
+    private String listaPresencaExterna;
 
     @Column(name = "atividade_realizada", nullable = false)
     private Boolean atividadeRealizada = false;
@@ -173,8 +148,6 @@ public class EducacaoSaude extends BaseEntity {
     @Column(name = "encaminhamentos_realizados", columnDefinition = "TEXT")
     private String encaminhamentosRealizados;
 
-    // ========== MATERIAL DE APOIO ==========
-
     @Column(name = "material_distribuido", columnDefinition = "TEXT")
     private String materialDistribuido;
 
@@ -182,17 +155,9 @@ public class EducacaoSaude extends BaseEntity {
     @Min(value = 0, message = "Quantidade não pode ser negativa")
     private Integer quantidadeMaterialDistribuido;
 
-    // ========== OBSERVAÇÕES ==========
-
     @Column(name = "observacoes", columnDefinition = "TEXT")
     private String observacoes;
 
-    // ========== MÉTODOS DE CICLO DE VIDA ==========
-
-    /**
-     * Garante que as coleções não sejam nulas antes de persistir ou atualizar.
-     * Recria as listas se estiverem nulas.
-     */
     @PrePersist
     @PreUpdate
     public void validateCollections() {
@@ -204,4 +169,3 @@ public class EducacaoSaude extends BaseEntity {
         }
     }
 }
-

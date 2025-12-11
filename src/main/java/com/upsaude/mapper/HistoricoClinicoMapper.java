@@ -16,30 +16,14 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 
-/**
- * Mapper para conversões de HistoricoClinico.
- * Entity ↔ DTO ↔ Request/Response
- */
 @Mapper(config = MappingConfig.class, uses = {AgendamentoMapper.class, AtendimentoMapper.class, CirurgiaMapper.class, ExamesMapper.class, PacienteMapper.class, ProfissionaisSaudeMapper.class, ReceitasMedicasMapper.class})
 public interface HistoricoClinicoMapper extends EntityMapper<HistoricoClinico, HistoricoClinicoDTO> {
 
-    /**
-     * Converte DTO para Entity.
-     * O campo 'active' é ignorado (gerenciado pelo sistema).
-     */
     @Mapping(target = "active", ignore = true)
     HistoricoClinico toEntity(HistoricoClinicoDTO dto);
 
-    /**
-     * Converte Entity para DTO.
-     */
     HistoricoClinicoDTO toDTO(HistoricoClinico entity);
 
-    /**
-     * Converte Request para Entity.
-     * Os campos 'id', 'createdAt', 'updatedAt', 'active' são ignorados.
-     * Relacionamentos (UUID) devem ser tratados manualmente no Service.
-     */
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
@@ -53,11 +37,6 @@ public interface HistoricoClinicoMapper extends EntityMapper<HistoricoClinico, H
     @Mapping(target = "receita", ignore = true)
     HistoricoClinico fromRequest(HistoricoClinicoRequest request);
 
-    /**
-     * Atualiza Entity existente com dados do Request.
-     * Os campos 'id', 'createdAt', 'updatedAt', 'active' são ignorados.
-     * Relacionamentos (UUID) devem ser tratados manualmente no Service.
-     */
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
@@ -71,8 +50,5 @@ public interface HistoricoClinicoMapper extends EntityMapper<HistoricoClinico, H
     @Mapping(target = "receita", ignore = true)
     void updateFromRequest(HistoricoClinicoRequest request, @MappingTarget HistoricoClinico entity);
 
-    /**
-     * Converte Entity para Response.
-     */
     HistoricoClinicoResponse toResponse(HistoricoClinico entity);
 }

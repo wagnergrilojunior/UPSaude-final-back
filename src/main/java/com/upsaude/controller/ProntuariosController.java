@@ -24,11 +24,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
 
-/**
- * Controlador REST para operações relacionadas a Prontuários.
- *
- * @author UPSaúde
- */
 @RestController
 @RequestMapping("/v1/prontuarios")
 @Tag(name = "Prontuários", description = "API para gerenciamento de Prontuários")

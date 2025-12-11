@@ -14,7 +14,6 @@ public interface DiagnosticoAlergiaPacienteMapper {
     DiagnosticoAlergiaPacienteResponse toResponse(DiagnosticoAlergiaPaciente entity);
     void updateFromRequest(DiagnosticoAlergiaPacienteRequest request, @MappingTarget DiagnosticoAlergiaPaciente entity);
 
-    // Mapeamento entre DTO e Entity
     DiagnosticoAlergiaPaciente toEntity(com.upsaude.dto.embeddable.DiagnosticoAlergiaPacienteDTO dto);
     com.upsaude.dto.embeddable.DiagnosticoAlergiaPacienteDTO toDTO(DiagnosticoAlergiaPaciente entity);
     void updateFromDTO(com.upsaude.dto.embeddable.DiagnosticoAlergiaPacienteDTO dto, @MappingTarget DiagnosticoAlergiaPaciente entity);

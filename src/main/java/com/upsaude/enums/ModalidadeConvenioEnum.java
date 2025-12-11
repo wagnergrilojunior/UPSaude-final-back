@@ -3,12 +3,6 @@ package com.upsaude.enums;
 import java.util.Arrays;
 import java.util.Locale;
 
-/**
- * Enum para modalidade de convênio/plano de saúde.
- * Baseado em padrões da ANS.
- *
- * @author UPSaúde
- */
 public enum ModalidadeConvenioEnum {
     INDIVIDUAL(1, "Individual"),
     FAMILIAR(2, "Familiar"),
@@ -86,4 +80,3 @@ public enum ModalidadeConvenioEnum {
                 .orElse(null);
     }
 }
-

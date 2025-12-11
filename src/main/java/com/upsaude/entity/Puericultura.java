@@ -15,13 +15,6 @@ import lombok.EqualsAndHashCode;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
-/**
- * Entidade que representa o acompanhamento de puericultura (saúde da criança).
- * Armazena informações sobre o acompanhamento do crescimento e desenvolvimento infantil.
- * Conforme diretrizes do Ministério da Saúde para acompanhamento de crianças de 0 a 10 anos.
- *
- * @author UPSaúde
- */
 @Entity
 @Table(name = "puericultura", schema = "public",
        indexes = {
@@ -32,8 +25,6 @@ import java.time.LocalDate;
 @Data
 @EqualsAndHashCode(callSuper = true)
 public class Puericultura extends BaseEntity {
-
-    // ========== RELACIONAMENTOS ==========
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "paciente_id", nullable = false)
@@ -48,19 +39,17 @@ public class Puericultura extends BaseEntity {
     @JoinColumn(name = "equipe_saude_id")
     private EquipeSaude equipeSaude;
 
-    // ========== DADOS DO NASCIMENTO ==========
-
     @Column(name = "data_nascimento")
     private LocalDate dataNascimento;
 
     @Column(name = "peso_nascimento", precision = 6, scale = 2)
-    private BigDecimal pesoNascimento; // em gramas
+    private BigDecimal pesoNascimento;
 
     @Column(name = "comprimento_nascimento", precision = 4, scale = 1)
-    private BigDecimal comprimentoNascimento; // em cm
+    private BigDecimal comprimentoNascimento;
 
     @Column(name = "perimetro_cefalico_nascimento", precision = 4, scale = 1)
-    private BigDecimal perimetroCefalicoNascimento; // em cm
+    private BigDecimal perimetroCefalicoNascimento;
 
     @Column(name = "apgar_1_minuto")
     private Integer apgar1Minuto;
@@ -73,12 +62,10 @@ public class Puericultura extends BaseEntity {
     private String tipoParto;
 
     @Column(name = "idade_gestacional_nascimento")
-    private Integer idadeGestacionalNascimento; // em semanas
+    private Integer idadeGestacionalNascimento;
 
     @Column(name = "prematuro")
     private Boolean prematuro;
-
-    // ========== DADOS DA MÃE ==========
 
     @Size(max = 255, message = "Nome da mãe deve ter no máximo 255 caracteres")
     @Column(name = "nome_mae", length = 255)
@@ -94,8 +81,6 @@ public class Puericultura extends BaseEntity {
     @Column(name = "intercorrencias_gestacao", columnDefinition = "TEXT")
     private String intercorrenciasGestacao;
 
-    // ========== ALEITAMENTO ==========
-
     @Column(name = "aleitamento_materno_exclusivo")
     private Boolean aleitamentoMaternoExclusivo;
 
@@ -107,9 +92,7 @@ public class Puericultura extends BaseEntity {
 
     @Size(max = 100, message = "Tipo de aleitamento deve ter no máximo 100 caracteres")
     @Column(name = "tipo_aleitamento_atual", length = 100)
-    private String tipoAleitamentoAtual; // Exclusivo, Predominante, Complementado, Fórmula
-
-    // ========== TRIAGEM NEONATAL ==========
+    private String tipoAleitamentoAtual;
 
     @Column(name = "teste_pezinho_realizado")
     private Boolean testePezinhoRealizado;
@@ -161,8 +144,6 @@ public class Puericultura extends BaseEntity {
     @Column(name = "resultado_teste_linguinha", length = 100)
     private String resultadoTesteLinguinha;
 
-    // ========== STATUS DO ACOMPANHAMENTO ==========
-
     @Column(name = "data_inicio_acompanhamento")
     private LocalDate dataInicioAcompanhamento;
 
@@ -176,8 +157,6 @@ public class Puericultura extends BaseEntity {
     @Column(name = "motivo_encerramento", length = 100)
     private String motivoEncerramento;
 
-    // ========== INFORMAÇÕES ADICIONAIS ==========
-
     @Column(name = "antecedentes_familiares", columnDefinition = "TEXT")
     private String antecedentesFamiliares;
 
@@ -190,4 +169,3 @@ public class Puericultura extends BaseEntity {
     @Column(name = "observacoes", columnDefinition = "TEXT")
     private String observacoes;
 }
-

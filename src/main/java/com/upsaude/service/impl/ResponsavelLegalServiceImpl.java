@@ -52,18 +52,15 @@ public class ResponsavelLegalServiceImpl implements ResponsavelLegalService {
             throw new BadRequestException("Nome do responsável legal é obrigatório");
         }
 
-        // Limpa CPF e telefone removendo caracteres não numéricos
         String cpfLimpo = StringUtils.hasText(request.getCpf()) ? limparNumeros(request.getCpf()) : null;
         String telefoneLimpo = StringUtils.hasText(request.getTelefone()) ? limparNumeros(request.getTelefone()) : null;
 
-        // Valida CPF após limpeza
         if (StringUtils.hasText(cpfLimpo)) {
             if (cpfLimpo.length() != 11) {
             throw new BadRequestException("CPF deve conter exatamente 11 dígitos numéricos");
             }
         }
 
-        // Valida telefone após limpeza
         if (StringUtils.hasText(telefoneLimpo)) {
             if (telefoneLimpo.length() != 10 && telefoneLimpo.length() != 11) {
                 throw new BadRequestException("Telefone deve conter 10 ou 11 dígitos numéricos");
@@ -71,8 +68,7 @@ public class ResponsavelLegalServiceImpl implements ResponsavelLegalService {
         }
 
         try {
-            // Carrega o paciente para definir o relacionamento
-            // Verifica primeiro se o paciente existe antes de outras validações
+
             UUID pacienteId = request.getPaciente();
             Paciente paciente = pacienteRepository.findById(pacienteId)
                     .orElseThrow(() -> {
@@ -80,12 +76,10 @@ public class ResponsavelLegalServiceImpl implements ResponsavelLegalService {
                         return new NotFoundException("Paciente não encontrado com ID: " + pacienteId + ". Verifique se o ID está correto e se o paciente foi cadastrado anteriormente.");
                     });
 
-            // Verifica se o paciente está ativo
             if (Boolean.FALSE.equals(paciente.getActive())) {
                 throw new BadRequestException("Não é possível criar responsável legal para um paciente inativo. ID do paciente: " + pacienteId);
             }
 
-            // Verifica se já existe responsável legal para este paciente
             repository.findByPacienteId(pacienteId)
                     .ifPresent(d -> {
                         throw new ConflictException("Responsável legal já existe para este paciente. ID do responsável existente: " + d.getId());
@@ -93,13 +87,11 @@ public class ResponsavelLegalServiceImpl implements ResponsavelLegalService {
 
             ResponsavelLegal entity = mapper.fromRequest(request);
             entity.setActive(true);
-            entity.setPaciente(paciente); // Define o relacionamento manualmente
-            
-            // Aplica os valores limpos
+            entity.setPaciente(paciente);
+
             entity.setCpf(cpfLimpo);
             entity.setTelefone(telefoneLimpo);
-            
-            // Obtém o tenant do usuário autenticado (obrigatório para ResponsavelLegal que estende BaseEntity)
+
             Tenant tenant = tenantService.obterTenantDoUsuarioAutenticado();
             if (tenant == null) {
                 throw new BadRequestException("Não foi possível obter tenant do usuário autenticado. É necessário estar autenticado para criar responsável legal.");
@@ -114,7 +106,7 @@ public class ResponsavelLegalServiceImpl implements ResponsavelLegalService {
             log.warn("Erro de validação ao criar responsável legal. Request: {}. Erro: {}", request, e.getMessage());
             throw e;
         } catch (org.springframework.transaction.TransactionSystemException e) {
-            // Captura erros de validação do JPA/Hibernate que vêm dentro de TransactionSystemException
+
             Throwable cause = e.getCause();
             if (cause instanceof jakarta.persistence.RollbackException) {
                 Throwable rootCause = cause.getCause();
@@ -131,7 +123,7 @@ public class ResponsavelLegalServiceImpl implements ResponsavelLegalService {
             log.error("Erro de transação ao criar responsável legal. Request: {}, Exception: {}", request, e.getClass().getName(), e);
             throw new InternalServerErrorException("Erro ao persistir responsável legal", e);
         } catch (jakarta.validation.ConstraintViolationException e) {
-            // Captura erros de validação do JPA/Hibernate diretamente
+
             StringBuilder mensagens = new StringBuilder("Erro de validação: ");
             for (ConstraintViolation<?> violation : e.getConstraintViolations()) {
                 mensagens.append(violation.getPropertyPath()).append(" - ").append(violation.getMessage()).append("; ");
@@ -159,7 +151,6 @@ public class ResponsavelLegalServiceImpl implements ResponsavelLegalService {
         ResponsavelLegal entity = repository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Responsável legal não encontrado com ID: " + id));
 
-        // Inicializa o relacionamento lazy do paciente dentro da transação
         if (entity.getPaciente() != null) {
             Hibernate.initialize(entity.getPaciente());
         }
@@ -179,7 +170,6 @@ public class ResponsavelLegalServiceImpl implements ResponsavelLegalService {
         ResponsavelLegal entity = repository.findByPacienteId(pacienteId)
                 .orElseThrow(() -> new NotFoundException("Responsável legal não encontrado para o paciente: " + pacienteId));
 
-        // Inicializa o relacionamento lazy do paciente dentro da transação
         if (entity.getPaciente() != null) {
             Hibernate.initialize(entity.getPaciente());
         }
@@ -193,15 +183,13 @@ public class ResponsavelLegalServiceImpl implements ResponsavelLegalService {
         log.debug("Listando responsáveis legais paginados");
 
         Page<ResponsavelLegal> entities = repository.findAll(pageable);
-        
-        // Inicializa o relacionamento lazy do paciente dentro da transação
-        // para evitar LazyInitializationException ao mapear para response
+
         entities.getContent().forEach(entity -> {
             if (entity.getPaciente() != null) {
                 Hibernate.initialize(entity.getPaciente());
             }
         });
-        
+
         return entities.map(mapper::toResponse);
     }
 
@@ -231,18 +219,15 @@ public class ResponsavelLegalServiceImpl implements ResponsavelLegalService {
                     });
         }
 
-        // Limpa CPF e telefone removendo caracteres não numéricos
         String cpfLimpo = StringUtils.hasText(request.getCpf()) ? limparNumeros(request.getCpf()) : null;
         String telefoneLimpo = StringUtils.hasText(request.getTelefone()) ? limparNumeros(request.getTelefone()) : null;
 
-        // Valida CPF após limpeza
         if (StringUtils.hasText(cpfLimpo)) {
             if (cpfLimpo.length() != 11) {
             throw new BadRequestException("CPF deve conter exatamente 11 dígitos numéricos");
         }
         }
 
-        // Valida telefone após limpeza
         if (StringUtils.hasText(telefoneLimpo)) {
             if (telefoneLimpo.length() != 10 && telefoneLimpo.length() != 11) {
                 throw new BadRequestException("Telefone deve conter 10 ou 11 dígitos numéricos");
@@ -279,21 +264,13 @@ public class ResponsavelLegalServiceImpl implements ResponsavelLegalService {
     }
 
     private void atualizarDados(ResponsavelLegal entity, ResponsavelLegalRequest request, String cpfLimpo, String telefoneLimpo) {
-        // Usar mapper para atualizar campos básicos
+
         mapper.updateFromRequest(request, entity);
-        
-        // Aplica valores limpos de CPF e telefone após o mapeamento
+
         entity.setCpf(cpfLimpo);
         entity.setTelefone(telefoneLimpo);
     }
 
-    /**
-     * Remove todos os caracteres não numéricos de uma string.
-     * Útil para limpar CPF e telefone que podem vir com máscara.
-     *
-     * @param valor String com possível máscara
-     * @return String contendo apenas dígitos numéricos
-     */
     private String limparNumeros(String valor) {
         if (valor == null) {
                     return null;
@@ -302,4 +279,3 @@ public class ResponsavelLegalServiceImpl implements ResponsavelLegalService {
                 }
 
 }
-

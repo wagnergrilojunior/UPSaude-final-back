@@ -141,7 +141,7 @@ public class IntegracaoGovServiceImpl implements IntegracaoGovService {
 
     private void atualizarDados(IntegracaoGov entity, IntegracaoGovRequest request) {
         IntegracaoGov updated = mapper.fromRequest(request);
-        
+
         entity.setUuidRnds(updated.getUuidRnds());
         entity.setIdIntegracaoGov(updated.getIdIntegracaoGov());
         entity.setDataSincronizacaoGov(updated.getDataSincronizacaoGov());
@@ -151,4 +151,3 @@ public class IntegracaoGovServiceImpl implements IntegracaoGovService {
         entity.setOrigemCadastro(updated.getOrigemCadastro());
     }
 }
-

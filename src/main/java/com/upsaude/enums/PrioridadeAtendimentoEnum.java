@@ -3,12 +3,6 @@ package com.upsaude.enums;
 import java.util.Arrays;
 import java.util.Locale;
 
-/**
- * Enum para classificação de prioridade de atendimento.
- * Baseado em padrões de sistemas de gestão de agendamentos em saúde.
- *
- * @author UPSaúde
- */
 public enum PrioridadeAtendimentoEnum {
     NORMAL(1, "Normal"),
     PRIORITARIO(2, "Prioritário"),
@@ -52,4 +46,3 @@ public enum PrioridadeAtendimentoEnum {
                 .orElse(null);
     }
 }
-

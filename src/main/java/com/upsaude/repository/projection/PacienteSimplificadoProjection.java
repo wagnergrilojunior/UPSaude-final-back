@@ -15,10 +15,6 @@ import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.UUID;
 
-/**
- * Projeção para buscar apenas os campos necessários do Paciente
- * sem carregar relacionamentos lazy, melhorando significativamente a performance.
- */
 public interface PacienteSimplificadoProjection {
     UUID getId();
     OffsetDateTime getCreatedAt();

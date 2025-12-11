@@ -4,12 +4,6 @@ import com.upsaude.enums.FormaFarmaceuticaEnum;
 import jakarta.persistence.AttributeConverter;
 import jakarta.persistence.Converter;
 
-/**
- * Converter para FormaFarmaceuticaEnum.
- * Converte entre o enum e o código Integer no banco de dados.
- *
- * @author UPSaúde
- */
 @Converter(autoApply = false)
 public class FormaFarmaceuticaEnumConverter implements AttributeConverter<FormaFarmaceuticaEnum, Integer> {
 
@@ -29,4 +23,3 @@ public class FormaFarmaceuticaEnumConverter implements AttributeConverter<FormaF
         return FormaFarmaceuticaEnum.fromCodigo(dbData);
     }
 }
-

@@ -4,12 +4,6 @@ import com.upsaude.enums.TipoEquipamentoEnum;
 import jakarta.persistence.AttributeConverter;
 import jakarta.persistence.Converter;
 
-/**
- * Converter para TipoEquipamentoEnum.
- * Converte entre o enum e o código Integer no banco de dados.
- *
- * @author UPSaúde
- */
 @Converter(autoApply = false)
 public class TipoEquipamentoEnumConverter implements AttributeConverter<TipoEquipamentoEnum, Integer> {
 
@@ -29,4 +23,3 @@ public class TipoEquipamentoEnumConverter implements AttributeConverter<TipoEqui
         return TipoEquipamentoEnum.fromCodigo(dbData);
     }
 }
-

@@ -1,35 +1,30 @@
 package com.upsaude.service.impl;
 
+import java.util.UUID;
+
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.upsaude.api.request.ExamesRequest;
 import com.upsaude.api.response.ExamesResponse;
 import com.upsaude.entity.Estabelecimentos;
 import com.upsaude.entity.Exames;
 import com.upsaude.entity.Paciente;
 import com.upsaude.exception.BadRequestException;
-import com.upsaude.exception.InternalServerErrorException;
 import com.upsaude.exception.NotFoundException;
-import org.springframework.dao.DataAccessException;
 import com.upsaude.mapper.ExamesMapper;
 import com.upsaude.repository.EstabelecimentosRepository;
 import com.upsaude.repository.ExamesRepository;
 import com.upsaude.repository.PacienteRepository;
 import com.upsaude.service.ExamesService;
-import org.springframework.transaction.annotation.Transactional;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.Page;
-import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.Cacheable;
-import org.springframework.data.domain.Pageable;
-import org.springframework.stereotype.Service;
 
-import java.util.UUID;
-
-/**
- * Implementação do serviço de gerenciamento de Exames.
- *
- * @author UPSaúde
- */
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -45,23 +40,20 @@ public class ExamesServiceImpl implements ExamesService {
     @CacheEvict(value = "exames", allEntries = true)
     public ExamesResponse criar(ExamesRequest request) {
         log.debug("Criando novo Exame");
-        
+
         if (request == null) {
             log.warn("Request nulo recebido para criação de Exame");
             throw new BadRequestException("Dados do exame são obrigatórios");
         }
 
-        // Validação de dados básicos é feita automaticamente pelo Bean Validation no Request
         Exames exames = examesMapper.fromRequest(request);
 
-        // Carrega e define o estabelecimento
         if (request.getEstabelecimentoRealizador() != null) {
             Estabelecimentos estabelecimento = estabelecimentosRepository.findById(request.getEstabelecimentoRealizador())
                     .orElseThrow(() -> new NotFoundException("Estabelecimento não encontrado com ID: " + request.getEstabelecimentoRealizador()));
             exames.setEstabelecimentoRealizador(estabelecimento);
         }
 
-        // Carrega e define o paciente
         Paciente paciente = pacienteRepository.findById(request.getPaciente())
                 .orElseThrow(() -> new NotFoundException("Paciente não encontrado com ID: " + request.getPaciente()));
         exames.setPaciente(paciente);
@@ -79,7 +71,7 @@ public class ExamesServiceImpl implements ExamesService {
     @Cacheable(value = "exames", key = "#id")
     public ExamesResponse obterPorId(UUID id) {
         log.debug("Buscando Exame por ID: {} (cache miss)", id);
-        
+
         if (id == null) {
             log.warn("ID nulo recebido para busca de Exame");
             throw new BadRequestException("ID do exame é obrigatório");
@@ -129,13 +121,12 @@ public class ExamesServiceImpl implements ExamesService {
             log.warn("ID nulo recebido para atualização de Exame");
             throw new BadRequestException("ID do exame é obrigatório");
         }
-        
+
         if (request == null) {
             log.warn("Request nulo recebido para atualização de Exame. ID: {}", id);
             throw new BadRequestException("Dados do exame são obrigatórios");
         }
 
-        // Validação de dados básicos é feita automaticamente pelo Bean Validation no Request
         Exames examesExistente = examesRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Exame não encontrado com ID: " + id));
 
@@ -171,15 +162,10 @@ public class ExamesServiceImpl implements ExamesService {
         log.info("Exame excluído (desativado) com sucesso. ID: {}", id);
     }
 
-    // Validações de dados básicos foram movidas para o Request usando Bean Validation
-    // (@NotNull, @NotBlank, etc). Isso garante validação automática no Controller
-    // e retorno de erro 400 padronizado via ApiExceptionHandler.
-
     private void atualizarDadosExames(Exames exames, ExamesRequest request) {
-        // Usar mapper para atualizar campos básicos
+
         examesMapper.updateFromRequest(request, exames);
-        
-        // Processar relacionamentos que são ignorados pelo mapper
+
         if (request.getEstabelecimentoRealizador() != null) {
             Estabelecimentos estabelecimento = estabelecimentosRepository.findById(request.getEstabelecimentoRealizador())
                     .orElseThrow(() -> new NotFoundException("Estabelecimento não encontrado com ID: " + request.getEstabelecimentoRealizador()));

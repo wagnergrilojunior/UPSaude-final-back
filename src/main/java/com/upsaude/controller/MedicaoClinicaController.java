@@ -24,11 +24,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
 
-/**
- * Controlador REST para operações relacionadas a Medições Clínicas.
- *
- * @author UPSaúde
- */
 @RestController
 @RequestMapping("/v1/medicoes-clinicas")
 @Tag(name = "Medições Clínicas", description = "API para gerenciamento de Medições Clínicas")

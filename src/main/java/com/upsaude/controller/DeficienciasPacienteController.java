@@ -25,11 +25,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
 
-/**
- * Controlador REST para operações relacionadas a Deficiências de Paciente.
- *
- * @author UPSaúde
- */
 @RestController
 @RequestMapping("/v1/deficiencias-paciente")
 @Tag(name = "Deficiências de Paciente", description = "API para gerenciamento de Deficiências de Paciente")

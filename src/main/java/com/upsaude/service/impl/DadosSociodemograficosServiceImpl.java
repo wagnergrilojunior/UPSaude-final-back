@@ -58,15 +58,13 @@ public class DadosSociodemograficosServiceImpl implements DadosSociodemograficos
                         throw new ConflictException("Dados sociodemográficos já existem para este paciente");
                     });
 
-            // Carrega o paciente para definir o relacionamento
             Paciente paciente = pacienteRepository.findById(request.getPaciente())
                     .orElseThrow(() -> new NotFoundException("Paciente não encontrado com ID: " + request.getPaciente()));
 
             DadosSociodemograficos entity = mapper.fromRequest(request);
             entity.setActive(true);
-            entity.setPaciente(paciente); // Define o relacionamento manualmente
-            
-            // Obtém o tenant do usuário autenticado (obrigatório para DadosSociodemograficos que estende BaseEntity)
+            entity.setPaciente(paciente);
+
             Tenant tenant = tenantService.obterTenantDoUsuarioAutenticado();
             if (tenant == null) {
                 throw new BadRequestException("Não foi possível obter tenant do usuário autenticado. É necessário estar autenticado para criar dados sociodemográficos.");
@@ -77,7 +75,7 @@ public class DadosSociodemograficosServiceImpl implements DadosSociodemograficos
             log.info("Dados sociodemográficos criados. ID: {}", saved.getId());
 
             DadosSociodemograficosResponse response = mapper.toResponse(saved);
-            // Mapeia apenas o ID do paciente para evitar referência circular
+
             response.setPaciente(createPacienteResponseMinimal(saved.getPaciente()));
             return response;
         } catch (BadRequestException | ConflictException | NotFoundException e) {
@@ -108,7 +106,7 @@ public class DadosSociodemograficosServiceImpl implements DadosSociodemograficos
 
             log.debug("Dados sociodemográficos encontrados. ID: {}", id);
             DadosSociodemograficosResponse response = mapper.toResponse(entity);
-            // Mapeia apenas o ID do paciente para evitar referência circular
+
             response.setPaciente(createPacienteResponseMinimal(entity.getPaciente()));
             return response;
         } catch (NotFoundException e) {
@@ -139,7 +137,7 @@ public class DadosSociodemograficosServiceImpl implements DadosSociodemograficos
 
             log.debug("Dados sociodemográficos encontrados para paciente. Paciente ID: {}", pacienteId);
             DadosSociodemograficosResponse response = mapper.toResponse(entity);
-            // Mapeia apenas o ID do paciente para evitar referência circular
+
             response.setPaciente(createPacienteResponseMinimal(entity.getPaciente()));
             return response;
         } catch (NotFoundException e) {
@@ -165,7 +163,7 @@ public class DadosSociodemograficosServiceImpl implements DadosSociodemograficos
             log.debug("Listagem de dados sociodemográficos concluída. Total de elementos: {}", entities.getTotalElements());
             return entities.map(entity -> {
                 DadosSociodemograficosResponse response = mapper.toResponse(entity);
-                // Mapeia apenas o ID do paciente para evitar referência circular
+
                 response.setPaciente(createPacienteResponseMinimal(entity.getPaciente()));
                 return response;
             });
@@ -205,8 +203,7 @@ public class DadosSociodemograficosServiceImpl implements DadosSociodemograficos
                                 throw new ConflictException("Dados sociodemográficos já existem para este paciente");
                             }
                         });
-                
-                // Carrega o novo paciente para atualizar o relacionamento
+
                 Paciente paciente = pacienteRepository.findById(request.getPaciente())
                         .orElseThrow(() -> new NotFoundException("Paciente não encontrado com ID: " + request.getPaciente()));
                 entity.setPaciente(paciente);
@@ -217,7 +214,7 @@ public class DadosSociodemograficosServiceImpl implements DadosSociodemograficos
             log.info("Dados sociodemográficos atualizados. ID: {}", updated.getId());
 
             DadosSociodemograficosResponse response = mapper.toResponse(updated);
-            // Mapeia apenas o ID do paciente para evitar referência circular
+
             response.setPaciente(createPacienteResponseMinimal(updated.getPaciente()));
             return response;
         } catch (NotFoundException e) {
@@ -274,16 +271,10 @@ public class DadosSociodemograficosServiceImpl implements DadosSociodemograficos
     }
 
     private void atualizarDados(DadosSociodemograficos entity, DadosSociodemograficosRequest request) {
-        // Usar mapper para atualizar campos básicos
+
         mapper.updateFromRequest(request, entity);
     }
 
-    /**
-     * Cria um PacienteResponse mínimo apenas com o ID para evitar referência circular.
-     * 
-     * @param paciente Entidade Paciente
-     * @return PacienteResponse com apenas o ID preenchido
-     */
     private PacienteResponse createPacienteResponseMinimal(Paciente paciente) {
         if (paciente == null) {
             return null;
@@ -293,4 +284,3 @@ public class DadosSociodemograficosServiceImpl implements DadosSociodemograficos
         return response;
     }
 }
-

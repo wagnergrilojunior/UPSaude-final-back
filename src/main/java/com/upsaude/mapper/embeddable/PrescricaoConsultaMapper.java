@@ -14,7 +14,6 @@ public interface PrescricaoConsultaMapper {
     PrescricaoConsultaResponse toResponse(PrescricaoConsulta entity);
     void updateFromRequest(PrescricaoConsultaRequest request, @MappingTarget PrescricaoConsulta entity);
 
-    // Mapeamento entre DTO e Entity
     PrescricaoConsulta toEntity(com.upsaude.dto.embeddable.PrescricaoConsultaDTO dto);
     com.upsaude.dto.embeddable.PrescricaoConsultaDTO toDTO(PrescricaoConsulta entity);
     void updateFromDTO(com.upsaude.dto.embeddable.PrescricaoConsultaDTO dto, @MappingTarget PrescricaoConsulta entity);

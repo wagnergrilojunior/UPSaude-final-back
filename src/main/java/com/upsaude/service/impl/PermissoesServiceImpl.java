@@ -20,11 +20,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.UUID;
 
-/**
- * Implementação do serviço de gerenciamento de Permissoes.
- *
- * @author UPSaúde
- */
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -38,8 +33,6 @@ public class PermissoesServiceImpl implements PermissoesService {
     @CacheEvict(value = "permissoes", allEntries = true)
     public PermissoesResponse criar(PermissoesRequest request) {
         log.debug("Criando novo permissoes");
-
-        // Validação de dados básicos é feita automaticamente pelo Bean Validation no Request
 
         Permissoes permissoes = permissoesMapper.fromRequest(request);
         permissoes.setActive(true);
@@ -84,8 +77,6 @@ public class PermissoesServiceImpl implements PermissoesService {
             throw new BadRequestException("ID do permissoes é obrigatório");
         }
 
-        // Validação de dados básicos é feita automaticamente pelo Bean Validation no Request
-
         Permissoes permissoesExistente = permissoesRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Permissoes não encontrado com ID: " + id));
 
@@ -119,23 +110,16 @@ public class PermissoesServiceImpl implements PermissoesService {
         log.info("Permissoes excluído (desativado) com sucesso. ID: {}", id);
     }
 
-    // Validações de dados básicos foram movidas para o Request usando Bean Validation
-    // (@NotNull, @NotBlank, @Pattern, etc). Isso garante validação automática no Controller
-    // e retorno de erro 400 padronizado via ApiExceptionHandler.
-
         private void atualizarDadosPermissoes(Permissoes permissoes, PermissoesRequest request) {
         Permissoes permissoesAtualizado = permissoesMapper.fromRequest(request);
-        
-        // Preserva campos de controle
+
         java.util.UUID idOriginal = permissoes.getId();
         com.upsaude.entity.Tenant tenantOriginal = permissoes.getTenant();
         Boolean activeOriginal = permissoes.getActive();
         java.time.OffsetDateTime createdAtOriginal = permissoes.getCreatedAt();
-        
-        // Copia todas as propriedades do objeto atualizado
+
         BeanUtils.copyProperties(permissoesAtualizado, permissoes);
-        
-        // Restaura campos de controle
+
         permissoes.setId(idOriginal);
         permissoes.setTenant(tenantOriginal);
         permissoes.setActive(activeOriginal);

@@ -14,7 +14,6 @@ public interface ExamesSolicitadosConsultaMapper {
     ExamesSolicitadosConsultaResponse toResponse(ExamesSolicitadosConsulta entity);
     void updateFromRequest(ExamesSolicitadosConsultaRequest request, @MappingTarget ExamesSolicitadosConsulta entity);
 
-    // Mapeamento entre DTO e Entity
     ExamesSolicitadosConsulta toEntity(com.upsaude.dto.embeddable.ExamesSolicitadosConsultaDTO dto);
     com.upsaude.dto.embeddable.ExamesSolicitadosConsultaDTO toDTO(ExamesSolicitadosConsulta entity);
     void updateFromDTO(com.upsaude.dto.embeddable.ExamesSolicitadosConsultaDTO dto, @MappingTarget ExamesSolicitadosConsulta entity);

@@ -3,12 +3,6 @@ package com.upsaude.enums;
 import java.util.Arrays;
 import java.util.Locale;
 
-/**
- * Enum para classificação de tipos de alergias.
- * Baseado em padrões médicos e sistemas de saúde.
- *
- * @author UPSaúde
- */
 public enum TipoAlergiaEnum {
     MEDICAMENTO(1, "Medicamento"),
     ALIMENTO(2, "Alimento"),
@@ -64,4 +58,3 @@ public enum TipoAlergiaEnum {
                 .orElse(null);
     }
 }
-

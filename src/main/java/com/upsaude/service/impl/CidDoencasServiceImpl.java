@@ -22,11 +22,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.UUID;
 
-/**
- * Implementação do serviço de gerenciamento de CidDoencas.
- *
- * @author UPSaúde
- */
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -40,16 +35,14 @@ public class CidDoencasServiceImpl implements CidDoencasService {
     @CacheEvict(value = "ciddoencas", allEntries = true)
     public CidDoencasResponse criar(CidDoencasRequest request) {
         log.debug("Criando novo CID de doença. Request: {}", request);
-        
+
         if (request == null) {
             log.warn("Tentativa de criar CID de doença com request nulo");
             throw new BadRequestException("Dados do CID de doença são obrigatórios");
         }
 
         try {
-            // Validação de dados básicos é feita automaticamente pelo Bean Validation no Request
 
-            // Validação de duplicidade de código
             if (request.getCodigo() != null && cidDoencasRepository.findByCodigo(request.getCodigo()).isPresent()) {
                 log.warn("Tentativa de criar CID de doença com código duplicado: {}", request.getCodigo());
                 throw new ConflictException("Já existe um CID de doença com o código: " + request.getCodigo());
@@ -79,7 +72,7 @@ public class CidDoencasServiceImpl implements CidDoencasService {
     @Cacheable(value = "ciddoencas", key = "#id")
     public CidDoencasResponse obterPorId(UUID id) {
         log.debug("Buscando CID de doença por ID: {} (cache miss)", id);
-        
+
         if (id == null) {
             log.warn("ID nulo recebido para busca de CID de doença");
             throw new BadRequestException("ID do CID de doença é obrigatório");
@@ -138,12 +131,10 @@ public class CidDoencasServiceImpl implements CidDoencasService {
         }
 
         try {
-            // Validação de dados básicos é feita automaticamente pelo Bean Validation no Request
 
             CidDoencas cidDoencasExistente = cidDoencasRepository.findById(id)
                     .orElseThrow(() -> new NotFoundException("CID de doença não encontrado com ID: " + id));
 
-            // Validação de duplicidade de código (se o código foi alterado)
             if (request.getCodigo() != null && !request.getCodigo().equals(cidDoencasExistente.getCodigo())) {
                 if (cidDoencasRepository.existsByCodigoAndIdNot(request.getCodigo(), id)) {
                     log.warn("Tentativa de atualizar CID de doença com código duplicado: {}. ID: {}", request.getCodigo(), id);
@@ -151,7 +142,6 @@ public class CidDoencasServiceImpl implements CidDoencasService {
                 }
             }
 
-            // Usa mapper do MapStruct que preserva campos de controle automaticamente
             cidDoencasMapper.updateFromRequest(request, cidDoencasExistente);
 
             CidDoencas cidDoencasAtualizado = cidDoencasRepository.save(cidDoencasExistente);
@@ -211,10 +201,4 @@ public class CidDoencasServiceImpl implements CidDoencasService {
         }
     }
 
-        // Validações de dados básicos foram movidas para o Request usando Bean Validation
-    // (@NotNull, @NotBlank, @Pattern, etc). Isso garante validação automática no Controller
-    // e retorno de erro 400 padronizado via ApiExceptionHandler.
-
-    // Método removido - agora usa cidDoencasMapper.updateFromRequest diretamente
-    // O MapStruct já preserva campos de controle automaticamente
 }

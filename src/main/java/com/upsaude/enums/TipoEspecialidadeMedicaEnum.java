@@ -3,12 +3,6 @@ package com.upsaude.enums;
 import java.util.Arrays;
 import java.util.Locale;
 
-/**
- * Enum para classificação de tipos de especialidades médicas.
- * Baseado em padrões do Conselho Federal de Medicina (CFM).
- *
- * @author UPSaúde
- */
 public enum TipoEspecialidadeMedicaEnum {
     CLINICA_MEDICA(1, "Clínica Médica"),
     CIRURGIA_GERAL(2, "Cirurgia Geral"),
@@ -77,4 +71,3 @@ public enum TipoEspecialidadeMedicaEnum {
                 .orElse(null);
     }
 }
-

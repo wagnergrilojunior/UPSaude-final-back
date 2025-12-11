@@ -3,10 +3,6 @@ package com.upsaude.enums;
 import java.util.Arrays;
 import java.util.Locale;
 
-/**
- * Enum para classificação de escolaridade conforme padrão brasileiro e SUS/e-SUS.
- * Baseado na classificação do IBGE.
- */
 public enum EscolaridadeEnum {
     ANALFABETO(1, "Analfabeto"),
     FUNDAMENTAL_INCOMPLETO(2, "Fundamental incompleto"),
@@ -52,4 +48,3 @@ public enum EscolaridadeEnum {
                 .orElse(null);
     }
 }
-

@@ -23,7 +23,7 @@ public class EnderecoResponse {
     private OffsetDateTime createdAt;
     private OffsetDateTime updatedAt;
     private Boolean active;
-    
+
     @JsonSerialize(using = TipoLogradouroEnumSerializer.class)
     private TipoLogradouroEnum tipoLogradouro;
     private String logradouro;

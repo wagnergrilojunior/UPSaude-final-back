@@ -20,11 +20,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.UUID;
 
-/**
- * Implementação do serviço de gerenciamento de Cuidados de Enfermagem.
- *
- * @author UPSaúde
- */
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -38,8 +33,6 @@ public class CuidadosEnfermagemServiceImpl implements CuidadosEnfermagemService 
     @CacheEvict(value = "cuidadosenfermagem", allEntries = true)
     public CuidadosEnfermagemResponse criar(CuidadosEnfermagemRequest request) {
         log.debug("Criando novo cuidado de enfermagem");
-
-        // Validação de dados básicos é feita automaticamente pelo Bean Validation no Request
 
         CuidadosEnfermagem cuidadosEnfermagem = cuidadosEnfermagemMapper.fromRequest(request);
         cuidadosEnfermagem.setActive(true);
@@ -107,8 +100,6 @@ public class CuidadosEnfermagemServiceImpl implements CuidadosEnfermagemService 
             throw new BadRequestException("ID do cuidado de enfermagem é obrigatório");
         }
 
-        // Validação de dados básicos é feita automaticamente pelo Bean Validation no Request
-
         CuidadosEnfermagem cuidadosExistente = cuidadosEnfermagemRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Cuidado de enfermagem não encontrado com ID: " + id));
 
@@ -142,11 +133,6 @@ public class CuidadosEnfermagemServiceImpl implements CuidadosEnfermagemService 
         log.info("Cuidado de enfermagem excluído (desativado) com sucesso. ID: {}", id);
     }
 
-    // Validações de dados básicos foram movidas para o Request usando Bean Validation
-    // (@NotNull, @NotBlank, @Pattern, etc). Isso garante validação automática no Controller
-    // e retorno de erro 400 padronizado via ApiExceptionHandler.
-    // Os campos 'paciente', 'profissional' e 'tipoCuidado' já têm @NotNull no Request.
-
     private void atualizarDadosCuidadosEnfermagem(CuidadosEnfermagem cuidados, CuidadosEnfermagemRequest request) {
         CuidadosEnfermagem cuidadosAtualizado = cuidadosEnfermagemMapper.fromRequest(request);
 
@@ -163,4 +149,3 @@ public class CuidadosEnfermagemServiceImpl implements CuidadosEnfermagemService 
         cuidados.setCreatedAt(createdAtOriginal);
     }
 }
-

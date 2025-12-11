@@ -24,11 +24,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
 
-/**
- * Controlador REST para operações relacionadas a Especialidades Médicas.
- *
- * @author UPSaúde
- */
 @RestController
 @RequestMapping("/v1/especialidades-medicas")
 @Tag(name = "Especialidades Médicas", description = "API para gerenciamento de Especialidades Médicas")

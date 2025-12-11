@@ -18,13 +18,13 @@ import lombok.Setter;
 public class ReacoesAlergiaRequest {
     @JsonDeserialize(using = TipoReacaoAlergicaEnumDeserializer.class)
     private TipoReacaoAlergicaEnum tipoReacaoPrincipal;
-    
+
     private String reacoesComuns;
-    
+
     private String reacoesGraves;
-    
+
     private String sintomas;
-    
+
     @Size(max = 100, message = "Tempo após exposição deve ter no máximo 100 caracteres")
     private String tempoAposExposicao;
 }

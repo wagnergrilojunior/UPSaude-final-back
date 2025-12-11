@@ -24,31 +24,31 @@ import lombok.Setter;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class MedicacaoRequest {
     private UUID fabricanteEntity;
-    
+
     @Valid
     private IdentificacaoMedicamentoRequest identificacao;
-    
+
     @Valid
     private DosagemAdministracaoMedicamentoRequest dosagemAdministracao;
-    
+
     @Valid
     private ClassificacaoMedicamentoRequest classificacao;
-    
+
     @Valid
     private RegistroControleMedicamentoRequest registroControle;
-    
+
     @Valid
     private ContraindicacoesPrecaucoesMedicamentoRequest contraindicacoesPrecaucoes;
-    
+
     @Valid
     private ConservacaoArmazenamentoMedicamentoRequest conservacaoArmazenamento;
-    
+
     @Size(max = 1000, message = "Descrição deve ter no máximo 1000 caracteres")
     private String descricao;
-    
+
     @Size(max = 1000, message = "Indicações deve ter no máximo 1000 caracteres")
     private String indicacoes;
-    
+
     @Size(max = 1000, message = "Observações deve ter no máximo 1000 caracteres")
     private String observacoes;
 }

@@ -24,12 +24,12 @@ public class HistoricoReacoesAlergiaPacienteRequest {
     private Integer numeroReacoes;
     @JsonDeserialize(using = TipoReacaoAlergicaEnumDeserializer.class)
     private TipoReacaoAlergicaEnum tipoUltimaReacao;
-    
+
     @JsonDeserialize(using = SeveridadeAlergiaEnumDeserializer.class)
     private SeveridadeAlergiaEnum severidadeUltimaReacao;
     private String reacaoMaisGrave;
     private String tratamentoUtilizado;
-    
+
     @NotNull(message = "Necessitou hospitalização é obrigatório")
     @Builder.Default
     private Boolean necessitouHospitalizacao = false;

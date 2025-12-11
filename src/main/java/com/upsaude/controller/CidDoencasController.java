@@ -24,11 +24,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
 
-/**
- * Controlador REST para operações relacionadas a CID Doenças.
- *
- * @author UPSaúde
- */
 @RestController
 @RequestMapping("/v1/cid-doencas")
 @Tag(name = "CID Doenças", description = "API para gerenciamento de CID Doenças")

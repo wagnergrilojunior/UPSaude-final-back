@@ -20,7 +20,7 @@ public class PlanejamentoFamiliarRequest {
     private TipoMetodoContraceptivoEnum metodoAtual;
     private LocalDate dataInicioMetodo;
     private String nomeComercialMetodo;
-    
+
     @JsonDeserialize(using = TipoMetodoContraceptivoEnumDeserializer.class)
     private TipoMetodoContraceptivoEnum metodoAnterior;
     private String motivoTrocaMetodo;

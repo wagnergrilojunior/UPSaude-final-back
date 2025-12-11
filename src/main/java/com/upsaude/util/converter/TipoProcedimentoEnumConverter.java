@@ -23,4 +23,3 @@ public class TipoProcedimentoEnumConverter implements AttributeConverter<TipoPro
         return TipoProcedimentoEnum.fromCodigo(dbData);
     }
 }
-

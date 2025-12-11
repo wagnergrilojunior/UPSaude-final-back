@@ -26,11 +26,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
 
-/**
- * Controller REST para gerenciamento de vínculos entre profissionais de saúde e equipes de saúde.
- *
- * @author UPSaúde
- */
 @RestController
 @RequestMapping("/v1/vinculos-profissional-equipe")
 @Tag(name = "Vínculos Profissional-Equipe", description = "API para gerenciamento de vínculos entre profissionais de saúde e equipes de saúde")

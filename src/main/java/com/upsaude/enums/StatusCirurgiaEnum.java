@@ -3,12 +3,6 @@ package com.upsaude.enums;
 import java.util.Arrays;
 import java.util.Locale;
 
-/**
- * Enum para classificação de status de cirurgia.
- * Baseado em padrões de sistemas de gestão cirúrgica.
- *
- * @author UPSaúde
- */
 public enum StatusCirurgiaEnum {
     AGENDADA(1, "Agendada"),
     CONFIRMADA(2, "Confirmada"),
@@ -53,4 +47,3 @@ public enum StatusCirurgiaEnum {
                 .orElse(null);
     }
 }
-

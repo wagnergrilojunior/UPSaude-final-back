@@ -3,10 +3,6 @@ package com.upsaude.enums;
 import java.util.Arrays;
 import java.util.Locale;
 
-/**
- * Enum para classificação de formas farmacêuticas conforme padrão SUS/SIGTAP.
- * Baseado na Farmacopeia Brasileira e ANVISA.
- */
 public enum FormaFarmaceuticaEnum {
     COMPRIMIDO(1, "Comprimido"),
     CAPSULA(2, "Cápsula"),
@@ -64,4 +60,3 @@ public enum FormaFarmaceuticaEnum {
                 .orElse(null);
     }
 }
-

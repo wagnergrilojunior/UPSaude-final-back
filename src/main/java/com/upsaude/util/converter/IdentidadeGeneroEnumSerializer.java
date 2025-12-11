@@ -6,10 +6,6 @@ import com.fasterxml.jackson.databind.SerializerProvider;
 import com.upsaude.enums.IdentidadeGeneroEnum;
 import java.io.IOException;
 
-/**
- * Serializador customizado para IdentidadeGeneroEnum.
- * Retorna a descrição do enum ao invés do nome.
- */
 public class IdentidadeGeneroEnumSerializer extends JsonSerializer<IdentidadeGeneroEnum> {
 
     @Override

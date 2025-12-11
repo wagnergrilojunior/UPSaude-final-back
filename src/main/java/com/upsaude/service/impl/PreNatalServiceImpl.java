@@ -23,11 +23,6 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-/**
- * Implementação do serviço de gerenciamento de Pré-Natal.
- *
- * @author UPSaúde
- */
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -41,8 +36,6 @@ public class PreNatalServiceImpl implements PreNatalService {
     @CacheEvict(value = "prenatal", allEntries = true)
     public PreNatalResponse criar(PreNatalRequest request) {
         log.debug("Criando novo pré-natal");
-
-        // Validação de dados básicos é feita automaticamente pelo Bean Validation no Request
 
         PreNatal preNatal = preNatalMapper.fromRequest(request);
         preNatal.setActive(true);
@@ -115,8 +108,6 @@ public class PreNatalServiceImpl implements PreNatalService {
             throw new BadRequestException("ID do pré-natal é obrigatório");
         }
 
-        // Validação de dados básicos é feita automaticamente pelo Bean Validation no Request
-
         PreNatal preNatalExistente = preNatalRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Pré-natal não encontrado com ID: " + id));
 
@@ -150,10 +141,6 @@ public class PreNatalServiceImpl implements PreNatalService {
         log.info("Pré-natal excluído (desativado) com sucesso. ID: {}", id);
     }
 
-    // Validações de dados básicos foram movidas para o Request usando Bean Validation
-    // (@NotNull, @NotBlank, @Pattern, etc). Isso garante validação automática no Controller
-    // e retorno de erro 400 padronizado via ApiExceptionHandler.
-
     private void atualizarDadosPreNatal(PreNatal preNatal, PreNatalRequest request) {
         PreNatal preNatalAtualizado = preNatalMapper.fromRequest(request);
 
@@ -170,4 +157,3 @@ public class PreNatalServiceImpl implements PreNatalService {
         preNatal.setCreatedAt(createdAtOriginal);
     }
 }
-

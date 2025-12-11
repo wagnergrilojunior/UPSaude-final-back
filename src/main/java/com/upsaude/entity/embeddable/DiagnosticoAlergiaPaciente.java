@@ -13,11 +13,6 @@ import lombok.Data;
 
 import java.time.LocalDate;
 
-/**
- * Classe embeddable para informações de diagnóstico da alergia no paciente.
- *
- * @author UPSaúde
- */
 @Embeddable
 @Data
 @Builder
@@ -31,26 +26,25 @@ public class DiagnosticoAlergiaPaciente {
     }
 
     @Column(name = "data_diagnostico")
-    private LocalDate dataDiagnostico; // Data do diagnóstico da alergia
+    private LocalDate dataDiagnostico;
 
     @Column(name = "data_primeira_reacao")
-    private LocalDate dataPrimeiraReacao; // Data da primeira reação alérgica
+    private LocalDate dataPrimeiraReacao;
 
     @Convert(converter = SeveridadeAlergiaEnumConverter.class)
     @Column(name = "severidade")
-    private SeveridadeAlergiaEnum severidade; // Severidade da alergia
+    private SeveridadeAlergiaEnum severidade;
 
     @Convert(converter = TipoReacaoAlergicaEnumConverter.class)
     @Column(name = "tipo_reacao_observada")
-    private TipoReacaoAlergicaEnum tipoReacaoObservada; // Tipo de reação observada no paciente
+    private TipoReacaoAlergicaEnum tipoReacaoObservada;
 
     @Column(name = "metodo_diagnostico", length = 255)
-    private String metodoDiagnostico; // Método de diagnóstico (ex: Teste cutâneo, RAST, Teste de provocação)
+    private String metodoDiagnostico;
 
     @Column(name = "local_diagnostico", length = 255)
-    private String localDiagnostico; // Local onde foi feito o diagnóstico
+    private String localDiagnostico;
 
     @Column(name = "profissional_diagnostico", length = 255)
-    private String profissionalDiagnostico; // Profissional que fez o diagnóstico
+    private String profissionalDiagnostico;
 }
-

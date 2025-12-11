@@ -20,11 +20,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.UUID;
 
-/**
- * Implementação do serviço de gerenciamento de Educação em Saúde.
- *
- * @author UPSaúde
- */
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -38,8 +33,6 @@ public class EducacaoSaudeServiceImpl implements EducacaoSaudeService {
     @CacheEvict(value = "educacaosaude", allEntries = true)
     public EducacaoSaudeResponse criar(EducacaoSaudeRequest request) {
         log.debug("Criando nova ação de educação em saúde");
-
-        // Validação de dados básicos é feita automaticamente pelo Bean Validation no Request
 
         EducacaoSaude educacaoSaude = educacaoSaudeMapper.fromRequest(request);
         educacaoSaude.setActive(true);
@@ -111,8 +104,6 @@ public class EducacaoSaudeServiceImpl implements EducacaoSaudeService {
             throw new BadRequestException("ID da educação em saúde é obrigatório");
         }
 
-        // Validação de dados básicos é feita automaticamente pelo Bean Validation no Request
-
         EducacaoSaude educacaoExistente = educacaoSaudeRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Educação em saúde não encontrada com ID: " + id));
 
@@ -146,10 +137,6 @@ public class EducacaoSaudeServiceImpl implements EducacaoSaudeService {
         log.info("Educação em saúde excluída (desativada) com sucesso. ID: {}", id);
     }
 
-    // Validações de dados básicos foram movidas para o Request usando Bean Validation
-    // (@NotNull, @NotBlank, @Pattern, etc). Isso garante validação automática no Controller
-    // e retorno de erro 400 padronizado via ApiExceptionHandler.
-
     private void atualizarDadosEducacaoSaude(EducacaoSaude educacao, EducacaoSaudeRequest request) {
         EducacaoSaude educacaoAtualizada = educacaoSaudeMapper.fromRequest(request);
 
@@ -166,4 +153,3 @@ public class EducacaoSaudeServiceImpl implements EducacaoSaudeService {
         educacao.setCreatedAt(createdAtOriginal);
     }
 }
-

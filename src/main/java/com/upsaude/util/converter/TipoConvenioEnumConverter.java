@@ -4,12 +4,6 @@ import com.upsaude.enums.TipoConvenioEnum;
 import jakarta.persistence.AttributeConverter;
 import jakarta.persistence.Converter;
 
-/**
- * Converter para TipoConvenioEnum.
- * Converte entre o enum e o código Integer no banco de dados.
- *
- * @author UPSaúde
- */
 @Converter(autoApply = false)
 public class TipoConvenioEnumConverter implements AttributeConverter<TipoConvenioEnum, Integer> {
 
@@ -29,4 +23,3 @@ public class TipoConvenioEnumConverter implements AttributeConverter<TipoConveni
         return TipoConvenioEnum.fromCodigo(dbData);
     }
 }
-

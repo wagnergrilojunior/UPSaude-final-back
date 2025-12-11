@@ -23,11 +23,6 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.UUID;
 
-/**
- * Implementação do serviço de gerenciamento de Medições Clínicas.
- *
- * @author UPSaúde
- */
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -43,16 +38,12 @@ public class MedicaoClinicaServiceImpl implements MedicaoClinicaService {
     public MedicaoClinicaResponse criar(MedicaoClinicaRequest request) {
         log.debug("Criando nova medição clínica para paciente: {}", request.getPaciente());
 
-        // Validação de dados básicos é feita automaticamente pelo Bean Validation no Request
-
         MedicaoClinica medicaoClinica = medicaoClinicaMapper.fromRequest(request);
 
-        // Carrega e define o paciente
         Paciente paciente = pacienteRepository.findById(request.getPaciente())
                 .orElseThrow(() -> new NotFoundException("Paciente não encontrado com ID: " + request.getPaciente()));
         medicaoClinica.setPaciente(paciente);
 
-        // Calcula IMC se peso e altura forem fornecidos
         calcularImc(medicaoClinica);
 
         medicaoClinica.setActive(true);
@@ -110,14 +101,11 @@ public class MedicaoClinicaServiceImpl implements MedicaoClinicaService {
             throw new BadRequestException("ID da medição clínica é obrigatório");
         }
 
-        // Validação de dados básicos é feita automaticamente pelo Bean Validation no Request
-
         MedicaoClinica medicaoClinicaExistente = medicaoClinicaRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Medição clínica não encontrada com ID: " + id));
 
         atualizarDadosMedicaoClinica(medicaoClinicaExistente, request);
 
-        // Recalcula IMC se peso ou altura foram atualizados
         calcularImc(medicaoClinicaExistente);
 
         MedicaoClinica medicaoClinicaAtualizada = medicaoClinicaRepository.save(medicaoClinicaExistente);
@@ -148,17 +136,12 @@ public class MedicaoClinicaServiceImpl implements MedicaoClinicaService {
         log.info("Medição clínica excluída (desativada) com sucesso. ID: {}", id);
     }
 
-    // Validações de dados básicos foram movidas para o Request usando Bean Validation
-    // (@NotNull, @NotBlank, @Pattern, etc). Isso garante validação automática no Controller
-    // e retorno de erro 400 padronizado via ApiExceptionHandler.
-
     private void atualizarDadosMedicaoClinica(MedicaoClinica medicaoClinica, MedicaoClinicaRequest request) {
-        // Atualiza data/hora
+
         if (request.getDataHora() != null) {
             medicaoClinica.setDataHora(request.getDataHora());
         }
 
-        // Atualiza sinais vitais
         if (request.getPressaoSistolica() != null) {
             medicaoClinica.setPressaoSistolica(request.getPressaoSistolica());
         }
@@ -181,7 +164,6 @@ public class MedicaoClinicaServiceImpl implements MedicaoClinicaService {
             medicaoClinica.setGlicemiaCapilar(request.getGlicemiaCapilar());
         }
 
-        // Atualiza medidas antropométricas
         if (request.getPeso() != null) {
             medicaoClinica.setPeso(request.getPeso());
         }
@@ -195,12 +177,10 @@ public class MedicaoClinicaServiceImpl implements MedicaoClinicaService {
             medicaoClinica.setImc(request.getImc());
         }
 
-        // Atualiza observações
         if (request.getObservacoes() != null) {
             medicaoClinica.setObservacoes(request.getObservacoes());
         }
 
-        // Atualiza relacionamento com paciente se fornecido
         if (request.getPaciente() != null) {
             Paciente paciente = pacienteRepository.findById(request.getPaciente())
                     .orElseThrow(() -> new NotFoundException("Paciente não encontrado com ID: " + request.getPaciente()));
@@ -208,12 +188,6 @@ public class MedicaoClinicaServiceImpl implements MedicaoClinicaService {
         }
     }
 
-    /**
-     * Calcula o IMC baseado no peso e altura.
-     * Utiliza BigDecimal para garantir precisão nos cálculos.
-     *
-     * @param medicaoClinica Medição clínica para calcular o IMC
-     */
     private void calcularImc(MedicaoClinica medicaoClinica) {
         if (medicaoClinica.getPeso() != null && medicaoClinica.getAltura() != null
                 && medicaoClinica.getAltura().compareTo(BigDecimal.ZERO) > 0) {
@@ -224,4 +198,3 @@ public class MedicaoClinicaServiceImpl implements MedicaoClinicaService {
         }
     }
 }
-

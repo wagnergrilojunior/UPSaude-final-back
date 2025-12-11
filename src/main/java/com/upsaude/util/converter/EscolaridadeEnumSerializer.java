@@ -6,10 +6,6 @@ import com.fasterxml.jackson.databind.SerializerProvider;
 import com.upsaude.enums.EscolaridadeEnum;
 import java.io.IOException;
 
-/**
- * Serializador customizado para EscolaridadeEnum.
- * Retorna a descrição do enum ao invés do nome.
- */
 public class EscolaridadeEnumSerializer extends JsonSerializer<EscolaridadeEnum> {
 
     @Override

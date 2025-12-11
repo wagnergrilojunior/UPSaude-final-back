@@ -28,11 +28,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-/**
- * Implementação do serviço de gerenciamento de Endereco.
- *
- * @author UPSaúde
- */
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -48,25 +43,21 @@ public class EnderecoServiceImpl implements EnderecoService {
     @CacheEvict(value = "endereco", allEntries = true)
     public EnderecoResponse criar(EnderecoRequest request) {
         log.debug("Criando novo endereço. Request: {}", request);
-        
+
         if (request == null) {
             log.warn("Tentativa de criar endereço com request nulo");
             throw new BadRequestException("Dados do endereço são obrigatórios");
         }
 
         try {
-            // Validação de dados básicos é feita automaticamente pelo Bean Validation no Request
 
-            // Converte request para entity
             Endereco endereco = enderecoMapper.fromRequest(request);
             endereco.setActive(true);
 
-            // Garante valores padrão para campos obrigatórios
             if (endereco.getSemNumero() == null) {
                 endereco.setSemNumero(false);
             }
 
-            // Processa relacionamentos estado e cidade
             if (request.getEstado() != null) {
                 Estados estado = estadosRepository.findById(request.getEstado())
                         .orElseThrow(() -> new NotFoundException("Estado não encontrado com ID: " + request.getEstado()));
@@ -79,9 +70,8 @@ public class EnderecoServiceImpl implements EnderecoService {
                 endereco.setCidade(cidade);
             }
 
-            // Usa findOrCreate para evitar duplicados (Fase 1.2)
             Endereco enderecoSalvo = findOrCreate(endereco);
-            log.info("Endereço processado. ID: {} - {}", enderecoSalvo.getId(), 
+            log.info("Endereço processado. ID: {} - {}", enderecoSalvo.getId(),
                     enderecoSalvo.getId().equals(endereco.getId()) ? "Novo endereço criado" : "Endereço existente reutilizado");
 
             return enderecoMapper.toResponse(enderecoSalvo);
@@ -102,7 +92,7 @@ public class EnderecoServiceImpl implements EnderecoService {
     @Cacheable(value = "endereco", key = "#id")
     public EnderecoResponse obterPorId(UUID id) {
         log.debug("Buscando endereço por ID: {} (cache miss)", id);
-        
+
         if (id == null) {
             log.warn("ID nulo recebido para busca de endereço");
             throw new BadRequestException("ID do endereço é obrigatório");
@@ -161,20 +151,16 @@ public class EnderecoServiceImpl implements EnderecoService {
         }
 
         try {
-            // Validação de dados básicos é feita automaticamente pelo Bean Validation no Request
 
             Endereco enderecoExistente = enderecoRepository.findById(id)
                     .orElseThrow(() -> new NotFoundException("Endereço não encontrado com ID: " + id));
 
-            // Usa mapper do MapStruct que preserva campos de controle automaticamente
             enderecoMapper.updateFromRequest(request, enderecoExistente);
-            
-            // Garante valores padrão para campos obrigatórios
+
             if (enderecoExistente.getSemNumero() == null) {
                 enderecoExistente.setSemNumero(false);
             }
-            
-            // Processa relacionamentos estado e cidade
+
             if (request.getEstado() != null) {
                 Estados estado = estadosRepository.findById(request.getEstado())
                         .orElseThrow(() -> new NotFoundException("Estado não encontrado com ID: " + request.getEstado()));
@@ -260,29 +246,25 @@ public class EnderecoServiceImpl implements EnderecoService {
         }
 
         try {
-            // Normaliza dados antes de buscar/criar (Fase 7.1)
+
             String logradouroNormalizado = normalizarString(endereco.getLogradouro());
             String numeroNormalizado = normalizarNumero(endereco.getNumero());
             String bairroNormalizado = normalizarString(endereco.getBairro());
             String cepNormalizado = normalizarCep(endereco.getCep());
-            
-            // Valida se há campos suficientes para buscar (pelo menos logradouro OU CEP)
+
             if ((logradouroNormalizado == null || logradouroNormalizado.trim().isEmpty()) &&
                 (cepNormalizado == null || cepNormalizado.trim().isEmpty())) {
                 log.debug("Endereço sem logradouro nem CEP. Criando novo sem buscar duplicados.");
-                // Não busca duplicados, cria novo diretamente
+
             } else {
-                // Busca endereço existente pelos campos principais (case-insensitive)
+
                 UUID cidadeId = endereco.getCidade() != null ? endereco.getCidade().getId() : null;
                 UUID estadoId = endereco.getEstado() != null ? endereco.getEstado().getId() : null;
 
-                // Usa findByFieldsList para evitar IncorrectResultSizeDataAccessException quando há múltiplos resultados
-                // Converte tipos para String para a query nativa
-                // tipo_logradouro é integer no banco, então usa o código do enum
                 String tipoLogradouroStr = endereco.getTipoLogradouro() != null ? endereco.getTipoLogradouro().getCodigo().toString() : null;
                 String cidadeIdStr = cidadeId != null ? cidadeId.toString() : null;
                 String estadoIdStr = estadoId != null ? estadoId.toString() : null;
-                
+
                 List<Endereco> enderecosExistentes = enderecoRepository.findByFieldsList(
                         tipoLogradouroStr,
                         logradouroNormalizado,
@@ -294,10 +276,10 @@ public class EnderecoServiceImpl implements EnderecoService {
                 );
 
                 if (!enderecosExistentes.isEmpty()) {
-                    // Se houver múltiplos resultados, usa o primeiro (mais antigo por padrão)
+
                     Endereco encontrado = enderecosExistentes.get(0);
                     if (enderecosExistentes.size() > 1) {
-                        log.warn("Múltiplos endereços encontrados ({}) para os mesmos campos. Usando o primeiro (ID: {})", 
+                        log.warn("Múltiplos endereços encontrados ({}) para os mesmos campos. Usando o primeiro (ID: {})",
                                 enderecosExistentes.size(), encontrado.getId());
                     } else {
                         log.info("Endereço existente encontrado. ID: {} - Reutilizando endereço existente", encontrado.getId());
@@ -306,14 +288,11 @@ public class EnderecoServiceImpl implements EnderecoService {
                 }
             }
 
-            // Não encontrou endereço existente, cria novo
-            // Aplica normalizações no endereço antes de salvar
             endereco.setLogradouro(logradouroNormalizado);
             endereco.setNumero(numeroNormalizado);
             endereco.setBairro(bairroNormalizado);
             endereco.setCep(cepNormalizado);
 
-            // Garante valores padrão para campos obrigatórios
             if (endereco.getSemNumero() == null) {
                 endereco.setSemNumero(false);
             }
@@ -328,7 +307,7 @@ public class EnderecoServiceImpl implements EnderecoService {
             log.warn("Erro de validação ao buscar/criar endereço. Erro: {}", e.getMessage());
             throw e;
         } catch (IncorrectResultSizeDataAccessException e) {
-            // Trata caso onde ainda ocorra IncorrectResultSizeDataAccessException (fallback)
+
             log.warn("Múltiplos endereços encontrados para os mesmos campos. Tentando buscar lista: {}", e.getMessage());
             UUID cidadeId = endereco.getCidade() != null ? endereco.getCidade().getId() : null;
             UUID estadoId = endereco.getEstado() != null ? endereco.getEstado().getId() : null;
@@ -336,13 +315,11 @@ public class EnderecoServiceImpl implements EnderecoService {
             String numeroNormalizado = normalizarNumero(endereco.getNumero());
             String bairroNormalizado = normalizarString(endereco.getBairro());
             String cepNormalizado = normalizarCep(endereco.getCep());
-            
-            // Converte tipos para String para a query nativa
-            // tipo_logradouro é integer no banco, então usa o código do enum
+
             String tipoLogradouroStr = endereco.getTipoLogradouro() != null ? endereco.getTipoLogradouro().getCodigo().toString() : null;
             String cidadeIdStr = cidadeId != null ? cidadeId.toString() : null;
             String estadoIdStr = estadoId != null ? estadoId.toString() : null;
-            
+
             List<Endereco> enderecosExistentes = enderecoRepository.findByFieldsList(
                     tipoLogradouroStr,
                     logradouroNormalizado,
@@ -352,29 +329,27 @@ public class EnderecoServiceImpl implements EnderecoService {
                     cidadeIdStr,
                     estadoIdStr
             );
-            
+
             if (!enderecosExistentes.isEmpty()) {
                 Endereco encontrado = enderecosExistentes.get(0);
                 log.info("Endereço existente encontrado após tratamento de múltiplos resultados. ID: {}", encontrado.getId());
                 return encontrado;
             }
-            // Se ainda não encontrou, cria novo endereço
+
             log.debug("Nenhum endereço encontrado após tratamento de exceção. Criando novo endereço.");
-            
-            // Aplica normalizações no endereço antes de salvar
+
             endereco.setLogradouro(logradouroNormalizado);
             endereco.setNumero(numeroNormalizado);
             endereco.setBairro(bairroNormalizado);
             endereco.setCep(cepNormalizado);
-            
-            // Garante valores padrão para campos obrigatórios
+
             if (endereco.getSemNumero() == null) {
                 endereco.setSemNumero(false);
             }
             if (endereco.getActive() == null) {
                 endereco.setActive(true);
             }
-            
+
             Endereco enderecoSalvo = enderecoRepository.save(endereco);
             log.info("Novo endereço criado após tratamento de exceção. ID: {}", enderecoSalvo.getId());
             return enderecoSalvo;
@@ -387,12 +362,6 @@ public class EnderecoServiceImpl implements EnderecoService {
         }
     }
 
-    /**
-     * Normaliza string removendo espaços extras e convertendo para lowercase para comparação.
-     *
-     * @param str string a ser normalizada
-     * @return string normalizada ou null se entrada for null
-     */
     private String normalizarString(String str) {
         if (str == null) {
             return null;
@@ -400,12 +369,6 @@ public class EnderecoServiceImpl implements EnderecoService {
         return str.trim();
     }
 
-    /**
-     * Normaliza número de endereço removendo caracteres especiais e espaços.
-     *
-     * @param numero número a ser normalizado
-     * @return número normalizado ou null se entrada for null
-     */
     private String normalizarNumero(String numero) {
         if (numero == null) {
             return null;
@@ -413,12 +376,6 @@ public class EnderecoServiceImpl implements EnderecoService {
         return numero.trim().replaceAll("[^\\d]", "");
     }
 
-    /**
-     * Normaliza CEP removendo caracteres especiais e espaços.
-     *
-     * @param cep CEP a ser normalizado
-     * @return CEP normalizado ou null se entrada for null
-     */
     private String normalizarCep(String cep) {
         if (cep == null) {
             return null;
@@ -426,11 +383,4 @@ public class EnderecoServiceImpl implements EnderecoService {
         return cep.trim().replaceAll("[^\\d]", "");
     }
 
-        // Validações de dados básicos foram movidas para o Request usando Bean Validation
-    // (@NotNull, @NotBlank, @Pattern, etc). Isso garante validação automática no Controller
-    // e retorno de erro 400 padronizado via ApiExceptionHandler.
-
-    // Método removido - agora usa enderecoMapper.updateFromRequest diretamente
-    // O MapStruct já preserva campos de controle automaticamente
-    // A lógica de relacionamentos foi movida para o método atualizar
 }

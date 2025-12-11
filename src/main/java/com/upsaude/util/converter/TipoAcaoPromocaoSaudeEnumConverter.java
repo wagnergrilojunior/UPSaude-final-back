@@ -23,4 +23,3 @@ public class TipoAcaoPromocaoSaudeEnumConverter implements AttributeConverter<Ti
         return TipoAcaoPromocaoSaudeEnum.fromCodigo(dbData);
     }
 }
-

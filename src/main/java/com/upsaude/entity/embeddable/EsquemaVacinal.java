@@ -9,11 +9,6 @@ import lombok.Data;
 
 import java.math.BigDecimal;
 
-/**
- * Classe embeddable para informações de esquema vacinal e administração.
- *
- * @author UPSaúde
- */
 @Embeddable
 @Data
 @Builder
@@ -28,22 +23,21 @@ public class EsquemaVacinal {
 
     @Column(name = "numero_doses", nullable = false)
     @Default
-    private Integer numeroDoses = 1; // Número total de doses do esquema vacinal
+    private Integer numeroDoses = 1;
 
     @Column(name = "intervalo_doses_dias")
-    private Integer intervaloDosesDias; // Intervalo mínimo entre doses em dias
+    private Integer intervaloDosesDias;
 
     @Column(name = "dose_reforco", nullable = false)
     @Default
-    private Boolean doseReforco = false; // Se requer dose de reforço
+    private Boolean doseReforco = false;
 
     @Column(name = "intervalo_reforco_anos")
-    private Integer intervaloReforcoAnos; // Intervalo para dose de reforço em anos
+    private Integer intervaloReforcoAnos;
 
     @Column(name = "dose_ml", precision = 10, scale = 2)
-    private BigDecimal doseMl; // Volume da dose em mililitros
+    private BigDecimal doseMl;
 
     @Column(name = "local_aplicacao_padrao", length = 100)
-    private String localAplicacaoPadrao; // Ex: Braço direito, Coxa, Glúteo
+    private String localAplicacaoPadrao;
 }
-

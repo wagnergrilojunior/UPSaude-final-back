@@ -14,13 +14,13 @@ import lombok.Setter;
 @AllArgsConstructor
 public class ComposicaoVacinaRequest {
     private String composicao;
-    
+
     @Size(max = 100, message = "Tecnologia deve ter no máximo 100 caracteres")
     private String tecnologia;
-    
+
     @Size(max = 100, message = "Adjuvante deve ter no máximo 100 caracteres")
     private String adjuvante;
-    
+
     @Size(max = 100, message = "Conservante deve ter no máximo 100 caracteres")
     private String conservante;
 }

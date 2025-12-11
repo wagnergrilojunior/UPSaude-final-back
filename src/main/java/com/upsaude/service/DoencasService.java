@@ -7,11 +7,6 @@ import org.springframework.data.domain.Pageable;
 
 import java.util.UUID;
 
-/**
- * Interface de serviço para operações CRUD relacionadas a Doencas.
- *
- * @author UPSaúde
- */
 public interface DoencasService {
 
     DoencasResponse criar(DoencasRequest request);
@@ -28,4 +23,3 @@ public interface DoencasService {
 
     void excluir(UUID id);
 }
-

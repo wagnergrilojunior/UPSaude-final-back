@@ -20,13 +20,6 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 
-/**
- * Entidade que representa a associação entre um equipamento e um estabelecimento de saúde.
- * Permite registrar equipamentos médicos específicos em estabelecimentos conforme exigências do CNES.
- * Mantém informações sobre quantidade, localização, status de manutenção e histórico.
- *
- * @author UPSaúde
- */
 @Entity
 @Table(name = "equipamentos_estabelecimento", schema = "public",
        uniqueConstraints = {
@@ -43,8 +36,6 @@ import java.time.OffsetDateTime;
 @EqualsAndHashCode(callSuper = true)
 public class EquipamentosEstabelecimento extends BaseEntity {
 
-    // ========== RELACIONAMENTOS ==========
-
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "estabelecimento_id", nullable = false)
     @NotNull(message = "Estabelecimento é obrigatório")
@@ -55,48 +46,42 @@ public class EquipamentosEstabelecimento extends BaseEntity {
     @NotNull(message = "Equipamento é obrigatório")
     private Equipamentos equipamento;
 
-    // ========== IDENTIFICAÇÃO DO EQUIPAMENTO NO ESTABELECIMENTO ==========
-
     @Size(max = 50, message = "Código interno do estabelecimento deve ter no máximo 50 caracteres")
     @Column(name = "codigo_interno", length = 50)
-    private String codigoInterno; // Código único do equipamento no estabelecimento
+    private String codigoInterno;
 
     @Size(max = 50, message = "Número de série deve ter no máximo 50 caracteres")
     @Column(name = "numero_serie", length = 50)
-    private String numeroSerie; // Número de série do equipamento específico
+    private String numeroSerie;
 
     @Size(max = 50, message = "Número de patrimônio deve ter no máximo 50 caracteres")
     @Column(name = "numero_patrimonio", length = 50)
-    private String numeroPatrimonio; // Número de patrimônio do equipamento
+    private String numeroPatrimonio;
 
     @Size(max = 50, message = "Número de tombo deve ter no máximo 50 caracteres")
     @Column(name = "numero_tombo", length = 50)
-    private String numeroTombo; // Número de tombo (inventário)
-
-    // ========== QUANTIDADE E DISPONIBILIDADE ==========
+    private String numeroTombo;
 
     @Column(name = "quantidade", nullable = false)
     @NotNull(message = "Quantidade é obrigatória")
     private Integer quantidade = 1;
 
     @Column(name = "quantidade_disponivel")
-    private Integer quantidadeDisponivel; // Quantidade disponível para uso
+    private Integer quantidadeDisponivel;
 
     @Column(name = "quantidade_em_manutencao")
-    private Integer quantidadeEmManutencao; // Quantidade em manutenção
+    private Integer quantidadeEmManutencao;
 
     @Column(name = "quantidade_inativa")
-    private Integer quantidadeInativa; // Quantidade inativa
-
-    // ========== LOCALIZAÇÃO NO ESTABELECIMENTO ==========
+    private Integer quantidadeInativa;
 
     @Size(max = 255, message = "Setor/Departamento deve ter no máximo 255 caracteres")
     @Column(name = "setor_departamento", length = 255)
-    private String setorDepartamento; // Setor ou departamento onde o equipamento está localizado
+    private String setorDepartamento;
 
     @Size(max = 255, message = "Sala/Ambiente deve ter no máximo 255 caracteres")
     @Column(name = "sala_ambiente", length = 255)
-    private String salaAmbiente; // Sala ou ambiente específico
+    private String salaAmbiente;
 
     @Size(max = 100, message = "Andar deve ter no máximo 100 caracteres")
     @Column(name = "andar", length = 100)
@@ -104,9 +89,7 @@ public class EquipamentosEstabelecimento extends BaseEntity {
 
     @Size(max = 255, message = "Localização física deve ter no máximo 255 caracteres")
     @Column(name = "localizacao_fisica", length = 255)
-    private String localizacaoFisica; // Descrição detalhada da localização
-
-    // ========== STATUS E MANUTENÇÃO ==========
+    private String localizacaoFisica;
 
     @Convert(converter = StatusManutencaoEnumConverter.class)
     @Column(name = "status_manutencao", nullable = false)
@@ -127,19 +110,17 @@ public class EquipamentosEstabelecimento extends BaseEntity {
 
     @Size(max = 255, message = "Empresa de manutenção deve ter no máximo 255 caracteres")
     @Column(name = "empresa_manutencao", length = 255)
-    private String empresaManutencao; // Empresa responsável pela manutenção
+    private String empresaManutencao;
 
     @Size(max = 50, message = "Contato manutenção deve ter no máximo 50 caracteres")
     @Column(name = "contato_manutencao", length = 50)
-    private String contatoManutencao; // Telefone ou email da empresa de manutenção
-
-    // ========== AQUISIÇÃO E GARANTIA ==========
+    private String contatoManutencao;
 
     @Column(name = "data_aquisicao")
-    private LocalDate dataAquisicao; // Data de aquisição pelo estabelecimento
+    private LocalDate dataAquisicao;
 
     @Column(name = "data_instalacao")
-    private LocalDate dataInstalacao; // Data de instalação no estabelecimento
+    private LocalDate dataInstalacao;
 
     @Column(name = "data_inicio_garantia")
     private LocalDate dataInicioGarantia;
@@ -148,37 +129,32 @@ public class EquipamentosEstabelecimento extends BaseEntity {
     private LocalDate dataFimGarantia;
 
     @Column(name = "valor_aquisicao", precision = 12, scale = 2)
-    private BigDecimal valorAquisicao; // Valor de aquisição pelo estabelecimento
+    private BigDecimal valorAquisicao;
 
     @Size(max = 50, message = "Número da nota fiscal deve ter no máximo 50 caracteres")
     @Column(name = "numero_nota_fiscal", length = 50)
     private String numeroNotaFiscal;
 
-    // ========== RESPONSÁVEL E USO ==========
-
     @Size(max = 255, message = "Responsável técnico deve ter no máximo 255 caracteres")
     @Column(name = "responsavel_tecnico", length = 255)
-    private String responsavelTecnico; // Nome do responsável técnico pelo equipamento
+    private String responsavelTecnico;
 
     @Size(max = 50, message = "Registro do responsável deve ter no máximo 50 caracteres")
     @Column(name = "registro_responsavel", length = 50)
-    private String registroResponsavel; // Registro profissional do responsável
+    private String registroResponsavel;
 
     @Column(name = "horas_uso_total")
-    private Integer horasUsoTotal; // Total de horas de uso do equipamento
+    private Integer horasUsoTotal;
 
     @Column(name = "horas_uso_ultimo_mes")
-    private Integer horasUsoUltimoMes; // Horas de uso no último mês
-
-    // ========== OBSERVAÇÕES E DOCUMENTAÇÃO ==========
+    private Integer horasUsoUltimoMes;
 
     @Column(name = "observacoes", columnDefinition = "TEXT")
     private String observacoes;
 
     @Column(name = "historico_manutencao", columnDefinition = "TEXT")
-    private String historicoManutencao; // Histórico de manutenções realizadas
+    private String historicoManutencao;
 
     @Column(name = "problemas_conhecidos", columnDefinition = "TEXT")
-    private String problemasConhecidos; // Problemas conhecidos do equipamento
+    private String problemasConhecidos;
 }
-

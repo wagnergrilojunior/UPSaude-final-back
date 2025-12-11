@@ -47,12 +47,12 @@ public class EducacaoSaudeResponse {
     private String encaminhamentosRealizados;
     private String materialDistribuido;
     private Integer quantidadeMaterialDistribuido;
-    
+
     @Builder.Default
     private List<PacienteResponse> participantes = new ArrayList<>();
-    
+
     @Builder.Default
     private List<ProfissionaisSaudeResponse> profissionaisParticipantes = new ArrayList<>();
-    
+
     private String observacoes;
 }

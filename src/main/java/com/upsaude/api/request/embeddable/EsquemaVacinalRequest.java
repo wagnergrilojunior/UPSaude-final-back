@@ -19,17 +19,17 @@ public class EsquemaVacinalRequest {
     @NotNull(message = "Número de doses é obrigatório")
     @Builder.Default
     private Integer numeroDoses = 1;
-    
+
     private Integer intervaloDosesDias;
-    
+
     @NotNull(message = "Dose reforço é obrigatório")
     @Builder.Default
     private Boolean doseReforco = false;
-    
+
     private Integer intervaloReforcoAnos;
-    
+
     private BigDecimal doseMl;
-    
+
     @Size(max = 100, message = "Local aplicação padrão deve ter no máximo 100 caracteres")
     private String localAplicacaoPadrao;
 }

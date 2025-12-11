@@ -22,16 +22,16 @@ import lombok.Setter;
 public class AlergiasPacienteRequest {
     @NotNull(message = "Paciente é obrigatório")
     private UUID paciente;
-    
+
     @NotNull(message = "Alergia é obrigatória")
     private UUID alergia;
-    
+
     @Valid
     private DiagnosticoAlergiaPacienteRequest diagnostico;
-    
+
     @Valid
     private HistoricoReacoesAlergiaPacienteRequest historicoReacoes;
-    
+
     @Size(max = 1000, message = "Observações deve ter no máximo 1000 caracteres")
     private String observacoes;
     private Boolean alertaMedico;

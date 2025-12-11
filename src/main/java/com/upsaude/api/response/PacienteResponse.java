@@ -48,10 +48,10 @@ public class PacienteResponse {
     private String cns;
     private LocalDate dataNascimento;
     private Integer idade;
-    
+
     @JsonSerialize(using = SexoEnumSerializer.class)
     private SexoEnum sexo;
-    
+
     @JsonSerialize(using = EstadoCivilEnumSerializer.class)
     private EstadoCivilEnum estadoCivil;
     private String telefone;
@@ -65,67 +65,67 @@ public class PacienteResponse {
     private String numeroCarteirinha;
     private LocalDate dataValidadeCarteirinha;
     private String observacoes;
-    
+
     @JsonSerialize(using = RacaCorEnumSerializer.class)
     private RacaCorEnum racaCor;
-    
+
     @JsonSerialize(using = NacionalidadeEnumSerializer.class)
     private NacionalidadeEnum nacionalidade;
     private String paisNascimento;
     private String naturalidade;
     private String municipioNascimentoIbge;
-    
+
     @JsonSerialize(using = EscolaridadeEnumSerializer.class)
     private EscolaridadeEnum escolaridade;
-    
+
     private String ocupacaoProfissao;
     private Boolean situacaoRua;
-    
+
     @JsonSerialize(using = StatusPacienteEnumSerializer.class)
     private StatusPacienteEnum statusPaciente;
     private LocalDate dataObito;
     private String causaObitoCid10;
     private Boolean cartaoSusAtivo;
     private LocalDate dataAtualizacaoCns;
-    
+
     @JsonSerialize(using = TipoAtendimentoPreferencialEnumSerializer.class)
     private TipoAtendimentoPreferencialEnum tipoAtendimentoPreferencial;
-    
+
     private String origemCadastro;
     private String nomeSocial;
-    
+
     @JsonSerialize(using = IdentidadeGeneroEnumSerializer.class)
     private IdentidadeGeneroEnum identidadeGenero;
-    
+
     @JsonSerialize(using = OrientacaoSexualEnumSerializer.class)
     private OrientacaoSexualEnum orientacaoSexual;
     private Boolean possuiDeficiencia;
     private String tipoDeficiencia;
     private Boolean cnsValidado;
-    
+
     @JsonSerialize(using = TipoCnsEnumSerializer.class)
     private TipoCnsEnum tipoCns;
-    
+
     private Boolean acompanhadoPorEquipeEsf;
-    
+
     @Builder.Default
     private List<EnderecoResponse> enderecos = new ArrayList<>();
-    
+
     private DadosSociodemograficosResponse dadosSociodemograficos;
     private DadosClinicosBasicosResponse dadosClinicosBasicos;
     private ResponsavelLegalResponse responsavelLegal;
     private LGPDConsentimentoResponse lgpdConsentimento;
     private IntegracaoGovResponse integracaoGov;
-    
+
     @Builder.Default
     private List<DoencasPacienteResponse> doencas = new ArrayList<>();
-    
+
     @Builder.Default
     private List<AlergiasPacienteResponse> alergias = new ArrayList<>();
-    
+
     @Builder.Default
     private List<DeficienciasPacienteResponse> deficiencias = new ArrayList<>();
-    
+
     @Builder.Default
     private List<MedicacaoPacienteResponse> medicacoes = new ArrayList<>();
 }

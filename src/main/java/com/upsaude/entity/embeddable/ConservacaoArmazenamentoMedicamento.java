@@ -8,11 +8,6 @@ import lombok.Data;
 
 import java.math.BigDecimal;
 
-/**
- * Classe embeddable para conservação e armazenamento do medicamento.
- *
- * @author UPSaúde
- */
 @Embeddable
 @Data
 @Builder
@@ -27,26 +22,25 @@ public class ConservacaoArmazenamentoMedicamento {
     }
 
     @Column(name = "temperatura_conservacao_min", precision = 5, scale = 2)
-    private BigDecimal temperaturaConservacaoMin; // Temperatura mínima de conservação
+    private BigDecimal temperaturaConservacaoMin;
 
     @Column(name = "temperatura_conservacao_max", precision = 5, scale = 2)
-    private BigDecimal temperaturaConservacaoMax; // Temperatura máxima de conservação
+    private BigDecimal temperaturaConservacaoMax;
 
     @Column(name = "proteger_luz", nullable = false)
     @Builder.Default
-    private Boolean protegerLuz = false; // Se deve proteger da luz
+    private Boolean protegerLuz = false;
 
     @Column(name = "proteger_umidade", nullable = false)
     @Builder.Default
-    private Boolean protegerUmidade = false; // Se deve proteger da umidade
+    private Boolean protegerUmidade = false;
 
     @Column(name = "condicoes_armazenamento", length = 255)
-    private String condicoesArmazenamento; // Condições específicas de armazenamento
+    private String condicoesArmazenamento;
 
     @Column(name = "validade_apos_abertura_dias")
-    private Integer validadeAposAberturaDias; // Validade em dias após abertura
+    private Integer validadeAposAberturaDias;
 
     @Column(name = "instrucoes_conservacao", columnDefinition = "TEXT")
-    private String instrucoesConservacao; // Instruções de conservação
+    private String instrucoesConservacao;
 }
-

@@ -8,11 +8,6 @@ import lombok.Data;
 
 import java.time.LocalDate;
 
-/**
- * Classe embeddable para informações de tratamento atual da doença no paciente.
- *
- * @author UPSaúde
- */
 @Embeddable
 @Data
 @Builder
@@ -30,30 +25,29 @@ public class TratamentoAtualDoencaPaciente {
     }
 
     @Column(name = "medicacao_atual", columnDefinition = "TEXT")
-    private String medicacaoAtual; // Medicamentos em uso atual
+    private String medicacaoAtual;
 
     @Column(name = "dose_medicacao", columnDefinition = "TEXT")
-    private String doseMedicacao; // Dosagem dos medicamentos
+    private String doseMedicacao;
 
     @Column(name = "frequencia_medicacao", length = 100)
-    private String frequenciaMedicacao; // Frequência de uso dos medicamentos
+    private String frequenciaMedicacao;
 
     @Column(name = "data_inicio_tratamento")
-    private LocalDate dataInicioTratamento; // Data de início do tratamento atual
+    private LocalDate dataInicioTratamento;
 
     @Column(name = "data_fim_tratamento")
-    private LocalDate dataFimTratamento; // Data prevista de fim do tratamento
+    private LocalDate dataFimTratamento;
 
     @Column(name = "procedimentos_em_andamento", columnDefinition = "TEXT")
-    private String procedimentosEmAndamento; // Procedimentos em andamento
+    private String procedimentosEmAndamento;
 
     @Column(name = "adherencia_tratamento", length = 50)
-    private String adherenciaTratamento; // Ex: Boa, Regular, Ruim
+    private String adherenciaTratamento;
 
     @Column(name = "efeitos_colaterais", columnDefinition = "TEXT")
-    private String efeitosColaterais; // Efeitos colaterais apresentados
+    private String efeitosColaterais;
 
     @Column(name = "contraindicoes", columnDefinition = "TEXT")
-    private String contraindicacoes; // Contraindicações ao tratamento
+    private String contraindicacoes;
 }
-

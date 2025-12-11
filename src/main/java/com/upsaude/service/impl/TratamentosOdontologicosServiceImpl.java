@@ -20,11 +20,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.UUID;
 
-/**
- * Implementação do serviço de gerenciamento de TratamentosOdontologicos.
- *
- * @author UPSaúde
- */
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -38,8 +33,6 @@ public class TratamentosOdontologicosServiceImpl implements TratamentosOdontolog
     @CacheEvict(value = "tratamentosodontologicos", allEntries = true)
     public TratamentosOdontologicosResponse criar(TratamentosOdontologicosRequest request) {
         log.debug("Criando novo tratamentosodontologicos");
-
-        // Validação de dados básicos é feita automaticamente pelo Bean Validation no Request
 
         TratamentosOdontologicos tratamentosOdontologicos = tratamentosOdontologicosMapper.fromRequest(request);
         tratamentosOdontologicos.setActive(true);
@@ -84,8 +77,6 @@ public class TratamentosOdontologicosServiceImpl implements TratamentosOdontolog
             throw new BadRequestException("ID do tratamentosodontologicos é obrigatório");
         }
 
-        // Validação de dados básicos é feita automaticamente pelo Bean Validation no Request
-
         TratamentosOdontologicos tratamentosOdontologicosExistente = tratamentosOdontologicosRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("TratamentosOdontologicos não encontrado com ID: " + id));
 
@@ -119,23 +110,16 @@ public class TratamentosOdontologicosServiceImpl implements TratamentosOdontolog
         log.info("TratamentosOdontologicos excluído (desativado) com sucesso. ID: {}", id);
     }
 
-    // Validações de dados básicos foram movidas para o Request usando Bean Validation
-    // (@NotNull, @NotBlank, @Pattern, etc). Isso garante validação automática no Controller
-    // e retorno de erro 400 padronizado via ApiExceptionHandler.
-
         private void atualizarDadosTratamentosOdontologicos(TratamentosOdontologicos tratamentosOdontologicos, TratamentosOdontologicosRequest request) {
         TratamentosOdontologicos tratamentosOdontologicosAtualizado = tratamentosOdontologicosMapper.fromRequest(request);
-        
-        // Preserva campos de controle
+
         java.util.UUID idOriginal = tratamentosOdontologicos.getId();
         com.upsaude.entity.Tenant tenantOriginal = tratamentosOdontologicos.getTenant();
         Boolean activeOriginal = tratamentosOdontologicos.getActive();
         java.time.OffsetDateTime createdAtOriginal = tratamentosOdontologicos.getCreatedAt();
-        
-        // Copia todas as propriedades do objeto atualizado
+
         BeanUtils.copyProperties(tratamentosOdontologicosAtualizado, tratamentosOdontologicos);
-        
-        // Restaura campos de controle
+
         tratamentosOdontologicos.setId(idOriginal);
         tratamentosOdontologicos.setTenant(tenantOriginal);
         tratamentosOdontologicos.setActive(activeOriginal);

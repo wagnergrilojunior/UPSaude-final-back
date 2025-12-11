@@ -13,14 +13,9 @@ import jakarta.validation.constraints.Size;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
-/**
- * Entidade que representa um exame no catálogo de exames.
- * Armazena informações sobre exames laboratoriais, de imagem, funcionais, etc.
- *
- * @author UPSaúde
- */
 @Entity
-@Table(name = "catalogo_exames", schema = "public",
+@Table(name = ""
+		+ "", schema = "public",
        indexes = {
            @Index(name = "idx_catalogo_exame_tipo", columnList = "tipo_exame"),
            @Index(name = "idx_catalogo_exame_codigo", columnList = "codigo"),
@@ -45,21 +40,20 @@ public class CatalogoExames extends BaseEntity {
 
     @Size(max = 50, message = "Código deve ter no máximo 50 caracteres")
     @Column(name = "codigo", length = 50)
-    private String codigo; // Código TUSS ou código interno
+    private String codigo;
 
     @Column(name = "descricao", columnDefinition = "TEXT")
     private String descricao;
 
     @Column(name = "requer_preparacao")
-    private Boolean requerPreparacao = false; // Se requer preparação prévia
+    private Boolean requerPreparacao = false;
 
     @Column(name = "instrucoes_preparacao", columnDefinition = "TEXT")
-    private String instrucoesPreparacao; // Instruções de preparação (jejum, etc.)
+    private String instrucoesPreparacao;
 
     @Column(name = "prazo_resultado_dias")
-    private Integer prazoResultadoDias; // Prazo estimado para resultado em dias
+    private Integer prazoResultadoDias;
 
     @Column(name = "observacoes", columnDefinition = "TEXT")
     private String observacoes;
 }
-

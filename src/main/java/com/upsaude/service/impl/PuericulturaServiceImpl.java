@@ -22,11 +22,6 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-/**
- * Implementação do serviço de gerenciamento de Puericultura.
- *
- * @author UPSaúde
- */
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -40,8 +35,6 @@ public class PuericulturaServiceImpl implements PuericulturaService {
     @CacheEvict(value = "puericultura", allEntries = true)
     public PuericulturaResponse criar(PuericulturaRequest request) {
         log.debug("Criando nova puericultura");
-
-        // Validação de dados básicos é feita automaticamente pelo Bean Validation no Request
 
         Puericultura puericultura = puericulturaMapper.fromRequest(request);
         puericultura.setActive(true);
@@ -113,8 +106,6 @@ public class PuericulturaServiceImpl implements PuericulturaService {
             throw new BadRequestException("ID da puericultura é obrigatório");
         }
 
-        // Validação de dados básicos é feita automaticamente pelo Bean Validation no Request
-
         Puericultura puericulturaExistente = puericulturaRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Puericultura não encontrada com ID: " + id));
 
@@ -148,10 +139,6 @@ public class PuericulturaServiceImpl implements PuericulturaService {
         log.info("Puericultura excluída (desativada) com sucesso. ID: {}", id);
     }
 
-    // Validações de dados básicos foram movidas para o Request usando Bean Validation
-    // (@NotNull, @NotBlank, @Pattern, etc). Isso garante validação automática no Controller
-    // e retorno de erro 400 padronizado via ApiExceptionHandler.
-
     private void atualizarDadosPuericultura(Puericultura puericultura, PuericulturaRequest request) {
         Puericultura puericulturaAtualizada = puericulturaMapper.fromRequest(request);
 
@@ -168,4 +155,3 @@ public class PuericulturaServiceImpl implements PuericulturaService {
         puericultura.setCreatedAt(createdAtOriginal);
     }
 }
-

@@ -25,11 +25,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.UUID;
 
-/**
- * Implementação do serviço de gerenciamento de Convenio.
- *
- * @author UPSaúde
- */
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -37,7 +32,7 @@ public class ConvenioServiceImpl implements ConvenioService {
 
     private final ConvenioRepository convenioRepository;
     private final ConvenioMapper convenioMapper;
-    @SuppressWarnings("unused") // Será usado quando requests aceitarem objeto completo EnderecoRequest
+    @SuppressWarnings("unused")
     private final EnderecoService enderecoService;
     private final EnderecoRepository enderecoRepository;
 
@@ -46,26 +41,23 @@ public class ConvenioServiceImpl implements ConvenioService {
     @CacheEvict(value = "convenio", allEntries = true)
     public ConvenioResponse criar(ConvenioRequest request) {
         log.debug("Criando novo convênio. Request: {}", request);
-        
+
         if (request == null) {
             log.warn("Tentativa de criar convênio com request nulo");
             throw new BadRequestException("Dados do convênio são obrigatórios");
         }
 
         try {
-            // Validação de dados básicos é feita automaticamente pelo Bean Validation no Request
 
             Convenio convenio = convenioMapper.fromRequest(request);
             convenio.setActive(true);
 
-            // Processa endereço se fornecido (Fase 2.1)
             if (request.getEndereco() != null) {
                 Endereco endereco = enderecoRepository.findById(request.getEndereco())
                         .orElseThrow(() -> new NotFoundException("Endereço não encontrado com ID: " + request.getEndereco()));
                 convenio.setEndereco(endereco);
             }
 
-            // Valida duplicidade antes de salvar (após o tenant ser setado)
             validarDuplicidade(null, convenio, request);
 
             Convenio convenioSalvo = convenioRepository.save(convenio);
@@ -89,7 +81,7 @@ public class ConvenioServiceImpl implements ConvenioService {
     @Cacheable(value = "convenio", key = "#id")
     public ConvenioResponse obterPorId(UUID id) {
         log.debug("Buscando convênio por ID: {} (cache miss)", id);
-        
+
         if (id == null) {
             log.warn("ID nulo recebido para busca de convênio");
             throw new BadRequestException("ID do convênio é obrigatório");
@@ -148,25 +140,20 @@ public class ConvenioServiceImpl implements ConvenioService {
         }
 
         try {
-            // Validação de dados básicos é feita automaticamente pelo Bean Validation no Request
 
             Convenio convenioExistente = convenioRepository.findById(id)
                     .orElseThrow(() -> new NotFoundException("Convênio não encontrado com ID: " + id));
 
-            // Valida duplicidade antes de atualizar
             validarDuplicidade(id, convenioExistente, request);
 
-            // Usa mapper do MapStruct que preserva campos de controle automaticamente
             convenioMapper.updateFromRequest(request, convenioExistente);
 
-            // Processa endereço se fornecido (Fase 2.1 e 6.1)
             if (request.getEndereco() != null) {
                 Endereco endereco = enderecoRepository.findById(request.getEndereco())
                         .orElseThrow(() -> new NotFoundException("Endereço não encontrado com ID: " + request.getEndereco()));
                 convenioExistente.setEndereco(endereco);
             } else {
-                // Se endereço não foi fornecido no request, mantém o existente (não remove)
-                // O mapper já preserva o endereço existente devido ao ignore
+
             }
 
             Convenio convenioAtualizado = convenioRepository.save(convenioExistente);
@@ -226,18 +213,6 @@ public class ConvenioServiceImpl implements ConvenioService {
         }
     }
 
-    // Validações de dados básicos foram movidas para o Request usando Bean Validation
-    // (@NotNull, @NotBlank, @Pattern, etc). Isso garante validação automática no Controller
-    // e retorno de erro 400 padronizado via ApiExceptionHandler.
-
-    /**
-     * Valida se já existe um convênio com o mesmo CNPJ, inscrição estadual ou código no mesmo tenant.
-     * 
-     * @param id ID do convênio sendo atualizado (null para criação)
-     * @param convenio objeto Convenio (usado para obter o tenant)
-     * @param request dados do convênio sendo cadastrado/atualizado
-     * @throws BadRequestException se já existe um convênio com o mesmo CNPJ, inscrição estadual ou código no tenant
-     */
     private void validarDuplicidade(UUID id, Convenio convenio, ConvenioRequest request) {
         if (request == null || convenio == null || convenio.getTenant() == null) {
             return;
@@ -245,14 +220,13 @@ public class ConvenioServiceImpl implements ConvenioService {
 
         Tenant tenant = convenio.getTenant();
 
-        // Valida duplicidade do CNPJ (apenas se fornecido)
         if (request.getCnpj() != null && !request.getCnpj().trim().isEmpty()) {
             boolean cnpjDuplicado;
             if (id == null) {
-                // Criação: verifica se existe qualquer registro com este CNPJ no tenant
+
                 cnpjDuplicado = convenioRepository.existsByCnpjAndTenant(request.getCnpj().trim(), tenant);
             } else {
-                // Atualização: verifica se existe outro registro (diferente do atual) com este CNPJ no tenant
+
                 cnpjDuplicado = convenioRepository.existsByCnpjAndTenantAndIdNot(request.getCnpj().trim(), tenant, id);
             }
 
@@ -264,14 +238,13 @@ public class ConvenioServiceImpl implements ConvenioService {
             }
         }
 
-        // Valida duplicidade da inscrição estadual (apenas se fornecido)
         if (request.getInscricaoEstadual() != null && !request.getInscricaoEstadual().trim().isEmpty()) {
             boolean inscricaoDuplicada;
             if (id == null) {
-                // Criação: verifica se existe qualquer registro com esta inscrição estadual no tenant
+
                 inscricaoDuplicada = convenioRepository.existsByInscricaoEstadualAndTenant(request.getInscricaoEstadual().trim(), tenant);
             } else {
-                // Atualização: verifica se existe outro registro (diferente do atual) com esta inscrição estadual no tenant
+
                 inscricaoDuplicada = convenioRepository.existsByInscricaoEstadualAndTenantAndIdNot(request.getInscricaoEstadual().trim(), tenant, id);
             }
 
@@ -283,14 +256,13 @@ public class ConvenioServiceImpl implements ConvenioService {
             }
         }
 
-        // Valida duplicidade do código (apenas se fornecido)
         if (request.getCodigo() != null && !request.getCodigo().trim().isEmpty()) {
             boolean codigoDuplicado;
             if (id == null) {
-                // Criação: verifica se existe qualquer registro com este código no tenant
+
                 codigoDuplicado = convenioRepository.existsByCodigoAndTenant(request.getCodigo().trim(), tenant);
             } else {
-                // Atualização: verifica se existe outro registro (diferente do atual) com este código no tenant
+
                 codigoDuplicado = convenioRepository.existsByCodigoAndTenantAndIdNot(request.getCodigo().trim(), tenant, id);
             }
 
@@ -303,6 +275,4 @@ public class ConvenioServiceImpl implements ConvenioService {
         }
     }
 
-    // Método removido - agora usa convenioMapper.updateFromRequest diretamente
-    // O MapStruct já preserva campos de controle automaticamente
 }

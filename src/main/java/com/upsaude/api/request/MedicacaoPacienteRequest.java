@@ -22,7 +22,7 @@ public class MedicacaoPacienteRequest {
     private String dose;
     @JsonDeserialize(using = FrequenciaMedicacaoEnumDeserializer.class)
     private FrequenciaMedicacaoEnum frequencia;
-    
+
     @JsonDeserialize(using = ViaAdministracaoEnumDeserializer.class)
     private ViaAdministracaoEnum via;
     private UUID cidRelacionado;

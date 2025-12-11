@@ -25,23 +25,23 @@ public class EquipeSaudeRequest {
     @NotBlank(message = "INE é obrigatório")
     @Size(max = 15, message = "INE deve ter no máximo 15 caracteres")
     private String ine;
-    
+
     @NotBlank(message = "Nome de referência é obrigatório")
     @Size(max = 255, message = "Nome de referência deve ter no máximo 255 caracteres")
     private String nomeReferencia;
-    
+
     @NotNull(message = "Tipo de equipe é obrigatório")
     @JsonDeserialize(using = TipoEquipeEnumDeserializer.class)
     private TipoEquipeEnum tipoEquipe;
-    
+
     @NotNull(message = "Estabelecimento é obrigatório")
     private UUID estabelecimento;
-    
+
     @NotNull(message = "Data de ativação é obrigatória")
     private OffsetDateTime dataAtivacao;
-    
+
     private OffsetDateTime dataInativacao;
-    
+
     @NotNull(message = "Status é obrigatório")
     @JsonDeserialize(using = StatusAtivoEnumDeserializer.class)
     private StatusAtivoEnum status;

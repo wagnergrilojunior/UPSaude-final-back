@@ -13,30 +13,14 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 
-/**
- * Mapper para conversões de Notificacao.
- * Entity ↔ DTO ↔ Request/Response
- */
 @Mapper(config = MappingConfig.class, uses = {AgendamentoMapper.class, PacienteMapper.class, ProfissionaisSaudeMapper.class, TemplateNotificacaoMapper.class})
 public interface NotificacaoMapper extends EntityMapper<Notificacao, NotificacaoDTO> {
 
-    /**
-     * Converte DTO para Entity.
-     * O campo 'active' é ignorado (gerenciado pelo sistema).
-     */
     @Mapping(target = "active", ignore = true)
     Notificacao toEntity(NotificacaoDTO dto);
 
-    /**
-     * Converte Entity para DTO.
-     */
     NotificacaoDTO toDTO(Notificacao entity);
 
-    /**
-     * Converte Request para Entity.
-     * Os campos 'id', 'createdAt', 'updatedAt', 'active' são ignorados.
-     * Relacionamentos (UUID) devem ser tratados manualmente no Service.
-     */
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
@@ -47,11 +31,6 @@ public interface NotificacaoMapper extends EntityMapper<Notificacao, Notificacao
     @Mapping(target = "template", ignore = true)
     Notificacao fromRequest(NotificacaoRequest request);
 
-    /**
-     * Atualiza Entity existente com dados do Request.
-     * Os campos 'id', 'createdAt', 'updatedAt', 'active' são ignorados.
-     * Relacionamentos (UUID) devem ser tratados manualmente no Service.
-     */
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
@@ -62,8 +41,5 @@ public interface NotificacaoMapper extends EntityMapper<Notificacao, Notificacao
     @Mapping(target = "template", ignore = true)
     void updateFromRequest(NotificacaoRequest request, @MappingTarget Notificacao entity);
 
-    /**
-     * Converte Entity para Response.
-     */
     NotificacaoResponse toResponse(Notificacao entity);
 }

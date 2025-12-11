@@ -17,7 +17,7 @@ public class HistoricoHabilitacaoProfissionalRequest {
     private OffsetDateTime dataEvento;
     @JsonDeserialize(using = StatusAtivoEnumDeserializer.class)
     private StatusAtivoEnum statusAnterior;
-    
+
     @JsonDeserialize(using = StatusAtivoEnumDeserializer.class)
     private StatusAtivoEnum statusNovo;
     private OffsetDateTime dataValidadeAnterior;

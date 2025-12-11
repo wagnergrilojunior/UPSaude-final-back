@@ -56,13 +56,13 @@ public class AgendamentoResponse {
     private Boolean notificacaoEnviada24h;
     private Boolean notificacaoEnviada1h;
     private Boolean confirmacaoEnviada;
-    
+
     @Builder.Default
     private List<AgendamentoResponse> reagendamentos = new ArrayList<>();
-    
+
     @Builder.Default
     private List<NotificacaoResponse> notificacoes = new ArrayList<>();
-    
+
     @Builder.Default
     private List<CheckInAtendimentoResponse> checkIns = new ArrayList<>();
 }

@@ -25,4 +25,3 @@ public class UserResponse {
     private OffsetDateTime createdAt;
     private OffsetDateTime updatedAt;
 }
-

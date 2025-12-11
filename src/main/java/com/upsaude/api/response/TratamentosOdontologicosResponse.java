@@ -28,9 +28,9 @@ public class TratamentosOdontologicosResponse {
     private OffsetDateTime dataInicio;
     private OffsetDateTime dataFim;
     private StatusTratamento status;
-    
+
     @Builder.Default
     private List<TratamentosProcedimentosResponse> procedimentos = new ArrayList<>();
-    
+
     private String observacoes;
 }

@@ -25,11 +25,6 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.UUID;
 
-/**
- * Controlador REST para operações relacionadas a Puericultura.
- *
- * @author UPSaúde
- */
 @RestController
 @RequestMapping("/v1/puericultura")
 @Tag(name = "Puericultura", description = "API para gerenciamento de acompanhamento de saúde da criança")

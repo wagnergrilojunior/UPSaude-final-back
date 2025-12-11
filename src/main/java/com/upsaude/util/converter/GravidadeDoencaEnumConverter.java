@@ -4,12 +4,6 @@ import com.upsaude.enums.GravidadeDoencaEnum;
 import jakarta.persistence.AttributeConverter;
 import jakarta.persistence.Converter;
 
-/**
- * Converter para GravidadeDoencaEnum.
- * Converte entre o enum e o código Integer no banco de dados.
- *
- * @author UPSaúde
- */
 @Converter(autoApply = false)
 public class GravidadeDoencaEnumConverter implements AttributeConverter<GravidadeDoencaEnum, Integer> {
 
@@ -29,4 +23,3 @@ public class GravidadeDoencaEnumConverter implements AttributeConverter<Gravidad
         return GravidadeDoencaEnum.fromCodigo(dbData);
     }
 }
-

@@ -22,11 +22,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.UUID;
 
-/**
- * Implementação do serviço de gerenciamento de Cidades.
- *
- * @author UPSaúde
- */
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -40,14 +35,13 @@ public class CidadesServiceImpl implements CidadesService {
     @CacheEvict(value = "cidades", allEntries = true)
     public CidadesResponse criar(CidadesRequest request) {
         log.debug("Criando nova cidade. Request: {}", request);
-        
+
         if (request == null) {
             log.warn("Tentativa de criar cidade com request nulo");
             throw new BadRequestException("Dados da cidade são obrigatórios");
         }
 
         try {
-            // Validação de dados básicos é feita automaticamente pelo Bean Validation no Request
 
             Cidades cidades = cidadesMapper.fromRequest(request);
             cidades.setActive(true);
@@ -73,7 +67,7 @@ public class CidadesServiceImpl implements CidadesService {
     @Cacheable(value = "cidades", key = "#id")
     public CidadesResponse obterPorId(UUID id) {
         log.debug("Buscando cidade por ID: {} (cache miss)", id);
-        
+
         if (id == null) {
             log.warn("ID nulo recebido para busca de cidade");
             throw new BadRequestException("ID da cidade é obrigatório");
@@ -129,14 +123,13 @@ public class CidadesServiceImpl implements CidadesService {
 
         try {
             Page<Cidades> cidades = cidadesRepository.findByEstadoId(estadoId, pageable);
-            
-            // Forçar inicialização do relacionamento estado antes de mapear
+
             cidades.getContent().forEach(cidade -> {
                 if (cidade.getEstado() != null) {
                     Hibernate.initialize(cidade.getEstado());
                 }
             });
-            
+
             log.debug("Listagem de cidades por estado concluída. Estado ID: {}, Total: {}", estadoId, cidades.getTotalElements());
             return cidades.map(cidadesMapper::toResponse);
         } catch (DataAccessException e) {
@@ -164,12 +157,10 @@ public class CidadesServiceImpl implements CidadesService {
         }
 
         try {
-            // Validação de dados básicos é feita automaticamente pelo Bean Validation no Request
 
             Cidades cidadesExistente = cidadesRepository.findById(id)
                     .orElseThrow(() -> new NotFoundException("Cidade não encontrada com ID: " + id));
 
-            // Usa mapper do MapStruct que preserva campos de controle automaticamente
             cidadesMapper.updateFromRequest(request, cidadesExistente);
 
             Cidades cidadesAtualizado = cidadesRepository.save(cidadesExistente);
@@ -229,10 +220,4 @@ public class CidadesServiceImpl implements CidadesService {
         }
     }
 
-        // Validações de dados básicos foram movidas para o Request usando Bean Validation
-    // (@NotNull, @NotBlank, @Pattern, etc). Isso garante validação automática no Controller
-    // e retorno de erro 400 padronizado via ApiExceptionHandler.
-
-    // Método removido - agora usa cidadesMapper.updateFromRequest diretamente
-    // O MapStruct já preserva campos de controle automaticamente
 }

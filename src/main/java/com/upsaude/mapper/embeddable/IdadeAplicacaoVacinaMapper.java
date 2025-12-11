@@ -14,7 +14,6 @@ public interface IdadeAplicacaoVacinaMapper {
     IdadeAplicacaoVacinaResponse toResponse(IdadeAplicacaoVacina entity);
     void updateFromRequest(IdadeAplicacaoVacinaRequest request, @MappingTarget IdadeAplicacaoVacina entity);
 
-    // Mapeamento entre DTO e Entity
     IdadeAplicacaoVacina toEntity(com.upsaude.dto.embeddable.IdadeAplicacaoVacinaDTO dto);
     com.upsaude.dto.embeddable.IdadeAplicacaoVacinaDTO toDTO(IdadeAplicacaoVacina entity);
     void updateFromDTO(com.upsaude.dto.embeddable.IdadeAplicacaoVacinaDTO dto, @MappingTarget IdadeAplicacaoVacina entity);

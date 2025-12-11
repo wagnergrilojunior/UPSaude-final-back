@@ -18,12 +18,6 @@ import lombok.EqualsAndHashCode;
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 
-/**
- * Entidade que representa um registro de cuidados de enfermagem.
- * Armazena informações sobre procedimentos e cuidados realizados pela equipe de enfermagem.
- *
- * @author UPSaúde
- */
 @Entity
 @Table(name = "cuidados_enfermagem", schema = "public",
        indexes = {
@@ -37,8 +31,6 @@ import java.time.OffsetDateTime;
 @EqualsAndHashCode(callSuper = true)
 public class CuidadosEnfermagem extends BaseEntity {
 
-    // ========== RELACIONAMENTOS ==========
-
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "paciente_id", nullable = false)
     @NotNull(message = "Paciente é obrigatório")
@@ -51,9 +43,7 @@ public class CuidadosEnfermagem extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "atendimento_id")
-    private Atendimento atendimento; // Pode estar vinculado a um atendimento
-
-    // ========== TIPO DE CUIDADO ==========
+    private Atendimento atendimento;
 
     @Convert(converter = TipoCuidadoEnfermagemEnumConverter.class)
     @Column(name = "tipo_cuidado", nullable = false)
@@ -64,13 +54,9 @@ public class CuidadosEnfermagem extends BaseEntity {
     @Column(name = "descricao_procedimento", length = 255)
     private String descricaoProcedimento;
 
-    // ========== DATA E HORA ==========
-
     @Column(name = "data_hora", nullable = false)
     @NotNull(message = "Data e hora são obrigatórios")
     private OffsetDateTime dataHora;
-
-    // ========== SINAIS VITAIS (quando aplicável) ==========
 
     @Column(name = "pressao_sistolica")
     private Integer pressaoSistolica;
@@ -99,8 +85,6 @@ public class CuidadosEnfermagem extends BaseEntity {
     @Column(name = "altura", precision = 3, scale = 2)
     private BigDecimal altura;
 
-    // ========== DADOS DO CURATIVO (quando aplicável) ==========
-
     @Size(max = 100, message = "Localização deve ter no máximo 100 caracteres")
     @Column(name = "localizacao_ferida", length = 100)
     private String localizacaoFerida;
@@ -126,8 +110,6 @@ public class CuidadosEnfermagem extends BaseEntity {
     @Column(name = "material_utilizado", columnDefinition = "TEXT")
     private String materialUtilizado;
 
-    // ========== MEDICAÇÃO ADMINISTRADA (quando aplicável) ==========
-
     @Size(max = 255, message = "Medicamento deve ter no máximo 255 caracteres")
     @Column(name = "medicamento_administrado", length = 255)
     private String medicamentoAdministrado;
@@ -148,8 +130,6 @@ public class CuidadosEnfermagem extends BaseEntity {
     @Column(name = "lote_medicamento", length = 50)
     private String loteMedicamento;
 
-    // ========== TESTE RÁPIDO (quando aplicável) ==========
-
     @Size(max = 100, message = "Tipo de teste deve ter no máximo 100 caracteres")
     @Column(name = "tipo_teste_rapido", length = 100)
     private String tipoTesteRapido;
@@ -161,8 +141,6 @@ public class CuidadosEnfermagem extends BaseEntity {
     @Size(max = 50, message = "Lote do teste deve ter no máximo 50 caracteres")
     @Column(name = "lote_teste", length = 50)
     private String loteTeste;
-
-    // ========== EVOLUÇÃO E RESPOSTA ==========
 
     @Column(name = "queixa_paciente", columnDefinition = "TEXT")
     private String queixaPaciente;
@@ -179,12 +157,8 @@ public class CuidadosEnfermagem extends BaseEntity {
     @Column(name = "descricao_reacao", columnDefinition = "TEXT")
     private String descricaoReacao;
 
-    // ========== ORIENTAÇÕES ==========
-
     @Column(name = "orientacoes", columnDefinition = "TEXT")
     private String orientacoes;
-
-    // ========== AGENDAMENTO RETORNO ==========
 
     @Column(name = "necessita_retorno")
     private Boolean necessitaRetorno;
@@ -192,9 +166,6 @@ public class CuidadosEnfermagem extends BaseEntity {
     @Column(name = "data_retorno")
     private OffsetDateTime dataRetorno;
 
-    // ========== OBSERVAÇÕES ==========
-
     @Column(name = "observacoes", columnDefinition = "TEXT")
     private String observacoes;
 }
-

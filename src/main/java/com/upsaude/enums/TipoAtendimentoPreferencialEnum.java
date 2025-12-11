@@ -3,10 +3,6 @@ package com.upsaude.enums;
 import java.util.Arrays;
 import java.util.Locale;
 
-/**
- * Enum para tipos de atendimento preferencial conforme legislação brasileira e SUS/e-SUS.
- * Identifica pacientes com direito a atendimento prioritário.
- */
 public enum TipoAtendimentoPreferencialEnum {
     NENHUM(1, "Nenhum"),
     IDOSO(2, "Idoso (≥60 anos)"),
@@ -53,4 +49,3 @@ public enum TipoAtendimentoPreferencialEnum {
                 .orElse(null);
     }
 }
-

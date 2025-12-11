@@ -24,11 +24,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.UUID;
 
-/**
- * Implementação do serviço de gerenciamento de Vínculos de Profissionais com Estabelecimentos.
- *
- * @author UPSaúde
- */
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -45,31 +40,24 @@ public class ProfissionalEstabelecimentoServiceImpl implements ProfissionalEstab
     public ProfissionalEstabelecimentoResponse criar(ProfissionalEstabelecimentoRequest request) {
         log.debug("Criando novo vínculo de profissional com estabelecimento");
 
-        // Validação de dados básicos é feita automaticamente pelo Bean Validation no Request
-
-        // Valida se já existe vínculo ativo entre o profissional e o estabelecimento
         if (profissionalEstabelecimentoRepository
                 .findByProfissionalIdAndEstabelecimentoId(request.getProfissional(), request.getEstabelecimento())
                 .isPresent()) {
             throw new BadRequestException("Já existe um vínculo entre este profissional e este estabelecimento");
         }
 
-        // Valida se profissional existe
         ProfissionaisSaude profissional = profissionaisSaudeRepository.findById(request.getProfissional())
                 .orElseThrow(() -> new NotFoundException("Profissional não encontrado com ID: " + request.getProfissional()));
 
-        // Valida se estabelecimento existe
         Estabelecimentos estabelecimento = estabelecimentosRepository.findById(request.getEstabelecimento())
                 .orElseThrow(() -> new NotFoundException("Estabelecimento não encontrado com ID: " + request.getEstabelecimento()));
 
-        // Validar integridade multitenant: profissional e estabelecimento devem pertencer ao mesmo tenant
         if (!profissional.getTenant().getId().equals(estabelecimento.getTenant().getId())) {
             throw new BadRequestException("Profissional e estabelecimento devem pertencer ao mesmo tenant");
         }
 
-        // Validar que profissional com registro suspenso ou inativo não pode ser vinculado
-        if (profissional.getStatusRegistro() != null && 
-            (profissional.getStatusRegistro() == com.upsaude.enums.StatusAtivoEnum.SUSPENSO || 
+        if (profissional.getStatusRegistro() != null &&
+            (profissional.getStatusRegistro() == com.upsaude.enums.StatusAtivoEnum.SUSPENSO ||
              profissional.getStatusRegistro() == com.upsaude.enums.StatusAtivoEnum.INATIVO)) {
             throw new BadRequestException("Não é possível vincular profissional com registro suspenso ou inativo");
         }
@@ -160,8 +148,6 @@ public class ProfissionalEstabelecimentoServiceImpl implements ProfissionalEstab
             throw new BadRequestException("ID do vínculo é obrigatório");
         }
 
-        // Validação de dados básicos é feita automaticamente pelo Bean Validation no Request
-
         ProfissionalEstabelecimento vinculoExistente = profissionalEstabelecimentoRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Vínculo não encontrado com ID: " + id));
 
@@ -195,10 +181,6 @@ public class ProfissionalEstabelecimentoServiceImpl implements ProfissionalEstab
         log.info("Vínculo excluído (desativado) com sucesso. ID: {}", id);
     }
 
-    // Validações de dados básicos foram movidas para o Request usando Bean Validation
-    // (@NotNull, @NotBlank, @Pattern, etc). Isso garante validação automática no Controller
-    // e retorno de erro 400 padronizado via ApiExceptionHandler.
-
     private void atualizarDadosVinculo(ProfissionalEstabelecimento vinculo, ProfissionalEstabelecimentoRequest request) {
         ProfissionalEstabelecimento vinculoAtualizado = profissionalEstabelecimentoMapper.fromRequest(request);
 
@@ -213,4 +195,3 @@ public class ProfissionalEstabelecimentoServiceImpl implements ProfissionalEstab
         vinculo.setObservacoes(vinculoAtualizado.getObservacoes());
     }
 }
-

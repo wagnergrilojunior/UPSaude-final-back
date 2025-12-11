@@ -15,30 +15,14 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 
-/**
- * Mapper para conversões de Consultas.
- * Entity ↔ DTO ↔ Request/Response
- */
 @Mapper(config = MappingConfig.class, uses = {CidDoencasMapper.class, ConvenioMapper.class, EspecialidadesMedicasMapper.class, MedicosMapper.class, PacienteMapper.class, ProfissionaisSaudeMapper.class, com.upsaude.mapper.embeddable.InformacoesConsultaMapper.class, com.upsaude.mapper.embeddable.AnamneseConsultaMapper.class, com.upsaude.mapper.embeddable.DiagnosticoConsultaMapper.class, com.upsaude.mapper.embeddable.PrescricaoConsultaMapper.class, com.upsaude.mapper.embeddable.ExamesSolicitadosConsultaMapper.class, com.upsaude.mapper.embeddable.EncaminhamentoConsultaMapper.class, com.upsaude.mapper.embeddable.AtestadoConsultaMapper.class})
 public interface ConsultasMapper extends EntityMapper<Consultas, ConsultasDTO> {
 
-    /**
-     * Converte DTO para Entity.
-     * O campo 'active' é ignorado (gerenciado pelo sistema).
-     */
     @Mapping(target = "active", ignore = true)
     Consultas toEntity(ConsultasDTO dto);
 
-    /**
-     * Converte Entity para DTO.
-     */
     ConsultasDTO toDTO(Consultas entity);
 
-    /**
-     * Converte Request para Entity.
-     * Os campos 'id', 'createdAt', 'updatedAt', 'active' são ignorados.
-     * Relacionamentos (UUID) devem ser tratados manualmente no Service.
-     */
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
@@ -51,11 +35,6 @@ public interface ConsultasMapper extends EntityMapper<Consultas, ConsultasDTO> {
     @Mapping(target = "profissionalSaude", ignore = true)
     Consultas fromRequest(ConsultasRequest request);
 
-    /**
-     * Atualiza Entity existente com dados do Request.
-     * Os campos 'id', 'createdAt', 'updatedAt', 'active' são ignorados.
-     * Relacionamentos (UUID) devem ser tratados manualmente no Service.
-     */
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
@@ -68,8 +47,5 @@ public interface ConsultasMapper extends EntityMapper<Consultas, ConsultasDTO> {
     @Mapping(target = "profissionalSaude", ignore = true)
     void updateFromRequest(ConsultasRequest request, @MappingTarget Consultas entity);
 
-    /**
-     * Converte Entity para Response.
-     */
     ConsultasResponse toResponse(Consultas entity);
 }

@@ -26,11 +26,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.UUID;
 
-/**
- * Implementação do serviço de gerenciamento de DispensacoesMedicamentos.
- *
- * @author UPSaúde
- */
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -48,16 +43,12 @@ public class DispensacoesMedicamentosServiceImpl implements DispensacoesMedicame
     public DispensacoesMedicamentosResponse criar(DispensacoesMedicamentosRequest request) {
         log.debug("Criando novo dispensacoesmedicamentos");
 
-        // Validação de dados básicos é feita automaticamente pelo Bean Validation no Request
-
         DispensacoesMedicamentos dispensacoesMedicamentos = dispensacoesMedicamentosMapper.fromRequest(request);
 
-        // Carrega e define o paciente
         Paciente paciente = pacienteRepository.findById(request.getPaciente())
                 .orElseThrow(() -> new NotFoundException("Paciente não encontrado com ID: " + request.getPaciente()));
         dispensacoesMedicamentos.setPaciente(paciente);
 
-        // Carrega e define o medicamento
         Medicacao medicacao = medicacaoRepository.findById(request.getMedicacao())
                 .orElseThrow(() -> new NotFoundException("Medicamento não encontrado com ID: " + request.getMedicacao()));
         dispensacoesMedicamentos.setMedicacao(medicacao);
@@ -117,8 +108,6 @@ public class DispensacoesMedicamentosServiceImpl implements DispensacoesMedicame
             throw new BadRequestException("ID do dispensacoesmedicamentos é obrigatório");
         }
 
-        // Validação de dados básicos é feita automaticamente pelo Bean Validation no Request
-
         DispensacoesMedicamentos dispensacoesMedicamentosExistente = dispensacoesMedicamentosRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("DispensacoesMedicamentos não encontrado com ID: " + id));
 
@@ -152,26 +141,20 @@ public class DispensacoesMedicamentosServiceImpl implements DispensacoesMedicame
         log.info("DispensacoesMedicamentos excluído (desativado) com sucesso. ID: {}", id);
     }
 
-    // Validações de dados básicos foram movidas para o Request usando Bean Validation
-    // (@NotNull, @NotBlank, @Pattern, etc). Isso garante validação automática no Controller
-    // e retorno de erro 400 padronizado via ApiExceptionHandler.
-
     private void atualizarDadosDispensacoesMedicamentos(DispensacoesMedicamentos dispensacoesMedicamentos, DispensacoesMedicamentosRequest request) {
-        // Atualiza paciente se fornecido
+
         if (request.getPaciente() != null) {
             Paciente paciente = pacienteRepository.findById(request.getPaciente())
                     .orElseThrow(() -> new NotFoundException("Paciente não encontrado com ID: " + request.getPaciente()));
             dispensacoesMedicamentos.setPaciente(paciente);
         }
 
-        // Atualiza medicamento se fornecido
         if (request.getMedicacao() != null) {
             Medicacao medicacao = medicacaoRepository.findById(request.getMedicacao())
                     .orElseThrow(() -> new NotFoundException("Medicamento não encontrado com ID: " + request.getMedicacao()));
             dispensacoesMedicamentos.setMedicacao(medicacao);
         }
 
-        // Atualiza outros campos
         if (request.getQuantidade() != null) {
             dispensacoesMedicamentos.setQuantidade(request.getQuantidade());
         }

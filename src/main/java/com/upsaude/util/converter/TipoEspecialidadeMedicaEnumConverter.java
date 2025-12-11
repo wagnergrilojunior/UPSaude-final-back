@@ -4,12 +4,6 @@ import com.upsaude.enums.TipoEspecialidadeMedicaEnum;
 import jakarta.persistence.AttributeConverter;
 import jakarta.persistence.Converter;
 
-/**
- * Converter para TipoEspecialidadeMedicaEnum.
- * Converte entre o enum e o código Integer no banco de dados.
- *
- * @author UPSaúde
- */
 @Converter(autoApply = false)
 public class TipoEspecialidadeMedicaEnumConverter implements AttributeConverter<TipoEspecialidadeMedicaEnum, Integer> {
 
@@ -29,4 +23,3 @@ public class TipoEspecialidadeMedicaEnumConverter implements AttributeConverter<
         return TipoEspecialidadeMedicaEnum.fromCodigo(dbData);
     }
 }
-

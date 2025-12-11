@@ -13,12 +13,6 @@ import lombok.EqualsAndHashCode;
 
 import java.time.OffsetDateTime;
 
-/**
- * Entidade que representa o check-in/check-out de um atendimento.
- * Registra a entrada e saída do paciente no atendimento.
- *
- * @author UPSaúde
- */
 @Entity
 @Table(name = "checkin_atendimento", schema = "public",
        indexes = {
@@ -32,8 +26,6 @@ import java.time.OffsetDateTime;
 @EqualsAndHashCode(callSuper = true)
 public class CheckInAtendimento extends BaseEntity {
 
-    // ========== RELACIONAMENTOS ==========
-
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "agendamento_id", nullable = false)
     @NotNull(message = "Agendamento é obrigatório")
@@ -41,74 +33,63 @@ public class CheckInAtendimento extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "atendimento_id")
-    private Atendimento atendimento; // Link para atendimento quando iniciado
+    private Atendimento atendimento;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "paciente_id", nullable = false)
     @NotNull(message = "Paciente é obrigatório")
     private Paciente paciente;
 
-    // ========== DADOS DO CHECK-IN ==========
-
     @Column(name = "data_checkin", nullable = false)
     @NotNull(message = "Data do check-in é obrigatória")
-    private OffsetDateTime dataCheckin; // Quando fez check-in
+    private OffsetDateTime dataCheckin;
 
     @Column(name = "data_checkout")
-    private OffsetDateTime dataCheckout; // Quando fez check-out
+    private OffsetDateTime dataCheckout;
 
     @Column(name = "tipo_checkin", nullable = false, length = 50)
     @NotNull(message = "Tipo de check-in é obrigatório")
-    private String tipoCheckin; // PRESENCIAL, ONLINE, AUTOMATICO
+    private String tipoCheckin;
 
     @Column(name = "eh_presencial")
-    private Boolean ehPresencial; // Se compareceu presencialmente
-
-    // ========== CONTROLE DE ATRASO ==========
+    private Boolean ehPresencial;
 
     @Column(name = "horario_previsto")
-    private OffsetDateTime horarioPrevisto; // Horário previsto do agendamento
+    private OffsetDateTime horarioPrevisto;
 
     @Column(name = "tempo_antecedencia_minutos")
-    private Integer tempoAntecedenciaMinutos; // Tempo de antecedência (positivo) ou atraso (negativo) em minutos
+    private Integer tempoAntecedenciaMinutos;
 
     @Column(name = "esta_atrasado")
-    private Boolean estaAtrasado; // Se chegou atrasado
+    private Boolean estaAtrasado;
 
     @Column(name = "tempo_atraso_minutos")
-    private Integer tempoAtrasoMinutos; // Tempo de atraso em minutos (se atrasado)
-
-    // ========== LOCALIZAÇÃO ==========
+    private Integer tempoAtrasoMinutos;
 
     @Column(name = "latitude")
-    private Double latitude; // Para validação de geolocalização
+    private Double latitude;
 
     @Column(name = "longitude")
-    private Double longitude; // Para validação de geolocalização
+    private Double longitude;
 
     @Column(name = "endereco_ip", length = 45)
-    private String enderecoIp; // IP do check-in (para online)
+    private String enderecoIp;
 
     @Column(name = "user_agent", length = 500)
-    private String userAgent; // User agent do navegador (para online)
-
-    // ========== INFORMAÇÕES ==========
+    private String userAgent;
 
     @Column(name = "observacoes", columnDefinition = "TEXT")
     private String observacoes;
 
     @Column(name = "acompanhante_presente")
-    private Boolean acompanhantePresente; // Se veio com acompanhante
+    private Boolean acompanhantePresente;
 
     @Column(name = "numero_acompanhantes")
-    private Integer numeroAcompanhantes; // Número de acompanhantes
-
-    // ========== AUDITORIA ==========
+    private Integer numeroAcompanhantes;
 
     @Column(name = "checkin_realizado_por")
-    private java.util.UUID checkinRealizadoPor; // ID do usuário que realizou check-in (se não foi o paciente)
+    private java.util.UUID checkinRealizadoPor;
 
     @Column(name = "checkout_realizado_por")
-    private java.util.UUID checkoutRealizadoPor; // ID do usuário que realizou check-out (se não foi o paciente)
+    private java.util.UUID checkoutRealizadoPor;
 }
-

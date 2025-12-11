@@ -8,11 +8,6 @@ import org.springframework.data.domain.Pageable;
 import java.util.List;
 import java.util.UUID;
 
-/**
- * Interface de serviço para operações relacionadas a Pré-Natal.
- *
- * @author UPSaúde
- */
 public interface PreNatalService {
 
     PreNatalResponse criar(PreNatalRequest request);
@@ -31,4 +26,3 @@ public interface PreNatalService {
 
     void excluir(UUID id);
 }
-

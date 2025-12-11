@@ -20,11 +20,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.UUID;
 
-/**
- * Implementação do serviço de gerenciamento de TratamentosProcedimentos.
- *
- * @author UPSaúde
- */
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -38,8 +33,6 @@ public class TratamentosProcedimentosServiceImpl implements TratamentosProcedime
     @CacheEvict(value = "tratamentosprocedimentos", allEntries = true)
     public TratamentosProcedimentosResponse criar(TratamentosProcedimentosRequest request) {
         log.debug("Criando novo tratamentosprocedimentos");
-
-        // Validação de dados básicos é feita automaticamente pelo Bean Validation no Request
 
         TratamentosProcedimentos tratamentosProcedimentos = tratamentosProcedimentosMapper.fromRequest(request);
         tratamentosProcedimentos.setActive(true);
@@ -84,8 +77,6 @@ public class TratamentosProcedimentosServiceImpl implements TratamentosProcedime
             throw new BadRequestException("ID do tratamentosprocedimentos é obrigatório");
         }
 
-        // Validação de dados básicos é feita automaticamente pelo Bean Validation no Request
-
         TratamentosProcedimentos tratamentosProcedimentosExistente = tratamentosProcedimentosRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("TratamentosProcedimentos não encontrado com ID: " + id));
 
@@ -119,23 +110,16 @@ public class TratamentosProcedimentosServiceImpl implements TratamentosProcedime
         log.info("TratamentosProcedimentos excluído (desativado) com sucesso. ID: {}", id);
     }
 
-    // Validações de dados básicos foram movidas para o Request usando Bean Validation
-    // (@NotNull, @NotBlank, @Pattern, etc). Isso garante validação automática no Controller
-    // e retorno de erro 400 padronizado via ApiExceptionHandler.
-
         private void atualizarDadosTratamentosProcedimentos(TratamentosProcedimentos tratamentosProcedimentos, TratamentosProcedimentosRequest request) {
         TratamentosProcedimentos tratamentosProcedimentosAtualizado = tratamentosProcedimentosMapper.fromRequest(request);
-        
-        // Preserva campos de controle
+
         java.util.UUID idOriginal = tratamentosProcedimentos.getId();
         com.upsaude.entity.Tenant tenantOriginal = tratamentosProcedimentos.getTenant();
         Boolean activeOriginal = tratamentosProcedimentos.getActive();
         java.time.OffsetDateTime createdAtOriginal = tratamentosProcedimentos.getCreatedAt();
-        
-        // Copia todas as propriedades do objeto atualizado
+
         BeanUtils.copyProperties(tratamentosProcedimentosAtualizado, tratamentosProcedimentos);
-        
-        // Restaura campos de controle
+
         tratamentosProcedimentos.setId(idOriginal);
         tratamentosProcedimentos.setTenant(tenantOriginal);
         tratamentosProcedimentos.setActive(activeOriginal);

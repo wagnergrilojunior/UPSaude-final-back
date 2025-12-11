@@ -14,7 +14,6 @@ public interface EncaminhamentoConsultaMapper {
     EncaminhamentoConsultaResponse toResponse(EncaminhamentoConsulta entity);
     void updateFromRequest(EncaminhamentoConsultaRequest request, @MappingTarget EncaminhamentoConsulta entity);
 
-    // Mapeamento entre DTO e Entity
     EncaminhamentoConsulta toEntity(com.upsaude.dto.embeddable.EncaminhamentoConsultaDTO dto);
     com.upsaude.dto.embeddable.EncaminhamentoConsultaDTO toDTO(EncaminhamentoConsulta entity);
     void updateFromDTO(com.upsaude.dto.embeddable.EncaminhamentoConsultaDTO dto, @MappingTarget EncaminhamentoConsulta entity);

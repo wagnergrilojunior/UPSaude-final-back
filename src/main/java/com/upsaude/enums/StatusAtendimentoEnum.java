@@ -3,11 +3,6 @@ package com.upsaude.enums;
 import java.util.Arrays;
 import java.util.Locale;
 
-/**
- * Enum para status de atendimento.
- *
- * @author UPSaúde
- */
 public enum StatusAtendimentoEnum {
     AGENDADO(1, "Agendado"),
     EM_ESPERA(2, "Em Espera"),
@@ -53,4 +48,3 @@ public enum StatusAtendimentoEnum {
                 .orElse(null);
     }
 }
-

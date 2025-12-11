@@ -25,11 +25,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
 
-/**
- * Controlador REST para operações relacionadas a Vínculos de Profissionais com Estabelecimentos.
- *
- * @author UPSaúde
- */
 @RestController
 @RequestMapping("/v1/profissionais-estabelecimentos")
 @Tag(name = "Vínculos Profissional-Estabelecimento", description = "API para gerenciamento de vínculos entre profissionais e estabelecimentos")

@@ -3,10 +3,6 @@ package com.upsaude.enums;
 import java.util.Arrays;
 import java.util.Locale;
 
-/**
- * Enum para situação familiar conforme padrão SUS/e-SUS.
- * Utilizado para identificar a composição familiar do paciente.
- */
 public enum SituacaoFamiliarEnum {
     SOZINHO(1, "Vive sozinho"),
     COM_FAMILIA(2, "Vive com família"),
@@ -49,4 +45,3 @@ public enum SituacaoFamiliarEnum {
                 .orElse(null);
     }
 }
-

@@ -20,12 +20,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
-/**
- * Controlador REST para operações relacionadas a Enums.
- * Cada método retorna os valores de um enum específico.
- *
- * @author UPSaúde
- */
 @Slf4j
 @RestController
 @RequestMapping("/v1/enums")
@@ -33,7 +27,6 @@ import java.util.stream.Collectors;
         "Cada endpoint retorna os valores de um enum específico com seus códigos e descrições.")
 public class EnumsController {
 
-    // Método helper para converter enum com código e descrição
     private <T extends Enum<T>> EnumInfoResponse converterEnum(Class<T> enumClass, T[] values) {
         List<EnumItemResponse> itens = Arrays.stream(values)
                 .map(valor -> {
@@ -42,7 +35,6 @@ public class EnumsController {
                         Integer codigo = null;
                         String descricao = null;
 
-                        // Tenta obter código
                         try {
                             Method getCodigo = enumClass.getMethod("getCodigo");
                             Object codigoObj = getCodigo.invoke(valor);
@@ -50,10 +42,9 @@ public class EnumsController {
                                 codigo = (Integer) codigoObj;
                             }
                         } catch (Exception e) {
-                            // Enum não tem código
+
                         }
 
-                        // Tenta obter descrição
                         try {
                             Method getDescricao = enumClass.getMethod("getDescricao");
                             Object descricaoObj = getDescricao.invoke(valor);
@@ -61,7 +52,7 @@ public class EnumsController {
                                 descricao = (String) descricaoObj;
                             }
                         } catch (Exception e) {
-                            // Enum não tem descrição
+
                         }
 
                         return EnumItemResponse.builder()

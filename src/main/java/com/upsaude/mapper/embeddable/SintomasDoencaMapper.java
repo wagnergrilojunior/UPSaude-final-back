@@ -14,7 +14,6 @@ public interface SintomasDoencaMapper {
     SintomasDoencaResponse toResponse(SintomasDoenca entity);
     void updateFromRequest(SintomasDoencaRequest request, @MappingTarget SintomasDoenca entity);
 
-    // Mapeamento entre DTO e Entity
     SintomasDoenca toEntity(com.upsaude.dto.embeddable.SintomasDoencaDTO dto);
     com.upsaude.dto.embeddable.SintomasDoencaDTO toDTO(SintomasDoenca entity);
     void updateFromDTO(com.upsaude.dto.embeddable.SintomasDoencaDTO dto, @MappingTarget SintomasDoenca entity);

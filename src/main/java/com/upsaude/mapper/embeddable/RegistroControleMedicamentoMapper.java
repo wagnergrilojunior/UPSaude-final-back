@@ -14,7 +14,6 @@ public interface RegistroControleMedicamentoMapper {
     RegistroControleMedicamentoResponse toResponse(RegistroControleMedicamento entity);
     void updateFromRequest(RegistroControleMedicamentoRequest request, @MappingTarget RegistroControleMedicamento entity);
 
-    // Mapeamento entre DTO e Entity
     RegistroControleMedicamento toEntity(com.upsaude.dto.embeddable.RegistroControleMedicamentoDTO dto);
     com.upsaude.dto.embeddable.RegistroControleMedicamentoDTO toDTO(RegistroControleMedicamento entity);
     void updateFromDTO(com.upsaude.dto.embeddable.RegistroControleMedicamentoDTO dto, @MappingTarget RegistroControleMedicamento entity);

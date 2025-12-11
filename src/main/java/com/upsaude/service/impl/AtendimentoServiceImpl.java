@@ -42,11 +42,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.UUID;
 
-/**
- * Implementação do serviço de gerenciamento de Atendimentos.
- *
- * @author UPSaúde
- */
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -73,56 +68,48 @@ public class AtendimentoServiceImpl implements AtendimentoService {
     @CacheEvict(value = "atendimento", allEntries = true)
     public AtendimentoResponse criar(AtendimentoRequest request) {
         log.debug("Criando novo atendimento. Request: {}", request);
-        
+
         if (request == null) {
             log.warn("Tentativa de criar atendimento com request nulo");
             throw new BadRequestException("Dados do atendimento são obrigatórios");
         }
 
         try {
-            // Validação de dados básicos é feita automaticamente pelo Bean Validation no Request
 
             Atendimento atendimento = atendimentoMapper.fromRequest(request);
 
-            // Carrega e define o paciente
             Paciente paciente = pacienteRepository.findById(request.getPaciente())
                     .orElseThrow(() -> new NotFoundException("Paciente não encontrado com ID: " + request.getPaciente()));
             atendimento.setPaciente(paciente);
 
-            // Carrega e define o profissional
             ProfissionaisSaude profissional = profissionaisSaudeRepository.findById(request.getProfissional())
                     .orElseThrow(() -> new NotFoundException("Profissional de saúde não encontrado com ID: " + request.getProfissional()));
             atendimento.setProfissional(profissional);
 
-            // Especialidade é opcional
             if (request.getEspecialidade() != null) {
                 EspecialidadesMedicas especialidade = especialidadesMedicasRepository.findById(request.getEspecialidade())
                         .orElseThrow(() -> new NotFoundException("Especialidade não encontrada com ID: " + request.getEspecialidade()));
                 atendimento.setEspecialidade(especialidade);
             }
 
-            // Equipe de saúde é opcional
             if (request.getEquipeSaude() != null) {
                 EquipeSaude equipeSaude = equipeSaudeRepository.findById(request.getEquipeSaude())
                         .orElseThrow(() -> new NotFoundException("Equipe de saúde não encontrada com ID: " + request.getEquipeSaude()));
                 atendimento.setEquipeSaude(equipeSaude);
             }
 
-            // Convênio é opcional
             if (request.getConvenio() != null) {
                 Convenio convenio = convenioRepository.findById(request.getConvenio())
                         .orElseThrow(() -> new NotFoundException("Convênio não encontrado com ID: " + request.getConvenio()));
                 atendimento.setConvenio(convenio);
             }
 
-            // CID principal é opcional
             if (request.getCidPrincipal() != null) {
                 CidDoencas cidPrincipal = cidDoencasRepository.findById(request.getCidPrincipal())
                         .orElseThrow(() -> new NotFoundException("CID não encontrado com ID: " + request.getCidPrincipal()));
                 atendimento.setCidPrincipal(cidPrincipal);
             }
 
-            // Define o tenant do usuário autenticado
             Tenant tenant = tenantService.obterTenantDoUsuarioAutenticado();
             atendimento.setTenant(tenant);
 
@@ -149,7 +136,7 @@ public class AtendimentoServiceImpl implements AtendimentoService {
     @Cacheable(value = "atendimento", key = "#id")
     public AtendimentoResponse obterPorId(UUID id) {
         log.debug("Buscando atendimento por ID: {} (cache miss)", id);
-        
+
         if (id == null) {
             log.warn("ID nulo recebido para busca de atendimento");
             throw new BadRequestException("ID do atendimento é obrigatório");
@@ -280,7 +267,6 @@ public class AtendimentoServiceImpl implements AtendimentoService {
         }
 
         try {
-            // Validação de dados básicos é feita automaticamente pelo Bean Validation no Request
 
             Atendimento atendimentoExistente = atendimentoRepository.findById(id)
                     .orElseThrow(() -> new NotFoundException("Atendimento não encontrado com ID: " + id));
@@ -344,12 +330,8 @@ public class AtendimentoServiceImpl implements AtendimentoService {
         }
     }
 
-    // Validações de dados básicos foram movidas para o Request usando Bean Validation
-    // (@NotNull, @NotBlank, @Pattern, etc). Isso garante validação automática no Controller
-    // e retorno de erro 400 padronizado via ApiExceptionHandler.
-
     private void atualizarDadosAtendimento(Atendimento atendimento, AtendimentoRequest request) {
-        // Atualiza informações básicas usando mapper
+
         if (request.getInformacoes() != null) {
             if (atendimento.getInformacoes() == null) {
                 atendimento.setInformacoes(informacoesAtendimentoMapper.toEntity(request.getInformacoes()));
@@ -358,7 +340,6 @@ public class AtendimentoServiceImpl implements AtendimentoService {
             }
         }
 
-        // Atualiza anamnese usando mapper
         if (request.getAnamnese() != null) {
             if (atendimento.getAnamnese() == null) {
                 atendimento.setAnamnese(anamneseAtendimentoMapper.toEntity(request.getAnamnese()));
@@ -367,7 +348,6 @@ public class AtendimentoServiceImpl implements AtendimentoService {
             }
         }
 
-        // Atualiza diagnóstico usando mapper
         if (request.getDiagnostico() != null) {
             if (atendimento.getDiagnostico() == null) {
                 atendimento.setDiagnostico(diagnosticoAtendimentoMapper.toEntity(request.getDiagnostico()));
@@ -376,7 +356,6 @@ public class AtendimentoServiceImpl implements AtendimentoService {
             }
         }
 
-        // Atualiza procedimentos realizados usando mapper
         if (request.getProcedimentosRealizados() != null) {
             if (atendimento.getProcedimentosRealizados() == null) {
                 atendimento.setProcedimentosRealizados(procedimentosRealizadosAtendimentoMapper.toEntity(request.getProcedimentosRealizados()));
@@ -385,7 +364,6 @@ public class AtendimentoServiceImpl implements AtendimentoService {
             }
         }
 
-        // Atualiza classificação de risco usando mapper
         if (request.getClassificacaoRisco() != null) {
             if (atendimento.getClassificacaoRisco() == null) {
                 atendimento.setClassificacaoRisco(classificacaoRiscoAtendimentoMapper.toEntity(request.getClassificacaoRisco()));
@@ -394,17 +372,14 @@ public class AtendimentoServiceImpl implements AtendimentoService {
             }
         }
 
-        // Atualiza anotações
         if (request.getAnotacoes() != null) {
             atendimento.setAnotacoes(request.getAnotacoes());
         }
 
-        // Atualiza observações internas
         if (request.getObservacoesInternas() != null) {
             atendimento.setObservacoesInternas(request.getObservacoesInternas());
         }
 
-        // Atualiza relacionamentos se fornecidos
         if (request.getPaciente() != null) {
             Paciente paciente = pacienteRepository.findById(request.getPaciente())
                     .orElseThrow(() -> new NotFoundException("Paciente não encontrado com ID: " + request.getPaciente()));
@@ -417,7 +392,6 @@ public class AtendimentoServiceImpl implements AtendimentoService {
             atendimento.setProfissional(profissional);
         }
 
-        // Especialidade é opcional
         if (request.getEspecialidade() != null) {
             EspecialidadesMedicas especialidade = especialidadesMedicasRepository.findById(request.getEspecialidade())
                     .orElseThrow(() -> new NotFoundException("Especialidade não encontrada com ID: " + request.getEspecialidade()));
@@ -426,7 +400,6 @@ public class AtendimentoServiceImpl implements AtendimentoService {
             atendimento.setEspecialidade(null);
         }
 
-        // Equipe de saúde é opcional
         if (request.getEquipeSaude() != null) {
             EquipeSaude equipeSaude = equipeSaudeRepository.findById(request.getEquipeSaude())
                     .orElseThrow(() -> new NotFoundException("Equipe de saúde não encontrada com ID: " + request.getEquipeSaude()));
@@ -435,7 +408,6 @@ public class AtendimentoServiceImpl implements AtendimentoService {
             atendimento.setEquipeSaude(null);
         }
 
-        // Convênio é opcional
         if (request.getConvenio() != null) {
             Convenio convenio = convenioRepository.findById(request.getConvenio())
                     .orElseThrow(() -> new NotFoundException("Convênio não encontrado com ID: " + request.getConvenio()));
@@ -444,7 +416,6 @@ public class AtendimentoServiceImpl implements AtendimentoService {
             atendimento.setConvenio(null);
         }
 
-        // CID principal é opcional
         if (request.getCidPrincipal() != null) {
             CidDoencas cidPrincipal = cidDoencasRepository.findById(request.getCidPrincipal())
                     .orElseThrow(() -> new NotFoundException("CID não encontrado com ID: " + request.getCidPrincipal()));

@@ -8,11 +8,6 @@ import lombok.Data;
 
 import java.math.BigDecimal;
 
-/**
- * Classe embeddable para informações de eficácia e proteção da vacina.
- *
- * @author UPSaúde
- */
 @Embeddable
 @Data
 @Builder
@@ -24,15 +19,14 @@ public class EficaciaVacina {
     }
 
     @Column(name = "eficacia_percentual", precision = 5, scale = 2)
-    private BigDecimal eficaciaPercentual; // Eficácia da vacina em percentual
+    private BigDecimal eficaciaPercentual;
 
     @Column(name = "protecao_inicio_dias")
-    private Integer protecaoInicioDias; // Dias após aplicação para início da proteção
+    private Integer protecaoInicioDias;
 
     @Column(name = "protecao_duracao_anos")
-    private Integer protecaoDuracaoAnos; // Duração estimada da proteção em anos
+    private Integer protecaoDuracaoAnos;
 
     @Column(name = "doencas_protege", columnDefinition = "TEXT")
-    private String doencasProtege; // Doenças que a vacina protege
+    private String doencasProtege;
 }
-

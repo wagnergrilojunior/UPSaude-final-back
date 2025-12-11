@@ -18,12 +18,6 @@ import lombok.EqualsAndHashCode;
 
 import java.time.OffsetDateTime;
 
-/**
- * Entidade que representa uma notificação enviada pelo sistema.
- * Armazena informações sobre notificações enviadas por e-mail, SMS, WhatsApp ou mensagens internas.
- *
- * @author UPSaúde
- */
 @Entity
 @Table(name = "notificacoes", schema = "public",
        indexes = {
@@ -40,25 +34,21 @@ import java.time.OffsetDateTime;
 @EqualsAndHashCode(callSuper = true)
 public class Notificacao extends BaseEntity {
 
-    // ========== RELACIONAMENTOS ==========
-
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "paciente_id")
-    private Paciente paciente; // Opcional: notificação para paciente
+    private Paciente paciente;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "profissional_id")
-    private ProfissionaisSaude profissional; // Opcional: notificação para profissional
+    private ProfissionaisSaude profissional;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "agendamento_id")
-    private Agendamento agendamento; // Opcional: relacionado a agendamento
+    private Agendamento agendamento;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "template_id")
-    private TemplateNotificacao template; // Opcional: template usado
-
-    // ========== DADOS DA NOTIFICAÇÃO ==========
+    private TemplateNotificacao template;
 
     @Convert(converter = TipoNotificacaoEnumConverter.class)
     @Column(name = "tipo_notificacao", nullable = false)
@@ -72,53 +62,46 @@ public class Notificacao extends BaseEntity {
 
     @Column(name = "destinatario", nullable = false, length = 255)
     @NotNull(message = "Destinatário é obrigatório")
-    private String destinatario; // E-mail, telefone ou ID de usuário
+    private String destinatario;
 
     @Column(name = "assunto", length = 500)
-    private String assunto; // Assunto da notificação
+    private String assunto;
 
     @Column(name = "mensagem", nullable = false, columnDefinition = "TEXT")
     @NotNull(message = "Mensagem é obrigatória")
-    private String mensagem; // Conteúdo da mensagem
-
-    // ========== STATUS E CONTROLE ==========
+    private String mensagem;
 
     @Column(name = "status_envio", nullable = false, length = 50)
     @NotNull(message = "Status de envio é obrigatório")
-    private String statusEnvio; // PENDENTE, ENVIADO, FALHA, CANCELADO
+    private String statusEnvio;
 
     @Column(name = "data_envio_prevista")
-    private OffsetDateTime dataEnvioPrevista; // Quando deveria ser enviada
+    private OffsetDateTime dataEnvioPrevista;
 
     @Column(name = "data_envio")
-    private OffsetDateTime dataEnvio; // Quando foi enviada
+    private OffsetDateTime dataEnvio;
 
     @Column(name = "data_leitura")
-    private OffsetDateTime dataLeitura; // Quando foi lida (se aplicável)
+    private OffsetDateTime dataLeitura;
 
     @Column(name = "tentativas_envio")
-    private Integer tentativasEnvio; // Quantidade de tentativas de envio
+    private Integer tentativasEnvio;
 
     @Column(name = "maximo_tentativas")
-    private Integer maximoTentativas; // Máximo de tentativas permitidas
-
-    // ========== ERROS E LOGS ==========
+    private Integer maximoTentativas;
 
     @Column(name = "erro_envio", columnDefinition = "TEXT")
-    private String erroEnvio; // Mensagem de erro se falhou
+    private String erroEnvio;
 
     @Column(name = "log_envio", columnDefinition = "TEXT")
-    private String logEnvio; // Log detalhado do envio
+    private String logEnvio;
 
     @Column(name = "id_externo", length = 255)
-    private String idExterno; // ID retornado pelo provedor externo (SMS, WhatsApp, etc.)
-
-    // ========== METADADOS ==========
+    private String idExterno;
 
     @Column(name = "parametros_json", columnDefinition = "TEXT")
-    private String parametrosJson; // Parâmetros adicionais em JSON
+    private String parametrosJson;
 
     @Column(name = "enviado_por")
-    private java.util.UUID enviadoPor; // ID do usuário/sistema que enviou
+    private java.util.UUID enviadoPor;
 }
-

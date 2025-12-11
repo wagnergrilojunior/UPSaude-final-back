@@ -3,9 +3,6 @@ package com.upsaude.enums;
 import java.util.Arrays;
 import java.util.Locale;
 
-/**
- * Enum para classificação de frequência de administração de medicamentos conforme padrão médico.
- */
 public enum FrequenciaMedicacaoEnum {
     UMA_VEZ_AO_DIA(1, "1x ao dia"),
     DUAS_VEZES_AO_DIA(2, "2x ao dia"),
@@ -60,4 +57,3 @@ public enum FrequenciaMedicacaoEnum {
                 .orElse(null);
     }
 }
-

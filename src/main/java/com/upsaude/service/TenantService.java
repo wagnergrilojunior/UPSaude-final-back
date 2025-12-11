@@ -8,11 +8,6 @@ import org.springframework.data.domain.Pageable;
 
 import java.util.UUID;
 
-/**
- * Interface de serviço para operações CRUD relacionadas a Tenant.
- *
- * @author UPSaúde
- */
 public interface TenantService {
 
     TenantResponse criar(TenantRequest request);
@@ -25,10 +20,5 @@ public interface TenantService {
 
     void excluir(UUID id);
 
-    /**
-     * Obtém o tenant do usuário autenticado.
-     * 
-     * @return Tenant do usuário autenticado ou null se não encontrado
-     */
     Tenant obterTenantDoUsuarioAutenticado();
 }

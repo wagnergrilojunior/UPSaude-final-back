@@ -24,11 +24,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
 
-/**
- * Controlador REST para operações relacionadas a Vacinações.
- *
- * @author UPSaúde
- */
 @RestController
 @RequestMapping("/v1/vacinacoes")
 @Tag(name = "Vacinações", description = "API para gerenciamento de Vacinações")

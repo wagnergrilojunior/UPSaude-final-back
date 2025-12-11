@@ -10,30 +10,14 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 
-/**
- * Mapper para conversões de EquipeSaude.
- * Entity ↔ DTO ↔ Request/Response
- */
 @Mapper(config = MappingConfig.class, uses = {EstabelecimentosMapper.class})
 public interface EquipeSaudeMapper extends EntityMapper<EquipeSaude, EquipeSaudeDTO> {
 
-    /**
-     * Converte DTO para Entity.
-     * O campo 'active' é ignorado (gerenciado pelo sistema).
-     */
     @Mapping(target = "active", ignore = true)
     EquipeSaude toEntity(EquipeSaudeDTO dto);
 
-    /**
-     * Converte Entity para DTO.
-     */
     EquipeSaudeDTO toDTO(EquipeSaude entity);
 
-    /**
-     * Converte Request para Entity.
-     * Os campos 'id', 'createdAt', 'updatedAt', 'active' são ignorados.
-     * Relacionamentos (UUID) devem ser tratados manualmente no Service.
-     */
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
@@ -42,11 +26,6 @@ public interface EquipeSaudeMapper extends EntityMapper<EquipeSaude, EquipeSaude
     @Mapping(target = "vinculosProfissionais", ignore = true)
     EquipeSaude fromRequest(EquipeSaudeRequest request);
 
-    /**
-     * Atualiza Entity existente com dados do Request.
-     * Os campos 'id', 'createdAt', 'updatedAt', 'active' são ignorados.
-     * Relacionamentos (UUID) devem ser tratados manualmente no Service.
-     */
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
@@ -55,8 +34,5 @@ public interface EquipeSaudeMapper extends EntityMapper<EquipeSaude, EquipeSaude
     @Mapping(target = "vinculosProfissionais", ignore = true)
     void updateFromRequest(EquipeSaudeRequest request, @MappingTarget EquipeSaude entity);
 
-    /**
-     * Converte Entity para Response.
-     */
     EquipeSaudeResponse toResponse(EquipeSaude entity);
 }

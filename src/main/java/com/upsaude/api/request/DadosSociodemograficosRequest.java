@@ -23,27 +23,27 @@ import lombok.*;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class DadosSociodemograficosRequest {
     private UUID paciente;
-    
+
     @JsonDeserialize(using = RacaCorEnumDeserializer.class)
     private RacaCorEnum racaCor;
-    
+
     @JsonDeserialize(using = NacionalidadeEnumDeserializer.class)
     private NacionalidadeEnum nacionalidade;
-    
+
     private String paisNascimento;
     private String naturalidade;
     private String municipioNascimentoIbge;
-    
+
     @JsonDeserialize(using = EscolaridadeEnumDeserializer.class)
     private EscolaridadeEnum escolaridade;
-    
+
     private String ocupacaoProfissao;
     private Boolean situacaoRua;
     private Integer tempoSituacaoRua;
-    
+
     @JsonDeserialize(using = CondicaoMoradiaEnumDeserializer.class)
     private CondicaoMoradiaEnum condicaoMoradia;
-    
+
     @JsonDeserialize(using = SituacaoFamiliarEnumDeserializer.class)
     private SituacaoFamiliarEnum situacaoFamiliar;
 }

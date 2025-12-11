@@ -28,13 +28,6 @@ import lombok.EqualsAndHashCode;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Entidade que representa um médico.
- * Armazena informações completas sobre médicos para sistemas de gestão de saúde.
- * Baseado em padrões do Conselho Federal de Medicina (CFM).
- *
- * @author UPSaúde
- */
 @Entity
 @Table(name = "medicos", schema = "public",
        uniqueConstraints = {
@@ -49,8 +42,7 @@ import java.util.List;
     name = "Medicos.listagemCompleta",
     attributeNodes = {
         @NamedAttributeNode("especialidades")
-        // enderecos e medicosEstabelecimentos são carregados via batch fetching
-        // (hibernate.default_batch_fetch_size) para evitar MultipleBagFetchException
+
     }
 )
 @Data
@@ -67,13 +59,6 @@ public class Medicos extends BaseEntityWithoutEstabelecimento {
         this.especialidades = new ArrayList<>();
     }
 
-    // ========== RELACIONAMENTOS ==========
-
-    /**
-     * Lista de especialidades médicas do médico.
-     * Relacionamento ManyToMany - permite que um médico tenha múltiplas especialidades.
-     * Usa JoinTable para gerenciar o relacionamento bidirecional.
-     */
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
         name = "medicos_especialidades",
@@ -87,41 +72,23 @@ public class Medicos extends BaseEntityWithoutEstabelecimento {
     )
     private List<EspecialidadesMedicas> especialidades = new ArrayList<>();
 
-    // ========== IDENTIFICAÇÃO BÁSICA ==========
-
     @NotBlank(message = "Nome completo é obrigatório")
     @Size(max = 255, message = "Nome completo deve ter no máximo 255 caracteres")
     @Column(name = "nome_completo", nullable = false, length = 255)
     private String nomeCompleto;
 
-    // ========== DADOS PESSOAIS ==========
-
     @Embedded
     private DadosPessoaisMedico dadosPessoais;
-
-    // ========== REGISTRO PROFISSIONAL (CRM) ==========
 
     @Embedded
     private RegistroProfissionalMedico registroProfissional;
 
-    // ========== FORMAÇÃO ==========
-
     @Embedded
     private FormacaoMedico formacao;
-
-    // ========== CONTATO ==========
 
     @Embedded
     private ContatoMedico contato;
 
-    // ========== ENDEREÇOS ==========
-
-    /**
-     * Endereços do médico (consultório, residência, etc).
-     * Relacionamento OneToMany usando JoinTable.
-     * Usa cascade PERSIST e MERGE para gerenciar endereços associados,
-     * mas não remove endereços que podem ser compartilhados.
-     */
     @OneToMany(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinTable(
         name = "medicos_enderecos",
@@ -131,24 +98,16 @@ public class Medicos extends BaseEntityWithoutEstabelecimento {
     )
     private List<Endereco> enderecos = new ArrayList<>();
 
-    /**
-     * Vínculos do médico com estabelecimentos.
-     * Relacionamento OneToMany bidirecional com cascade completo e remoção de órfãos.
-     * Permite gerenciar múltiplos vínculos do médico com diferentes estabelecimentos,
-     * incluindo tipo de vínculo, carga horária, salário e período de trabalho.
-     */
     @OneToMany(mappedBy = "medico", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
     private List<MedicoEstabelecimento> medicosEstabelecimentos = new ArrayList<>();
 
-    // ========== OBSERVAÇÕES ==========
-
     @Column(name = "observacoes", columnDefinition = "TEXT")
-    private String observacoes; // Observações gerais sobre o médico
+    private String observacoes;
 
     @PrePersist
     @PreUpdate
     public void validateEmbeddablesAndCollections() {
-        // Valida embeddables
+
         if (dadosPessoais == null) {
             dadosPessoais = new DadosPessoaisMedico();
         }
@@ -161,8 +120,7 @@ public class Medicos extends BaseEntityWithoutEstabelecimento {
         if (contato == null) {
             contato = new ContatoMedico();
         }
-        
-        // Valida coleções
+
         if (enderecos == null) {
             enderecos = new ArrayList<>();
         }
@@ -174,13 +132,6 @@ public class Medicos extends BaseEntityWithoutEstabelecimento {
         }
     }
 
-    // ========== MÉTODOS UTILITÁRIOS - ESPECIALIDADES ==========
-
-    /**
-     * Adiciona uma especialidade à lista de especialidades do médico.
-     *
-     * @param especialidade A especialidade a ser adicionada
-     */
     public void addEspecialidade(EspecialidadesMedicas especialidade) {
         if (especialidade == null) {
             return;
@@ -193,11 +144,6 @@ public class Medicos extends BaseEntityWithoutEstabelecimento {
         }
     }
 
-    /**
-     * Remove uma especialidade da lista de especialidades do médico.
-     *
-     * @param especialidade A especialidade a ser removida
-     */
     public void removeEspecialidade(EspecialidadesMedicas especialidade) {
         if (especialidade == null || especialidades == null) {
             return;
@@ -205,14 +151,6 @@ public class Medicos extends BaseEntityWithoutEstabelecimento {
         especialidades.remove(especialidade);
     }
 
-    // ========== MÉTODOS UTILITÁRIOS - MEDICOS ESTABELECIMENTOS ==========
-
-    /**
-     * Adiciona um vínculo médico-estabelecimento com sincronização bidirecional.
-     * Garante que o vínculo também referencia este médico.
-     *
-     * @param medicoEstabelecimento O vínculo a ser adicionado
-     */
     public void addMedicoEstabelecimento(MedicoEstabelecimento medicoEstabelecimento) {
         if (medicoEstabelecimento == null) {
             return;
@@ -226,12 +164,6 @@ public class Medicos extends BaseEntityWithoutEstabelecimento {
         }
     }
 
-    /**
-     * Remove um vínculo médico-estabelecimento com sincronização bidirecional.
-     * Remove a referência do vínculo para este médico.
-     *
-     * @param medicoEstabelecimento O vínculo a ser removido
-     */
     public void removeMedicoEstabelecimento(MedicoEstabelecimento medicoEstabelecimento) {
         if (medicoEstabelecimento == null || medicosEstabelecimentos == null) {
             return;

@@ -8,11 +8,6 @@ import org.springframework.data.domain.Pageable;
 import java.time.LocalDate;
 import java.util.UUID;
 
-/**
- * Interface de serviço para operações CRUD relacionadas a ControlePonto.
- *
- * @author UPSaúde
- */
 public interface ControlePontoService {
 
     ControlePontoResponse criar(ControlePontoRequest request);
@@ -35,4 +30,3 @@ public interface ControlePontoService {
 
     void excluir(UUID id);
 }
-

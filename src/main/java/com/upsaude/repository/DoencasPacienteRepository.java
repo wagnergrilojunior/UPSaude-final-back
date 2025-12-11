@@ -37,4 +37,3 @@ public interface DoencasPacienteRepository extends JpaRepository<DoencasPaciente
     @Query("SELECT dp FROM DoencasPaciente dp WHERE dp.paciente.id = :pacienteId AND dp.active = true")
     List<DoencasPaciente> findActiveByPacienteId(@Param("pacienteId") UUID pacienteId);
 }
-

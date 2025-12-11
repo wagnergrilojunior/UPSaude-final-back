@@ -3,11 +3,6 @@ package com.upsaude.enums;
 import java.util.Arrays;
 import java.util.Locale;
 
-/**
- * Enum para status de registro médico (CRM).
- *
- * @author UPSaúde
- */
 public enum StatusRegistroMedicoEnum {
     ATIVO(1, "Ativo"),
     SUSPENSO(2, "Suspenso"),
@@ -49,4 +44,3 @@ public enum StatusRegistroMedicoEnum {
                 .orElse(null);
     }
 }
-

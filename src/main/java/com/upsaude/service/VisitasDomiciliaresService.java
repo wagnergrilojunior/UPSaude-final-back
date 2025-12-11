@@ -7,11 +7,6 @@ import org.springframework.data.domain.Pageable;
 
 import java.util.UUID;
 
-/**
- * Interface de serviço para operações CRUD relacionadas a VisitasDomiciliares.
- *
- * @author UPSaúde
- */
 public interface VisitasDomiciliaresService {
 
     VisitasDomiciliaresResponse criar(VisitasDomiciliaresRequest request);

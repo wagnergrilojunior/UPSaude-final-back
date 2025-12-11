@@ -21,4 +21,3 @@ public class FabricantesMedicamento extends BaseEntityWithoutTenant {
     @Column(name = "contato_json", columnDefinition = "jsonb")
     private String contatoJson;
 }
-

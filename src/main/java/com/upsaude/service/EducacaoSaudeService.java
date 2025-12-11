@@ -7,11 +7,6 @@ import org.springframework.data.domain.Pageable;
 
 import java.util.UUID;
 
-/**
- * Interface de serviço para operações relacionadas a Educação em Saúde.
- *
- * @author UPSaúde
- */
 public interface EducacaoSaudeService {
 
     EducacaoSaudeResponse criar(EducacaoSaudeRequest request);
@@ -30,4 +25,3 @@ public interface EducacaoSaudeService {
 
     void excluir(UUID id);
 }
-

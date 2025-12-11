@@ -4,12 +4,6 @@ import com.upsaude.enums.FrequenciaMedicacaoEnum;
 import jakarta.persistence.AttributeConverter;
 import jakarta.persistence.Converter;
 
-/**
- * Converter para FrequenciaMedicacaoEnum.
- * Converte entre o enum e o código Integer no banco de dados.
- *
- * @author UPSaúde
- */
 @Converter(autoApply = false)
 public class FrequenciaMedicacaoEnumConverter implements AttributeConverter<FrequenciaMedicacaoEnum, Integer> {
 
@@ -29,4 +23,3 @@ public class FrequenciaMedicacaoEnumConverter implements AttributeConverter<Freq
         return FrequenciaMedicacaoEnum.fromCodigo(dbData);
     }
 }
-

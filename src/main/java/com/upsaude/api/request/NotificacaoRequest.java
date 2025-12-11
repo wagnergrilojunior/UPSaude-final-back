@@ -26,21 +26,21 @@ public class NotificacaoRequest {
     private UUID profissional;
     private UUID agendamento;
     private UUID template;
-    
+
     @NotNull(message = "Tipo de notificação é obrigatório")
     @JsonDeserialize(using = TipoNotificacaoEnumDeserializer.class)
     private TipoNotificacaoEnum tipoNotificacao;
-    
+
     @NotNull(message = "Canal de notificação é obrigatório")
     @JsonDeserialize(using = CanalNotificacaoEnumDeserializer.class)
     private CanalNotificacaoEnum canal;
-    
+
     @NotBlank(message = "Destinatário é obrigatório")
     @Size(max = 255, message = "Destinatário deve ter no máximo 255 caracteres")
     private String destinatario;
     @Size(max = 500, message = "Assunto deve ter no máximo 500 caracteres")
     private String assunto;
-    
+
     @NotBlank(message = "Mensagem é obrigatória")
     private String mensagem;
     private String statusEnvio;
