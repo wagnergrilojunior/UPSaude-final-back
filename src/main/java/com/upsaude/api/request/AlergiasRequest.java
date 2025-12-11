@@ -28,7 +28,7 @@ public class AlergiasRequest {
     @Size(max = 255, message = "Nome deve ter no máximo 255 caracteres")
     private String nome;
     
-    @Pattern(regexp = "^[\\p{L}0-9 .'-]+$", message = "Caracteres inválidos no nome científico")
+    @Pattern(regexp = "^$|^[\\p{L}0-9 .'-]+$", message = "Caracteres inválidos no nome científico")
     @Size(max = 255, message = "Nome científico deve ter no máximo 255 caracteres")
     private String nomeCientifico;
     

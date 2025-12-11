@@ -61,7 +61,7 @@ public class ProfissionaisSaudeRequest {
     
     // ========== CAMPOS OPCIONAIS COM VALIDAÇÕES GOVERNAMENTAIS ==========
     
-    @Pattern(regexp = "^[0-9]{11}$", message = "CPF deve conter 11 dígitos")
+    @Pattern(regexp = "^$|^[0-9]{11}$", message = "CPF deve conter 11 dígitos")
     private String cpf;
     private LocalDate dataNascimento;
     @JsonDeserialize(using = SexoEnumDeserializer.class)
@@ -89,7 +89,7 @@ public class ProfissionaisSaudeRequest {
     
     private NacionalidadeEnum nacionalidade;
     
-    @Pattern(regexp = "^[\\p{L}0-9 .'-]+$", message = "Caracteres inválidos na naturalidade")
+    @Pattern(regexp = "^$|^[\\p{L}0-9 .'-]+$", message = "Caracteres inválidos na naturalidade")
     @Size(max = 100, message = "Naturalidade deve ter no máximo 100 caracteres")
     private String naturalidade;
     private String ufRegistro;
@@ -99,7 +99,7 @@ public class ProfissionaisSaudeRequest {
     private StatusAtivoEnum statusRegistro;
     @JsonDeserialize(using = TipoProfissionalEnumDeserializer.class)
     private TipoProfissionalEnum tipoProfissional;
-    @Pattern(regexp = "^[0-9]{15}$", message = "CNS deve conter 15 dígitos")
+    @Pattern(regexp = "^$|^[0-9]{15}$", message = "CNS deve conter 15 dígitos")
     private String cns;
     
     @Size(max = 10, message = "Código CBO deve ter no máximo 10 caracteres")
@@ -111,14 +111,14 @@ public class ProfissionaisSaudeRequest {
     @Size(max = 10, message = "Código ocupacional deve ter no máximo 10 caracteres")
     private String codigoOcupacional;
     
-    @Pattern(regexp = "^[0-9]{10,11}$", message = "Telefone deve conter DDD + número (10 ou 11 dígitos)")
+    @Pattern(regexp = "^$|^[0-9]{10,11}$", message = "Telefone deve conter DDD + número (10 ou 11 dígitos)")
     private String telefone;
     
     @Email(message = "Email inválido")
     @Size(max = 255, message = "Email deve ter no máximo 255 caracteres")
     private String email;
     
-    @Pattern(regexp = "^[0-9]{10,11}$", message = "Telefone institucional deve conter DDD + número (10 ou 11 dígitos)")
+    @Pattern(regexp = "^$|^[0-9]{10,11}$", message = "Telefone institucional deve conter DDD + número (10 ou 11 dígitos)")
     private String telefoneInstitucional;
     
     @Email(message = "Email institucional inválido")

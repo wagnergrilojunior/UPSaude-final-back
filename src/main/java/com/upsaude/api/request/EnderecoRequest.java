@@ -27,7 +27,7 @@ import lombok.Setter;
 public class EnderecoRequest {
     @JsonDeserialize(using = TipoLogradouroEnumDeserializer.class)
     private TipoLogradouroEnum tipoLogradouro;
-    @Pattern(regexp = "^[\\p{L}0-9 .'-]+$", message = "Caracteres inválidos no logradouro")
+    @Pattern(regexp = "^$|^[\\p{L}0-9 .'-]+$", message = "Caracteres inválidos no logradouro")
     @Size(max = 200, message = "Logradouro deve ter no máximo 200 caracteres")
     private String logradouro;
     
@@ -37,11 +37,11 @@ public class EnderecoRequest {
     @Size(max = 100, message = "Complemento deve ter no máximo 100 caracteres")
     private String complemento;
     
-    @Pattern(regexp = "^[\\p{L}0-9 .'-]+$", message = "Caracteres inválidos no bairro")
+    @Pattern(regexp = "^$|^[\\p{L}0-9 .'-]+$", message = "Caracteres inválidos no bairro")
     @Size(max = 100, message = "Bairro deve ter no máximo 100 caracteres")
     private String bairro;
     
-    @Pattern(regexp = "^[0-9]{8}$", message = "CEP deve conter 8 dígitos")
+    @Pattern(regexp = "^$|^[0-9]{8}$", message = "CEP deve conter 8 dígitos")
     private String cep;
     private String pais;
     private String distrito;
@@ -50,7 +50,7 @@ public class EnderecoRequest {
     private Double longitude;
     private TipoEnderecoEnum tipoEndereco;
     private ZonaDomicilioEnum zona;
-    @Pattern(regexp = "^[0-9]{7}$", message = "Código IBGE deve conter 7 dígitos")
+    @Pattern(regexp = "^$|^[0-9]{7}$", message = "Código IBGE deve conter 7 dígitos")
     @Size(max = 7, message = "Código IBGE município deve ter no máximo 7 caracteres")
     private String codigoIbgeMunicipio;
     
