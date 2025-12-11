@@ -24,11 +24,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
 
-/**
- * Controlador REST para operações relacionadas a Estoques de Vacina.
- *
- * @author UPSaúde
- */
 @Slf4j
 @RestController
 @RequestMapping("/v1/estoques-vacina")
@@ -155,4 +150,3 @@ public class EstoquesVacinaController {
         }
     }
 }
-

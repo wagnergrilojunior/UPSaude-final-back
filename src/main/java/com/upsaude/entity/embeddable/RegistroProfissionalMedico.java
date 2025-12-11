@@ -13,11 +13,6 @@ import lombok.Data;
 
 import java.time.LocalDate;
 
-/**
- * Classe embeddable para dados de registro profissional do médico (CRM).
- *
- * @author UPSaúde
- */
 @Embeddable
 @Data
 @Builder
@@ -25,8 +20,7 @@ import java.time.LocalDate;
 public class RegistroProfissionalMedico {
 
     public RegistroProfissionalMedico() {
-        // Campos inicializados como null para evitar violação de constraint única
-        // quando CRM/UF estão vazios
+
     }
 
     @Pattern(regexp = "^\\d{4,10}$", message = "CRM deve ter entre 4 e 10 dígitos")
@@ -42,17 +36,16 @@ public class RegistroProfissionalMedico {
     private StatusRegistroMedicoEnum statusCrm;
 
     @Column(name = "data_emissao_crm")
-    private LocalDate dataEmissaoCrm; // Data de emissão do CRM
+    private LocalDate dataEmissaoCrm;
 
     @Column(name = "data_validade_crm")
-    private LocalDate dataValidadeCrm; // Data de validade do CRM (se aplicável)
+    private LocalDate dataValidadeCrm;
 
     @Size(max = 50, message = "CRM complementar deve ter no máximo 50 caracteres")
     @Column(name = "crm_complementar", length = 50)
-    private String crmComplementar; // CRM complementar (RQE - Registro de Qualificação de Especialista)
+    private String crmComplementar;
 
     @Size(max = 255, message = "Observações CRM deve ter no máximo 255 caracteres")
     @Column(name = "observacoes_crm", length = 255)
-    private String observacoesCrm; // Observações sobre o registro
+    private String observacoesCrm;
 }
-

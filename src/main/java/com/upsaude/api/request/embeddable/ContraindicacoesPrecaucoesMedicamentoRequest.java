@@ -14,26 +14,26 @@ import lombok.Setter;
 @AllArgsConstructor
 public class ContraindicacoesPrecaucoesMedicamentoRequest {
     private String contraindicacoes;
-    
+
     private String precaucoes;
-    
+
     @NotNull(message = "Gestante pode é obrigatório")
     @Builder.Default
     private Boolean gestantePode = false;
-    
+
     @NotNull(message = "Lactante pode é obrigatório")
     @Builder.Default
     private Boolean lactantePode = false;
-    
+
     @NotNull(message = "Criança pode é obrigatório")
     @Builder.Default
     private Boolean criancaPode = true;
-    
+
     @NotNull(message = "Idoso pode é obrigatório")
     @Builder.Default
     private Boolean idosoPode = true;
-    
+
     private String interacoesMedicamentosas;
-    
+
     private String efeitosColaterais;
 }

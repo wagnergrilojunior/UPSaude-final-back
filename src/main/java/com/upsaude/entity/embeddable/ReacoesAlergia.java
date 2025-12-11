@@ -10,11 +10,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 
-/**
- * Classe embeddable para informações de reações alérgicas.
- *
- * @author UPSaúde
- */
 @Embeddable
 @Data
 @Builder
@@ -37,7 +32,6 @@ public class ReacoesAlergia {
     @Column(name = "tempo_apos_exposicao", length = 100)
     private String tempoAposExposicao;
 
-    // Garantia contra null em string
     public ReacoesAlergia() {
         this.reacoesComuns = "";
         this.reacoesGraves = "";
@@ -45,5 +39,3 @@ public class ReacoesAlergia {
         this.tempoAposExposicao = "";
     }
 }
-
-

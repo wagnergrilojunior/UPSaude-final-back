@@ -17,7 +17,7 @@ public class ExamesSolicitadosConsultaRequest {
     private String examesLaboratoriais;
     private String examesImagem;
     private String examesOutros;
-    
+
     @NotNull(message = "Urgência dos exames é obrigatório")
     @Builder.Default
     private Boolean urgenciaExames = false;

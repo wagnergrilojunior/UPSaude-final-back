@@ -3,12 +3,6 @@ package com.upsaude.enums;
 import java.util.Arrays;
 import java.util.Locale;
 
-/**
- * Enum para classificação de tipos de plantão.
- * Baseado em padrões de sistemas de gestão de plantões em saúde.
- *
- * @author UPSaúde
- */
 public enum TipoPlantaoEnum {
     PLANTAO_DIURNO(1, "Plantão Diurno"),
     PLANTAO_NOTURNO(2, "Plantão Noturno"),
@@ -55,4 +49,3 @@ public enum TipoPlantaoEnum {
                 .orElse(null);
     }
 }
-

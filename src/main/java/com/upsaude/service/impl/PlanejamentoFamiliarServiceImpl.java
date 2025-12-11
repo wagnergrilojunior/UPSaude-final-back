@@ -22,11 +22,6 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-/**
- * Implementação do serviço de gerenciamento de Planejamento Familiar.
- *
- * @author UPSaúde
- */
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -40,8 +35,6 @@ public class PlanejamentoFamiliarServiceImpl implements PlanejamentoFamiliarServ
     @CacheEvict(value = "planejamentofamiliar", allEntries = true)
     public PlanejamentoFamiliarResponse criar(PlanejamentoFamiliarRequest request) {
         log.debug("Criando novo planejamento familiar");
-
-        // Validação de dados básicos é feita automaticamente pelo Bean Validation no Request
 
         PlanejamentoFamiliar planejamentoFamiliar = planejamentoFamiliarMapper.fromRequest(request);
         planejamentoFamiliar.setActive(true);
@@ -113,8 +106,6 @@ public class PlanejamentoFamiliarServiceImpl implements PlanejamentoFamiliarServ
             throw new BadRequestException("ID do planejamento familiar é obrigatório");
         }
 
-        // Validação de dados básicos é feita automaticamente pelo Bean Validation no Request
-
         PlanejamentoFamiliar planejamentoExistente = planejamentoFamiliarRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Planejamento familiar não encontrado com ID: " + id));
 
@@ -148,10 +139,6 @@ public class PlanejamentoFamiliarServiceImpl implements PlanejamentoFamiliarServ
         log.info("Planejamento familiar excluído (desativado) com sucesso. ID: {}", id);
     }
 
-    // Validações de dados básicos foram movidas para o Request usando Bean Validation
-    // (@NotNull, @NotBlank, @Pattern, etc). Isso garante validação automática no Controller
-    // e retorno de erro 400 padronizado via ApiExceptionHandler.
-
     private void atualizarDadosPlanejamentoFamiliar(PlanejamentoFamiliar planejamento, PlanejamentoFamiliarRequest request) {
         PlanejamentoFamiliar planejamentoAtualizado = planejamentoFamiliarMapper.fromRequest(request);
 
@@ -168,4 +155,3 @@ public class PlanejamentoFamiliarServiceImpl implements PlanejamentoFamiliarServ
         planejamento.setCreatedAt(createdAtOriginal);
     }
 }
-

@@ -19,13 +19,6 @@ import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
-/**
- * Entidade que representa um atendimento realizado por um profissional de saúde a um paciente.
- * Armazena informações completas sobre atendimentos para sistemas de gestão de saúde.
- * Baseado em padrões de prontuário eletrônico e sistemas de saúde.
- *
- * @author UPSaúde
- */
 @Entity
 @Table(name = "atendimentos", schema = "public",
        indexes = {
@@ -48,8 +41,6 @@ public class Atendimento extends BaseEntity {
         this.classificacaoRisco = new ClassificacaoRiscoAtendimento();
     }
 
-    // ========== RELACIONAMENTOS ==========
-
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "paciente_id", nullable = false)
     @NotNull(message = "Paciente é obrigatório")
@@ -62,54 +53,40 @@ public class Atendimento extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "especialidade_id")
-    private EspecialidadesMedicas especialidade; // Especialidade do atendimento
+    private EspecialidadesMedicas especialidade;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "equipe_saude_id")
-    private EquipeSaude equipeSaude; // Equipe de saúde que realizou o atendimento
+    private EquipeSaude equipeSaude;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "convenio_id")
-    private Convenio convenio; // Convênio utilizado no atendimento
-
-    // ========== INFORMAÇÕES BÁSICAS ==========
+    private Convenio convenio;
 
     @Embedded
     private InformacoesAtendimento informacoes;
 
-    // ========== ANAMNESE ==========
-
     @Embedded
     private AnamneseAtendimento anamnese;
-
-    // ========== DIAGNÓSTICO ==========
 
     @Embedded
     private DiagnosticoAtendimento diagnostico;
 
-    // ========== PROCEDIMENTOS REALIZADOS ==========
-
     @Embedded
     private ProcedimentosRealizadosAtendimento procedimentosRealizados;
-
-    // ========== CLASSIFICAÇÃO DE RISCO ==========
 
     @Embedded
     private ClassificacaoRiscoAtendimento classificacaoRisco;
 
-    // ========== RELACIONAMENTO COM CID ==========
-
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "cid_principal_id")
-    private CidDoencas cidPrincipal; // CID principal do atendimento
-
-    // ========== OBSERVAÇÕES ==========
+    private CidDoencas cidPrincipal;
 
     @Column(name = "anotacoes", columnDefinition = "TEXT")
-    private String anotacoes; // Anotações gerais do atendimento
+    private String anotacoes;
 
     @Column(name = "observacoes_internas", columnDefinition = "TEXT")
-    private String observacoesInternas; // Observações internas (não visíveis ao paciente)
+    private String observacoesInternas;
 
     @PrePersist
     @PreUpdate

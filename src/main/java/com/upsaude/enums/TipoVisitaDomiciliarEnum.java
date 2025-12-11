@@ -3,12 +3,6 @@ package com.upsaude.enums;
 import java.util.Arrays;
 import java.util.Locale;
 
-/**
- * Enum para tipos de visitas domiciliares.
- * Baseado nos tipos de visitas realizadas por equipes da Estratégia Saúde da Família.
- *
- * @author UPSaúde
- */
 public enum TipoVisitaDomiciliarEnum {
     CADASTRAMENTO(1, "Cadastramento de Família"),
     ACOMPANHAMENTO_GESTANTE(2, "Acompanhamento de Gestante"),
@@ -70,4 +64,3 @@ public enum TipoVisitaDomiciliarEnum {
                 .orElse(null);
     }
 }
-

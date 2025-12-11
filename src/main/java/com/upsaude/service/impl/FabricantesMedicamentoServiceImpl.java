@@ -20,11 +20,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.UUID;
 
-/**
- * Implementação do serviço de gerenciamento de FabricantesMedicamento.
- *
- * @author UPSaúde
- */
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -39,7 +34,6 @@ public class FabricantesMedicamentoServiceImpl implements FabricantesMedicamento
     public FabricantesMedicamentoResponse criar(FabricantesMedicamentoRequest request) {
         log.debug("Criando novo fabricantesmedicamento");
 
-        // Validação de dados básicos é feita automaticamente pelo Bean Validation no Request
         validarDuplicidade(null, request);
 
         FabricantesMedicamento fabricantesMedicamento = fabricantesMedicamentoMapper.fromRequest(request);
@@ -85,8 +79,6 @@ public class FabricantesMedicamentoServiceImpl implements FabricantesMedicamento
             throw new BadRequestException("ID do fabricantesmedicamento é obrigatório");
         }
 
-        // Validação de dados básicos é feita automaticamente pelo Bean Validation no Request
-
         FabricantesMedicamento fabricantesMedicamentoExistente = fabricantesMedicamentoRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("FabricantesMedicamento não encontrado com ID: " + id));
 
@@ -122,30 +114,18 @@ public class FabricantesMedicamentoServiceImpl implements FabricantesMedicamento
         log.info("FabricantesMedicamento excluído (desativado) com sucesso. ID: {}", id);
     }
 
-        // Validações de dados básicos foram movidas para o Request usando Bean Validation
-    // (@NotNull, @NotBlank, @Pattern, etc). Isso garante validação automática no Controller
-    // e retorno de erro 400 padronizado via ApiExceptionHandler.
-
-    /**
-     * Valida se já existe um fabricante de medicamento com o mesmo nome no banco de dados.
-     * 
-     * @param id ID do fabricante de medicamento sendo atualizado (null para criação)
-     * @param request dados do fabricante de medicamento sendo cadastrado/atualizado
-     * @throws BadRequestException se já existe um fabricante de medicamento com o mesmo nome
-     */
     private void validarDuplicidade(UUID id, FabricantesMedicamentoRequest request) {
         if (request == null) {
             return;
         }
 
-        // Valida duplicidade do nome
         if (request.getNome() != null && !request.getNome().trim().isEmpty()) {
             boolean nomeDuplicado;
             if (id == null) {
-                // Criação: verifica se existe qualquer registro com este nome
+
                 nomeDuplicado = fabricantesMedicamentoRepository.existsByNome(request.getNome().trim());
             } else {
-                // Atualização: verifica se existe outro registro (diferente do atual) com este nome
+
                 nomeDuplicado = fabricantesMedicamentoRepository.existsByNomeAndIdNot(request.getNome().trim(), id);
             }
 
@@ -160,16 +140,13 @@ public class FabricantesMedicamentoServiceImpl implements FabricantesMedicamento
 
     private void atualizarDadosFabricantesMedicamento(FabricantesMedicamento fabricantesMedicamento, FabricantesMedicamentoRequest request) {
         FabricantesMedicamento fabricantesMedicamentoAtualizado = fabricantesMedicamentoMapper.fromRequest(request);
-        
-        // Preserva campos de controle
+
         java.util.UUID idOriginal = fabricantesMedicamento.getId();
         Boolean activeOriginal = fabricantesMedicamento.getActive();
         java.time.OffsetDateTime createdAtOriginal = fabricantesMedicamento.getCreatedAt();
-        
-        // Copia todas as propriedades do objeto atualizado
+
         BeanUtils.copyProperties(fabricantesMedicamentoAtualizado, fabricantesMedicamento);
-        
-        // Restaura campos de controle
+
         fabricantesMedicamento.setId(idOriginal);
         fabricantesMedicamento.setActive(activeOriginal);
         fabricantesMedicamento.setCreatedAt(createdAtOriginal);

@@ -6,11 +6,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
-/**
- * Configuração para registrar interceptor de métricas.
- * 
- * @author UPSaude
- */
 @Configuration
 @RequiredArgsConstructor
 public class WebMvcConfigCustomMetrics implements WebMvcConfigurer {
@@ -24,4 +19,3 @@ public class WebMvcConfigCustomMetrics implements WebMvcConfigurer {
             .excludePathPatterns("/actuator/**", "/swagger-ui/**", "/api-docs/**");
     }
 }
-

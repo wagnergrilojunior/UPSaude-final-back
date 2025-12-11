@@ -25,11 +25,6 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.UUID;
 
-/**
- * Controlador REST para operações relacionadas a Pré-Natal.
- *
- * @author UPSaúde
- */
 @RestController
 @RequestMapping("/v1/pre-natal")
 @Tag(name = "Pré-Natal", description = "API para gerenciamento de acompanhamento Pré-Natal")

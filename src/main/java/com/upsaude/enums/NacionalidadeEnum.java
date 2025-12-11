@@ -3,9 +3,6 @@ package com.upsaude.enums;
 import java.util.Arrays;
 import java.util.Locale;
 
-/**
- * Enum para classificação de nacionalidade conforme padrão brasileiro e SUS/e-SUS.
- */
 public enum NacionalidadeEnum {
     BRASILEIRA(1, "Brasileira"),
     BRASILEIRA_NATURALIZADA(2, "Brasileira naturalizada"),
@@ -46,4 +43,3 @@ public enum NacionalidadeEnum {
                 .orElse(null);
     }
 }
-

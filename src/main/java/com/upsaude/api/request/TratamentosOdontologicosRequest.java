@@ -20,10 +20,10 @@ import lombok.Setter;
 public class TratamentosOdontologicosRequest {
     @NotNull(message = "Paciente é obrigatório")
     private UUID paciente;
-    
+
     @NotNull(message = "Profissional é obrigatório")
     private UUID profissional;
-    
+
     @NotBlank(message = "Título é obrigatório")
     @Size(max = 255, message = "Título deve ter no máximo 255 caracteres")
     private String titulo;

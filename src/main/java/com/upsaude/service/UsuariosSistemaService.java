@@ -8,11 +8,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.util.UUID;
 
-/**
- * Interface de serviço para operações CRUD relacionadas a UsuariosSistema.
- *
- * @author UPSaúde
- */
 public interface UsuariosSistemaService {
 
     UsuariosSistemaResponse criar(UsuariosSistemaRequest request);
@@ -25,27 +20,9 @@ public interface UsuariosSistemaService {
 
     void excluir(UUID id);
 
-    /**
-     * Faz upload da foto do usuário para o Supabase Storage.
-     *
-     * @param id ID do usuário
-     * @param file Arquivo de imagem
-     * @return URL pública da foto
-     */
     String uploadFoto(UUID id, MultipartFile file);
 
-    /**
-     * Obtém a URL da foto do usuário.
-     *
-     * @param id ID do usuário
-     * @return URL pública da foto ou null se não houver foto
-     */
     String obterFotoUrl(UUID id);
 
-    /**
-     * Deleta a foto do usuário do Supabase Storage.
-     *
-     * @param id ID do usuário
-     */
     void deletarFoto(UUID id);
 }

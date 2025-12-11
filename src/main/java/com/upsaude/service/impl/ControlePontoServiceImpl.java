@@ -28,11 +28,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDate;
 import java.util.UUID;
 
-/**
- * Implementação do serviço de gerenciamento de ControlePonto.
- *
- * @author UPSaúde
- */
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -49,25 +44,22 @@ public class ControlePontoServiceImpl implements ControlePontoService {
     @CacheEvict(value = "controleponto", allEntries = true)
     public ControlePontoResponse criar(ControlePontoRequest request) {
         log.debug("Criando novo registro de ponto. Request: {}", request);
-        
+
         if (request == null) {
             log.warn("Tentativa de criar registro de ponto com request nulo");
             throw new BadRequestException("Dados do registro de ponto são obrigatórios");
         }
 
         try {
-            // Validação de dados básicos é feita automaticamente pelo Bean Validation no Request
 
             ControlePonto controlePonto = controlePontoMapper.fromRequest(request);
 
-            // Carrega e define o profissional (obrigatório se médico não for fornecido)
             if (request.getProfissional() != null) {
                 ProfissionaisSaude profissional = profissionaisSaudeRepository.findById(request.getProfissional())
                         .orElseThrow(() -> new NotFoundException("Profissional de saúde não encontrado com ID: " + request.getProfissional()));
                 controlePonto.setProfissional(profissional);
             }
 
-            // Carrega e define o médico (opcional)
             if (request.getMedico() != null) {
                 Medicos medico = medicosRepository.findById(request.getMedico())
                         .orElseThrow(() -> new NotFoundException("Médico não encontrado com ID: " + request.getMedico()));
@@ -97,7 +89,7 @@ public class ControlePontoServiceImpl implements ControlePontoService {
     @Cacheable(value = "controleponto", key = "#id")
     public ControlePontoResponse obterPorId(UUID id) {
         log.debug("Buscando registro de ponto por ID: {} (cache miss)", id);
-        
+
         if (id == null) {
             log.warn("ID nulo recebido para busca de registro de ponto");
             throw new BadRequestException("ID do registro de ponto é obrigatório");
@@ -284,15 +276,12 @@ public class ControlePontoServiceImpl implements ControlePontoService {
         }
 
         try {
-            // Validação de dados básicos é feita automaticamente pelo Bean Validation no Request
 
             ControlePonto controlePontoExistente = controlePontoRepository.findById(id)
                     .orElseThrow(() -> new NotFoundException("Registro de ponto não encontrado com ID: " + id));
 
-            // Usa mapper do MapStruct que preserva campos de controle automaticamente
             controlePontoMapper.updateFromRequest(request, controlePontoExistente);
-            
-            // Atualiza relacionamentos se fornecidos
+
             if (request.getProfissional() != null) {
                 ProfissionaisSaude profissional = profissionaisSaudeRepository.findById(request.getProfissional())
                         .orElseThrow(() -> new NotFoundException("Profissional de saúde não encontrado com ID: " + request.getProfissional()));
@@ -362,12 +351,4 @@ public class ControlePontoServiceImpl implements ControlePontoService {
         }
     }
 
-    // Validações de dados básicos foram movidas para o Request usando Bean Validation
-    // (@NotNull, @NotBlank, @Pattern, etc). Isso garante validação automática no Controller
-    // e retorno de erro 400 padronizado via ApiExceptionHandler.
-
-    // Método removido - agora usa controlePontoMapper.updateFromRequest diretamente
-    // O MapStruct já preserva campos de controle automaticamente
-    // A lógica de atualização de relacionamentos foi movida para o método atualizar
 }
-

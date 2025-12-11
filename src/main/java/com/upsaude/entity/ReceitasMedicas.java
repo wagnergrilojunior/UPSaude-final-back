@@ -27,9 +27,6 @@ import lombok.Data;
 @Data
 public class ReceitasMedicas extends BaseEntity {
 
-    /**
-     * Construtor padrão que inicializa as coleções para evitar NullPointerException.
-     */
     public ReceitasMedicas() {
         this.medicacoes = new ArrayList<>();
     }
@@ -87,12 +84,6 @@ public class ReceitasMedicas extends BaseEntity {
     )
     private List<Medicacao> medicacoes = new ArrayList<>();
 
-    // ========== MÉTODOS DE CICLO DE VIDA ==========
-
-    /**
-     * Garante que as coleções não sejam nulas antes de persistir ou atualizar.
-     * Recria a lista se estiver nula.
-     */
     @PrePersist
     @PreUpdate
     public void validateCollections() {

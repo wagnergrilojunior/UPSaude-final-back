@@ -15,11 +15,6 @@ import lombok.Data;
 
 import java.time.LocalDate;
 
-/**
- * Classe embeddable para dados pessoais do médico.
- *
- * @author UPSaúde
- */
 @Embeddable
 @Data
 @Builder
@@ -38,7 +33,7 @@ public class DadosPessoaisMedico {
 
     @Size(max = 255, message = "Nome social deve ter no máximo 255 caracteres")
     @Column(name = "nome_social", length = 255)
-    private String nomeSocial; // Nome social (se diferente do nome completo)
+    private String nomeSocial;
 
     @Pattern(regexp = "^\\d{11}$", message = "CPF deve ter 11 dígitos")
     @Column(name = "cpf", length = 11)
@@ -61,7 +56,7 @@ public class DadosPessoaisMedico {
 
     @Size(max = 10, message = "Órgão emissor RG deve ter no máximo 10 caracteres")
     @Column(name = "orgao_emissor_rg", length = 10)
-    private String orgaoEmissorRg; // Ex: SSP, IFP, etc.
+    private String orgaoEmissorRg;
 
     @Size(max = 2, message = "UF emissor RG deve ter 2 caracteres")
     @Column(name = "uf_emissor_rg", length = 2)
@@ -75,4 +70,3 @@ public class DadosPessoaisMedico {
     @Column(name = "naturalidade", length = 50)
     private String naturalidade;
 }
-

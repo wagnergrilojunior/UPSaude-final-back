@@ -16,12 +16,6 @@ import lombok.EqualsAndHashCode;
 
 import java.time.OffsetDateTime;
 
-/**
- * Entidade que representa uma entrada na fila de espera.
- * Permite que pacientes sejam adicionados à fila quando não há horários disponíveis.
- *
- * @author UPSaúde
- */
 @Entity
 @Table(name = "fila_espera", schema = "public",
        indexes = {
@@ -36,8 +30,6 @@ import java.time.OffsetDateTime;
 @EqualsAndHashCode(callSuper = true)
 public class FilaEspera extends BaseEntity {
 
-    // ========== RELACIONAMENTOS ==========
-
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "paciente_id", nullable = false)
     @NotNull(message = "Paciente é obrigatório")
@@ -45,11 +37,11 @@ public class FilaEspera extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "profissional_id")
-    private ProfissionaisSaude profissional; // Opcional: profissional específico
+    private ProfissionaisSaude profissional;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "medico_id")
-    private Medicos medico; // Opcional: médico específico
+    private Medicos medico;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "especialidade_id")
@@ -57,52 +49,43 @@ public class FilaEspera extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "agendamento_id")
-    private Agendamento agendamento; // Agendamento criado quando vaga disponível
-
-    // ========== DADOS DA FILA ==========
+    private Agendamento agendamento;
 
     @Column(name = "data_entrada", nullable = false)
     @NotNull(message = "Data de entrada na fila é obrigatória")
     private OffsetDateTime dataEntrada;
 
     @Column(name = "data_fim_desejada")
-    private java.time.LocalDate dataFimDesejada; // Até quando o paciente deseja ser atendido
+    private java.time.LocalDate dataFimDesejada;
 
     @Convert(converter = PrioridadeAtendimentoEnumConverter.class)
     @Column(name = "prioridade")
     private PrioridadeAtendimentoEnum prioridade;
 
     @Column(name = "posicao_fila")
-    private Integer posicaoFila; // Posição na fila
-
-    // ========== INFORMAÇÕES ==========
+    private Integer posicaoFila;
 
     @Column(name = "motivo", columnDefinition = "TEXT")
-    private String motivo; // Motivo para estar na fila
+    private String motivo;
 
     @Column(name = "observacoes", columnDefinition = "TEXT")
     private String observacoes;
 
-    // ========== NOTIFICAÇÕES ==========
-
     @Column(name = "notificado")
-    private Boolean notificado; // Se foi notificado sobre vaga disponível
+    private Boolean notificado;
 
     @Column(name = "data_notificacao")
     private OffsetDateTime dataNotificacao;
 
     @Column(name = "notificacoes_enviadas")
-    private Integer notificacoesEnviadas; // Quantidade de notificações enviadas
-
-    // ========== CONTROLE ==========
+    private Integer notificacoesEnviadas;
 
     @Column(name = "aceita_qualquer_horario")
-    private Boolean aceitaQualquerHorario; // Se aceita qualquer horário disponível
+    private Boolean aceitaQualquerHorario;
 
     @Column(name = "telefone_contato", length = 20)
-    private String telefoneContato; // Telefone para contato rápido
+    private String telefoneContato;
 
     @Column(name = "email_contato", length = 255)
-    private String emailContato; // E-mail para contato
+    private String emailContato;
 }
-

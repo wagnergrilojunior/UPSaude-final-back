@@ -3,11 +3,6 @@ package com.upsaude.enums;
 import java.util.Arrays;
 import java.util.Locale;
 
-/**
- * Enum para classificação de zona do domicílio conforme padrão SUS/e-SUS.
- * Utilizado para identificação geográfica e planejamento de ações de saúde pública.
- * A zona determina estratégias diferentes de atendimento (urbana, rural, periurbana).
- */
 public enum ZonaDomicilioEnum {
     URBANA(1, "Urbana"),
     RURAL(2, "Rural"),
@@ -46,4 +41,3 @@ public enum ZonaDomicilioEnum {
                 .orElse(null);
     }
 }
-

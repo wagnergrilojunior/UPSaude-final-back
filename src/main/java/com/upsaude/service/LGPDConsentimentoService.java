@@ -21,4 +21,3 @@ public interface LGPDConsentimentoService {
 
     void excluir(UUID id);
 }
-

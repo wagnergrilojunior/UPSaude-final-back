@@ -24,11 +24,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
 
-/**
- * Controlador REST para operações relacionadas a Movimentações de Estoque.
- *
- * @author UPSaúde
- */
 @RestController
 @RequestMapping("/v1/movimentacoes-estoque")
 @Tag(name = "Movimentações de Estoque", description = "API para gerenciamento de Movimentações de Estoque")
@@ -155,4 +150,3 @@ public class MovimentacoesEstoqueController {
         }
     }
 }
-

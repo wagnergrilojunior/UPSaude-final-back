@@ -13,8 +13,7 @@ public interface PrevencaoTratamentoAlergiaMapper {
     PrevencaoTratamentoAlergia toEntity(PrevencaoTratamentoAlergiaRequest request);
     PrevencaoTratamentoAlergiaResponse toResponse(PrevencaoTratamentoAlergia entity);
     void updateFromRequest(PrevencaoTratamentoAlergiaRequest request, @MappingTarget PrevencaoTratamentoAlergia entity);
-    
-    // Mapeamento entre DTO e Entity
+
     PrevencaoTratamentoAlergia toEntity(PrevencaoTratamentoAlergiaDTO dto);
     PrevencaoTratamentoAlergiaDTO toDTO(PrevencaoTratamentoAlergia entity);
     void updateFromDTO(PrevencaoTratamentoAlergiaDTO dto, @MappingTarget PrevencaoTratamentoAlergia entity);

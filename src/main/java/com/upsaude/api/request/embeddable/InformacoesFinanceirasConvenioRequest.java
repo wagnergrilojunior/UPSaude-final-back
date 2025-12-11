@@ -32,13 +32,13 @@ public class InformacoesFinanceirasConvenioRequest {
     private Integer limiteAnualConsultas;
     private Integer limiteAnualExames;
     private Integer limiteAnualInternacoes;
-    
+
     @Size(max = 50, message = "Forma de pagamento deve ter no máximo 50 caracteres")
     private String formaPagamento;
-    
+
     @Size(max = 50, message = "Dia de vencimento deve ter no máximo 50 caracteres")
     private String diaVencimento;
-    
+
     @Size(max = 255, message = "Observações financeiras deve ter no máximo 255 caracteres")
     private String observacoesFinanceiras;
 }

@@ -20,12 +20,12 @@ import lombok.Setter;
 public class EquipeCirurgicaRequest {
     @NotNull(message = "Cirurgia é obrigatória")
     private UUID cirurgia;
-    
+
     @NotNull(message = "Profissional é obrigatório")
     private UUID profissional;
-    
+
     private UUID medico;
-    
+
     @NotBlank(message = "Função na cirurgia é obrigatória")
     @Size(max = 100, message = "Função deve ter no máximo 100 caracteres")
     private String funcao;

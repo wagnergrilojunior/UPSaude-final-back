@@ -7,11 +7,6 @@ import org.springframework.data.domain.Pageable;
 
 import java.util.UUID;
 
-/**
- * Interface de serviço para operações CRUD relacionadas a LogsAuditoria.
- *
- * @author UPSaúde
- */
 public interface LogsAuditoriaService {
 
     LogsAuditoriaResponse criar(LogsAuditoriaRequest request);

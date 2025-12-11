@@ -11,30 +11,14 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 
-/**
- * Mapper para conversões de ProfissionaisSaude.
- * Entity ↔ DTO ↔ Request/Response
- */
 @Mapper(config = MappingConfig.class, uses = {ConselhosProfissionaisMapper.class, EnderecoMapper.class})
 public interface ProfissionaisSaudeMapper extends EntityMapper<ProfissionaisSaude, ProfissionaisSaudeDTO> {
 
-    /**
-     * Converte DTO para Entity.
-     * O campo 'active' é ignorado (gerenciado pelo sistema).
-     */
     @Mapping(target = "active", ignore = true)
     ProfissionaisSaude toEntity(ProfissionaisSaudeDTO dto);
 
-    /**
-     * Converte Entity para DTO.
-     */
     ProfissionaisSaudeDTO toDTO(ProfissionaisSaude entity);
 
-    /**
-     * Converte Request para Entity.
-     * Os campos 'id', 'createdAt', 'updatedAt', 'active' são ignorados.
-     * Relacionamentos (UUID) devem ser tratados manualmente no Service.
-     */
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
@@ -45,11 +29,6 @@ public interface ProfissionaisSaudeMapper extends EntityMapper<ProfissionaisSaud
     @Mapping(target = "historicoHabilitacao", ignore = true)
     ProfissionaisSaude fromRequest(ProfissionaisSaudeRequest request);
 
-    /**
-     * Atualiza Entity existente com dados do Request.
-     * Os campos 'id', 'createdAt', 'updatedAt', 'active' são ignorados.
-     * Relacionamentos (UUID) devem ser tratados manualmente no Service.
-     */
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
@@ -60,8 +39,5 @@ public interface ProfissionaisSaudeMapper extends EntityMapper<ProfissionaisSaud
     @Mapping(target = "historicoHabilitacao", ignore = true)
     void updateFromRequest(ProfissionaisSaudeRequest request, @MappingTarget ProfissionaisSaude entity);
 
-    /**
-     * Converte Entity para Response.
-     */
     ProfissionaisSaudeResponse toResponse(ProfissionaisSaude entity);
 }

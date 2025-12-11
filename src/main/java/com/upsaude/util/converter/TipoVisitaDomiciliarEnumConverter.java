@@ -23,4 +23,3 @@ public class TipoVisitaDomiciliarEnumConverter implements AttributeConverter<Tip
         return TipoVisitaDomiciliarEnum.fromCodigo(dbData);
     }
 }
-

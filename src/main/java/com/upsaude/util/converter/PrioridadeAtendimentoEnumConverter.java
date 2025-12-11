@@ -4,12 +4,6 @@ import com.upsaude.enums.PrioridadeAtendimentoEnum;
 import jakarta.persistence.AttributeConverter;
 import jakarta.persistence.Converter;
 
-/**
- * Converter para PrioridadeAtendimentoEnum.
- * Converte entre o enum e o código Integer no banco de dados.
- *
- * @author UPSaúde
- */
 @Converter(autoApply = false)
 public class PrioridadeAtendimentoEnumConverter implements AttributeConverter<PrioridadeAtendimentoEnum, Integer> {
 
@@ -29,4 +23,3 @@ public class PrioridadeAtendimentoEnumConverter implements AttributeConverter<Pr
         return PrioridadeAtendimentoEnum.fromCodigo(dbData);
     }
 }
-

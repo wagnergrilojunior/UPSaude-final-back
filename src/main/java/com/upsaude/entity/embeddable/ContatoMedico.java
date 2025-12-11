@@ -9,11 +9,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 
-/**
- * Classe embeddable para dados de contato do médico.
- *
- * @author UPSaúde
- */
 @Embeddable
 @Data
 @Builder
@@ -53,6 +48,5 @@ public class ContatoMedico {
 
     @Size(max = 255, message = "Site deve ter no máximo 255 caracteres")
     @Column(name = "site", length = 255)
-    private String site; // Site pessoal ou clínica
+    private String site;
 }
-

@@ -21,4 +21,3 @@ public interface IntegracaoGovService {
 
     void excluir(UUID id);
 }
-

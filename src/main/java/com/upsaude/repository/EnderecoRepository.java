@@ -15,57 +15,13 @@ import com.upsaude.entity.Tenant;
 import com.upsaude.enums.TipoLogradouroEnum;
 
 public interface EnderecoRepository extends JpaRepository<Endereco, UUID> {
-    
-    /**
-     * Busca todos os endereços de um estabelecimento.
-     *
-     * @param estabelecimentoId ID do estabelecimento
-     * @param pageable informações de paginação
-     * @return página de endereços do estabelecimento
-     */
+
     Page<Endereco> findByEstabelecimentoId(UUID estabelecimentoId, Pageable pageable);
 
-    /**
-     * Busca todos os endereços de um tenant.
-     *
-     * @param tenant tenant
-     * @param pageable informações de paginação
-     * @return página de endereços do tenant
-     */
     Page<Endereco> findByTenant(Tenant tenant, Pageable pageable);
 
-    /**
-     * Busca todos os endereços de um estabelecimento e tenant.
-     *
-     * @param estabelecimentoId ID do estabelecimento
-     * @param tenant tenant
-     * @param pageable informações de paginação
-     * @return página de endereços
-     */
     Page<Endereco> findByEstabelecimentoIdAndTenant(UUID estabelecimentoId, Tenant tenant, Pageable pageable);
 
-    /**
-     * Busca um endereço existente pelos campos principais usando comparação case-insensitive.
-     * Usa lower() para comparar campos de texto e ignora diferenças de maiúsculas/minúsculas.
-     * Compara apenas campos não-null fornecidos, ignorando campos null na busca.
-     * 
-     * IMPORTANTE: Esta query busca endereços que correspondem aos campos fornecidos.
-     * Se um campo é null, ele não é considerado na busca (qualquer valor é aceito).
-     * Para uma busca mais precisa, forneça o máximo de campos possível.
-     * 
-     * Campos mínimos recomendados para busca eficaz:
-     * - logradouro OU cep (pelo menos um)
-     * - cidadeId OU estadoId (pelo menos um)
-     * 
-     * @param tipoLogradouro tipo do logradouro (pode ser null)
-     * @param logradouro logradouro normalizado (pode ser null, mas recomendado)
-     * @param numero número normalizado (pode ser null)
-     * @param bairro bairro normalizado (pode ser null)
-     * @param cep CEP normalizado (pode ser null, mas recomendado se logradouro for null)
-     * @param cidadeId ID da cidade (pode ser null, mas recomendado)
-     * @param estadoId ID do estado (pode ser null, mas recomendado se cidadeId for null)
-     * @return Optional com o endereço encontrado ou vazio se não encontrar
-     */
     @Query("SELECT e FROM Endereco e WHERE " +
            "(:tipoLogradouro IS NULL OR e.tipoLogradouro = :tipoLogradouro) AND " +
            "(:logradouro IS NULL OR (e.logradouro IS NOT NULL AND LOWER(e.logradouro) = LOWER(:logradouro))) AND " +
@@ -84,20 +40,7 @@ public interface EnderecoRepository extends JpaRepository<Endereco, UUID> {
             @Param("cidadeId") UUID cidadeId,
             @Param("estadoId") UUID estadoId
     );
-    
-    /**
-     * Busca endereços existentes pelos campos principais usando comparação case-insensitive.
-     * Retorna lista para tratar casos onde há múltiplos resultados.
-     * 
-     * @param tipoLogradouro tipo do logradouro (pode ser null)
-     * @param logradouro logradouro normalizado (pode ser null)
-     * @param numero número normalizado (pode ser null)
-     * @param bairro bairro normalizado (pode ser null)
-     * @param cep CEP normalizado (pode ser null)
-     * @param cidadeId ID da cidade (pode ser null)
-     * @param estadoId ID do estado (pode ser null)
-     * @return lista de endereços encontrados
-     */
+
     @Query(value = "SELECT e.* FROM enderecos e WHERE " +
            "(:tipoLogradouro IS NULL OR e.tipo_logradouro = CAST(:tipoLogradouro AS integer)) AND " +
            "(:logradouro IS NULL OR (e.logradouro IS NOT NULL AND LOWER(CAST(e.logradouro AS text)) = LOWER(:logradouro))) AND " +
@@ -116,15 +59,7 @@ public interface EnderecoRepository extends JpaRepository<Endereco, UUID> {
             @Param("cidadeId") String cidadeId,
             @Param("estadoId") String estadoId
     );
-    
-    /**
-     * Verifica quantas associações um endereço tem com pacientes.
-     * Usado para detectar se um endereço já está associado a outro paciente
-     * (devido à constraint única pacientes_enderecos_endereco_id_key).
-     *
-     * @param enderecoId ID do endereço
-     * @return número de associações do endereço com pacientes
-     */
+
     @Query(value = "SELECT COUNT(*) FROM pacientes_enderecos WHERE endereco_id = :enderecoId", nativeQuery = true)
     Long countAssociacoesPaciente(@Param("enderecoId") UUID enderecoId);
 }

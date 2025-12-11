@@ -11,30 +11,14 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 
-/**
- * Mapper para conversões de AlergiasPaciente.
- * Entity ↔ DTO ↔ Request/Response
- */
 @Mapper(config = MappingConfig.class, uses = {AlergiasMapper.class, PacienteMapper.class, com.upsaude.mapper.embeddable.DiagnosticoAlergiaPacienteMapper.class, com.upsaude.mapper.embeddable.HistoricoReacoesAlergiaPacienteMapper.class})
 public interface AlergiasPacienteMapper extends EntityMapper<AlergiasPaciente, AlergiasPacienteDTO> {
 
-    /**
-     * Converte DTO para Entity.
-     * O campo 'active' é ignorado (gerenciado pelo sistema).
-     */
     @Mapping(target = "active", ignore = true)
     AlergiasPaciente toEntity(AlergiasPacienteDTO dto);
 
-    /**
-     * Converte Entity para DTO.
-     */
     AlergiasPacienteDTO toDTO(AlergiasPaciente entity);
 
-    /**
-     * Converte Request para Entity.
-     * Os campos 'id', 'createdAt', 'updatedAt', 'active' são ignorados.
-     * Relacionamentos (UUID) devem ser tratados manualmente no Service.
-     */
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
@@ -43,11 +27,6 @@ public interface AlergiasPacienteMapper extends EntityMapper<AlergiasPaciente, A
     @Mapping(target = "paciente", ignore = true)
     AlergiasPaciente fromRequest(AlergiasPacienteRequest request);
 
-    /**
-     * Atualiza Entity existente com dados do Request.
-     * Os campos 'id', 'createdAt', 'updatedAt', 'active' são ignorados.
-     * Relacionamentos (UUID) devem ser tratados manualmente no Service.
-     */
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
@@ -56,11 +35,6 @@ public interface AlergiasPacienteMapper extends EntityMapper<AlergiasPaciente, A
     @Mapping(target = "paciente", ignore = true)
     void updateFromRequest(AlergiasPacienteRequest request, @MappingTarget AlergiasPaciente entity);
 
-    /**
-     * Converte Entity para Response.
-     * IMPORTANTE: O campo 'paciente' é ignorado para evitar recursão circular,
-     * pois quando PacienteResponse é mapeado, ele já contém a lista de alergias.
-     */
     @Mapping(target = "paciente", ignore = true)
     AlergiasPacienteResponse toResponse(AlergiasPaciente entity);
 }

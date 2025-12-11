@@ -6,11 +6,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 
-/**
- * Classe embeddable para informações de anamnese da consulta.
- *
- * @author UPSaúde
- */
 @Embeddable
 @Data
 @Builder
@@ -30,30 +25,29 @@ public class AnamneseConsulta {
     }
 
     @Column(name = "queixa_principal", columnDefinition = "TEXT")
-    private String queixaPrincipal; // Queixa principal do paciente
+    private String queixaPrincipal;
 
     @Column(name = "historia_doenca_atual", columnDefinition = "TEXT")
-    private String historiaDoencaAtual; // História da doença atual (HDA)
+    private String historiaDoencaAtual;
 
     @Column(name = "antecedentes_pessoais", columnDefinition = "TEXT")
-    private String antecedentesPessoais; // Antecedentes pessoais
+    private String antecedentesPessoais;
 
     @Column(name = "antecedentes_familiares", columnDefinition = "TEXT")
-    private String antecedentesFamiliares; // Antecedentes familiares
+    private String antecedentesFamiliares;
 
     @Column(name = "medicamentos_uso", columnDefinition = "TEXT")
-    private String medicamentosUso; // Medicamentos em uso
+    private String medicamentosUso;
 
     @Column(name = "alergias", columnDefinition = "TEXT")
-    private String alergias; // Alergias conhecidas
+    private String alergias;
 
     @Column(name = "habitos_vida", columnDefinition = "TEXT")
-    private String habitosVida; // Hábitos de vida (tabagismo, etilismo, etc.)
+    private String habitosVida;
 
     @Column(name = "exame_fisico", columnDefinition = "TEXT")
-    private String exameFisico; // Exame físico realizado
+    private String exameFisico;
 
     @Column(name = "sinais_vitais", columnDefinition = "TEXT")
-    private String sinaisVitais; // Sinais vitais (PA, FC, FR, T, SatO2, etc.)
+    private String sinaisVitais;
 }
-

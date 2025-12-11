@@ -1,9 +1,25 @@
 package com.upsaude.service.impl;
 
-import com.upsaude.api.request.EnderecoRequest;
+import java.time.OffsetDateTime;
+import java.util.ArrayList;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+import java.util.UUID;
+
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.dao.DataAccessException;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
+
 import com.upsaude.api.request.MedicosRequest;
 import com.upsaude.api.response.MedicosResponse;
-import com.upsaude.entity.Endereco;
 import com.upsaude.entity.EspecialidadesMedicas;
 import com.upsaude.entity.Estabelecimentos;
 import com.upsaude.entity.MedicoEstabelecimento;
@@ -24,32 +40,10 @@ import com.upsaude.repository.MedicosRepository;
 import com.upsaude.service.EnderecoService;
 import com.upsaude.service.MedicosService;
 import com.upsaude.service.TenantService;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.Cacheable;
-import org.springframework.dao.DataAccessException;
-import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.StringUtils;
 
-import java.time.OffsetDateTime;
-import java.util.ArrayList;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
-import java.util.UUID;
-
-/**
- * Implementação do serviço de gerenciamento de Medicos.
- * Usa anotações JPA para delegar responsabilidades ao framework.
- *
- * @author UPSaúde
- */
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -71,22 +65,19 @@ public class MedicosServiceImpl implements MedicosService {
     @CacheEvict(value = "medicos", allEntries = true)
     public MedicosResponse criar(MedicosRequest request) {
         log.debug("Criando novo médico. Request: {}", request);
-        
+
         if (request == null) {
             log.warn("Tentativa de criar médico com request nulo");
             throw new BadRequestException("Dados do médico são obrigatórios");
         }
 
         try {
-            // Validação de dados básicos é feita automaticamente pelo Bean Validation no Request
-
-            // Obtém o tenant do usuário autenticado (obrigatório para BaseEntityWithoutEstabelecimento)
             Tenant tenant = tenantService.obterTenantDoUsuarioAutenticado();
+
             if (tenant == null) {
                 throw new BadRequestException("Não foi possível obter tenant do usuário autenticado. É necessário estar autenticado para criar médicos.");
             }
 
-            // Validações de duplicatas antes de criar
             validarCrmUnicoPorTenant(null, request, tenant);
             validarCpfUnicoPorTenant(null, request, tenant);
 
@@ -94,7 +85,6 @@ public class MedicosServiceImpl implements MedicosService {
             medicos.setActive(true);
             medicos.setTenant(tenant);
 
-            // Garantir que embeddables sejam inicializados corretamente se não vierem no request
             if (medicos.getDadosPessoais() == null) {
                 medicos.setDadosPessoais(new com.upsaude.entity.embeddable.DadosPessoaisMedico());
             }
@@ -108,7 +98,6 @@ public class MedicosServiceImpl implements MedicosService {
                 medicos.setContato(new com.upsaude.entity.embeddable.ContatoMedico());
             }
 
-            // Garantir que CRM vazio seja NULL para evitar violação de constraint única
             if (medicos.getRegistroProfissional() != null) {
                 if (!StringUtils.hasText(medicos.getRegistroProfissional().getCrm())) {
                     medicos.getRegistroProfissional().setCrm(null);
@@ -117,13 +106,11 @@ public class MedicosServiceImpl implements MedicosService {
                     medicos.getRegistroProfissional().setCrmUf(null);
                 }
             }
-            
-            // Garantir que tituloEspecialista não seja null
+
             if (medicos.getFormacao() != null && medicos.getFormacao().getTituloEspecialista() == null) {
                 medicos.getFormacao().setTituloEspecialista(false);
             }
 
-            // Processar relacionamentos - JPA gerencia a persistência automaticamente
             processarRelacionamentos(medicos, request);
 
             Medicos medicosSalvo = medicosRepository.save(medicos);
@@ -135,8 +122,6 @@ public class MedicosServiceImpl implements MedicosService {
             throw e;
         } catch (DataIntegrityViolationException e) {
             log.warn("Erro de integridade de dados ao criar Medico. Exception: {}", e.getClass().getSimpleName(), e);
-            // Converte DataIntegrityViolationException em BadRequestException
-            // O ApiExceptionHandler vai tratar e retornar 400
             throw new BadRequestException("Erro de integridade de dados: " + e.getMessage(), e);
         } catch (DataAccessException e) {
             log.error("Erro de acesso a dados ao criar Medico. Exception: {}", e.getClass().getSimpleName(), e);
@@ -152,7 +137,7 @@ public class MedicosServiceImpl implements MedicosService {
     @Cacheable(value = "medicos", key = "#id")
     public MedicosResponse obterPorId(UUID id) {
         log.debug("Buscando médico por ID: {} (cache miss)", id);
-        
+
         if (id == null) {
             log.warn("ID nulo recebido para busca de médico");
             throw new BadRequestException("ID do médico é obrigatório");
@@ -176,16 +161,6 @@ public class MedicosServiceImpl implements MedicosService {
         }
     }
 
-    /**
-     * {@inheritDoc}
-     * 
-     * OTIMIZAÇÃO: Usa EntityGraph para carregar todos os relacionamentos necessários
-     * em uma única query, evitando o problema N+1 queries.
-     * O método findAll() do repository já está configurado com @EntityGraph que carrega:
-     * - especialidades (lista de especialidades)
-     * - enderecos
-     * - medicosEstabelecimentos
-     */
     @Override
     @Transactional(readOnly = true)
     public Page<MedicosResponse> listar(Pageable pageable) {
@@ -193,9 +168,6 @@ public class MedicosServiceImpl implements MedicosService {
                 pageable.getPageNumber(), pageable.getPageSize());
 
         try {
-            // Busca médicos paginados com especialidades carregadas via EntityGraph
-            // enderecos e medicosEstabelecimentos são carregados via batch fetching
-            // (hibernate.default_batch_fetch_size) para evitar MultipleBagFetchException
             Page<Medicos> medicos = medicosRepository.findAll(pageable);
             log.debug("Listagem de médicos concluída. Total de elementos: {}", medicos.getTotalElements());
             return medicos.map(medicosMapper::toResponse);
@@ -224,25 +196,19 @@ public class MedicosServiceImpl implements MedicosService {
         }
 
         try {
-            // Validação de dados básicos é feita automaticamente pelo Bean Validation no Request
-
             Medicos medicosExistente = medicosRepository.findById(id)
                     .orElseThrow(() -> new NotFoundException("Médico não encontrado com ID: " + id));
 
-            // Obtém o tenant do médico existente para validações
             Tenant tenant = medicosExistente.getTenant();
             if (tenant == null) {
                 throw new BadRequestException("Médico não possui tenant associado. Não é possível atualizar.");
             }
 
-            // Validações de duplicatas antes de atualizar
             validarCrmUnicoPorTenant(id, request, tenant);
             validarCpfUnicoPorTenant(id, request, tenant);
 
-            // Usa mapper do MapStruct que preserva campos de controle automaticamente
             medicosMapper.updateFromRequest(request, medicosExistente);
-            
-            // Garantir que CRM vazio seja NULL para evitar violação de constraint única
+
             if (medicosExistente.getRegistroProfissional() != null) {
                 if (!StringUtils.hasText(medicosExistente.getRegistroProfissional().getCrm())) {
                     medicosExistente.getRegistroProfissional().setCrm(null);
@@ -251,8 +217,7 @@ public class MedicosServiceImpl implements MedicosService {
                     medicosExistente.getRegistroProfissional().setCrmUf(null);
                 }
             }
-            
-            // Processar relacionamentos - JPA gerencia a persistência automaticamente
+
             processarRelacionamentos(medicosExistente, request);
 
             Medicos medicosAtualizado = medicosRepository.save(medicosExistente);
@@ -278,10 +243,17 @@ public class MedicosServiceImpl implements MedicosService {
     @Transactional
     @CacheEvict(value = "medicos", key = "#id")
     public void excluir(UUID id) {
-        log.debug("Excluindo médico. ID: {}", id);
+        inativar(id);
+    }
+
+    @Override
+    @Transactional
+    @CacheEvict(value = "medicos", key = "#id")
+    public void inativar(UUID id) {
+        log.debug("Inativando médico. ID: {}", id);
 
         if (id == null) {
-            log.warn("ID nulo recebido para exclusão de médico");
+            log.warn("ID nulo recebido para inativação de médico");
             throw new BadRequestException("ID do médico é obrigatório");
         }
 
@@ -290,40 +262,57 @@ public class MedicosServiceImpl implements MedicosService {
                     .orElseThrow(() -> new NotFoundException("Médico não encontrado com ID: " + id));
 
             if (Boolean.FALSE.equals(medicos.getActive())) {
-                log.warn("Tentativa de excluir médico já inativo. ID: {}", id);
+                log.warn("Tentativa de inativar médico já inativo. ID: {}", id);
                 throw new BadRequestException("Médico já está inativo");
             }
 
             medicos.setActive(false);
             medicosRepository.save(medicos);
-            log.info("Médico excluído (desativado) com sucesso. ID: {}", id);
+            log.info("Médico inativado com sucesso. ID: {}", id);
         } catch (NotFoundException e) {
-            log.warn("Tentativa de excluir Medico não existente. ID: {}", id);
+            log.warn("Tentativa de inativar médico não existente. ID: {}", id);
             throw e;
         } catch (BadRequestException e) {
-            log.warn("Erro de validação ao excluir Medico. ID: {}, Erro: {}", id, e.getMessage());
+            log.warn("Erro de validação ao inativar médico. ID: {}, Erro: {}", id, e.getMessage());
             throw e;
         } catch (DataAccessException e) {
-            log.error("Erro de acesso a dados ao excluir Medico. ID: {}, Exception: {}", id, e.getClass().getSimpleName(), e);
-            throw new InternalServerErrorException("Erro ao excluir Medico", e);
+            log.error("Erro de acesso a dados ao inativar médico. ID: {}, Exception: {}", id, e.getClass().getSimpleName(), e);
+            throw new InternalServerErrorException("Erro ao inativar médico", e);
         } catch (RuntimeException e) {
-            log.error("Erro inesperado ao excluir Medico. ID: {}, Exception: {}", id, e.getClass().getSimpleName(), e);
+            log.error("Erro inesperado ao inativar médico. ID: {}, Exception: {}", id, e.getClass().getSimpleName(), e);
             throw e;
         }
     }
 
-    // Validações de dados básicos foram movidas para o Request usando Bean Validation
-    // (@NotNull, @NotBlank, @Pattern, etc). Isso garante validação automática no Controller
-    // e retorno de erro 400 padronizado via ApiExceptionHandler.
+    @Override
+    @Transactional
+    @CacheEvict(value = "medicos", key = "#id")
+    public void deletarPermanentemente(UUID id) {
+        log.debug("Deletando médico permanentemente. ID: {}", id);
 
-    /**
-     * Valida se o CRM já está cadastrado para outro médico no mesmo tenant.
-     * 
-     * @param medicoId ID do médico sendo atualizado (null se for criação)
-     * @param request dados do request com CRM e UF
-     * @param tenant tenant do médico
-     * @throws BadRequestException se já existir outro médico com o mesmo CRM/UF no tenant
-     */
+        if (id == null) {
+            log.warn("ID nulo recebido para exclusão permanente de médico");
+            throw new BadRequestException("ID do médico é obrigatório");
+        }
+
+        try {
+            Medicos medicos = medicosRepository.findById(id)
+                    .orElseThrow(() -> new NotFoundException("Médico não encontrado com ID: " + id));
+
+            medicosRepository.delete(medicos);
+            log.info("Médico deletado permanentemente do banco de dados. ID: {}", id);
+        } catch (NotFoundException e) {
+            log.warn("Tentativa de deletar médico não existente. ID: {}", id);
+            throw e;
+        } catch (DataAccessException e) {
+            log.error("Erro de acesso a dados ao deletar médico permanentemente. ID: {}, Exception: {}", id, e.getClass().getSimpleName(), e);
+            throw new InternalServerErrorException("Erro ao deletar médico permanentemente", e);
+        } catch (RuntimeException e) {
+            log.error("Erro inesperado ao deletar médico permanentemente. ID: {}, Exception: {}", id, e.getClass().getSimpleName(), e);
+            throw e;
+        }
+    }
+
     private void validarCrmUnicoPorTenant(UUID medicoId, MedicosRequest request, Tenant tenant) {
         if (request == null || request.getRegistroProfissional() == null) {
             return;
@@ -342,13 +331,11 @@ public class MedicosServiceImpl implements MedicosService {
         if (medicoExistente.isPresent()) {
             Medicos medicoEncontrado = medicoExistente.get();
 
-            // Se for atualização, verifica se o CRM pertence a outro médico
             if (medicoId != null && !medicoEncontrado.getId().equals(medicoId)) {
                 throw new BadRequestException(
                         String.format("Já existe um médico cadastrado com CRM %s/%s neste tenant.", crm, crmUf));
             }
 
-            // Se for criação, sempre lança exceção se encontrar CRM
             if (medicoId == null) {
                 throw new BadRequestException(
                         String.format("Já existe um médico cadastrado com CRM %s/%s neste tenant.", crm, crmUf));
@@ -356,14 +343,6 @@ public class MedicosServiceImpl implements MedicosService {
         }
     }
 
-    /**
-     * Valida se o CPF já está cadastrado para outro médico no mesmo tenant.
-     * 
-     * @param medicoId ID do médico sendo atualizado (null se for criação)
-     * @param request dados do request com CPF
-     * @param tenant tenant do médico
-     * @throws BadRequestException se já existir outro médico com o mesmo CPF no tenant
-     */
     private void validarCpfUnicoPorTenant(UUID medicoId, MedicosRequest request, Tenant tenant) {
         if (request == null || request.getDadosPessoais() == null) {
             return;
@@ -380,13 +359,11 @@ public class MedicosServiceImpl implements MedicosService {
         if (medicoExistente.isPresent()) {
             Medicos medicoEncontrado = medicoExistente.get();
 
-            // Se for atualização, verifica se o CPF pertence a outro médico
             if (medicoId != null && !medicoEncontrado.getId().equals(medicoId)) {
                 throw new BadRequestException(
                         String.format("Já existe um médico cadastrado com CPF %s neste tenant.", cpf));
             }
 
-            // Se for criação, sempre lança exceção se encontrar CPF
             if (medicoId == null) {
                 throw new BadRequestException(
                         String.format("Já existe um médico cadastrado com CPF %s neste tenant.", cpf));
@@ -394,46 +371,25 @@ public class MedicosServiceImpl implements MedicosService {
         }
     }
 
-    // Método removido - agora usa medicosMapper.updateFromRequest diretamente
-    // O MapStruct já preserva campos de controle automaticamente
-
-    /**
-     * Processa relacionamentos do médico de forma simplificada.
-     * Com as anotações corretas do JPA (cascade, orphanRemoval), o Hibernate 
-     * gerencia automaticamente a ordem de salvamento e integridade referencial.
-     *
-     * Responsabilidades deste método:
-     * 1. Buscar entidades relacionadas existentes (validação e busca)
-     * 2. Atribuir as referências
-     * 3. O JPA/Hibernate cuida do resto (ordem, persistência, cascade)
-     *
-     * @param medicos entidade Medicos a ser processada
-     * @param request dados do request com os UUIDs dos relacionamentos
-     */
     private void processarRelacionamentos(Medicos medicos, MedicosRequest request) {
         log.debug("Processando relacionamentos do médico");
 
-        // LISTA DE ESPECIALIDADES (ManyToMany) - Processar lista de IDs
-        // O backend busca internamente as especialidades pelos IDs e faz o vínculo correto
         if (request.getEspecialidades() != null && !request.getEspecialidades().isEmpty()) {
             log.debug("Processando {} especialidade(s) para o médico", request.getEspecialidades().size());
             List<EspecialidadesMedicas> especialidades = new ArrayList<>();
-            
-            // Remove duplicatas da lista de IDs antes de processar
-            // Usa LinkedHashSet para manter ordem e remover duplicatas
+
             Set<UUID> especialidadesIdsUnicos = new LinkedHashSet<>(request.getEspecialidades());
-            
+
             if (especialidadesIdsUnicos.size() != request.getEspecialidades().size()) {
                 log.warn("Lista de especialidades contém IDs duplicados. Removendo duplicatas.");
             }
-            
-            // Busca cada especialidade pelo ID e valida existência
+
             for (UUID especialidadeId : especialidadesIdsUnicos) {
                 if (especialidadeId == null) {
                     log.warn("ID de especialidade nulo encontrado na lista. Ignorando.");
                     continue;
                 }
-                
+
                 EspecialidadesMedicas especialidade = especialidadesMedicasRepository
                         .findById(especialidadeId)
                         .orElseThrow(() -> new NotFoundException(
@@ -441,110 +397,48 @@ public class MedicosServiceImpl implements MedicosService {
                 especialidades.add(especialidade);
                 log.debug("Especialidade {} associada ao médico", especialidadeId);
             }
-            
+
             medicos.setEspecialidades(especialidades);
             log.debug("{} especialidade(s) associada(s) ao médico com sucesso", especialidades.size());
         } else {
-            // Se não vier lista de especialidades, limpa a lista existente
+
             medicos.setEspecialidades(new ArrayList<>());
             log.debug("Nenhuma especialidade fornecida. Lista de especialidades será limpa.");
         }
 
-        // ENDEREÇOS (OneToMany) - Processar lista de endereços
-        // TODO: MedicosRequest não possui campo enderecos - necessário adicionar ou remover esta lógica
-        /*
-        if (request.getEnderecos() != null && !request.getEnderecos().isEmpty()) {
-            log.debug("Processando {} endereço(s) para o médico", request.getEnderecos().size());
-            
-            // Obtém o tenant do usuário autenticado (obrigatório para Endereco que estende BaseEntity)
-            Tenant tenant = tenantService.obterTenantDoUsuarioAutenticado();
-            if (tenant == null) {
-                throw new BadRequestException("Não foi possível obter tenant do usuário autenticado. É necessário estar autenticado para criar endereços.");
-            }
-            
-            List<Endereco> enderecos = new ArrayList<>();
-            for (EnderecoRequest enderecoRequest : request.getEnderecos()) {
-                // Só processa endereço se tiver logradouro ou número
-                if (enderecoRequest.getLogradouro() != null || enderecoRequest.getNumero() != null) {
-                    Endereco endereco = enderecoMapper.fromRequest(enderecoRequest);
-                    endereco.setActive(true);
-                    
-                    // Define o tenant do endereço (obrigatório para BaseEntity)
-                    endereco.setTenant(tenant);
-                    
-                    // Garante valores padrão para campos obrigatórios
-                    if (endereco.getSemNumero() == null) {
-                        endereco.setSemNumero(false);
-                    }
-                    
-                    // Processa relacionamentos estado e cidade (opcionais)
-                    if (enderecoRequest.getEstado() != null) {
-                        endereco.setEstado(estadosRepository.findById(enderecoRequest.getEstado())
-                                .orElseThrow(() -> new NotFoundException("Estado não encontrado com ID: " + enderecoRequest.getEstado())));
-                    }
-
-                    if (enderecoRequest.getCidade() != null) {
-                        endereco.setCidade(cidadesRepository.findById(enderecoRequest.getCidade())
-                                .orElseThrow(() -> new NotFoundException("Cidade não encontrada com ID: " + enderecoRequest.getCidade())));
-                    }
-                    
-                    // Usa findOrCreate para evitar duplicados - busca endereço existente ou cria novo
-                    Endereco enderecoFinal = enderecoService.findOrCreate(endereco);
-                    enderecos.add(enderecoFinal);
-                    log.debug("Endereço processado. ID: {}", enderecoFinal.getId());
-                }
-            }
-            
-            if (!enderecos.isEmpty()) {
-                medicos.setEnderecos(enderecos);
-                log.debug("{} endereço(s) processado(s) para associação ao médico", enderecos.size());
-            }
-        }
-        */
-
-        // ESTABELECIMENTOS (OneToMany via MedicoEstabelecimento) - Processar lista de IDs
-        // O backend busca internamente os estabelecimentos pelos IDs e cria/atualiza os vínculos
-        // IMPORTANTE: Verifica vínculos existentes antes de criar novos para evitar violação de constraint de unicidade
         if (request.getEstabelecimentos() != null && !request.getEstabelecimentos().isEmpty()) {
             log.debug("Processando {} estabelecimento(s) para o médico", request.getEstabelecimentos().size());
-            
-            // Remove duplicatas da lista de IDs antes de processar
+
             Set<UUID> estabelecimentosIdsUnicos = new LinkedHashSet<>(request.getEstabelecimentos());
-            
+
             if (estabelecimentosIdsUnicos.size() != request.getEstabelecimentos().size()) {
                 log.warn("Lista de estabelecimentos contém IDs duplicados. Removendo duplicatas.");
             }
-            
-            // Obtém o tenant do usuário autenticado (obrigatório para MedicoEstabelecimento que estende BaseEntity)
+
             Tenant tenant = tenantService.obterTenantDoUsuarioAutenticado();
             if (tenant == null) {
                 throw new BadRequestException("Não foi possível obter tenant do usuário autenticado. É necessário estar autenticado para criar vínculos com estabelecimentos.");
             }
-            
-            // Coleta IDs dos estabelecimentos que devem ser mantidos
+
             Set<UUID> estabelecimentosParaManter = new LinkedHashSet<>(estabelecimentosIdsUnicos);
-            
-            // Remove vínculos que não estão mais na lista (orphanRemoval vai remover do banco)
-            medicos.getMedicosEstabelecimentos().removeIf(vinculo -> 
+
+            medicos.getMedicosEstabelecimentos().removeIf(vinculo ->
                 !estabelecimentosParaManter.contains(vinculo.getEstabelecimento().getId())
             );
-            
-            // Busca cada estabelecimento pelo ID e cria ou atualiza o vínculo
+
             for (UUID estabelecimentoId : estabelecimentosIdsUnicos) {
                 if (estabelecimentoId == null) {
                     log.warn("ID de estabelecimento nulo encontrado na lista. Ignorando.");
                     continue;
                 }
-                
+
                 Estabelecimentos estabelecimento = estabelecimentosRepository
                         .findById(estabelecimentoId)
                         .orElseThrow(() -> new NotFoundException(
                                 "Estabelecimento não encontrado com ID: " + estabelecimentoId));
-                
-                // Verifica se já existe vínculo para este médico e estabelecimento
+
                 MedicoEstabelecimento medicoEstabelecimento = null;
-                
-                // Primeiro tenta encontrar na lista atual (pode estar gerenciado pelo Hibernate)
+
                 for (MedicoEstabelecimento vinculoExistente : medicos.getMedicosEstabelecimentos()) {
                     if (vinculoExistente.getEstabelecimento().getId().equals(estabelecimentoId)) {
                         medicoEstabelecimento = vinculoExistente;
@@ -552,54 +446,50 @@ public class MedicosServiceImpl implements MedicosService {
                         break;
                     }
                 }
-                
-                // Se não encontrou na lista, tenta buscar no banco (pode estar desanexado)
+
                 if (medicoEstabelecimento == null && medicos.getId() != null) {
                     Optional<MedicoEstabelecimento> vinculoBanco = medicoEstabelecimentoRepository
                             .findByMedicoIdAndEstabelecimentoId(medicos.getId(), estabelecimentoId);
-                    
+
                     if (vinculoBanco.isPresent()) {
                         medicoEstabelecimento = vinculoBanco.get();
-                        // Garante que o vínculo está na lista do médico
+
                         if (!medicos.getMedicosEstabelecimentos().contains(medicoEstabelecimento)) {
                             medicos.getMedicosEstabelecimentos().add(medicoEstabelecimento);
                         }
                         log.debug("Vínculo encontrado no banco para estabelecimento {}", estabelecimentoId);
                     }
                 }
-                
-                // Se não existe vínculo, cria um novo
+
                 if (medicoEstabelecimento == null) {
                     medicoEstabelecimento = new MedicoEstabelecimento();
                     medicoEstabelecimento.setMedico(medicos);
                     medicoEstabelecimento.setEstabelecimento(estabelecimento);
                     medicoEstabelecimento.setTenant(tenant);
                     medicoEstabelecimento.setActive(true);
-                    medicoEstabelecimento.setDataInicio(OffsetDateTime.now()); // Data atual como padrão
-                    medicoEstabelecimento.setTipoVinculo(TipoVinculoProfissionalEnum.CONTRATO); // Valor padrão
-                    
-                    // Adiciona à lista existente
+                    medicoEstabelecimento.setDataInicio(OffsetDateTime.now());
+                    medicoEstabelecimento.setTipoVinculo(TipoVinculoProfissionalEnum.CONTRATO);
+
                     medicos.getMedicosEstabelecimentos().add(medicoEstabelecimento);
                     log.debug("Novo vínculo criado para estabelecimento {}", estabelecimentoId);
                 } else {
-                    // Se já existe, apenas garante que está ativo e atualiza data se necessário
+
                     medicoEstabelecimento.setActive(true);
                     if (medicoEstabelecimento.getDataFim() != null) {
-                        // Se tinha data de fim, remove para reativar o vínculo
+
                         medicoEstabelecimento.setDataFim(null);
                         log.debug("Vínculo reativado para estabelecimento {}", estabelecimentoId);
                     }
                 }
             }
-            
+
             log.debug("{} estabelecimento(s) vinculado(s) ao médico com sucesso", medicos.getMedicosEstabelecimentos().size());
         } else {
-            // Se não vier lista de estabelecimentos, limpa a lista existente
-            // Usa clear() ao invés de set para manter a mesma instância da coleção
+
             medicos.getMedicosEstabelecimentos().clear();
             log.debug("Nenhum estabelecimento fornecido. Lista de vínculos será limpa.");
         }
-        
+
         log.debug("Relacionamentos processados. JPA gerenciará persistência automaticamente.");
     }
 }

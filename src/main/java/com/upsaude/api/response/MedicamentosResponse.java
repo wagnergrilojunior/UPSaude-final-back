@@ -14,4 +14,3 @@ public class MedicamentosResponse {
     private OffsetDateTime updatedAt;
     private Boolean active;
 }
-

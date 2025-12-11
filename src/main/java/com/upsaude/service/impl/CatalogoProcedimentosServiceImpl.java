@@ -24,11 +24,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.UUID;
 
-/**
- * Implementação do serviço de gerenciamento de CatalogoProcedimentos.
- *
- * @author UPSaúde
- */
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -44,16 +39,12 @@ public class CatalogoProcedimentosServiceImpl implements CatalogoProcedimentosSe
     public CatalogoProcedimentosResponse criar(CatalogoProcedimentosRequest request) {
         log.debug("Criando novo procedimento no catálogo");
 
-        // Validação de dados básicos é feita automaticamente pelo Bean Validation no Request
-
         CatalogoProcedimentos procedimento = catalogoProcedimentosMapper.fromRequest(request);
         procedimento.setActive(true);
 
-        // Define o tenant do usuário autenticado
         Tenant tenant = obterTenantDoUsuarioAutenticado();
         procedimento.setTenant(tenant);
 
-        // Valida duplicidade antes de salvar (após o tenant ser setado)
         validarDuplicidade(null, procedimento, request);
 
         CatalogoProcedimentos procedimentoSalvo = catalogoProcedimentosRepository.save(procedimento);
@@ -96,12 +87,9 @@ public class CatalogoProcedimentosServiceImpl implements CatalogoProcedimentosSe
             throw new BadRequestException("ID do procedimento é obrigatório");
         }
 
-        // Validação de dados básicos é feita automaticamente pelo Bean Validation no Request
-
         CatalogoProcedimentos procedimentoExistente = catalogoProcedimentosRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Procedimento não encontrado no catálogo com ID: " + id));
 
-        // Valida duplicidade antes de atualizar
         validarDuplicidade(id, procedimentoExistente, request);
 
         atualizarDadosProcedimento(procedimentoExistente, request);
@@ -134,18 +122,6 @@ public class CatalogoProcedimentosServiceImpl implements CatalogoProcedimentosSe
         log.info("Procedimento excluído (desativado) do catálogo com sucesso. ID: {}", id);
     }
 
-        // Validações de dados básicos foram movidas para o Request usando Bean Validation
-    // (@NotNull, @NotBlank, @Pattern, etc). Isso garante validação automática no Controller
-    // e retorno de erro 400 padronizado via ApiExceptionHandler.
-
-    /**
-     * Valida se já existe um procedimento no catálogo com o mesmo nome ou código no mesmo tenant.
-     * 
-     * @param id ID do procedimento sendo atualizado (null para criação)
-     * @param procedimento objeto CatalogoProcedimentos (usado para obter o tenant)
-     * @param request dados do procedimento sendo cadastrado/atualizado
-     * @throws BadRequestException se já existe um procedimento com o mesmo nome ou código no tenant
-     */
     private void validarDuplicidade(UUID id, CatalogoProcedimentos procedimento, CatalogoProcedimentosRequest request) {
         if (request == null || procedimento == null || procedimento.getTenant() == null) {
             return;
@@ -153,14 +129,13 @@ public class CatalogoProcedimentosServiceImpl implements CatalogoProcedimentosSe
 
         Tenant tenant = procedimento.getTenant();
 
-        // Valida duplicidade do nome
         if (request.getNome() != null && !request.getNome().trim().isEmpty()) {
             boolean nomeDuplicado;
             if (id == null) {
-                // Criação: verifica se existe qualquer registro com este nome no tenant
+
                 nomeDuplicado = catalogoProcedimentosRepository.existsByNomeAndTenant(request.getNome().trim(), tenant);
             } else {
-                // Atualização: verifica se existe outro registro (diferente do atual) com este nome no tenant
+
                 nomeDuplicado = catalogoProcedimentosRepository.existsByNomeAndTenantAndIdNot(request.getNome().trim(), tenant, id);
             }
 
@@ -172,14 +147,13 @@ public class CatalogoProcedimentosServiceImpl implements CatalogoProcedimentosSe
             }
         }
 
-        // Valida duplicidade do código (apenas se fornecido)
         if (request.getCodigo() != null && !request.getCodigo().trim().isEmpty()) {
             boolean codigoDuplicado;
             if (id == null) {
-                // Criação: verifica se existe qualquer registro com este código no tenant
+
                 codigoDuplicado = catalogoProcedimentosRepository.existsByCodigoAndTenant(request.getCodigo().trim(), tenant);
             } else {
-                // Atualização: verifica se existe outro registro (diferente do atual) com este código no tenant
+
                 codigoDuplicado = catalogoProcedimentosRepository.existsByCodigoAndTenantAndIdNot(request.getCodigo().trim(), tenant, id);
             }
 
@@ -194,35 +168,26 @@ public class CatalogoProcedimentosServiceImpl implements CatalogoProcedimentosSe
 
     private void atualizarDadosProcedimento(CatalogoProcedimentos procedimento, CatalogoProcedimentosRequest request) {
         CatalogoProcedimentos procedimentoAtualizado = catalogoProcedimentosMapper.fromRequest(request);
-        
-        // Preserva campos de controle
+
         UUID idOriginal = procedimento.getId();
         com.upsaude.entity.Tenant tenantOriginal = procedimento.getTenant();
         com.upsaude.entity.Estabelecimentos estabelecimentoOriginal = procedimento.getEstabelecimento();
         Boolean activeOriginal = procedimento.getActive();
         java.time.OffsetDateTime createdAtOriginal = procedimento.getCreatedAt();
-        
-        // Copia todas as propriedades do objeto atualizado
+
         BeanUtils.copyProperties(procedimentoAtualizado, procedimento);
-        
-        // Restaura campos de controle
+
         procedimento.setId(idOriginal);
         procedimento.setTenant(tenantOriginal);
         procedimento.setEstabelecimento(estabelecimentoOriginal);
         procedimento.setActive(activeOriginal);
         procedimento.setCreatedAt(createdAtOriginal);
-        // Estabelecimento não faz parte do Request
+
     }
 
-    /**
-     * Obtém o tenant do usuário autenticado.
-     * 
-     * @return Tenant do usuário autenticado
-     * @throws NotFoundException se o usuário não estiver autenticado ou não tiver tenant associado
-     */
     private Tenant obterTenantDoUsuarioAutenticado() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        
+
         if (authentication == null || !authentication.isAuthenticated()) {
             log.warn("Tentativa de criar procedimento sem autenticação");
             throw new BadRequestException("Usuário não autenticado");
@@ -239,4 +204,3 @@ public class CatalogoProcedimentosServiceImpl implements CatalogoProcedimentosSe
         }
     }
 }
-

@@ -21,4 +21,3 @@ public interface DadosClinicosBasicosService {
 
     void excluir(UUID id);
 }
-

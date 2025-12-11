@@ -19,13 +19,6 @@ import lombok.EqualsAndHashCode;
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 
-/**
- * Entidade que representa uma visita domiciliar.
- * Armazena informações sobre visitas realizadas por profissionais de saúde no domicílio do paciente.
- * Baseado nas fichas de visita domiciliar do e-SUS AB.
- *
- * @author UPSaúde
- */
 @Entity
 @Table(name = "visitas_domiciliares", schema = "public",
        indexes = {
@@ -38,8 +31,6 @@ import java.time.OffsetDateTime;
 @Data
 @EqualsAndHashCode(callSuper = true)
 public class VisitasDomiciliares extends BaseEntity {
-
-    // ========== RELACIONAMENTOS ==========
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "paciente_id", nullable = false)
@@ -55,14 +46,10 @@ public class VisitasDomiciliares extends BaseEntity {
     @JoinColumn(name = "equipe_saude_id")
     private EquipeSaude equipeSaude;
 
-    // ========== TIPO DE VISITA ==========
-
     @Convert(converter = TipoVisitaDomiciliarEnumConverter.class)
     @Column(name = "tipo_visita", nullable = false)
     @NotNull(message = "Tipo de visita é obrigatório")
     private TipoVisitaDomiciliarEnum tipoVisita;
-
-    // ========== DATA E TURNO ==========
 
     @Column(name = "data_visita", nullable = false)
     @NotNull(message = "Data da visita é obrigatória")
@@ -70,13 +57,11 @@ public class VisitasDomiciliares extends BaseEntity {
 
     @Size(max = 20, message = "Turno deve ter no máximo 20 caracteres")
     @Column(name = "turno", length = 20)
-    private String turno; // Manhã, Tarde, Noite
+    private String turno;
 
     @Column(name = "duracao_minutos")
     @Min(value = 0, message = "Duração não pode ser negativa")
     private Integer duracaoMinutos;
-
-    // ========== LOCAL ==========
 
     @Size(max = 500, message = "Endereço deve ter no máximo 500 caracteres")
     @Column(name = "endereco", length = 500)
@@ -96,8 +81,6 @@ public class VisitasDomiciliares extends BaseEntity {
     @Column(name = "longitude", precision = 11, scale = 8)
     private BigDecimal longitude;
 
-    // ========== MOTIVO ==========
-
     @Column(name = "motivo", columnDefinition = "TEXT")
     private String motivo;
 
@@ -107,14 +90,12 @@ public class VisitasDomiciliares extends BaseEntity {
     @Column(name = "acompanhamento_programado")
     private Boolean acompanhamentoProgramado = false;
 
-    // ========== SITUAÇÃO ENCONTRADA ==========
-
     @Column(name = "visita_realizada", nullable = false)
     private Boolean visitaRealizada = true;
 
     @Size(max = 50, message = "Motivo não realização deve ter no máximo 50 caracteres")
     @Column(name = "motivo_nao_realizacao", length = 50)
-    private String motivoNaoRealizacao; // Ausente, Recusou, Endereço não encontrado
+    private String motivoNaoRealizacao;
 
     @Column(name = "pessoa_presente", nullable = false)
     private Boolean pessoaPresente = true;
@@ -127,77 +108,56 @@ public class VisitasDomiciliares extends BaseEntity {
     @Column(name = "informante_parentesco", length = 50)
     private String informanteParentesco;
 
-    // ========== ACOMPANHAMENTO DE SITUAÇÕES ESPECIAIS ==========
-
-    // Gestante
     @Column(name = "acompanhamento_gestante")
     private Boolean acompanhamentoGestante = false;
 
-    // Puérpera
     @Column(name = "acompanhamento_puerpera")
     private Boolean acompanhamentoPuerpera = false;
 
-    // Recém-nascido
     @Column(name = "acompanhamento_recem_nascido")
     private Boolean acompanhamentoRecemNascido = false;
 
-    // Criança
     @Column(name = "acompanhamento_crianca")
     private Boolean acompanhamentoCrianca = false;
 
-    // Pessoa com desnutrição
     @Column(name = "acompanhamento_desnutricao")
     private Boolean acompanhamentoDesnutricao = false;
 
-    // Pessoa em reabilitação/deficiência
     @Column(name = "acompanhamento_reabilitacao")
     private Boolean acompanhamentoReabilitacao = false;
 
-    // Pessoa com hipertensão
     @Column(name = "acompanhamento_hipertensao")
     private Boolean acompanhamentoHipertensao = false;
 
-    // Pessoa com diabetes
     @Column(name = "acompanhamento_diabetes")
     private Boolean acompanhamentoDiabetes = false;
 
-    // Pessoa com asma
     @Column(name = "acompanhamento_asma")
     private Boolean acompanhamentoAsma = false;
 
-    // Pessoa com DPOC/enfisema
     @Column(name = "acompanhamento_dpoc")
     private Boolean acompanhamentoDpoc = false;
 
-    // Pessoa com câncer
     @Column(name = "acompanhamento_cancer")
     private Boolean acompanhamentoCancer = false;
 
-    // Pessoa com doença mental
     @Column(name = "acompanhamento_saude_mental")
     private Boolean acompanhamentoSaudeMental = false;
 
-    // Pessoa acamada
     @Column(name = "acompanhamento_acamado")
     private Boolean acompanhamentoAcamado = false;
 
-    // Pessoa domiciliada
     @Column(name = "acompanhamento_domiciliado")
     private Boolean acompanhamentoDomiciliado = false;
 
-    // Tabagismo
     @Column(name = "acompanhamento_tabagismo")
     private Boolean acompanhamentoTabagismo = false;
 
-    // Usuário de álcool
     @Column(name = "acompanhamento_alcool")
     private Boolean acompanhamentoAlcool = false;
 
-    // Usuário de drogas
     @Column(name = "acompanhamento_drogas")
     private Boolean acompanhamentoDrogas = false;
-
-    // ========== SINAIS VITAIS AFERIDOS ==========
 
     @Column(name = "pressao_sistolica")
     private Integer pressaoSistolica;
@@ -213,8 +173,6 @@ public class VisitasDomiciliares extends BaseEntity {
 
     @Column(name = "peso", precision = 5, scale = 2)
     private BigDecimal peso;
-
-    // ========== PROCEDIMENTOS REALIZADOS ==========
 
     @Column(name = "curativo_realizado")
     private Boolean curativoRealizado = false;
@@ -234,8 +192,6 @@ public class VisitasDomiciliares extends BaseEntity {
     @Column(name = "procedimentos_detalhes", columnDefinition = "TEXT")
     private String procedimentosDetalhes;
 
-    // ========== ENCAMINHAMENTOS ==========
-
     @Column(name = "encaminhamento_ubs")
     private Boolean encaminhamentoUbs = false;
 
@@ -251,8 +207,6 @@ public class VisitasDomiciliares extends BaseEntity {
     @Column(name = "encaminhamento_detalhes", columnDefinition = "TEXT")
     private String encaminhamentoDetalhes;
 
-    // ========== DESFECHO ==========
-
     @Column(name = "desfecho", columnDefinition = "TEXT")
     private String desfecho;
 
@@ -261,8 +215,6 @@ public class VisitasDomiciliares extends BaseEntity {
 
     @Column(name = "data_proxima_visita")
     private OffsetDateTime dataProximaVisita;
-
-    // ========== OBSERVAÇÕES ==========
 
     @Column(name = "observacoes", columnDefinition = "TEXT")
     private String observacoes;

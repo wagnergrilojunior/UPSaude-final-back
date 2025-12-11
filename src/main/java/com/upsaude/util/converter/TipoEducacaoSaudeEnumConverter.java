@@ -23,4 +23,3 @@ public class TipoEducacaoSaudeEnumConverter implements AttributeConverter<TipoEd
         return TipoEducacaoSaudeEnum.fromCodigo(dbData);
     }
 }
-

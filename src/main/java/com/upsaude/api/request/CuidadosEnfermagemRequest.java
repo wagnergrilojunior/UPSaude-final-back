@@ -17,11 +17,11 @@ import lombok.*;
 public class CuidadosEnfermagemRequest {
     @NotNull(message = "Paciente é obrigatório")
     private UUID paciente;
-    
+
     @NotNull(message = "Profissional é obrigatório")
     private UUID profissional;
     private UUID atendimento;
-    
+
     @NotNull(message = "Tipo de cuidado é obrigatório")
     @JsonDeserialize(using = TipoCuidadoEnfermagemEnumDeserializer.class)
     private TipoCuidadoEnfermagemEnum tipoCuidado;

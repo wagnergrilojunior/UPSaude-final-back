@@ -13,11 +13,6 @@ import lombok.Data;
 
 import java.time.LocalDate;
 
-/**
- * Classe embeddable para histórico de reações alérgicas do paciente.
- *
- * @author UPSaúde
- */
 @Embeddable
 @Data
 @Builder
@@ -31,27 +26,26 @@ public class HistoricoReacoesAlergiaPaciente {
     }
 
     @Column(name = "data_ultima_reacao")
-    private LocalDate dataUltimaReacao; // Data da última reação alérgica
+    private LocalDate dataUltimaReacao;
 
     @Column(name = "numero_reacoes")
-    private Integer numeroReacoes; // Número de reações já ocorridas
+    private Integer numeroReacoes;
 
     @Convert(converter = TipoReacaoAlergicaEnumConverter.class)
     @Column(name = "tipo_ultima_reacao")
-    private TipoReacaoAlergicaEnum tipoUltimaReacao; // Tipo da última reação
+    private TipoReacaoAlergicaEnum tipoUltimaReacao;
 
     @Convert(converter = SeveridadeAlergiaEnumConverter.class)
     @Column(name = "severidade_ultima_reacao")
-    private SeveridadeAlergiaEnum severidadeUltimaReacao; // Severidade da última reação
+    private SeveridadeAlergiaEnum severidadeUltimaReacao;
 
     @Column(name = "reacao_mais_grave", columnDefinition = "TEXT")
-    private String reacaoMaisGrave; // Descrição da reação mais grave já ocorrida
+    private String reacaoMaisGrave;
 
     @Column(name = "tratamento_utilizado", columnDefinition = "TEXT")
-    private String tratamentoUtilizado; // Tratamento utilizado nas reações anteriores
+    private String tratamentoUtilizado;
 
     @Column(name = "necessitou_hospitalizacao", nullable = false)
     @Builder.Default
-    private Boolean necessitouHospitalizacao = false; // Se já necessitou hospitalização por reação alérgica
+    private Boolean necessitouHospitalizacao = false;
 }
-

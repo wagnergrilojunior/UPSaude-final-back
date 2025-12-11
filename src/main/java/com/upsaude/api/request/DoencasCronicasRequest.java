@@ -7,4 +7,3 @@ import lombok.*;
 @NoArgsConstructor
 public class DoencasCronicasRequest {
 }
-

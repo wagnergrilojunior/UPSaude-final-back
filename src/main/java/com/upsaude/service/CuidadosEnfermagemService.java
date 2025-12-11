@@ -7,11 +7,6 @@ import org.springframework.data.domain.Pageable;
 
 import java.util.UUID;
 
-/**
- * Interface de serviço para operações relacionadas a Cuidados de Enfermagem.
- *
- * @author UPSaúde
- */
 public interface CuidadosEnfermagemService {
 
     CuidadosEnfermagemResponse criar(CuidadosEnfermagemRequest request);
@@ -30,4 +25,3 @@ public interface CuidadosEnfermagemService {
 
     void excluir(UUID id);
 }
-

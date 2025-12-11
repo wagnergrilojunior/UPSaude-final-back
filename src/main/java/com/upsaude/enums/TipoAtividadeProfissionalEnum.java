@@ -3,12 +3,6 @@ package com.upsaude.enums;
 import java.util.Arrays;
 import java.util.Locale;
 
-/**
- * Enum para classificação de tipos de atividades profissionais.
- * Baseado em padrões de sistemas de gestão de atividades em saúde.
- *
- * @author UPSaúde
- */
 public enum TipoAtividadeProfissionalEnum {
     ATENDIMENTO_PACIENTE(1, "Atendimento ao Paciente"),
     CONSULTA(2, "Consulta"),
@@ -60,4 +54,3 @@ public enum TipoAtividadeProfissionalEnum {
                 .orElse(null);
     }
 }
-

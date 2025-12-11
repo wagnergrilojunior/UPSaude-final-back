@@ -20,11 +20,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.UUID;
 
-/**
- * Implementação do serviço de gerenciamento de FabricantesEquipamento.
- *
- * @author UPSaúde
- */
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -39,7 +34,6 @@ public class FabricantesEquipamentoServiceImpl implements FabricantesEquipamento
     public FabricantesEquipamentoResponse criar(FabricantesEquipamentoRequest request) {
         log.debug("Criando novo fabricante de equipamento");
 
-        // Validação de dados básicos é feita automaticamente pelo Bean Validation no Request
         validarDuplicidade(null, request);
 
         FabricantesEquipamento fabricantesEquipamento = fabricantesEquipamentoMapper.fromRequest(request);
@@ -85,8 +79,6 @@ public class FabricantesEquipamentoServiceImpl implements FabricantesEquipamento
             throw new BadRequestException("ID do fabricante de equipamento é obrigatório");
         }
 
-        // Validação de dados básicos é feita automaticamente pelo Bean Validation no Request
-
         FabricantesEquipamento fabricantesEquipamentoExistente = fabricantesEquipamentoRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Fabricante de equipamento não encontrado com ID: " + id));
 
@@ -122,30 +114,18 @@ public class FabricantesEquipamentoServiceImpl implements FabricantesEquipamento
         log.info("Fabricante de equipamento excluído (desativado) com sucesso. ID: {}", id);
     }
 
-        // Validações de dados básicos foram movidas para o Request usando Bean Validation
-    // (@NotNull, @NotBlank, @Pattern, etc). Isso garante validação automática no Controller
-    // e retorno de erro 400 padronizado via ApiExceptionHandler.
-
-    /**
-     * Valida se já existe um fabricante de equipamento com o mesmo nome ou CNPJ no banco de dados.
-     * 
-     * @param id ID do fabricante de equipamento sendo atualizado (null para criação)
-     * @param request dados do fabricante de equipamento sendo cadastrado/atualizado
-     * @throws BadRequestException se já existe um fabricante de equipamento com o mesmo nome ou CNPJ
-     */
     private void validarDuplicidade(UUID id, FabricantesEquipamentoRequest request) {
         if (request == null) {
             return;
         }
 
-        // Valida duplicidade do nome
         if (request.getNome() != null && !request.getNome().trim().isEmpty()) {
             boolean nomeDuplicado;
             if (id == null) {
-                // Criação: verifica se existe qualquer registro com este nome
+
                 nomeDuplicado = fabricantesEquipamentoRepository.existsByNome(request.getNome().trim());
             } else {
-                // Atualização: verifica se existe outro registro (diferente do atual) com este nome
+
                 nomeDuplicado = fabricantesEquipamentoRepository.existsByNomeAndIdNot(request.getNome().trim(), id);
             }
 
@@ -157,14 +137,13 @@ public class FabricantesEquipamentoServiceImpl implements FabricantesEquipamento
             }
         }
 
-        // Valida duplicidade do CNPJ (apenas se fornecido)
         if (request.getCnpj() != null && !request.getCnpj().trim().isEmpty()) {
             boolean cnpjDuplicado;
             if (id == null) {
-                // Criação: verifica se existe qualquer registro com este CNPJ
+
                 cnpjDuplicado = fabricantesEquipamentoRepository.existsByCnpj(request.getCnpj().trim());
             } else {
-                // Atualização: verifica se existe outro registro (diferente do atual) com este CNPJ
+
                 cnpjDuplicado = fabricantesEquipamentoRepository.existsByCnpjAndIdNot(request.getCnpj().trim(), id);
             }
 
@@ -179,16 +158,13 @@ public class FabricantesEquipamentoServiceImpl implements FabricantesEquipamento
 
     private void atualizarDadosFabricantesEquipamento(FabricantesEquipamento fabricantesEquipamento, FabricantesEquipamentoRequest request) {
         FabricantesEquipamento fabricantesEquipamentoAtualizado = fabricantesEquipamentoMapper.fromRequest(request);
-        
-        // Preserva campos de controle
+
         UUID idOriginal = fabricantesEquipamento.getId();
         Boolean activeOriginal = fabricantesEquipamento.getActive();
         java.time.OffsetDateTime createdAtOriginal = fabricantesEquipamento.getCreatedAt();
-        
-        // Copia todas as propriedades do objeto atualizado
+
         BeanUtils.copyProperties(fabricantesEquipamentoAtualizado, fabricantesEquipamento);
-        
-        // Restaura campos de controle
+
         fabricantesEquipamento.setId(idOriginal);
         fabricantesEquipamento.setActive(activeOriginal);
         fabricantesEquipamento.setCreatedAt(createdAtOriginal);

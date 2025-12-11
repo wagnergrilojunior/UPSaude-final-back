@@ -16,12 +16,6 @@ import lombok.EqualsAndHashCode;
 
 import java.time.OffsetDateTime;
 
-/**
- * Entidade que representa o controle de ponto de profissionais de saúde.
- * Armazena registros de entrada, saída e intervalos para controle de jornada de trabalho.
- *
- * @author UPSaúde
- */
 @Entity
 @Table(name = "controle_ponto", schema = "public",
        indexes = {
@@ -35,8 +29,6 @@ import java.time.OffsetDateTime;
 @EqualsAndHashCode(callSuper = true)
 public class ControlePonto extends BaseEntity {
 
-    // ========== RELACIONAMENTOS ==========
-
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "profissional_id", nullable = false)
     @NotNull(message = "Profissional de saúde é obrigatório")
@@ -44,9 +36,7 @@ public class ControlePonto extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "medico_id")
-    private Medicos medico; // Opcional: para médicos específicos
-
-    // ========== DADOS DO PONTO ==========
+    private Medicos medico;
 
     @Column(name = "data_hora", nullable = false)
     @NotNull(message = "Data e hora do ponto são obrigatórias")
@@ -61,32 +51,27 @@ public class ControlePonto extends BaseEntity {
     @NotNull(message = "Tipo de ponto é obrigatório")
     private TipoPontoEnum tipoPonto;
 
-    // ========== LOCALIZAÇÃO ==========
-
     @Column(name = "latitude")
-    private Double latitude; // Para validação de geolocalização
+    private Double latitude;
 
     @Column(name = "longitude")
-    private Double longitude; // Para validação de geolocalização
+    private Double longitude;
 
     @Column(name = "endereco_ip", length = 45)
-    private String enderecoIp; // Para auditoria
-
-    // ========== INFORMAÇÕES COMPLEMENTARES ==========
+    private String enderecoIp;
 
     @Column(name = "observacoes", columnDefinition = "TEXT")
     private String observacoes;
 
     @Column(name = "justificativa", columnDefinition = "TEXT")
-    private String justificativa; // Para pontos atípicos ou ajustes
+    private String justificativa;
 
     @Column(name = "aprovado")
-    private Boolean aprovado; // Se o ponto foi aprovado pelo gestor
+    private Boolean aprovado;
 
     @Column(name = "aprovado_por")
-    private java.util.UUID aprovadoPor; // ID do usuário que aprovou
+    private java.util.UUID aprovadoPor;
 
     @Column(name = "data_aprovacao")
     private OffsetDateTime dataAprovacao;
 }
-

@@ -21,11 +21,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.UUID;
 
-/**
- * Implementação do serviço de gerenciamento de Vacinas.
- *
- * @author UPSaúde
- */
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -39,14 +34,14 @@ public class VacinasServiceImpl implements VacinasService {
     @CacheEvict(value = "vacinas", allEntries = true)
     public VacinasResponse criar(VacinasRequest request) {
         log.debug("Criando nova vacina. Request: {}", request);
-        
+
         if (request == null) {
             log.warn("Tentativa de criar vacina com request nulo");
             throw new BadRequestException("Dados da vacina são obrigatórios");
         }
 
         try {
-            // Validação de dados básicos é feita automaticamente pelo Bean Validation no Request
+
             validarDuplicidade(null, request);
 
             Vacinas vacinas = vacinasMapper.fromRequest(request);
@@ -73,7 +68,7 @@ public class VacinasServiceImpl implements VacinasService {
     @Cacheable(value = "vacinas", key = "#id")
     public VacinasResponse obterPorId(UUID id) {
         log.debug("Buscando vacina por ID: {} (cache miss)", id);
-        
+
         if (id == null) {
             log.warn("ID nulo recebido para busca de vacina");
             throw new BadRequestException("ID da vacina é obrigatório");
@@ -132,14 +127,12 @@ public class VacinasServiceImpl implements VacinasService {
         }
 
         try {
-            // Validação de dados básicos é feita automaticamente pelo Bean Validation no Request
 
             Vacinas vacinasExistente = vacinasRepository.findById(id)
                     .orElseThrow(() -> new NotFoundException("Vacina não encontrada com ID: " + id));
 
             validarDuplicidade(id, request);
 
-            // Usa mapper do MapStruct que preserva campos de controle automaticamente
             vacinasMapper.updateFromRequest(request, vacinasExistente);
 
             Vacinas vacinasAtualizado = vacinasRepository.save(vacinasExistente);
@@ -199,30 +192,18 @@ public class VacinasServiceImpl implements VacinasService {
         }
     }
 
-        // Validações de dados básicos foram movidas para o Request usando Bean Validation
-    // (@NotNull, @NotBlank, @Pattern, etc). Isso garante validação automática no Controller
-    // e retorno de erro 400 padronizado via ApiExceptionHandler.
-
-    /**
-     * Valida se já existe uma vacina com o mesmo nome ou código interno no banco de dados.
-     * 
-     * @param id ID da vacina sendo atualizada (null para criação)
-     * @param request dados da vacina sendo cadastrada/atualizada
-     * @throws BadRequestException se já existe uma vacina com o mesmo nome ou código interno
-     */
     private void validarDuplicidade(UUID id, VacinasRequest request) {
         if (request == null) {
             return;
         }
 
-        // Valida duplicidade do nome
         if (request.getNome() != null && !request.getNome().trim().isEmpty()) {
             boolean nomeDuplicado;
             if (id == null) {
-                // Criação: verifica se existe qualquer registro com este nome
+
                 nomeDuplicado = vacinasRepository.existsByNome(request.getNome().trim());
             } else {
-                // Atualização: verifica se existe outro registro (diferente do atual) com este nome
+
                 nomeDuplicado = vacinasRepository.existsByNomeAndIdNot(request.getNome().trim(), id);
             }
 
@@ -234,14 +215,13 @@ public class VacinasServiceImpl implements VacinasService {
             }
         }
 
-        // Valida duplicidade do código interno (apenas se fornecido)
         if (request.getCodigoInterno() != null && !request.getCodigoInterno().trim().isEmpty()) {
             boolean codigoDuplicado;
             if (id == null) {
-                // Criação: verifica se existe qualquer registro com este código interno
+
                 codigoDuplicado = vacinasRepository.existsByCodigoInterno(request.getCodigoInterno().trim());
             } else {
-                // Atualização: verifica se existe outro registro (diferente do atual) com este código interno
+
                 codigoDuplicado = vacinasRepository.existsByCodigoInternoAndIdNot(request.getCodigoInterno().trim(), id);
             }
 
@@ -254,6 +234,4 @@ public class VacinasServiceImpl implements VacinasService {
         }
     }
 
-    // Método removido - agora usa vacinasMapper.updateFromRequest diretamente
-    // O MapStruct já preserva campos de controle automaticamente
 }

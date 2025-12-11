@@ -9,12 +9,6 @@ import jakarta.persistence.Table;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
-/**
- * Entidade que representa a ligação entre um paciente e uma deficiência.
- * Armazena informações sobre a deficiência do paciente, incluindo laudo e diagnóstico.
- *
- * @author UPSaúde
- */
 @Entity
 @Table(name = "deficiencias_paciente", schema = "public")
 @Data
@@ -38,4 +32,3 @@ public class DeficienciasPaciente extends BaseEntity {
     @Column(name = "observacoes", columnDefinition = "TEXT")
     private String observacoes;
 }
-

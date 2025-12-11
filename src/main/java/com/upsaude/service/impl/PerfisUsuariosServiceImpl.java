@@ -20,11 +20,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.UUID;
 
-/**
- * Implementação do serviço de gerenciamento de PerfisUsuarios.
- *
- * @author UPSaúde
- */
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -38,8 +33,6 @@ public class PerfisUsuariosServiceImpl implements PerfisUsuariosService {
     @CacheEvict(value = "perfisusuarios", allEntries = true)
     public PerfisUsuariosResponse criar(PerfisUsuariosRequest request) {
         log.debug("Criando novo perfisusuarios");
-
-        // Validação de dados básicos é feita automaticamente pelo Bean Validation no Request
 
         PerfisUsuarios perfisUsuarios = perfisUsuariosMapper.fromRequest(request);
         perfisUsuarios.setActive(true);
@@ -84,8 +77,6 @@ public class PerfisUsuariosServiceImpl implements PerfisUsuariosService {
             throw new BadRequestException("ID do perfisusuarios é obrigatório");
         }
 
-        // Validação de dados básicos é feita automaticamente pelo Bean Validation no Request
-
         PerfisUsuarios perfisUsuariosExistente = perfisUsuariosRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("PerfisUsuarios não encontrado com ID: " + id));
 
@@ -119,23 +110,16 @@ public class PerfisUsuariosServiceImpl implements PerfisUsuariosService {
         log.info("PerfisUsuarios excluído (desativado) com sucesso. ID: {}", id);
     }
 
-    // Validações de dados básicos foram movidas para o Request usando Bean Validation
-    // (@NotNull, @NotBlank, @Pattern, etc). Isso garante validação automática no Controller
-    // e retorno de erro 400 padronizado via ApiExceptionHandler.
-
         private void atualizarDadosPerfisUsuarios(PerfisUsuarios perfisUsuarios, PerfisUsuariosRequest request) {
         PerfisUsuarios perfisUsuariosAtualizado = perfisUsuariosMapper.fromRequest(request);
-        
-        // Preserva campos de controle
+
         java.util.UUID idOriginal = perfisUsuarios.getId();
         com.upsaude.entity.Tenant tenantOriginal = perfisUsuarios.getTenant();
         Boolean activeOriginal = perfisUsuarios.getActive();
         java.time.OffsetDateTime createdAtOriginal = perfisUsuarios.getCreatedAt();
-        
-        // Copia todas as propriedades do objeto atualizado
+
         BeanUtils.copyProperties(perfisUsuariosAtualizado, perfisUsuarios);
-        
-        // Restaura campos de controle
+
         perfisUsuarios.setId(idOriginal);
         perfisUsuarios.setTenant(tenantOriginal);
         perfisUsuarios.setActive(activeOriginal);

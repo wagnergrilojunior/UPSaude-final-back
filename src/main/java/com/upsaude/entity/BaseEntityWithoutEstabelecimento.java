@@ -19,12 +19,6 @@ import jakarta.persistence.MappedSuperclass;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
-/**
- * Classe base para entidades que precisam de tenant mas não precisam de estabelecimento.
- * Usado para catálogos globais, configurações e outras entidades que não são específicas de uma unidade.
- * 
- * @author UPSaúde
- */
 @MappedSuperclass
 @Data
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
@@ -51,4 +45,3 @@ public abstract class BaseEntityWithoutEstabelecimento {
     @Column(name = "ativo", nullable = false)
     private Boolean active = true;
 }
-

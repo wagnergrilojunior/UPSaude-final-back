@@ -23,39 +23,39 @@ public class DoencasRequest {
     @NotBlank(message = "Nome da doença é obrigatório")
     @Size(max = 255, message = "Nome deve ter no máximo 255 caracteres")
     private String nome;
-    
+
     @Size(max = 255, message = "Nome científico deve ter no máximo 255 caracteres")
     private String nomeCientifico;
-    
+
     @Size(max = 50, message = "Código interno deve ter no máximo 50 caracteres")
     private String codigoInterno;
-    
+
     @Valid
     private ClassificacaoDoencaRequest classificacao;
-    
+
     private UUID cidPrincipal;
-    
+
     @Valid
     private SintomasDoencaRequest sintomas;
-    
+
     @Valid
     private TratamentoPadraoDoencaRequest tratamentoPadrao;
-    
+
     @Valid
     private EpidemiologiaDoencaRequest epidemiologia;
-    
+
     @Size(max = 1000, message = "Descrição deve ter no máximo 1000 caracteres")
     private String descricao;
-    
+
     @Size(max = 1000, message = "Causas deve ter no máximo 1000 caracteres")
     private String causas;
-    
+
     @Size(max = 2000, message = "Fisiopatologia deve ter no máximo 2000 caracteres")
     private String fisiopatologia;
-    
+
     @Size(max = 1000, message = "Prognóstico deve ter no máximo 1000 caracteres")
     private String prognostico;
-    
+
     @Size(max = 1000, message = "Observações deve ter no máximo 1000 caracteres")
     private String observacoes;
 }

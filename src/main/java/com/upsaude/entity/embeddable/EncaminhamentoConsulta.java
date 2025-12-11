@@ -6,11 +6,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 
-/**
- * Classe embeddable para informações de encaminhamentos da consulta.
- *
- * @author UPSaúde
- */
 @Embeddable
 @Data
 @Builder
@@ -26,19 +21,18 @@ public class EncaminhamentoConsulta {
     }
 
     @Column(name = "encaminhamentos", columnDefinition = "TEXT")
-    private String encaminhamentos; // Encaminhamentos realizados
+    private String encaminhamentos;
 
     @Column(name = "especialista_encaminhado", length = 255)
-    private String especialistaEncaminhado; // Especialista para o qual foi encaminhado
+    private String especialistaEncaminhado;
 
     @Column(name = "motivo_encaminhamento", columnDefinition = "TEXT")
-    private String motivoEncaminhamento; // Motivo do encaminhamento
+    private String motivoEncaminhamento;
 
     @Column(name = "urgencia_encaminhamento", nullable = false)
     @Builder.Default
-    private Boolean urgenciaEncaminhamento = false; // Se o encaminhamento é urgente
+    private Boolean urgenciaEncaminhamento = false;
 
     @Column(name = "prazo_encaminhamento", length = 50)
-    private String prazoEncaminhamento; // Prazo para o encaminhamento (ex: 30 dias)
+    private String prazoEncaminhamento;
 }
-

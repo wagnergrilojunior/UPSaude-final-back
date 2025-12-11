@@ -10,12 +10,6 @@ import jakarta.persistence.Table;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
-/**
- * Entidade que representa o perfil de um usuário.
- * Possui relação com Tenant.
- *
- * @author UPSaúde
- */
 @Entity
 @Table(name = "perfis_usuarios", schema = "public")
 @Data

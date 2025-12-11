@@ -6,11 +6,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 
-/**
- * Classe embeddable para informações de reações adversas da vacina.
- *
- * @author UPSaúde
- */
 @Embeddable
 @Data
 @Builder
@@ -24,12 +19,11 @@ public class ReacoesAdversasVacina {
     }
 
     @Column(name = "reacoes_adversas_comuns", columnDefinition = "TEXT")
-    private String reacoesAdversasComuns; // Reações adversas comuns
+    private String reacoesAdversasComuns;
 
     @Column(name = "reacoes_adversas_raras", columnDefinition = "TEXT")
-    private String reacoesAdversasRaras; // Reações adversas raras
+    private String reacoesAdversasRaras;
 
     @Column(name = "reacoes_adversas_graves", columnDefinition = "TEXT")
-    private String reacoesAdversasGraves; // Reações adversas graves
+    private String reacoesAdversasGraves;
 }
-

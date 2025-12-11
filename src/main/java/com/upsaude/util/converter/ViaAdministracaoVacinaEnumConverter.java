@@ -4,12 +4,6 @@ import com.upsaude.enums.ViaAdministracaoVacinaEnum;
 import jakarta.persistence.AttributeConverter;
 import jakarta.persistence.Converter;
 
-/**
- * Converter para ViaAdministracaoVacinaEnum.
- * Converte entre o enum e o código Integer no banco de dados.
- *
- * @author UPSaúde
- */
 @Converter(autoApply = false)
 public class ViaAdministracaoVacinaEnumConverter implements AttributeConverter<ViaAdministracaoVacinaEnum, Integer> {
 
@@ -29,4 +23,3 @@ public class ViaAdministracaoVacinaEnumConverter implements AttributeConverter<V
         return ViaAdministracaoVacinaEnum.fromCodigo(dbData);
     }
 }
-

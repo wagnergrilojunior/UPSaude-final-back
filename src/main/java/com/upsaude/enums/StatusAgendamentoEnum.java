@@ -3,12 +3,6 @@ package com.upsaude.enums;
 import java.util.Arrays;
 import java.util.Locale;
 
-/**
- * Enum para classificação de status de agendamento.
- * Baseado em padrões de sistemas de gestão de agendamentos em saúde.
- *
- * @author UPSaúde
- */
 public enum StatusAgendamentoEnum {
     AGENDADO(1, "Agendado"),
     CONFIRMADO(2, "Confirmado"),
@@ -54,4 +48,3 @@ public enum StatusAgendamentoEnum {
                 .orElse(null);
     }
 }
-

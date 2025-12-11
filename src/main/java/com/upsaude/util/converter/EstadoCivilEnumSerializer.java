@@ -6,10 +6,6 @@ import com.fasterxml.jackson.databind.SerializerProvider;
 import com.upsaude.enums.EstadoCivilEnum;
 import java.io.IOException;
 
-/**
- * Serializador customizado para EstadoCivilEnum.
- * Retorna a descrição do enum ao invés do nome.
- */
 public class EstadoCivilEnumSerializer extends JsonSerializer<EstadoCivilEnum> {
 
     @Override

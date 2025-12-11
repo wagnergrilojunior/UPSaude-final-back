@@ -23,4 +23,3 @@ public class StatusPacienteEnumConverter implements AttributeConverter<StatusPac
         return StatusPacienteEnum.fromCodigo(dbData);
     }
 }
-

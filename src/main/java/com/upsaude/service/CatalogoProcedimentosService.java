@@ -7,11 +7,6 @@ import org.springframework.data.domain.Pageable;
 
 import java.util.UUID;
 
-/**
- * Interface de serviço para operações CRUD relacionadas a CatalogoProcedimentos.
- *
- * @author UPSaúde
- */
 public interface CatalogoProcedimentosService {
 
     CatalogoProcedimentosResponse criar(CatalogoProcedimentosRequest request);
@@ -24,4 +19,3 @@ public interface CatalogoProcedimentosService {
 
     void excluir(UUID id);
 }
-

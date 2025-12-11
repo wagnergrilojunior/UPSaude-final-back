@@ -14,7 +14,6 @@ public interface HistoricoReacoesAlergiaPacienteMapper {
     HistoricoReacoesAlergiaPacienteResponse toResponse(HistoricoReacoesAlergiaPaciente entity);
     void updateFromRequest(HistoricoReacoesAlergiaPacienteRequest request, @MappingTarget HistoricoReacoesAlergiaPaciente entity);
 
-    // Mapeamento entre DTO e Entity
     HistoricoReacoesAlergiaPaciente toEntity(com.upsaude.dto.embeddable.HistoricoReacoesAlergiaPacienteDTO dto);
     com.upsaude.dto.embeddable.HistoricoReacoesAlergiaPacienteDTO toDTO(HistoricoReacoesAlergiaPaciente entity);
     void updateFromDTO(com.upsaude.dto.embeddable.HistoricoReacoesAlergiaPacienteDTO dto, @MappingTarget HistoricoReacoesAlergiaPaciente entity);

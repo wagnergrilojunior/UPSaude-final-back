@@ -24,11 +24,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
 
-/**
- * Controlador REST para operações relacionadas a Tratamentos e Procedimentos.
- *
- * @author UPSaúde
- */
 @RestController
 @RequestMapping("/v1/tratamentos-procedimentos")
 @Tag(name = "Tratamentos e Procedimentos", description = "API para gerenciamento de Tratamentos e Procedimentos")
@@ -155,4 +150,3 @@ public class TratamentosProcedimentosController {
         }
     }
 }
-

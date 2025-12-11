@@ -29,23 +29,18 @@ public class AlergiasServiceImpl implements AlergiasService {
     private final AlergiasRepository alergiasRepository;
     private final AlergiasMapper alergiasMapper;
 
-    /**
-     * Sanitiza os campos de texto do request removendo caracteres de controle inválidos.
-     * 
-     * @param request request a ser sanitizado
-     */
     private void sanitizarRequest(AlergiasRequest request) {
         if (request == null) {
             return;
         }
-        
+
         if (request.getNome() != null) {
             String nomeSanitizado = sanitizarString(request.getNome());
             if (nomeSanitizado != null && !nomeSanitizado.trim().isEmpty()) {
                 request.setNome(nomeSanitizado.trim());
             }
         }
-        
+
         if (request.getNomeCientifico() != null) {
             String nomeCientificoSanitizado = sanitizarString(request.getNomeCientifico());
             if (nomeCientificoSanitizado != null && !nomeCientificoSanitizado.trim().isEmpty()) {
@@ -54,7 +49,7 @@ public class AlergiasServiceImpl implements AlergiasService {
                 request.setNomeCientifico(null);
             }
         }
-        
+
         if (request.getCodigoInterno() != null) {
             String codigoSanitizado = sanitizarString(request.getCodigoInterno());
             if (codigoSanitizado != null && !codigoSanitizado.trim().isEmpty()) {
@@ -63,17 +58,17 @@ public class AlergiasServiceImpl implements AlergiasService {
                 request.setCodigoInterno(null);
             }
         }
-        
+
         if (request.getDescricao() != null) {
             String descricaoSanitizada = sanitizarString(request.getDescricao());
             request.setDescricao(descricaoSanitizada);
         }
-        
+
         if (request.getSubstanciasRelacionadas() != null) {
             String substanciasSanitizadas = sanitizarString(request.getSubstanciasRelacionadas());
             request.setSubstanciasRelacionadas(substanciasSanitizadas);
         }
-        
+
         if (request.getObservacoes() != null) {
             String observacoesSanitizadas = sanitizarString(request.getObservacoes());
             request.setObservacoes(observacoesSanitizadas);
@@ -90,14 +85,13 @@ public class AlergiasServiceImpl implements AlergiasService {
         }
 
         try {
-            // Sanitiza o request antes de validar e processar
+
             sanitizarRequest(request);
-            
-            // Valida se o nome ainda é válido após sanitização
+
             if (request.getNome() == null || request.getNome().trim().isEmpty()) {
                 throw new BadRequestException("Nome da alergia é obrigatório e não pode conter apenas caracteres de controle inválidos");
             }
-            
+
             validarDuplicidade(null, request);
 
             Alergias alergia = alergiasMapper.fromRequest(request);
@@ -173,10 +167,8 @@ public class AlergiasServiceImpl implements AlergiasService {
             Alergias existente = alergiasRepository.findById(id)
                     .orElseThrow(() -> new NotFoundException("Alergia não encontrada com ID: " + id));
 
-            // Sanitiza o request antes de validar e processar
             sanitizarRequest(request);
-            
-            // Valida se o nome ainda é válido após sanitização
+
             if (request.getNome() == null || request.getNome().trim().isEmpty()) {
                 throw new BadRequestException("Nome da alergia é obrigatório e não pode conter apenas caracteres de controle inválidos");
             }
@@ -239,48 +231,33 @@ public class AlergiasServiceImpl implements AlergiasService {
         }
     }
 
-    /**
-     * Sanitiza uma string removendo caracteres de controle que podem causar problemas no banco de dados.
-     * Remove caracteres de controle (0x00-0x1F) exceto tabulação (0x09), quebra de linha (0x0A) e retorno de carro (0x0D).
-     * 
-     * @param str string a ser sanitizada
-     * @return string sanitizada ou null se a entrada for null
-     */
     private String sanitizarString(String str) {
         if (str == null) {
             return null;
         }
-        // Remove caracteres de controle (0x00-0x1F) exceto tab (\t=0x09), newline (\n=0x0A) e carriage return (\r=0x0D)
+
         return str.replaceAll("[\\x00-\\x08\\x0B\\x0C\\x0E-\\x1F]", "");
     }
 
-    /**
-     * Valida se já existe uma alergia com o mesmo nome ou código interno no banco de dados.
-     * 
-     * @param id ID da alergia sendo atualizada (null para criação)
-     * @param request dados da alergia sendo cadastrada/atualizada
-     * @throws BadRequestException se já existe uma alergia com o mesmo nome ou código interno
-     */
     private void validarDuplicidade(UUID id, AlergiasRequest request) {
         if (request == null) {
             return;
         }
 
-        // Valida duplicidade do nome
         if (request.getNome() != null && !request.getNome().trim().isEmpty()) {
-            // Sanitiza o nome antes de validar duplicidade para evitar erros com caracteres de controle
+
             String nomeSanitizado = sanitizarString(request.getNome().trim());
             if (nomeSanitizado == null || nomeSanitizado.isEmpty()) {
                 log.warn("Nome da alergia contém apenas caracteres de controle inválidos");
                 throw new BadRequestException("Nome da alergia não pode conter apenas caracteres de controle inválidos");
             }
-            
+
             boolean nomeDuplicado;
             if (id == null) {
-                // Criação: verifica se existe qualquer registro com este nome
+
                 nomeDuplicado = alergiasRepository.existsByNome(nomeSanitizado);
             } else {
-                // Atualização: verifica se existe outro registro (diferente do atual) com este nome
+
                 nomeDuplicado = alergiasRepository.existsByNomeAndIdNot(nomeSanitizado, id);
             }
 
@@ -292,21 +269,20 @@ public class AlergiasServiceImpl implements AlergiasService {
             }
         }
 
-        // Valida duplicidade do código interno (apenas se fornecido)
         if (request.getCodigoInterno() != null && !request.getCodigoInterno().trim().isEmpty()) {
-            // Sanitiza o código interno antes de validar duplicidade
+
             String codigoSanitizado = sanitizarString(request.getCodigoInterno().trim());
             if (codigoSanitizado == null || codigoSanitizado.isEmpty()) {
                 log.warn("Código interno da alergia contém apenas caracteres de controle inválidos");
                 throw new BadRequestException("Código interno não pode conter apenas caracteres de controle inválidos");
             }
-            
+
             boolean codigoDuplicado;
             if (id == null) {
-                // Criação: verifica se existe qualquer registro com este código interno
+
                 codigoDuplicado = alergiasRepository.existsByCodigoInterno(codigoSanitizado);
             } else {
-                // Atualização: verifica se existe outro registro (diferente do atual) com este código interno
+
                 codigoDuplicado = alergiasRepository.existsByCodigoInternoAndIdNot(codigoSanitizado, id);
             }
 

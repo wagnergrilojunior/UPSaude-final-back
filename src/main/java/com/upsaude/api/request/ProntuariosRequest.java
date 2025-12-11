@@ -14,12 +14,12 @@ public class ProntuariosRequest {
     @NotNull(message = "Paciente é obrigatório")
     @NotNull(message = "Paciente é obrigatório")
     private UUID paciente;
-    
+
     @Size(max = 50, message = "Tipo de registro deve ter no máximo 50 caracteres")
     private String tipoRegistro;
-    
+
     @Size(max = 10000, message = "Conteúdo deve ter no máximo 10000 caracteres")
     private String conteudo;
-    
+
     private UUID criadoPor;
 }

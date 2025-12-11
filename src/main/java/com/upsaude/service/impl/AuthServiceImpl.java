@@ -32,22 +32,20 @@ public class AuthServiceImpl implements AuthService {
     @Override
     @Transactional(readOnly = true)
     public LoginResponse login(LoginRequest request) {
-        String loginIdentifier = request.getEmail(); // Pode ser email ou user
+        String loginIdentifier = request.getEmail();
         log.debug("Iniciando processo de login para: {}", loginIdentifier);
-        
-        // Determinar se é email ou user
+
         String emailParaLogin = loginIdentifier;
-        
-        // Se não contém @, pode ser um username
+
         if (!loginIdentifier.contains("@")) {
             log.debug("Identificador não contém @, tentando buscar por campo 'username'");
             UsuariosSistema usuarioSistema = usuariosSistemaRepository.findByUsername(loginIdentifier)
                     .orElse(null);
-            
+
             if (usuarioSistema != null) {
-                // Buscar email do usuário no Supabase Auth usando o userId
+
                 SupabaseAuthResponse.User user = supabaseAuthService.getUserById(usuarioSistema.getUserId());
-                
+
                 if (user != null && user.getEmail() != null) {
                     emailParaLogin = user.getEmail();
                     log.debug("Email encontrado para user '{}': {}", loginIdentifier, emailParaLogin);
@@ -62,22 +60,19 @@ public class AuthServiceImpl implements AuthService {
                 throw new com.upsaude.exception.UnauthorizedException("Credenciais inválidas");
             }
         }
-        
-        // Chama o serviço do Supabase para autenticar com email
+
         SupabaseAuthResponse authResponse = supabaseAuthService.signInWithEmail(
-                emailParaLogin, 
+                emailParaLogin,
                 request.getPassword()
         );
-        
+
         UUID userId = authResponse.getUser() != null ? authResponse.getUser().getId() : null;
-        
-        // Busca informações do usuário no sistema
+
         UsuarioSistemaInfoResponse usuarioSistemaInfo = null;
         if (userId != null) {
             usuarioSistemaInfo = buscarInformacoesUsuarioSistema(userId);
         }
-        
-        // Converte a resposta do Supabase para o formato esperado pela API
+
         LoginResponse loginResponse = LoginResponse.builder()
                 .accessToken(authResponse.getAccessToken())
                 .refreshToken(authResponse.getRefreshToken())
@@ -90,32 +85,27 @@ public class AuthServiceImpl implements AuthService {
                 .role(authResponse.getUser() != null ? authResponse.getUser().getRole() : null)
                 .usuarioSistema(usuarioSistemaInfo)
                 .build();
-        
+
         log.info("Login realizado com sucesso para: {}", loginIdentifier);
-        
+
         return loginResponse;
     }
-    
-    /**
-     * Busca todas as informações do usuário no sistema, incluindo estabelecimentos.
-     */
+
     private UsuarioSistemaInfoResponse buscarInformacoesUsuarioSistema(UUID userId) {
         log.debug("Buscando informações do usuário sistema para userId: {}", userId);
-        
+
         UsuariosSistema usuarioSistema = usuariosSistemaRepository.findByUserId(userId)
                 .orElse(null);
-        
+
         if (usuarioSistema == null) {
             log.debug("Usuário {} não possui registro em usuarios_sistema", userId);
             return null;
         }
-        
-        // Buscar estabelecimentos vinculados
-        List<UsuarioEstabelecimento> estabelecimentosVinculados = 
+
+        List<UsuarioEstabelecimento> estabelecimentosVinculados =
                 usuarioEstabelecimentoRepository.findByUsuarioUserId(userId);
-        
-        // Montar lista de estabelecimentos vinculados com seus tipos de acesso
-        List<UsuarioSistemaInfoResponse.EstabelecimentoVinculoResponse> estabelecimentosResponse = 
+
+        List<UsuarioSistemaInfoResponse.EstabelecimentoVinculoResponse> estabelecimentosResponse =
                 estabelecimentosVinculados.stream()
                         .map(ue -> UsuarioSistemaInfoResponse.EstabelecimentoVinculoResponse.builder()
                                 .id(ue.getId())
@@ -126,38 +116,37 @@ public class AuthServiceImpl implements AuthService {
                                 .tipoUsuario(ue.getTipoUsuario())
                                 .build())
                         .collect(Collectors.toList());
-        
-        // Montar resposta completa
+
         UsuarioSistemaInfoResponse response = UsuarioSistemaInfoResponse.builder()
                 .id(usuarioSistema.getId())
                 .createdAt(usuarioSistema.getCreatedAt())
                 .updatedAt(usuarioSistema.getUpdatedAt())
                 .active(usuarioSistema.getActive())
                 .userId(usuarioSistema.getUserId())
-                // Vínculos do usuário
+
                 .profissionalSaudeId(usuarioSistema.getProfissionalSaude() != null ? usuarioSistema.getProfissionalSaude().getId() : null)
                 .medicoId(usuarioSistema.getMedico() != null ? usuarioSistema.getMedico().getId() : null)
                 .pacienteId(usuarioSistema.getPaciente() != null ? usuarioSistema.getPaciente().getId() : null)
                 .tipoVinculo(usuarioSistema.getTipoVinculo())
-                // Dados de exibição
+
                 .nomeExibicao(usuarioSistema.getNomeExibicao())
                 .username(usuarioSistema.getUsername())
                 .fotoUrl(usuarioSistema.getFotoUrl())
-                // Permissões
+
                 .adminTenant(usuarioSistema.getAdminTenant())
-                // Dados do Tenant
+
                 .tenantId(usuarioSistema.getTenant() != null ? usuarioSistema.getTenant().getId() : null)
                 .tenantNome(usuarioSistema.getTenant() != null ? usuarioSistema.getTenant().getNome() : null)
                 .tenantSlug(usuarioSistema.getTenant() != null ? usuarioSistema.getTenant().getSlug() : null)
                 .tenantAtivo(usuarioSistema.getTenant() != null ? usuarioSistema.getTenant().getAtivo() : null)
                 .tenantCnes(usuarioSistema.getTenant() != null ? usuarioSistema.getTenant().getCnes() : null)
-                // Estabelecimentos vinculados
+
                 .estabelecimentos(estabelecimentosResponse)
                 .build();
-        
-        log.debug("Informações do usuário sistema carregadas: {} estabelecimentos, tenant: {}", 
+
+        log.debug("Informações do usuário sistema carregadas: {} estabelecimentos, tenant: {}",
                 estabelecimentosResponse.size(), response.getTenantNome());
-        
+
         return response;
     }
 
@@ -174,4 +163,3 @@ public class AuthServiceImpl implements AuthService {
         return temAcesso;
     }
 }
-

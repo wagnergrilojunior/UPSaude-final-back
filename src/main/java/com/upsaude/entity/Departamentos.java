@@ -23,5 +23,4 @@ public class Departamentos extends BaseEntity {
     @Column(name = "descricao", columnDefinition = "TEXT")
     private String descricao;
 
-    
 }

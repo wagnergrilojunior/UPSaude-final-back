@@ -9,11 +9,6 @@ import lombok.Data;
 
 import java.math.BigDecimal;
 
-/**
- * Classe embeddable para informações de conservação e armazenamento de vacinas.
- *
- * @author UPSaúde
- */
 @Embeddable
 @Data
 @Builder
@@ -27,26 +22,25 @@ public class ConservacaoVacina {
     }
 
     @Column(name = "temperatura_conservacao_min", precision = 5, scale = 2)
-    private BigDecimal temperaturaConservacaoMin; // Temperatura mínima de conservação em °C
+    private BigDecimal temperaturaConservacaoMin;
 
     @Column(name = "temperatura_conservacao_max", precision = 5, scale = 2)
-    private BigDecimal temperaturaConservacaoMax; // Temperatura máxima de conservação em °C
+    private BigDecimal temperaturaConservacaoMax;
 
     @Column(name = "tipo_conservacao", length = 50)
-    private String tipoConservacao; // Ex: Refrigerada (2-8°C), Congelada (-15°C), Ambiente
+    private String tipoConservacao;
 
     @Column(name = "proteger_luz", nullable = false)
     @Default
-    private Boolean protegerLuz = false; // Se deve ser protegida da luz
+    private Boolean protegerLuz = false;
 
     @Column(name = "agitar_antes_uso", nullable = false)
     @Default
-    private Boolean agitarAntesUso = false; // Se deve ser agitada antes do uso
+    private Boolean agitarAntesUso = false;
 
     @Column(name = "validade_apos_abertura_horas")
-    private Integer validadeAposAberturaHoras; // Validade após abertura em horas
+    private Integer validadeAposAberturaHoras;
 
     @Column(name = "validade_apos_reconstituicao_horas")
-    private Integer validadeAposReconstituicaoHoras; // Validade após reconstituição em horas
+    private Integer validadeAposReconstituicaoHoras;
 }
-

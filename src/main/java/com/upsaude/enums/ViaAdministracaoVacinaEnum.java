@@ -3,13 +3,6 @@ package com.upsaude.enums;
 import java.util.Arrays;
 import java.util.Locale;
 
-/**
- * Enum para via de administração de vacinas.
- * Baseado em padrões do PNI e ANVISA.
- *
- * @deprecated Use {@link ViaAdministracaoEnum} unificado. Este enum será removido em versão futura.
- * @author UPSaúde
- */
 @Deprecated
 public enum ViaAdministracaoVacinaEnum {
     INTRAMUSCULAR(1, "Intramuscular"),
@@ -53,4 +46,3 @@ public enum ViaAdministracaoVacinaEnum {
                 .orElse(null);
     }
 }
-

@@ -4,12 +4,6 @@ import com.upsaude.enums.StatusAtendimentoEnum;
 import jakarta.persistence.AttributeConverter;
 import jakarta.persistence.Converter;
 
-/**
- * Converter para StatusAtendimentoEnum.
- * Converte entre o enum e o código Integer no banco de dados.
- *
- * @author UPSaúde
- */
 @Converter(autoApply = false)
 public class StatusAtendimentoEnumConverter implements AttributeConverter<StatusAtendimentoEnum, Integer> {
 
@@ -29,4 +23,3 @@ public class StatusAtendimentoEnumConverter implements AttributeConverter<Status
         return StatusAtendimentoEnum.fromCodigo(dbData);
     }
 }
-

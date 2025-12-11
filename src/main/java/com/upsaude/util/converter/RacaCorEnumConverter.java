@@ -23,4 +23,3 @@ public class RacaCorEnumConverter implements AttributeConverter<RacaCorEnum, Int
         return RacaCorEnum.fromCodigo(dbData);
     }
 }
-

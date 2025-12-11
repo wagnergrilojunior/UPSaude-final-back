@@ -3,12 +3,6 @@ package com.upsaude.enums;
 import java.util.Arrays;
 import java.util.Locale;
 
-/**
- * Enum para classificação de tipos de registro de ponto.
- * Baseado em padrões de sistemas de controle de ponto.
- *
- * @author UPSaúde
- */
 public enum TipoPontoEnum {
     ENTRADA(1, "Entrada"),
     SAIDA(2, "Saída"),
@@ -54,4 +48,3 @@ public enum TipoPontoEnum {
                 .orElse(null);
     }
 }
-

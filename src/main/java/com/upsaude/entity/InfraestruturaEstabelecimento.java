@@ -11,12 +11,6 @@ import jakarta.validation.constraints.Size;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
-/**
- * Entidade que representa infraestrutura física de um estabelecimento de saúde.
- * Permite registrar recursos físicos conforme exigências do CNES.
- *
- * @author UPSaúde
- */
 @Entity
 @Table(name = "infraestrutura_estabelecimento", schema = "public")
 @Data
@@ -49,4 +43,3 @@ public class InfraestruturaEstabelecimento extends BaseEntity {
     @Column(name = "descricao", columnDefinition = "TEXT")
     private String descricao;
 }
-

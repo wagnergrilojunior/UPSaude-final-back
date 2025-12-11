@@ -4,12 +4,6 @@ import com.upsaude.enums.CanalNotificacaoEnum;
 import jakarta.persistence.AttributeConverter;
 import jakarta.persistence.Converter;
 
-/**
- * Converter para CanalNotificacaoEnum.
- * Converte entre o enum e o código Integer no banco de dados.
- *
- * @author UPSaúde
- */
 @Converter(autoApply = false)
 public class CanalNotificacaoEnumConverter implements AttributeConverter<CanalNotificacaoEnum, Integer> {
 
@@ -29,4 +23,3 @@ public class CanalNotificacaoEnumConverter implements AttributeConverter<CanalNo
         return CanalNotificacaoEnum.fromCodigo(dbData);
     }
 }
-

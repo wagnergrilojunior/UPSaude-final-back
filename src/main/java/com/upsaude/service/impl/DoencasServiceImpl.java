@@ -27,11 +27,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.UUID;
 
-/**
- * Implementação do serviço de gerenciamento de Doencas.
- *
- * @author UPSaúde
- */
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -50,19 +45,18 @@ public class DoencasServiceImpl implements DoencasService {
     @CacheEvict(value = "doencas", allEntries = true)
     public DoencasResponse criar(DoencasRequest request) {
         log.debug("Criando nova doença. Request: {}", request);
-        
+
         if (request == null) {
             log.warn("Tentativa de criar doença com request nulo");
             throw new BadRequestException("Dados da doença são obrigatórios");
         }
 
         try {
-            // Validação de dados básicos é feita automaticamente pelo Bean Validation no Request
+
             validarDuplicidade(null, request);
 
             Doencas doenca = doencasMapper.fromRequest(request);
 
-            // Carrega e define CID principal se fornecido
             if (request.getCidPrincipal() != null) {
                 CidDoencas cidPrincipal = cidDoencasRepository.findById(request.getCidPrincipal())
                         .orElseThrow(() -> new NotFoundException("CID não encontrado com ID: " + request.getCidPrincipal()));
@@ -92,7 +86,7 @@ public class DoencasServiceImpl implements DoencasService {
     @Cacheable(value = "doencas", key = "#id")
     public DoencasResponse obterPorId(UUID id) {
         log.debug("Buscando doença por ID: {} (cache miss)", id);
-        
+
         if (id == null) {
             log.warn("ID nulo recebido para busca de doença");
             throw new BadRequestException("ID da doença é obrigatório");
@@ -199,7 +193,6 @@ public class DoencasServiceImpl implements DoencasService {
         }
 
         try {
-            // Validação de dados básicos é feita automaticamente pelo Bean Validation no Request
 
             Doencas doencaExistente = doencasRepository.findById(id)
                     .orElseThrow(() -> new NotFoundException("Doença não encontrada com ID: " + id));
@@ -265,30 +258,18 @@ public class DoencasServiceImpl implements DoencasService {
         }
     }
 
-    // Validações de dados básicos foram movidas para o Request usando Bean Validation
-    // (@NotNull, @NotBlank, @Pattern, etc). Isso garante validação automática no Controller
-    // e retorno de erro 400 padronizado via ApiExceptionHandler.
-
-    /**
-     * Valida se já existe uma doença com o mesmo nome ou código interno no banco de dados.
-     * 
-     * @param id ID da doença sendo atualizada (null para criação)
-     * @param request dados da doença sendo cadastrada/atualizada
-     * @throws BadRequestException se já existe uma doença com o mesmo nome ou código interno
-     */
     private void validarDuplicidade(UUID id, DoencasRequest request) {
         if (request == null) {
             return;
         }
 
-        // Valida duplicidade do nome
         if (request.getNome() != null && !request.getNome().trim().isEmpty()) {
             boolean nomeDuplicado;
             if (id == null) {
-                // Criação: verifica se existe qualquer registro com este nome
+
                 nomeDuplicado = doencasRepository.existsByNome(request.getNome().trim());
             } else {
-                // Atualização: verifica se existe outro registro (diferente do atual) com este nome
+
                 nomeDuplicado = doencasRepository.existsByNomeAndIdNot(request.getNome().trim(), id);
             }
 
@@ -300,14 +281,13 @@ public class DoencasServiceImpl implements DoencasService {
             }
         }
 
-        // Valida duplicidade do código interno (apenas se fornecido)
         if (request.getCodigoInterno() != null && !request.getCodigoInterno().trim().isEmpty()) {
             boolean codigoDuplicado;
             if (id == null) {
-                // Criação: verifica se existe qualquer registro com este código interno
+
                 codigoDuplicado = doencasRepository.existsByCodigoInterno(request.getCodigoInterno().trim());
             } else {
-                // Atualização: verifica se existe outro registro (diferente do atual) com este código interno
+
                 codigoDuplicado = doencasRepository.existsByCodigoInternoAndIdNot(request.getCodigoInterno().trim(), id);
             }
 
@@ -330,7 +310,7 @@ public class DoencasServiceImpl implements DoencasService {
         if (request.getCodigoInterno() != null) {
             doenca.setCodigoInterno(request.getCodigoInterno());
         }
-        // Atualiza embeddables usando mappers
+
         if (request.getClassificacao() != null) {
             if (doenca.getClassificacao() == null) {
                 doenca.setClassificacao(classificacaoDoencaMapper.toEntity(request.getClassificacao()));
@@ -375,7 +355,6 @@ public class DoencasServiceImpl implements DoencasService {
             doenca.setObservacoes(request.getObservacoes());
         }
 
-        // Atualiza CID principal se fornecido
         if (request.getCidPrincipal() != null) {
             CidDoencas cidPrincipal = cidDoencasRepository.findById(request.getCidPrincipal())
                     .orElseThrow(() -> new NotFoundException("CID não encontrado com ID: " + request.getCidPrincipal()));
@@ -383,4 +362,3 @@ public class DoencasServiceImpl implements DoencasService {
         }
     }
 }
-

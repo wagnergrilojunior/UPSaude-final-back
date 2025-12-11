@@ -16,12 +16,6 @@ import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
-/**
- * Entidade que representa o relacionamento entre um paciente e uma alergia.
- * Armazena informações completas sobre alergias específicas de um paciente.
- *
- * @author UPSaúde
- */
 @Entity
 @Table(name = "alergias_paciente", schema = "public",
        indexes = {
@@ -38,8 +32,6 @@ public class AlergiasPaciente extends BaseEntity {
         this.historicoReacoes = new HistoricoReacoesAlergiaPaciente();
     }
 
-    // ========== RELACIONAMENTOS ==========
-
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "paciente_id", nullable = false)
     @NotNull(message = "Paciente é obrigatório")
@@ -50,23 +42,17 @@ public class AlergiasPaciente extends BaseEntity {
     @NotNull(message = "Alergia é obrigatória")
     private Alergias alergia;
 
-    // ========== DIAGNÓSTICO ==========
-
     @Embedded
     private DiagnosticoAlergiaPaciente diagnostico;
-
-    // ========== HISTÓRICO DE REAÇÕES ==========
 
     @Embedded
     private HistoricoReacoesAlergiaPaciente historicoReacoes;
 
-    // ========== OBSERVAÇÕES ==========
-
     @Column(name = "observacoes", columnDefinition = "TEXT")
-    private String observacoes; // Observações específicas sobre a alergia neste paciente
+    private String observacoes;
 
     @Column(name = "alerta_medico", nullable = false)
-    private Boolean alertaMedico = true; // Se deve aparecer alerta médico no prontuário
+    private Boolean alertaMedico = true;
 
     @PrePersist
     @PreUpdate

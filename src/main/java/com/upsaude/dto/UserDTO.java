@@ -8,11 +8,6 @@ import lombok.NoArgsConstructor;
 import java.time.OffsetDateTime;
 import java.util.UUID;
 
-/**
- * DTO para User.
- *
- * @author UPSaúde
- */
 @Data
 @Builder
 @NoArgsConstructor
@@ -28,4 +23,3 @@ public class UserDTO {
     private OffsetDateTime createdAt;
     private OffsetDateTime updatedAt;
 }
-

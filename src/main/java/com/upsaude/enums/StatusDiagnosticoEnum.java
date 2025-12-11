@@ -3,11 +3,6 @@ package com.upsaude.enums;
 import java.util.Arrays;
 import java.util.Locale;
 
-/**
- * Enum para status do diagnóstico de doença no paciente.
- *
- * @author UPSaúde
- */
 public enum StatusDiagnosticoEnum {
     SUSPEITA(1, "Suspeita"),
     PROVAVEL(2, "Provável"),
@@ -55,4 +50,3 @@ public enum StatusDiagnosticoEnum {
                 .orElse(null);
     }
 }
-

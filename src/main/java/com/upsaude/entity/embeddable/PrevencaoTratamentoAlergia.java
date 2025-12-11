@@ -6,11 +6,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 
-/**
- * Classe embeddable para informações de prevenção e tratamento da alergia.
- *
- * @author UPSaúde
- */
 @Embeddable
 @Data
 @Builder
@@ -48,4 +43,3 @@ public class PrevencaoTratamentoAlergia {
         this.antihistaminicoRecomendado = "";
     }
 }
-

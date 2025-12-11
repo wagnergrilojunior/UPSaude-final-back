@@ -12,11 +12,6 @@ import lombok.Data;
 
 import java.time.LocalDate;
 
-/**
- * Classe embeddable para registro e controle do medicamento.
- *
- * @author UPSaúde
- */
 @Embeddable
 @Data
 @Builder
@@ -34,13 +29,13 @@ public class RegistroControleMedicamento {
 
     @Size(max = 50, message = "Registro ANVISA deve ter no máximo 50 caracteres")
     @Column(name = "registro_anvisa", length = 50)
-    private String registroAnvisa; // Número de registro na ANVISA
+    private String registroAnvisa;
 
     @Column(name = "data_registro_anvisa")
-    private LocalDate dataRegistroAnvisa; // Data de registro na ANVISA
+    private LocalDate dataRegistroAnvisa;
 
     @Column(name = "data_validade_registro_anvisa")
-    private LocalDate dataValidadeRegistroAnvisa; // Data de validade do registro
+    private LocalDate dataValidadeRegistroAnvisa;
 
     @Convert(converter = TipoControleMedicamentoEnumConverter.class)
     @Column(name = "tipo_controle")
@@ -60,10 +55,9 @@ public class RegistroControleMedicamento {
 
     @Column(name = "medicamento_especial", nullable = false)
     @Builder.Default
-    private Boolean medicamentoEspecial = false; // Medicamento de alto custo ou especial
+    private Boolean medicamentoEspecial = false;
 
     @Column(name = "medicamento_excepcional", nullable = false)
     @Builder.Default
-    private Boolean medicamentoExcepcional = false; // Medicamento excepcional do SUS
+    private Boolean medicamentoExcepcional = false;
 }
-

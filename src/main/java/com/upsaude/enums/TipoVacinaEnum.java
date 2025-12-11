@@ -3,14 +3,8 @@ package com.upsaude.enums;
 import java.util.Arrays;
 import java.util.Locale;
 
-/**
- * Enum para classificação de tipos de vacinas conforme PNI (Programa Nacional de Imunizações).
- * Baseado no Calendário Nacional de Vacinação do Ministério da Saúde.
- *
- * @author UPSaúde
- */
 public enum TipoVacinaEnum {
-    // ========== VACINAS DO CALENDÁRIO BÁSICO ==========
+
     BCG(1, "BCG - Tuberculose"),
     HEPATITE_B(2, "Hepatite B"),
     PENTAVALENTE(3, "Pentavalente (DTP + Hib + Hepatite B)"),
@@ -35,8 +29,7 @@ public enum TipoVacinaEnum {
     HPV_QUADRIVALENTE(22, "HPV Quadrivalente"),
     HPV_BIVALENTE(23, "HPV Bivalente"),
     DENGUE(24, "Dengue"),
-    
-    // ========== VACINAS PARA ADULTOS E IDOSOS ==========
+
     DUPLA_ADULTO(30, "Dupla Adulto - Difteria e Tétano"),
     HEPATITE_B_ADULTO(31, "Hepatite B (Adulto)"),
     FEBRE_AMARELA_ADULTO(32, "Febre Amarela (Adulto)"),
@@ -44,30 +37,26 @@ public enum TipoVacinaEnum {
     PNEUMOCOCICA_23_ADULTO(34, "Pneumocócica 23-valente (Adulto)"),
     INFLUENZA(35, "Influenza (Gripe)"),
     HERPES_ZOSTER(36, "Herpes Zoster"),
-    
-    // ========== VACINAS ESPECIAIS ==========
+
     RABICA(40, "Raiva"),
     ANTIRRABICA(41, "Antirrábica"),
     ANTITETANICA(42, "Antitetânica"),
     ANTIDIFTERICA(43, "Antidiftérica"),
     TETANO_ACIDENTAL(44, "Tétano (Acidental)"),
     HEPATITE_A_E_B(45, "Hepatite A e B Combinada"),
-    
-    // ========== VACINAS PARA GRUPOS ESPECIAIS ==========
+
     COVID_19(50, "COVID-19"),
     COVID_19_CORONAVAC(51, "COVID-19 - Coronavac"),
     COVID_19_ASTRAZENECA(52, "COVID-19 - AstraZeneca"),
     COVID_19_PFIZER(53, "COVID-19 - Pfizer"),
     COVID_19_JANSSEN(54, "COVID-19 - Janssen"),
     COVID_19_BUTANVAC(55, "COVID-19 - Butanvac"),
-    
-    // ========== VACINAS PARA VIAGENS ==========
+
     FEBRE_TIFOIDE(60, "Febre Tifoide"),
     COLERA(61, "Cólera"),
     ENCEFALITE_JAPONESA(62, "Encefalite Japonesa"),
     MENINGOCOCICA_ACWY_VIAGEM(63, "Meningocócica ACWY (Viagem)"),
-    
-    // ========== OUTRAS ==========
+
     OUTRA(99, "Outra");
 
     private final Integer codigo;
@@ -103,4 +92,3 @@ public enum TipoVacinaEnum {
                 .orElse(null);
     }
 }
-

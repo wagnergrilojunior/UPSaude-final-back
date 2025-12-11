@@ -24,12 +24,6 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Entidade que representa uma ação de promoção e prevenção em saúde.
- * Armazena informações sobre programas e ações de saúde pública.
- *
- * @author UPSaúde
- */
 @Entity
 @Table(name = "acoes_promocao_prevencao", schema = "public",
        indexes = {
@@ -41,14 +35,9 @@ import java.util.List;
 @EqualsAndHashCode(callSuper = true)
 public class AcaoPromocaoPrevencao extends BaseEntity {
 
-    /**
-     * Construtor padrão que inicializa as coleções para evitar NullPointerException.
-     */
     public AcaoPromocaoPrevencao() {
         this.profissionaisParticipantes = new ArrayList<>();
     }
-
-    // ========== RELACIONAMENTOS ==========
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "profissional_responsavel_id", nullable = false)
@@ -59,7 +48,6 @@ public class AcaoPromocaoPrevencao extends BaseEntity {
     @JoinColumn(name = "equipe_saude_id")
     private EquipeSaude equipeSaude;
 
-    /** Profissionais que participaram da ação */
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
         name = "acoes_promocao_profissionais",
@@ -69,14 +57,10 @@ public class AcaoPromocaoPrevencao extends BaseEntity {
     )
     private List<ProfissionaisSaude> profissionaisParticipantes = new ArrayList<>();
 
-    // ========== TIPO DE AÇÃO ==========
-
     @Convert(converter = TipoAcaoPromocaoSaudeEnumConverter.class)
     @Column(name = "tipo_acao", nullable = false)
     @NotNull(message = "Tipo de ação é obrigatório")
     private TipoAcaoPromocaoSaudeEnum tipoAcao;
-
-    // ========== INFORMAÇÕES DA AÇÃO ==========
 
     @Size(max = 255, message = "Nome deve ter no máximo 255 caracteres")
     @Column(name = "nome", nullable = false, length = 255)
@@ -95,8 +79,6 @@ public class AcaoPromocaoPrevencao extends BaseEntity {
     @Column(name = "metodologia", columnDefinition = "TEXT")
     private String metodologia;
 
-    // ========== PERÍODO ==========
-
     @Column(name = "data_inicio", nullable = false)
     @NotNull(message = "Data de início é obrigatória")
     private LocalDate dataInicio;
@@ -109,9 +91,7 @@ public class AcaoPromocaoPrevencao extends BaseEntity {
 
     @Size(max = 100, message = "Periodicidade deve ter no máximo 100 caracteres")
     @Column(name = "periodicidade", length = 100)
-    private String periodicidade; // Semanal, Mensal, Anual, etc.
-
-    // ========== LOCAL ==========
+    private String periodicidade;
 
     @Size(max = 255, message = "Local deve ter no máximo 255 caracteres")
     @Column(name = "local", length = 255)
@@ -119,8 +99,6 @@ public class AcaoPromocaoPrevencao extends BaseEntity {
 
     @Column(name = "abrangencia_territorial", columnDefinition = "TEXT")
     private String abrangenciaTerritorial;
-
-    // ========== PÚBLICO-ALVO ==========
 
     @Size(max = 255, message = "Público-alvo deve ter no máximo 255 caracteres")
     @Column(name = "publico_alvo", length = 255)
@@ -133,10 +111,8 @@ public class AcaoPromocaoPrevencao extends BaseEntity {
     @Column(name = "criterios_inclusao", columnDefinition = "TEXT")
     private String criteriosInclusao;
 
-    // ========== METAS E INDICADORES ==========
-
     @Column(name = "meta_cobertura")
-    private Integer metaCobertura; // Percentual de cobertura esperado
+    private Integer metaCobertura;
 
     @Column(name = "meta_atendimentos")
     @Min(value = 0, message = "Meta de atendimentos não pode ser negativa")
@@ -145,14 +121,12 @@ public class AcaoPromocaoPrevencao extends BaseEntity {
     @Column(name = "indicadores_acompanhamento", columnDefinition = "TEXT")
     private String indicadoresAcompanhamento;
 
-    // ========== RESULTADOS ==========
-
     @Column(name = "numero_atendimentos_realizados")
     @Min(value = 0, message = "Número de atendimentos não pode ser negativo")
     private Integer numeroAtendimentosRealizados;
 
     @Column(name = "cobertura_alcancada")
-    private Integer coberturaAlcancada; // Percentual
+    private Integer coberturaAlcancada;
 
     @Column(name = "resultados_alcancados", columnDefinition = "TEXT")
     private String resultadosAlcancados;
@@ -163,8 +137,6 @@ public class AcaoPromocaoPrevencao extends BaseEntity {
     @Column(name = "licoes_aprendidas", columnDefinition = "TEXT")
     private String licoesAprendidas;
 
-    // ========== RECURSOS ==========
-
     @Column(name = "recursos_necessarios", columnDefinition = "TEXT")
     private String recursosNecessarios;
 
@@ -174,11 +146,9 @@ public class AcaoPromocaoPrevencao extends BaseEntity {
     @Column(name = "parcerias", columnDefinition = "TEXT")
     private String parcerias;
 
-    // ========== STATUS ==========
-
     @Column(name = "status_acao", nullable = false)
     @Size(max = 50, message = "Status deve ter no máximo 50 caracteres")
-    private String statusAcao = "PLANEJADA"; // PLANEJADA, EM_ANDAMENTO, CONCLUIDA, CANCELADA
+    private String statusAcao = "PLANEJADA";
 
     @Column(name = "data_inicio_execucao")
     private LocalDate dataInicioExecucao;
@@ -186,17 +156,9 @@ public class AcaoPromocaoPrevencao extends BaseEntity {
     @Column(name = "data_conclusao")
     private LocalDate dataConclusao;
 
-    // ========== OBSERVAÇÕES ==========
-
     @Column(name = "observacoes", columnDefinition = "TEXT")
     private String observacoes;
 
-    // ========== MÉTODOS DE CICLO DE VIDA ==========
-
-    /**
-     * Garante que as coleções não sejam nulas antes de persistir ou atualizar.
-     * Recria a lista se estiver nula.
-     */
     @PrePersist
     @PreUpdate
     public void validateCollections() {
@@ -205,4 +167,3 @@ public class AcaoPromocaoPrevencao extends BaseEntity {
         }
     }
 }
-

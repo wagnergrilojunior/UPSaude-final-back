@@ -20,11 +20,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.UUID;
 
-/**
- * Implementação do serviço de gerenciamento de MovimentacoesEstoque.
- *
- * @author UPSaúde
- */
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -38,8 +33,6 @@ public class MovimentacoesEstoqueServiceImpl implements MovimentacoesEstoqueServ
     @CacheEvict(value = "movimentacoesestoque", allEntries = true)
     public MovimentacoesEstoqueResponse criar(MovimentacoesEstoqueRequest request) {
         log.debug("Criando novo movimentacoesestoque");
-
-        // Validação de dados básicos é feita automaticamente pelo Bean Validation no Request
 
         MovimentacoesEstoque movimentacoesEstoque = movimentacoesEstoqueMapper.fromRequest(request);
         movimentacoesEstoque.setActive(true);
@@ -84,8 +77,6 @@ public class MovimentacoesEstoqueServiceImpl implements MovimentacoesEstoqueServ
             throw new BadRequestException("ID do movimentacoesestoque é obrigatório");
         }
 
-        // Validação de dados básicos é feita automaticamente pelo Bean Validation no Request
-
         MovimentacoesEstoque movimentacoesEstoqueExistente = movimentacoesEstoqueRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("MovimentacoesEstoque não encontrado com ID: " + id));
 
@@ -119,23 +110,16 @@ public class MovimentacoesEstoqueServiceImpl implements MovimentacoesEstoqueServ
         log.info("MovimentacoesEstoque excluído (desativado) com sucesso. ID: {}", id);
     }
 
-    // Validações de dados básicos foram movidas para o Request usando Bean Validation
-    // (@NotNull, @NotBlank, @Pattern, etc). Isso garante validação automática no Controller
-    // e retorno de erro 400 padronizado via ApiExceptionHandler.
-
         private void atualizarDadosMovimentacoesEstoque(MovimentacoesEstoque movimentacoesEstoque, MovimentacoesEstoqueRequest request) {
         MovimentacoesEstoque movimentacoesEstoqueAtualizado = movimentacoesEstoqueMapper.fromRequest(request);
-        
-        // Preserva campos de controle
+
         java.util.UUID idOriginal = movimentacoesEstoque.getId();
         com.upsaude.entity.Tenant tenantOriginal = movimentacoesEstoque.getTenant();
         Boolean activeOriginal = movimentacoesEstoque.getActive();
         java.time.OffsetDateTime createdAtOriginal = movimentacoesEstoque.getCreatedAt();
-        
-        // Copia todas as propriedades do objeto atualizado
+
         BeanUtils.copyProperties(movimentacoesEstoqueAtualizado, movimentacoesEstoque);
-        
-        // Restaura campos de controle
+
         movimentacoesEstoque.setId(idOriginal);
         movimentacoesEstoque.setTenant(tenantOriginal);
         movimentacoesEstoque.setActive(activeOriginal);

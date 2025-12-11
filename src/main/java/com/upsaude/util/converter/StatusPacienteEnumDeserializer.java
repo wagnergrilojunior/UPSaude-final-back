@@ -9,7 +9,7 @@ import java.io.IOException;
 public class StatusPacienteEnumDeserializer extends JsonDeserializer<StatusPacienteEnum> {
     @Override
     public StatusPacienteEnum deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
-        // Se for número inteiro, tenta usar como código
+
         if (p.getCurrentToken().isNumeric()) {
             Integer codigo = p.getIntValue();
             StatusPacienteEnum result = StatusPacienteEnum.fromCodigo(codigo);
@@ -17,16 +17,14 @@ public class StatusPacienteEnumDeserializer extends JsonDeserializer<StatusPacie
                 return result;
             }
         }
-        
-        // Se for string, tenta converter
+
         String value = p.getValueAsString();
         if (value == null || value.trim().isEmpty()) {
             return null;
         }
-        
+
         String strValue = value.trim();
-        
-        // Tenta como número (código) se for string numérica
+
         try {
             Integer codigo = Integer.parseInt(strValue);
             StatusPacienteEnum result = StatusPacienteEnum.fromCodigo(codigo);
@@ -34,20 +32,18 @@ public class StatusPacienteEnumDeserializer extends JsonDeserializer<StatusPacie
                 return result;
             }
         } catch (NumberFormatException e) {
-            // Não é número, continua para tentar como string
+
         }
-        
-        // Tenta por descrição
+
         StatusPacienteEnum result = StatusPacienteEnum.fromDescricao(strValue);
         if (result != null) {
             return result;
         }
-        
-        // Tenta por nome do enum (case-insensitive)
+
         try {
             return StatusPacienteEnum.valueOf(strValue.toUpperCase());
         } catch (IllegalArgumentException e) {
-            // Se não encontrar, retorna null (não lança exceção)
+
             return null;
         }
     }

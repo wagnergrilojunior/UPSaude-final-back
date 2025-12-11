@@ -22,23 +22,23 @@ import lombok.Setter;
 public class AgendamentoRequest {
     @NotNull(message = "Paciente é obrigatório")
     private UUID paciente;
-    
+
     private UUID profissional;
     private UUID medico;
     private UUID especialidade;
     private UUID convenio;
     private UUID atendimento;
     private UUID agendamentoOriginal;
-    
+
     @NotNull(message = "Data e hora são obrigatórias")
     private OffsetDateTime dataHora;
     private OffsetDateTime dataHoraFim;
     private Integer duracaoPrevistaMinutos;
-    
+
     @NotNull(message = "Status do agendamento é obrigatório")
     @JsonDeserialize(using = StatusAgendamentoEnumDeserializer.class)
     private StatusAgendamentoEnum status;
-    
+
     @JsonDeserialize(using = PrioridadeAtendimentoEnumDeserializer.class)
     private PrioridadeAtendimentoEnum prioridade;
     private Boolean ehEncaixe;

@@ -30,9 +30,9 @@ public class EquipeSaudeResponse {
     private OffsetDateTime dataAtivacao;
     private OffsetDateTime dataInativacao;
     private StatusAtivoEnum status;
-    
+
     @Builder.Default
     private Set<VinculoProfissionalEquipeResponse> vinculosProfissionais = new HashSet<>();
-    
+
     private String observacoes;
 }

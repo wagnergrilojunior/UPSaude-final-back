@@ -21,11 +21,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.UUID;
 
-/**
- * Implementação do serviço de gerenciamento de EspecialidadesMedicas.
- *
- * @author UPSaúde
- */
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -39,14 +34,13 @@ public class EspecialidadesMedicasServiceImpl implements EspecialidadesMedicasSe
     @CacheEvict(value = "especialidadesmedicas", allEntries = true)
     public EspecialidadesMedicasResponse criar(EspecialidadesMedicasRequest request) {
         log.debug("Criando nova especialidade médica. Request: {}", request);
-        
+
         if (request == null) {
             log.warn("Tentativa de criar especialidade médica com request nulo");
             throw new BadRequestException("Dados da especialidade médica são obrigatórios");
         }
 
         try {
-            // Validação de dados básicos é feita automaticamente pelo Bean Validation no Request
 
             EspecialidadesMedicas especialidadesMedicas = especialidadesMedicasMapper.fromRequest(request);
             especialidadesMedicas.setActive(true);
@@ -72,7 +66,7 @@ public class EspecialidadesMedicasServiceImpl implements EspecialidadesMedicasSe
     @Cacheable(value = "especialidadesmedicas", key = "#id")
     public EspecialidadesMedicasResponse obterPorId(UUID id) {
         log.debug("Buscando especialidade médica por ID: {} (cache miss)", id);
-        
+
         if (id == null) {
             log.warn("ID nulo recebido para busca de especialidade médica");
             throw new BadRequestException("ID da especialidade médica é obrigatório");
@@ -131,12 +125,10 @@ public class EspecialidadesMedicasServiceImpl implements EspecialidadesMedicasSe
         }
 
         try {
-            // Validação de dados básicos é feita automaticamente pelo Bean Validation no Request
 
             EspecialidadesMedicas especialidadesMedicasExistente = especialidadesMedicasRepository.findById(id)
                     .orElseThrow(() -> new NotFoundException("Especialidade médica não encontrada com ID: " + id));
 
-            // Usa mapper do MapStruct que preserva campos de controle automaticamente
             especialidadesMedicasMapper.updateFromRequest(request, especialidadesMedicasExistente);
 
             EspecialidadesMedicas especialidadesMedicasAtualizado = especialidadesMedicasRepository.save(especialidadesMedicasExistente);
@@ -196,10 +188,4 @@ public class EspecialidadesMedicasServiceImpl implements EspecialidadesMedicasSe
         }
     }
 
-        // Validações de dados básicos foram movidas para o Request usando Bean Validation
-    // (@NotNull, @NotBlank, @Pattern, etc). Isso garante validação automática no Controller
-    // e retorno de erro 400 padronizado via ApiExceptionHandler.
-
-    // Método removido - agora usa especialidadesMedicasMapper.updateFromRequest diretamente
-    // O MapStruct já preserva campos de controle automaticamente
 }

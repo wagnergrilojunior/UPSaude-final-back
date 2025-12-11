@@ -30,11 +30,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-/**
- * Implementação do serviço de gerenciamento de Equipes de Saúde.
- *
- * @author UPSaúde
- */
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -50,22 +45,19 @@ public class EquipeSaudeServiceImpl implements EquipeSaudeService {
     @CacheEvict(value = "equipesaude", allEntries = true)
     public EquipeSaudeResponse criar(EquipeSaudeRequest request) {
         log.debug("Criando nova equipe de saúde. Request: {}", request);
-        
+
         if (request == null) {
             log.warn("Tentativa de criar equipe de saúde com request nulo");
             throw new BadRequestException("Dados da equipe de saúde são obrigatórios");
         }
 
         try {
-            // Validação de dados básicos é feita automaticamente pelo Bean Validation no Request
 
-            // Valida se já existe equipe com mesmo INE no estabelecimento
             if (equipeSaudeRepository.findByIneAndEstabelecimentoId(request.getIne(), request.getEstabelecimento()).isPresent()) {
                 log.warn("Tentativa de criar equipe com INE duplicado. INE: {}, Estabelecimento: {}", request.getIne(), request.getEstabelecimento());
                 throw new BadRequestException("Já existe uma equipe com o INE " + request.getIne() + " neste estabelecimento");
             }
 
-            // Carrega e valida estabelecimento
             Estabelecimentos estabelecimento = estabelecimentosRepository.findById(request.getEstabelecimento())
                     .orElseThrow(() -> new NotFoundException("Estabelecimento não encontrado com ID: " + request.getEstabelecimento()));
 
@@ -74,10 +66,6 @@ public class EquipeSaudeServiceImpl implements EquipeSaudeService {
             equipe.setActive(true);
 
             EquipeSaude equipeSalva = equipeSaudeRepository.save(equipe);
-
-            // Cria vínculos com profissionais se fornecidos
-            // Nota: Os vínculos devem ser criados através de endpoint específico ou service dedicado
-            // Aqui apenas salvamos a equipe sem vínculos iniciais
 
             log.info("Equipe de saúde criada com sucesso. ID: {}", equipeSalva.getId());
 
@@ -99,7 +87,7 @@ public class EquipeSaudeServiceImpl implements EquipeSaudeService {
     @Cacheable(value = "equipesaude", key = "#id")
     public EquipeSaudeResponse obterPorId(UUID id) {
         log.debug("Buscando equipe de saúde por ID: {} (cache miss)", id);
-        
+
         if (id == null) {
             log.warn("ID nulo recebido para busca de equipe de saúde");
             throw new BadRequestException("ID da equipe é obrigatório");
@@ -209,12 +197,10 @@ public class EquipeSaudeServiceImpl implements EquipeSaudeService {
         }
 
         try {
-            // Validação de dados básicos é feita automaticamente pelo Bean Validation no Request
 
             EquipeSaude equipeExistente = equipeSaudeRepository.findById(id)
                     .orElseThrow(() -> new NotFoundException("Equipe de saúde não encontrada com ID: " + id));
 
-            // Valida se o INE foi alterado e se já existe outro com o mesmo INE no estabelecimento
             if (!equipeExistente.getIne().equals(request.getIne())) {
                 if (equipeSaudeRepository.findByIneAndEstabelecimentoId(request.getIne(), request.getEstabelecimento()).isPresent()) {
                     log.warn("Tentativa de atualizar equipe com INE duplicado. INE: {}, Estabelecimento: {}", request.getIne(), request.getEstabelecimento());
@@ -222,10 +208,8 @@ public class EquipeSaudeServiceImpl implements EquipeSaudeService {
                 }
             }
 
-            // Usa mapper do MapStruct que preserva campos de controle automaticamente
             equipeSaudeMapper.updateFromRequest(request, equipeExistente);
-            
-            // Atualiza estabelecimento se foi alterado
+
             if (!equipeExistente.getEstabelecimento().getId().equals(request.getEstabelecimento())) {
                 Estabelecimentos estabelecimento = estabelecimentosRepository.findById(request.getEstabelecimento())
                         .orElseThrow(() -> new NotFoundException("Estabelecimento não encontrado com ID: " + request.getEstabelecimento()));
@@ -289,13 +273,4 @@ public class EquipeSaudeServiceImpl implements EquipeSaudeService {
         }
     }
 
-    // Validações de dados básicos foram movidas para o Request usando Bean Validation
-    // (@NotNull, @NotBlank, @Pattern, etc). Isso garante validação automática no Controller
-    // e retorno de erro 400 padronizado via ApiExceptionHandler.
-
-    // Método removido - agora usa equipeSaudeMapper.updateFromRequest diretamente
-    // O MapStruct já preserva campos de controle automaticamente
-    // A lógica de atualização de estabelecimento foi movida para o método atualizar
-    // Nota: Vínculos com profissionais devem ser gerenciados através de endpoints específicos
 }
-

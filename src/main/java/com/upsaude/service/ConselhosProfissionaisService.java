@@ -7,11 +7,6 @@ import org.springframework.data.domain.Pageable;
 
 import java.util.UUID;
 
-/**
- * Interface de serviço para operações CRUD relacionadas a ConselhosProfissionais.
- *
- * @author UPSaúde
- */
 public interface ConselhosProfissionaisService {
 
     ConselhosProfissionaisResponse criar(ConselhosProfissionaisRequest request);

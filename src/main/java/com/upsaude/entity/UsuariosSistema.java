@@ -42,9 +42,6 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 @EntityListeners({AuditingEntityListener.class})
 public class UsuariosSistema {
 
-    /**
-     * Construtor padrão que inicializa as coleções para evitar NullPointerException.
-     */
     public UsuariosSistema() {
         this.estabelecimentosVinculados = new ArrayList<>();
     }
@@ -65,13 +62,11 @@ public class UsuariosSistema {
     @Column(name = "ativo", nullable = false)
     private Boolean active = true;
 
-    // ========== TENANT ==========
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "tenant_id", nullable = false)
     @NotNull(message = "Tenant é obrigatório")
     private Tenant tenant;
 
-    // ========== DADOS DO USUÁRIO ==========
     @Column(name = "user_id", nullable = false)
     @NotNull(message = "Usuário (auth) é obrigatório")
     private UUID userId;
@@ -88,46 +83,25 @@ public class UsuariosSistema {
     @JoinColumn(name = "paciente_id")
     private Paciente paciente;
 
-    /**
-     * Indica se o usuário é administrador do tenant.
-     * Se true: tem acesso total ao tenant e todos os estabelecimentos, não precisa de vínculos.
-     * Se false: precisa ter vínculos com estabelecimentos específicos.
-     */
     @Column(name = "admin_tenant", nullable = false)
     @NotNull(message = "Admin tenant é obrigatório")
     private Boolean adminTenant = false;
 
-    /**
-     * Tipo de vínculo do usuário: MEDICO, PROFISSIONAL, PACIENTE, OUTROS.
-     * Define qual tipo de relacionamento o usuário tem e quais abas aparecem no formulário.
-     */
     @Column(name = "tipo_vinculo", length = 50)
-    private String tipoVinculo; // Valores: MEDICO, PROFISSIONAL, PACIENTE, OUTROS
+    private String tipoVinculo;
 
     @Column(name = "nome_exibicao", length = 255)
     private String nomeExibicao;
 
     @Column(name = "username", length = 100, unique = true)
-    private String username; // Campo para login alternativo
+    private String username;
 
     @Column(name = "foto_url", columnDefinition = "TEXT")
-    private String fotoUrl; // URL da foto no Supabase Storage
+    private String fotoUrl;
 
-    // ========== RELACIONAMENTOS ==========
-    
-    /**
-     * Estabelecimentos vinculados ao usuário.
-     * OneToMany bidirecional com cascade completo - JPA gerencia automaticamente.
-     */
     @OneToMany(mappedBy = "usuario", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     private List<UsuarioEstabelecimento> estabelecimentosVinculados = new ArrayList<>();
 
-    // ========== MÉTODOS DE CICLO DE VIDA ==========
-
-    /**
-     * Garante que as coleções não sejam nulas antes de persistir ou atualizar.
-     * Recria a lista se estiver nula.
-     */
     @PrePersist
     @PreUpdate
     public void validateCollections() {
@@ -136,14 +110,6 @@ public class UsuariosSistema {
         }
     }
 
-    // ========== MÉTODOS UTILITÁRIOS - ESTABELECIMENTOS VINCULADOS ==========
-
-    /**
-     * Adiciona um estabelecimento vinculado com sincronização bidirecional.
-     * Garante que o vínculo também referencia este usuário.
-     *
-     * @param estabelecimentoVinculado O vínculo a ser adicionado
-     */
     public void addEstabelecimentoVinculado(UsuarioEstabelecimento estabelecimentoVinculado) {
         if (estabelecimentoVinculado == null) {
             return;
@@ -157,12 +123,6 @@ public class UsuariosSistema {
         }
     }
 
-    /**
-     * Remove um estabelecimento vinculado com sincronização bidirecional.
-     * Remove a referência do vínculo para este usuário.
-     *
-     * @param estabelecimentoVinculado O vínculo a ser removido
-     */
     public void removeEstabelecimentoVinculado(UsuarioEstabelecimento estabelecimentoVinculado) {
         if (estabelecimentoVinculado == null || estabelecimentosVinculados == null) {
             return;

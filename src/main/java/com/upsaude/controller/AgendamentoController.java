@@ -27,11 +27,6 @@ import org.springframework.web.bind.annotation.*;
 import java.time.OffsetDateTime;
 import java.util.UUID;
 
-/**
- * Controlador REST para operações relacionadas a Agendamento.
- *
- * @author UPSaúde
- */
 @RestController
 @RequestMapping("/v1/agendamentos")
 @Tag(name = "Agendamentos", description = "API para gerenciamento de Agendamentos")

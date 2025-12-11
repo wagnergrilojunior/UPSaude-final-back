@@ -24,11 +24,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
 
-/**
- * Controlador REST para operações relacionadas a Fabricantes de Medicamento.
- *
- * @author UPSaúde
- */
 @Slf4j
 @RestController
 @RequestMapping("/v1/fabricantes-medicamento")
@@ -155,4 +150,3 @@ public class FabricantesMedicamentoController {
         }
     }
 }
-

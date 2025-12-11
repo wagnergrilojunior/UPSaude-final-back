@@ -19,11 +19,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.UUID;
 
-/**
- * Implementação do serviço de gerenciamento de LogsAuditoria.
- *
- * @author UPSaúde
- */
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -37,13 +32,11 @@ public class LogsAuditoriaServiceImpl implements LogsAuditoriaService {
     @CacheEvict(value = "logsauditoria", allEntries = true)
     public LogsAuditoriaResponse criar(LogsAuditoriaRequest request) {
         log.debug("Criando novo LogsAuditoria");
-        
+
         if (request == null) {
             log.warn("Request nulo recebido para criação de LogsAuditoria");
             throw new BadRequestException("Dados do log de auditoria são obrigatórios");
         }
-
-        // Validação de dados básicos é feita automaticamente pelo Bean Validation no Request
 
         LogsAuditoria logsAuditoria = logsAuditoriaMapper.fromRequest(request);
         logsAuditoria.setActive(true);
@@ -59,7 +52,7 @@ public class LogsAuditoriaServiceImpl implements LogsAuditoriaService {
     @Cacheable(value = "logsauditoria", key = "#id")
     public LogsAuditoriaResponse obterPorId(UUID id) {
         log.debug("Buscando LogsAuditoria por ID: {} (cache miss)", id);
-        
+
         if (id == null) {
             log.warn("ID nulo recebido para busca de LogsAuditoria");
             throw new BadRequestException("ID do log de auditoria é obrigatório");
@@ -93,13 +86,11 @@ public class LogsAuditoriaServiceImpl implements LogsAuditoriaService {
             log.warn("ID nulo recebido para atualização de LogsAuditoria");
             throw new BadRequestException("ID do log de auditoria é obrigatório");
         }
-        
+
         if (request == null) {
             log.warn("Request nulo recebido para atualização de LogsAuditoria. ID: {}", id);
             throw new BadRequestException("Dados do log de auditoria são obrigatórios");
         }
-
-        // Validação de dados básicos é feita automaticamente pelo Bean Validation no Request
 
         LogsAuditoria logsAuditoriaExistente = logsAuditoriaRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("LogsAuditoria não encontrado com ID: " + id));
@@ -136,12 +127,8 @@ public class LogsAuditoriaServiceImpl implements LogsAuditoriaService {
         log.info("LogsAuditoria excluído (desativado) com sucesso. ID: {}", id);
     }
 
-    // Validações de dados básicos foram movidas para o Request usando Bean Validation
-    // (@NotNull, @NotBlank, @Pattern, etc). Isso garante validação automática no Controller
-    // e retorno de erro 400 padronizado via ApiExceptionHandler.
-
     private void atualizarDadosLogsAuditoria(LogsAuditoria logsAuditoria, LogsAuditoriaRequest request) {
-        // Usar mapper para atualizar campos básicos
+
         logsAuditoriaMapper.updateFromRequest(request, logsAuditoria);
     }
 }

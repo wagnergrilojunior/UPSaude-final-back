@@ -24,11 +24,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
 
-/**
- * Controlador REST para operações relacionadas a Tenants.
- *
- * @author UPSaúde
- */
 @RestController
 @RequestMapping("/v1/tenants")
 @Tag(name = "Tenants", description = "API para gerenciamento de Tenants")

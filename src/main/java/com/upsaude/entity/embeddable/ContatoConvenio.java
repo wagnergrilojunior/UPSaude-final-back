@@ -8,11 +8,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 
-/**
- * Classe embeddable para informações de contato do convênio.
- *
- * @author UPSaúde
- */
 @Embeddable
 @Data
 @Builder
@@ -80,4 +75,3 @@ public class ContatoConvenio {
     @Column(name = "email_contato", length = 255)
     private String emailContato;
 }
-

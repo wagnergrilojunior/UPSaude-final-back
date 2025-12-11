@@ -23,4 +23,3 @@ public class ClassificacaoRiscoGestacionalEnumConverter implements AttributeConv
         return ClassificacaoRiscoGestacionalEnum.fromCodigo(dbData);
     }
 }
-

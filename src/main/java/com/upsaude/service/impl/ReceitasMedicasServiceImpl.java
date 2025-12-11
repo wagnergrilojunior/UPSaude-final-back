@@ -30,11 +30,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.UUID;
 
-/**
- * Implementação do serviço de gerenciamento de ReceitasMedicas.
- *
- * @author UPSaúde
- */
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -54,28 +49,21 @@ public class ReceitasMedicasServiceImpl implements ReceitasMedicasService {
     public ReceitasMedicasResponse criar(ReceitasMedicasRequest request) {
         log.debug("Criando novo receitasmedicas");
 
-        // Validação de dados básicos é feita automaticamente pelo Bean Validation no Request
-
         ReceitasMedicas receitasMedicas = receitasMedicasMapper.fromRequest(request);
 
-        // Carrega e define o médico
         Medicos medico = medicosRepository.findById(request.getMedico())
                 .orElseThrow(() -> new NotFoundException("Médico não encontrado com ID: " + request.getMedico()));
         receitasMedicas.setMedico(medico);
 
-        // Carrega e define o paciente
         Paciente paciente = pacienteRepository.findById(request.getPaciente())
                 .orElseThrow(() -> new NotFoundException("Paciente não encontrado com ID: " + request.getPaciente()));
         receitasMedicas.setPaciente(paciente);
 
-        // CID principal é opcional
         if (request.getCidPrincipal() != null) {
             CidDoencas cidPrincipal = cidDoencasRepository.findById(request.getCidPrincipal())
                     .orElseThrow(() -> new NotFoundException("CID não encontrado com ID: " + request.getCidPrincipal()));
             receitasMedicas.setCidPrincipal(cidPrincipal);
         }
-
-        // Medicações são gerenciadas por relacionamento separado
 
         receitasMedicas.setActive(true);
 
@@ -132,8 +120,6 @@ public class ReceitasMedicasServiceImpl implements ReceitasMedicasService {
             throw new BadRequestException("ID do receitasmedicas é obrigatório");
         }
 
-        // Validação de dados básicos é feita automaticamente pelo Bean Validation no Request
-
         ReceitasMedicas receitasMedicasExistente = receitasMedicasRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("ReceitasMedicas não encontrado com ID: " + id));
 
@@ -167,27 +153,20 @@ public class ReceitasMedicasServiceImpl implements ReceitasMedicasService {
         log.info("ReceitasMedicas excluído (desativado) com sucesso. ID: {}", id);
     }
 
-    // Validações de dados básicos foram movidas para o Request usando Bean Validation
-    // (@NotNull, @NotBlank, @Pattern, etc). Isso garante validação automática no Controller
-    // e retorno de erro 400 padronizado via ApiExceptionHandler.
-    // Todos os campos obrigatórios já têm @NotNull/@NotBlank no Request.
-
     private void atualizarDadosReceitasMedicas(ReceitasMedicas receitasMedicas, ReceitasMedicasRequest request) {
-        // Atualiza médico se fornecido
+
         if (request.getMedico() != null) {
             Medicos medico = medicosRepository.findById(request.getMedico())
                     .orElseThrow(() -> new NotFoundException("Médico não encontrado com ID: " + request.getMedico()));
             receitasMedicas.setMedico(medico);
         }
 
-        // Atualiza paciente se fornecido
         if (request.getPaciente() != null) {
             Paciente paciente = pacienteRepository.findById(request.getPaciente())
                     .orElseThrow(() -> new NotFoundException("Paciente não encontrado com ID: " + request.getPaciente()));
             receitasMedicas.setPaciente(paciente);
         }
 
-        // Atualiza CID principal se fornecido
         if (request.getCidPrincipal() != null) {
             CidDoencas cidPrincipal = cidDoencasRepository.findById(request.getCidPrincipal())
                     .orElseThrow(() -> new NotFoundException("CID não encontrado com ID: " + request.getCidPrincipal()));
@@ -196,9 +175,6 @@ public class ReceitasMedicasServiceImpl implements ReceitasMedicasService {
             receitasMedicas.setCidPrincipal(null);
         }
 
-        // Medicações são gerenciadas por relacionamento separado
-
-        // Atualiza outros campos
         if (request.getNumeroReceita() != null) {
             receitasMedicas.setNumeroReceita(request.getNumeroReceita());
         }

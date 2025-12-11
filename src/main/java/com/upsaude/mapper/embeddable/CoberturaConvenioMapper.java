@@ -14,7 +14,6 @@ public interface CoberturaConvenioMapper {
     CoberturaConvenioResponse toResponse(CoberturaConvenio entity);
     void updateFromRequest(CoberturaConvenioRequest request, @MappingTarget CoberturaConvenio entity);
 
-    // Mapeamento entre DTO e Entity
     CoberturaConvenio toEntity(com.upsaude.dto.embeddable.CoberturaConvenioDTO dto);
     com.upsaude.dto.embeddable.CoberturaConvenioDTO toDTO(CoberturaConvenio entity);
     void updateFromDTO(com.upsaude.dto.embeddable.CoberturaConvenioDTO dto, @MappingTarget CoberturaConvenio entity);

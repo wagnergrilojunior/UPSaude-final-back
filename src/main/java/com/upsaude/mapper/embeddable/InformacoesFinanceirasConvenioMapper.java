@@ -14,7 +14,6 @@ public interface InformacoesFinanceirasConvenioMapper {
     InformacoesFinanceirasConvenioResponse toResponse(InformacoesFinanceirasConvenio entity);
     void updateFromRequest(InformacoesFinanceirasConvenioRequest request, @MappingTarget InformacoesFinanceirasConvenio entity);
 
-    // Mapeamento entre DTO e Entity
     InformacoesFinanceirasConvenio toEntity(com.upsaude.dto.embeddable.InformacoesFinanceirasConvenioDTO dto);
     com.upsaude.dto.embeddable.InformacoesFinanceirasConvenioDTO toDTO(InformacoesFinanceirasConvenio entity);
     void updateFromDTO(com.upsaude.dto.embeddable.InformacoesFinanceirasConvenioDTO dto, @MappingTarget InformacoesFinanceirasConvenio entity);

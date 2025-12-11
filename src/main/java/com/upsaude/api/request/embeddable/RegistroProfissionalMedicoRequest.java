@@ -23,20 +23,20 @@ public class RegistroProfissionalMedicoRequest {
     @NotBlank(message = "CRM é obrigatório")
     @Pattern(regexp = "^\\d{4,10}$", message = "CRM deve ter entre 4 e 10 dígitos")
     private String crm;
-    
+
     @Pattern(regexp = "^$|^[A-Z]{2}$", message = "UF do CRM deve ter exatamente 2 letras maiúsculas")
     private String crmUf;
-    
+
     @JsonDeserialize(using = StatusRegistroMedicoEnumDeserializer.class)
     private StatusRegistroMedicoEnum statusCrm;
-    
+
     private LocalDate dataEmissaoCrm;
-    
+
     private LocalDate dataValidadeCrm;
-    
+
     @Size(max = 50, message = "CRM complementar deve ter no máximo 50 caracteres")
     private String crmComplementar;
-    
+
     @Size(max = 255, message = "Observações CRM deve ter no máximo 255 caracteres")
     private String observacoesCrm;
 }

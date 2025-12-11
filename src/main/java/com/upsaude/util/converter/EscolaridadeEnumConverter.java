@@ -23,4 +23,3 @@ public class EscolaridadeEnumConverter implements AttributeConverter<Escolaridad
         return EscolaridadeEnum.fromCodigo(dbData);
     }
 }
-

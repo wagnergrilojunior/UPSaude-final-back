@@ -7,11 +7,6 @@ import org.springframework.data.domain.Pageable;
 
 import java.util.UUID;
 
-/**
- * Interface de serviço para operações CRUD relacionadas a TratamentosProcedimentos.
- *
- * @author UPSaúde
- */
 public interface TratamentosProcedimentosService {
 
     TratamentosProcedimentosResponse criar(TratamentosProcedimentosRequest request);

@@ -21,4 +21,3 @@ public interface ResponsavelLegalService {
 
     void excluir(UUID id);
 }
-

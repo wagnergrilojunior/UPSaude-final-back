@@ -8,11 +8,6 @@ import org.springframework.data.domain.Pageable;
 import java.util.List;
 import java.util.UUID;
 
-/**
- * Interface de serviço para operações relacionadas a Puericultura.
- *
- * @author UPSaúde
- */
 public interface PuericulturaService {
 
     PuericulturaResponse criar(PuericulturaRequest request);
@@ -31,4 +26,3 @@ public interface PuericulturaService {
 
     void excluir(UUID id);
 }
-

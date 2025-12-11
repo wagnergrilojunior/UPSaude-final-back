@@ -26,11 +26,6 @@ import org.springframework.stereotype.Service;
 import java.util.Optional;
 import java.util.UUID;
 
-/**
- * Implementação do serviço de gerenciamento de vínculos entre profissionais e equipes de saúde.
- *
- * @author UPSaúde
- */
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -47,7 +42,6 @@ public class VinculoProfissionalEquipeServiceImpl implements VinculoProfissional
     public VinculoProfissionalEquipeResponse criar(VinculoProfissionalEquipeRequest request) {
         log.debug("Criando novo vínculo de profissional com equipe");
 
-        // Validação de dados básicos é feita automaticamente pelo Bean Validation no Request
         validarIntegridade(request, null);
 
         ProfissionaisSaude profissional = profissionaisSaudeRepository.findById(request.getProfissional())
@@ -56,17 +50,14 @@ public class VinculoProfissionalEquipeServiceImpl implements VinculoProfissional
         EquipeSaude equipe = equipeSaudeRepository.findById(request.getEquipe())
                 .orElseThrow(() -> new NotFoundException("Equipe não encontrada com ID: " + request.getEquipe()));
 
-        // Valida se o profissional está ativo e habilitado
         if (profissional.getStatusRegistro() == null || profissional.getStatusRegistro().isSuspenso() || profissional.getStatusRegistro().isInativo()) {
             throw new BadRequestException("Não é possível vincular um profissional com registro " + profissional.getStatusRegistro().getDescricao());
         }
 
-        // Valida que o profissional e a equipe pertencem ao mesmo tenant
         if (!profissional.getTenant().getId().equals(equipe.getTenant().getId())) {
             throw new BadRequestException("Profissional e equipe devem pertencer ao mesmo tenant.");
         }
 
-        // Valida que a equipe está ativa
         if (equipe.getStatus() == null || equipe.getStatus().isInativo()) {
             throw new BadRequestException("Não é possível vincular profissional a uma equipe inativa.");
         }
@@ -74,7 +65,7 @@ public class VinculoProfissionalEquipeServiceImpl implements VinculoProfissional
         VinculoProfissionalEquipe vinculo = vinculoMapper.fromRequest(request);
         vinculo.setProfissional(profissional);
         vinculo.setEquipe(equipe);
-        vinculo.setTenant(profissional.getTenant()); // Garante que o vínculo tenha o tenant do profissional
+        vinculo.setTenant(profissional.getTenant());
         vinculo.setActive(true);
 
         VinculoProfissionalEquipe vinculoSalvo = vinculoRepository.save(vinculo);
@@ -163,7 +154,6 @@ public class VinculoProfissionalEquipeServiceImpl implements VinculoProfissional
             throw new BadRequestException("ID do vínculo é obrigatório");
         }
 
-        // Validação de dados básicos é feita automaticamente pelo Bean Validation no Request
         validarIntegridade(request, id);
 
         VinculoProfissionalEquipe vinculoExistente = vinculoRepository.findById(id)
@@ -175,12 +165,10 @@ public class VinculoProfissionalEquipeServiceImpl implements VinculoProfissional
         EquipeSaude equipe = equipeSaudeRepository.findById(request.getEquipe())
                 .orElseThrow(() -> new NotFoundException("Equipe não encontrada com ID: " + request.getEquipe()));
 
-        // Valida se o profissional está ativo e habilitado
         if (profissional.getStatusRegistro() == null || profissional.getStatusRegistro().isSuspenso() || profissional.getStatusRegistro().isInativo()) {
             throw new BadRequestException("Não é possível vincular um profissional com registro " + profissional.getStatusRegistro().getDescricao());
         }
 
-        // Valida que o profissional e a equipe pertencem ao mesmo tenant
         if (!profissional.getTenant().getId().equals(equipe.getTenant().getId())) {
             throw new BadRequestException("Profissional e equipe devem pertencer ao mesmo tenant.");
         }
@@ -215,12 +203,8 @@ public class VinculoProfissionalEquipeServiceImpl implements VinculoProfissional
         log.info("Vínculo de profissional com equipe excluído (desativado) com sucesso. ID: {}", id);
     }
 
-    // Validações de dados básicos foram movidas para o Request usando Bean Validation
-    // (@NotNull, @NotBlank, @Pattern, etc). Isso garante validação automática no Controller
-    // e retorno de erro 400 padronizado via ApiExceptionHandler.
-
     private void validarIntegridade(VinculoProfissionalEquipeRequest request, UUID currentId) {
-        // Valida se já existe vínculo ativo entre o profissional e a equipe
+
         Optional<VinculoProfissionalEquipe> existingVinculo = vinculoRepository
                 .findByProfissionalIdAndEquipeId(request.getProfissional(), request.getEquipe());
 
@@ -242,4 +226,3 @@ public class VinculoProfissionalEquipeServiceImpl implements VinculoProfissional
         vinculo.setObservacoes(request.getObservacoes());
     }
 }
-

@@ -14,4 +14,3 @@ public class DoencasCronicasPacienteResponse {
     private OffsetDateTime updatedAt;
     private Boolean active;
 }
-

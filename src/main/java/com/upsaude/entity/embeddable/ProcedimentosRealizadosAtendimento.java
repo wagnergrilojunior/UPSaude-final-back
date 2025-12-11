@@ -6,11 +6,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 
-/**
- * Classe embeddable para informações de procedimentos realizados no atendimento.
- *
- * @author UPSaúde
- */
 @Embeddable
 @Data
 @Builder
@@ -26,18 +21,17 @@ public class ProcedimentosRealizadosAtendimento {
     }
 
     @Column(name = "procedimentos_realizados", columnDefinition = "TEXT")
-    private String procedimentosRealizados; // Procedimentos realizados durante o atendimento
+    private String procedimentosRealizados;
 
     @Column(name = "exames_solicitados", columnDefinition = "TEXT")
-    private String examesSolicitados; // Exames solicitados
+    private String examesSolicitados;
 
     @Column(name = "medicamentos_prescritos", columnDefinition = "TEXT")
-    private String medicamentosPrescritos; // Medicamentos prescritos
+    private String medicamentosPrescritos;
 
     @Column(name = "orientacoes", columnDefinition = "TEXT")
-    private String orientacoes; // Orientações dadas ao paciente
+    private String orientacoes;
 
     @Column(name = "encaminhamentos", columnDefinition = "TEXT")
-    private String encaminhamentos; // Encaminhamentos realizados
+    private String encaminhamentos;
 }
-

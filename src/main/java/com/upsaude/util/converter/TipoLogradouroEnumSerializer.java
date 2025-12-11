@@ -6,10 +6,6 @@ import com.fasterxml.jackson.databind.SerializerProvider;
 import com.upsaude.enums.TipoLogradouroEnum;
 import java.io.IOException;
 
-/**
- * Serializador customizado para TipoLogradouroEnum.
- * Retorna a descrição do enum ao invés do nome.
- */
 public class TipoLogradouroEnumSerializer extends JsonSerializer<TipoLogradouroEnum> {
 
     @Override

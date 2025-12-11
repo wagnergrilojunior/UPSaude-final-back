@@ -6,11 +6,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 
-/**
- * Classe embeddable para contraindicações e precauções do medicamento.
- *
- * @author UPSaúde
- */
 @Embeddable
 @Data
 @Builder
@@ -29,31 +24,30 @@ public class ContraindicacoesPrecaucoesMedicamento {
     }
 
     @Column(name = "contraindicacoes", columnDefinition = "TEXT")
-    private String contraindicacoes; // Contraindicações gerais
+    private String contraindicacoes;
 
     @Column(name = "precaucoes", columnDefinition = "TEXT")
-    private String precaucoes; // Precauções de uso
+    private String precaucoes;
 
     @Column(name = "gestante_pode", nullable = false)
     @Builder.Default
-    private Boolean gestantePode = false; // Se gestante pode usar
+    private Boolean gestantePode = false;
 
     @Column(name = "lactante_pode", nullable = false)
     @Builder.Default
-    private Boolean lactantePode = false; // Se lactante pode usar
+    private Boolean lactantePode = false;
 
     @Column(name = "crianca_pode", nullable = false)
     @Builder.Default
-    private Boolean criancaPode = true; // Se criança pode usar
+    private Boolean criancaPode = true;
 
     @Column(name = "idoso_pode", nullable = false)
     @Builder.Default
-    private Boolean idosoPode = true; // Se idoso pode usar
+    private Boolean idosoPode = true;
 
     @Column(name = "interacoes_medicamentosas", columnDefinition = "TEXT")
-    private String interacoesMedicamentosas; // Interações medicamentosas conhecidas
+    private String interacoesMedicamentosas;
 
     @Column(name = "efeitos_colaterais", columnDefinition = "TEXT")
-    private String efeitosColaterais; // Efeitos colaterais comuns
+    private String efeitosColaterais;
 }
-

@@ -23,4 +23,3 @@ public class TipoAtendimentoPreferencialEnumConverter implements AttributeConver
         return TipoAtendimentoPreferencialEnum.fromCodigo(dbData);
     }
 }
-

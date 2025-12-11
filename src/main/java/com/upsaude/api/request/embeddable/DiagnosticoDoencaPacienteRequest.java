@@ -24,13 +24,13 @@ public class DiagnosticoDoencaPacienteRequest {
     private LocalDate dataInicioSintomas;
     @JsonDeserialize(using = StatusDiagnosticoEnumDeserializer.class)
     private StatusDiagnosticoEnum statusDiagnostico;
-    
+
     @JsonDeserialize(using = GravidadeDoencaEnumDeserializer.class)
     private GravidadeDoencaEnum gravidadeAtual;
-    
+
     @Size(max = 255, message = "Local diagnóstico deve ter no máximo 255 caracteres")
     private String localDiagnostico;
-    
+
     @Size(max = 255, message = "Método diagnóstico deve ter no máximo 255 caracteres")
     private String metodoDiagnostico;
 }

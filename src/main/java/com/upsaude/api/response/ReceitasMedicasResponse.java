@@ -31,7 +31,7 @@ public class ReceitasMedicasResponse {
     private StatusReceitaEnum status;
     private String origemReceita;
     private CidDoencasResponse cidPrincipal;
-    
+
     @Builder.Default
     private List<MedicacaoResponse> medicacoes = new ArrayList<>();
 }

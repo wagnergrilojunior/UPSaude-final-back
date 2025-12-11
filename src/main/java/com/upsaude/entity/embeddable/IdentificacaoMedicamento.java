@@ -8,11 +8,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 
-/**
- * Classe embeddable para identificação do medicamento.
- *
- * @author UPSaúde
- */
 @Embeddable
 @Data
 @Builder
@@ -42,26 +37,25 @@ public class IdentificacaoMedicamento {
 
     @Size(max = 255, message = "Nome genérico deve ter no máximo 255 caracteres")
     @Column(name = "nome_generico", length = 255)
-    private String nomeGenerico; // Nome genérico do medicamento
+    private String nomeGenerico;
 
     @Size(max = 50, message = "Código interno deve ter no máximo 50 caracteres")
     @Column(name = "codigo_interno", length = 50)
-    private String codigoInterno; // Código interno do sistema
+    private String codigoInterno;
 
     @Size(max = 20, message = "Código CATMAT deve ter no máximo 20 caracteres")
     @Column(name = "catmat_codigo", length = 20)
-    private String catmatCodigo; // Código CATMAT do Ministério da Saúde
+    private String catmatCodigo;
 
     @Size(max = 50, message = "Código ANVISA deve ter no máximo 50 caracteres")
     @Column(name = "codigo_anvisa", length = 50)
-    private String codigoAnvisa; // Código de registro na ANVISA
+    private String codigoAnvisa;
 
     @Size(max = 50, message = "Código TUSS deve ter no máximo 50 caracteres")
     @Column(name = "codigo_tuss", length = 50)
-    private String codigoTuss; // Código TUSS (Terminologia Unificada da Saúde Suplementar)
+    private String codigoTuss;
 
     @Size(max = 50, message = "Código SIGTAP deve ter no máximo 50 caracteres")
     @Column(name = "codigo_sigtap", length = 50)
-    private String codigoSigtap; // Código SIGTAP (Sistema de Gerenciamento da Tabela de Procedimentos)
+    private String codigoSigtap;
 }
-

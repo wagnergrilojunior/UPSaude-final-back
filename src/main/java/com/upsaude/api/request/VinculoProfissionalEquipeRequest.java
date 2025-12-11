@@ -22,7 +22,7 @@ public class VinculoProfissionalEquipeRequest {
     private TipoVinculoProfissionalEnum tipoVinculo;
     private String funcaoEquipe;
     private Integer cargaHorariaSemanal;
-    
+
     @JsonDeserialize(using = StatusAtivoEnumDeserializer.class)
     private StatusAtivoEnum status;
     private String observacoes;

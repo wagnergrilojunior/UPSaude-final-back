@@ -11,12 +11,6 @@ import jakarta.validation.constraints.Size;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
-/**
- * Entidade que representa um serviço oferecido por um estabelecimento de saúde.
- * Permite registrar os serviços disponíveis conforme exigências do CNES.
- *
- * @author UPSaúde
- */
 @Entity
 @Table(name = "servicos_estabelecimento", schema = "public")
 @Data
@@ -43,4 +37,3 @@ public class ServicosEstabelecimento extends BaseEntity {
     @Column(name = "descricao", columnDefinition = "TEXT")
     private String descricao;
 }
-

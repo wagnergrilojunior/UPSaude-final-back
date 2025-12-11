@@ -16,12 +16,6 @@ import lombok.EqualsAndHashCode;
 
 import java.time.OffsetDateTime;
 
-/**
- * Entidade que representa atividades realizadas por profissionais de saúde no dia a dia.
- * Permite registrar o trabalho diário dos profissionais para gestão e auditoria.
- *
- * @author UPSaúde
- */
 @Entity
 @Table(name = "atividades_profissionais", schema = "public",
        indexes = {
@@ -35,8 +29,6 @@ import java.time.OffsetDateTime;
 @EqualsAndHashCode(callSuper = true)
 public class AtividadeProfissional extends BaseEntity {
 
-    // ========== RELACIONAMENTOS ==========
-
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "profissional_id", nullable = false)
     @NotNull(message = "Profissional de saúde é obrigatório")
@@ -44,21 +36,19 @@ public class AtividadeProfissional extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "medico_id")
-    private Medicos medico; // Opcional: para médicos específicos
+    private Medicos medico;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "paciente_id")
-    private Paciente paciente; // Opcional: se a atividade envolve um paciente
+    private Paciente paciente;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "atendimento_id")
-    private Atendimento atendimento; // Opcional: se relacionado a um atendimento
+    private Atendimento atendimento;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "cirurgia_id")
-    private Cirurgia cirurgia; // Opcional: se relacionado a uma cirurgia
-
-    // ========== DADOS DA ATIVIDADE ==========
+    private Cirurgia cirurgia;
 
     @Column(name = "data_hora", nullable = false)
     @NotNull(message = "Data e hora da atividade são obrigatórias")
@@ -77,34 +67,27 @@ public class AtividadeProfissional extends BaseEntity {
     @NotNull(message = "Descrição da atividade é obrigatória")
     private String descricao;
 
-    // ========== DURAÇÃO ==========
-
     @Column(name = "duracao_minutos")
-    private Integer duracaoMinutos; // Duração da atividade em minutos
+    private Integer duracaoMinutos;
 
     @Column(name = "data_hora_inicio")
-    private OffsetDateTime dataHoraInicio; // Início da atividade (se diferente de data_hora)
+    private OffsetDateTime dataHoraInicio;
 
     @Column(name = "data_hora_fim")
-    private OffsetDateTime dataHoraFim; // Fim da atividade
-
-    // ========== LOCALIZAÇÃO ==========
+    private OffsetDateTime dataHoraFim;
 
     @Column(name = "local_realizacao", length = 255)
-    private String localRealizacao; // Local onde foi realizada a atividade
+    private String localRealizacao;
 
     @Column(name = "setor", length = 255)
-    private String setor; // Setor/unidade
-
-    // ========== INFORMAÇÕES COMPLEMENTARES ==========
+    private String setor;
 
     @Column(name = "quantidade_atendimentos")
-    private Integer quantidadeAtendimentos; // Quantidade de atendimentos/procedimentos realizados
+    private Integer quantidadeAtendimentos;
 
     @Column(name = "observacoes", columnDefinition = "TEXT")
     private String observacoes;
 
     @Column(name = "observacoes_internas", columnDefinition = "TEXT")
-    private String observacoesInternas; // Observações internas (não visíveis externamente)
+    private String observacoesInternas;
 }
-

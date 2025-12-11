@@ -14,12 +14,6 @@ import lombok.EqualsAndHashCode;
 import java.time.DayOfWeek;
 import java.time.LocalTime;
 
-/**
- * Entidade que representa a escala de trabalho dos profissionais de saúde.
- * Define os dias da semana e horários em que o profissional trabalha.
- *
- * @author UPSaúde
- */
 @Entity
 @Table(name = "escala_trabalho", schema = "public",
        indexes = {
@@ -32,8 +26,6 @@ import java.time.LocalTime;
 @EqualsAndHashCode(callSuper = true)
 public class EscalaTrabalho extends BaseEntity {
 
-    // ========== RELACIONAMENTOS ==========
-
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "profissional_id", nullable = false)
     @NotNull(message = "Profissional de saúde é obrigatório")
@@ -41,21 +33,17 @@ public class EscalaTrabalho extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "medico_id")
-    private Medicos medico; // Opcional: para médicos específicos
-
-    // ========== PERÍODO DA ESCALA ==========
+    private Medicos medico;
 
     @Column(name = "data_inicio")
-    private java.time.LocalDate dataInicio; // Início da vigência da escala
+    private java.time.LocalDate dataInicio;
 
     @Column(name = "data_fim")
-    private java.time.LocalDate dataFim; // Fim da vigência da escala (null = sem previsão de fim)
-
-    // ========== DIA DA SEMANA E HORÁRIOS ==========
+    private java.time.LocalDate dataFim;
 
     @Column(name = "dia_semana", nullable = false)
     @NotNull(message = "Dia da semana é obrigatório")
-    private DayOfWeek diaSemana; // 1=Segunda, 2=Terça, ..., 7=Domingo
+    private DayOfWeek diaSemana;
 
     @Column(name = "hora_entrada", nullable = false)
     @NotNull(message = "Hora de entrada é obrigatória")
@@ -65,20 +53,15 @@ public class EscalaTrabalho extends BaseEntity {
     @NotNull(message = "Hora de saída é obrigatória")
     private LocalTime horaSaida;
 
-    // ========== INTERVALOS ==========
-
     @Column(name = "intervalo_inicio")
-    private LocalTime intervaloInicio; // Início do intervalo (ex: almoço)
+    private LocalTime intervaloInicio;
 
     @Column(name = "intervalo_fim")
-    private LocalTime intervaloFim; // Fim do intervalo
-
-    // ========== INFORMAÇÕES COMPLEMENTARES ==========
+    private LocalTime intervaloFim;
 
     @Column(name = "carga_horaria_diaria")
-    private Integer cargaHorariaDiaria; // Carga horária em minutos do dia
+    private Integer cargaHorariaDiaria;
 
     @Column(name = "observacoes", columnDefinition = "TEXT")
     private String observacoes;
 }
-

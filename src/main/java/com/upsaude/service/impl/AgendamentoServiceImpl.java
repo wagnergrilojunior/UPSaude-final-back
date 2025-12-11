@@ -33,11 +33,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.OffsetDateTime;
 import java.util.UUID;
 
-/**
- * Implementação do serviço de gerenciamento de Agendamento.
- *
- * @author UPSaúde
- */
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -56,19 +51,18 @@ public class AgendamentoServiceImpl implements AgendamentoService {
     @CacheEvict(value = "agendamento", allEntries = true)
     public AgendamentoResponse criar(AgendamentoRequest request) {
         log.debug("Criando novo agendamento. Request: {}", request);
-        
+
         if (request == null) {
             log.warn("Tentativa de criar agendamento com request nulo");
             throw new BadRequestException("Dados do agendamento são obrigatórios");
         }
 
         try {
-            // Validação de dados básicos é feita automaticamente pelo Bean Validation no Request
+
             verificarConflitosHorario(request);
 
             Agendamento agendamento = agendamentoMapper.fromRequest(request);
 
-            // Carrega e define relacionamentos obrigatórios
             Paciente paciente = pacienteRepository.findById(request.getPaciente())
                     .orElseThrow(() -> new NotFoundException("Paciente não encontrado com ID: " + request.getPaciente()));
             agendamento.setPaciente(paciente);
@@ -77,16 +71,14 @@ public class AgendamentoServiceImpl implements AgendamentoService {
                     .orElseThrow(() -> new NotFoundException("Profissional não encontrado com ID: " + request.getProfissional()));
             agendamento.setProfissional(profissional);
 
-            // Define estabelecimento do profissional (paciente não tem estabelecimento)
             if (profissional.getEstabelecimento() != null) {
                 agendamento.setEstabelecimento(profissional.getEstabelecimento());
             }
-            // Define tenant do profissional (paciente não tem tenant)
+
             if (profissional.getTenant() != null) {
                 agendamento.setTenant(profissional.getTenant());
             }
 
-            // Carrega relacionamentos opcionais
             if (request.getMedico() != null) {
                 Medicos medico = medicosRepository.findById(request.getMedico())
                         .orElseThrow(() -> new NotFoundException("Médico não encontrado com ID: " + request.getMedico()));
@@ -135,7 +127,7 @@ public class AgendamentoServiceImpl implements AgendamentoService {
     @Cacheable(value = "agendamento", key = "#id")
     public AgendamentoResponse obterPorId(UUID id) {
         log.debug("Buscando agendamento por ID: {} (cache miss)", id);
-        
+
         if (id == null) {
             log.warn("ID nulo recebido para busca de agendamento");
             throw new BadRequestException("ID do agendamento é obrigatório");
@@ -401,7 +393,6 @@ public class AgendamentoServiceImpl implements AgendamentoService {
         }
 
         try {
-            // Validação de dados básicos é feita automaticamente pelo Bean Validation no Request
 
             Agendamento agendamentoExistente = agendamentoRepository.findById(id)
                     .orElseThrow(() -> new NotFoundException("Agendamento não encontrado com ID: " + id));
@@ -449,8 +440,6 @@ public class AgendamentoServiceImpl implements AgendamentoService {
             agendamento.setStatus(StatusAgendamentoEnum.CANCELADO);
             agendamento.setDataCancelamento(OffsetDateTime.now());
             agendamento.setMotivoCancelamento(motivoCancelamento);
-            // TODO: Obter ID do usuário logado
-            // agendamento.setCanceladoPor(obterUsuarioLogadoId());
 
             Agendamento agendamentoCancelado = agendamentoRepository.save(agendamento);
             log.info("Agendamento cancelado com sucesso. ID: {}", agendamentoCancelado.getId());
@@ -487,8 +476,6 @@ public class AgendamentoServiceImpl implements AgendamentoService {
 
             agendamento.setStatus(StatusAgendamentoEnum.CONFIRMADO);
             agendamento.setDataConfirmacao(OffsetDateTime.now());
-            // TODO: Obter ID do usuário logado
-            // agendamento.setConfirmadoPor(obterUsuarioLogadoId());
 
             Agendamento agendamentoConfirmado = agendamentoRepository.save(agendamento);
             log.info("Agendamento confirmado com sucesso. ID: {}", agendamentoConfirmado.getId());
@@ -524,13 +511,11 @@ public class AgendamentoServiceImpl implements AgendamentoService {
             Agendamento agendamentoOriginal = agendamentoRepository.findById(id)
                     .orElseThrow(() -> new NotFoundException("Agendamento não encontrado com ID: " + id));
 
-            // Cancela o agendamento original
             agendamentoOriginal.setStatus(StatusAgendamentoEnum.REAGENDADO);
             agendamentoOriginal.setDataReagendamento(OffsetDateTime.now());
             agendamentoOriginal.setMotivoReagendamento(motivoReagendamento);
             agendamentoRepository.save(agendamentoOriginal);
 
-            // Cria novo agendamento
             novoAgendamentoRequest.setAgendamentoOriginal(id);
             novoAgendamentoRequest.setStatus(StatusAgendamentoEnum.AGENDADO);
             AgendamentoResponse novoAgendamento = criar(novoAgendamentoRequest);
@@ -591,19 +576,15 @@ public class AgendamentoServiceImpl implements AgendamentoService {
         }
     }
 
-    // Validações de dados básicos foram movidas para o Request usando Bean Validation
-    // (@NotNull, @NotBlank, @Pattern, etc). Isso garante validação automática no Controller
-    // e retorno de erro 400 padronizado via ApiExceptionHandler.
-
     private void verificarConflitosHorario(AgendamentoRequest request) {
         if (request.getProfissional() != null && request.getDataHora() != null && request.getDataHoraFim() != null) {
-            // Verifica se há conflito de horário
+
             java.util.List<Agendamento> conflitos = agendamentoRepository.findByProfissionalIdAndDataHoraBetween(
                     request.getProfissional(), request.getDataHora(), request.getDataHoraFim());
 
             if (!conflitos.isEmpty()) {
                 log.warn("Conflito de horário detectado para o profissional: {}", request.getProfissional());
-                // Apenas registra o conflito - a lógica de permitir ou não pode ser feita em outra camada
+
             }
         }
     }
@@ -640,7 +621,6 @@ public class AgendamentoServiceImpl implements AgendamentoService {
             agendamento.setObservacoesInternas(request.getObservacoesInternas());
         }
 
-        // Atualiza relacionamentos se fornecidos
         if (request.getMedico() != null) {
             Medicos medico = medicosRepository.findById(request.getMedico())
                     .orElseThrow(() -> new NotFoundException("Médico não encontrado com ID: " + request.getMedico()));
@@ -660,8 +640,6 @@ public class AgendamentoServiceImpl implements AgendamentoService {
         }
 
         agendamento.setDataUltimaAlteracao(OffsetDateTime.now());
-        // TODO: Obter ID do usuário logado
-        // agendamento.setAlteradoPor(obterUsuarioLogadoId());
+
     }
 }
-

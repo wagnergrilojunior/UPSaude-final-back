@@ -23,33 +23,33 @@ import lombok.Setter;
 public class CirurgiaRequest {
     @NotNull(message = "Paciente é obrigatório")
     private UUID paciente;
-    
+
     @NotNull(message = "Cirurgião principal é obrigatório")
     private UUID cirurgiaoPrincipal;
-    
+
     private UUID medicoCirurgiao;
     private UUID especialidade;
     private UUID convenio;
-    
+
     @NotBlank(message = "Descrição da cirurgia é obrigatória")
     private String descricao;
-    
+
     @Size(max = 50, message = "Código do procedimento deve ter no máximo 50 caracteres")
     private String codigoProcedimento;
-    
+
     @NotNull(message = "Data e hora prevista são obrigatórias")
     private OffsetDateTime dataHoraPrevista;
     private OffsetDateTime dataHoraInicio;
     private OffsetDateTime dataHoraFim;
     private Integer duracaoPrevistaMinutos;
     private Integer duracaoRealMinutos;
-    
+
     @Size(max = 100, message = "Sala cirúrgica deve ter no máximo 100 caracteres")
     private String salaCirurgica;
-    
+
     @Size(max = 100, message = "Leito centro cirúrgico deve ter no máximo 100 caracteres")
     private String leitoCentroCirurgico;
-    
+
     @NotNull(message = "Status da cirurgia é obrigatório")
     @JsonDeserialize(using = StatusCirurgiaEnumDeserializer.class)
     private StatusCirurgiaEnum status;

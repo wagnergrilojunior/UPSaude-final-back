@@ -24,11 +24,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
 
-/**
- * Controlador REST para operações relacionadas a Cuidados de Enfermagem.
- *
- * @author UPSaúde
- */
 @RestController
 @RequestMapping("/v1/cuidados-enfermagem")
 @Tag(name = "Cuidados de Enfermagem", description = "API para gerenciamento de cuidados e procedimentos de enfermagem")

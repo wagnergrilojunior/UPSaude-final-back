@@ -17,13 +17,6 @@ import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
-/**
- * Entidade que representa o relacionamento entre um paciente e uma doença.
- * Armazena informações completas sobre o diagnóstico, acompanhamento e tratamento
- * de uma doença específica em um paciente.
- *
- * @author UPSaúde
- */
 @Entity
 @Table(name = "doencas_paciente", schema = "public",
        indexes = {
@@ -42,8 +35,6 @@ public class DoencasPaciente extends BaseEntity {
         this.tratamentoAtual = new TratamentoAtualDoencaPaciente();
     }
 
-    // ========== RELACIONAMENTOS ==========
-
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "paciente_id", nullable = false)
     @NotNull(message = "Paciente é obrigatório")
@@ -56,27 +47,19 @@ public class DoencasPaciente extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "cid_principal_id")
-    private CidDoencas cidPrincipal; // CID específico para este paciente
-
-    // ========== DIAGNÓSTICO ==========
+    private CidDoencas cidPrincipal;
 
     @Embedded
     private DiagnosticoDoencaPaciente diagnostico;
 
-    // ========== ACOMPANHAMENTO ==========
-
     @Embedded
     private AcompanhamentoDoencaPaciente acompanhamento;
-
-    // ========== TRATAMENTO ATUAL ==========
 
     @Embedded
     private TratamentoAtualDoencaPaciente tratamentoAtual;
 
-    // ========== OBSERVAÇÕES ==========
-
     @Column(name = "observacoes", columnDefinition = "TEXT")
-    private String observacoes; // Observações específicas sobre a doença neste paciente
+    private String observacoes;
 
     @PrePersist
     @PreUpdate
@@ -92,4 +75,3 @@ public class DoencasPaciente extends BaseEntity {
         }
     }
 }
-

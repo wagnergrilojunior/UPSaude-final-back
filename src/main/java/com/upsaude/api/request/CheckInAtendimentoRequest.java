@@ -18,12 +18,12 @@ import lombok.Setter;
 public class CheckInAtendimentoRequest {
     @NotNull(message = "Agendamento é obrigatório")
     private UUID agendamento;
-    
+
     private UUID atendimento;
-    
+
     @NotNull(message = "Paciente é obrigatório")
     private UUID paciente;
-    
+
     @NotNull(message = "Data do check-in é obrigatória")
     private OffsetDateTime dataCheckin;
     private OffsetDateTime dataCheckout;

@@ -6,10 +6,6 @@ import com.fasterxml.jackson.databind.SerializerProvider;
 import com.upsaude.enums.SexoEnum;
 import java.io.IOException;
 
-/**
- * Serializador customizado para SexoEnum.
- * Retorna a descrição do enum ao invés do nome.
- */
 public class SexoEnumSerializer extends JsonSerializer<SexoEnum> {
 
     @Override

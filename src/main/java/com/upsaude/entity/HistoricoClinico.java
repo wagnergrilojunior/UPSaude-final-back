@@ -13,12 +13,6 @@ import lombok.EqualsAndHashCode;
 
 import java.time.OffsetDateTime;
 
-/**
- * Entidade que representa um registro no histórico clínico do paciente.
- * Armazena todas as informações relevantes do histórico do paciente de forma consolidada.
- *
- * @author UPSaúde
- */
 @Entity
 @Table(name = "historico_clinico", schema = "public",
        indexes = {
@@ -32,8 +26,6 @@ import java.time.OffsetDateTime;
 @EqualsAndHashCode(callSuper = true)
 public class HistoricoClinico extends BaseEntity {
 
-    // ========== RELACIONAMENTOS ==========
-
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "paciente_id", nullable = false)
     @NotNull(message = "Paciente é obrigatório")
@@ -41,29 +33,27 @@ public class HistoricoClinico extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "profissional_id")
-    private ProfissionaisSaude profissional; // Profissional que registrou
+    private ProfissionaisSaude profissional;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "atendimento_id")
-    private Atendimento atendimento; // Link para atendimento
+    private Atendimento atendimento;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "agendamento_id")
-    private Agendamento agendamento; // Link para agendamento
+    private Agendamento agendamento;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "exame_id")
-    private Exames exame; // Link para exame
+    private Exames exame;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "receita_id")
-    private ReceitasMedicas receita; // Link para receita
+    private ReceitasMedicas receita;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "cirurgia_id")
-    private Cirurgia cirurgia; // Link para cirurgia
-
-    // ========== DADOS DO REGISTRO ==========
+    private Cirurgia cirurgia;
 
     @Column(name = "data_registro", nullable = false)
     @NotNull(message = "Data do registro é obrigatória")
@@ -71,46 +61,39 @@ public class HistoricoClinico extends BaseEntity {
 
     @Column(name = "tipo_registro", nullable = false, length = 50)
     @NotNull(message = "Tipo de registro é obrigatório")
-    private String tipoRegistro; // CONSULTA, EXAME, PROCEDIMENTO, MEDICACAO, CIRURGIA, OBSERVACAO, etc.
+    private String tipoRegistro;
 
     @Column(name = "titulo", length = 255)
-    private String titulo; // Título do registro
+    private String titulo;
 
     @Column(name = "descricao", nullable = false, columnDefinition = "TEXT")
     @NotNull(message = "Descrição é obrigatória")
-    private String descricao; // Descrição completa do registro
-
-    // ========== INFORMAÇÕES COMPLEMENTARES ==========
+    private String descricao;
 
     @Column(name = "observacoes", columnDefinition = "TEXT")
     private String observacoes;
 
     @Column(name = "observacoes_internas", columnDefinition = "TEXT")
-    private String observacoesInternas; // Observações internas (não visíveis ao paciente)
+    private String observacoesInternas;
 
     @Column(name = "tags", length = 500)
-    private String tags; // Tags para busca/filtro (separadas por vírgula)
-
-    // ========== AUDITORIA ==========
+    private String tags;
 
     @Column(name = "registrado_por")
-    private java.util.UUID registradoPor; // ID do usuário que registrou
+    private java.util.UUID registradoPor;
 
     @Column(name = "revisado_por")
-    private java.util.UUID revisadoPor; // ID do usuário que revisou
+    private java.util.UUID revisadoPor;
 
     @Column(name = "data_revisao")
     private OffsetDateTime dataRevisao;
 
     @Column(name = "versao")
-    private Integer versao; // Versão do registro (para controle de alterações)
-
-    // ========== VISIBILIDADE ==========
+    private Integer versao;
 
     @Column(name = "visivel_para_paciente")
-    private Boolean visivelParaPaciente; // Se é visível para o paciente no portal
+    private Boolean visivelParaPaciente;
 
     @Column(name = "compartilhado_outros_estabelecimentos")
-    private Boolean compartilhadoOutrosEstabelecimentos; // Se é compartilhado com outros estabelecimentos
+    private Boolean compartilhadoOutrosEstabelecimentos;
 }
-

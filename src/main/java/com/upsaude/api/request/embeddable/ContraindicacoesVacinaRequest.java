@@ -15,15 +15,15 @@ import lombok.Setter;
 public class ContraindicacoesVacinaRequest {
     private String contraindicacoes;
     private String precaucoes;
-    
+
     @NotNull(message = "Gestante pode é obrigatório")
     @Builder.Default
     private Boolean gestantePode = false;
-    
+
     @NotNull(message = "Lactante pode é obrigatório")
     @Builder.Default
     private Boolean lactantePode = false;
-    
+
     @NotNull(message = "Imunocomprometido pode é obrigatório")
     @Builder.Default
     private Boolean imunocomprometidoPode = false;

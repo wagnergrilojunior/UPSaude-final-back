@@ -7,11 +7,6 @@ import org.springframework.data.domain.Pageable;
 
 import java.util.UUID;
 
-/**
- * Interface de serviço para operações CRUD relacionadas a Medicos.
- *
- * @author UPSaúde
- */
 public interface MedicosService {
 
     MedicosResponse criar(MedicosRequest request);
@@ -23,4 +18,8 @@ public interface MedicosService {
     MedicosResponse atualizar(UUID id, MedicosRequest request);
 
     void excluir(UUID id);
+
+    void inativar(UUID id);
+
+    void deletarPermanentemente(UUID id);
 }

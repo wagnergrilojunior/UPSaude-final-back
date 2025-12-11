@@ -21,11 +21,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.UUID;
 
-/**
- * Implementação do serviço de gerenciamento de CatalogoExames.
- *
- * @author UPSaúde
- */
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -40,12 +35,9 @@ public class CatalogoExamesServiceImpl implements CatalogoExamesService {
     public CatalogoExamesResponse criar(CatalogoExamesRequest request) {
         log.debug("Criando novo exame no catálogo");
 
-        // Validação de dados básicos é feita automaticamente pelo Bean Validation no Request
-
         CatalogoExames exame = catalogoExamesMapper.fromRequest(request);
         exame.setActive(true);
 
-        // Valida duplicidade antes de salvar (após o tenant ser setado)
         validarDuplicidade(null, exame, request);
 
         CatalogoExames exameSalvo = catalogoExamesRepository.save(exame);
@@ -88,12 +80,9 @@ public class CatalogoExamesServiceImpl implements CatalogoExamesService {
             throw new BadRequestException("ID do exame é obrigatório");
         }
 
-        // Validação de dados básicos é feita automaticamente pelo Bean Validation no Request
-
         CatalogoExames exameExistente = catalogoExamesRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Exame não encontrado no catálogo com ID: " + id));
 
-        // Valida duplicidade antes de atualizar
         validarDuplicidade(id, exameExistente, request);
 
         atualizarDadosExame(exameExistente, request);
@@ -126,18 +115,6 @@ public class CatalogoExamesServiceImpl implements CatalogoExamesService {
         log.info("Exame excluído (desativado) do catálogo com sucesso. ID: {}", id);
     }
 
-    // Validações de dados básicos foram movidas para o Request usando Bean Validation
-    // (@NotNull, @NotBlank, @Pattern, etc). Isso garante validação automática no Controller
-    // e retorno de erro 400 padronizado via ApiExceptionHandler.
-
-    /**
-     * Valida se já existe um exame no catálogo com o mesmo nome ou código no mesmo tenant.
-     * 
-     * @param id ID do exame sendo atualizado (null para criação)
-     * @param exame objeto CatalogoExames (usado para obter o tenant)
-     * @param request dados do exame sendo cadastrado/atualizado
-     * @throws BadRequestException se já existe um exame com o mesmo nome ou código no tenant
-     */
     private void validarDuplicidade(UUID id, CatalogoExames exame, CatalogoExamesRequest request) {
         if (request == null || exame == null || exame.getTenant() == null) {
             return;
@@ -145,14 +122,13 @@ public class CatalogoExamesServiceImpl implements CatalogoExamesService {
 
         Tenant tenant = exame.getTenant();
 
-        // Valida duplicidade do nome
         if (request.getNome() != null && !request.getNome().trim().isEmpty()) {
             boolean nomeDuplicado;
             if (id == null) {
-                // Criação: verifica se existe qualquer registro com este nome no tenant
+
                 nomeDuplicado = catalogoExamesRepository.existsByNomeAndTenant(request.getNome().trim(), tenant);
             } else {
-                // Atualização: verifica se existe outro registro (diferente do atual) com este nome no tenant
+
                 nomeDuplicado = catalogoExamesRepository.existsByNomeAndTenantAndIdNot(request.getNome().trim(), tenant, id);
             }
 
@@ -164,14 +140,13 @@ public class CatalogoExamesServiceImpl implements CatalogoExamesService {
             }
         }
 
-        // Valida duplicidade do código (apenas se fornecido)
         if (request.getCodigo() != null && !request.getCodigo().trim().isEmpty()) {
             boolean codigoDuplicado;
             if (id == null) {
-                // Criação: verifica se existe qualquer registro com este código no tenant
+
                 codigoDuplicado = catalogoExamesRepository.existsByCodigoAndTenant(request.getCodigo().trim(), tenant);
             } else {
-                // Atualização: verifica se existe outro registro (diferente do atual) com este código no tenant
+
                 codigoDuplicado = catalogoExamesRepository.existsByCodigoAndTenantAndIdNot(request.getCodigo().trim(), tenant, id);
             }
 
@@ -186,24 +161,20 @@ public class CatalogoExamesServiceImpl implements CatalogoExamesService {
 
     private void atualizarDadosExame(CatalogoExames exame, CatalogoExamesRequest request) {
         CatalogoExames exameAtualizado = catalogoExamesMapper.fromRequest(request);
-        
-        // Preserva campos de controle
+
         UUID idOriginal = exame.getId();
         com.upsaude.entity.Tenant tenantOriginal = exame.getTenant();
         com.upsaude.entity.Estabelecimentos estabelecimentoOriginal = exame.getEstabelecimento();
         Boolean activeOriginal = exame.getActive();
         java.time.OffsetDateTime createdAtOriginal = exame.getCreatedAt();
-        
-        // Copia todas as propriedades do objeto atualizado
+
         BeanUtils.copyProperties(exameAtualizado, exame);
-        
-        // Restaura campos de controle
+
         exame.setId(idOriginal);
         exame.setTenant(tenantOriginal);
         exame.setEstabelecimento(estabelecimentoOriginal);
         exame.setActive(activeOriginal);
         exame.setCreatedAt(createdAtOriginal);
-        // Estabelecimento não faz parte do Request
+
     }
 }
-

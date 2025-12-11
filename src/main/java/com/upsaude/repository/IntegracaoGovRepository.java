@@ -10,37 +10,14 @@ import java.util.Optional;
 import java.util.UUID;
 
 public interface IntegracaoGovRepository extends JpaRepository<IntegracaoGov, UUID> {
-    
+
     Optional<IntegracaoGov> findByPacienteId(UUID pacienteId);
-    
+
     Optional<IntegracaoGov> findByUuidRnds(UUID uuidRnds);
 
-    /**
-     * Busca todas as integrações governamentais de um estabelecimento.
-     *
-     * @param estabelecimentoId ID do estabelecimento
-     * @param pageable informações de paginação
-     * @return página de integrações do estabelecimento
-     */
     Page<IntegracaoGov> findByEstabelecimentoId(UUID estabelecimentoId, Pageable pageable);
 
-    /**
-     * Busca todas as integrações governamentais de um tenant.
-     *
-     * @param tenant tenant
-     * @param pageable informações de paginação
-     * @return página de integrações do tenant
-     */
     Page<IntegracaoGov> findByTenant(Tenant tenant, Pageable pageable);
 
-    /**
-     * Busca todas as integrações governamentais de um estabelecimento e tenant.
-     *
-     * @param estabelecimentoId ID do estabelecimento
-     * @param tenant tenant
-     * @param pageable informações de paginação
-     * @return página de integrações
-     */
     Page<IntegracaoGov> findByEstabelecimentoIdAndTenant(UUID estabelecimentoId, Tenant tenant, Pageable pageable);
 }
-

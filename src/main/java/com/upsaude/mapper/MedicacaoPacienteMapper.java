@@ -12,30 +12,14 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 
-/**
- * Mapper para conversões de MedicacaoPaciente.
- * Entity ↔ DTO ↔ Request/Response
- */
 @Mapper(config = MappingConfig.class, uses = {CidDoencasMapper.class, MedicacaoMapper.class, PacienteMapper.class})
 public interface MedicacaoPacienteMapper extends EntityMapper<MedicacaoPaciente, MedicacaoPacienteDTO> {
 
-    /**
-     * Converte DTO para Entity.
-     * O campo 'active' é ignorado (gerenciado pelo sistema).
-     */
     @Mapping(target = "active", ignore = true)
     MedicacaoPaciente toEntity(MedicacaoPacienteDTO dto);
 
-    /**
-     * Converte Entity para DTO.
-     */
     MedicacaoPacienteDTO toDTO(MedicacaoPaciente entity);
 
-    /**
-     * Converte Request para Entity.
-     * Os campos 'id', 'createdAt', 'updatedAt', 'active' são ignorados.
-     * Relacionamentos (UUID) devem ser tratados manualmente no Service.
-     */
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
@@ -45,11 +29,6 @@ public interface MedicacaoPacienteMapper extends EntityMapper<MedicacaoPaciente,
     @Mapping(target = "paciente", ignore = true)
     MedicacaoPaciente fromRequest(MedicacaoPacienteRequest request);
 
-    /**
-     * Atualiza Entity existente com dados do Request.
-     * Os campos 'id', 'createdAt', 'updatedAt', 'active' são ignorados.
-     * Relacionamentos (UUID) devem ser tratados manualmente no Service.
-     */
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
@@ -59,11 +38,6 @@ public interface MedicacaoPacienteMapper extends EntityMapper<MedicacaoPaciente,
     @Mapping(target = "paciente", ignore = true)
     void updateFromRequest(MedicacaoPacienteRequest request, @MappingTarget MedicacaoPaciente entity);
 
-    /**
-     * Converte Entity para Response.
-     * IMPORTANTE: O campo 'paciente' é ignorado para evitar recursão circular,
-     * pois quando PacienteResponse é mapeado, ele já contém a lista de medicações.
-     */
     @Mapping(target = "paciente", ignore = true)
     MedicacaoPacienteResponse toResponse(MedicacaoPaciente entity);
 }

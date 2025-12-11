@@ -36,7 +36,7 @@ import java.util.List;
            @UniqueConstraint(name = "uk_pacientes_email", columnNames = {"email"})
        },
        indexes = {
-           // Índices simples para campos frequentemente usados em buscas
+
            @Index(name = "idx_pacientes_cpf", columnList = "cpf"),
            @Index(name = "idx_pacientes_email", columnList = "email"),
            @Index(name = "idx_pacientes_cns", columnList = "cns"),
@@ -48,14 +48,12 @@ import java.util.List;
            @Index(name = "idx_pacientes_convenio", columnList = "convenio_id"),
            @Index(name = "idx_pacientes_criado_em", columnList = "criado_em"),
            @Index(name = "idx_pacientes_atualizado_em", columnList = "atualizado_em"),
-           
-           // Índices compostos para queries comuns
+
            @Index(name = "idx_pacientes_ativo_nome", columnList = "ativo, nome_completo"),
            @Index(name = "idx_pacientes_status_ativo", columnList = "status_paciente, ativo"),
            @Index(name = "idx_pacientes_ativo_criado_em", columnList = "ativo, criado_em"),
            @Index(name = "idx_pacientes_ativo_data_nascimento", columnList = "ativo, data_nascimento"),
-           
-           // Índices para campos booleanos frequentemente filtrados
+
            @Index(name = "idx_pacientes_situacao_rua", columnList = "situacao_rua"),
            @Index(name = "idx_pacientes_cartao_sus_ativo", columnList = "cartao_sus_ativo"),
            @Index(name = "idx_pacientes_possui_deficiencia", columnList = "possui_deficiencia"),
@@ -77,9 +75,6 @@ import java.util.List;
 @EqualsAndHashCode(callSuper = true)
 public class Paciente extends BaseEntityWithoutTenant {
 
-    /**
-     * Construtor padrão que inicializa as coleções para evitar NullPointerException.
-     */
     public Paciente() {
         this.enderecos = new ArrayList<>();
         this.doencas = new ArrayList<>();
@@ -145,12 +140,6 @@ public class Paciente extends BaseEntityWithoutTenant {
     @Column(name = "observacoes", columnDefinition = "TEXT")
     private String observacoes;
 
-    /**
-     * Endereços do paciente.
-     * Relacionamento OneToMany usando JoinTable.
-     * Usa cascade PERSIST e MERGE para gerenciar endereços associados,
-     * mas não remove endereços que podem ser compartilhados.
-     */
     @OneToMany(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinTable(
         name = "pacientes_enderecos",
@@ -159,69 +148,54 @@ public class Paciente extends BaseEntityWithoutTenant {
         inverseJoinColumns = @JoinColumn(name = "endereco_id")
     )
     private List<Endereco> enderecos = new ArrayList<>();
-    
-    /** Raça/Cor conforme classificação IBGE */
+
     @Convert(converter = RacaCorEnumConverter.class)
     @Column(name = "raca_cor")
     private RacaCorEnum racaCor;
 
-    /** Nacionalidade do paciente */
     @Convert(converter = NacionalidadeEnumConverter.class)
     @Column(name = "nacionalidade")
     private NacionalidadeEnum nacionalidade;
 
-    /** País de nascimento */
     @Column(name = "pais_nascimento", length = 100)
     private String paisNascimento;
 
-    /** Naturalidade (cidade de nascimento) */
     @Column(name = "naturalidade", length = 100)
     private String naturalidade;
 
-    /** Código IBGE do município de nascimento */
     @Column(name = "municipio_nascimento_ibge", length = 7)
     private String municipioNascimentoIbge;
 
-    /** Escolaridade do paciente */
     @Convert(converter = EscolaridadeEnumConverter.class)
     @Column(name = "escolaridade")
     private EscolaridadeEnum escolaridade;
 
-    /** Ocupação/Profissão do paciente */
     @Column(name = "ocupacao_profissao", length = 150)
     private String ocupacaoProfissao;
 
-    /** Indica se paciente está em situação de rua */
     @Column(name = "situacao_rua", nullable = false)
     private Boolean situacaoRua = false;
 
-    /** Status do paciente no sistema de saúde */
     @Convert(converter = StatusPacienteEnumConverter.class)
     @Column(name = "status_paciente", nullable = false)
     private StatusPacienteEnum statusPaciente = StatusPacienteEnum.ATIVO;
 
-    /** Data do óbito (quando statusPaciente = OBITO) */
     @Column(name = "data_obito")
     private LocalDate dataObito;
 
-    /** CID-10 da causa do óbito */
     @Column(name = "causa_obito_cid10", length = 10)
     private String causaObitoCid10;
 
-    /** Indica se CNS está ativo */
     @Column(name = "cartao_sus_ativo", nullable = false)
     private Boolean cartaoSusAtivo = true;
 
-    /** Data da última atualização do CNS */
     @Column(name = "data_atualizacao_cns")
     private LocalDate dataAtualizacaoCns;
 
-    /** Tipo de atendimento preferencial */
     @Convert(converter = TipoAtendimentoPreferencialEnumConverter.class)
     @Column(name = "tipo_atendimento_preferencial")
     private TipoAtendimentoPreferencialEnum tipoAtendimentoPreferencial;
 
-    /** Origem do cadastro (e-SUS, SISAB, etc.) */
     @Column(name = "origem_cadastro", length = 30)
     private String origemCadastro;
 
@@ -252,87 +226,33 @@ public class Paciente extends BaseEntityWithoutTenant {
     @Column(name = "acompanhado_por_equipe_esf", nullable = false)
     private Boolean acompanhadoPorEquipeEsf = false;
 
-    /** 
-     * Dados sociodemográficos do paciente.
-     * Relacionamento OneToOne bidirecional com cascade completo e remoção de órfãos.
-     * O JPA gerencia automaticamente a persistência e sincronização.
-     */
     @OneToOne(mappedBy = "paciente", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
     private DadosSociodemograficos dadosSociodemograficos;
 
-    /** 
-     * Dados clínicos básicos do paciente.
-     * Relacionamento OneToOne bidirecional com cascade completo e remoção de órfãos.
-     * O JPA gerencia automaticamente a persistência e sincronização.
-     */
     @OneToOne(mappedBy = "paciente", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
     private DadosClinicosBasicos dadosClinicosBasicos;
 
-    /** 
-     * Responsável legal do paciente.
-     * Relacionamento OneToOne bidirecional com cascade completo e remoção de órfãos.
-     * O JPA gerencia automaticamente a persistência e sincronização.
-     */
     @OneToOne(mappedBy = "paciente", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
     private ResponsavelLegal responsavelLegal;
 
-    /** 
-     * Consentimentos LGPD do paciente.
-     * Relacionamento OneToOne bidirecional com cascade completo e remoção de órfãos.
-     * O JPA gerencia automaticamente a persistência e sincronização.
-     */
     @OneToOne(mappedBy = "paciente", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
     private LGPDConsentimento lgpdConsentimento;
 
-    /** 
-     * Informações de integração com sistemas governamentais.
-     * Relacionamento OneToOne bidirecional com cascade completo e remoção de órfãos.
-     * O JPA gerencia automaticamente a persistência e sincronização.
-     */
     @OneToOne(mappedBy = "paciente", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
     private IntegracaoGov integracaoGov;
 
-    /** 
-     * Doenças do paciente.
-     * Relacionamento OneToMany bidirecional com cascade completo e remoção de órfãos.
-     * Permite registrar múltiplas doenças/comorbidades com informações de diagnóstico, 
-     * acompanhamento e tratamento.
-     */
     @OneToMany(mappedBy = "paciente", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
     private List<DoencasPaciente> doencas = new ArrayList<>();
 
-    /** 
-     * Alergias do paciente.
-     * Relacionamento OneToMany bidirecional com cascade completo e remoção de órfãos.
-     * Permite registrar múltiplas alergias com informações de diagnóstico e histórico de reações.
-     * Alertas médicos importantes são exibidos no prontuário.
-     */
     @OneToMany(mappedBy = "paciente", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
     private List<AlergiasPaciente> alergias = new ArrayList<>();
 
-    /** 
-     * Deficiências do paciente.
-     * Relacionamento OneToMany bidirecional com cascade completo e remoção de órfãos.
-     * Permite registrar múltiplas deficiências com informações de laudo e diagnóstico.
-     */
     @OneToMany(mappedBy = "paciente", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
     private List<DeficienciasPaciente> deficiencias = new ArrayList<>();
 
-    /** 
-     * Medicações contínuas do paciente.
-     * Relacionamento OneToMany bidirecional com cascade completo e remoção de órfãos.
-     * Permite registrar múltiplas medicações em uso contínuo com informações de dose, 
-     * frequência, via de administração e período de uso.
-     */
     @OneToMany(mappedBy = "paciente", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
     private List<MedicacaoPaciente> medicacoes = new ArrayList<>();
 
-    // ========== MÉTODOS DE CICLO DE VIDA ==========
-
-    /**
-     * Garante que as coleções não sejam nulas antes de persistir ou atualizar.
-     * Recria as listas se estiverem nulas.
-     */
     @PrePersist
     @PreUpdate
     public void validateCollections() {
@@ -353,14 +273,6 @@ public class Paciente extends BaseEntityWithoutTenant {
         }
     }
 
-    // ========== MÉTODOS UTILITÁRIOS - DOENÇAS ==========
-
-    /**
-     * Adiciona uma doença ao paciente com sincronização bidirecional.
-     * Garante que a doença também referencia este paciente.
-     *
-     * @param doenca A doença a ser adicionada
-     */
     public void addDoenca(DoencasPaciente doenca) {
         if (doenca == null) {
             return;
@@ -374,12 +286,6 @@ public class Paciente extends BaseEntityWithoutTenant {
         }
     }
 
-    /**
-     * Remove uma doença do paciente com sincronização bidirecional.
-     * Remove a referência da doença para este paciente.
-     *
-     * @param doenca A doença a ser removida
-     */
     public void removeDoenca(DoencasPaciente doenca) {
         if (doenca == null || doencas == null) {
             return;
@@ -389,14 +295,6 @@ public class Paciente extends BaseEntityWithoutTenant {
         }
     }
 
-    // ========== MÉTODOS UTILITÁRIOS - ALERGIAS ==========
-
-    /**
-     * Adiciona uma alergia ao paciente com sincronização bidirecional.
-     * Garante que a alergia também referencia este paciente.
-     *
-     * @param alergia A alergia a ser adicionada
-     */
     public void addAlergia(AlergiasPaciente alergia) {
         if (alergia == null) {
             return;
@@ -410,12 +308,6 @@ public class Paciente extends BaseEntityWithoutTenant {
         }
     }
 
-    /**
-     * Remove uma alergia do paciente com sincronização bidirecional.
-     * Remove a referência da alergia para este paciente.
-     *
-     * @param alergia A alergia a ser removida
-     */
     public void removeAlergia(AlergiasPaciente alergia) {
         if (alergia == null || alergias == null) {
             return;
@@ -425,14 +317,6 @@ public class Paciente extends BaseEntityWithoutTenant {
         }
     }
 
-    // ========== MÉTODOS UTILITÁRIOS - DEFICIÊNCIAS ==========
-
-    /**
-     * Adiciona uma deficiência ao paciente com sincronização bidirecional.
-     * Garante que a deficiência também referencia este paciente.
-     *
-     * @param deficiencia A deficiência a ser adicionada
-     */
     public void addDeficiencia(DeficienciasPaciente deficiencia) {
         if (deficiencia == null) {
             return;
@@ -446,12 +330,6 @@ public class Paciente extends BaseEntityWithoutTenant {
         }
     }
 
-    /**
-     * Remove uma deficiência do paciente com sincronização bidirecional.
-     * Remove a referência da deficiência para este paciente.
-     *
-     * @param deficiencia A deficiência a ser removida
-     */
     public void removeDeficiencia(DeficienciasPaciente deficiencia) {
         if (deficiencia == null || deficiencias == null) {
             return;
@@ -461,14 +339,6 @@ public class Paciente extends BaseEntityWithoutTenant {
         }
     }
 
-    // ========== MÉTODOS UTILITÁRIOS - MEDICAÇÕES ==========
-
-    /**
-     * Adiciona uma medicação ao paciente com sincronização bidirecional.
-     * Garante que a medicação também referencia este paciente.
-     *
-     * @param medicacao A medicação a ser adicionada
-     */
     public void addMedicacao(MedicacaoPaciente medicacao) {
         if (medicacao == null) {
             return;
@@ -482,12 +352,6 @@ public class Paciente extends BaseEntityWithoutTenant {
         }
     }
 
-    /**
-     * Remove uma medicação do paciente com sincronização bidirecional.
-     * Remove a referência da medicação para este paciente.
-     *
-     * @param medicacao A medicação a ser removida
-     */
     public void removeMedicacao(MedicacaoPaciente medicacao) {
         if (medicacao == null || medicacoes == null) {
             return;

@@ -19,13 +19,6 @@ import lombok.EqualsAndHashCode;
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 
-/**
- * Entidade que representa o vínculo entre um médico e um estabelecimento.
- * Permite associar um médico a múltiplos estabelecimentos com datas de início e fim,
- * tipo de vínculo e demais informações importantes.
- *
- * @author UPSaúde
- */
 @Entity
 @Table(name = "medicos_estabelecimentos", schema = "public",
        uniqueConstraints = {
@@ -41,8 +34,6 @@ import java.time.OffsetDateTime;
 @EqualsAndHashCode(callSuper = true)
 public class MedicoEstabelecimento extends BaseEntity {
 
-    // ========== RELACIONAMENTOS ==========
-
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "medico_id", nullable = false)
     @NotNull(message = "Médico é obrigatório")
@@ -53,8 +44,6 @@ public class MedicoEstabelecimento extends BaseEntity {
     @NotNull(message = "Estabelecimento é obrigatório")
     private Estabelecimentos estabelecimento;
 
-    // ========== DATAS DO VÍNCULO ==========
-
     @Column(name = "data_inicio", nullable = false)
     @NotNull(message = "Data de início do vínculo é obrigatória")
     private OffsetDateTime dataInicio;
@@ -62,17 +51,13 @@ public class MedicoEstabelecimento extends BaseEntity {
     @Column(name = "data_fim")
     private OffsetDateTime dataFim;
 
-    // ========== TIPO DE VÍNCULO ==========
-
     @Convert(converter = TipoVinculoProfissionalEnumConverter.class)
     @Column(name = "tipo_vinculo", nullable = false)
     @NotNull(message = "Tipo de vínculo é obrigatório")
     private TipoVinculoProfissionalEnum tipoVinculo;
 
-    // ========== INFORMAÇÕES COMPLEMENTARES ==========
-
     @Column(name = "carga_horaria_semanal")
-    private Integer cargaHorariaSemanal; // em horas
+    private Integer cargaHorariaSemanal;
 
     @Column(name = "salario", precision = 10, scale = 2)
     private BigDecimal salario;
@@ -92,4 +77,3 @@ public class MedicoEstabelecimento extends BaseEntity {
     @Column(name = "observacoes", columnDefinition = "TEXT")
     private String observacoes;
 }
-

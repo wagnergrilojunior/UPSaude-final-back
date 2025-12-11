@@ -20,11 +20,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.UUID;
 
-/**
- * Implementação do serviço de gerenciamento de MedicacoesContinuasPaciente.
- *
- * @author UPSaúde
- */
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -38,8 +33,6 @@ public class MedicacoesContinuasPacienteServiceImpl implements MedicacoesContinu
     @CacheEvict(value = "medicacoescontinuaspaciente", allEntries = true)
     public MedicacoesContinuasPacienteResponse criar(MedicacoesContinuasPacienteRequest request) {
         log.debug("Criando novo medicacoescontinuaspaciente");
-
-        // Validação de dados básicos é feita automaticamente pelo Bean Validation no Request
 
         MedicacoesContinuasPaciente medicacoesContinuasPaciente = medicacoesContinuasPacienteMapper.fromRequest(request);
         medicacoesContinuasPaciente.setActive(true);
@@ -84,8 +77,6 @@ public class MedicacoesContinuasPacienteServiceImpl implements MedicacoesContinu
             throw new BadRequestException("ID do medicacoescontinuaspaciente é obrigatório");
         }
 
-        // Validação de dados básicos é feita automaticamente pelo Bean Validation no Request
-
         MedicacoesContinuasPaciente medicacoesContinuasPacienteExistente = medicacoesContinuasPacienteRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("MedicacoesContinuasPaciente não encontrado com ID: " + id));
 
@@ -119,23 +110,16 @@ public class MedicacoesContinuasPacienteServiceImpl implements MedicacoesContinu
         log.info("MedicacoesContinuasPaciente excluído (desativado) com sucesso. ID: {}", id);
     }
 
-    // Validações de dados básicos foram movidas para o Request usando Bean Validation
-    // (@NotNull, @NotBlank, @Pattern, etc). Isso garante validação automática no Controller
-    // e retorno de erro 400 padronizado via ApiExceptionHandler.
-
         private void atualizarDadosMedicacoesContinuasPaciente(MedicacoesContinuasPaciente medicacoesContinuasPaciente, MedicacoesContinuasPacienteRequest request) {
         MedicacoesContinuasPaciente medicacoesContinuasPacienteAtualizado = medicacoesContinuasPacienteMapper.fromRequest(request);
-        
-        // Preserva campos de controle
+
         java.util.UUID idOriginal = medicacoesContinuasPaciente.getId();
         com.upsaude.entity.Tenant tenantOriginal = medicacoesContinuasPaciente.getTenant();
         Boolean activeOriginal = medicacoesContinuasPaciente.getActive();
         java.time.OffsetDateTime createdAtOriginal = medicacoesContinuasPaciente.getCreatedAt();
-        
-        // Copia todas as propriedades do objeto atualizado
+
         BeanUtils.copyProperties(medicacoesContinuasPacienteAtualizado, medicacoesContinuasPaciente);
-        
-        // Restaura campos de controle
+
         medicacoesContinuasPaciente.setId(idOriginal);
         medicacoesContinuasPaciente.setTenant(tenantOriginal);
         medicacoesContinuasPaciente.setActive(activeOriginal);

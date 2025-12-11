@@ -6,24 +6,17 @@ import lombok.Getter;
 import java.util.Arrays;
 import java.util.Optional;
 
-/**
- * Enum para tipos de usuário do sistema.
- * Controla as permissões e funcionalidades disponíveis para cada tipo de usuário.
- */
 @Getter
 public enum TipoUsuarioSistemaEnum {
-    
-    // Administrativo
+
     ADMIN_TENANT(1, "ADMIN_TENANT", "Administrador da Organização", "Acesso total à organização com permissões administrativas completas"),
     GERENTE(2, "GERENTE", "Gerente da Organização", "Gestão operacional e administrativa da organização"),
     ADMIN_ESTABELECIMENTO(3, "ADMIN_ESTABELECIMENTO", "Administrador do Estabelecimento", "Acesso administrativo completo ao estabelecimento"),
     GERENTE_ESTABELECIMENTO(4, "GERENTE_ESTABELECIMENTO", "Gerente do Estabelecimento", "Gestão operacional do estabelecimento"),
-    
-    // Atendimento e Recepção
+
     RECEPCIONISTA(10, "RECEPCIONISTA", "Recepcionista", "Atendimento ao público e agendamentos"),
     ATENDENTE(11, "ATENDENTE", "Atendente", "Atendimento geral ao público"),
-    
-    // Profissionais de Saúde
+
     MEDICO(20, "MEDICO", "Médico", "Profissional médico com permissões clínicas completas"),
     ENFERMEIRO(21, "ENFERMEIRO", "Enfermeiro", "Profissional de enfermagem"),
     TECNICO_ENFERMAGEM(22, "TECNICO_ENFERMAGEM", "Técnico de Enfermagem", "Técnico de enfermagem com permissões técnicas"),
@@ -37,18 +30,16 @@ public enum TipoUsuarioSistemaEnum {
     BIOMEDICO(30, "BIOMEDICO", "Biomédico", "Profissional biomédico"),
     ASSISTENTE_SOCIAL(31, "ASSISTENTE_SOCIAL", "Assistente Social", "Profissional de serviço social"),
     PROFISSIONAL_SAUDE(32, "PROFISSIONAL_SAUDE", "Profissional de Saúde", "Outros profissionais de saúde"),
-    
-    // Paciente
+
     PACIENTE(40, "PACIENTE", "Paciente", "Usuário paciente do sistema"),
-    
-    // Outros
+
     OUTRO(99, "OUTRO", "Outro", "Outros tipos de usuário");
 
     private final Integer codigo;
-    
+
     @JsonValue
     private final String slug;
-    
+
     private final String descricao;
     private final String detalhes;
 
@@ -59,9 +50,6 @@ public enum TipoUsuarioSistemaEnum {
         this.detalhes = detalhes;
     }
 
-    /**
-     * Busca um tipo de usuário pelo código numérico
-     */
     public static Optional<TipoUsuarioSistemaEnum> fromCodigo(Integer codigo) {
         if (codigo == null) {
             return Optional.empty();
@@ -71,9 +59,6 @@ public enum TipoUsuarioSistemaEnum {
                 .findFirst();
     }
 
-    /**
-     * Busca um tipo de usuário pelo slug
-     */
     public static Optional<TipoUsuarioSistemaEnum> fromSlug(String slug) {
         if (slug == null || slug.trim().isEmpty()) {
             return Optional.empty();
@@ -83,9 +68,6 @@ public enum TipoUsuarioSistemaEnum {
                 .findFirst();
     }
 
-    /**
-     * Busca um tipo de usuário pelo nome do enum
-     */
     public static Optional<TipoUsuarioSistemaEnum> fromName(String name) {
         if (name == null || name.trim().isEmpty()) {
             return Optional.empty();
@@ -97,17 +79,11 @@ public enum TipoUsuarioSistemaEnum {
         }
     }
 
-    /**
-     * Verifica se é um tipo administrativo
-     */
     public boolean isAdministrativo() {
-        return this == ADMIN_TENANT || this == GERENTE || 
+        return this == ADMIN_TENANT || this == GERENTE ||
                this == ADMIN_ESTABELECIMENTO || this == GERENTE_ESTABELECIMENTO;
     }
 
-    /**
-     * Verifica se é um profissional de saúde
-     */
     public boolean isProfissionalSaude() {
         return this == MEDICO || this == ENFERMEIRO || this == TECNICO_ENFERMAGEM ||
                this == FARMACEUTICO || this == FISIOTERAPEUTA || this == PSICOLOGO ||
@@ -116,9 +92,6 @@ public enum TipoUsuarioSistemaEnum {
                this == PROFISSIONAL_SAUDE;
     }
 
-    /**
-     * Verifica se é paciente
-     */
     public boolean isPaciente() {
         return this == PACIENTE;
     }

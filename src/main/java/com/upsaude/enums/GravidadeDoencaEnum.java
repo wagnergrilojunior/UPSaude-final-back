@@ -3,11 +3,6 @@ package com.upsaude.enums;
 import java.util.Arrays;
 import java.util.Locale;
 
-/**
- * Enum para classificação de gravidade/severidade de doenças.
- *
- * @author UPSaúde
- */
 public enum GravidadeDoencaEnum {
     LEVE(1, "Leve"),
     MODERADA(2, "Moderada"),
@@ -48,4 +43,3 @@ public enum GravidadeDoencaEnum {
                 .orElse(null);
     }
 }
-

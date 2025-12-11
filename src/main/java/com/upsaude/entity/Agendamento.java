@@ -23,12 +23,6 @@ import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Entidade que representa um agendamento de atendimento.
- * Armazena informações completas sobre agendamentos com controle de conflitos e fila de espera.
- *
- * @author UPSaúde
- */
 @Entity
 @Table(name = "agendamentos", schema = "public",
        indexes = {
@@ -45,16 +39,11 @@ import java.util.List;
 @EqualsAndHashCode(callSuper = true)
 public class Agendamento extends BaseEntity {
 
-    /**
-     * Construtor padrão que inicializa as coleções para evitar NullPointerException.
-     */
     public Agendamento() {
         this.reagendamentos = new ArrayList<>();
         this.notificacoes = new ArrayList<>();
         this.checkIns = new ArrayList<>();
     }
-
-    // ========== RELACIONAMENTOS ==========
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "paciente_id", nullable = false)
@@ -68,7 +57,7 @@ public class Agendamento extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "medico_id")
-    private Medicos medico; // Opcional: médico específico
+    private Medicos medico;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "especialidade_id")
@@ -80,34 +69,30 @@ public class Agendamento extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "atendimento_id")
-    private Atendimento atendimento; // Link para o atendimento quando for realizado
+    private Atendimento atendimento;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "agendamento_original_id")
-    private Agendamento agendamentoOriginal; // Para rastrear reagendamentos
-
-    // ========== RELACIONAMENTOS FILHOS ==========
+    private Agendamento agendamentoOriginal;
 
     @OneToMany(mappedBy = "agendamentoOriginal", fetch = FetchType.LAZY)
-    private List<Agendamento> reagendamentos = new ArrayList<>(); // Reagendamentos feitos a partir deste
+    private List<Agendamento> reagendamentos = new ArrayList<>();
 
     @OneToMany(mappedBy = "agendamento", fetch = FetchType.LAZY)
-    private List<Notificacao> notificacoes = new ArrayList<>(); // Notificações relacionadas
+    private List<Notificacao> notificacoes = new ArrayList<>();
 
     @OneToMany(mappedBy = "agendamento", fetch = FetchType.LAZY)
-    private List<CheckInAtendimento> checkIns = new ArrayList<>(); // Check-ins relacionados
-
-    // ========== DADOS DO AGENDAMENTO ==========
+    private List<CheckInAtendimento> checkIns = new ArrayList<>();
 
     @Column(name = "data_hora", nullable = false)
     @NotNull(message = "Data e hora do agendamento são obrigatórias")
     private OffsetDateTime dataHora;
 
     @Column(name = "data_hora_fim")
-    private OffsetDateTime dataHoraFim; // Data/hora prevista de fim
+    private OffsetDateTime dataHoraFim;
 
     @Column(name = "duracao_prevista_minutos")
-    private Integer duracaoPrevistaMinutos; // Duração prevista em minutos
+    private Integer duracaoPrevistaMinutos;
 
     @Convert(converter = StatusAgendamentoEnumConverter.class)
     @Column(name = "status", nullable = false)
@@ -119,40 +104,34 @@ public class Agendamento extends BaseEntity {
     private PrioridadeAtendimentoEnum prioridade;
 
     @Column(name = "eh_encaixe")
-    private Boolean ehEncaixe; // Se é um encaixe
+    private Boolean ehEncaixe;
 
     @Column(name = "eh_retorno")
-    private Boolean ehRetorno; // Se é um retorno
-
-    // ========== INFORMAÇÕES DE AGENDAMENTO ==========
+    private Boolean ehRetorno;
 
     @Column(name = "motivo_consulta", columnDefinition = "TEXT")
-    private String motivoConsulta; // Motivo da consulta informado pelo paciente
+    private String motivoConsulta;
 
     @Column(name = "observacoes_agendamento", columnDefinition = "TEXT")
-    private String observacoesAgendamento; // Observações do agendamento
+    private String observacoesAgendamento;
 
     @Column(name = "observacoes_internas", columnDefinition = "TEXT")
-    private String observacoesInternas; // Observações internas
-
-    // ========== CONTROLE DE CONFLITOS ==========
+    private String observacoesInternas;
 
     @Column(name = "tem_conflito_horario")
-    private Boolean temConflitoHorario; // Se tem conflito de horário detectado
+    private Boolean temConflitoHorario;
 
     @Column(name = "sobreposicao_permitida")
-    private Boolean sobreposicaoPermitida; // Se sobreposição foi permitida
+    private Boolean sobreposicaoPermitida;
 
     @Column(name = "justificativa_conflito", columnDefinition = "TEXT")
-    private String justificativaConflito; // Justificativa para conflito permitido
-
-    // ========== CONTROLE DE CANCELAMENTO/REAGENDAMENTO ==========
+    private String justificativaConflito;
 
     @Column(name = "data_cancelamento")
     private OffsetDateTime dataCancelamento;
 
     @Column(name = "cancelado_por")
-    private java.util.UUID canceladoPor; // ID do usuário que cancelou
+    private java.util.UUID canceladoPor;
 
     @Column(name = "motivo_cancelamento", columnDefinition = "TEXT")
     private String motivoCancelamento;
@@ -161,18 +140,16 @@ public class Agendamento extends BaseEntity {
     private OffsetDateTime dataReagendamento;
 
     @Column(name = "reagendado_por")
-    private java.util.UUID reagendadoPor; // ID do usuário que reagendou
+    private java.util.UUID reagendadoPor;
 
     @Column(name = "motivo_reagendamento", columnDefinition = "TEXT")
     private String motivoReagendamento;
 
-    // ========== AUDITORIA ==========
-
     @Column(name = "agendado_por")
-    private java.util.UUID agendadoPor; // ID do usuário que criou o agendamento
+    private java.util.UUID agendadoPor;
 
     @Column(name = "confirmado_por")
-    private java.util.UUID confirmadoPor; // ID do usuário que confirmou
+    private java.util.UUID confirmadoPor;
 
     @Column(name = "data_confirmacao")
     private OffsetDateTime dataConfirmacao;
@@ -181,25 +158,17 @@ public class Agendamento extends BaseEntity {
     private OffsetDateTime dataUltimaAlteracao;
 
     @Column(name = "alterado_por")
-    private java.util.UUID alteradoPor; // ID do usuário da última alteração
-
-    // ========== NOTIFICAÇÕES ==========
+    private java.util.UUID alteradoPor;
 
     @Column(name = "notificacao_enviada_24h")
-    private Boolean notificacaoEnviada24h; // Se notificação 24h foi enviada
+    private Boolean notificacaoEnviada24h;
 
     @Column(name = "notificacao_enviada_1h")
-    private Boolean notificacaoEnviada1h; // Se notificação 1h foi enviada
+    private Boolean notificacaoEnviada1h;
 
     @Column(name = "confirmacao_enviada")
-    private Boolean confirmacaoEnviada; // Se confirmação foi enviada
+    private Boolean confirmacaoEnviada;
 
-    // ========== MÉTODOS DE CICLO DE VIDA ==========
-
-    /**
-     * Garante que as coleções não sejam nulas antes de persistir ou atualizar.
-     * Recria as listas se estiverem nulas.
-     */
     @PrePersist
     @PreUpdate
     public void validateCollections() {
@@ -214,14 +183,6 @@ public class Agendamento extends BaseEntity {
         }
     }
 
-    // ========== MÉTODOS UTILITÁRIOS - REAGENDAMENTOS ==========
-
-    /**
-     * Adiciona um reagendamento com sincronização bidirecional.
-     * Garante que o reagendamento também referencia este agendamento como original.
-     *
-     * @param reagendamento O reagendamento a ser adicionado
-     */
     public void addReagendamento(Agendamento reagendamento) {
         if (reagendamento == null) {
             return;
@@ -235,12 +196,6 @@ public class Agendamento extends BaseEntity {
         }
     }
 
-    /**
-     * Remove um reagendamento com sincronização bidirecional.
-     * Remove a referência do reagendamento para este agendamento.
-     *
-     * @param reagendamento O reagendamento a ser removido
-     */
     public void removeReagendamento(Agendamento reagendamento) {
         if (reagendamento == null || reagendamentos == null) {
             return;
@@ -250,14 +205,6 @@ public class Agendamento extends BaseEntity {
         }
     }
 
-    // ========== MÉTODOS UTILITÁRIOS - NOTIFICAÇÕES ==========
-
-    /**
-     * Adiciona uma notificação com sincronização bidirecional.
-     * Garante que a notificação também referencia este agendamento.
-     *
-     * @param notificacao A notificação a ser adicionada
-     */
     public void addNotificacao(Notificacao notificacao) {
         if (notificacao == null) {
             return;
@@ -271,12 +218,6 @@ public class Agendamento extends BaseEntity {
         }
     }
 
-    /**
-     * Remove uma notificação com sincronização bidirecional.
-     * Remove a referência da notificação para este agendamento.
-     *
-     * @param notificacao A notificação a ser removida
-     */
     public void removeNotificacao(Notificacao notificacao) {
         if (notificacao == null || notificacoes == null) {
             return;
@@ -286,14 +227,6 @@ public class Agendamento extends BaseEntity {
         }
     }
 
-    // ========== MÉTODOS UTILITÁRIOS - CHECK-INS ==========
-
-    /**
-     * Adiciona um check-in com sincronização bidirecional.
-     * Garante que o check-in também referencia este agendamento.
-     *
-     * @param checkIn O check-in a ser adicionado
-     */
     public void addCheckIn(CheckInAtendimento checkIn) {
         if (checkIn == null) {
             return;
@@ -307,12 +240,6 @@ public class Agendamento extends BaseEntity {
         }
     }
 
-    /**
-     * Remove um check-in com sincronização bidirecional.
-     * Remove a referência do check-in para este agendamento.
-     *
-     * @param checkIn O check-in a ser removido
-     */
     public void removeCheckIn(CheckInAtendimento checkIn) {
         if (checkIn == null || checkIns == null) {
             return;
@@ -322,4 +249,3 @@ public class Agendamento extends BaseEntity {
         }
     }
 }
-

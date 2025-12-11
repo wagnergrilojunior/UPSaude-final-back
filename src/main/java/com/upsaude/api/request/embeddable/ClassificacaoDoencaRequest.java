@@ -21,23 +21,23 @@ import lombok.Setter;
 public class ClassificacaoDoencaRequest {
     @JsonDeserialize(using = TipoDoencaEnumDeserializer.class)
     private TipoDoencaEnum tipoDoenca;
-    
+
     @JsonDeserialize(using = GravidadeDoencaEnumDeserializer.class)
     private GravidadeDoencaEnum gravidade;
-    
+
     @Size(max = 100, message = "Categoria deve ter no máximo 100 caracteres")
     private String categoria;
-    
+
     @Size(max = 100, message = "Subcategoria deve ter no máximo 100 caracteres")
     private String subcategoria;
-    
+
     @Size(max = 50, message = "Código CID principal deve ter no máximo 50 caracteres")
     private String codigoCidPrincipal;
-    
+
     @NotNull(message = "Doença notificável é obrigatória")
     @Builder.Default
     private Boolean doencaNotificavel = false;
-    
+
     @NotNull(message = "Doença transmissível é obrigatória")
     @Builder.Default
     private Boolean doencaTransmissivel = false;

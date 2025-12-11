@@ -23,4 +23,3 @@ public class TipoLogradouroEnumConverter implements AttributeConverter<TipoLogra
         return TipoLogradouroEnum.fromCodigo(dbData);
     }
 }
-

@@ -6,10 +6,6 @@ import com.fasterxml.jackson.databind.SerializerProvider;
 import com.upsaude.enums.NacionalidadeEnum;
 import java.io.IOException;
 
-/**
- * Serializador customizado para NacionalidadeEnum.
- * Retorna a descrição do enum ao invés do nome.
- */
 public class NacionalidadeEnumSerializer extends JsonSerializer<NacionalidadeEnum> {
 
     @Override

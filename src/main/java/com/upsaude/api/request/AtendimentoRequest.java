@@ -25,43 +25,36 @@ import lombok.Setter;
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class AtendimentoRequest {
-    // ========== CAMPOS OBRIGATÓRIOS ==========
-    
+
     @NotNull(message = "Paciente é obrigatório")
     private UUID paciente;
-    
+
     @NotNull(message = "Profissional de saúde é obrigatório")
     private UUID profissional;
-    
-    // ========== IDs DE RELACIONAMENTO ==========
-    
+
     private UUID especialidade;
     private UUID equipeSaude;
     private UUID convenio;
     private UUID cidPrincipal;
-    
-    // ========== OBJETOS EMBEDDABLE ==========
-    
+
     @Valid
     private InformacoesAtendimentoRequest informacoes;
-    
+
     @Valid
     private AnamneseAtendimentoRequest anamnese;
-    
+
     @Valid
     private DiagnosticoAtendimentoRequest diagnostico;
-    
+
     @Valid
     private ProcedimentosRealizadosAtendimentoRequest procedimentosRealizados;
-    
+
     @Valid
     private ClassificacaoRiscoAtendimentoRequest classificacaoRisco;
-    
-    // ========== CAMPOS TEXTUAIS LONGOS ==========
-    
+
     @Size(max = 1000, message = "Anotações deve ter no máximo 1000 caracteres")
     private String anotacoes;
-    
+
     @Size(max = 1000, message = "Observações internas deve ter no máximo 1000 caracteres")
     private String observacoesInternas;
 }

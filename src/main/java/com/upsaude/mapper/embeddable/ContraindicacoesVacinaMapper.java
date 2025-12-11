@@ -14,7 +14,6 @@ public interface ContraindicacoesVacinaMapper {
     ContraindicacoesVacinaResponse toResponse(ContraindicacoesVacina entity);
     void updateFromRequest(ContraindicacoesVacinaRequest request, @MappingTarget ContraindicacoesVacina entity);
 
-    // Mapeamento entre DTO e Entity
     ContraindicacoesVacina toEntity(com.upsaude.dto.embeddable.ContraindicacoesVacinaDTO dto);
     com.upsaude.dto.embeddable.ContraindicacoesVacinaDTO toDTO(ContraindicacoesVacina entity);
     void updateFromDTO(com.upsaude.dto.embeddable.ContraindicacoesVacinaDTO dto, @MappingTarget ContraindicacoesVacina entity);

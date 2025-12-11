@@ -7,11 +7,6 @@ import org.springframework.data.domain.Pageable;
 
 import java.util.UUID;
 
-/**
- * Interface de serviço para operações CRUD relacionadas a Departamentos.
- *
- * @author UPSaúde
- */
 public interface DepartamentosService {
 
     DepartamentosResponse criar(DepartamentosRequest request);

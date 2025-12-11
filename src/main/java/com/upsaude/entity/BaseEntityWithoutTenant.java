@@ -16,12 +16,6 @@ import jakarta.persistence.MappedSuperclass;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
-/**
- * Classe base para entidades que não precisam de relacionamento com Tenant.
- * Usa UUID como identificador.
- *
- * @author UPSaúde
- */
 @MappedSuperclass
 @Data
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
@@ -44,4 +38,3 @@ public abstract class BaseEntityWithoutTenant {
     @Column(name = "ativo", nullable = false)
     private Boolean active = true;
 }
-

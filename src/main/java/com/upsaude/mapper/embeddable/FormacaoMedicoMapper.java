@@ -14,7 +14,6 @@ public interface FormacaoMedicoMapper {
     FormacaoMedicoResponse toResponse(FormacaoMedico entity);
     void updateFromRequest(FormacaoMedicoRequest request, @MappingTarget FormacaoMedico entity);
 
-    // Mapeamento entre DTO e Entity
     FormacaoMedico toEntity(com.upsaude.dto.embeddable.FormacaoMedicoDTO dto);
     com.upsaude.dto.embeddable.FormacaoMedicoDTO toDTO(FormacaoMedico entity);
     void updateFromDTO(com.upsaude.dto.embeddable.FormacaoMedicoDTO dto, @MappingTarget FormacaoMedico entity);

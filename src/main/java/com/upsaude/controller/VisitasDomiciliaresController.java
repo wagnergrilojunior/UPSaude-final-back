@@ -24,11 +24,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
 
-/**
- * Controlador REST para operações relacionadas a Visitas Domiciliares.
- *
- * @author UPSaúde
- */
 @RestController
 @RequestMapping("/v1/visitas-domiciliares")
 @Tag(name = "Visitas Domiciliares", description = "API para gerenciamento de Visitas Domiciliares")

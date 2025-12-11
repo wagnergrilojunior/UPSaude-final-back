@@ -7,11 +7,6 @@ import org.springframework.data.domain.Pageable;
 
 import java.util.UUID;
 
-/**
- * Interface de serviço para operações CRUD relacionadas a DispensacoesMedicamentos.
- *
- * @author UPSaúde
- */
 public interface DispensacoesMedicamentosService {
 
     DispensacoesMedicamentosResponse criar(DispensacoesMedicamentosRequest request);
@@ -20,13 +15,6 @@ public interface DispensacoesMedicamentosService {
 
     Page<DispensacoesMedicamentosResponse> listar(Pageable pageable);
 
-    /**
-     * Lista todas as dispensações de um estabelecimento, ordenadas por data decrescente.
-     *
-     * @param estabelecimentoId ID do estabelecimento
-     * @param pageable Parâmetros de paginação
-     * @return Página com as dispensações do estabelecimento
-     */
     Page<DispensacoesMedicamentosResponse> listarPorEstabelecimento(UUID estabelecimentoId, Pageable pageable);
 
     DispensacoesMedicamentosResponse atualizar(UUID id, DispensacoesMedicamentosRequest request);

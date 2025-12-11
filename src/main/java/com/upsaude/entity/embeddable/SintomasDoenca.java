@@ -6,11 +6,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 
-/**
- * Classe embeddable para sintomas e manifestações da doença.
- *
- * @author UPSaúde
- */
 @Embeddable
 @Data
 @Builder
@@ -25,15 +20,14 @@ public class SintomasDoenca {
     }
 
     @Column(name = "sintomas_comuns", columnDefinition = "TEXT")
-    private String sintomasComuns; // Sintomas comuns da doença
+    private String sintomasComuns;
 
     @Column(name = "sintomas_graves", columnDefinition = "TEXT")
-    private String sintomasGraves; // Sintomas graves que requerem atenção imediata
+    private String sintomasGraves;
 
     @Column(name = "sinais_clinicos", columnDefinition = "TEXT")
-    private String sinaisClinicos; // Sinais clínicos característicos
+    private String sinaisClinicos;
 
     @Column(name = "manifestacoes_extras", columnDefinition = "TEXT")
-    private String manifestacoesExtras; // Outras manifestações da doença
+    private String manifestacoesExtras;
 }
-

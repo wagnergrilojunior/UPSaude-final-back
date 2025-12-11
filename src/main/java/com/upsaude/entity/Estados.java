@@ -6,12 +6,6 @@ import jakarta.persistence.Table;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
-/**
- * Entidade que representa um Estado.
- * Não possui relação com Tenant por ser uma entidade de referência.
- *
- * @author UPSaúde
- */
 @Entity
 @Table(name = "estados", schema = "public")
 @Data
@@ -27,4 +21,3 @@ public class Estados extends BaseEntityWithoutTenant {
     @Column(name = "codigo_ibge", length = 20)
     private String codigoIbge;
 }
-

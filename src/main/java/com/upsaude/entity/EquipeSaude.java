@@ -28,12 +28,6 @@ import java.time.OffsetDateTime;
 import java.util.HashSet;
 import java.util.Set;
 
-/**
- * Entidade que representa uma equipe de saúde vinculada a um estabelecimento.
- * Permite gerenciar equipes de profissionais de saúde conforme padrões do CNES.
- *
- * @author UPSaúde
- */
 @Entity
 @Table(name = "equipes_saude", schema = "public",
        uniqueConstraints = {
@@ -48,15 +42,10 @@ import java.util.Set;
 @EqualsAndHashCode(callSuper = true)
 public class EquipeSaude extends BaseEntity {
 
-    /**
-     * Construtor padrão que inicializa as coleções para evitar NullPointerException.
-     */
     public EquipeSaude() {
         this.vinculosProfissionais = new HashSet<>();
     }
 
-    // ========== IDENTIFICAÇÃO ==========
-    
     @NotBlank(message = "INE é obrigatório")
     @Size(max = 15, message = "INE deve ter no máximo 15 caracteres")
     @Column(name = "ine", nullable = false, length = 15)
@@ -72,15 +61,11 @@ public class EquipeSaude extends BaseEntity {
     @Column(name = "tipo_equipe", nullable = false, length = 100)
     private TipoEquipeEnum tipoEquipe;
 
-    // ========== RELACIONAMENTO COM ESTABELECIMENTO ==========
-    
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "estabelecimento_id", nullable = false)
     @NotNull(message = "Estabelecimento é obrigatório")
     private Estabelecimentos estabelecimento;
 
-    // ========== DATAS E STATUS ==========
-    
     @Column(name = "data_ativacao", nullable = false)
     @NotNull(message = "Data de ativação é obrigatória")
     private OffsetDateTime dataAtivacao;
@@ -93,26 +78,12 @@ public class EquipeSaude extends BaseEntity {
     @NotNull(message = "Status é obrigatório")
     private StatusAtivoEnum status;
 
-    // ========== RELACIONAMENTO COM PROFISSIONAIS ==========
-    
-    /**
-     * Vínculos de profissionais com esta equipe.
-     * OneToMany bidirecional com cascade completo - JPA gerencia automaticamente.
-     */
     @OneToMany(mappedBy = "equipe", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<VinculoProfissionalEquipe> vinculosProfissionais = new HashSet<>();
 
-    // ========== OBSERVAÇÕES ==========
-    
     @Column(name = "observacoes", columnDefinition = "TEXT")
     private String observacoes;
 
-    // ========== MÉTODOS DE CICLO DE VIDA ==========
-
-    /**
-     * Garante que as coleções não sejam nulas antes de persistir ou atualizar.
-     * Recria o Set se estiver nulo.
-     */
     @PrePersist
     @PreUpdate
     public void validateCollections() {
@@ -121,14 +92,6 @@ public class EquipeSaude extends BaseEntity {
         }
     }
 
-    // ========== MÉTODOS UTILITÁRIOS - VÍNCULOS PROFISSIONAIS ==========
-
-    /**
-     * Adiciona um vínculo profissional com sincronização bidirecional.
-     * Garante que o vínculo também referencia esta equipe.
-     *
-     * @param vinculo O vínculo a ser adicionado
-     */
     public void addVinculoProfissional(VinculoProfissionalEquipe vinculo) {
         if (vinculo == null) {
             return;
@@ -142,12 +105,6 @@ public class EquipeSaude extends BaseEntity {
         }
     }
 
-    /**
-     * Remove um vínculo profissional com sincronização bidirecional.
-     * Remove a referência do vínculo para esta equipe.
-     *
-     * @param vinculo O vínculo a ser removido
-     */
     public void removeVinculoProfissional(VinculoProfissionalEquipe vinculo) {
         if (vinculo == null || vinculosProfissionais == null) {
             return;
@@ -157,4 +114,3 @@ public class EquipeSaude extends BaseEntity {
         }
     }
 }
-

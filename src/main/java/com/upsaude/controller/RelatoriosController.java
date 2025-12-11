@@ -16,11 +16,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-/**
- * Controlador REST para operações relacionadas a Relatórios e Estatísticas.
- *
- * @author UPSaúde
- */
 @Slf4j
 @RestController
 @RequestMapping("/v1/relatorios")
@@ -54,4 +49,3 @@ public class RelatoriosController {
         }
     }
 }
-

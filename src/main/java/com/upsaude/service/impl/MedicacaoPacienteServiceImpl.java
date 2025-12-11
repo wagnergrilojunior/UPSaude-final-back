@@ -29,11 +29,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.UUID;
 
-/**
- * Implementação do serviço de gerenciamento de Medicações de Paciente.
- *
- * @author UPSaúde
- */
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -53,11 +48,8 @@ public class MedicacaoPacienteServiceImpl implements MedicacaoPacienteService {
     public MedicacaoPacienteResponse criar(MedicacaoPacienteRequest request) {
         log.debug("Criando nova ligação paciente-medicação");
 
-        // Validação de dados básicos é feita automaticamente pelo Bean Validation no Request
-
         MedicacaoPaciente medicacaoPaciente = medicacaoPacienteMapper.fromRequest(request);
-        
-        // Carrega e define as entidades relacionadas
+
         Paciente paciente = pacienteRepository.findById(request.getPaciente())
                 .orElseThrow(() -> new NotFoundException("Paciente não encontrado com ID: " + request.getPaciente()));
         medicacaoPaciente.setPaciente(paciente);
@@ -66,17 +58,14 @@ public class MedicacaoPacienteServiceImpl implements MedicacaoPacienteService {
                 .orElseThrow(() -> new NotFoundException("Medicação não encontrada com ID: " + request.getMedicacao()));
         medicacaoPaciente.setMedicacao(medicacao);
 
-        // CID relacionado é opcional
         if (request.getCidRelacionado() != null) {
             CidDoencas cidRelacionado = cidDoencasRepository.findById(request.getCidRelacionado())
                     .orElseThrow(() -> new NotFoundException("CID não encontrado com ID: " + request.getCidRelacionado()));
             medicacaoPaciente.setCidRelacionado(cidRelacionado);
         }
 
-        // medicacaoAtiva não faz parte do Request - definido como true por padrão
         medicacaoPaciente.setMedicacaoAtiva(true);
 
-        // Obtém o tenant do usuário autenticado (obrigatório para MedicacaoPaciente que estende BaseEntity)
         Tenant tenant = tenantService.obterTenantDoUsuarioAutenticado();
         if (tenant == null) {
             throw new BadRequestException("Não foi possível obter tenant do usuário autenticado. É necessário estar autenticado para criar relacionamentos de medicações.");
@@ -95,7 +84,7 @@ public class MedicacaoPacienteServiceImpl implements MedicacaoPacienteService {
     @Transactional
     @CacheEvict(value = "medicacaopaciente", allEntries = true)
     public MedicacaoPacienteResponse criarSimplificado(MedicacaoPacienteSimplificadoRequest request) {
-        log.debug("Criando nova ligação paciente-medicação simplificada - Paciente: {}, Tenant: {}, Medicação: {}", 
+        log.debug("Criando nova ligação paciente-medicação simplificada - Paciente: {}, Tenant: {}, Medicação: {}",
                 request.getPaciente(), request.getTenant(), request.getMedicacao());
 
         if (request == null) {
@@ -114,26 +103,21 @@ public class MedicacaoPacienteServiceImpl implements MedicacaoPacienteService {
             throw new BadRequestException("ID da medicação é obrigatório");
         }
 
-        // Busca paciente
         Paciente paciente = pacienteRepository.findById(request.getPaciente())
                 .orElseThrow(() -> new NotFoundException("Paciente não encontrado com ID: " + request.getPaciente()));
 
-        // Busca tenant
         Tenant tenant = tenantRepository.findById(request.getTenant())
                 .orElseThrow(() -> new NotFoundException("Tenant não encontrado com ID: " + request.getTenant()));
 
-        // Busca medicação
         Medicacao medicacao = medicacaoRepository.findById(request.getMedicacao())
                 .orElseThrow(() -> new NotFoundException("Medicação não encontrada com ID: " + request.getMedicacao()));
 
-        // Cria nova entidade com valores padrão
         MedicacaoPaciente medicacaoPaciente = new MedicacaoPaciente();
         medicacaoPaciente.setPaciente(paciente);
         medicacaoPaciente.setTenant(tenant);
         medicacaoPaciente.setMedicacao(medicacao);
         medicacaoPaciente.setActive(true);
-        medicacaoPaciente.setMedicacaoAtiva(true); // Valor padrão
-        // dose, frequencia, via, cidRelacionado, dataInicio, dataFim e observacoes ficam null
+        medicacaoPaciente.setMedicacaoAtiva(true);
 
         MedicacaoPaciente medicacaoPacienteSalvo = medicacaoPacienteRepository.save(medicacaoPaciente);
         log.info("Ligação paciente-medicação criada com sucesso (simplificado). ID: {}", medicacaoPacienteSalvo.getId());
@@ -175,8 +159,6 @@ public class MedicacaoPacienteServiceImpl implements MedicacaoPacienteService {
             throw new BadRequestException("ID da ligação paciente-medicação é obrigatório");
         }
 
-        // Validação de dados básicos é feita automaticamente pelo Bean Validation no Request
-
         MedicacaoPaciente medicacaoPacienteExistente = medicacaoPacienteRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Ligação paciente-medicação não encontrada com ID: " + id));
 
@@ -210,12 +192,8 @@ public class MedicacaoPacienteServiceImpl implements MedicacaoPacienteService {
         log.info("Ligação paciente-medicação excluída (desativada) com sucesso. ID: {}", id);
     }
 
-    // Validações de dados básicos foram movidas para o Request usando Bean Validation
-    // (@NotNull, @NotBlank, @Pattern, etc). Isso garante validação automática no Controller
-    // e retorno de erro 400 padronizado via ApiExceptionHandler.
-
     private void atualizarDadosMedicacaoPaciente(MedicacaoPaciente medicacaoPaciente, MedicacaoPacienteRequest request) {
-        // Atualiza campos simples
+
         if (request.getDose() != null) {
             medicacaoPaciente.setDose(request.getDose());
         }
@@ -231,12 +209,11 @@ public class MedicacaoPacienteServiceImpl implements MedicacaoPacienteService {
         if (request.getDataFim() != null) {
             medicacaoPaciente.setDataFim(request.getDataFim());
         }
-        // medicacaoAtiva não faz parte do Request
+
         if (request.getObservacoes() != null) {
             medicacaoPaciente.setObservacoes(request.getObservacoes());
         }
 
-        // Atualiza relacionamentos se fornecidos
         if (request.getPaciente() != null) {
             Paciente paciente = pacienteRepository.findById(request.getPaciente())
                     .orElseThrow(() -> new NotFoundException("Paciente não encontrado com ID: " + request.getPaciente()));
@@ -249,16 +226,14 @@ public class MedicacaoPacienteServiceImpl implements MedicacaoPacienteService {
             medicacaoPaciente.setMedicacao(medicacao);
         }
 
-        // CID relacionado é opcional
         if (request.getCidRelacionado() != null) {
             CidDoencas cidRelacionado = cidDoencasRepository.findById(request.getCidRelacionado())
                     .orElseThrow(() -> new NotFoundException("CID não encontrado com ID: " + request.getCidRelacionado()));
             medicacaoPaciente.setCidRelacionado(cidRelacionado);
         } else {
-            // Se não fornecido, remove a relação
+
             medicacaoPaciente.setCidRelacionado(null);
         }
     }
 
 }
-

@@ -8,22 +8,10 @@ import org.springframework.data.domain.Pageable;
 
 import java.util.UUID;
 
-/**
- * Interface de serviço para operações CRUD relacionadas a DoencasPaciente.
- *
- * @author UPSaúde
- */
 public interface DoencasPacienteService {
 
     DoencasPacienteResponse criar(DoencasPacienteRequest request);
 
-    /**
-     * Cria um novo registro de doença do paciente de forma simplificada.
-     * Apenas requer paciente, tenant e doença. Os demais campos são criados com valores padrão.
-     *
-     * @param request Dados simplificados do registro a ser criado
-     * @return Resposta com os dados do registro criado
-     */
     DoencasPacienteResponse criarSimplificado(DoencasPacienteSimplificadoRequest request);
 
     DoencasPacienteResponse obterPorId(UUID id);
@@ -38,4 +26,3 @@ public interface DoencasPacienteService {
 
     void excluir(UUID id);
 }
-

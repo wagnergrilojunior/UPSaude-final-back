@@ -14,7 +14,6 @@ public interface InformacoesAtendimentoMapper {
     InformacoesAtendimentoResponse toResponse(InformacoesAtendimento entity);
     void updateFromRequest(InformacoesAtendimentoRequest request, @MappingTarget InformacoesAtendimento entity);
 
-    // Mapeamento entre DTO e Entity
     InformacoesAtendimento toEntity(com.upsaude.dto.embeddable.InformacoesAtendimentoDTO dto);
     com.upsaude.dto.embeddable.InformacoesAtendimentoDTO toDTO(InformacoesAtendimento entity);
     void updateFromDTO(com.upsaude.dto.embeddable.InformacoesAtendimentoDTO dto, @MappingTarget InformacoesAtendimento entity);

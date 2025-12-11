@@ -48,5 +48,4 @@ public class CidDoencas extends BaseEntityWithoutTenant {
     @Column(name = "idade_maxima")
     private Integer idadeMaxima;
 
-    
 }

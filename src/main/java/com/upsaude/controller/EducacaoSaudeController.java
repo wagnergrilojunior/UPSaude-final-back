@@ -24,11 +24,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
 
-/**
- * Controlador REST para operações relacionadas a Educação em Saúde.
- *
- * @author UPSaúde
- */
 @RestController
 @RequestMapping("/v1/educacao-saude")
 @Tag(name = "Educação em Saúde", description = "API para gerenciamento de ações de educação em saúde")

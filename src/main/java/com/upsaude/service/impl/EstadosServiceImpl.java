@@ -21,11 +21,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.UUID;
 
-/**
- * Implementação do serviço de gerenciamento de Estados.
- *
- * @author UPSaúde
- */
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -39,14 +34,13 @@ public class EstadosServiceImpl implements EstadosService {
     @CacheEvict(value = "estados", allEntries = true)
     public EstadosResponse criar(EstadosRequest request) {
         log.debug("Criando novo estado. Request: {}", request);
-        
+
         if (request == null) {
             log.warn("Tentativa de criar estado com request nulo");
             throw new BadRequestException("Dados do estado são obrigatórios");
         }
 
         try {
-            // Validação de dados básicos é feita automaticamente pelo Bean Validation no Request
 
             Estados estados = estadosMapper.fromRequest(request);
             estados.setActive(true);
@@ -72,7 +66,7 @@ public class EstadosServiceImpl implements EstadosService {
     @Cacheable(value = "estados", key = "#id")
     public EstadosResponse obterPorId(UUID id) {
         log.debug("Buscando estado por ID: {} (cache miss)", id);
-        
+
         if (id == null) {
             log.warn("ID nulo recebido para busca de estado");
             throw new BadRequestException("ID do estado é obrigatório");
@@ -131,12 +125,10 @@ public class EstadosServiceImpl implements EstadosService {
         }
 
         try {
-            // Validação de dados básicos é feita automaticamente pelo Bean Validation no Request
 
             Estados estadosExistente = estadosRepository.findById(id)
                     .orElseThrow(() -> new NotFoundException("Estado não encontrado com ID: " + id));
 
-            // Usa mapper do MapStruct que preserva campos de controle automaticamente
             estadosMapper.updateFromRequest(request, estadosExistente);
 
             Estados estadosAtualizado = estadosRepository.save(estadosExistente);
@@ -196,10 +188,4 @@ public class EstadosServiceImpl implements EstadosService {
         }
     }
 
-        // Validações de dados básicos foram movidas para o Request usando Bean Validation
-    // (@NotNull, @NotBlank, @Pattern, etc). Isso garante validação automática no Controller
-    // e retorno de erro 400 padronizado via ApiExceptionHandler.
-
-    // Método removido - agora usa estadosMapper.updateFromRequest diretamente
-    // O MapStruct já preserva campos de controle automaticamente
 }

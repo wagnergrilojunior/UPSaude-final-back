@@ -3,10 +3,6 @@ package com.upsaude.enums;
 import java.util.Arrays;
 import java.util.Locale;
 
-/**
- * Enum para condições de moradia conforme padrão SUS/e-SUS.
- * Utilizado para identificar condições habitacionais do paciente.
- */
 public enum CondicaoMoradiaEnum {
     PROPRIO_QUITADO(1, "Próprio quitado"),
     PROPRIO_FINANCIADO(2, "Próprio financiado"),
@@ -50,4 +46,3 @@ public enum CondicaoMoradiaEnum {
                 .orElse(null);
     }
 }
-

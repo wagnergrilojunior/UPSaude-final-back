@@ -3,10 +3,6 @@ package com.upsaude.enums;
 import java.util.Arrays;
 import java.util.Locale;
 
-/**
- * Enum para tipos de responsável legal conforme legislação brasileira.
- * Utilizado para identificação do tipo de responsabilidade (pai, mãe, tutor, etc.).
- */
 public enum TipoResponsavelEnum {
     PAI(1, "Pai"),
     MAE(2, "Mãe"),
@@ -51,4 +47,3 @@ public enum TipoResponsavelEnum {
                 .orElse(null);
     }
 }
-

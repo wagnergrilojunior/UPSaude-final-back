@@ -26,11 +26,6 @@ import org.springframework.web.bind.annotation.*;
 import java.time.LocalDate;
 import java.util.UUID;
 
-/**
- * Controlador REST para operações relacionadas a ControlePonto.
- *
- * @author UPSaúde
- */
 @RestController
 @RequestMapping("/v1/controle-ponto")
 @Tag(name = "Controle de Ponto", description = "API para gerenciamento de Controle de Ponto")

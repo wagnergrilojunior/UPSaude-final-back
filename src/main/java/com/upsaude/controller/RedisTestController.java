@@ -19,15 +19,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
-/**
- * Controller de teste para verificar o funcionamento do Redis.
- * Permite testar conexão, operações de cache e obter estatísticas.
- * 
- * IMPORTANTE: Este controller só está disponível quando o Redis está habilitado.
- * No profile 'local', o Redis está desabilitado, então este controller não será carregado.
- * 
- * @author UPSaúde
- */
 @RestController
 @RequestMapping("/v1/test/redis")
 @Tag(name = "Teste Redis", description = "Endpoints para testar e diagnosticar o Redis")
@@ -48,20 +39,20 @@ public class RedisTestController {
     @Operation(summary = "Verificar saúde do Redis", description = "Testa a conexão com o Redis e retorna informações sobre o status")
     public ResponseEntity<Map<String, Object>> health() {
         Map<String, Object> response = new HashMap<>();
-        
+
         try {
-            // Testa conexão básica
+
             RedisConnection connection = redisConnectionFactory.getConnection();
             String pong = connection.ping();
             connection.close();
-            
+
             response.put("status", "OK");
             response.put("ping", pong);
             response.put("timestamp", LocalDateTime.now());
             response.put("message", "Redis está funcionando corretamente");
-            
+
             log.info("✅ Teste de saúde do Redis: OK - Ping: {}", pong);
-            
+
             return ResponseEntity.ok(response);
         } catch (Exception e) {
             log.error("❌ Erro ao testar Redis: {}", e.getMessage(), e);
@@ -69,7 +60,7 @@ public class RedisTestController {
             response.put("error", e.getMessage());
             response.put("timestamp", LocalDateTime.now());
             response.put("message", "Redis não está disponível");
-            
+
             return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body(response);
         }
     }
@@ -78,7 +69,7 @@ public class RedisTestController {
     @Operation(summary = "Testar operações de cache", description = "Testa operações de escrita e leitura no cache")
     public ResponseEntity<Map<String, Object>> testCache() {
         Map<String, Object> response = new HashMap<>();
-        
+
         try {
             Cache cache = cacheManager.getCache("paciente");
             if (cache == null) {
@@ -86,22 +77,19 @@ public class RedisTestController {
                 response.put("message", "Cache 'paciente' não encontrado");
                 return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
             }
-            
-            // Gera uma chave de teste única
+
             String testKey = "test-" + UUID.randomUUID().toString();
             TestData testData = new TestData();
             testData.setId(UUID.randomUUID());
             testData.setMessage("Teste de cache Redis");
             testData.setTimestamp(LocalDateTime.now());
-            
-            // Teste de escrita
+
             log.info("📝 Testando escrita no cache - Chave: {}", testKey);
             cache.put(testKey, testData);
-            
-            // Teste de leitura
+
             log.info("📖 Testando leitura do cache - Chave: {}", testKey);
             Cache.ValueWrapper wrapper = cache.get(testKey);
-            
+
             if (wrapper != null && wrapper.get() != null) {
                 TestData retrieved = (TestData) wrapper.get();
                 boolean match = retrieved != null && testData.getId().equals(retrieved.getId());
@@ -111,24 +99,23 @@ public class RedisTestController {
                 response.put("written", testData);
                 response.put("retrieved", retrieved);
                 response.put("match", match);
-                
-                // Limpa o cache de teste
+
                 cache.evict(testKey);
-                
+
                 log.info("✅ Teste de cache: OK - Dados escritos e lidos com sucesso");
             } else {
                 response.put("status", "ERROR");
                 response.put("message", "Não foi possível ler os dados do cache");
                 log.warn("⚠️ Teste de cache: FALHOU - Dados não encontrados após escrita");
             }
-            
+
             return ResponseEntity.ok(response);
         } catch (Exception e) {
             log.error("❌ Erro ao testar cache: {}", e.getMessage(), e);
             response.put("status", "ERROR");
             response.put("error", e.getMessage());
             response.put("message", "Erro ao testar operações de cache");
-            
+
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
         }
     }
@@ -137,27 +124,24 @@ public class RedisTestController {
     @Operation(summary = "Obter informações do Redis", description = "Retorna informações sobre a configuração e status do Redis")
     public ResponseEntity<Map<String, Object>> info() {
         Map<String, Object> response = new HashMap<>();
-        
+
         try {
             RedisConnection connection = redisConnectionFactory.getConnection();
-            
-            // Informações básicas do Redis
+
             Map<String, Object> redisInfo = new HashMap<>();
             redisInfo.put("connected", true);
-            
-            // Testa ping para confirmar conexão
+
             try {
                 String pong = connection.ping();
                 redisInfo.put("ping", pong);
             } catch (Exception e) {
                 log.warn("Não foi possível fazer ping no Redis: {}", e.getMessage());
             }
-            
-            // Tenta obter informações básicas usando comandos simples
+
             try {
-                // Usa comandos diretos do Redis através da conexão
+
                 if (connection instanceof org.springframework.data.redis.connection.DefaultedRedisConnection) {
-                    org.springframework.data.redis.connection.DefaultedRedisConnection defaultedConnection = 
+                    org.springframework.data.redis.connection.DefaultedRedisConnection defaultedConnection =
                         (org.springframework.data.redis.connection.DefaultedRedisConnection) connection;
                     Long dbSize = defaultedConnection.dbSize();
                     redisInfo.put("dbSize", dbSize != null ? dbSize : 0);
@@ -168,36 +152,34 @@ public class RedisTestController {
                 log.warn("Não foi possível obter tamanho do banco Redis: {}", e.getMessage());
                 redisInfo.put("dbSize", "N/A");
             }
-            
+
             connection.close();
-            
-            // Informações do CacheManager
+
             Map<String, Object> cacheInfo = new HashMap<>();
             cacheInfo.put("cacheNames", cacheManager.getCacheNames());
-            
-            // Informações da conexão
+
             if (redisConnectionFactory instanceof org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory) {
-                org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory lettuceFactory = 
+                org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory lettuceFactory =
                     (org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory) redisConnectionFactory;
                 redisInfo.put("hostName", lettuceFactory.getHostName());
                 redisInfo.put("port", lettuceFactory.getPort());
                 redisInfo.put("database", lettuceFactory.getDatabase());
             }
-            
+
             response.put("status", "OK");
             response.put("redis", redisInfo);
             response.put("cacheManager", cacheInfo);
             response.put("timestamp", LocalDateTime.now());
-            
+
             log.info("✅ Informações do Redis obtidas com sucesso");
-            
+
             return ResponseEntity.ok(response);
         } catch (Exception e) {
             log.error("❌ Erro ao obter informações do Redis: {}", e.getMessage(), e);
             response.put("status", "ERROR");
             response.put("error", e.getMessage());
             response.put("message", "Erro ao obter informações do Redis");
-            
+
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
         }
     }
@@ -206,7 +188,7 @@ public class RedisTestController {
     @Operation(summary = "Obter estatísticas do cache", description = "Retorna estatísticas de uso do cache")
     public ResponseEntity<Map<String, Object>> stats() {
         Map<String, Object> response = new HashMap<>();
-        
+
         try {
             Cache cache = cacheManager.getCache("paciente");
             if (cache == null) {
@@ -214,25 +196,24 @@ public class RedisTestController {
                 response.put("message", "Cache 'paciente' não encontrado");
                 return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
             }
-            
-            // Tenta obter estatísticas do cache (se disponível)
+
             Map<String, Object> stats = new HashMap<>();
             stats.put("cacheName", cache.getName());
             stats.put("nativeCache", cache.getNativeCache().getClass().getName());
-            
+
             response.put("status", "OK");
             response.put("cache", stats);
             response.put("timestamp", LocalDateTime.now());
-            
+
             log.info("✅ Estatísticas do cache obtidas com sucesso");
-            
+
             return ResponseEntity.ok(response);
         } catch (Exception e) {
             log.error("❌ Erro ao obter estatísticas do cache: {}", e.getMessage(), e);
             response.put("status", "ERROR");
             response.put("error", e.getMessage());
             response.put("message", "Erro ao obter estatísticas do cache");
-            
+
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
         }
     }

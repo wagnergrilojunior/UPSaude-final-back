@@ -11,11 +11,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 
-/**
- * Classe embeddable para classificação da alergia.
- *
- * @author UPSaúde
- */
 @Embeddable
 @Data
 @Builder
@@ -49,5 +44,3 @@ public class ClassificacaoAlergia {
     @Column(name = "alergia_grave", nullable = false)
     private Boolean alergiaGrave;
 }
-
-

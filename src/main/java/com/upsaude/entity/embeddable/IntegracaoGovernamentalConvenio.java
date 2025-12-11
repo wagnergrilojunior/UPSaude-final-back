@@ -9,11 +9,6 @@ import lombok.Data;
 
 import java.time.OffsetDateTime;
 
-/**
- * Classe embeddable para informações de integração com sistemas governamentais.
- *
- * @author UPSaúde
- */
 @Embeddable
 @Data
 @Builder
@@ -32,39 +27,38 @@ public class IntegracaoGovernamentalConvenio {
 
     @Column(name = "sincronizar_ans", nullable = false)
     @Builder.Default
-    private Boolean sincronizarAns = false; // Se deve sincronizar com ANS
+    private Boolean sincronizarAns = false;
 
     @Column(name = "ultima_sincronizacao_ans")
-    private OffsetDateTime ultimaSincronizacaoAns; // Data da última sincronização com ANS
+    private OffsetDateTime ultimaSincronizacaoAns;
 
     @Column(name = "sincronizar_tiss", nullable = false)
     @Builder.Default
-    private Boolean sincronizarTiss = false; // Se deve sincronizar com TISS
+    private Boolean sincronizarTiss = false;
 
     @Column(name = "ultima_sincronizacao_tiss")
-    private OffsetDateTime ultimaSincronizacaoTiss; // Data da última sincronização com TISS
+    private OffsetDateTime ultimaSincronizacaoTiss;
 
     @Column(name = "sincronizar_sus", nullable = false)
     @Builder.Default
-    private Boolean sincronizarSus = false; // Se deve sincronizar com SUS
+    private Boolean sincronizarSus = false;
 
     @Column(name = "ultima_sincronizacao_sus")
-    private OffsetDateTime ultimaSincronizacaoSus; // Data da última sincronização com SUS
+    private OffsetDateTime ultimaSincronizacaoSus;
 
     @Size(max = 50, message = "Código sistema externo deve ter no máximo 50 caracteres")
     @Column(name = "codigo_sistema_externo", length = 50)
-    private String codigoSistemaExterno; // Código em sistema externo de integração
+    private String codigoSistemaExterno;
 
     @Size(max = 255, message = "URL API deve ter no máximo 255 caracteres")
     @Column(name = "url_api", length = 255)
-    private String urlApi; // URL da API de integração
+    private String urlApi;
 
     @Size(max = 255, message = "Token API deve ter no máximo 255 caracteres")
     @Column(name = "token_api", length = 255)
-    private String tokenApi; // Token para autenticação na API
+    private String tokenApi;
 
     @Size(max = 255, message = "Chave API deve ter no máximo 255 caracteres")
     @Column(name = "chave_api", length = 255)
-    private String chaveApi; // Chave para autenticação na API
+    private String chaveApi;
 }
-
