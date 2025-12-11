@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonDeserializer;
 import com.upsaude.enums.TipoDeficienciaEnum;
+import com.upsaude.exception.InvalidArgumentException;
 import java.io.IOException;
 
 public class TipoDeficienciaEnumDeserializer extends JsonDeserializer<TipoDeficienciaEnum> {
@@ -47,8 +48,10 @@ public class TipoDeficienciaEnumDeserializer extends JsonDeserializer<TipoDefici
         try {
             return TipoDeficienciaEnum.valueOf(strValue.toUpperCase());
         } catch (IllegalArgumentException e) {
-            // Se não encontrar, retorna null (não lança exceção)
-            return null;
+            // Se não encontrar, lança exceção para forçar validação
+            throw new InvalidArgumentException(
+                String.format("Valor inválido para TipoDeficienciaEnum: '%s'. Use um valor válido do enum.", strValue)
+            );
         }
     }
 }

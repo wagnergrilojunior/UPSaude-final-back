@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonDeserializer;
 import com.upsaude.enums.RacaCorEnum;
+import com.upsaude.exception.InvalidArgumentException;
 import java.io.IOException;
 
 public class RacaCorEnumDeserializer extends JsonDeserializer<RacaCorEnum> {
@@ -47,8 +48,10 @@ public class RacaCorEnumDeserializer extends JsonDeserializer<RacaCorEnum> {
         try {
             return RacaCorEnum.valueOf(strValue.toUpperCase());
         } catch (IllegalArgumentException e) {
-            // Se não encontrar, retorna null (não lança exceção)
-            return null;
+            // Se não encontrar, lança exceção para forçar validação
+            throw new InvalidArgumentException(
+                String.format("Valor inválido para RacaCorEnum: '%s'. Valores válidos: BRANCA, PRETA, PARDA, AMARELA, INDIGENA", strValue)
+            );
         }
     }
 }
