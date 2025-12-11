@@ -1,6 +1,8 @@
 package com.upsaude.api.request;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.upsaude.enums.TipoPlantaoEnum;
+import com.upsaude.util.converter.TipoPlantaoEnumDeserializer;
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 import java.util.UUID;
@@ -16,6 +18,7 @@ public class PlantaoRequest {
     private OffsetDateTime dataHoraInicio;
     private OffsetDateTime dataHoraFim;
     private OffsetDateTime dataHoraFimPrevisto;
+    @JsonDeserialize(using = TipoPlantaoEnumDeserializer.class)
     private TipoPlantaoEnum tipoPlantao;
     private String setor;
     private Integer leitoInicio;

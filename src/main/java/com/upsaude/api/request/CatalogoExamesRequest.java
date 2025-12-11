@@ -1,6 +1,8 @@
 package com.upsaude.api.request;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.upsaude.enums.TipoExameEnum;
+import com.upsaude.util.converter.TipoExameEnumDeserializer;
 import java.time.OffsetDateTime;
 import java.util.UUID;
 import lombok.*;
@@ -10,6 +12,7 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 public class CatalogoExamesRequest {
+    @JsonDeserialize(using = TipoExameEnumDeserializer.class)
     private TipoExameEnum tipoExame;
     private String nome;
     private String codigo;

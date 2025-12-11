@@ -1,7 +1,10 @@
 package com.upsaude.api.request.embeddable;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.upsaude.enums.UnidadeMedidaEnum;
 import com.upsaude.enums.ViaAdministracaoEnum;
+import com.upsaude.util.converter.UnidadeMedidaEnumDeserializer;
+import com.upsaude.util.converter.ViaAdministracaoEnumDeserializer;
 import jakarta.validation.constraints.DecimalMax;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotBlank;
@@ -24,8 +27,10 @@ public class DosagemAdministracaoMedicamentoRequest {
     @Size(max = 50, message = "Dosagem deve ter no máximo 50 caracteres")
     private String dosagem;
     
+    @JsonDeserialize(using = UnidadeMedidaEnumDeserializer.class)
     private UnidadeMedidaEnum unidadeMedida;
     
+    @JsonDeserialize(using = ViaAdministracaoEnumDeserializer.class)
     private ViaAdministracaoEnum viaAdministracao;
     
     @DecimalMin(value = "0.00", message = "Concentração deve ser maior ou igual a 0")

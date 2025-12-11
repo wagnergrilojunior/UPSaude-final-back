@@ -1,7 +1,10 @@
 package com.upsaude.api.request.embeddable;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.upsaude.enums.ClasseTerapeuticaEnum;
 import com.upsaude.enums.FormaFarmaceuticaEnum;
+import com.upsaude.util.converter.ClasseTerapeuticaEnumDeserializer;
+import com.upsaude.util.converter.FormaFarmaceuticaEnumDeserializer;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -15,8 +18,10 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ClassificacaoMedicamentoRequest {
+    @JsonDeserialize(using = ClasseTerapeuticaEnumDeserializer.class)
     private ClasseTerapeuticaEnum classeTerapeutica;
     
+    @JsonDeserialize(using = FormaFarmaceuticaEnumDeserializer.class)
     private FormaFarmaceuticaEnum formaFarmaceutica;
     
     @Size(max = 100, message = "Categoria deve ter no máximo 100 caracteres")

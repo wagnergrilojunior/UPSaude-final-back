@@ -1,7 +1,10 @@
 package com.upsaude.api.request;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.upsaude.enums.CanalNotificacaoEnum;
 import com.upsaude.enums.TipoNotificacaoEnum;
+import com.upsaude.util.converter.CanalNotificacaoEnumDeserializer;
+import com.upsaude.util.converter.TipoNotificacaoEnumDeserializer;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -25,9 +28,11 @@ public class NotificacaoRequest {
     private UUID template;
     
     @NotNull(message = "Tipo de notificação é obrigatório")
+    @JsonDeserialize(using = TipoNotificacaoEnumDeserializer.class)
     private TipoNotificacaoEnum tipoNotificacao;
     
     @NotNull(message = "Canal de notificação é obrigatório")
+    @JsonDeserialize(using = CanalNotificacaoEnumDeserializer.class)
     private CanalNotificacaoEnum canal;
     
     @NotBlank(message = "Destinatário é obrigatório")

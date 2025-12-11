@@ -1,6 +1,8 @@
 package com.upsaude.api.request;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.upsaude.enums.TipoUsuarioSistemaEnum;
+import com.upsaude.util.converter.TipoUsuarioSistemaEnumDeserializer;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -65,6 +67,7 @@ public class UsuariosSistemaRequest {
         @NotNull(message = "Estabelecimento é obrigatório")
         private UUID estabelecimentoId;
         
+        @JsonDeserialize(using = TipoUsuarioSistemaEnumDeserializer.class)
         private TipoUsuarioSistemaEnum tipoUsuario;
     }
 }

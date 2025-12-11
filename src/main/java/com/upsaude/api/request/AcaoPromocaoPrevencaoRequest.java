@@ -1,6 +1,8 @@
 package com.upsaude.api.request;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.upsaude.enums.TipoAcaoPromocaoSaudeEnum;
+import com.upsaude.util.converter.TipoAcaoPromocaoSaudeEnumDeserializer;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -27,6 +29,7 @@ public class AcaoPromocaoPrevencaoRequest {
     private UUID equipeSaude;
     
     @NotNull(message = "Tipo de ação é obrigatório")
+    @JsonDeserialize(using = TipoAcaoPromocaoSaudeEnumDeserializer.class)
     private TipoAcaoPromocaoSaudeEnum tipoAcao;
     
     @NotBlank(message = "Nome é obrigatório")

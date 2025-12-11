@@ -1,6 +1,8 @@
 package com.upsaude.api.request;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.upsaude.enums.StatusCirurgiaEnum;
+import com.upsaude.util.converter.StatusCirurgiaEnumDeserializer;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -49,6 +51,7 @@ public class CirurgiaRequest {
     private String leitoCentroCirurgico;
     
     @NotNull(message = "Status da cirurgia é obrigatório")
+    @JsonDeserialize(using = StatusCirurgiaEnumDeserializer.class)
     private StatusCirurgiaEnum status;
     private BigDecimal valorCirurgia;
     private BigDecimal valorMaterial;

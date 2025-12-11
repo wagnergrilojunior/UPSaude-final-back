@@ -1,6 +1,8 @@
 package com.upsaude.api.request;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.upsaude.enums.StatusReceitaEnum;
+import com.upsaude.util.converter.StatusReceitaEnumDeserializer;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -43,6 +45,7 @@ public class ReceitasMedicasRequest {
     private String observacoes;
     
     @NotNull(message = "Status é obrigatório")
+    @JsonDeserialize(using = StatusReceitaEnumDeserializer.class)
     private StatusReceitaEnum status;
     
     @Size(max = 50, message = "Origem da receita deve ter no máximo 50 caracteres")

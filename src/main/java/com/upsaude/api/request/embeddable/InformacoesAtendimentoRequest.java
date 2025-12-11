@@ -1,7 +1,10 @@
 package com.upsaude.api.request.embeddable;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.upsaude.enums.StatusAtendimentoEnum;
 import com.upsaude.enums.TipoAtendimentoEnum;
+import com.upsaude.util.converter.StatusAtendimentoEnumDeserializer;
+import com.upsaude.util.converter.TipoAtendimentoEnumDeserializer;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
@@ -31,10 +34,12 @@ public class InformacoesAtendimentoRequest {
     
     private Integer duracaoRealMinutos;
     
+    @JsonDeserialize(using = TipoAtendimentoEnumDeserializer.class)
     private TipoAtendimentoEnum tipoAtendimento;
     
     @NotNull(message = "Status do atendimento é obrigatório")
     @Builder.Default
+    @JsonDeserialize(using = StatusAtendimentoEnumDeserializer.class)
     private StatusAtendimentoEnum statusAtendimento = StatusAtendimentoEnum.AGENDADO;
     
     private String motivo;

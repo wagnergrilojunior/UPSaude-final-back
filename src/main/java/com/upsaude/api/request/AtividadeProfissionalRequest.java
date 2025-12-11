@@ -1,6 +1,8 @@
 package com.upsaude.api.request;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.upsaude.enums.TipoAtividadeProfissionalEnum;
+import com.upsaude.util.converter.TipoAtividadeProfissionalEnumDeserializer;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.UUID;
@@ -18,6 +20,7 @@ public class AtividadeProfissionalRequest {
     private UUID cirurgia;
     private OffsetDateTime dataHora;
     private LocalDate dataAtividade;
+    @JsonDeserialize(using = TipoAtividadeProfissionalEnumDeserializer.class)
     private TipoAtividadeProfissionalEnum tipoAtividade;
     private String descricao;
     private Integer duracaoMinutos;

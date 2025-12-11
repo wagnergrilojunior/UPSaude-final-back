@@ -1,6 +1,8 @@
 package com.upsaude.api.request.embeddable;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.upsaude.enums.TipoReacaoAlergicaEnum;
+import com.upsaude.util.converter.TipoReacaoAlergicaEnumDeserializer;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -14,6 +16,7 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ReacoesAlergiaRequest {
+    @JsonDeserialize(using = TipoReacaoAlergicaEnumDeserializer.class)
     private TipoReacaoAlergicaEnum tipoReacaoPrincipal;
     
     private String reacoesComuns;

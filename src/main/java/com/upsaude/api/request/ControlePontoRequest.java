@@ -1,6 +1,8 @@
 package com.upsaude.api.request;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.upsaude.enums.TipoPontoEnum;
+import com.upsaude.util.converter.TipoPontoEnumDeserializer;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.UUID;
@@ -15,6 +17,7 @@ public class ControlePontoRequest {
     private UUID medico;
     private OffsetDateTime dataHora;
     private LocalDate dataPonto;
+    @JsonDeserialize(using = TipoPontoEnumDeserializer.class)
     private TipoPontoEnum tipoPonto;
     private Double latitude;
     private Double longitude;
