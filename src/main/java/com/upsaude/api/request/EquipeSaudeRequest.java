@@ -1,7 +1,10 @@
 package com.upsaude.api.request;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.upsaude.enums.StatusAtivoEnum;
 import com.upsaude.enums.TipoEquipeEnum;
+import com.upsaude.util.converter.StatusAtivoEnumDeserializer;
+import com.upsaude.util.converter.TipoEquipeEnumDeserializer;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -28,6 +31,7 @@ public class EquipeSaudeRequest {
     private String nomeReferencia;
     
     @NotNull(message = "Tipo de equipe é obrigatório")
+    @JsonDeserialize(using = TipoEquipeEnumDeserializer.class)
     private TipoEquipeEnum tipoEquipe;
     
     @NotNull(message = "Estabelecimento é obrigatório")
@@ -39,6 +43,7 @@ public class EquipeSaudeRequest {
     private OffsetDateTime dataInativacao;
     
     @NotNull(message = "Status é obrigatório")
+    @JsonDeserialize(using = StatusAtivoEnumDeserializer.class)
     private StatusAtivoEnum status;
     private String observacoes;
 }

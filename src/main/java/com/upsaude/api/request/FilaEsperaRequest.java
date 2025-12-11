@@ -1,6 +1,8 @@
 package com.upsaude.api.request;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.upsaude.enums.PrioridadeAtendimentoEnum;
+import com.upsaude.util.converter.PrioridadeAtendimentoEnumDeserializer;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.UUID;
@@ -18,6 +20,7 @@ public class FilaEsperaRequest {
     private UUID agendamento;
     private OffsetDateTime dataEntrada;
     private LocalDate dataFimDesejada;
+    @JsonDeserialize(using = PrioridadeAtendimentoEnumDeserializer.class)
     private PrioridadeAtendimentoEnum prioridade;
     private Integer posicaoFila;
     private String motivo;

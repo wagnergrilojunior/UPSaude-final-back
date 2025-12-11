@@ -4,10 +4,14 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.upsaude.enums.NaturezaJuridicaEnum;
 import com.upsaude.enums.StatusFuncionamentoEnum;
 import com.upsaude.enums.TipoEstabelecimentoEnum;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.upsaude.util.converter.NaturezaJuridicaEnumDeserializer;
+import com.upsaude.util.converter.StatusFuncionamentoEnumDeserializer;
+import com.upsaude.util.converter.TipoEstabelecimentoEnumDeserializer;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.Max;
@@ -46,6 +50,7 @@ public class EstabelecimentosRequest {
     private String nomeFantasia;
     
     @NotNull(message = "Tipo de estabelecimento é obrigatório")
+    @JsonDeserialize(using = TipoEstabelecimentoEnumDeserializer.class)
     private TipoEstabelecimentoEnum tipo;
     
     // ========== CAMPOS OPCIONAIS COM VALIDAÇÕES GOVERNAMENTAIS ==========
@@ -57,6 +62,7 @@ public class EstabelecimentosRequest {
     @Pattern(regexp = "^$|^[0-9]{14}$", message = "CNPJ deve conter 14 dígitos")
     private String cnpj;
     
+    @JsonDeserialize(using = NaturezaJuridicaEnumDeserializer.class)
     private NaturezaJuridicaEnum naturezaJuridica;
     
     @Size(max = 50, message = "Registro oficial deve ter no máximo 50 caracteres")
@@ -143,6 +149,7 @@ public class EstabelecimentosRequest {
     
     @Pattern(regexp = "^$|^[0-9]{11}$", message = "CPF do responsável legal deve conter 11 dígitos")
     private String responsavelLegalCpf;
+    @JsonDeserialize(using = StatusFuncionamentoEnumDeserializer.class)
     private StatusFuncionamentoEnum statusFuncionamento;
     private OffsetDateTime dataAbertura;
     private OffsetDateTime dataLicenciamento;

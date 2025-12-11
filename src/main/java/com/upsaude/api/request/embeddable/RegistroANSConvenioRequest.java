@@ -1,6 +1,8 @@
 package com.upsaude.api.request.embeddable;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.upsaude.enums.StatusAtivoEnum;
+import com.upsaude.util.converter.StatusAtivoEnumDeserializer;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
@@ -27,6 +29,7 @@ public class RegistroANSConvenioRequest {
     
     private LocalDate dataValidadeRegistroAns;
     
+    @JsonDeserialize(using = StatusAtivoEnumDeserializer.class)
     private StatusAtivoEnum statusAns;
     
     @Size(max = 100, message = "Razão social ANS deve ter no máximo 100 caracteres")

@@ -1,6 +1,8 @@
 package com.upsaude.api.request.embeddable;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.upsaude.enums.TipoAlergiaEnum;
+import com.upsaude.util.converter.TipoAlergiaEnumDeserializer;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
@@ -15,6 +17,7 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ClassificacaoAlergiaRequest {
+    @JsonDeserialize(using = TipoAlergiaEnumDeserializer.class)
     private TipoAlergiaEnum tipoAlergia;
     
     @Size(max = 100, message = "Categoria deve ter no máximo 100 caracteres")

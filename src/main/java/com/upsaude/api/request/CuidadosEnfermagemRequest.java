@@ -1,6 +1,8 @@
 package com.upsaude.api.request;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.upsaude.enums.TipoCuidadoEnfermagemEnum;
+import com.upsaude.util.converter.TipoCuidadoEnfermagemEnumDeserializer;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import java.math.BigDecimal;
@@ -21,6 +23,7 @@ public class CuidadosEnfermagemRequest {
     private UUID atendimento;
     
     @NotNull(message = "Tipo de cuidado é obrigatório")
+    @JsonDeserialize(using = TipoCuidadoEnfermagemEnumDeserializer.class)
     private TipoCuidadoEnfermagemEnum tipoCuidado;
     private String descricaoProcedimento;
     private OffsetDateTime dataHora;

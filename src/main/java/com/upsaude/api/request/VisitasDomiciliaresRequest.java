@@ -1,6 +1,8 @@
 package com.upsaude.api.request;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.upsaude.enums.TipoVisitaDomiciliarEnum;
+import com.upsaude.util.converter.TipoVisitaDomiciliarEnumDeserializer;
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 import java.util.UUID;
@@ -14,6 +16,7 @@ public class VisitasDomiciliaresRequest {
     private UUID paciente;
     private UUID profissional;
     private UUID equipeSaude;
+    @JsonDeserialize(using = TipoVisitaDomiciliarEnumDeserializer.class)
     private TipoVisitaDomiciliarEnum tipoVisita;
     private OffsetDateTime dataVisita;
     private String turno;

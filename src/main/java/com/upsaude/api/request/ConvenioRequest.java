@@ -3,11 +3,15 @@ package com.upsaude.api.request;
 import com.upsaude.api.request.embeddable.CoberturaConvenioRequest;
 import com.upsaude.api.request.embeddable.ContatoConvenioRequest;
 import com.upsaude.api.request.embeddable.InformacoesFinanceirasConvenioRequest;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.upsaude.api.request.embeddable.IntegracaoGovernamentalConvenioRequest;
 import com.upsaude.api.request.embeddable.RegistroANSConvenioRequest;
 import com.upsaude.enums.ModalidadeConvenioEnum;
 import com.upsaude.enums.StatusAtivoEnum;
 import com.upsaude.enums.TipoConvenioEnum;
+import com.upsaude.util.converter.ModalidadeConvenioEnumDeserializer;
+import com.upsaude.util.converter.StatusAtivoEnumDeserializer;
+import com.upsaude.util.converter.TipoConvenioEnumDeserializer;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -47,9 +51,11 @@ public class ConvenioRequest {
     private String inscricaoMunicipal;
     
     @NotNull(message = "Tipo de convênio é obrigatório")
+    @JsonDeserialize(using = TipoConvenioEnumDeserializer.class)
     private TipoConvenioEnum tipo;
     
     @NotNull(message = "Modalidade de convênio é obrigatória")
+    @JsonDeserialize(using = ModalidadeConvenioEnumDeserializer.class)
     private ModalidadeConvenioEnum modalidade;
     
     @Size(max = 100, message = "Categoria deve ter no máximo 100 caracteres")
@@ -68,6 +74,7 @@ public class ConvenioRequest {
     @Valid
     private InformacoesFinanceirasConvenioRequest informacoesFinanceiras;
     
+    @JsonDeserialize(using = StatusAtivoEnumDeserializer.class)
     private StatusAtivoEnum status;
     private LocalDate dataCadastro;
     private LocalDate dataAtivacao;

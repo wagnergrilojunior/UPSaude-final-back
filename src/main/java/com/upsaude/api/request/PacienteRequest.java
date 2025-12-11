@@ -2,8 +2,23 @@ package com.upsaude.api.request;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.upsaude.enums.EscolaridadeEnum;
 import com.upsaude.enums.EstadoCivilEnum;
+import com.upsaude.enums.IdentidadeGeneroEnum;
+import com.upsaude.enums.NacionalidadeEnum;
+import com.upsaude.enums.OrientacaoSexualEnum;
+import com.upsaude.enums.RacaCorEnum;
 import com.upsaude.enums.SexoEnum;
+import com.upsaude.enums.StatusPacienteEnum;
+import com.upsaude.util.converter.EscolaridadeEnumDeserializer;
+import com.upsaude.util.converter.EstadoCivilEnumDeserializer;
+import com.upsaude.util.converter.IdentidadeGeneroEnumDeserializer;
+import com.upsaude.util.converter.NacionalidadeEnumDeserializer;
+import com.upsaude.util.converter.OrientacaoSexualEnumDeserializer;
+import com.upsaude.util.converter.RacaCorEnumDeserializer;
+import com.upsaude.util.converter.SexoEnumDeserializer;
+import com.upsaude.util.converter.StatusPacienteEnumDeserializer;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -15,6 +30,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
@@ -46,9 +62,47 @@ public class PacienteRequest {
     private LocalDate dataNascimento;
     
     @NotNull(message = "Sexo é obrigatório")
+    @JsonDeserialize(using = SexoEnumDeserializer.class)
     private SexoEnum sexo;
     
+    @JsonDeserialize(using = EstadoCivilEnumDeserializer.class)
     private EstadoCivilEnum estadoCivil;
+    
+    @JsonDeserialize(using = IdentidadeGeneroEnumDeserializer.class)
+    private IdentidadeGeneroEnum identidadeGenero;
+    
+    @JsonDeserialize(using = OrientacaoSexualEnumDeserializer.class)
+    private OrientacaoSexualEnum orientacaoSexual;
+    
+    @JsonDeserialize(using = RacaCorEnumDeserializer.class)
+    private RacaCorEnum racaCor;
+    
+    @JsonDeserialize(using = NacionalidadeEnumDeserializer.class)
+    private NacionalidadeEnum nacionalidade;
+    
+    private String paisNascimento;
+    
+    private String naturalidade;
+    
+    @JsonDeserialize(using = EscolaridadeEnumDeserializer.class)
+    private EscolaridadeEnum escolaridade;
+    
+    private String ocupacaoProfissao;
+    
+    @JsonDeserialize(using = StatusPacienteEnumDeserializer.class)
+    private StatusPacienteEnum statusPaciente;
+    
+    private String nomeSocial;
+    
+    private Boolean situacaoRua;
+    
+    private Boolean possuiDeficiencia;
+    
+    private Boolean acompanhadoPorEquipeEsf;
+    
+    private Boolean cartaoSusAtivo;
+    
+    private Boolean cnsValidado;
     
     @Pattern(regexp = "^$|^[0-9]{10,11}$", message = "Telefone deve conter DDD + número (10 ou 11 dígitos)")
     private String telefone;
@@ -107,5 +161,9 @@ public class PacienteRequest {
     private Set<UUID> medicacoes;
     private Set<UUID> alergias;
     private Set<UUID> doencas;
+    
+    // ========== LISTA DE ENDEREÇOS COMPLETOS ==========
+    
+    private List<EnderecoRequest> enderecos;
 }
 

@@ -1,6 +1,8 @@
 package com.upsaude.api.request.embeddable;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.upsaude.enums.TipoEspecialidadeMedicaEnum;
+import com.upsaude.util.converter.TipoEspecialidadeMedicaEnumDeserializer;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
@@ -15,6 +17,7 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ClassificacaoEspecialidadeMedicaRequest {
+    @JsonDeserialize(using = TipoEspecialidadeMedicaEnumDeserializer.class)
     private TipoEspecialidadeMedicaEnum tipoEspecialidade;
     
     @Size(max = 50, message = "Código CFM deve ter no máximo 50 caracteres")

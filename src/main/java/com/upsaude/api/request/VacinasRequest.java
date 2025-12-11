@@ -19,6 +19,10 @@ import com.upsaude.enums.StatusAtivoEnum;
 import com.upsaude.enums.TipoVacinaEnum;
 import com.upsaude.enums.UnidadeMedidaEnum;
 import com.upsaude.enums.ViaAdministracaoEnum;
+import com.upsaude.util.converter.StatusAtivoEnumDeserializer;
+import com.upsaude.util.converter.TipoVacinaEnumDeserializer;
+import com.upsaude.util.converter.UnidadeMedidaEnumDeserializer;
+import com.upsaude.util.converter.ViaAdministracaoEnumDeserializer;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
@@ -90,6 +94,7 @@ public class VacinasRequest {
     @Valid
     private CalendarioVacinalRequest calendario;
     
+    @JsonDeserialize(using = StatusAtivoEnumDeserializer.class)
     private StatusAtivoEnum status;
     
     @Size(max = 5000, message = "Bula deve ter no máximo 5000 caracteres")

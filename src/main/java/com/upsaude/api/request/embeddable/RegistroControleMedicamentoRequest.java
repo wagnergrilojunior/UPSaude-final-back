@@ -1,6 +1,8 @@
 package com.upsaude.api.request.embeddable;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.upsaude.enums.TipoControleMedicamentoEnum;
+import com.upsaude.util.converter.TipoControleMedicamentoEnumDeserializer;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
@@ -24,6 +26,7 @@ public class RegistroControleMedicamentoRequest {
     
     private LocalDate dataValidadeRegistroAnvisa;
     
+    @JsonDeserialize(using = TipoControleMedicamentoEnumDeserializer.class)
     private TipoControleMedicamentoEnum tipoControle;
     
     @NotNull(message = "Receita obrigatória é obrigatório")

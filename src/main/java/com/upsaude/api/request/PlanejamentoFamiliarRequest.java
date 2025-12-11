@@ -1,6 +1,8 @@
 package com.upsaude.api.request;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.upsaude.enums.TipoMetodoContraceptivoEnum;
+import com.upsaude.util.converter.TipoMetodoContraceptivoEnumDeserializer;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.UUID;
@@ -14,9 +16,12 @@ public class PlanejamentoFamiliarRequest {
     private UUID paciente;
     private UUID profissionalResponsavel;
     private UUID equipeSaude;
+    @JsonDeserialize(using = TipoMetodoContraceptivoEnumDeserializer.class)
     private TipoMetodoContraceptivoEnum metodoAtual;
     private LocalDate dataInicioMetodo;
     private String nomeComercialMetodo;
+    
+    @JsonDeserialize(using = TipoMetodoContraceptivoEnumDeserializer.class)
     private TipoMetodoContraceptivoEnum metodoAnterior;
     private String motivoTrocaMetodo;
     private Integer numeroGestacoes;

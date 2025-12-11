@@ -1,6 +1,8 @@
 package com.upsaude.api.request;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.upsaude.enums.TipoVinculoProfissionalEnum;
+import com.upsaude.util.converter.TipoVinculoProfissionalEnumDeserializer;
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 import java.util.UUID;
@@ -15,6 +17,7 @@ public class ProfissionalEstabelecimentoRequest {
     private UUID estabelecimento;
     private OffsetDateTime dataInicio;
     private OffsetDateTime dataFim;
+    @JsonDeserialize(using = TipoVinculoProfissionalEnumDeserializer.class)
     private TipoVinculoProfissionalEnum tipoVinculo;
     private Integer cargaHorariaSemanal;
     private BigDecimal salario;

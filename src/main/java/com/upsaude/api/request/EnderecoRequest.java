@@ -6,7 +6,9 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.upsaude.enums.TipoEnderecoEnum;
 import com.upsaude.enums.TipoLogradouroEnum;
 import com.upsaude.enums.ZonaDomicilioEnum;
+import com.upsaude.util.converter.TipoEnderecoEnumDeserializer;
 import com.upsaude.util.converter.TipoLogradouroEnumDeserializer;
+import com.upsaude.util.converter.ZonaDomicilioEnumDeserializer;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
@@ -48,7 +50,11 @@ public class EnderecoRequest {
     private String pontoReferencia;
     private Double latitude;
     private Double longitude;
+    
+    @JsonDeserialize(using = TipoEnderecoEnumDeserializer.class)
     private TipoEnderecoEnum tipoEndereco;
+    
+    @JsonDeserialize(using = ZonaDomicilioEnumDeserializer.class)
     private ZonaDomicilioEnum zona;
     @Pattern(regexp = "^$|^[0-9]{7}$", message = "Código IBGE deve conter 7 dígitos")
     @Size(max = 7, message = "Código IBGE município deve ter no máximo 7 caracteres")
