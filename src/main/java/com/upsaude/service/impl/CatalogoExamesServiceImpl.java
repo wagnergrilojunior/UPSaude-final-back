@@ -28,6 +28,8 @@ public class CatalogoExamesServiceImpl implements CatalogoExamesService {
 
     private final CatalogoExamesRepository catalogoExamesRepository;
     private final CatalogoExamesMapper catalogoExamesMapper;
+    private final com.upsaude.service.TenantService tenantService;
+    private final com.upsaude.service.support.catalogoexames.CatalogoExamesValidationService catalogoExamesValidationService;
 
     @Override
     @Transactional
@@ -35,8 +37,13 @@ public class CatalogoExamesServiceImpl implements CatalogoExamesService {
     public CatalogoExamesResponse criar(CatalogoExamesRequest request) {
         log.debug("Criando novo exame no catálogo");
 
+        tenantService.validarTenantAtual();
+        catalogoExamesValidationService.validarObrigatorios(request);
+
         CatalogoExames exame = catalogoExamesMapper.fromRequest(request);
         exame.setActive(true);
+        com.upsaude.entity.Tenant tenant = tenantService.obterTenantDoUsuarioAutenticado();
+        exame.setTenant(tenant);
 
         validarDuplicidade(null, exame, request);
 
@@ -79,6 +86,9 @@ public class CatalogoExamesServiceImpl implements CatalogoExamesService {
         if (id == null) {
             throw new BadRequestException("ID do exame é obrigatório");
         }
+
+        tenantService.validarTenantAtual();
+        catalogoExamesValidationService.validarObrigatorios(request);
 
         CatalogoExames exameExistente = catalogoExamesRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Exame não encontrado no catálogo com ID: " + id));

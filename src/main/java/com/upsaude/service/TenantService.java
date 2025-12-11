@@ -21,4 +21,6 @@ public interface TenantService {
     void excluir(UUID id);
 
     Tenant obterTenantDoUsuarioAutenticado();
+
+    java.util.UUID validarTenantAtual();
 }

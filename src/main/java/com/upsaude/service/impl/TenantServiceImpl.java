@@ -198,4 +198,14 @@ public class TenantServiceImpl implements TenantService {
         }
         return null;
     }
+
+    @Override
+    public java.util.UUID validarTenantAtual() {
+        Tenant tenant = obterTenantDoUsuarioAutenticado();
+        if (tenant == null || tenant.getId() == null) {
+            throw new BadRequestException("Tenant do usuário autenticado é obrigatório");
+        }
+        obterPorId(tenant.getId());
+        return tenant.getId();
+    }
 }

@@ -28,14 +28,30 @@ public interface PacienteRepository extends JpaRepository<Paciente, UUID> {
     Page<PacienteSimplificadoProjection> findAllSimplificado(Pageable pageable);
 
     @Override
-    @EntityGraph(attributePaths = {
-        "convenio",
-        "enderecos",
-        "doencas",
-        "alergias",
-        "deficiencias",
-        "medicacoes"
-    })
+    @EntityGraph(value = "Paciente.completo")
     @NonNull
     Page<Paciente> findAll(@NonNull Pageable pageable);
+
+    @EntityGraph(attributePaths = {
+        "enderecos",
+        "doencas",
+        "doencas.doenca",
+        "doencas.cidPrincipal",
+        "alergias",
+        "alergias.alergia",
+        "deficiencias",
+        "medicacoes",
+        "medicacoes.medicacao",
+        "medicacoes.medicacao.identificacao",
+        "medicacoes.medicacao.fabricanteEntity",
+        "medicacoes.cidRelacionado",
+        "dadosSociodemograficos",
+        "dadosClinicosBasicos",
+        "responsavelLegal",
+        "lgpdConsentimento",
+        "integracaoGov",
+        "convenio"
+    })
+    @Query("SELECT p FROM Paciente p WHERE p.id = :id")
+    Optional<Paciente> findByIdCompleto(@org.springframework.data.repository.query.Param("id") UUID id);
 }
