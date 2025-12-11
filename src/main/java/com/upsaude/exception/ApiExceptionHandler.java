@@ -310,7 +310,16 @@ public class ApiExceptionHandler {
             } else if (causaMsg.contains("violates foreign key constraint")) {
                 mensagemErro = "Referência inválida: o registro referenciado não existe.";
             } else if (causaMsg.contains("violates not-null constraint")) {
-                mensagemErro = "Campo obrigatório não pode ser nulo.";
+                String coluna = extrairColunaNotNull(causaMsg);
+                String relacao = extrairRelacao(causaMsg);
+                String campoAmigavel = mapearCampoAmigavel(relacao, coluna);
+                if (coluna != null) {
+                    mensagemErro = String.format("Campo obrigatório '%s'%s não pode ser nulo.",
+                            campoAmigavel != null ? campoAmigavel : coluna,
+                            relacao != null ? String.format(" (tabela '%s')", relacao) : "");
+                } else {
+                    mensagemErro = "Campo obrigatório não pode ser nulo.";
+                }
             } else {
 
                 if (causaMsg.length() < 200) {
@@ -332,6 +341,62 @@ public class ApiExceptionHandler {
                 mensagemErro,
                 request.getRequestURI()
         );
+    }
+
+    private String extrairColunaNotNull(String causaMsg) {
+        // Exemplo PostgreSQL: "null value in column \"estabelecimento_id\" of relation \"equipes_saude\" violates not-null constraint"
+        try {
+            int colIdx = causaMsg.indexOf("column \"");
+            if (colIdx >= 0) {
+                int start = colIdx + "column \"".length();
+                int end = causaMsg.indexOf("\"", start);
+                if (end > start) {
+                    return causaMsg.substring(start, end);
+                }
+            }
+        } catch (Exception ignored) {}
+        return null;
+    }
+
+    private String extrairRelacao(String causaMsg) {
+        try {
+            int relIdx = causaMsg.indexOf("relation \"");
+            if (relIdx >= 0) {
+                int start = relIdx + "relation \"".length();
+                int end = causaMsg.indexOf("\"", start);
+                if (end > start) {
+                    return causaMsg.substring(start, end);
+                }
+            }
+        } catch (Exception ignored) {}
+        return null;
+    }
+
+    private String mapearCampoAmigavel(String relacao, String coluna) {
+        if (relacao == null || coluna == null) return null;
+        // Mapeamentos amigáveis para equipes_saude
+        if ("equipes_saude".equals(relacao)) {
+            return switch (coluna) {
+                case "estabelecimento_id" -> "estabelecimento";
+                case "ine" -> "INE";
+                case "nome_referencia" -> "nomeReferencia";
+                case "tipo_equipe" -> "tipoEquipe";
+                case "data_ativacao" -> "dataAtivacao";
+                case "status" -> "status";
+                default -> coluna;
+            };
+        }
+        // Mapeamentos para vinculos_profissional_equipe
+        if ("vinculos_profissional_equipe".equals(relacao)) {
+            return switch (coluna) {
+                case "profissional_id" -> "profissional";
+                case "equipe_id" -> "equipe";
+                case "data_inicio" -> "dataInicio";
+                case "status" -> "status";
+                default -> coluna;
+            };
+        }
+        return coluna;
     }
 
     @ExceptionHandler(Exception.class)

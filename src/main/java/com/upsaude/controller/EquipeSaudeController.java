@@ -26,7 +26,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/v1/equipes-saude")
+@RequestMapping({"/v1/equipes-saude", "/v1/equipe-saude"})
 @Tag(name = "Equipes de Saúde", description = "API para gerenciamento de Equipes de Saúde")
 @RequiredArgsConstructor
 @Slf4j

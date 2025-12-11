@@ -60,17 +60,113 @@ import java.util.List;
            @Index(name = "idx_pacientes_cns_validado", columnList = "cns_validado"),
            @Index(name = "idx_pacientes_acompanhado_esf", columnList = "acompanhado_por_equipe_esf")
        })
-@NamedEntityGraph(
-    name = "Paciente.listagemCompleta",
-    attributeNodes = {
-        @NamedAttributeNode("convenio"),
-        @NamedAttributeNode("enderecos"),
-        @NamedAttributeNode("doencas"),
-        @NamedAttributeNode("alergias"),
-        @NamedAttributeNode("deficiencias"),
-        @NamedAttributeNode("medicacoes")
-    }
-)
+@NamedEntityGraphs({
+    @NamedEntityGraph(
+        name = "Paciente.basic",
+        attributeNodes = {
+            @NamedAttributeNode("convenio")
+        }
+    ),
+    @NamedEntityGraph(
+        name = "Paciente.enderecos",
+        attributeNodes = {
+            @NamedAttributeNode("enderecos")
+        }
+    ),
+    @NamedEntityGraph(
+        name = "Paciente.infoClinica",
+        attributeNodes = {
+            @NamedAttributeNode("dadosSociodemograficos"),
+            @NamedAttributeNode("dadosClinicosBasicos"),
+            @NamedAttributeNode("responsavelLegal"),
+            @NamedAttributeNode("lgpdConsentimento"),
+            @NamedAttributeNode("integracaoGov")
+        }
+    ),
+    @NamedEntityGraph(
+        name = "Paciente.comAlergias",
+        attributeNodes = {
+            @NamedAttributeNode(value = "alergias", subgraph = "alergiasSubgraph")
+        },
+        subgraphs = {
+            @NamedSubgraph(name = "alergiasSubgraph", type = AlergiasPaciente.class, attributeNodes = {
+                @NamedAttributeNode("alergia")
+            })
+        }
+    ),
+    @NamedEntityGraph(
+        name = "Paciente.comDoencas",
+        attributeNodes = {
+            @NamedAttributeNode(value = "doencas", subgraph = "doencasSubgraph")
+        },
+        subgraphs = {
+            @NamedSubgraph(name = "doencasSubgraph", type = DoencasPaciente.class, attributeNodes = {
+                @NamedAttributeNode("doenca"),
+                @NamedAttributeNode("cidPrincipal")
+            })
+        }
+    ),
+    @NamedEntityGraph(
+        name = "Paciente.comMedicacoes",
+        attributeNodes = {
+            @NamedAttributeNode(value = "medicacoes", subgraph = "medicacoesSubgraph")
+        },
+        subgraphs = {
+            @NamedSubgraph(name = "medicacoesSubgraph", type = MedicacaoPaciente.class, attributeNodes = {
+                @NamedAttributeNode(value = "medicacao", subgraph = "medicacaoDetalhes"),
+                @NamedAttributeNode("cidRelacionado")
+            }),
+            @NamedSubgraph(name = "medicacaoDetalhes", type = Medicacao.class, attributeNodes = {
+                @NamedAttributeNode("identificacao"),
+                @NamedAttributeNode("fabricanteEntity")
+            })
+        }
+    ),
+    @NamedEntityGraph(
+        name = "Paciente.completo",
+        attributeNodes = {
+            @NamedAttributeNode("convenio"),
+            @NamedAttributeNode("enderecos"),
+            @NamedAttributeNode(value = "doencas", subgraph = "doencasSubgraph"),
+            @NamedAttributeNode(value = "alergias", subgraph = "alergiasSubgraph"),
+            @NamedAttributeNode("deficiencias"),
+            @NamedAttributeNode(value = "medicacoes", subgraph = "medicacoesSubgraph"),
+            @NamedAttributeNode("dadosSociodemograficos"),
+            @NamedAttributeNode("dadosClinicosBasicos"),
+            @NamedAttributeNode("responsavelLegal"),
+            @NamedAttributeNode("lgpdConsentimento"),
+            @NamedAttributeNode("integracaoGov")
+        },
+        subgraphs = {
+            @NamedSubgraph(name = "alergiasSubgraph", type = AlergiasPaciente.class, attributeNodes = {
+                @NamedAttributeNode("alergia")
+            }),
+            @NamedSubgraph(name = "doencasSubgraph", type = DoencasPaciente.class, attributeNodes = {
+                @NamedAttributeNode("doenca"),
+                @NamedAttributeNode("cidPrincipal")
+            }),
+            @NamedSubgraph(name = "medicacoesSubgraph", type = MedicacaoPaciente.class, attributeNodes = {
+                @NamedAttributeNode(value = "medicacao", subgraph = "medicacaoDetalhes"),
+                @NamedAttributeNode("cidRelacionado")
+            }),
+            @NamedSubgraph(name = "medicacaoDetalhes", type = Medicacao.class, attributeNodes = {
+                @NamedAttributeNode("identificacao"),
+                @NamedAttributeNode("fabricanteEntity")
+            })
+        }
+    ),
+    @NamedEntityGraph(
+        name = "Paciente.listagemCompleta",
+        attributeNodes = {
+            @NamedAttributeNode("convenio"),
+            @NamedAttributeNode("enderecos"),
+            @NamedAttributeNode("doencas"),
+            @NamedAttributeNode("alergias"),
+            @NamedAttributeNode("deficiencias"),
+            @NamedAttributeNode("medicacoes")
+        }
+    )
+})
 @Data
 @EqualsAndHashCode(callSuper = true)
 public class Paciente extends BaseEntityWithoutTenant {
@@ -147,6 +243,8 @@ public class Paciente extends BaseEntityWithoutTenant {
         joinColumns = @JoinColumn(name = "paciente_id"),
         inverseJoinColumns = @JoinColumn(name = "endereco_id")
     )
+    @org.hibernate.annotations.BatchSize(size = 50)
+    @org.hibernate.annotations.Fetch(org.hibernate.annotations.FetchMode.SUBSELECT)
     private List<Endereco> enderecos = new ArrayList<>();
 
     @Convert(converter = RacaCorEnumConverter.class)
@@ -242,15 +340,23 @@ public class Paciente extends BaseEntityWithoutTenant {
     private IntegracaoGov integracaoGov;
 
     @OneToMany(mappedBy = "paciente", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
+    @org.hibernate.annotations.BatchSize(size = 50)
+    @org.hibernate.annotations.Fetch(org.hibernate.annotations.FetchMode.SUBSELECT)
     private List<DoencasPaciente> doencas = new ArrayList<>();
 
     @OneToMany(mappedBy = "paciente", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
+    @org.hibernate.annotations.BatchSize(size = 50)
+    @org.hibernate.annotations.Fetch(org.hibernate.annotations.FetchMode.SUBSELECT)
     private List<AlergiasPaciente> alergias = new ArrayList<>();
 
     @OneToMany(mappedBy = "paciente", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
+    @org.hibernate.annotations.BatchSize(size = 50)
+    @org.hibernate.annotations.Fetch(org.hibernate.annotations.FetchMode.SUBSELECT)
     private List<DeficienciasPaciente> deficiencias = new ArrayList<>();
 
     @OneToMany(mappedBy = "paciente", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
+    @org.hibernate.annotations.BatchSize(size = 50)
+    @org.hibernate.annotations.Fetch(org.hibernate.annotations.FetchMode.SUBSELECT)
     private List<MedicacaoPaciente> medicacoes = new ArrayList<>();
 
     @PrePersist
