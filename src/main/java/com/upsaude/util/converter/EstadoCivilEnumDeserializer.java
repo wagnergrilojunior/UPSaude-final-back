@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonDeserializer;
 import com.upsaude.enums.EstadoCivilEnum;
+import com.upsaude.exception.InvalidArgumentException;
 import java.io.IOException;
 
 public class EstadoCivilEnumDeserializer extends JsonDeserializer<EstadoCivilEnum> {
@@ -47,8 +48,10 @@ public class EstadoCivilEnumDeserializer extends JsonDeserializer<EstadoCivilEnu
         try {
             return EstadoCivilEnum.valueOf(strValue.toUpperCase());
         } catch (IllegalArgumentException e) {
-            // Se não encontrar, retorna null (não lança exceção)
-            return null;
+            // Se não encontrar, lança exceção para forçar validação
+            throw new InvalidArgumentException(
+                String.format("Valor inválido para EstadoCivilEnum: '%s'. Valores válidos: SOLTEIRO, CASADO, DIVORCIADO, VIUVO, SEPARADO, UNIAO_ESTAVEL", strValue)
+            );
         }
     }
 }

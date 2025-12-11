@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonDeserializer;
 import com.upsaude.enums.IdentidadeGeneroEnum;
+import com.upsaude.exception.InvalidArgumentException;
 import java.io.IOException;
 
 public class IdentidadeGeneroEnumDeserializer extends JsonDeserializer<IdentidadeGeneroEnum> {
@@ -47,8 +48,10 @@ public class IdentidadeGeneroEnumDeserializer extends JsonDeserializer<Identidad
         try {
             return IdentidadeGeneroEnum.valueOf(strValue.toUpperCase());
         } catch (IllegalArgumentException e) {
-            // Se não encontrar, retorna null (não lança exceção)
-            return null;
+            // Se não encontrar, lança exceção para forçar validação
+            throw new InvalidArgumentException(
+                String.format("Valor inválido para IdentidadeGeneroEnum: '%s'. Valores válidos: CIS, TRANS, NAO_BINARIO, OUTRO", strValue)
+            );
         }
     }
 }

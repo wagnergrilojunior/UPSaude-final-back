@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonDeserializer;
 import com.upsaude.enums.TipoProfissionalEnum;
+import com.upsaude.exception.InvalidArgumentException;
 import java.io.IOException;
 
 public class TipoProfissionalEnumDeserializer extends JsonDeserializer<TipoProfissionalEnum> {
@@ -47,8 +48,10 @@ public class TipoProfissionalEnumDeserializer extends JsonDeserializer<TipoProfi
         try {
             return TipoProfissionalEnum.valueOf(strValue.toUpperCase());
         } catch (IllegalArgumentException e) {
-            // Se não encontrar, retorna null (não lança exceção)
-            return null;
+            // Se não encontrar, lança exceção para forçar validação
+            throw new InvalidArgumentException(
+                String.format("Valor inválido para TipoProfissionalEnum: '%s'. Use um valor válido do enum.", strValue)
+            );
         }
     }
 }
