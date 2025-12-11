@@ -2,9 +2,12 @@ package com.upsaude.api.request;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonSetter;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.upsaude.enums.NaturezaJuridicaEnum;
 import com.upsaude.enums.StatusFuncionamentoEnum;
 import com.upsaude.enums.TipoEstabelecimentoEnum;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.Max;
@@ -20,6 +23,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
 
 @Getter
 @Setter
@@ -28,6 +32,7 @@ import lombok.Setter;
 @AllArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
+@Slf4j
 public class EstabelecimentosRequest {
     // ========== CAMPOS OBRIGATÓRIOS ==========
     
@@ -36,7 +41,7 @@ public class EstabelecimentosRequest {
     @Size(max = 255, message = "Nome deve ter no máximo 255 caracteres")
     private String nome;
     
-    @Pattern(regexp = "^[\\p{L}0-9 .'-]+$", message = "Caracteres inválidos no nome fantasia")
+    @Pattern(regexp = "^$|^[\\p{L}0-9 .'-]+$", message = "Caracteres inválidos no nome fantasia")
     @Size(max = 255, message = "Nome fantasia deve ter no máximo 255 caracteres")
     private String nomeFantasia;
     
@@ -45,11 +50,11 @@ public class EstabelecimentosRequest {
     
     // ========== CAMPOS OPCIONAIS COM VALIDAÇÕES GOVERNAMENTAIS ==========
     
-    @Pattern(regexp = "^[0-9]{7}$", message = "CNES deve conter 7 dígitos")
+    @Pattern(regexp = "^$|^[0-9]{7}$", message = "CNES deve conter 7 dígitos")
     @Size(max = 7, message = "Código CNES deve ter no máximo 7 caracteres")
     private String codigoCnes;
     
-    @Pattern(regexp = "^[0-9]{14}$", message = "CNPJ deve conter 14 dígitos")
+    @Pattern(regexp = "^$|^[0-9]{14}$", message = "CNPJ deve conter 14 dígitos")
     private String cnpj;
     
     private NaturezaJuridicaEnum naturezaJuridica;
@@ -61,32 +66,74 @@ public class EstabelecimentosRequest {
     
     /**
      * Endereço principal do estabelecimento.
-     * IMPORTANTE: Apenas UUID deve ser usado. Para criar novos endereços, use o endpoint de endereços separadamente.
-     * @deprecated enderecoPrincipalCompleto será removido em versão futura - use apenas enderecoPrincipal (UUID)
+     * Aceita tanto UUID (string) quanto objeto EnderecoRequest completo.
+     * Se for objeto, será automaticamente convertido para enderecoPrincipalCompleto.
      */
     private UUID enderecoPrincipal;
     
     /**
-     * @deprecated Use apenas enderecoPrincipal (UUID). Para criar novos endereços, use o endpoint de endereços separadamente.
+     * Endereço principal completo (objeto).
+     * Este campo é preenchido automaticamente quando enderecoPrincipal recebe um objeto JSON.
      */
     @Deprecated
     @Valid
     private EnderecoRequest enderecoPrincipalCompleto;
     
-    @Pattern(regexp = "^[0-9]{10,11}$", message = "Telefone deve conter DDD + número (10 ou 11 dígitos)")
+    /**
+     * Setter customizado que aceita tanto UUID quanto objeto EnderecoRequest.
+     * Se receber um objeto, converte para EnderecoRequest e preenche enderecoPrincipalCompleto.
+     * Se receber uma string UUID, converte para UUID e preenche enderecoPrincipal.
+     */
+    @JsonSetter("enderecoPrincipal")
+    public void setEnderecoPrincipalFlexivel(JsonNode node) {
+        if (node == null || node.isNull()) {
+            this.enderecoPrincipal = null;
+            this.enderecoPrincipalCompleto = null;
+            return;
+        }
+        
+        try {
+            // Se for string (UUID)
+            if (node.isTextual()) {
+                String uuidString = node.asText();
+                if (uuidString != null && !uuidString.trim().isEmpty()) {
+                    this.enderecoPrincipal = UUID.fromString(uuidString);
+                    this.enderecoPrincipalCompleto = null;
+                }
+            }
+            // Se for objeto (EnderecoRequest)
+            else if (node.isObject()) {
+                ObjectMapper mapper = new ObjectMapper();
+                this.enderecoPrincipalCompleto = mapper.treeToValue(node, EnderecoRequest.class);
+                this.enderecoPrincipal = null;
+                log.debug("Endereço principal recebido como objeto, convertido para enderecoPrincipalCompleto");
+            }
+            // Se for número (improvável, mas pode acontecer)
+            else {
+                log.warn("Tipo inesperado para enderecoPrincipal: {}", node.getNodeType());
+                this.enderecoPrincipal = null;
+                this.enderecoPrincipalCompleto = null;
+            }
+        } catch (Exception e) {
+            log.error("Erro ao processar enderecoPrincipal: {}", e.getMessage(), e);
+            throw new IllegalArgumentException("Erro ao processar enderecoPrincipal. Deve ser UUID (string) ou objeto EnderecoRequest.", e);
+        }
+    }
+    
+    @Pattern(regexp = "^$|^[0-9]{10,11}$", message = "Telefone deve conter DDD + número (10 ou 11 dígitos)")
     private String telefone;
     
-    @Pattern(regexp = "^[0-9]{10,11}$", message = "Telefone secundário deve conter DDD + número (10 ou 11 dígitos)")
+    @Pattern(regexp = "^$|^[0-9]{10,11}$", message = "Telefone secundário deve conter DDD + número (10 ou 11 dígitos)")
     private String telefoneSecundario;
     
-    @Pattern(regexp = "^[0-9]{10,11}$", message = "Fax deve conter DDD + número (10 ou 11 dígitos)")
+    @Pattern(regexp = "^$|^[0-9]{10,11}$", message = "Fax deve conter DDD + número (10 ou 11 dígitos)")
     private String fax;
     
     @Email(message = "Email inválido")
     @Size(max = 255, message = "Email deve ter no máximo 255 caracteres")
     private String email;
     
-    @Pattern(regexp = "^(https?://).+", message = "URL inválida, deve iniciar com http:// ou https://")
+    @Pattern(regexp = "^$|^(https?://).+", message = "URL inválida, deve iniciar com http:// ou https://")
     @Size(max = 255, message = "Site deve ter no máximo 255 caracteres")
     private String site;
     private UUID responsavelTecnico;
@@ -94,7 +141,7 @@ public class EstabelecimentosRequest {
     @Size(max = 255, message = "Nome do responsável legal deve ter no máximo 255 caracteres")
     private String responsavelLegalNome;
     
-    @Pattern(regexp = "^[0-9]{11}$", message = "CPF do responsável legal deve conter 11 dígitos")
+    @Pattern(regexp = "^$|^[0-9]{11}$", message = "CPF do responsável legal deve conter 11 dígitos")
     private String responsavelLegalCpf;
     private StatusFuncionamentoEnum statusFuncionamento;
     private OffsetDateTime dataAbertura;
