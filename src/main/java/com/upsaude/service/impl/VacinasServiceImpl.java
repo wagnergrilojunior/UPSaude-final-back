@@ -2,16 +2,23 @@ package com.upsaude.service.impl;
 
 import com.upsaude.api.request.VacinasRequest;
 import com.upsaude.api.response.VacinasResponse;
+import com.upsaude.cache.CacheKeyUtil;
 import com.upsaude.entity.Vacinas;
 import com.upsaude.exception.BadRequestException;
 import com.upsaude.exception.InternalServerErrorException;
 import com.upsaude.exception.NotFoundException;
-import com.upsaude.mapper.VacinasMapper;
 import com.upsaude.repository.VacinasRepository;
 import com.upsaude.service.VacinasService;
+import com.upsaude.service.support.vacinas.VacinasCreator;
+import com.upsaude.service.support.vacinas.VacinasDomainService;
+import com.upsaude.service.support.vacinas.VacinasResponseBuilder;
+import com.upsaude.service.support.vacinas.VacinasUpdater;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.Cache;
+import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.dao.DataAccessException;
 import org.springframework.data.domain.Page;
@@ -19,6 +26,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Objects;
 import java.util.UUID;
 
 @Slf4j
@@ -27,211 +35,109 @@ import java.util.UUID;
 public class VacinasServiceImpl implements VacinasService {
 
     private final VacinasRepository vacinasRepository;
-    private final VacinasMapper vacinasMapper;
+    private final CacheManager cacheManager;
+
+    private final VacinasCreator creator;
+    private final VacinasUpdater updater;
+    private final VacinasDomainService domainService;
+    private final VacinasResponseBuilder responseBuilder;
 
     @Override
     @Transactional
-    @CacheEvict(value = "vacinas", allEntries = true)
     public VacinasResponse criar(VacinasRequest request) {
-        log.debug("Criando nova vacina. Request: {}", request);
-
-        if (request == null) {
-            log.warn("Tentativa de criar vacina com request nulo");
-            throw new BadRequestException("Dados da vacina são obrigatórios");
-        }
-
         try {
+            Vacinas vacina = creator.criar(request);
+            VacinasResponse response = responseBuilder.build(vacina);
 
-            validarDuplicidade(null, request);
+            Cache cache = cacheManager.getCache(CacheKeyUtil.CACHE_VACINAS);
+            if (cache != null) {
+                Object key = Objects.requireNonNull((Object) CacheKeyUtil.vacina(vacina.getId()));
+                cache.put(key, response);
+            }
 
-            Vacinas vacinas = vacinasMapper.fromRequest(request);
-            vacinas.setActive(true);
-
-            Vacinas vacinasSalvo = vacinasRepository.save(vacinas);
-            log.info("Vacina criada com sucesso. ID: {}", vacinasSalvo.getId());
-
-            return vacinasMapper.toResponse(vacinasSalvo);
-        } catch (BadRequestException e) {
-            log.warn("Erro de validação ao criar vacina. Request: {}. Erro: {}", request, e.getMessage());
+            return response;
+        } catch (BadRequestException | NotFoundException e) {
+            log.warn("Erro de validação ao criar vacina. Erro: {}", e.getMessage());
             throw e;
         } catch (DataAccessException e) {
-            log.error("Erro de acesso a dados ao criar vacina. Request: {}", request, e);
+            log.error("Erro de acesso a dados ao criar vacina. Exception: {}", e.getClass().getSimpleName(), e);
             throw new InternalServerErrorException("Erro ao persistir vacina", e);
-        } catch (RuntimeException e) {
-            log.error("Erro inesperado ao criar vacina. Request: {}", request, e);
-            throw e;
         }
     }
 
     @Override
     @Transactional(readOnly = true)
-    @Cacheable(value = "vacinas", key = "#id")
+    @Cacheable(cacheNames = CacheKeyUtil.CACHE_VACINAS, keyGenerator = "vacinasCacheKeyGenerator")
     public VacinasResponse obterPorId(UUID id) {
-        log.debug("Buscando vacina por ID: {} (cache miss)", id);
-
         if (id == null) {
-            log.warn("ID nulo recebido para busca de vacina");
             throw new BadRequestException("ID da vacina é obrigatório");
         }
 
-        try {
-            Vacinas vacinas = vacinasRepository.findById(id)
-                    .orElseThrow(() -> new NotFoundException("Vacina não encontrada com ID: " + id));
+        Vacinas vacina = vacinasRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Vacina não encontrada com ID: " + id));
 
-            log.debug("Vacina encontrada. ID: {}", id);
-            return vacinasMapper.toResponse(vacinas);
-        } catch (NotFoundException e) {
-            log.warn("Vacina não encontrada. ID: {}", id);
-            throw e;
-        } catch (DataAccessException e) {
-            log.error("Erro de acesso a dados ao buscar vacina. ID: {}", id, e);
-            throw new InternalServerErrorException("Erro ao buscar vacina", e);
-        } catch (RuntimeException e) {
-            log.error("Erro inesperado ao buscar vacina. ID: {}", id, e);
-            throw e;
-        }
+        return responseBuilder.build(vacina);
     }
 
     @Override
     @Transactional(readOnly = true)
     public Page<VacinasResponse> listar(Pageable pageable) {
-        log.debug("Listando vacinas paginadas. Página: {}, Tamanho: {}",
-                pageable.getPageNumber(), pageable.getPageSize());
-
         try {
-            Page<Vacinas> vacinas = vacinasRepository.findAll(pageable);
-            log.debug("Listagem de vacinas concluída. Total de elementos: {}", vacinas.getTotalElements());
-            return vacinas.map(vacinasMapper::toResponse);
+            return vacinasRepository.findAll(Objects.requireNonNull(pageable, "pageable")).map(responseBuilder::build);
         } catch (DataAccessException e) {
-            log.error("Erro de acesso a dados ao listar vacinas. Pageable: {}", pageable, e);
+            log.error("Erro de acesso a dados ao listar vacinas.", e);
             throw new InternalServerErrorException("Erro ao listar vacinas", e);
-        } catch (RuntimeException e) {
-            log.error("Erro inesperado ao listar vacinas. Pageable: {}", pageable, e);
-            throw e;
         }
     }
 
     @Override
     @Transactional
-    @CacheEvict(value = "vacinas", key = "#id")
+    @CachePut(cacheNames = CacheKeyUtil.CACHE_VACINAS, keyGenerator = "vacinasCacheKeyGenerator")
     public VacinasResponse atualizar(UUID id, VacinasRequest request) {
-        log.debug("Atualizando vacina. ID: {}, Request: {}", id, request);
-
-        if (id == null) {
-            log.warn("ID nulo recebido para atualização de vacina");
-            throw new BadRequestException("ID da vacina é obrigatório");
-        }
-        if (request == null) {
-            log.warn("Request nulo recebido para atualização de vacina. ID: {}", id);
-            throw new BadRequestException("Dados da vacina são obrigatórios");
-        }
-
         try {
+            if (id == null) {
+                throw new BadRequestException("ID da vacina é obrigatório");
+            }
+            if (request == null) {
+                throw new BadRequestException("Dados da vacina são obrigatórios");
+            }
 
-            Vacinas vacinasExistente = vacinasRepository.findById(id)
-                    .orElseThrow(() -> new NotFoundException("Vacina não encontrada com ID: " + id));
-
-            validarDuplicidade(id, request);
-
-            vacinasMapper.updateFromRequest(request, vacinasExistente);
-
-            Vacinas vacinasAtualizado = vacinasRepository.save(vacinasExistente);
-            log.info("Vacina atualizada com sucesso. ID: {}", vacinasAtualizado.getId());
-
-            return vacinasMapper.toResponse(vacinasAtualizado);
-        } catch (NotFoundException e) {
-            log.warn("Tentativa de atualizar vacina não existente. ID: {}", id);
-            throw e;
-        } catch (BadRequestException e) {
-            log.warn("Erro de validação ao atualizar vacina. ID: {}, Request: {}. Erro: {}", id, request, e.getMessage());
+            Vacinas vacina = updater.atualizar(id, request);
+            return responseBuilder.build(vacina);
+        } catch (BadRequestException | NotFoundException e) {
+            log.warn("Erro de validação ao atualizar vacina. Erro: {}", e.getMessage());
             throw e;
         } catch (DataAccessException e) {
-            log.error("Erro de acesso a dados ao atualizar vacina. ID: {}, Request: {}", id, request, e);
+            log.error("Erro de acesso a dados ao atualizar vacina. Exception: {}", e.getClass().getSimpleName(), e);
             throw new InternalServerErrorException("Erro ao atualizar vacina", e);
-        } catch (RuntimeException e) {
-            log.error("Erro inesperado ao atualizar vacina. ID: {}, Request: {}", id, request, e);
-            throw e;
         }
     }
 
     @Override
     @Transactional
-    @CacheEvict(value = "vacinas", key = "#id")
+    @CacheEvict(cacheNames = CacheKeyUtil.CACHE_VACINAS, keyGenerator = "vacinasCacheKeyGenerator", beforeInvocation = false)
     public void excluir(UUID id) {
-        log.debug("Excluindo vacina. ID: {}", id);
+        try {
+            inativarInternal(id);
+        } catch (BadRequestException | NotFoundException e) {
+            log.warn("Erro de validação ao excluir(inativar) vacina. Erro: {}", e.getMessage());
+            throw e;
+        } catch (DataAccessException e) {
+            log.error("Erro de acesso a dados ao excluir(inativar) vacina. Exception: {}", e.getClass().getSimpleName(), e);
+            throw new InternalServerErrorException("Erro ao excluir vacina", e);
+        }
+    }
 
+    private void inativarInternal(UUID id) {
         if (id == null) {
-            log.warn("ID nulo recebido para exclusão de vacina");
             throw new BadRequestException("ID da vacina é obrigatório");
         }
 
-        try {
-            Vacinas vacinas = vacinasRepository.findById(id)
-                    .orElseThrow(() -> new NotFoundException("Vacina não encontrada com ID: " + id));
+        Vacinas vacina = vacinasRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Vacina não encontrada com ID: " + id));
 
-            if (Boolean.FALSE.equals(vacinas.getActive())) {
-                log.warn("Tentativa de excluir vacina já inativa. ID: {}", id);
-                throw new BadRequestException("Vacina já está inativa");
-            }
-
-            vacinas.setActive(false);
-            vacinasRepository.save(vacinas);
-            log.info("Vacina excluída (desativada) com sucesso. ID: {}", id);
-        } catch (NotFoundException e) {
-            log.warn("Tentativa de excluir vacina não existente. ID: {}", id);
-            throw e;
-        } catch (BadRequestException e) {
-            log.warn("Erro de validação ao excluir vacina. ID: {}. Erro: {}", id, e.getMessage());
-            throw e;
-        } catch (DataAccessException e) {
-            log.error("Erro de acesso a dados ao excluir vacina. ID: {}", id, e);
-            throw new InternalServerErrorException("Erro ao excluir vacina", e);
-        } catch (RuntimeException e) {
-            log.error("Erro inesperado ao excluir vacina. ID: {}", id, e);
-            throw e;
-        }
+        domainService.validarPodeInativar(vacina);
+        vacina.setActive(false);
+        vacinasRepository.save(Objects.requireNonNull(vacina));
     }
-
-    private void validarDuplicidade(UUID id, VacinasRequest request) {
-        if (request == null) {
-            return;
-        }
-
-        if (request.getNome() != null && !request.getNome().trim().isEmpty()) {
-            boolean nomeDuplicado;
-            if (id == null) {
-
-                nomeDuplicado = vacinasRepository.existsByNome(request.getNome().trim());
-            } else {
-
-                nomeDuplicado = vacinasRepository.existsByNomeAndIdNot(request.getNome().trim(), id);
-            }
-
-            if (nomeDuplicado) {
-                log.warn("Tentativa de cadastrar/atualizar vacina com nome duplicado. Nome: {}", request.getNome());
-                throw new BadRequestException(
-                    String.format("Já existe uma vacina cadastrada com o nome '%s' no banco de dados", request.getNome())
-                );
-            }
-        }
-
-        if (request.getCodigoInterno() != null && !request.getCodigoInterno().trim().isEmpty()) {
-            boolean codigoDuplicado;
-            if (id == null) {
-
-                codigoDuplicado = vacinasRepository.existsByCodigoInterno(request.getCodigoInterno().trim());
-            } else {
-
-                codigoDuplicado = vacinasRepository.existsByCodigoInternoAndIdNot(request.getCodigoInterno().trim(), id);
-            }
-
-            if (codigoDuplicado) {
-                log.warn("Tentativa de cadastrar/atualizar vacina com código interno duplicado. Código: {}", request.getCodigoInterno());
-                throw new BadRequestException(
-                    String.format("Já existe uma vacina cadastrada com o código interno '%s' no banco de dados", request.getCodigoInterno())
-                );
-            }
-        }
-    }
-
 }

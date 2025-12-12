@@ -14,6 +14,7 @@ import org.springframework.lang.NonNull;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 
 @Slf4j
 @Configuration
@@ -28,7 +29,11 @@ public class CacheInitializer implements ApplicationListener<ContextRefreshedEve
 
     private static final List<String> KNOWN_CACHES = Arrays.asList(
         "cidades", "estados", "medicos", "pacientes", "especialidades",
-        "profissionaisSaude", "vacinas", "medicacoes", "exames"
+        "profissionaisSaude", "vacinas", "medicacoes", "exames",
+        "acoesPromocaoPrevencao", "agendamentos", "alergias",
+        "catalogoExames", "equipesSaude",
+        "atendimentos", "consultas", "prontuarios", "preNatal", "puericultura",
+        "vacinacoes", "exames", "estoquesVacina", "medicacao", "medicacaoPaciente"
     );
 
     @Override
@@ -84,7 +89,7 @@ public class CacheInitializer implements ApplicationListener<ContextRefreshedEve
             int initializedCount = 0;
             for (String cacheName : cacheNames) {
                 try {
-                    Cache cache = cacheManager.getCache(cacheName);
+                    Cache cache = cacheManager.getCache(Objects.requireNonNull(cacheName, "cacheName"));
                     if (cache != null) {
                         initializeCache(cache, cacheName);
                         initializedCount++;
@@ -108,7 +113,7 @@ public class CacheInitializer implements ApplicationListener<ContextRefreshedEve
         int initializedCount = 0;
         for (String cacheName : KNOWN_CACHES) {
             try {
-                Cache cache = cacheManager.getCache(cacheName);
+                Cache cache = cacheManager.getCache(Objects.requireNonNull(cacheName, "cacheName"));
                 if (cache != null) {
                     initializeCache(cache, cacheName);
                     initializedCount++;
