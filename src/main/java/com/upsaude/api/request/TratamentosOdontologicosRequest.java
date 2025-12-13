@@ -24,6 +24,8 @@ public class TratamentosOdontologicosRequest {
     @NotNull(message = "Profissional é obrigatório")
     private UUID profissional;
 
+    private UUID estabelecimento;
+
     @NotBlank(message = "Título é obrigatório")
     @Size(max = 255, message = "Título deve ter no máximo 255 caracteres")
     private String titulo;

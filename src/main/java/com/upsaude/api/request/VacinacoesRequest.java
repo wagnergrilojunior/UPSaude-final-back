@@ -23,6 +23,7 @@ public class VacinacoesRequest {
     private UUID vacina;
 
     private UUID fabricante;
+    private UUID estabelecimento;
 
     @Size(max = 100, message = "Lote deve ter no máximo 100 caracteres")
     private String lote;

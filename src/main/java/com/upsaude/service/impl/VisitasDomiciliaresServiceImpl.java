@@ -2,22 +2,33 @@ package com.upsaude.service.impl;
 
 import com.upsaude.api.request.VisitasDomiciliaresRequest;
 import com.upsaude.api.response.VisitasDomiciliaresResponse;
+import com.upsaude.cache.CacheKeyUtil;
+import com.upsaude.entity.Tenant;
 import com.upsaude.entity.VisitasDomiciliares;
+import com.upsaude.enums.TipoVisitaDomiciliarEnum;
 import com.upsaude.exception.BadRequestException;
-import com.upsaude.exception.NotFoundException;
-import com.upsaude.mapper.VisitasDomiciliaresMapper;
 import com.upsaude.repository.VisitasDomiciliaresRepository;
+import com.upsaude.service.TenantService;
 import com.upsaude.service.VisitasDomiciliaresService;
-import jakarta.transaction.Transactional;
+import com.upsaude.service.support.visitasdomiciliares.VisitasDomiciliaresCreator;
+import com.upsaude.service.support.visitasdomiciliares.VisitasDomiciliaresDomainService;
+import com.upsaude.service.support.visitasdomiciliares.VisitasDomiciliaresResponseBuilder;
+import com.upsaude.service.support.visitasdomiciliares.VisitasDomiciliaresTenantEnforcer;
+import com.upsaude.service.support.visitasdomiciliares.VisitasDomiciliaresUpdater;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.BeanUtils;
-import org.springframework.data.domain.Page;
+import org.springframework.cache.Cache;
+import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.time.OffsetDateTime;
+import java.util.Objects;
 import java.util.UUID;
 
 @Slf4j
@@ -25,104 +36,115 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class VisitasDomiciliaresServiceImpl implements VisitasDomiciliaresService {
 
-    private final VisitasDomiciliaresRepository visitasDomiciliaresRepository;
-    private final VisitasDomiciliaresMapper visitasDomiciliaresMapper;
+    private final VisitasDomiciliaresRepository repository;
+    private final CacheManager cacheManager;
+    private final TenantService tenantService;
+
+    private final VisitasDomiciliaresCreator creator;
+    private final VisitasDomiciliaresUpdater updater;
+    private final VisitasDomiciliaresResponseBuilder responseBuilder;
+    private final VisitasDomiciliaresDomainService domainService;
+    private final VisitasDomiciliaresTenantEnforcer tenantEnforcer;
 
     @Override
     @Transactional
-    @CacheEvict(value = "visitasdomiciliares", allEntries = true)
     public VisitasDomiciliaresResponse criar(VisitasDomiciliaresRequest request) {
-        log.debug("Criando novo visitasdomiciliares");
+        UUID tenantId = tenantService.validarTenantAtual();
+        Tenant tenant = tenantService.obterTenantDoUsuarioAutenticado();
+        validarTenantAutenticadoOrThrow(tenantId, tenant);
 
-        VisitasDomiciliares visitasDomiciliares = visitasDomiciliaresMapper.fromRequest(request);
-        visitasDomiciliares.setActive(true);
+        VisitasDomiciliares saved = creator.criar(request, tenantId, tenant);
+        VisitasDomiciliaresResponse response = responseBuilder.build(saved);
 
-        VisitasDomiciliares visitasDomiciliaresSalvo = visitasDomiciliaresRepository.save(visitasDomiciliares);
-        log.info("VisitasDomiciliares criado com sucesso. ID: {}", visitasDomiciliaresSalvo.getId());
+        Cache cache = cacheManager.getCache(CacheKeyUtil.CACHE_VISITAS_DOMICILIARES);
+        if (cache != null) {
+            Object key = Objects.requireNonNull((Object) CacheKeyUtil.visitaDomiciliar(tenantId, saved.getId()));
+            cache.put(key, response);
+        }
 
-        return visitasDomiciliaresMapper.toResponse(visitasDomiciliaresSalvo);
+        return response;
     }
 
     @Override
-    @Transactional
-    @Cacheable(value = "visitasdomiciliares", key = "#id")
+    @Transactional(readOnly = true)
+    @Cacheable(cacheNames = CacheKeyUtil.CACHE_VISITAS_DOMICILIARES, keyGenerator = "visitasDomiciliaresCacheKeyGenerator")
     public VisitasDomiciliaresResponse obterPorId(UUID id) {
-        log.debug("Buscando visitasdomiciliares por ID: {} (cache miss)", id);
         if (id == null) {
-            throw new BadRequestException("ID do visitasdomiciliares é obrigatório");
+            throw new BadRequestException("ID da visita domiciliar é obrigatório");
         }
-
-        VisitasDomiciliares visitasDomiciliares = visitasDomiciliaresRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("VisitasDomiciliares não encontrado com ID: " + id));
-
-        return visitasDomiciliaresMapper.toResponse(visitasDomiciliares);
+        UUID tenantId = tenantService.validarTenantAtual();
+        return responseBuilder.build(tenantEnforcer.validarAcessoCompleto(id, tenantId));
     }
 
     @Override
-    public Page<VisitasDomiciliaresResponse> listar(Pageable pageable) {
-        log.debug("Listando VisitasDomiciliares paginados. Página: {}, Tamanho: {}",
-                pageable.getPageNumber(), pageable.getPageSize());
+    @Transactional(readOnly = true)
+    public Page<VisitasDomiciliaresResponse> listar(Pageable pageable,
+                                                   UUID estabelecimentoId,
+                                                   UUID pacienteId,
+                                                   UUID profissionalId,
+                                                   TipoVisitaDomiciliarEnum tipoVisita,
+                                                   OffsetDateTime inicio,
+                                                   OffsetDateTime fim) {
+        UUID tenantId = tenantService.validarTenantAtual();
 
-        Page<VisitasDomiciliares> visitasDomiciliares = visitasDomiciliaresRepository.findAll(pageable);
-        return visitasDomiciliares.map(visitasDomiciliaresMapper::toResponse);
+        Page<VisitasDomiciliares> page;
+        if (estabelecimentoId != null) {
+            page = repository.findByEstabelecimentoIdAndTenantIdOrderByDataVisitaDesc(estabelecimentoId, tenantId, pageable);
+        } else if (pacienteId != null) {
+            page = repository.findByPacienteIdAndTenantIdOrderByDataVisitaDesc(pacienteId, tenantId, pageable);
+        } else if (profissionalId != null) {
+            page = repository.findByProfissionalIdAndTenantIdOrderByDataVisitaDesc(profissionalId, tenantId, pageable);
+        } else if (tipoVisita != null) {
+            page = repository.findByTipoVisitaAndTenantIdOrderByDataVisitaDesc(tipoVisita, tenantId, pageable);
+        } else if (inicio != null || fim != null) {
+            if (inicio == null || fim == null) {
+                throw new BadRequestException("Para filtrar por período, informe 'inicio' e 'fim'");
+            }
+            page = repository.findByDataVisitaBetweenAndTenantIdOrderByDataVisitaDesc(inicio, fim, tenantId, pageable);
+        } else {
+            page = repository.findAllByTenant(tenantId, pageable);
+        }
+
+        return page.map(responseBuilder::build);
     }
 
     @Override
     @Transactional
-    @CacheEvict(value = "visitasdomiciliares", key = "#id")
+    @CachePut(cacheNames = CacheKeyUtil.CACHE_VISITAS_DOMICILIARES, keyGenerator = "visitasDomiciliaresCacheKeyGenerator")
     public VisitasDomiciliaresResponse atualizar(UUID id, VisitasDomiciliaresRequest request) {
-        log.debug("Atualizando visitasdomiciliares. ID: {}", id);
-
         if (id == null) {
-            throw new BadRequestException("ID do visitasdomiciliares é obrigatório");
+            throw new BadRequestException("ID da visita domiciliar é obrigatório");
         }
+        UUID tenantId = tenantService.validarTenantAtual();
+        Tenant tenant = tenantService.obterTenantDoUsuarioAutenticado();
+        validarTenantAutenticadoOrThrow(tenantId, tenant);
 
-        VisitasDomiciliares visitasDomiciliaresExistente = visitasDomiciliaresRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("VisitasDomiciliares não encontrado com ID: " + id));
-
-        atualizarDadosVisitasDomiciliares(visitasDomiciliaresExistente, request);
-
-        VisitasDomiciliares visitasDomiciliaresAtualizado = visitasDomiciliaresRepository.save(visitasDomiciliaresExistente);
-        log.info("VisitasDomiciliares atualizado com sucesso. ID: {}", visitasDomiciliaresAtualizado.getId());
-
-        return visitasDomiciliaresMapper.toResponse(visitasDomiciliaresAtualizado);
+        VisitasDomiciliares updated = updater.atualizar(id, request, tenantId, tenant);
+        return responseBuilder.build(updated);
     }
 
     @Override
     @Transactional
-    @CacheEvict(value = "visitasdomiciliares", key = "#id")
+    @CacheEvict(cacheNames = CacheKeyUtil.CACHE_VISITAS_DOMICILIARES, keyGenerator = "visitasDomiciliaresCacheKeyGenerator", beforeInvocation = false)
     public void excluir(UUID id) {
-        log.debug("Excluindo visitasdomiciliares. ID: {}", id);
-
-        if (id == null) {
-            throw new BadRequestException("ID do visitasdomiciliares é obrigatório");
-        }
-
-        VisitasDomiciliares visitasDomiciliares = visitasDomiciliaresRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("VisitasDomiciliares não encontrado com ID: " + id));
-
-        if (Boolean.FALSE.equals(visitasDomiciliares.getActive())) {
-            throw new BadRequestException("VisitasDomiciliares já está inativo");
-        }
-
-        visitasDomiciliares.setActive(false);
-        visitasDomiciliaresRepository.save(visitasDomiciliares);
-        log.info("VisitasDomiciliares excluído (desativado) com sucesso. ID: {}", id);
+        UUID tenantId = tenantService.validarTenantAtual();
+        inativarInternal(id, tenantId);
     }
 
-        private void atualizarDadosVisitasDomiciliares(VisitasDomiciliares visitasDomiciliares, VisitasDomiciliaresRequest request) {
-        VisitasDomiciliares visitasDomiciliaresAtualizado = visitasDomiciliaresMapper.fromRequest(request);
+    private void inativarInternal(UUID id, UUID tenantId) {
+        if (id == null) {
+            throw new BadRequestException("ID da visita domiciliar é obrigatório");
+        }
 
-        java.util.UUID idOriginal = visitasDomiciliares.getId();
-        com.upsaude.entity.Tenant tenantOriginal = visitasDomiciliares.getTenant();
-        Boolean activeOriginal = visitasDomiciliares.getActive();
-        java.time.OffsetDateTime createdAtOriginal = visitasDomiciliares.getCreatedAt();
+        VisitasDomiciliares entity = tenantEnforcer.validarAcesso(id, tenantId);
+        domainService.validarPodeInativar(entity);
+        entity.setActive(false);
+        repository.save(Objects.requireNonNull(entity));
+    }
 
-        BeanUtils.copyProperties(visitasDomiciliaresAtualizado, visitasDomiciliares);
-
-        visitasDomiciliares.setId(idOriginal);
-        visitasDomiciliares.setTenant(tenantOriginal);
-        visitasDomiciliares.setActive(activeOriginal);
-        visitasDomiciliares.setCreatedAt(createdAtOriginal);
+    private void validarTenantAutenticadoOrThrow(UUID tenantId, Tenant tenant) {
+        if (tenantId == null || tenant == null || tenant.getId() == null || !tenantId.equals(tenant.getId())) {
+            throw new BadRequestException("Não foi possível obter tenant do usuário autenticado");
+        }
     }
 }

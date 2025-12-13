@@ -44,7 +44,11 @@ public class CacheInitializer implements ApplicationListener<ContextRefreshedEve
         "perfisusuarios", "permissoes", "planejamentofamiliar",
         "plantoes", "procedimentosCirurgicos", "consultasPreNatal",
         "procedimentosOdontologicos", "consultasPuericultura",
-        "receitasmedicas", "responsavellegal", "servicosEstabelecimento"
+        "receitasmedicas", "responsavellegal", "servicosEstabelecimento",
+        "templatesNotificacao", "notificacoes", "configuracoesEstabelecimento",
+        "tratamentosodontologicos", "visitasdomiciliares", "conselhosprofissionais",
+        "controleponto", "cuidadosenfermagem", "dispensacoesmedicamentos", "educacaosaude",
+        "equipamentos", "equipamentosestabelecimento", "escalatrabalho"
     );
 
     @Override

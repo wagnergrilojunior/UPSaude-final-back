@@ -3,6 +3,7 @@ package com.upsaude.repository;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.time.OffsetDateTime;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -34,4 +35,10 @@ public interface ConsultaPreNatalRepository extends JpaRepository<ConsultaPreNat
     Page<ConsultaPreNatal> findByEstabelecimentoIdAndTenantIdOrderByDataConsultaDesc(UUID estabelecimentoId, UUID tenantId, Pageable pageable);
 
     long countByPreNatalIdAndTenantId(UUID preNatalId, UUID tenantId);
+
+    List<ConsultaPreNatal> findByPreNatalIdAndDataConsultaBetweenAndTenantIdOrderByDataConsultaAsc(UUID preNatalId, OffsetDateTime inicio, OffsetDateTime fim, UUID tenantId);
+
+    Page<ConsultaPreNatal> findByEstabelecimentoIdAndDataConsultaBetweenAndTenantIdOrderByDataConsultaDesc(UUID estabelecimentoId, OffsetDateTime inicio, OffsetDateTime fim, UUID tenantId, Pageable pageable);
+
+    Page<ConsultaPreNatal> findByDataConsultaBetweenAndTenantIdOrderByDataConsultaDesc(OffsetDateTime inicio, OffsetDateTime fim, UUID tenantId, Pageable pageable);
 }

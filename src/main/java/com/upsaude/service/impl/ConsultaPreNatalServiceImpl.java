@@ -27,6 +27,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
@@ -84,11 +85,17 @@ public class ConsultaPreNatalServiceImpl implements ConsultaPreNatalService {
 
     @Override
     @Transactional(readOnly = true)
-    public Page<ConsultaPreNatalResponse> listar(Pageable pageable, UUID preNatalId, UUID estabelecimentoId) {
+    public Page<ConsultaPreNatalResponse> listar(Pageable pageable, UUID preNatalId, UUID estabelecimentoId, OffsetDateTime inicio, OffsetDateTime fim) {
         UUID tenantId = tenantService.validarTenantAtual();
 
+        if ((inicio != null && fim == null) || (inicio == null && fim != null)) {
+            throw new BadRequestException("Para filtrar por período, informe 'inicio' e 'fim'");
+        }
+
         if (preNatalId != null) {
-            List<ConsultaPreNatal> list = repository.findByPreNatalIdAndTenantIdOrderByDataConsultaAsc(preNatalId, tenantId);
+            List<ConsultaPreNatal> list = (inicio != null)
+                ? repository.findByPreNatalIdAndDataConsultaBetweenAndTenantIdOrderByDataConsultaAsc(preNatalId, inicio, fim, tenantId)
+                : repository.findByPreNatalIdAndTenantIdOrderByDataConsultaAsc(preNatalId, tenantId);
             org.springframework.data.domain.Pageable safePageable = (pageable == null)
                 ? org.springframework.data.domain.Pageable.unpaged()
                 : pageable;
@@ -97,12 +104,26 @@ public class ConsultaPreNatalServiceImpl implements ConsultaPreNatalService {
 
         Page<ConsultaPreNatal> page;
         if (estabelecimentoId != null) {
-            page = repository.findByEstabelecimentoIdAndTenantIdOrderByDataConsultaDesc(estabelecimentoId, tenantId, pageable);
+            page = (inicio != null)
+                ? repository.findByEstabelecimentoIdAndDataConsultaBetweenAndTenantIdOrderByDataConsultaDesc(estabelecimentoId, inicio, fim, tenantId, pageable)
+                : repository.findByEstabelecimentoIdAndTenantIdOrderByDataConsultaDesc(estabelecimentoId, tenantId, pageable);
+        } else if (inicio != null) {
+            page = repository.findByDataConsultaBetweenAndTenantIdOrderByDataConsultaDesc(inicio, fim, tenantId, pageable);
         } else {
             page = repository.findAllByTenant(tenantId, pageable);
         }
 
         return page.map(responseBuilder::build);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public long countPorPreNatalId(UUID preNatalId) {
+        if (preNatalId == null) {
+            throw new BadRequestException("ID do pré-natal é obrigatório");
+        }
+        UUID tenantId = tenantService.validarTenantAtual();
+        return repository.countByPreNatalIdAndTenantId(preNatalId, tenantId);
     }
 
     @Override

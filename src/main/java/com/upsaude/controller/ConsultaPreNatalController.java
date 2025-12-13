@@ -18,6 +18,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.OffsetDateTime;
 import java.util.UUID;
 
 @Slf4j
@@ -58,10 +59,20 @@ public class ConsultaPreNatalController {
     public ResponseEntity<Page<ConsultaPreNatalResponse>> listar(
         @Parameter(description = "Parâmetros de paginação (page, size, sort)") Pageable pageable,
         @RequestParam(required = false) UUID preNatalId,
-        @RequestParam(required = false) UUID estabelecimentoId
+        @RequestParam(required = false) UUID estabelecimentoId,
+        @RequestParam(required = false) OffsetDateTime inicio,
+        @RequestParam(required = false) OffsetDateTime fim
     ) {
-        log.debug("REQUEST GET /v1/consultas-pre-natal - pageable: {}, preNatalId: {}, estabelecimentoId: {}", pageable, preNatalId, estabelecimentoId);
-        return ResponseEntity.ok(service.listar(pageable, preNatalId, estabelecimentoId));
+        log.debug("REQUEST GET /v1/consultas-pre-natal - pageable: {}, preNatalId: {}, estabelecimentoId: {}, inicio: {}, fim: {}",
+            pageable, preNatalId, estabelecimentoId, inicio, fim);
+        return ResponseEntity.ok(service.listar(pageable, preNatalId, estabelecimentoId, inicio, fim));
+    }
+
+    @GetMapping("/pre-natal/{preNatalId}/count")
+    @Operation(summary = "Contar consultas por pré-natal")
+    public ResponseEntity<Long> countPorPreNatal(@PathVariable UUID preNatalId) {
+        log.debug("REQUEST GET /v1/consultas-pre-natal/pre-natal/{}/count", preNatalId);
+        return ResponseEntity.ok(service.countPorPreNatalId(preNatalId));
     }
 
     @PutMapping("/{id}")

@@ -53,6 +53,19 @@ public final class CacheKeyUtil {
     public static final String CACHE_RECEITAS_MEDICAS = "receitasmedicas";
     public static final String CACHE_RESPONSAVEIS_LEGAIS = "responsavellegal";
     public static final String CACHE_SERVICOS_ESTABELECIMENTO = "servicosEstabelecimento";
+    public static final String CACHE_TEMPLATES_NOTIFICACAO = "templatesNotificacao";
+    public static final String CACHE_NOTIFICACOES = "notificacoes";
+    public static final String CACHE_CONFIGURACOES_ESTABELECIMENTO = "configuracoesEstabelecimento";
+    public static final String CACHE_TRATAMENTOS_ODONTOLOGICOS = "tratamentosodontologicos";
+    public static final String CACHE_VISITAS_DOMICILIARES = "visitasdomiciliares";
+    public static final String CACHE_CONSELHOS_PROFISSIONAIS = "conselhosprofissionais";
+    public static final String CACHE_CONTROLE_PONTO = "controleponto";
+    public static final String CACHE_CUIDADOS_ENFERMAGEM = "cuidadosenfermagem";
+    public static final String CACHE_DISPENSACOES_MEDICAMENTOS = "dispensacoesmedicamentos";
+    public static final String CACHE_EDUCACAO_SAUDE = "educacaosaude";
+    public static final String CACHE_EQUIPAMENTOS = "equipamentos";
+    public static final String CACHE_EQUIPAMENTOS_ESTABELECIMENTO = "equipamentosestabelecimento";
+    public static final String CACHE_ESCALA_TRABALHO = "escalatrabalho";
 
     private CacheKeyUtil() {
     }
@@ -339,6 +352,133 @@ public final class CacheKeyUtil {
             throw new IllegalArgumentException("servicoEstabelecimentoId é obrigatório");
         }
         return String.format("servicoEstabelecimento_%s_%s", tenantId, servicoEstabelecimentoId);
+    }
+
+    public static String templateNotificacao(UUID tenantId, UUID templateNotificacaoId) {
+        if (tenantId == null) {
+            throw new IllegalArgumentException("tenantId é obrigatório");
+        }
+        if (templateNotificacaoId == null) {
+            throw new IllegalArgumentException("templateNotificacaoId é obrigatório");
+        }
+        return String.format("templateNotificacao_%s_%s", tenantId, templateNotificacaoId);
+    }
+
+    public static String notificacao(UUID tenantId, UUID notificacaoId) {
+        if (tenantId == null) {
+            throw new IllegalArgumentException("tenantId é obrigatório");
+        }
+        if (notificacaoId == null) {
+            throw new IllegalArgumentException("notificacaoId é obrigatório");
+        }
+        return String.format("notificacao_%s_%s", tenantId, notificacaoId);
+    }
+
+    public static String configuracaoEstabelecimento(UUID tenantId, UUID configuracaoEstabelecimentoId) {
+        if (tenantId == null) {
+            throw new IllegalArgumentException("tenantId é obrigatório");
+        }
+        if (configuracaoEstabelecimentoId == null) {
+            throw new IllegalArgumentException("configuracaoEstabelecimentoId é obrigatório");
+        }
+        return String.format("configuracaoEstabelecimento_%s_%s", tenantId, configuracaoEstabelecimentoId);
+    }
+
+    public static String tratamentoOdontologico(UUID tenantId, UUID tratamentoOdontologicoId) {
+        if (tenantId == null) {
+            throw new IllegalArgumentException("tenantId é obrigatório");
+        }
+        if (tratamentoOdontologicoId == null) {
+            throw new IllegalArgumentException("tratamentoOdontologicoId é obrigatório");
+        }
+        return String.format("tratamentoOdontologico_%s_%s", tenantId, tratamentoOdontologicoId);
+    }
+
+    public static String visitaDomiciliar(UUID tenantId, UUID visitaDomiciliarId) {
+        if (tenantId == null) {
+            throw new IllegalArgumentException("tenantId é obrigatório");
+        }
+        if (visitaDomiciliarId == null) {
+            throw new IllegalArgumentException("visitaDomiciliarId é obrigatório");
+        }
+        return String.format("visitaDomiciliar_%s_%s", tenantId, visitaDomiciliarId);
+    }
+
+    public static String conselhoProfissional(UUID conselhoProfissionalId) {
+        if (conselhoProfissionalId == null) {
+            throw new IllegalArgumentException("conselhoProfissionalId é obrigatório");
+        }
+        return String.format("conselhoProfissional_%s", conselhoProfissionalId);
+    }
+
+    public static String controlePonto(UUID tenantId, UUID controlePontoId) {
+        if (tenantId == null) {
+            throw new IllegalArgumentException("tenantId é obrigatório");
+        }
+        if (controlePontoId == null) {
+            throw new IllegalArgumentException("controlePontoId é obrigatório");
+        }
+        return String.format("controlePonto_%s_%s", tenantId, controlePontoId);
+    }
+
+    public static String cuidadoEnfermagem(UUID tenantId, UUID cuidadoEnfermagemId) {
+        if (tenantId == null) {
+            throw new IllegalArgumentException("tenantId é obrigatório");
+        }
+        if (cuidadoEnfermagemId == null) {
+            throw new IllegalArgumentException("cuidadoEnfermagemId é obrigatório");
+        }
+        return String.format("cuidadoEnfermagem_%s_%s", tenantId, cuidadoEnfermagemId);
+    }
+
+    public static String dispensacaoMedicamento(UUID tenantId, UUID dispensacaoMedicamentoId) {
+        if (tenantId == null) {
+            throw new IllegalArgumentException("tenantId é obrigatório");
+        }
+        if (dispensacaoMedicamentoId == null) {
+            throw new IllegalArgumentException("dispensacaoMedicamentoId é obrigatório");
+        }
+        return String.format("dispensacaoMedicamento_%s_%s", tenantId, dispensacaoMedicamentoId);
+    }
+
+    public static String educacaoSaude(UUID tenantId, UUID educacaoSaudeId) {
+        if (tenantId == null) {
+            throw new IllegalArgumentException("tenantId é obrigatório");
+        }
+        if (educacaoSaudeId == null) {
+            throw new IllegalArgumentException("educacaoSaudeId é obrigatório");
+        }
+        return String.format("educacaoSaude_%s_%s", tenantId, educacaoSaudeId);
+    }
+
+    public static String equipamento(UUID tenantId, UUID equipamentoId) {
+        if (tenantId == null) {
+            throw new IllegalArgumentException("tenantId é obrigatório");
+        }
+        if (equipamentoId == null) {
+            throw new IllegalArgumentException("equipamentoId é obrigatório");
+        }
+        return String.format("equipamento_%s_%s", tenantId, equipamentoId);
+    }
+
+    public static String equipamentoEstabelecimento(UUID tenantId, UUID equipamentoEstabelecimentoId) {
+        if (tenantId == null) {
+            throw new IllegalArgumentException("tenantId é obrigatório");
+        }
+        if (equipamentoEstabelecimentoId == null) {
+            throw new IllegalArgumentException("equipamentoEstabelecimentoId é obrigatório");
+        }
+        return String.format("equipamentoEstabelecimento_%s_%s", tenantId, equipamentoEstabelecimentoId);
+    }
+
+    public static String escalaTrabalho(UUID tenantId, UUID escalaTrabalhoId) {
+        if (tenantId == null) {
+            throw new IllegalArgumentException("tenantId é obrigatório");
+        }
+        if (escalaTrabalhoId == null) {
+            throw new IllegalArgumentException("escalaTrabalhoId é obrigatório");
+        }
+        return String.format("escalaTrabalho_%s_%s", tenantId, escalaTrabalhoId);
     }
 
     public static String estoqueVacina(UUID tenantId, UUID estoqueVacinaId) {

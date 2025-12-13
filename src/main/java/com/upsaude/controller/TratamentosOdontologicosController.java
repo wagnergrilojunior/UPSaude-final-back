@@ -2,6 +2,7 @@ package com.upsaude.controller;
 
 import com.upsaude.api.request.TratamentosOdontologicosRequest;
 import com.upsaude.api.response.TratamentosOdontologicosResponse;
+import com.upsaude.entity.TratamentosOdontologicos.StatusTratamento;
 import com.upsaude.exception.BadRequestException;
 import com.upsaude.exception.ConflictException;
 import com.upsaude.exception.NotFoundException;
@@ -22,6 +23,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.OffsetDateTime;
 import java.util.UUID;
 
 @RestController
@@ -64,10 +66,17 @@ public class TratamentosOdontologicosController {
     })
     public ResponseEntity<Page<TratamentosOdontologicosResponse>> listar(
             @Parameter(description = "Parâmetros de paginação (page, size, sort)")
-            Pageable pageable) {
-        log.debug("REQUEST GET /v1/tratamentos-odontologicos - pageable: {}", pageable);
+            Pageable pageable,
+            @RequestParam(required = false) UUID estabelecimentoId,
+            @RequestParam(required = false) UUID pacienteId,
+            @RequestParam(required = false) UUID profissionalId,
+            @RequestParam(required = false) StatusTratamento status,
+            @RequestParam(required = false) OffsetDateTime inicio,
+            @RequestParam(required = false) OffsetDateTime fim) {
+        log.debug("REQUEST GET /v1/tratamentos-odontologicos - pageable: {}, estabelecimentoId: {}, pacienteId: {}, profissionalId: {}, status: {}, inicio: {}, fim: {}",
+            pageable, estabelecimentoId, pacienteId, profissionalId, status, inicio, fim);
         try {
-            Page<TratamentosOdontologicosResponse> response = tratamentosOdontologicosService.listar(pageable);
+            Page<TratamentosOdontologicosResponse> response = tratamentosOdontologicosService.listar(pageable, estabelecimentoId, pacienteId, profissionalId, status, inicio, fim);
             return ResponseEntity.ok(response);
         } catch (Exception ex) {
             log.error("Erro inesperado ao listar tratamentos odontológicos — pageable: {}", pageable, ex);

@@ -22,6 +22,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.OffsetDateTime;
 import java.util.UUID;
 
 @RestController
@@ -64,10 +65,16 @@ public class VacinacoesController {
     })
     public ResponseEntity<Page<VacinacoesResponse>> listar(
             @Parameter(description = "Parâmetros de paginação (page, size, sort)")
-            Pageable pageable) {
-        log.debug("REQUEST GET /v1/vacinacoes - pageable: {}", pageable);
+            Pageable pageable,
+            @RequestParam(required = false) UUID estabelecimentoId,
+            @RequestParam(required = false) UUID pacienteId,
+            @RequestParam(required = false) UUID vacinaId,
+            @RequestParam(required = false) OffsetDateTime inicio,
+            @RequestParam(required = false) OffsetDateTime fim) {
+        log.debug("REQUEST GET /v1/vacinacoes - pageable: {}, estabelecimentoId: {}, pacienteId: {}, vacinaId: {}, inicio: {}, fim: {}",
+            pageable, estabelecimentoId, pacienteId, vacinaId, inicio, fim);
         try {
-            Page<VacinacoesResponse> response = vacinacoesService.listar(pageable);
+            Page<VacinacoesResponse> response = vacinacoesService.listar(pageable, estabelecimentoId, pacienteId, vacinaId, inicio, fim);
             return ResponseEntity.ok(response);
         } catch (Exception ex) {
             log.error("Erro inesperado ao listar vacinações — pageable: {}", pageable, ex);

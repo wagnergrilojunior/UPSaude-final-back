@@ -1,0 +1,38 @@
+package com.upsaude.service.support.vacinacoes;
+
+import com.upsaude.api.request.VacinacoesRequest;
+import com.upsaude.entity.Tenant;
+import com.upsaude.entity.Vacinacoes;
+import com.upsaude.mapper.VacinacoesMapper;
+import com.upsaude.repository.VacinacoesRepository;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
+
+import java.util.Objects;
+import java.util.UUID;
+
+@Slf4j
+@Service
+@RequiredArgsConstructor
+public class VacinacoesUpdater {
+
+    private final VacinacoesRepository repository;
+    private final VacinacoesMapper mapper;
+    private final VacinacoesTenantEnforcer tenantEnforcer;
+    private final VacinacoesValidationService validationService;
+    private final VacinacoesRelacionamentosHandler relacionamentosHandler;
+
+    public Vacinacoes atualizar(UUID id, VacinacoesRequest request, UUID tenantId, Tenant tenant) {
+        validationService.validarObrigatorios(request);
+
+        Vacinacoes entity = tenantEnforcer.validarAcesso(id, tenantId);
+        mapper.updateFromRequest(request, entity);
+        relacionamentosHandler.resolver(entity, request, tenantId, tenant);
+
+        Vacinacoes saved = repository.save(Objects.requireNonNull(entity));
+        log.info("Vacinação atualizada com sucesso. ID: {}, tenant: {}", saved.getId(), tenantId);
+        return saved;
+    }
+}
+
