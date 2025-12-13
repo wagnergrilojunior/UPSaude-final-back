@@ -64,10 +64,13 @@ public class PermissoesController {
     })
     public ResponseEntity<Page<PermissoesResponse>> listar(
             @Parameter(description = "Parâmetros de paginação (page, size, sort)")
-            Pageable pageable) {
-        log.debug("REQUEST GET /v1/permissoes - pageable: {}", pageable);
+            Pageable pageable,
+            @RequestParam(required = false) UUID estabelecimentoId,
+            @RequestParam(required = false) String modulo,
+            @RequestParam(required = false) String nome) {
+        log.debug("REQUEST GET /v1/permissoes - pageable: {}, estabelecimentoId: {}, modulo: {}, nome: {}", pageable, estabelecimentoId, modulo, nome);
         try {
-            Page<PermissoesResponse> response = permissoesService.listar(pageable);
+            Page<PermissoesResponse> response = permissoesService.listar(pageable, estabelecimentoId, modulo, nome);
             return ResponseEntity.ok(response);
         } catch (Exception ex) {
             log.error("Erro inesperado ao listar permissões — pageable: {}", pageable, ex);

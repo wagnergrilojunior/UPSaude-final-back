@@ -15,6 +15,7 @@ import lombok.*;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class ResponsavelLegalRequest {
     private UUID paciente;
+    private UUID estabelecimento;
     private String nome;
     private String cpf;
     private String telefone;

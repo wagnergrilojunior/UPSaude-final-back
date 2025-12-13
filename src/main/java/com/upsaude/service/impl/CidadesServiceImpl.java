@@ -2,17 +2,23 @@ package com.upsaude.service.impl;
 
 import com.upsaude.api.request.CidadesRequest;
 import com.upsaude.api.response.CidadesResponse;
+import com.upsaude.cache.CacheKeyUtil;
 import com.upsaude.entity.Cidades;
 import com.upsaude.exception.BadRequestException;
 import com.upsaude.exception.InternalServerErrorException;
 import com.upsaude.exception.NotFoundException;
-import com.upsaude.mapper.CidadesMapper;
 import com.upsaude.repository.CidadesRepository;
 import com.upsaude.service.CidadesService;
+import com.upsaude.service.support.cidades.CidadesCreator;
+import com.upsaude.service.support.cidades.CidadesDomainService;
+import com.upsaude.service.support.cidades.CidadesResponseBuilder;
+import com.upsaude.service.support.cidades.CidadesUpdater;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.hibernate.Hibernate;
+import org.springframework.cache.Cache;
+import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.dao.DataAccessException;
 import org.springframework.data.domain.Page;
@@ -20,6 +26,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Objects;
 import java.util.UUID;
 
 @Slf4j
@@ -28,28 +35,28 @@ import java.util.UUID;
 public class CidadesServiceImpl implements CidadesService {
 
     private final CidadesRepository cidadesRepository;
-    private final CidadesMapper cidadesMapper;
+    private final CacheManager cacheManager;
+    private final CidadesCreator creator;
+    private final CidadesUpdater updater;
+    private final CidadesResponseBuilder responseBuilder;
+    private final CidadesDomainService domainService;
 
     @Override
     @Transactional
-    @CacheEvict(value = "cidades", allEntries = true)
     public CidadesResponse criar(CidadesRequest request) {
         log.debug("Criando nova cidade. Request: {}", request);
 
-        if (request == null) {
-            log.warn("Tentativa de criar cidade com request nulo");
-            throw new BadRequestException("Dados da cidade são obrigatórios");
-        }
-
         try {
+            Cidades saved = creator.criar(request);
+            CidadesResponse response = responseBuilder.build(saved);
 
-            Cidades cidades = cidadesMapper.fromRequest(request);
-            cidades.setActive(true);
+            Cache cache = cacheManager.getCache(CacheKeyUtil.CACHE_CIDADES);
+            if (cache != null) {
+                Object key = Objects.requireNonNull((Object) CacheKeyUtil.cidade(saved.getId()));
+                cache.put(key, response);
+            }
 
-            Cidades cidadesSalvo = cidadesRepository.save(cidades);
-            log.info("Cidade criada com sucesso. ID: {}", cidadesSalvo.getId());
-
-            return cidadesMapper.toResponse(cidadesSalvo);
+            return response;
         } catch (BadRequestException e) {
             log.warn("Erro de validação ao criar cidade. Request: {}. Erro: {}", request, e.getMessage());
             throw e;
@@ -64,7 +71,7 @@ public class CidadesServiceImpl implements CidadesService {
 
     @Override
     @Transactional(readOnly = true)
-    @Cacheable(value = "cidades", key = "#id")
+    @Cacheable(cacheNames = CacheKeyUtil.CACHE_CIDADES, keyGenerator = "cidadesCacheKeyGenerator")
     public CidadesResponse obterPorId(UUID id) {
         log.debug("Buscando cidade por ID: {} (cache miss)", id);
 
@@ -78,7 +85,7 @@ public class CidadesServiceImpl implements CidadesService {
                     .orElseThrow(() -> new NotFoundException("Cidade não encontrada com ID: " + id));
 
             log.debug("Cidade encontrada. ID: {}", id);
-            return cidadesMapper.toResponse(cidades);
+            return responseBuilder.build(cidades);
         } catch (NotFoundException e) {
             log.warn("Cidade não encontrada. ID: {}", id);
             throw e;
@@ -100,7 +107,7 @@ public class CidadesServiceImpl implements CidadesService {
         try {
             Page<Cidades> cidades = cidadesRepository.findAll(pageable);
             log.debug("Listagem de cidades concluída. Total de elementos: {}", cidades.getTotalElements());
-            return cidades.map(cidadesMapper::toResponse);
+            return cidades.map(responseBuilder::build);
         } catch (DataAccessException e) {
             log.error("Erro de acesso a dados ao listar cidades. Pageable: {}", pageable, e);
             throw new InternalServerErrorException("Erro ao listar cidades", e);
@@ -124,14 +131,8 @@ public class CidadesServiceImpl implements CidadesService {
         try {
             Page<Cidades> cidades = cidadesRepository.findByEstadoId(estadoId, pageable);
 
-            cidades.getContent().forEach(cidade -> {
-                if (cidade.getEstado() != null) {
-                    Hibernate.initialize(cidade.getEstado());
-                }
-            });
-
             log.debug("Listagem de cidades por estado concluída. Estado ID: {}, Total: {}", estadoId, cidades.getTotalElements());
-            return cidades.map(cidadesMapper::toResponse);
+            return cidades.map(responseBuilder::build);
         } catch (DataAccessException e) {
             log.error("Erro de acesso a dados ao listar cidades por estado. Estado ID: {}, Pageable: {}", estadoId, pageable, e);
             throw new InternalServerErrorException("Erro ao listar cidades por estado", e);
@@ -143,7 +144,7 @@ public class CidadesServiceImpl implements CidadesService {
 
     @Override
     @Transactional
-    @CacheEvict(value = "cidades", key = "#id")
+    @CachePut(cacheNames = CacheKeyUtil.CACHE_CIDADES, keyGenerator = "cidadesCacheKeyGenerator")
     public CidadesResponse atualizar(UUID id, CidadesRequest request) {
         log.debug("Atualizando cidade. ID: {}, Request: {}", id, request);
 
@@ -157,16 +158,8 @@ public class CidadesServiceImpl implements CidadesService {
         }
 
         try {
-
-            Cidades cidadesExistente = cidadesRepository.findById(id)
-                    .orElseThrow(() -> new NotFoundException("Cidade não encontrada com ID: " + id));
-
-            cidadesMapper.updateFromRequest(request, cidadesExistente);
-
-            Cidades cidadesAtualizado = cidadesRepository.save(cidadesExistente);
-            log.info("Cidade atualizada com sucesso. ID: {}", cidadesAtualizado.getId());
-
-            return cidadesMapper.toResponse(cidadesAtualizado);
+            Cidades updated = updater.atualizar(id, request);
+            return responseBuilder.build(updated);
         } catch (NotFoundException e) {
             log.warn("Tentativa de atualizar cidade não existente. ID: {}", id);
             throw e;
@@ -184,27 +177,12 @@ public class CidadesServiceImpl implements CidadesService {
 
     @Override
     @Transactional
-    @CacheEvict(value = "cidades", key = "#id")
+    @CacheEvict(cacheNames = CacheKeyUtil.CACHE_CIDADES, keyGenerator = "cidadesCacheKeyGenerator", beforeInvocation = false)
     public void excluir(UUID id) {
         log.debug("Excluindo cidade. ID: {}", id);
 
-        if (id == null) {
-            log.warn("ID nulo recebido para exclusão de cidade");
-            throw new BadRequestException("ID da cidade é obrigatório");
-        }
-
         try {
-            Cidades cidades = cidadesRepository.findById(id)
-                    .orElseThrow(() -> new NotFoundException("Cidade não encontrada com ID: " + id));
-
-            if (Boolean.FALSE.equals(cidades.getActive())) {
-                log.warn("Tentativa de excluir cidade já inativa. ID: {}", id);
-                throw new BadRequestException("Cidade já está inativa");
-            }
-
-            cidades.setActive(false);
-            cidadesRepository.save(cidades);
-            log.info("Cidade excluída (desativada) com sucesso. ID: {}", id);
+            inativarInternal(id);
         } catch (NotFoundException e) {
             log.warn("Tentativa de excluir cidade não existente. ID: {}", id);
             throw e;
@@ -218,6 +196,21 @@ public class CidadesServiceImpl implements CidadesService {
             log.error("Erro inesperado ao excluir cidade. ID: {}", id, e);
             throw e;
         }
+    }
+
+    private void inativarInternal(UUID id) {
+        if (id == null) {
+            log.warn("ID nulo recebido para exclusão de cidade");
+            throw new BadRequestException("ID da cidade é obrigatório");
+        }
+
+        Cidades cidades = cidadesRepository.findById(id)
+            .orElseThrow(() -> new NotFoundException("Cidade não encontrada com ID: " + id));
+
+        domainService.validarPodeInativar(cidades);
+        cidades.setActive(false);
+        cidadesRepository.save(Objects.requireNonNull(cidades));
+        log.info("Cidade excluída (desativada) com sucesso. ID: {}", id);
     }
 
 }

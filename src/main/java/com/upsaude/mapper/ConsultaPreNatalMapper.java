@@ -4,8 +4,6 @@ import com.upsaude.api.request.ConsultaPreNatalRequest;
 import com.upsaude.api.response.ConsultaPreNatalResponse;
 import com.upsaude.dto.ConsultaPreNatalDTO;
 import com.upsaude.entity.ConsultaPreNatal;
-import com.upsaude.entity.PreNatal;
-import com.upsaude.entity.ProfissionaisSaude;
 import com.upsaude.mapper.config.MappingConfig;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;

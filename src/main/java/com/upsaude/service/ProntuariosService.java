@@ -15,6 +15,8 @@ public interface ProntuariosService {
 
     Page<ProntuariosResponse> listar(Pageable pageable);
 
+    Page<ProntuariosResponse> listar(Pageable pageable, UUID pacienteId, UUID estabelecimentoId, String tipoRegistro, UUID criadoPor);
+
     Page<ProntuariosResponse> listarPorEstabelecimento(UUID estabelecimentoId, Pageable pageable);
 
     ProntuariosResponse atualizar(UUID id, ProntuariosRequest request);

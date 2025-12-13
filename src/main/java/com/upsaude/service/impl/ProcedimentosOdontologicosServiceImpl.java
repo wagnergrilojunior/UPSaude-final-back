@@ -2,22 +2,34 @@ package com.upsaude.service.impl;
 
 import com.upsaude.api.request.ProcedimentosOdontologicosRequest;
 import com.upsaude.api.response.ProcedimentosOdontologicosResponse;
+import com.upsaude.cache.CacheKeyUtil;
 import com.upsaude.entity.ProcedimentosOdontologicos;
 import com.upsaude.exception.BadRequestException;
+import com.upsaude.exception.InternalServerErrorException;
 import com.upsaude.exception.NotFoundException;
-import com.upsaude.mapper.ProcedimentosOdontologicosMapper;
 import com.upsaude.repository.ProcedimentosOdontologicosRepository;
 import com.upsaude.service.ProcedimentosOdontologicosService;
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.BeanUtils;
+import org.springframework.cache.Cache;
+import org.springframework.cache.CacheManager;
 import org.springframework.data.domain.Page;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.CachePut;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import com.upsaude.entity.Tenant;
+import com.upsaude.service.TenantService;
+import com.upsaude.service.support.procedimentosodontologicos.ProcedimentosOdontologicosCreator;
+import com.upsaude.service.support.procedimentosodontologicos.ProcedimentosOdontologicosDomainService;
+import com.upsaude.service.support.procedimentosodontologicos.ProcedimentosOdontologicosResponseBuilder;
+import com.upsaude.service.support.procedimentosodontologicos.ProcedimentosOdontologicosTenantEnforcer;
+import com.upsaude.service.support.procedimentosodontologicos.ProcedimentosOdontologicosUpdater;
+
+import java.util.Objects;
 import java.util.UUID;
 
 @Slf4j
@@ -26,50 +38,65 @@ import java.util.UUID;
 public class ProcedimentosOdontologicosServiceImpl implements ProcedimentosOdontologicosService {
 
     private final ProcedimentosOdontologicosRepository procedimentosOdontologicosRepository;
-    private final ProcedimentosOdontologicosMapper procedimentosOdontologicosMapper;
+    private final CacheManager cacheManager;
+    private final TenantService tenantService;
+
+    private final ProcedimentosOdontologicosCreator creator;
+    private final ProcedimentosOdontologicosUpdater updater;
+    private final ProcedimentosOdontologicosResponseBuilder responseBuilder;
+    private final ProcedimentosOdontologicosDomainService domainService;
+    private final ProcedimentosOdontologicosTenantEnforcer tenantEnforcer;
 
     @Override
     @Transactional
-    @CacheEvict(value = "procedimentosodontologicos", allEntries = true)
     public ProcedimentosOdontologicosResponse criar(ProcedimentosOdontologicosRequest request) {
         log.debug("Criando novo procedimentosodontologicos");
 
-        ProcedimentosOdontologicos procedimentosOdontologicos = procedimentosOdontologicosMapper.fromRequest(request);
-        procedimentosOdontologicos.setActive(true);
+        try {
+            UUID tenantId = tenantService.validarTenantAtual();
+            Tenant tenant = tenantService.obterTenantDoUsuarioAutenticado();
+            validarTenantAutenticadoOrThrow(tenantId, tenant);
 
-        ProcedimentosOdontologicos procedimentosOdontologicosSalvo = procedimentosOdontologicosRepository.save(procedimentosOdontologicos);
-        log.info("ProcedimentosOdontologicos criado com sucesso. ID: {}", procedimentosOdontologicosSalvo.getId());
+            ProcedimentosOdontologicos saved = creator.criar(request, tenantId, tenant);
+            ProcedimentosOdontologicosResponse response = responseBuilder.build(saved);
 
-        return procedimentosOdontologicosMapper.toResponse(procedimentosOdontologicosSalvo);
+            Cache cache = cacheManager.getCache(CacheKeyUtil.CACHE_PROCEDIMENTOS_ODONTOLOGICOS);
+            if (cache != null) {
+                Object key = Objects.requireNonNull((Object) CacheKeyUtil.procedimentoOdontologico(tenantId, saved.getId()));
+                cache.put(key, response);
+            }
+
+            return response;
+        } catch (BadRequestException | NotFoundException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new InternalServerErrorException("Erro ao criar procedimento odontológico", e);
+        }
     }
 
     @Override
-    @Transactional
-    @Cacheable(value = "procedimentosodontologicos", key = "#id")
+    @Transactional(readOnly = true)
+    @Cacheable(cacheNames = CacheKeyUtil.CACHE_PROCEDIMENTOS_ODONTOLOGICOS, keyGenerator = "procedimentosOdontologicosCacheKeyGenerator")
     public ProcedimentosOdontologicosResponse obterPorId(UUID id) {
         log.debug("Buscando procedimentosodontologicos por ID: {} (cache miss)", id);
         if (id == null) {
             throw new BadRequestException("ID do procedimentosodontologicos é obrigatório");
         }
 
-        ProcedimentosOdontologicos procedimentosOdontologicos = procedimentosOdontologicosRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("ProcedimentosOdontologicos não encontrado com ID: " + id));
-
-        return procedimentosOdontologicosMapper.toResponse(procedimentosOdontologicos);
+        UUID tenantId = tenantService.validarTenantAtual();
+        ProcedimentosOdontologicos entity = tenantEnforcer.validarAcessoCompleto(id, tenantId);
+        return responseBuilder.build(entity);
     }
 
     @Override
+    @Transactional(readOnly = true)
     public Page<ProcedimentosOdontologicosResponse> listar(Pageable pageable) {
-        log.debug("Listando ProcedimentosOdontologicos paginados. Página: {}, Tamanho: {}",
-                pageable.getPageNumber(), pageable.getPageSize());
-
-        Page<ProcedimentosOdontologicos> procedimentosOdontologicos = procedimentosOdontologicosRepository.findAll(pageable);
-        return procedimentosOdontologicos.map(procedimentosOdontologicosMapper::toResponse);
+        return listar(pageable, null, null);
     }
 
     @Override
     @Transactional
-    @CacheEvict(value = "procedimentosodontologicos", key = "#id")
+    @CachePut(cacheNames = CacheKeyUtil.CACHE_PROCEDIMENTOS_ODONTOLOGICOS, keyGenerator = "procedimentosOdontologicosCacheKeyGenerator")
     public ProcedimentosOdontologicosResponse atualizar(UUID id, ProcedimentosOdontologicosRequest request) {
         log.debug("Atualizando procedimentosodontologicos. ID: {}", id);
 
@@ -77,52 +104,55 @@ public class ProcedimentosOdontologicosServiceImpl implements ProcedimentosOdont
             throw new BadRequestException("ID do procedimentosodontologicos é obrigatório");
         }
 
-        ProcedimentosOdontologicos procedimentosOdontologicosExistente = procedimentosOdontologicosRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("ProcedimentosOdontologicos não encontrado com ID: " + id));
+        UUID tenantId = tenantService.validarTenantAtual();
+        Tenant tenant = tenantService.obterTenantDoUsuarioAutenticado();
+        validarTenantAutenticadoOrThrow(tenantId, tenant);
 
-        atualizarDadosProcedimentosOdontologicos(procedimentosOdontologicosExistente, request);
-
-        ProcedimentosOdontologicos procedimentosOdontologicosAtualizado = procedimentosOdontologicosRepository.save(procedimentosOdontologicosExistente);
-        log.info("ProcedimentosOdontologicos atualizado com sucesso. ID: {}", procedimentosOdontologicosAtualizado.getId());
-
-        return procedimentosOdontologicosMapper.toResponse(procedimentosOdontologicosAtualizado);
+        ProcedimentosOdontologicos updated = updater.atualizar(id, request, tenantId, tenant);
+        return responseBuilder.build(updated);
     }
 
     @Override
     @Transactional
-    @CacheEvict(value = "procedimentosodontologicos", key = "#id")
+    @CacheEvict(cacheNames = CacheKeyUtil.CACHE_PROCEDIMENTOS_ODONTOLOGICOS, keyGenerator = "procedimentosOdontologicosCacheKeyGenerator", beforeInvocation = false)
     public void excluir(UUID id) {
         log.debug("Excluindo procedimentosodontologicos. ID: {}", id);
+        UUID tenantId = tenantService.validarTenantAtual();
+        inativarInternal(id, tenantId);
+    }
 
+    @Override
+    @Transactional(readOnly = true)
+    public Page<ProcedimentosOdontologicosResponse> listar(Pageable pageable, String codigo, String nome) {
+        UUID tenantId = tenantService.validarTenantAtual();
+
+        Page<ProcedimentosOdontologicos> page;
+        if (codigo != null && !codigo.isBlank()) {
+            page = procedimentosOdontologicosRepository.findByCodigoContainingIgnoreCaseAndTenantId(codigo, tenantId, pageable);
+        } else if (nome != null && !nome.isBlank()) {
+            page = procedimentosOdontologicosRepository.findByNomeContainingIgnoreCaseAndTenantId(nome, tenantId, pageable);
+        } else {
+            page = procedimentosOdontologicosRepository.findAllByTenant(tenantId, pageable);
+        }
+
+        return page.map(responseBuilder::build);
+    }
+
+    private void inativarInternal(UUID id, UUID tenantId) {
         if (id == null) {
             throw new BadRequestException("ID do procedimentosodontologicos é obrigatório");
         }
 
-        ProcedimentosOdontologicos procedimentosOdontologicos = procedimentosOdontologicosRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("ProcedimentosOdontologicos não encontrado com ID: " + id));
-
-        if (Boolean.FALSE.equals(procedimentosOdontologicos.getActive())) {
-            throw new BadRequestException("ProcedimentosOdontologicos já está inativo");
-        }
-
-        procedimentosOdontologicos.setActive(false);
-        procedimentosOdontologicosRepository.save(procedimentosOdontologicos);
+        ProcedimentosOdontologicos entity = tenantEnforcer.validarAcesso(id, tenantId);
+        domainService.validarPodeInativar(entity);
+        entity.setActive(false);
+        procedimentosOdontologicosRepository.save(Objects.requireNonNull(entity));
         log.info("ProcedimentosOdontologicos excluído (desativado) com sucesso. ID: {}", id);
     }
 
-        private void atualizarDadosProcedimentosOdontologicos(ProcedimentosOdontologicos procedimentosOdontologicos, ProcedimentosOdontologicosRequest request) {
-        ProcedimentosOdontologicos procedimentosOdontologicosAtualizado = procedimentosOdontologicosMapper.fromRequest(request);
-
-        java.util.UUID idOriginal = procedimentosOdontologicos.getId();
-        com.upsaude.entity.Tenant tenantOriginal = procedimentosOdontologicos.getTenant();
-        Boolean activeOriginal = procedimentosOdontologicos.getActive();
-        java.time.OffsetDateTime createdAtOriginal = procedimentosOdontologicos.getCreatedAt();
-
-        BeanUtils.copyProperties(procedimentosOdontologicosAtualizado, procedimentosOdontologicos);
-
-        procedimentosOdontologicos.setId(idOriginal);
-        procedimentosOdontologicos.setTenant(tenantOriginal);
-        procedimentosOdontologicos.setActive(activeOriginal);
-        procedimentosOdontologicos.setCreatedAt(createdAtOriginal);
+    private void validarTenantAutenticadoOrThrow(UUID tenantId, Tenant tenant) {
+        if (tenantId == null || tenant == null || tenant.getId() == null || !tenantId.equals(tenant.getId())) {
+            throw new BadRequestException("Não foi possível obter tenant do usuário autenticado");
+        }
     }
 }

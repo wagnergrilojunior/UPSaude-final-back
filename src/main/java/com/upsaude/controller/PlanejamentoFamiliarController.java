@@ -5,6 +5,7 @@ import com.upsaude.api.response.PlanejamentoFamiliarResponse;
 import com.upsaude.exception.BadRequestException;
 import com.upsaude.exception.ConflictException;
 import com.upsaude.exception.NotFoundException;
+import com.upsaude.enums.TipoMetodoContraceptivoEnum;
 import com.upsaude.service.PlanejamentoFamiliarService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -149,6 +150,41 @@ public class PlanejamentoFamiliarController {
             throw ex;
         } catch (Exception ex) {
             log.error("Erro inesperado ao listar planejamentos familiares ativos — estabelecimentoId: {}, pageable: {}", estabelecimentoId, pageable, ex);
+            throw ex;
+        }
+    }
+
+    @GetMapping("/metodo/{estabelecimentoId}")
+    @Operation(summary = "Listar planejamentos familiares por método", description = "Retorna uma lista paginada de planejamentos familiares filtrando por método e estabelecimento")
+    public ResponseEntity<Page<PlanejamentoFamiliarResponse>> listarPorMetodo(
+        @PathVariable UUID estabelecimentoId,
+        @RequestParam TipoMetodoContraceptivoEnum metodo,
+        Pageable pageable) {
+        log.debug("REQUEST GET /v1/planejamento-familiar/metodo/{}?metodo={} - pageable: {}", estabelecimentoId, metodo, pageable);
+        try {
+            Page<PlanejamentoFamiliarResponse> response = planejamentoFamiliarService.listarPorMetodo(estabelecimentoId, metodo, pageable);
+            return ResponseEntity.ok(response);
+        } catch (BadRequestException ex) {
+            log.warn("Falha ao listar planejamentos familiares por método — estabelecimentoId: {}, metodo: {}, mensagem: {}", estabelecimentoId, metodo, ex.getMessage());
+            throw ex;
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao listar planejamentos familiares por método — estabelecimentoId: {}, metodo: {}, pageable: {}", estabelecimentoId, metodo, pageable, ex);
+            throw ex;
+        }
+    }
+
+    @GetMapping("/paciente/{pacienteId}/ativo")
+    @Operation(summary = "Obter acompanhamento ativo por paciente", description = "Retorna o acompanhamento ativo de planejamento familiar do paciente")
+    public ResponseEntity<PlanejamentoFamiliarResponse> obterAtivoPorPaciente(@PathVariable UUID pacienteId) {
+        log.debug("REQUEST GET /v1/planejamento-familiar/paciente/{}/ativo", pacienteId);
+        try {
+            PlanejamentoFamiliarResponse response = planejamentoFamiliarService.obterAtivoPorPaciente(pacienteId);
+            return ResponseEntity.ok(response);
+        } catch (NotFoundException ex) {
+            log.warn("Acompanhamento ativo não encontrado — pacienteId: {}, mensagem: {}", pacienteId, ex.getMessage());
+            throw ex;
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao obter acompanhamento ativo por paciente — pacienteId: {}", pacienteId, ex);
             throw ex;
         }
     }

@@ -68,7 +68,7 @@ import java.util.List;
         }
     ),
     @NamedEntityGraph(
-        name = "Paciente.enderecos",
+        name = "Paciente.enderecos", 
         attributeNodes = {
             @NamedAttributeNode("enderecos")
         }

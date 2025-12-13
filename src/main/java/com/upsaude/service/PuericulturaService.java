@@ -6,6 +6,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 import java.util.List;
+import java.time.LocalDate;
 import java.util.UUID;
 
 public interface PuericulturaService {
@@ -21,6 +22,10 @@ public interface PuericulturaService {
     List<PuericulturaResponse> listarPorPaciente(UUID pacienteId);
 
     Page<PuericulturaResponse> listarAtivos(UUID estabelecimentoId, Pageable pageable);
+
+    PuericulturaResponse obterAtivoPorPaciente(UUID pacienteId);
+
+    Page<PuericulturaResponse> listarPorPeriodo(UUID estabelecimentoId, LocalDate inicio, LocalDate fim, Pageable pageable);
 
     PuericulturaResponse atualizar(UUID id, PuericulturaRequest request);
 

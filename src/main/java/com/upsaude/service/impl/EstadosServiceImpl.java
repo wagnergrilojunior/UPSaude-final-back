@@ -2,16 +2,23 @@ package com.upsaude.service.impl;
 
 import com.upsaude.api.request.EstadosRequest;
 import com.upsaude.api.response.EstadosResponse;
+import com.upsaude.cache.CacheKeyUtil;
 import com.upsaude.entity.Estados;
 import com.upsaude.exception.BadRequestException;
 import com.upsaude.exception.InternalServerErrorException;
 import com.upsaude.exception.NotFoundException;
-import com.upsaude.mapper.EstadosMapper;
 import com.upsaude.repository.EstadosRepository;
 import com.upsaude.service.EstadosService;
+import com.upsaude.service.support.estados.EstadosCreator;
+import com.upsaude.service.support.estados.EstadosDomainService;
+import com.upsaude.service.support.estados.EstadosResponseBuilder;
+import com.upsaude.service.support.estados.EstadosUpdater;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.Cache;
+import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.dao.DataAccessException;
 import org.springframework.data.domain.Page;
@@ -19,6 +26,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Objects;
 import java.util.UUID;
 
 @Slf4j
@@ -27,28 +35,28 @@ import java.util.UUID;
 public class EstadosServiceImpl implements EstadosService {
 
     private final EstadosRepository estadosRepository;
-    private final EstadosMapper estadosMapper;
+    private final CacheManager cacheManager;
+    private final EstadosCreator creator;
+    private final EstadosUpdater updater;
+    private final EstadosResponseBuilder responseBuilder;
+    private final EstadosDomainService domainService;
 
     @Override
     @Transactional
-    @CacheEvict(value = "estados", allEntries = true)
     public EstadosResponse criar(EstadosRequest request) {
         log.debug("Criando novo estado. Request: {}", request);
 
-        if (request == null) {
-            log.warn("Tentativa de criar estado com request nulo");
-            throw new BadRequestException("Dados do estado são obrigatórios");
-        }
-
         try {
+            Estados saved = creator.criar(request);
+            EstadosResponse response = responseBuilder.build(saved);
 
-            Estados estados = estadosMapper.fromRequest(request);
-            estados.setActive(true);
+            Cache cache = cacheManager.getCache(CacheKeyUtil.CACHE_ESTADOS);
+            if (cache != null) {
+                Object key = Objects.requireNonNull((Object) CacheKeyUtil.estado(saved.getId()));
+                cache.put(key, response);
+            }
 
-            Estados estadosSalvo = estadosRepository.save(estados);
-            log.info("Estado criado com sucesso. ID: {}", estadosSalvo.getId());
-
-            return estadosMapper.toResponse(estadosSalvo);
+            return response;
         } catch (BadRequestException e) {
             log.warn("Erro de validação ao criar estado. Request: {}. Erro: {}", request, e.getMessage());
             throw e;
@@ -63,7 +71,7 @@ public class EstadosServiceImpl implements EstadosService {
 
     @Override
     @Transactional(readOnly = true)
-    @Cacheable(value = "estados", key = "#id")
+    @Cacheable(cacheNames = CacheKeyUtil.CACHE_ESTADOS, keyGenerator = "estadosCacheKeyGenerator")
     public EstadosResponse obterPorId(UUID id) {
         log.debug("Buscando estado por ID: {} (cache miss)", id);
 
@@ -77,7 +85,7 @@ public class EstadosServiceImpl implements EstadosService {
                     .orElseThrow(() -> new NotFoundException("Estado não encontrado com ID: " + id));
 
             log.debug("Estado encontrado. ID: {}", id);
-            return estadosMapper.toResponse(estados);
+            return responseBuilder.build(estados);
         } catch (NotFoundException e) {
             log.warn("Estado não encontrado. ID: {}", id);
             throw e;
@@ -99,7 +107,7 @@ public class EstadosServiceImpl implements EstadosService {
         try {
             Page<Estados> estados = estadosRepository.findAll(pageable);
             log.debug("Listagem de estados concluída. Total de elementos: {}", estados.getTotalElements());
-            return estados.map(estadosMapper::toResponse);
+            return estados.map(responseBuilder::build);
         } catch (DataAccessException e) {
             log.error("Erro de acesso a dados ao listar estados. Pageable: {}", pageable, e);
             throw new InternalServerErrorException("Erro ao listar estados", e);
@@ -111,7 +119,7 @@ public class EstadosServiceImpl implements EstadosService {
 
     @Override
     @Transactional
-    @CacheEvict(value = "estados", key = "#id")
+    @CachePut(cacheNames = CacheKeyUtil.CACHE_ESTADOS, keyGenerator = "estadosCacheKeyGenerator")
     public EstadosResponse atualizar(UUID id, EstadosRequest request) {
         log.debug("Atualizando estado. ID: {}, Request: {}", id, request);
 
@@ -125,16 +133,8 @@ public class EstadosServiceImpl implements EstadosService {
         }
 
         try {
-
-            Estados estadosExistente = estadosRepository.findById(id)
-                    .orElseThrow(() -> new NotFoundException("Estado não encontrado com ID: " + id));
-
-            estadosMapper.updateFromRequest(request, estadosExistente);
-
-            Estados estadosAtualizado = estadosRepository.save(estadosExistente);
-            log.info("Estado atualizado com sucesso. ID: {}", estadosAtualizado.getId());
-
-            return estadosMapper.toResponse(estadosAtualizado);
+            Estados updated = updater.atualizar(id, request);
+            return responseBuilder.build(updated);
         } catch (NotFoundException e) {
             log.warn("Tentativa de atualizar estado não existente. ID: {}", id);
             throw e;
@@ -152,27 +152,12 @@ public class EstadosServiceImpl implements EstadosService {
 
     @Override
     @Transactional
-    @CacheEvict(value = "estados", key = "#id")
+    @CacheEvict(cacheNames = CacheKeyUtil.CACHE_ESTADOS, keyGenerator = "estadosCacheKeyGenerator", beforeInvocation = false)
     public void excluir(UUID id) {
         log.debug("Excluindo estado. ID: {}", id);
 
-        if (id == null) {
-            log.warn("ID nulo recebido para exclusão de estado");
-            throw new BadRequestException("ID do estado é obrigatório");
-        }
-
         try {
-            Estados estados = estadosRepository.findById(id)
-                    .orElseThrow(() -> new NotFoundException("Estado não encontrado com ID: " + id));
-
-            if (Boolean.FALSE.equals(estados.getActive())) {
-                log.warn("Tentativa de excluir estado já inativo. ID: {}", id);
-                throw new BadRequestException("Estado já está inativo");
-            }
-
-            estados.setActive(false);
-            estadosRepository.save(estados);
-            log.info("Estado excluído (desativado) com sucesso. ID: {}", id);
+            inativarInternal(id);
         } catch (NotFoundException e) {
             log.warn("Tentativa de excluir estado não existente. ID: {}", id);
             throw e;
@@ -186,6 +171,21 @@ public class EstadosServiceImpl implements EstadosService {
             log.error("Erro inesperado ao excluir estado. ID: {}", id, e);
             throw e;
         }
+    }
+
+    private void inativarInternal(UUID id) {
+        if (id == null) {
+            log.warn("ID nulo recebido para exclusão de estado");
+            throw new BadRequestException("ID do estado é obrigatório");
+        }
+
+        Estados entity = estadosRepository.findById(id)
+            .orElseThrow(() -> new NotFoundException("Estado não encontrado com ID: " + id));
+
+        domainService.validarPodeInativar(entity);
+        entity.setActive(false);
+        estadosRepository.save(Objects.requireNonNull(entity));
+        log.info("Estado excluído (desativado) com sucesso. ID: {}", id);
     }
 
 }

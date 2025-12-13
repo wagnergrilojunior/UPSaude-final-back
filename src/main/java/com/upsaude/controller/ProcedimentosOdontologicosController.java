@@ -64,10 +64,12 @@ public class ProcedimentosOdontologicosController {
     })
     public ResponseEntity<Page<ProcedimentosOdontologicosResponse>> listar(
             @Parameter(description = "Parâmetros de paginação (page, size, sort)")
-            Pageable pageable) {
-        log.debug("REQUEST GET /v1/procedimentos-odontologicos - pageable: {}", pageable);
+            Pageable pageable,
+            @RequestParam(required = false) String codigo,
+            @RequestParam(required = false) String nome) {
+        log.debug("REQUEST GET /v1/procedimentos-odontologicos - pageable: {}, codigo: {}, nome: {}", pageable, codigo, nome);
         try {
-            Page<ProcedimentosOdontologicosResponse> response = procedimentosOdontologicosService.listar(pageable);
+            Page<ProcedimentosOdontologicosResponse> response = procedimentosOdontologicosService.listar(pageable, codigo, nome);
             return ResponseEntity.ok(response);
         } catch (Exception ex) {
             log.error("Erro inesperado ao listar procedimentos odontológicos — pageable: {}", pageable, ex);

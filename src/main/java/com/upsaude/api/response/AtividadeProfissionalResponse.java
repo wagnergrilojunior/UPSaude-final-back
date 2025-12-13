@@ -20,6 +20,7 @@ public class AtividadeProfissionalResponse {
     private PacienteResponse paciente;
     private AtendimentoResponse atendimento;
     private CirurgiaResponse cirurgia;
+    private EstabelecimentosResponse estabelecimento;
     private OffsetDateTime dataHora;
     private LocalDate dataAtividade;
     private TipoAtividadeProfissionalEnum tipoAtividade;

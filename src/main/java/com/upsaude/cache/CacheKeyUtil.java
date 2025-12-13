@@ -23,6 +23,36 @@ public final class CacheKeyUtil {
     public static final String CACHE_ESTOQUES_VACINA = "estoquesVacina";
     public static final String CACHE_MEDICACAO = "medicacao";
     public static final String CACHE_MEDICACAO_PACIENTE = "medicacaoPaciente";
+    public static final String CACHE_CATALOGO_PROCEDIMENTOS = "catalogoProcedimentos";
+    public static final String CACHE_DOENCAS = "doencas";
+    public static final String CACHE_CONVENIOS = "convenio";
+    public static final String CACHE_DADOS_CLINICOS_BASICOS = "dadosClinicosBasicos";
+    public static final String CACHE_DADOS_SOCIODEMOGRAFICOS = "dadosSociodemograficos";
+    public static final String CACHE_CID_DOENCAS = "ciddoencas";
+    public static final String CACHE_CIDADES = "cidades";
+    public static final String CACHE_CIRURGIAS = "cirurgias";
+    public static final String CACHE_ESPECIALIDADES_MEDICAS = "especialidadesmedicas";
+    public static final String CACHE_ESTABELECIMENTOS = "estabelecimentos";
+    public static final String CACHE_ESTADOS = "estados";
+    public static final String CACHE_FABRICANTES_EQUIPAMENTO = "fabricantesequipamento";
+    public static final String CACHE_FABRICANTES_MEDICAMENTO = "fabricantesmedicamento";
+    public static final String CACHE_FABRICANTES_VACINA = "fabricantesvacina";
+    public static final String CACHE_DEFICIENCIAS = "deficiencias";
+    public static final String CACHE_DEPARTAMENTOS = "departamentos";
+    public static final String CACHE_ATIVIDADES_PROFISSIONAIS = "atividadesprofissionais";
+    public static final String CACHE_FALTAS = "faltas";
+    public static final String CACHE_FILA_ESPERA = "filaEspera";
+    public static final String CACHE_PERFIS_USUARIOS = "perfisusuarios";
+    public static final String CACHE_PERMISSOES = "permissoes";
+    public static final String CACHE_PLANEJAMENTO_FAMILIAR = "planejamentofamiliar";
+    public static final String CACHE_PLANTOES = "plantoes";
+    public static final String CACHE_PROCEDIMENTOS_CIRURGICOS = "procedimentosCirurgicos";
+    public static final String CACHE_CONSULTAS_PRE_NATAL = "consultasPreNatal";
+    public static final String CACHE_PROCEDIMENTOS_ODONTOLOGICOS = "procedimentosOdontologicos";
+    public static final String CACHE_CONSULTAS_PUERICULTURA = "consultasPuericultura";
+    public static final String CACHE_RECEITAS_MEDICAS = "receitasmedicas";
+    public static final String CACHE_RESPONSAVEIS_LEGAIS = "responsavellegal";
+    public static final String CACHE_SERVICOS_ESTABELECIMENTO = "servicosEstabelecimento";
 
     private CacheKeyUtil() {
     }
@@ -181,6 +211,136 @@ public final class CacheKeyUtil {
         return String.format("exame_%s_%s", tenantId, exameId);
     }
 
+    public static String falta(UUID tenantId, UUID faltaId) {
+        if (tenantId == null) {
+            throw new IllegalArgumentException("tenantId é obrigatório");
+        }
+        if (faltaId == null) {
+            throw new IllegalArgumentException("faltaId é obrigatório");
+        }
+        return String.format("falta_%s_%s", tenantId, faltaId);
+    }
+
+    public static String filaEspera(UUID tenantId, UUID filaEsperaId) {
+        if (tenantId == null) {
+            throw new IllegalArgumentException("tenantId é obrigatório");
+        }
+        if (filaEsperaId == null) {
+            throw new IllegalArgumentException("filaEsperaId é obrigatório");
+        }
+        return String.format("filaEspera_%s_%s", tenantId, filaEsperaId);
+    }
+
+    public static String perfilUsuario(UUID tenantId, UUID perfilUsuarioId) {
+        if (tenantId == null) {
+            throw new IllegalArgumentException("tenantId é obrigatório");
+        }
+        if (perfilUsuarioId == null) {
+            throw new IllegalArgumentException("perfilUsuarioId é obrigatório");
+        }
+        return String.format("perfilUsuario_%s_%s", tenantId, perfilUsuarioId);
+    }
+
+    public static String permissao(UUID tenantId, UUID permissaoId) {
+        if (tenantId == null) {
+            throw new IllegalArgumentException("tenantId é obrigatório");
+        }
+        if (permissaoId == null) {
+            throw new IllegalArgumentException("permissaoId é obrigatório");
+        }
+        return String.format("permissao_%s_%s", tenantId, permissaoId);
+    }
+
+    public static String planejamentoFamiliar(UUID tenantId, UUID planejamentoFamiliarId) {
+        if (tenantId == null) {
+            throw new IllegalArgumentException("tenantId é obrigatório");
+        }
+        if (planejamentoFamiliarId == null) {
+            throw new IllegalArgumentException("planejamentoFamiliarId é obrigatório");
+        }
+        return String.format("planejamentoFamiliar_%s_%s", tenantId, planejamentoFamiliarId);
+    }
+
+    public static String plantao(UUID tenantId, UUID plantaoId) {
+        if (tenantId == null) {
+            throw new IllegalArgumentException("tenantId é obrigatório");
+        }
+        if (plantaoId == null) {
+            throw new IllegalArgumentException("plantaoId é obrigatório");
+        }
+        return String.format("plantao_%s_%s", tenantId, plantaoId);
+    }
+
+    public static String procedimentoCirurgico(UUID tenantId, UUID procedimentoCirurgicoId) {
+        if (tenantId == null) {
+            throw new IllegalArgumentException("tenantId é obrigatório");
+        }
+        if (procedimentoCirurgicoId == null) {
+            throw new IllegalArgumentException("procedimentoCirurgicoId é obrigatório");
+        }
+        return String.format("procedimentoCirurgico_%s_%s", tenantId, procedimentoCirurgicoId);
+    }
+
+    public static String consultaPreNatal(UUID tenantId, UUID consultaPreNatalId) {
+        if (tenantId == null) {
+            throw new IllegalArgumentException("tenantId é obrigatório");
+        }
+        if (consultaPreNatalId == null) {
+            throw new IllegalArgumentException("consultaPreNatalId é obrigatório");
+        }
+        return String.format("consultaPreNatal_%s_%s", tenantId, consultaPreNatalId);
+    }
+
+    public static String procedimentoOdontologico(UUID tenantId, UUID procedimentoOdontologicoId) {
+        if (tenantId == null) {
+            throw new IllegalArgumentException("tenantId é obrigatório");
+        }
+        if (procedimentoOdontologicoId == null) {
+            throw new IllegalArgumentException("procedimentoOdontologicoId é obrigatório");
+        }
+        return String.format("procedimentoOdontologico_%s_%s", tenantId, procedimentoOdontologicoId);
+    }
+
+    public static String consultaPuericultura(UUID tenantId, UUID consultaPuericulturaId) {
+        if (tenantId == null) {
+            throw new IllegalArgumentException("tenantId é obrigatório");
+        }
+        if (consultaPuericulturaId == null) {
+            throw new IllegalArgumentException("consultaPuericulturaId é obrigatório");
+        }
+        return String.format("consultaPuericultura_%s_%s", tenantId, consultaPuericulturaId);
+    }
+
+    public static String receitaMedica(UUID tenantId, UUID receitaMedicaId) {
+        if (tenantId == null) {
+            throw new IllegalArgumentException("tenantId é obrigatório");
+        }
+        if (receitaMedicaId == null) {
+            throw new IllegalArgumentException("receitaMedicaId é obrigatório");
+        }
+        return String.format("receitaMedica_%s_%s", tenantId, receitaMedicaId);
+    }
+
+    public static String responsavelLegal(UUID tenantId, UUID responsavelLegalId) {
+        if (tenantId == null) {
+            throw new IllegalArgumentException("tenantId é obrigatório");
+        }
+        if (responsavelLegalId == null) {
+            throw new IllegalArgumentException("responsavelLegalId é obrigatório");
+        }
+        return String.format("responsavelLegal_%s_%s", tenantId, responsavelLegalId);
+    }
+
+    public static String servicoEstabelecimento(UUID tenantId, UUID servicoEstabelecimentoId) {
+        if (tenantId == null) {
+            throw new IllegalArgumentException("tenantId é obrigatório");
+        }
+        if (servicoEstabelecimentoId == null) {
+            throw new IllegalArgumentException("servicoEstabelecimentoId é obrigatório");
+        }
+        return String.format("servicoEstabelecimento_%s_%s", tenantId, servicoEstabelecimentoId);
+    }
+
     public static String estoqueVacina(UUID tenantId, UUID estoqueVacinaId) {
         if (tenantId == null) {
             throw new IllegalArgumentException("tenantId é obrigatório");
@@ -196,6 +356,149 @@ public final class CacheKeyUtil {
             throw new IllegalArgumentException("medicacaoId é obrigatório");
         }
         return String.format("medicacao_%s", medicacaoId);
+    }
+
+    public static String catalogoProcedimento(UUID tenantId, UUID catalogoProcedimentoId) {
+        if (tenantId == null) {
+            throw new IllegalArgumentException("tenantId é obrigatório");
+        }
+        if (catalogoProcedimentoId == null) {
+            throw new IllegalArgumentException("catalogoProcedimentoId é obrigatório");
+        }
+        return String.format("catalogoProcedimento_%s_%s", tenantId, catalogoProcedimentoId);
+    }
+
+    public static String doenca(UUID doencaId) {
+        if (doencaId == null) {
+            throw new IllegalArgumentException("doencaId é obrigatório");
+        }
+        return String.format("doenca_%s", doencaId);
+    }
+
+    public static String cidDoenca(UUID cidDoencaId) {
+        if (cidDoencaId == null) {
+            throw new IllegalArgumentException("cidDoencaId é obrigatório");
+        }
+        return String.format("cidDoenca_%s", cidDoencaId);
+    }
+
+    public static String cidade(UUID cidadeId) {
+        if (cidadeId == null) {
+            throw new IllegalArgumentException("cidadeId é obrigatório");
+        }
+        return String.format("cidade_%s", cidadeId);
+    }
+
+    public static String cirurgia(UUID tenantId, UUID cirurgiaId) {
+        if (tenantId == null) {
+            throw new IllegalArgumentException("tenantId é obrigatório");
+        }
+        if (cirurgiaId == null) {
+            throw new IllegalArgumentException("cirurgiaId é obrigatório");
+        }
+        return String.format("cirurgia_%s_%s", tenantId, cirurgiaId);
+    }
+
+    public static String especialidadeMedica(UUID especialidadeMedicaId) {
+        if (especialidadeMedicaId == null) {
+            throw new IllegalArgumentException("especialidadeMedicaId é obrigatório");
+        }
+        return String.format("especialidadeMedica_%s", especialidadeMedicaId);
+    }
+
+    public static String estado(UUID estadoId) {
+        if (estadoId == null) {
+            throw new IllegalArgumentException("estadoId é obrigatório");
+        }
+        return String.format("estado_%s", estadoId);
+    }
+
+    public static String estabelecimento(UUID tenantId, UUID estabelecimentoId) {
+        if (tenantId == null) {
+            throw new IllegalArgumentException("tenantId é obrigatório");
+        }
+        if (estabelecimentoId == null) {
+            throw new IllegalArgumentException("estabelecimentoId é obrigatório");
+        }
+        return String.format("estabelecimento_%s_%s", tenantId, estabelecimentoId);
+    }
+
+    public static String fabricanteEquipamento(UUID fabricanteEquipamentoId) {
+        if (fabricanteEquipamentoId == null) {
+            throw new IllegalArgumentException("fabricanteEquipamentoId é obrigatório");
+        }
+        return String.format("fabricanteEquipamento_%s", fabricanteEquipamentoId);
+    }
+
+    public static String fabricanteMedicamento(UUID fabricanteMedicamentoId) {
+        if (fabricanteMedicamentoId == null) {
+            throw new IllegalArgumentException("fabricanteMedicamentoId é obrigatório");
+        }
+        return String.format("fabricanteMedicamento_%s", fabricanteMedicamentoId);
+    }
+
+    public static String fabricanteVacina(UUID fabricanteVacinaId) {
+        if (fabricanteVacinaId == null) {
+            throw new IllegalArgumentException("fabricanteVacinaId é obrigatório");
+        }
+        return String.format("fabricanteVacina_%s", fabricanteVacinaId);
+    }
+
+    public static String deficiencia(UUID deficienciaId) {
+        if (deficienciaId == null) {
+            throw new IllegalArgumentException("deficienciaId é obrigatório");
+        }
+        return String.format("deficiencia_%s", deficienciaId);
+    }
+
+    public static String departamento(UUID tenantId, UUID departamentoId) {
+        if (tenantId == null) {
+            throw new IllegalArgumentException("tenantId é obrigatório");
+        }
+        if (departamentoId == null) {
+            throw new IllegalArgumentException("departamentoId é obrigatório");
+        }
+        return String.format("departamento_%s_%s", tenantId, departamentoId);
+    }
+
+    public static String atividadeProfissional(UUID tenantId, UUID atividadeProfissionalId) {
+        if (tenantId == null) {
+            throw new IllegalArgumentException("tenantId é obrigatório");
+        }
+        if (atividadeProfissionalId == null) {
+            throw new IllegalArgumentException("atividadeProfissionalId é obrigatório");
+        }
+        return String.format("atividadeProfissional_%s_%s", tenantId, atividadeProfissionalId);
+    }
+
+    public static String convenio(UUID tenantId, UUID convenioId) {
+        if (tenantId == null) {
+            throw new IllegalArgumentException("tenantId é obrigatório");
+        }
+        if (convenioId == null) {
+            throw new IllegalArgumentException("convenioId é obrigatório");
+        }
+        return String.format("convenio_%s_%s", tenantId, convenioId);
+    }
+
+    public static String dadosClinicosBasicos(UUID tenantId, UUID dadosClinicosBasicosId) {
+        if (tenantId == null) {
+            throw new IllegalArgumentException("tenantId é obrigatório");
+        }
+        if (dadosClinicosBasicosId == null) {
+            throw new IllegalArgumentException("dadosClinicosBasicosId é obrigatório");
+        }
+        return String.format("dadosClinicosBasicos_%s_%s", tenantId, dadosClinicosBasicosId);
+    }
+
+    public static String dadosSociodemograficos(UUID tenantId, UUID dadosSociodemograficosId) {
+        if (tenantId == null) {
+            throw new IllegalArgumentException("tenantId é obrigatório");
+        }
+        if (dadosSociodemograficosId == null) {
+            throw new IllegalArgumentException("dadosSociodemograficosId é obrigatório");
+        }
+        return String.format("dadosSociodemograficos_%s_%s", tenantId, dadosSociodemograficosId);
     }
 
     public static String medicacaoPaciente(UUID tenantId, UUID medicacaoPacienteId) {

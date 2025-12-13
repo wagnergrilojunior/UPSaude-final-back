@@ -18,6 +18,7 @@ public class AtividadeProfissionalRequest {
     private UUID paciente;
     private UUID atendimento;
     private UUID cirurgia;
+    private UUID estabelecimento;
     private OffsetDateTime dataHora;
     private LocalDate dataAtividade;
     @JsonDeserialize(using = TipoAtividadeProfissionalEnumDeserializer.class)

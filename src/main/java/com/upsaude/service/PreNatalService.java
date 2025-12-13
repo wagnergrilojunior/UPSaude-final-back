@@ -2,6 +2,7 @@ package com.upsaude.service;
 
 import com.upsaude.api.request.PreNatalRequest;
 import com.upsaude.api.response.PreNatalResponse;
+import com.upsaude.enums.StatusPreNatalEnum;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -21,6 +22,8 @@ public interface PreNatalService {
     List<PreNatalResponse> listarPorPaciente(UUID pacienteId);
 
     Page<PreNatalResponse> listarEmAcompanhamento(UUID estabelecimentoId, Pageable pageable);
+
+    Page<PreNatalResponse> listarPorStatus(UUID estabelecimentoId, StatusPreNatalEnum status, Pageable pageable);
 
     PreNatalResponse atualizar(UUID id, PreNatalRequest request);
 

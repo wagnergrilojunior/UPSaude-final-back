@@ -18,10 +18,12 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.OffsetDateTime;
 import java.util.UUID;
 
 @RestController
@@ -64,10 +66,15 @@ public class ExamesController {
     })
     public ResponseEntity<Page<ExamesResponse>> listar(
             @Parameter(description = "Parâmetros de paginação (page, size, sort)")
-            Pageable pageable) {
-        log.debug("REQUEST GET /v1/exames - pageable: {}", pageable);
+            Pageable pageable,
+            @RequestParam(required = false) UUID estabelecimentoId,
+            @RequestParam(required = false) UUID pacienteId,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) OffsetDateTime dataInicio,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) OffsetDateTime dataFim) {
+        log.debug("REQUEST GET /v1/exames - pageable: {}, estabelecimentoId: {}, pacienteId: {}, dataInicio: {}, dataFim: {}",
+            pageable, estabelecimentoId, pacienteId, dataInicio, dataFim);
         try {
-            Page<ExamesResponse> response = examesService.listar(pageable);
+            Page<ExamesResponse> response = examesService.listar(pageable, estabelecimentoId, pacienteId, dataInicio, dataFim);
             return ResponseEntity.ok(response);
         } catch (Exception ex) {
             log.error("Erro inesperado ao listar exames — pageable: {}", pageable, ex);

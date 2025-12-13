@@ -13,6 +13,7 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 public class FilaEsperaRequest {
+    private UUID estabelecimento;
     private UUID paciente;
     private UUID profissional;
     private UUID medico;

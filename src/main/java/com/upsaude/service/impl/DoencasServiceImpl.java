@@ -2,22 +2,23 @@ package com.upsaude.service.impl;
 
 import com.upsaude.api.request.DoencasRequest;
 import com.upsaude.api.response.DoencasResponse;
-import com.upsaude.entity.CidDoencas;
+import com.upsaude.cache.CacheKeyUtil;
 import com.upsaude.entity.Doencas;
 import com.upsaude.exception.BadRequestException;
 import com.upsaude.exception.InternalServerErrorException;
 import com.upsaude.exception.NotFoundException;
-import com.upsaude.mapper.DoencasMapper;
-import com.upsaude.mapper.embeddable.ClassificacaoDoencaMapper;
-import com.upsaude.mapper.embeddable.SintomasDoencaMapper;
-import com.upsaude.mapper.embeddable.TratamentoPadraoDoencaMapper;
-import com.upsaude.mapper.embeddable.EpidemiologiaDoencaMapper;
-import com.upsaude.repository.CidDoencasRepository;
 import com.upsaude.repository.DoencasRepository;
 import com.upsaude.service.DoencasService;
+import com.upsaude.service.support.doencas.DoencasCreator;
+import com.upsaude.service.support.doencas.DoencasDomainService;
+import com.upsaude.service.support.doencas.DoencasResponseBuilder;
+import com.upsaude.service.support.doencas.DoencasUpdater;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.Cache;
+import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.dao.DataAccessException;
 import org.springframework.data.domain.Page;
@@ -25,6 +26,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Objects;
 import java.util.UUID;
 
 @Slf4j
@@ -33,42 +35,29 @@ import java.util.UUID;
 public class DoencasServiceImpl implements DoencasService {
 
     private final DoencasRepository doencasRepository;
-    private final DoencasMapper doencasMapper;
-    private final ClassificacaoDoencaMapper classificacaoDoencaMapper;
-    private final SintomasDoencaMapper sintomasDoencaMapper;
-    private final TratamentoPadraoDoencaMapper tratamentoPadraoDoencaMapper;
-    private final EpidemiologiaDoencaMapper epidemiologiaDoencaMapper;
-    private final CidDoencasRepository cidDoencasRepository;
+    private final CacheManager cacheManager;
+
+    private final DoencasCreator creator;
+    private final DoencasUpdater updater;
+    private final DoencasDomainService domainService;
+    private final DoencasResponseBuilder responseBuilder;
 
     @Override
     @Transactional
-    @CacheEvict(value = "doencas", allEntries = true)
     public DoencasResponse criar(DoencasRequest request) {
         log.debug("Criando nova doença. Request: {}", request);
 
-        if (request == null) {
-            log.warn("Tentativa de criar doença com request nulo");
-            throw new BadRequestException("Dados da doença são obrigatórios");
-        }
-
         try {
+            Doencas doenca = creator.criar(request);
+            DoencasResponse response = responseBuilder.build(doenca);
 
-            validarDuplicidade(null, request);
-
-            Doencas doenca = doencasMapper.fromRequest(request);
-
-            if (request.getCidPrincipal() != null) {
-                CidDoencas cidPrincipal = cidDoencasRepository.findById(request.getCidPrincipal())
-                        .orElseThrow(() -> new NotFoundException("CID não encontrado com ID: " + request.getCidPrincipal()));
-                doenca.setCidPrincipal(cidPrincipal);
+            Cache cache = cacheManager.getCache(CacheKeyUtil.CACHE_DOENCAS);
+            if (cache != null) {
+                Object key = Objects.requireNonNull((Object) CacheKeyUtil.doenca(doenca.getId()));
+                cache.put(key, response);
             }
 
-            doenca.setActive(true);
-
-            Doencas doencaSalva = doencasRepository.save(doenca);
-            log.info("Doença criada com sucesso. ID: {}", doencaSalva.getId());
-
-            return doencasMapper.toResponse(doencaSalva);
+            return response;
         } catch (BadRequestException | NotFoundException e) {
             log.warn("Erro de validação ao criar doença. Request: {}. Erro: {}", request, e.getMessage());
             throw e;
@@ -83,7 +72,7 @@ public class DoencasServiceImpl implements DoencasService {
 
     @Override
     @Transactional(readOnly = true)
-    @Cacheable(value = "doencas", key = "#id")
+    @Cacheable(cacheNames = CacheKeyUtil.CACHE_DOENCAS, keyGenerator = "doencasCacheKeyGenerator")
     public DoencasResponse obterPorId(UUID id) {
         log.debug("Buscando doença por ID: {} (cache miss)", id);
 
@@ -97,7 +86,7 @@ public class DoencasServiceImpl implements DoencasService {
                     .orElseThrow(() -> new NotFoundException("Doença não encontrada com ID: " + id));
 
             log.debug("Doença encontrada. ID: {}", id);
-            return doencasMapper.toResponse(doenca);
+            return responseBuilder.build(doenca);
         } catch (NotFoundException e) {
             log.warn("Doença não encontrada. ID: {}", id);
             throw e;
@@ -119,7 +108,7 @@ public class DoencasServiceImpl implements DoencasService {
         try {
             Page<Doencas> doencas = doencasRepository.findAll(pageable);
             log.debug("Listagem de doenças concluída. Total de elementos: {}", doencas.getTotalElements());
-            return doencas.map(doencasMapper::toResponse);
+            return doencas.map(responseBuilder::build);
         } catch (DataAccessException e) {
             log.error("Erro de acesso a dados ao listar doenças. Pageable: {}", pageable, e);
             throw new InternalServerErrorException("Erro ao listar doenças", e);
@@ -143,7 +132,7 @@ public class DoencasServiceImpl implements DoencasService {
         try {
             Page<Doencas> doencas = doencasRepository.findByNomeContainingIgnoreCase(nome, pageable);
             log.debug("Listagem de doenças por nome concluída. Nome: {}, Total: {}", nome, doencas.getTotalElements());
-            return doencas.map(doencasMapper::toResponse);
+            return doencas.map(responseBuilder::build);
         } catch (DataAccessException e) {
             log.error("Erro de acesso a dados ao listar doenças por nome. Nome: {}, Pageable: {}", nome, pageable, e);
             throw new InternalServerErrorException("Erro ao listar doenças por nome", e);
@@ -167,7 +156,7 @@ public class DoencasServiceImpl implements DoencasService {
         try {
             Page<Doencas> doencas = doencasRepository.findByCodigoCid(codigoCid, pageable);
             log.debug("Listagem de doenças por código CID concluída. Código CID: {}, Total: {}", codigoCid, doencas.getTotalElements());
-            return doencas.map(doencasMapper::toResponse);
+            return doencas.map(responseBuilder::build);
         } catch (DataAccessException e) {
             log.error("Erro de acesso a dados ao listar doenças por código CID. Código CID: {}, Pageable: {}", codigoCid, pageable, e);
             throw new InternalServerErrorException("Erro ao listar doenças por código CID", e);
@@ -179,7 +168,7 @@ public class DoencasServiceImpl implements DoencasService {
 
     @Override
     @Transactional
-    @CacheEvict(value = "doencas", key = "#id")
+    @CachePut(cacheNames = CacheKeyUtil.CACHE_DOENCAS, keyGenerator = "doencasCacheKeyGenerator")
     public DoencasResponse atualizar(UUID id, DoencasRequest request) {
         log.debug("Atualizando doença. ID: {}, Request: {}", id, request);
 
@@ -193,18 +182,8 @@ public class DoencasServiceImpl implements DoencasService {
         }
 
         try {
-
-            Doencas doencaExistente = doencasRepository.findById(id)
-                    .orElseThrow(() -> new NotFoundException("Doença não encontrada com ID: " + id));
-
-            validarDuplicidade(id, request);
-
-            atualizarDadosDoenca(doencaExistente, request);
-
-            Doencas doencaAtualizada = doencasRepository.save(doencaExistente);
-            log.info("Doença atualizada com sucesso. ID: {}", doencaAtualizada.getId());
-
-            return doencasMapper.toResponse(doencaAtualizada);
+            Doencas doencaAtualizada = updater.atualizar(id, request);
+            return responseBuilder.build(doencaAtualizada);
         } catch (NotFoundException e) {
             log.warn("Tentativa de atualizar doença não existente. ID: {}", id);
             throw e;
@@ -222,27 +201,12 @@ public class DoencasServiceImpl implements DoencasService {
 
     @Override
     @Transactional
-    @CacheEvict(value = "doencas", key = "#id")
+    @CacheEvict(cacheNames = CacheKeyUtil.CACHE_DOENCAS, keyGenerator = "doencasCacheKeyGenerator", beforeInvocation = false)
     public void excluir(UUID id) {
         log.debug("Excluindo doença. ID: {}", id);
 
-        if (id == null) {
-            log.warn("ID nulo recebido para exclusão de doença");
-            throw new BadRequestException("ID da doença é obrigatório");
-        }
-
         try {
-            Doencas doenca = doencasRepository.findById(id)
-                    .orElseThrow(() -> new NotFoundException("Doença não encontrada com ID: " + id));
-
-            if (Boolean.FALSE.equals(doenca.getActive())) {
-                log.warn("Tentativa de excluir doença já inativa. ID: {}", id);
-                throw new BadRequestException("Doença já está inativa");
-            }
-
-            doenca.setActive(false);
-            doencasRepository.save(doenca);
-            log.info("Doença excluída (desativada) com sucesso. ID: {}", id);
+            inativarInternal(id);
         } catch (NotFoundException e) {
             log.warn("Tentativa de excluir doença não existente. ID: {}", id);
             throw e;
@@ -258,107 +222,18 @@ public class DoencasServiceImpl implements DoencasService {
         }
     }
 
-    private void validarDuplicidade(UUID id, DoencasRequest request) {
-        if (request == null) {
-            return;
+    private void inativarInternal(UUID id) {
+        if (id == null) {
+            log.warn("ID nulo recebido para exclusão de doença");
+            throw new BadRequestException("ID da doença é obrigatório");
         }
 
-        if (request.getNome() != null && !request.getNome().trim().isEmpty()) {
-            boolean nomeDuplicado;
-            if (id == null) {
+        Doencas doenca = doencasRepository.findById(id)
+            .orElseThrow(() -> new NotFoundException("Doença não encontrada com ID: " + id));
 
-                nomeDuplicado = doencasRepository.existsByNome(request.getNome().trim());
-            } else {
-
-                nomeDuplicado = doencasRepository.existsByNomeAndIdNot(request.getNome().trim(), id);
-            }
-
-            if (nomeDuplicado) {
-                log.warn("Tentativa de cadastrar/atualizar doença com nome duplicado. Nome: {}", request.getNome());
-                throw new BadRequestException(
-                    String.format("Já existe uma doença cadastrada com o nome '%s' no banco de dados", request.getNome())
-                );
-            }
-        }
-
-        if (request.getCodigoInterno() != null && !request.getCodigoInterno().trim().isEmpty()) {
-            boolean codigoDuplicado;
-            if (id == null) {
-
-                codigoDuplicado = doencasRepository.existsByCodigoInterno(request.getCodigoInterno().trim());
-            } else {
-
-                codigoDuplicado = doencasRepository.existsByCodigoInternoAndIdNot(request.getCodigoInterno().trim(), id);
-            }
-
-            if (codigoDuplicado) {
-                log.warn("Tentativa de cadastrar/atualizar doença com código interno duplicado. Código: {}", request.getCodigoInterno());
-                throw new BadRequestException(
-                    String.format("Já existe uma doença cadastrada com o código interno '%s' no banco de dados", request.getCodigoInterno())
-                );
-            }
-        }
-    }
-
-    private void atualizarDadosDoenca(Doencas doenca, DoencasRequest request) {
-        if (request.getNome() != null) {
-            doenca.setNome(request.getNome());
-        }
-        if (request.getNomeCientifico() != null) {
-            doenca.setNomeCientifico(request.getNomeCientifico());
-        }
-        if (request.getCodigoInterno() != null) {
-            doenca.setCodigoInterno(request.getCodigoInterno());
-        }
-
-        if (request.getClassificacao() != null) {
-            if (doenca.getClassificacao() == null) {
-                doenca.setClassificacao(classificacaoDoencaMapper.toEntity(request.getClassificacao()));
-            } else {
-                classificacaoDoencaMapper.updateFromRequest(request.getClassificacao(), doenca.getClassificacao());
-            }
-        }
-        if (request.getSintomas() != null) {
-            if (doenca.getSintomas() == null) {
-                doenca.setSintomas(sintomasDoencaMapper.toEntity(request.getSintomas()));
-            } else {
-                sintomasDoencaMapper.updateFromRequest(request.getSintomas(), doenca.getSintomas());
-            }
-        }
-        if (request.getTratamentoPadrao() != null) {
-            if (doenca.getTratamentoPadrao() == null) {
-                doenca.setTratamentoPadrao(tratamentoPadraoDoencaMapper.toEntity(request.getTratamentoPadrao()));
-            } else {
-                tratamentoPadraoDoencaMapper.updateFromRequest(request.getTratamentoPadrao(), doenca.getTratamentoPadrao());
-            }
-        }
-        if (request.getEpidemiologia() != null) {
-            if (doenca.getEpidemiologia() == null) {
-                doenca.setEpidemiologia(epidemiologiaDoencaMapper.toEntity(request.getEpidemiologia()));
-            } else {
-                epidemiologiaDoencaMapper.updateFromRequest(request.getEpidemiologia(), doenca.getEpidemiologia());
-            }
-        }
-        if (request.getDescricao() != null) {
-            doenca.setDescricao(request.getDescricao());
-        }
-        if (request.getCausas() != null) {
-            doenca.setCausas(request.getCausas());
-        }
-        if (request.getFisiopatologia() != null) {
-            doenca.setFisiopatologia(request.getFisiopatologia());
-        }
-        if (request.getPrognostico() != null) {
-            doenca.setPrognostico(request.getPrognostico());
-        }
-        if (request.getObservacoes() != null) {
-            doenca.setObservacoes(request.getObservacoes());
-        }
-
-        if (request.getCidPrincipal() != null) {
-            CidDoencas cidPrincipal = cidDoencasRepository.findById(request.getCidPrincipal())
-                    .orElseThrow(() -> new NotFoundException("CID não encontrado com ID: " + request.getCidPrincipal()));
-            doenca.setCidPrincipal(cidPrincipal);
-        }
+        domainService.validarPodeInativar(doenca);
+        doenca.setActive(false);
+        doencasRepository.save(Objects.requireNonNull(doenca));
+        log.info("Doença excluída (desativada) com sucesso. ID: {}", id);
     }
 }

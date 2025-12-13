@@ -15,6 +15,7 @@ public class FaltaDTO {
     private OffsetDateTime createdAt;
     private OffsetDateTime updatedAt;
     private Boolean active;
+    private EstabelecimentosDTO estabelecimento;
     private ProfissionaisSaudeDTO profissional;
     private MedicosDTO medico;
     private LocalDate dataFalta;

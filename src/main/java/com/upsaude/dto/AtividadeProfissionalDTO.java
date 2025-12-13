@@ -20,6 +20,7 @@ public class AtividadeProfissionalDTO {
     private PacienteDTO paciente;
     private AtendimentoDTO atendimento;
     private CirurgiaDTO cirurgia;
+    private EstabelecimentosDTO estabelecimento;
     private OffsetDateTime dataHora;
     private LocalDate dataAtividade;
     private TipoAtividadeProfissionalEnum tipoAtividade;

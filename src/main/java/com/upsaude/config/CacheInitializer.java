@@ -33,7 +33,18 @@ public class CacheInitializer implements ApplicationListener<ContextRefreshedEve
         "acoesPromocaoPrevencao", "agendamentos", "alergias",
         "catalogoExames", "equipesSaude",
         "atendimentos", "consultas", "prontuarios", "preNatal", "puericultura",
-        "vacinacoes", "exames", "estoquesVacina", "medicacao", "medicacaoPaciente"
+        "vacinacoes", "exames", "estoquesVacina", "medicacao", "medicacaoPaciente",
+        "catalogoProcedimentos", "doencas",
+        "convenio", "dadosClinicosBasicos", "dadosSociodemograficos",
+        "ciddoencas", "cirurgias",
+        "especialidadesmedicas", "estabelecimentos",
+        "fabricantesequipamento", "fabricantesmedicamento", "fabricantesvacina",
+        "deficiencias", "departamentos", "atividadesprofissionais",
+        "faltas", "filaEspera",
+        "perfisusuarios", "permissoes", "planejamentofamiliar",
+        "plantoes", "procedimentosCirurgicos", "consultasPreNatal",
+        "procedimentosOdontologicos", "consultasPuericultura",
+        "receitasmedicas", "responsavellegal", "servicosEstabelecimento"
     );
 
     @Override

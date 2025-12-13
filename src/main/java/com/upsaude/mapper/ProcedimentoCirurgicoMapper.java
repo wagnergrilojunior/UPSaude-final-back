@@ -4,7 +4,6 @@ import com.upsaude.api.request.ProcedimentoCirurgicoRequest;
 import com.upsaude.api.response.ProcedimentoCirurgicoResponse;
 import com.upsaude.dto.ProcedimentoCirurgicoDTO;
 import com.upsaude.entity.ProcedimentoCirurgico;
-import com.upsaude.entity.Cirurgia;
 import com.upsaude.mapper.config.MappingConfig;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;

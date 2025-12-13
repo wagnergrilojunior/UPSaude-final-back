@@ -2,23 +2,36 @@ package com.upsaude.service.impl;
 
 import com.upsaude.api.request.PuericulturaRequest;
 import com.upsaude.api.response.PuericulturaResponse;
+import com.upsaude.cache.CacheKeyUtil;
 import com.upsaude.entity.Puericultura;
+import com.upsaude.entity.Tenant;
 import com.upsaude.exception.BadRequestException;
+import com.upsaude.exception.InternalServerErrorException;
 import com.upsaude.exception.NotFoundException;
-import com.upsaude.mapper.PuericulturaMapper;
 import com.upsaude.repository.PuericulturaRepository;
 import com.upsaude.service.PuericulturaService;
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.BeanUtils;
+import org.springframework.cache.Cache;
+import org.springframework.cache.CacheManager;
 import org.springframework.data.domain.Page;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.CachePut;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import com.upsaude.service.TenantService;
+import com.upsaude.service.support.puericultura.PuericulturaCreator;
+import com.upsaude.service.support.puericultura.PuericulturaDomainService;
+import com.upsaude.service.support.puericultura.PuericulturaResponseBuilder;
+import com.upsaude.service.support.puericultura.PuericulturaTenantEnforcer;
+import com.upsaude.service.support.puericultura.PuericulturaUpdater;
+
+import java.time.LocalDate;
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -28,77 +41,101 @@ import java.util.stream.Collectors;
 public class PuericulturaServiceImpl implements PuericulturaService {
 
     private final PuericulturaRepository puericulturaRepository;
-    private final PuericulturaMapper puericulturaMapper;
+    private final CacheManager cacheManager;
+    private final TenantService tenantService;
+
+    private final PuericulturaCreator creator;
+    private final PuericulturaUpdater updater;
+    private final PuericulturaResponseBuilder responseBuilder;
+    private final PuericulturaDomainService domainService;
+    private final PuericulturaTenantEnforcer tenantEnforcer;
 
     @Override
     @Transactional
-    @CacheEvict(value = "puericultura", allEntries = true)
     public PuericulturaResponse criar(PuericulturaRequest request) {
         log.debug("Criando nova puericultura");
 
-        Puericultura puericultura = puericulturaMapper.fromRequest(request);
-        puericultura.setActive(true);
+        try {
+            UUID tenantId = tenantService.validarTenantAtual();
+            Tenant tenant = tenantService.obterTenantDoUsuarioAutenticado();
+            validarTenantAutenticadoOrThrow(tenantId, tenant);
 
-        if (puericultura.getAcompanhamentoAtivo() == null) {
-            puericultura.setAcompanhamentoAtivo(true);
+            Puericultura saved = creator.criar(request, tenantId, tenant);
+            PuericulturaResponse response = responseBuilder.build(saved);
+
+            Cache cache = cacheManager.getCache(CacheKeyUtil.CACHE_PUERICULTURA);
+            if (cache != null) {
+                Object key = Objects.requireNonNull((Object) CacheKeyUtil.puericultura(tenantId, saved.getId()));
+                cache.put(key, response);
+            }
+
+            return response;
+        } catch (BadRequestException | NotFoundException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new InternalServerErrorException("Erro ao criar puericultura", e);
         }
-
-        Puericultura puericulturaSalva = puericulturaRepository.save(puericultura);
-        log.info("Puericultura criada com sucesso. ID: {}", puericulturaSalva.getId());
-
-        return puericulturaMapper.toResponse(puericulturaSalva);
     }
 
     @Override
-    @Transactional
-    @Cacheable(value = "puericultura", key = "#id")
+    @Transactional(readOnly = true)
+    @Cacheable(cacheNames = CacheKeyUtil.CACHE_PUERICULTURA, keyGenerator = "puericulturaCacheKeyGenerator")
     public PuericulturaResponse obterPorId(UUID id) {
         log.debug("Buscando puericultura por ID: {} (cache miss)", id);
         if (id == null) {
             throw new BadRequestException("ID da puericultura é obrigatório");
         }
 
-        Puericultura puericultura = puericulturaRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("Puericultura não encontrada com ID: " + id));
-
-        return puericulturaMapper.toResponse(puericultura);
+        UUID tenantId = tenantService.validarTenantAtual();
+        Puericultura entity = tenantEnforcer.validarAcessoCompleto(id, tenantId);
+        return responseBuilder.build(entity);
     }
 
     @Override
+    @Transactional(readOnly = true)
     public Page<PuericulturaResponse> listar(Pageable pageable) {
         log.debug("Listando puericulturas paginadas");
 
-        Page<Puericultura> puericulturas = puericulturaRepository.findAll(pageable);
-        return puericulturas.map(puericulturaMapper::toResponse);
+        UUID tenantId = tenantService.validarTenantAtual();
+        Page<Puericultura> puericulturas = puericulturaRepository.findAllByTenant(tenantId, pageable);
+        return puericulturas.map(responseBuilder::build);
     }
 
     @Override
+    @Transactional(readOnly = true)
     public Page<PuericulturaResponse> listarPorEstabelecimento(UUID estabelecimentoId, Pageable pageable) {
         log.debug("Listando puericulturas por estabelecimento: {}", estabelecimentoId);
 
-        Page<Puericultura> puericulturas = puericulturaRepository.findByEstabelecimentoIdOrderByDataInicioAcompanhamentoDesc(estabelecimentoId, pageable);
-        return puericulturas.map(puericulturaMapper::toResponse);
+        UUID tenantId = tenantService.validarTenantAtual();
+        Page<Puericultura> puericulturas = puericulturaRepository
+            .findByEstabelecimentoIdAndTenantIdOrderByDataInicioAcompanhamentoDesc(estabelecimentoId, tenantId, pageable);
+        return puericulturas.map(responseBuilder::build);
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<PuericulturaResponse> listarPorPaciente(UUID pacienteId) {
         log.debug("Listando puericulturas por paciente: {}", pacienteId);
 
-        List<Puericultura> puericulturas = puericulturaRepository.findByPacienteIdOrderByDataInicioAcompanhamentoDesc(pacienteId);
-        return puericulturas.stream().map(puericulturaMapper::toResponse).collect(Collectors.toList());
+        UUID tenantId = tenantService.validarTenantAtual();
+        List<Puericultura> puericulturas = puericulturaRepository.findByPacienteIdAndTenantIdOrderByDataInicioAcompanhamentoDesc(pacienteId, tenantId);
+        return puericulturas.stream().map(responseBuilder::build).collect(Collectors.toList());
     }
 
     @Override
+    @Transactional(readOnly = true)
     public Page<PuericulturaResponse> listarAtivos(UUID estabelecimentoId, Pageable pageable) {
         log.debug("Listando puericulturas ativos: {}", estabelecimentoId);
 
-        Page<Puericultura> puericulturas = puericulturaRepository.findByAcompanhamentoAtivoAndEstabelecimentoId(true, estabelecimentoId, pageable);
-        return puericulturas.map(puericulturaMapper::toResponse);
+        UUID tenantId = tenantService.validarTenantAtual();
+        Page<Puericultura> puericulturas = puericulturaRepository
+            .findByAcompanhamentoAtivoAndEstabelecimentoIdAndTenantId(true, estabelecimentoId, tenantId, pageable);
+        return puericulturas.map(responseBuilder::build);
     }
 
     @Override
     @Transactional
-    @CacheEvict(value = "puericultura", key = "#id")
+    @CachePut(cacheNames = CacheKeyUtil.CACHE_PUERICULTURA, keyGenerator = "puericulturaCacheKeyGenerator")
     public PuericulturaResponse atualizar(UUID id, PuericulturaRequest request) {
         log.debug("Atualizando puericultura. ID: {}", id);
 
@@ -106,52 +143,56 @@ public class PuericulturaServiceImpl implements PuericulturaService {
             throw new BadRequestException("ID da puericultura é obrigatório");
         }
 
-        Puericultura puericulturaExistente = puericulturaRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("Puericultura não encontrada com ID: " + id));
+        UUID tenantId = tenantService.validarTenantAtual();
+        Tenant tenant = tenantService.obterTenantDoUsuarioAutenticado();
+        validarTenantAutenticadoOrThrow(tenantId, tenant);
 
-        atualizarDadosPuericultura(puericulturaExistente, request);
-
-        Puericultura puericulturaAtualizada = puericulturaRepository.save(puericulturaExistente);
-        log.info("Puericultura atualizada com sucesso. ID: {}", puericulturaAtualizada.getId());
-
-        return puericulturaMapper.toResponse(puericulturaAtualizada);
+        Puericultura updated = updater.atualizar(id, request, tenantId, tenant);
+        return responseBuilder.build(updated);
     }
 
     @Override
     @Transactional
-    @CacheEvict(value = "puericultura", key = "#id")
+    @CacheEvict(cacheNames = CacheKeyUtil.CACHE_PUERICULTURA, keyGenerator = "puericulturaCacheKeyGenerator", beforeInvocation = false)
     public void excluir(UUID id) {
         log.debug("Excluindo puericultura. ID: {}", id);
+        UUID tenantId = tenantService.validarTenantAtual();
+        inativarInternal(id, tenantId);
+    }
 
+    @Override
+    @Transactional(readOnly = true)
+    public PuericulturaResponse obterAtivoPorPaciente(UUID pacienteId) {
+        UUID tenantId = tenantService.validarTenantAtual();
+        Puericultura entity = puericulturaRepository.findByPacienteIdAndAcompanhamentoAtivoAndTenantId(pacienteId, true, tenantId)
+            .orElseThrow(() -> new NotFoundException("Puericultura ativa não encontrada para o paciente: " + pacienteId));
+        return responseBuilder.build(entity);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Page<PuericulturaResponse> listarPorPeriodo(UUID estabelecimentoId, LocalDate inicio, LocalDate fim, Pageable pageable) {
+        UUID tenantId = tenantService.validarTenantAtual();
+        Page<Puericultura> page = puericulturaRepository
+            .findByEstabelecimentoIdAndDataInicioAcompanhamentoBetweenAndTenantIdOrderByDataInicioAcompanhamentoDesc(estabelecimentoId, inicio, fim, tenantId, pageable);
+        return page.map(responseBuilder::build);
+    }
+
+    private void inativarInternal(UUID id, UUID tenantId) {
         if (id == null) {
             throw new BadRequestException("ID da puericultura é obrigatório");
         }
 
-        Puericultura puericultura = puericulturaRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("Puericultura não encontrada com ID: " + id));
-
-        if (Boolean.FALSE.equals(puericultura.getActive())) {
-            throw new BadRequestException("Puericultura já está inativa");
-        }
-
-        puericultura.setActive(false);
-        puericulturaRepository.save(puericultura);
+        Puericultura entity = tenantEnforcer.validarAcesso(id, tenantId);
+        domainService.validarPodeInativar(entity);
+        entity.setActive(false);
+        puericulturaRepository.save(Objects.requireNonNull(entity));
         log.info("Puericultura excluída (desativada) com sucesso. ID: {}", id);
     }
 
-    private void atualizarDadosPuericultura(Puericultura puericultura, PuericulturaRequest request) {
-        Puericultura puericulturaAtualizada = puericulturaMapper.fromRequest(request);
-
-        UUID idOriginal = puericultura.getId();
-        com.upsaude.entity.Tenant tenantOriginal = puericultura.getTenant();
-        Boolean activeOriginal = puericultura.getActive();
-        java.time.OffsetDateTime createdAtOriginal = puericultura.getCreatedAt();
-
-        BeanUtils.copyProperties(puericulturaAtualizada, puericultura);
-
-        puericultura.setId(idOriginal);
-        puericultura.setTenant(tenantOriginal);
-        puericultura.setActive(activeOriginal);
-        puericultura.setCreatedAt(createdAtOriginal);
+    private void validarTenantAutenticadoOrThrow(UUID tenantId, Tenant tenant) {
+        if (tenantId == null || tenant == null || tenant.getId() == null || !tenantId.equals(tenant.getId())) {
+            throw new BadRequestException("Não foi possível obter tenant do usuário autenticado");
+        }
     }
 }

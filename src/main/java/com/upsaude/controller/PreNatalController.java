@@ -2,6 +2,7 @@ package com.upsaude.controller;
 
 import com.upsaude.api.request.PreNatalRequest;
 import com.upsaude.api.response.PreNatalResponse;
+import com.upsaude.enums.StatusPreNatalEnum;
 import com.upsaude.exception.BadRequestException;
 import com.upsaude.exception.ConflictException;
 import com.upsaude.exception.NotFoundException;
@@ -149,6 +150,25 @@ public class PreNatalController {
             throw ex;
         } catch (Exception ex) {
             log.error("Erro inesperado ao listar pré-natais em acompanhamento — estabelecimentoId: {}, pageable: {}", estabelecimentoId, pageable, ex);
+            throw ex;
+        }
+    }
+
+    @GetMapping("/status/{estabelecimentoId}")
+    @Operation(summary = "Listar pré-natais por status", description = "Retorna uma lista paginada de pré-natais filtrando por status e estabelecimento")
+    public ResponseEntity<Page<PreNatalResponse>> listarPorStatus(
+        @PathVariable UUID estabelecimentoId,
+        @RequestParam StatusPreNatalEnum status,
+        Pageable pageable) {
+        log.debug("REQUEST GET /v1/pre-natal/status/{}?status={} - pageable: {}", estabelecimentoId, status, pageable);
+        try {
+            Page<PreNatalResponse> response = preNatalService.listarPorStatus(estabelecimentoId, status, pageable);
+            return ResponseEntity.ok(response);
+        } catch (BadRequestException ex) {
+            log.warn("Falha ao listar pré-natais por status — estabelecimentoId: {}, status: {}, mensagem: {}", estabelecimentoId, status, ex.getMessage());
+            throw ex;
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao listar pré-natais por status — estabelecimentoId: {}, status: {}, pageable: {}", estabelecimentoId, status, pageable, ex);
             throw ex;
         }
     }

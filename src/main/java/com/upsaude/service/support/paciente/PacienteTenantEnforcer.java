@@ -18,7 +18,7 @@ public class PacienteTenantEnforcer {
 
     public Paciente validarAcesso(UUID id, UUID tenantId) {
         log.debug("Validando acesso ao paciente ID: {} para tenant: {}", id, tenantId);
-        
+
         return pacienteRepository.findByIdAndTenant(id, tenantId)
                 .orElseThrow(() -> {
                     log.warn("Paciente não encontrado com ID: {} para tenant: {}", id, tenantId);
@@ -28,7 +28,7 @@ public class PacienteTenantEnforcer {
 
     public Paciente validarAcessoCompleto(UUID id, UUID tenantId) {
         log.debug("Validando acesso completo ao paciente ID: {} para tenant: {}", id, tenantId);
-        
+
         return pacienteRepository.findByIdCompletoAndTenant(id, tenantId)
                 .orElseThrow(() -> {
                     log.warn("Paciente não encontrado com ID: {} para tenant: {}", id, tenantId);
@@ -36,3 +36,4 @@ public class PacienteTenantEnforcer {
                 });
     }
 }
+

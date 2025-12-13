@@ -1,0 +1,19 @@
+package com.upsaude.service.support.fabricantesequipamento;
+
+import com.upsaude.entity.FabricantesEquipamento;
+import com.upsaude.exception.BadRequestException;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
+
+@Slf4j
+@Service
+public class FabricantesEquipamentoDomainService {
+
+    public void validarPodeInativar(FabricantesEquipamento entity) {
+        if (Boolean.FALSE.equals(entity.getActive())) {
+            log.warn("Tentativa de inativar fabricante de equipamento já inativo. ID: {}", entity.getId());
+            throw new BadRequestException("Fabricante de equipamento já está inativo");
+        }
+    }
+}
+

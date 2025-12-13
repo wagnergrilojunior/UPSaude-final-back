@@ -15,6 +15,8 @@ public interface ProcedimentosOdontologicosService {
 
     Page<ProcedimentosOdontologicosResponse> listar(Pageable pageable);
 
+    Page<ProcedimentosOdontologicosResponse> listar(Pageable pageable, String codigo, String nome);
+
     ProcedimentosOdontologicosResponse atualizar(UUID id, ProcedimentosOdontologicosRequest request);
 
     void excluir(UUID id);

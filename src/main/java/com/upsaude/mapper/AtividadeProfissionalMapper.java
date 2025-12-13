@@ -4,17 +4,12 @@ import com.upsaude.api.request.AtividadeProfissionalRequest;
 import com.upsaude.api.response.AtividadeProfissionalResponse;
 import com.upsaude.dto.AtividadeProfissionalDTO;
 import com.upsaude.entity.AtividadeProfissional;
-import com.upsaude.entity.Atendimento;
-import com.upsaude.entity.Cirurgia;
-import com.upsaude.entity.Medicos;
-import com.upsaude.entity.Paciente;
-import com.upsaude.entity.ProfissionaisSaude;
 import com.upsaude.mapper.config.MappingConfig;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 
-@Mapper(config = MappingConfig.class, uses = {AtendimentoMapper.class, CirurgiaMapper.class, MedicosMapper.class, PacienteMapper.class, ProfissionaisSaudeMapper.class})
+@Mapper(config = MappingConfig.class, uses = {AtendimentoMapper.class, CirurgiaMapper.class, MedicosMapper.class, PacienteMapper.class, ProfissionaisSaudeMapper.class, EstabelecimentosMapper.class})
 public interface AtividadeProfissionalMapper extends EntityMapper<AtividadeProfissional, AtividadeProfissionalDTO> {
 
     @Mapping(target = "active", ignore = true)
@@ -28,6 +23,7 @@ public interface AtividadeProfissionalMapper extends EntityMapper<AtividadeProfi
     @Mapping(target = "active", ignore = true)
     @Mapping(target = "atendimento", ignore = true)
     @Mapping(target = "cirurgia", ignore = true)
+    @Mapping(target = "estabelecimento", ignore = true)
     @Mapping(target = "medico", ignore = true)
     @Mapping(target = "paciente", ignore = true)
     @Mapping(target = "profissional", ignore = true)
@@ -39,6 +35,7 @@ public interface AtividadeProfissionalMapper extends EntityMapper<AtividadeProfi
     @Mapping(target = "active", ignore = true)
     @Mapping(target = "atendimento", ignore = true)
     @Mapping(target = "cirurgia", ignore = true)
+    @Mapping(target = "estabelecimento", ignore = true)
     @Mapping(target = "medico", ignore = true)
     @Mapping(target = "paciente", ignore = true)
     @Mapping(target = "profissional", ignore = true)
