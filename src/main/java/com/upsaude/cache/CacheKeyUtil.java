@@ -14,6 +14,8 @@ public final class CacheKeyUtil {
     public static final String CACHE_EQUIPES_SAUDE = "equipesSaude";
     public static final String CACHE_VACINAS = "vacinas";
     public static final String CACHE_ATENDIMENTOS = "atendimentos";
+    // Compatibilidade: módulo Atendimento usa cache name singular "atendimento"
+    public static final String CACHE_ATENDIMENTO = "atendimento";
     public static final String CACHE_CONSULTAS = "consultas";
     public static final String CACHE_PRONTUARIOS = "prontuarios";
     public static final String CACHE_PRE_NATAL = "preNatal";
@@ -66,6 +68,15 @@ public final class CacheKeyUtil {
     public static final String CACHE_EQUIPAMENTOS = "equipamentos";
     public static final String CACHE_EQUIPAMENTOS_ESTABELECIMENTO = "equipamentosestabelecimento";
     public static final String CACHE_ESCALA_TRABALHO = "escalatrabalho";
+    public static final String CACHE_CHECKIN_ATENDIMENTO = "checkinatendimento";
+    public static final String CACHE_HISTORICO_CLINICO = "historicoclinico";
+    public static final String CACHE_HISTORICO_HABILITACAO_PROFISSIONAL = "historicohabilitacaoprofissional";
+    public static final String CACHE_INFRAESTRUTURA_ESTABELECIMENTO = "infraestruturaestabelecimento";
+    public static final String CACHE_INTEGRACAO_GOV = "integracaogov";
+    public static final String CACHE_LGPD_CONSENTIMENTO = "lgpdconsentimento";
+    public static final String CACHE_MEDICAO_CLINICA = "medicaoclinica";
+    public static final String CACHE_MOVIMENTACOES_ESTOQUE = "movimentacoesestoque";
+    public static final String CACHE_LOGS_AUDITORIA = "logsauditoria";
 
     private CacheKeyUtil() {
     }
@@ -162,6 +173,96 @@ public final class CacheKeyUtil {
             throw new IllegalArgumentException("atendimentoId é obrigatório");
         }
         return String.format("atendimento_%s_%s", tenantId, atendimentoId);
+    }
+
+    public static String checkInAtendimento(UUID tenantId, UUID checkInAtendimentoId) {
+        if (tenantId == null) {
+            throw new IllegalArgumentException("tenantId é obrigatório");
+        }
+        if (checkInAtendimentoId == null) {
+            throw new IllegalArgumentException("checkInAtendimentoId é obrigatório");
+        }
+        return String.format("checkInAtendimento_%s_%s", tenantId, checkInAtendimentoId);
+    }
+
+    public static String historicoClinico(UUID tenantId, UUID historicoClinicoId) {
+        if (tenantId == null) {
+            throw new IllegalArgumentException("tenantId é obrigatório");
+        }
+        if (historicoClinicoId == null) {
+            throw new IllegalArgumentException("historicoClinicoId é obrigatório");
+        }
+        return String.format("historicoClinico_%s_%s", tenantId, historicoClinicoId);
+    }
+
+    public static String historicoHabilitacaoProfissional(UUID tenantId, UUID historicoId) {
+        if (tenantId == null) {
+            throw new IllegalArgumentException("tenantId é obrigatório");
+        }
+        if (historicoId == null) {
+            throw new IllegalArgumentException("historicoHabilitacaoProfissionalId é obrigatório");
+        }
+        return String.format("historicoHabilitacaoProfissional_%s_%s", tenantId, historicoId);
+    }
+
+    public static String infraestruturaEstabelecimento(UUID tenantId, UUID infraestruturaId) {
+        if (tenantId == null) {
+            throw new IllegalArgumentException("tenantId é obrigatório");
+        }
+        if (infraestruturaId == null) {
+            throw new IllegalArgumentException("infraestruturaEstabelecimentoId é obrigatório");
+        }
+        return String.format("infraestruturaEstabelecimento_%s_%s", tenantId, infraestruturaId);
+    }
+
+    public static String integracaoGov(UUID tenantId, UUID integracaoGovId) {
+        if (tenantId == null) {
+            throw new IllegalArgumentException("tenantId é obrigatório");
+        }
+        if (integracaoGovId == null) {
+            throw new IllegalArgumentException("integracaoGovId é obrigatório");
+        }
+        return String.format("integracaoGov_%s_%s", tenantId, integracaoGovId);
+    }
+
+    public static String lgpdConsentimento(UUID tenantId, UUID lgpdConsentimentoId) {
+        if (tenantId == null) {
+            throw new IllegalArgumentException("tenantId é obrigatório");
+        }
+        if (lgpdConsentimentoId == null) {
+            throw new IllegalArgumentException("lgpdConsentimentoId é obrigatório");
+        }
+        return String.format("lgpdConsentimento_%s_%s", tenantId, lgpdConsentimentoId);
+    }
+
+    public static String medicaoClinica(UUID tenantId, UUID medicaoClinicaId) {
+        if (tenantId == null) {
+            throw new IllegalArgumentException("tenantId é obrigatório");
+        }
+        if (medicaoClinicaId == null) {
+            throw new IllegalArgumentException("medicaoClinicaId é obrigatório");
+        }
+        return String.format("medicaoClinica_%s_%s", tenantId, medicaoClinicaId);
+    }
+
+    public static String movimentacaoEstoque(UUID tenantId, UUID movimentacaoEstoqueId) {
+        if (tenantId == null) {
+            throw new IllegalArgumentException("tenantId é obrigatório");
+        }
+        if (movimentacaoEstoqueId == null) {
+            throw new IllegalArgumentException("movimentacaoEstoqueId é obrigatório");
+        }
+        return String.format("movimentacaoEstoque_%s_%s", tenantId, movimentacaoEstoqueId);
+    }
+
+    public static String logAuditoria(UUID tenantId, UUID logAuditoriaId) {
+        if (tenantId == null) {
+            throw new IllegalArgumentException("tenantId é obrigatório");
+        }
+        if (logAuditoriaId == null) {
+            throw new IllegalArgumentException("logAuditoriaId é obrigatório");
+        }
+        return String.format("logAuditoria_%s_%s", tenantId, logAuditoriaId);
     }
 
     public static String consulta(UUID tenantId, UUID consultaId) {
