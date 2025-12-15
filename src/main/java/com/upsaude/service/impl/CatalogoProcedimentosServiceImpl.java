@@ -90,6 +90,7 @@ public class CatalogoProcedimentosServiceImpl implements CatalogoProcedimentosSe
     }
 
     @Override
+    @Transactional
     public Page<CatalogoProcedimentosResponse> listar(Pageable pageable) {
         log.debug("Listando procedimentos do catálogo paginados. Página: {}, Tamanho: {}",
                 pageable.getPageNumber(), pageable.getPageSize());

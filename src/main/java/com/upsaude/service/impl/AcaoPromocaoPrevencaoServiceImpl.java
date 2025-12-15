@@ -84,12 +84,14 @@ public class AcaoPromocaoPrevencaoServiceImpl implements AcaoPromocaoPrevencaoSe
     }
 
     @Override
+    @Transactional
     public Page<AcaoPromocaoPrevencaoResponse> listar(Pageable pageable) {
         UUID tenantId = tenantService.validarTenantAtual();
         return acaoPromocaoPrevencaoRepository.findAllByTenant(tenantId, pageable).map(responseBuilder::build);
     }
 
     @Override
+    @Transactional
     public Page<AcaoPromocaoPrevencaoResponse> listarPorEstabelecimento(UUID estabelecimentoId, Pageable pageable) {
         UUID tenantId = tenantService.validarTenantAtual();
         return acaoPromocaoPrevencaoRepository.findByEstabelecimentoIdAndTenantIdOrderByDataInicioDesc(estabelecimentoId, tenantId, pageable)
@@ -97,6 +99,7 @@ public class AcaoPromocaoPrevencaoServiceImpl implements AcaoPromocaoPrevencaoSe
     }
 
     @Override
+    @Transactional
     public Page<AcaoPromocaoPrevencaoResponse> listarPorProfissionalResponsavel(UUID profissionalId, Pageable pageable) {
         UUID tenantId = tenantService.validarTenantAtual();
         return acaoPromocaoPrevencaoRepository.findByProfissionalResponsavelIdAndTenantIdOrderByDataInicioDesc(profissionalId, tenantId, pageable)
@@ -104,6 +107,7 @@ public class AcaoPromocaoPrevencaoServiceImpl implements AcaoPromocaoPrevencaoSe
     }
 
     @Override
+    @Transactional
     public Page<AcaoPromocaoPrevencaoResponse> listarPorStatus(String status, UUID estabelecimentoId, Pageable pageable) {
         UUID tenantId = tenantService.validarTenantAtual();
         return acaoPromocaoPrevencaoRepository
@@ -112,6 +116,7 @@ public class AcaoPromocaoPrevencaoServiceImpl implements AcaoPromocaoPrevencaoSe
     }
 
     @Override
+    @Transactional
     public Page<AcaoPromocaoPrevencaoResponse> listarContinuas(UUID estabelecimentoId, Pageable pageable) {
         UUID tenantId = tenantService.validarTenantAtual();
         return acaoPromocaoPrevencaoRepository

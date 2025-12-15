@@ -23,7 +23,6 @@ import com.upsaude.exception.BadRequestException;
 import com.upsaude.exception.InternalServerErrorException;
 import com.upsaude.exception.NotFoundException;
 import com.upsaude.repository.PacienteRepository;
-import com.upsaude.repository.projection.PacienteSimplificadoProjection;
 import com.upsaude.service.PacienteService;
 import com.upsaude.service.TenantService;
 import com.upsaude.service.support.paciente.PacienteAssociacoesManager;
@@ -100,10 +99,10 @@ public class PacienteServiceImpl implements PacienteService {
     @Override
     @Transactional(readOnly = true)
     public Page<PacienteSimplificadoResponse> listarSimplificado(Pageable pageable) {
-        UUID tenantId = tenantService.validarTenantAtual();
-        Page<PacienteSimplificadoProjection> projecoes = 
-                pacienteRepository.findAllSimplificadoByTenant(tenantId, pageable);
-        return projecoes.map(responseBuilder::buildSimplificado);
+        tenantService.validarTenantAtual();
+        // Paciente é BaseEntityWithoutTenant: listagem simplificada via Entity evita problemas de projeção em native query
+        Page<Paciente> pacientes = pacienteRepository.findAllSemRelacionamentos(Objects.requireNonNull(pageable, "pageable"));
+        return pacientes.map(responseBuilder::buildSimplificado);
     }
 
     @Override

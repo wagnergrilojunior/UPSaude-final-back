@@ -86,6 +86,7 @@ public class CatalogoExamesServiceImpl implements CatalogoExamesService {
     }
 
     @Override
+    @Transactional
     public Page<CatalogoExamesResponse> listar(Pageable pageable) {
         UUID tenantId = tenantService.validarTenantAtual();
         return catalogoExamesRepository.findAllByTenant(tenantId, pageable).map(responseBuilder::build);

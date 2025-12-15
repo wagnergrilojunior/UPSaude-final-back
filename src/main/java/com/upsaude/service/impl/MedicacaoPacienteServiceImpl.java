@@ -141,6 +141,7 @@ public class MedicacaoPacienteServiceImpl implements MedicacaoPacienteService {
     }
 
     @Override
+    @Transactional
     public Page<MedicacaoPacienteResponse> listar(Pageable pageable) {
         log.debug("Listando ligações paciente-medicação paginadas. Página: {}, Tamanho: {}",
                 pageable.getPageNumber(), pageable.getPageSize());

@@ -4,13 +4,6 @@ import com.upsaude.api.request.AgendamentoRequest;
 import com.upsaude.api.response.AgendamentoResponse;
 import com.upsaude.dto.AgendamentoDTO;
 import com.upsaude.entity.Agendamento;
-import com.upsaude.entity.Agendamento;
-import com.upsaude.entity.Atendimento;
-import com.upsaude.entity.Convenio;
-import com.upsaude.entity.EspecialidadesMedicas;
-import com.upsaude.entity.Medicos;
-import com.upsaude.entity.Paciente;
-import com.upsaude.entity.ProfissionaisSaude;
 import com.upsaude.mapper.config.MappingConfig;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -56,5 +49,18 @@ public interface AgendamentoMapper extends EntityMapper<Agendamento, Agendamento
     @Mapping(target = "checkIns", ignore = true)
     void updateFromRequest(AgendamentoRequest request, @MappingTarget Agendamento entity);
 
+    // Evita recursão infinita na serialização:
+    // AgendamentoResponse -> agendamentoOriginal/reagendamentos -> AgendamentoResponse ...
+    @Mapping(target = "agendamentoOriginal", ignore = true)
+    @Mapping(target = "reagendamentos", ignore = true)
+    @Mapping(target = "notificacoes", ignore = true)
+    @Mapping(target = "checkIns", ignore = true)
+    // Evita ciclos/recursões indiretas via PacienteResponse/ResponsavelLegalResponse e outros grafos grandes.
+    @Mapping(target = "paciente", ignore = true)
+    @Mapping(target = "profissional", ignore = true)
+    @Mapping(target = "medico", ignore = true)
+    @Mapping(target = "especialidade", ignore = true)
+    @Mapping(target = "convenio", ignore = true)
+    @Mapping(target = "atendimento", ignore = true)
     AgendamentoResponse toResponse(Agendamento entity);
 }

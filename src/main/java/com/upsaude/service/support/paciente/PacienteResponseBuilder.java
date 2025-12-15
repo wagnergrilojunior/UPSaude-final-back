@@ -30,4 +30,8 @@ public class PacienteResponseBuilder {
     public PacienteSimplificadoResponse buildSimplificado(PacienteSimplificadoProjection projecao) {
         return pacienteMapper.fromProjection(projecao);
     }
+
+    public PacienteSimplificadoResponse buildSimplificado(Paciente paciente) {
+        return pacienteMapper.toSimplified(paciente);
+    }
 }

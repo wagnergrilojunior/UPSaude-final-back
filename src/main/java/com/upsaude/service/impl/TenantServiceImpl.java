@@ -182,7 +182,9 @@ public class TenantServiceImpl implements TenantService {
                     com.upsaude.entity.UsuariosSistema usuario = usuarioOpt.get();
                     Tenant tenant = usuario.getTenant();
                     if (tenant != null) {
-                        log.debug("Tenant obtido com sucesso: {} (ID: {})", tenant.getNome(), tenant.getId());
+                        // Evita LazyInitializationException caso o relacionamento esteja LAZY e fora de transação
+                        // (acessar tenant.getNome() pode inicializar o proxy sem sessão).
+                        log.debug("Tenant obtido com sucesso. ID: {}", tenant.getId());
                         return tenant;
                     } else {
                         log.warn("Usuário encontrado mas sem tenant associado. UserId: {}", userId);

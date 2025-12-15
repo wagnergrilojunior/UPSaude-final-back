@@ -33,5 +33,8 @@ public interface ConsultaPreNatalMapper extends EntityMapper<ConsultaPreNatal, C
     @Mapping(target = "profissional", ignore = true)
     void updateFromRequest(ConsultaPreNatalRequest request, @MappingTarget ConsultaPreNatal entity);
 
+    // Evita ciclos/recursões via PreNatalResponse/PacienteResponse e grafos grandes.
+    @Mapping(target = "preNatal", ignore = true)
+    @Mapping(target = "profissional", ignore = true)
     ConsultaPreNatalResponse toResponse(ConsultaPreNatal entity);
 }

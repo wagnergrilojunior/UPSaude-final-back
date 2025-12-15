@@ -35,5 +35,9 @@ public interface PreNatalMapper extends EntityMapper<PreNatal, PreNatalDTO> {
     @Mapping(target = "profissionalResponsavel", ignore = true)
     void updateFromRequest(PreNatalRequest request, @MappingTarget PreNatal entity);
 
+    // Evita ciclos/recursões indiretas via PacienteResponse/ResponsavelLegalResponse e grafos grandes.
+    @Mapping(target = "paciente", ignore = true)
+    @Mapping(target = "profissionalResponsavel", ignore = true)
+    @Mapping(target = "equipeSaude", ignore = true)
     PreNatalResponse toResponse(PreNatal entity);
 }

@@ -22,6 +22,7 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.util.Objects;
 import java.util.UUID;
 
 @Slf4j
@@ -90,11 +91,20 @@ public class ProfissionalEstabelecimentoServiceImpl implements ProfissionalEstab
 
     @Override
     public Page<ProfissionalEstabelecimentoResponse> listar(Pageable pageable) {
+        Pageable safePageable = Objects.requireNonNull(pageable, "pageable");
         log.debug("Listando vínculos paginados. Página: {}, Tamanho: {}",
-                pageable.getPageNumber(), pageable.getPageSize());
+                safePageable.getPageNumber(), safePageable.getPageSize());
 
-        Page<ProfissionalEstabelecimento> vinculos = profissionalEstabelecimentoRepository.findAll(pageable);
-        return vinculos.map(profissionalEstabelecimentoMapper::toResponse);
+        try {
+            Page<ProfissionalEstabelecimento> vinculos = profissionalEstabelecimentoRepository.findAll(safePageable);
+            return vinculos.map(profissionalEstabelecimentoMapper::toResponse);
+        } catch (Exception ex) {
+            if (isMissingProfissionaisEstabelecimentosTable(ex)) {
+                log.warn("Tabela public.profissionais_estabelecimentos não existe no banco atual; retornando página vazia para listagem.");
+                return Page.empty(safePageable);
+            }
+            throw ex;
+        }
     }
 
     @Override
@@ -105,8 +115,16 @@ public class ProfissionalEstabelecimentoServiceImpl implements ProfissionalEstab
             throw new BadRequestException("ID do profissional é obrigatório");
         }
 
-        Page<ProfissionalEstabelecimento> vinculos = profissionalEstabelecimentoRepository.findByProfissionalId(profissionalId, pageable);
-        return vinculos.map(profissionalEstabelecimentoMapper::toResponse);
+        try {
+            Page<ProfissionalEstabelecimento> vinculos = profissionalEstabelecimentoRepository.findByProfissionalId(profissionalId, pageable);
+            return vinculos.map(profissionalEstabelecimentoMapper::toResponse);
+        } catch (Exception ex) {
+            if (isMissingProfissionaisEstabelecimentosTable(ex)) {
+                log.warn("Tabela public.profissionais_estabelecimentos não existe no banco atual; retornando página vazia para listagem por profissional.");
+                return Page.empty(pageable);
+            }
+            throw ex;
+        }
     }
 
     @Override
@@ -117,8 +135,16 @@ public class ProfissionalEstabelecimentoServiceImpl implements ProfissionalEstab
             throw new BadRequestException("ID do estabelecimento é obrigatório");
         }
 
-        Page<ProfissionalEstabelecimento> vinculos = profissionalEstabelecimentoRepository.findByEstabelecimentoId(estabelecimentoId, pageable);
-        return vinculos.map(profissionalEstabelecimentoMapper::toResponse);
+        try {
+            Page<ProfissionalEstabelecimento> vinculos = profissionalEstabelecimentoRepository.findByEstabelecimentoId(estabelecimentoId, pageable);
+            return vinculos.map(profissionalEstabelecimentoMapper::toResponse);
+        } catch (Exception ex) {
+            if (isMissingProfissionaisEstabelecimentosTable(ex)) {
+                log.warn("Tabela public.profissionais_estabelecimentos não existe no banco atual; retornando página vazia para listagem por estabelecimento.");
+                return Page.empty(pageable);
+            }
+            throw ex;
+        }
     }
 
     @Override
@@ -133,9 +159,17 @@ public class ProfissionalEstabelecimentoServiceImpl implements ProfissionalEstab
             throw new BadRequestException("ID do estabelecimento é obrigatório");
         }
 
-        Page<ProfissionalEstabelecimento> vinculos = profissionalEstabelecimentoRepository
-                .findByTipoVinculoAndEstabelecimentoId(tipoVinculo, estabelecimentoId, pageable);
-        return vinculos.map(profissionalEstabelecimentoMapper::toResponse);
+        try {
+            Page<ProfissionalEstabelecimento> vinculos = profissionalEstabelecimentoRepository
+                    .findByTipoVinculoAndEstabelecimentoId(tipoVinculo, estabelecimentoId, pageable);
+            return vinculos.map(profissionalEstabelecimentoMapper::toResponse);
+        } catch (Exception ex) {
+            if (isMissingProfissionaisEstabelecimentosTable(ex)) {
+                log.warn("Tabela public.profissionais_estabelecimentos não existe no banco atual; retornando página vazia para listagem por tipo de vínculo.");
+                return Page.empty(pageable);
+            }
+            throw ex;
+        }
     }
 
     @Override
@@ -193,5 +227,17 @@ public class ProfissionalEstabelecimentoServiceImpl implements ProfissionalEstab
         vinculo.setSetorDepartamento(vinculoAtualizado.getSetorDepartamento());
         vinculo.setCargoFuncao(vinculoAtualizado.getCargoFuncao());
         vinculo.setObservacoes(vinculoAtualizado.getObservacoes());
+    }
+
+    private boolean isMissingProfissionaisEstabelecimentosTable(Throwable ex) {
+        Throwable current = ex;
+        while (current != null) {
+            String msg = current.getMessage();
+            if (msg != null && msg.contains("relation \"public.profissionais_estabelecimentos\" does not exist")) {
+                return true;
+            }
+            current = current.getCause();
+        }
+        return false;
     }
 }

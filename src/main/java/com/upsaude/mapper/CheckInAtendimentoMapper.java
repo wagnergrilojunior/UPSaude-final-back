@@ -4,9 +4,6 @@ import com.upsaude.api.request.CheckInAtendimentoRequest;
 import com.upsaude.api.response.CheckInAtendimentoResponse;
 import com.upsaude.dto.CheckInAtendimentoDTO;
 import com.upsaude.entity.CheckInAtendimento;
-import com.upsaude.entity.Agendamento;
-import com.upsaude.entity.Atendimento;
-import com.upsaude.entity.Paciente;
 import com.upsaude.mapper.config.MappingConfig;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -38,5 +35,14 @@ public interface CheckInAtendimentoMapper extends EntityMapper<CheckInAtendiment
     @Mapping(target = "paciente", ignore = true)
     void updateFromRequest(CheckInAtendimentoRequest request, @MappingTarget CheckInAtendimento entity);
 
+    // Evita recursão infinita na serialização:
+    // - CheckInAtendimentoResponse -> AgendamentoResponse -> ... -> MedicosResponse -> medicoEstabelecimento -> MedicosResponse ...
+    // - CheckInAtendimentoResponse -> AgendamentoResponse -> checkIns -> CheckInAtendimentoResponse ...
+    //
+    // Para manter o endpoint estável, retornamos o check-in sem objetos aninhados (agendamento/atendimento/paciente),
+    // já que `PacienteResponse` também pode entrar em ciclos (ex.: ResponsavelLegalResponse -> PacienteResponse ...).
+    @Mapping(target = "agendamento", ignore = true)
+    @Mapping(target = "atendimento", ignore = true)
+    @Mapping(target = "paciente", ignore = true)
     CheckInAtendimentoResponse toResponse(CheckInAtendimento entity);
 }

@@ -4,11 +4,6 @@ import com.upsaude.api.request.CirurgiaRequest;
 import com.upsaude.api.response.CirurgiaResponse;
 import com.upsaude.dto.CirurgiaDTO;
 import com.upsaude.entity.Cirurgia;
-import com.upsaude.entity.Convenio;
-import com.upsaude.entity.EspecialidadesMedicas;
-import com.upsaude.entity.Medicos;
-import com.upsaude.entity.Paciente;
-import com.upsaude.entity.ProfissionaisSaude;
 import com.upsaude.mapper.config.MappingConfig;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -48,5 +43,13 @@ public interface CirurgiaMapper extends EntityMapper<Cirurgia, CirurgiaDTO> {
     @Mapping(target = "equipe", ignore = true)
     void updateFromRequest(CirurgiaRequest request, @MappingTarget Cirurgia entity);
 
+    // Evita ciclos/recursões indiretas via PacienteResponse/ResponsavelLegalResponse e grafos grandes.
+    @Mapping(target = "paciente", ignore = true)
+    @Mapping(target = "cirurgiaoPrincipal", ignore = true)
+    @Mapping(target = "medicoCirurgiao", ignore = true)
+    @Mapping(target = "especialidade", ignore = true)
+    @Mapping(target = "convenio", ignore = true)
+    @Mapping(target = "procedimentos", ignore = true)
+    @Mapping(target = "equipe", ignore = true)
     CirurgiaResponse toResponse(Cirurgia entity);
 }
