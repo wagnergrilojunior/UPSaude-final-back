@@ -1,0 +1,24 @@
+package com.upsaude.service.support.dadosclinicosbasicos;
+
+import com.upsaude.api.request.DadosClinicosBasicosRequest;
+import com.upsaude.entity.DadosClinicosBasicos;
+import com.upsaude.entity.Paciente;
+import com.upsaude.service.support.paciente.PacienteTenantEnforcer;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+
+import java.util.UUID;
+
+@Service
+@RequiredArgsConstructor
+public class DadosClinicosBasicosRelacionamentosHandler {
+
+    private final PacienteTenantEnforcer pacienteTenantEnforcer;
+
+    public DadosClinicosBasicos processarRelacionamentos(DadosClinicosBasicos entity, DadosClinicosBasicosRequest request, UUID tenantId) {
+        Paciente paciente = pacienteTenantEnforcer.validarAcesso(request.getPaciente(), tenantId);
+        entity.setPaciente(paciente);
+        return entity;
+    }
+}
+

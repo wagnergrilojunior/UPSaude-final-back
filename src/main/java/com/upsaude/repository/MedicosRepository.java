@@ -25,10 +25,22 @@ public interface MedicosRepository extends JpaRepository<Medicos, UUID> {
             @Param("crmUf") String crmUf,
             @Param("tenant") Tenant tenant);
 
+    @Query("SELECT m FROM Medicos m WHERE m.registroProfissional.crm = :crm " +
+           "AND m.registroProfissional.crmUf = :crmUf AND m.tenant.id = :tenantId")
+    Optional<Medicos> findByRegistroProfissionalCrmAndRegistroProfissionalCrmUfAndTenantId(
+            @Param("crm") String crm,
+            @Param("crmUf") String crmUf,
+            @Param("tenantId") UUID tenantId);
+
     @Query("SELECT m FROM Medicos m WHERE m.dadosPessoais.cpf = :cpf AND m.tenant = :tenant")
     Optional<Medicos> findByDadosPessoaisCpfAndTenant(
             @Param("cpf") String cpf,
             @Param("tenant") Tenant tenant);
+
+    @Query("SELECT m FROM Medicos m WHERE m.dadosPessoais.cpf = :cpf AND m.tenant.id = :tenantId")
+    Optional<Medicos> findByDadosPessoaisCpfAndTenantId(
+            @Param("cpf") String cpf,
+            @Param("tenantId") UUID tenantId);
 
     @Override
     @EntityGraph(attributePaths = {
@@ -36,4 +48,19 @@ public interface MedicosRepository extends JpaRepository<Medicos, UUID> {
     })
     @NonNull
     Page<Medicos> findAll(@NonNull Pageable pageable);
+
+    @Query("SELECT m FROM Medicos m WHERE m.id = :id AND m.tenant.id = :tenantId")
+    Optional<Medicos> findByIdAndTenant(@Param("id") UUID id, @Param("tenantId") UUID tenantId);
+
+    @EntityGraph(attributePaths = {
+        "especialidades",
+        "medicosEstabelecimentos",
+        "medicosEstabelecimentos.estabelecimento",
+        "enderecos"
+    })
+    @Query("SELECT m FROM Medicos m WHERE m.id = :id AND m.tenant.id = :tenantId")
+    Optional<Medicos> findByIdCompletoAndTenant(@Param("id") UUID id, @Param("tenantId") UUID tenantId);
+
+    @Query("SELECT m FROM Medicos m WHERE m.tenant.id = :tenantId")
+    Page<Medicos> findAllByTenant(@Param("tenantId") UUID tenantId, Pageable pageable);
 }

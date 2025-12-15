@@ -139,6 +139,7 @@ public class AlergiasPacienteServiceImpl implements AlergiasPacienteService {
     }
 
     @Override
+    @Transactional
     public Page<AlergiasPacienteResponse> listar(Pageable pageable) {
         log.debug("Listando AlergiasPacientes paginados. Página: {}, Tamanho: {}",
                 pageable.getPageNumber(), pageable.getPageSize());

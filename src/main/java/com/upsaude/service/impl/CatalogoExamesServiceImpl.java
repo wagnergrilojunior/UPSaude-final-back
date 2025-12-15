@@ -1,21 +1,32 @@
 package com.upsaude.service.impl;
 
+import java.util.Objects;
 import com.upsaude.api.request.CatalogoExamesRequest;
 import com.upsaude.api.response.CatalogoExamesResponse;
+import com.upsaude.cache.CacheKeyUtil;
 import com.upsaude.entity.CatalogoExames;
 import com.upsaude.entity.Tenant;
 import com.upsaude.exception.BadRequestException;
+import com.upsaude.exception.InternalServerErrorException;
 import com.upsaude.exception.NotFoundException;
-import com.upsaude.mapper.CatalogoExamesMapper;
 import com.upsaude.repository.CatalogoExamesRepository;
 import com.upsaude.service.CatalogoExamesService;
+import com.upsaude.service.TenantService;
+import com.upsaude.service.support.catalogoexames.CatalogoExamesCreator;
+import com.upsaude.service.support.catalogoexames.CatalogoExamesDomainService;
+import com.upsaude.service.support.catalogoexames.CatalogoExamesResponseBuilder;
+import com.upsaude.service.support.catalogoexames.CatalogoExamesTenantEnforcer;
+import com.upsaude.service.support.catalogoexames.CatalogoExamesUpdater;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.BeanUtils;
-import org.springframework.data.domain.Page;
+import org.springframework.cache.Cache;
+import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.dao.DataAccessException;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
@@ -27,164 +38,113 @@ import java.util.UUID;
 public class CatalogoExamesServiceImpl implements CatalogoExamesService {
 
     private final CatalogoExamesRepository catalogoExamesRepository;
-    private final CatalogoExamesMapper catalogoExamesMapper;
-    private final com.upsaude.service.TenantService tenantService;
-    private final com.upsaude.service.support.catalogoexames.CatalogoExamesValidationService catalogoExamesValidationService;
+    private final CacheManager cacheManager;
+    private final TenantService tenantService;
+
+    private final CatalogoExamesCreator creator;
+    private final CatalogoExamesUpdater updater;
+    private final CatalogoExamesTenantEnforcer tenantEnforcer;
+    private final CatalogoExamesResponseBuilder responseBuilder;
+    private final CatalogoExamesDomainService domainService;
 
     @Override
     @Transactional
-    @CacheEvict(value = "catalogoexames", allEntries = true)
     public CatalogoExamesResponse criar(CatalogoExamesRequest request) {
-        log.debug("Criando novo exame no catálogo");
+        try {
+            UUID tenantId = tenantService.validarTenantAtual();
+            Tenant tenant = obterTenantAutenticadoOrThrow(tenantId);
 
-        tenantService.validarTenantAtual();
-        catalogoExamesValidationService.validarObrigatorios(request);
+            CatalogoExames exame = creator.criar(request, tenantId, tenant);
+            CatalogoExamesResponse response = responseBuilder.build(exame);
 
-        CatalogoExames exame = catalogoExamesMapper.fromRequest(request);
-        exame.setActive(true);
-        com.upsaude.entity.Tenant tenant = tenantService.obterTenantDoUsuarioAutenticado();
-        exame.setTenant(tenant);
+            Cache cache = cacheManager.getCache(CacheKeyUtil.CACHE_CATALOGO_EXAMES);
+            if (cache != null) {
+                Object key = Objects.requireNonNull((Object) CacheKeyUtil.catalogoExame(tenantId, exame.getId()));
+                cache.put(key, response);
+            }
 
-        validarDuplicidade(null, exame, request);
-
-        CatalogoExames exameSalvo = catalogoExamesRepository.save(exame);
-        log.info("Exame criado no catálogo com sucesso. ID: {}", exameSalvo.getId());
-
-        return catalogoExamesMapper.toResponse(exameSalvo);
+            return response;
+        } catch (BadRequestException | NotFoundException e) {
+            log.warn("Erro de validação ao criar exame no catálogo. Erro: {}", e.getMessage());
+            throw e;
+        } catch (DataAccessException e) {
+            log.error("Erro de acesso a dados ao criar exame no catálogo. Exception: {}", e.getClass().getSimpleName(), e);
+            throw new InternalServerErrorException("Erro ao persistir exame no catálogo", e);
+        }
     }
 
     @Override
     @Transactional
-    @Cacheable(value = "catalogoexames", key = "#id")
+    @Cacheable(cacheNames = CacheKeyUtil.CACHE_CATALOGO_EXAMES, keyGenerator = "catalogoExamesCacheKeyGenerator")
     public CatalogoExamesResponse obterPorId(UUID id) {
-        log.debug("Buscando exame no catálogo por ID: {} (cache miss)", id);
         if (id == null) {
             throw new BadRequestException("ID do exame é obrigatório");
         }
-
-        CatalogoExames exame = catalogoExamesRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("Exame não encontrado no catálogo com ID: " + id));
-
-        return catalogoExamesMapper.toResponse(exame);
+        UUID tenantId = tenantService.validarTenantAtual();
+        CatalogoExames exame = tenantEnforcer.validarAcessoCompleto(id, tenantId);
+        return responseBuilder.build(exame);
     }
 
     @Override
+    @Transactional
     public Page<CatalogoExamesResponse> listar(Pageable pageable) {
-        log.debug("Listando exames do catálogo paginados. Página: {}, Tamanho: {}",
-                pageable.getPageNumber(), pageable.getPageSize());
-
-        Page<CatalogoExames> exames = catalogoExamesRepository.findAll(pageable);
-        return exames.map(catalogoExamesMapper::toResponse);
+        UUID tenantId = tenantService.validarTenantAtual();
+        return catalogoExamesRepository.findAllByTenant(tenantId, pageable).map(responseBuilder::build);
     }
 
     @Override
     @Transactional
-    @CacheEvict(value = "catalogoexames", key = "#id")
+    @CachePut(cacheNames = CacheKeyUtil.CACHE_CATALOGO_EXAMES, keyGenerator = "catalogoExamesCacheKeyGenerator")
     public CatalogoExamesResponse atualizar(UUID id, CatalogoExamesRequest request) {
-        log.debug("Atualizando exame no catálogo. ID: {}", id);
+        try {
+            if (id == null) {
+                throw new BadRequestException("ID do exame é obrigatório");
+            }
+            UUID tenantId = tenantService.validarTenantAtual();
+            Tenant tenant = obterTenantAutenticadoOrThrow(tenantId);
 
-        if (id == null) {
-            throw new BadRequestException("ID do exame é obrigatório");
+            CatalogoExames exame = updater.atualizar(id, request, tenantId, tenant);
+            return responseBuilder.build(exame);
+        } catch (BadRequestException | NotFoundException e) {
+            log.warn("Erro de validação ao atualizar exame no catálogo. Erro: {}", e.getMessage());
+            throw e;
+        } catch (DataAccessException e) {
+            log.error("Erro de acesso a dados ao atualizar exame no catálogo. Exception: {}", e.getClass().getSimpleName(), e);
+            throw new InternalServerErrorException("Erro ao atualizar exame no catálogo", e);
         }
-
-        tenantService.validarTenantAtual();
-        catalogoExamesValidationService.validarObrigatorios(request);
-
-        CatalogoExames exameExistente = catalogoExamesRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("Exame não encontrado no catálogo com ID: " + id));
-
-        validarDuplicidade(id, exameExistente, request);
-
-        atualizarDadosExame(exameExistente, request);
-
-        CatalogoExames exameAtualizado = catalogoExamesRepository.save(exameExistente);
-        log.info("Exame atualizado no catálogo com sucesso. ID: {}", exameAtualizado.getId());
-
-        return catalogoExamesMapper.toResponse(exameAtualizado);
     }
 
     @Override
     @Transactional
-    @CacheEvict(value = "catalogoexames", key = "#id")
+    @CacheEvict(cacheNames = CacheKeyUtil.CACHE_CATALOGO_EXAMES, keyGenerator = "catalogoExamesCacheKeyGenerator", beforeInvocation = false)
     public void excluir(UUID id) {
-        log.debug("Excluindo exame do catálogo. ID: {}", id);
+        try {
+            UUID tenantId = tenantService.validarTenantAtual();
+            inativarInternal(id, tenantId);
+        } catch (BadRequestException | NotFoundException e) {
+            log.warn("Erro de validação ao excluir(inativar) exame no catálogo. Erro: {}", e.getMessage());
+            throw e;
+        } catch (DataAccessException e) {
+            log.error("Erro de acesso a dados ao excluir(inativar) exame no catálogo. Exception: {}", e.getClass().getSimpleName(), e);
+            throw new InternalServerErrorException("Erro ao excluir exame no catálogo", e);
+        }
+    }
 
+    private void inativarInternal(UUID id, UUID tenantId) {
         if (id == null) {
             throw new BadRequestException("ID do exame é obrigatório");
         }
-
-        CatalogoExames exame = catalogoExamesRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("Exame não encontrado no catálogo com ID: " + id));
-
-        if (Boolean.FALSE.equals(exame.getActive())) {
-            throw new BadRequestException("Exame já está inativo");
-        }
-
+        CatalogoExames exame = tenantEnforcer.validarAcesso(id, tenantId);
+        domainService.validarPodeInativar(exame);
         exame.setActive(false);
-        catalogoExamesRepository.save(exame);
-        log.info("Exame excluído (desativado) do catálogo com sucesso. ID: {}", id);
+        catalogoExamesRepository.save(Objects.requireNonNull(exame));
     }
 
-    private void validarDuplicidade(UUID id, CatalogoExames exame, CatalogoExamesRequest request) {
-        if (request == null || exame == null || exame.getTenant() == null) {
-            return;
+    private Tenant obterTenantAutenticadoOrThrow(UUID tenantId) {
+        Tenant tenant = tenantService.obterTenantDoUsuarioAutenticado();
+        if (tenant == null || !tenant.getId().equals(tenantId)) {
+            throw new BadRequestException("Não foi possível obter tenant do usuário autenticado");
         }
-
-        Tenant tenant = exame.getTenant();
-
-        if (request.getNome() != null && !request.getNome().trim().isEmpty()) {
-            boolean nomeDuplicado;
-            if (id == null) {
-
-                nomeDuplicado = catalogoExamesRepository.existsByNomeAndTenant(request.getNome().trim(), tenant);
-            } else {
-
-                nomeDuplicado = catalogoExamesRepository.existsByNomeAndTenantAndIdNot(request.getNome().trim(), tenant, id);
-            }
-
-            if (nomeDuplicado) {
-                log.warn("Tentativa de cadastrar/atualizar exame no catálogo com nome duplicado. Nome: {}, Tenant: {}", request.getNome(), tenant.getId());
-                throw new BadRequestException(
-                    String.format("Já existe um exame cadastrado no catálogo com o nome '%s' no banco de dados", request.getNome())
-                );
-            }
-        }
-
-        if (request.getCodigo() != null && !request.getCodigo().trim().isEmpty()) {
-            boolean codigoDuplicado;
-            if (id == null) {
-
-                codigoDuplicado = catalogoExamesRepository.existsByCodigoAndTenant(request.getCodigo().trim(), tenant);
-            } else {
-
-                codigoDuplicado = catalogoExamesRepository.existsByCodigoAndTenantAndIdNot(request.getCodigo().trim(), tenant, id);
-            }
-
-            if (codigoDuplicado) {
-                log.warn("Tentativa de cadastrar/atualizar exame no catálogo com código duplicado. Código: {}, Tenant: {}", request.getCodigo(), tenant.getId());
-                throw new BadRequestException(
-                    String.format("Já existe um exame cadastrado no catálogo com o código '%s' no banco de dados", request.getCodigo())
-                );
-            }
-        }
-    }
-
-    private void atualizarDadosExame(CatalogoExames exame, CatalogoExamesRequest request) {
-        CatalogoExames exameAtualizado = catalogoExamesMapper.fromRequest(request);
-
-        UUID idOriginal = exame.getId();
-        com.upsaude.entity.Tenant tenantOriginal = exame.getTenant();
-        com.upsaude.entity.Estabelecimentos estabelecimentoOriginal = exame.getEstabelecimento();
-        Boolean activeOriginal = exame.getActive();
-        java.time.OffsetDateTime createdAtOriginal = exame.getCreatedAt();
-
-        BeanUtils.copyProperties(exameAtualizado, exame);
-
-        exame.setId(idOriginal);
-        exame.setTenant(tenantOriginal);
-        exame.setEstabelecimento(estabelecimentoOriginal);
-        exame.setActive(activeOriginal);
-        exame.setCreatedAt(createdAtOriginal);
-
+        return tenant;
     }
 }

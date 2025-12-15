@@ -2,23 +2,23 @@ package com.upsaude.service.impl;
 
 import com.upsaude.api.request.MedicacaoRequest;
 import com.upsaude.api.response.MedicacaoResponse;
+import com.upsaude.cache.CacheKeyUtil;
 import com.upsaude.entity.Medicacao;
-import com.upsaude.entity.embeddable.ContraindicacoesPrecaucoesMedicamento;
-import com.upsaude.entity.embeddable.ConservacaoArmazenamentoMedicamento;
-import com.upsaude.entity.embeddable.IdentificacaoMedicamento;
-import com.upsaude.entity.embeddable.DosagemAdministracaoMedicamento;
-import com.upsaude.entity.embeddable.RegistroControleMedicamento;
 import com.upsaude.exception.BadRequestException;
 import com.upsaude.exception.InternalServerErrorException;
 import com.upsaude.exception.NotFoundException;
-import com.upsaude.mapper.MedicacaoMapper;
-import com.upsaude.entity.FabricantesMedicamento;
-import com.upsaude.repository.FabricantesMedicamentoRepository;
 import com.upsaude.repository.MedicacaoRepository;
 import com.upsaude.service.MedicacaoService;
+import com.upsaude.service.support.medicacao.MedicacaoCreator;
+import com.upsaude.service.support.medicacao.MedicacaoDomainService;
+import com.upsaude.service.support.medicacao.MedicacaoResponseBuilder;
+import com.upsaude.service.support.medicacao.MedicacaoUpdater;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.Cache;
+import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.dao.DataAccessException;
 import org.springframework.data.domain.Page;
@@ -26,6 +26,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Objects;
 import java.util.UUID;
 
 @Slf4j
@@ -34,38 +35,30 @@ import java.util.UUID;
 public class MedicacaoServiceImpl implements MedicacaoService {
 
     private final MedicacaoRepository medicacaoRepository;
-    private final MedicacaoMapper medicacaoMapper;
-    private final FabricantesMedicamentoRepository fabricantesMedicamentoRepository;
+    private final CacheManager cacheManager;
+
+    private final MedicacaoCreator creator;
+    private final MedicacaoUpdater updater;
+    private final MedicacaoDomainService domainService;
+    private final MedicacaoResponseBuilder responseBuilder;
 
     @Override
     @Transactional
-    @CacheEvict(value = "medicacao", allEntries = true)
     public MedicacaoResponse criar(MedicacaoRequest request) {
         log.debug("Criando nova medicação. Request: {}", request);
 
-        if (request == null) {
-            log.warn("Tentativa de criar medicação com request nulo");
-            throw new BadRequestException("Dados da medicação são obrigatórios");
-        }
-
         try {
+            Medicacao medicacao = creator.criar(request);
+            MedicacaoResponse response = responseBuilder.build(medicacao);
 
-            Medicacao medicacao = medicacaoMapper.fromRequest(request);
-            medicacao.setActive(true);
-
-            if (request.getFabricanteEntity() != null) {
-                FabricantesMedicamento fabricante = fabricantesMedicamentoRepository.findById(request.getFabricanteEntity())
-                        .orElseThrow(() -> new NotFoundException("Fabricante não encontrado com ID: " + request.getFabricanteEntity()));
-                medicacao.setFabricanteEntity(fabricante);
+            Cache cache = cacheManager.getCache(CacheKeyUtil.CACHE_MEDICACAO);
+            if (cache != null) {
+                Object key = Objects.requireNonNull((Object) CacheKeyUtil.medicacao(medicacao.getId()));
+                cache.put(key, response);
             }
 
-            garantirValoresPadrao(medicacao);
-
-            Medicacao medicacaoSalvo = medicacaoRepository.save(medicacao);
-            log.info("Medicação criada com sucesso. ID: {}", medicacaoSalvo.getId());
-
-            return medicacaoMapper.toResponse(medicacaoSalvo);
-        } catch (BadRequestException e) {
+            return response;
+        } catch (BadRequestException | NotFoundException e) {
             log.warn("Erro de validação ao criar medicação. Request: {}. Erro: {}", request, e.getMessage());
             throw e;
         } catch (DataAccessException e) {
@@ -79,7 +72,7 @@ public class MedicacaoServiceImpl implements MedicacaoService {
 
     @Override
     @Transactional(readOnly = true)
-    @Cacheable(value = "medicacao", key = "#id")
+    @Cacheable(cacheNames = CacheKeyUtil.CACHE_MEDICACAO, keyGenerator = "medicacaoCacheKeyGenerator")
     public MedicacaoResponse obterPorId(UUID id) {
         log.debug("Buscando medicação por ID: {} (cache miss)", id);
 
@@ -93,7 +86,7 @@ public class MedicacaoServiceImpl implements MedicacaoService {
                     .orElseThrow(() -> new NotFoundException("Medicação não encontrada com ID: " + id));
 
             log.debug("Medicação encontrada. ID: {}", id);
-            return medicacaoMapper.toResponse(medicacao);
+            return responseBuilder.build(medicacao);
         } catch (NotFoundException e) {
             log.warn("Medicação não encontrada. ID: {}", id);
             throw e;
@@ -115,7 +108,7 @@ public class MedicacaoServiceImpl implements MedicacaoService {
         try {
             Page<Medicacao> medicacoes = medicacaoRepository.findAll(pageable);
             log.debug("Listagem de medicações concluída. Total de elementos: {}", medicacoes.getTotalElements());
-            return medicacoes.map(medicacaoMapper::toResponse);
+            return medicacoes.map(responseBuilder::build);
         } catch (DataAccessException e) {
             log.error("Erro de acesso a dados ao listar medicações. Pageable: {}", pageable, e);
             throw new InternalServerErrorException("Erro ao listar medicações", e);
@@ -127,7 +120,7 @@ public class MedicacaoServiceImpl implements MedicacaoService {
 
     @Override
     @Transactional
-    @CacheEvict(value = "medicacao", key = "#id")
+    @CachePut(cacheNames = CacheKeyUtil.CACHE_MEDICACAO, keyGenerator = "medicacaoCacheKeyGenerator")
     public MedicacaoResponse atualizar(UUID id, MedicacaoRequest request) {
         log.debug("Atualizando medicação. ID: {}, Request: {}", id, request);
 
@@ -141,25 +134,8 @@ public class MedicacaoServiceImpl implements MedicacaoService {
         }
 
         try {
-
-            Medicacao medicacaoExistente = medicacaoRepository.findById(id)
-                    .orElseThrow(() -> new NotFoundException("Medicação não encontrada com ID: " + id));
-
-            medicacaoMapper.updateFromRequest(request, medicacaoExistente);
-
-            if (request.getFabricanteEntity() != null) {
-                FabricantesMedicamento fabricante = fabricantesMedicamentoRepository.findById(request.getFabricanteEntity())
-                        .orElseThrow(() -> new NotFoundException("Fabricante não encontrado com ID: " + request.getFabricanteEntity()));
-                medicacaoExistente.setFabricanteEntity(fabricante);
-            } else {
-
-                medicacaoExistente.setFabricanteEntity(null);
-            }
-
-            Medicacao medicacaoAtualizado = medicacaoRepository.save(medicacaoExistente);
-            log.info("Medicação atualizada com sucesso. ID: {}", medicacaoAtualizado.getId());
-
-            return medicacaoMapper.toResponse(medicacaoAtualizado);
+            Medicacao medicacaoAtualizado = updater.atualizar(id, request);
+            return responseBuilder.build(medicacaoAtualizado);
         } catch (NotFoundException e) {
             log.warn("Tentativa de atualizar medicação não existente. ID: {}", id);
             throw e;
@@ -177,27 +153,12 @@ public class MedicacaoServiceImpl implements MedicacaoService {
 
     @Override
     @Transactional
-    @CacheEvict(value = "medicacao", key = "#id")
+    @CacheEvict(cacheNames = CacheKeyUtil.CACHE_MEDICACAO, keyGenerator = "medicacaoCacheKeyGenerator", beforeInvocation = false)
     public void excluir(UUID id) {
         log.debug("Excluindo medicação. ID: {}", id);
 
-        if (id == null) {
-            log.warn("ID nulo recebido para exclusão de medicação");
-            throw new BadRequestException("ID da medicação é obrigatório");
-        }
-
         try {
-            Medicacao medicacao = medicacaoRepository.findById(id)
-                    .orElseThrow(() -> new NotFoundException("Medicação não encontrada com ID: " + id));
-
-            if (Boolean.FALSE.equals(medicacao.getActive())) {
-                log.warn("Tentativa de excluir medicação já inativa. ID: {}", id);
-                throw new BadRequestException("Medicação já está inativa");
-            }
-
-            medicacao.setActive(false);
-            medicacaoRepository.save(medicacao);
-            log.info("Medicação excluída (desativada) com sucesso. ID: {}", id);
+            inativarInternal(id);
         } catch (NotFoundException e) {
             log.warn("Tentativa de excluir medicação não existente. ID: {}", id);
             throw e;
@@ -213,98 +174,19 @@ public class MedicacaoServiceImpl implements MedicacaoService {
         }
     }
 
-    private void garantirValoresPadrao(Medicacao medicacao) {
-
-        if (medicacao.getIdentificacao() == null) {
-            medicacao.setIdentificacao(IdentificacaoMedicamento.builder()
-                    .principioAtivo("Não informado")
-                    .nomeComercial("Não informado")
-                    .build());
-        } else {
-            IdentificacaoMedicamento identificacao = medicacao.getIdentificacao();
-            if (identificacao.getPrincipioAtivo() == null || identificacao.getPrincipioAtivo().trim().isEmpty()) {
-                identificacao.setPrincipioAtivo("Não informado");
-            }
-            if (identificacao.getNomeComercial() == null || identificacao.getNomeComercial().trim().isEmpty()) {
-                identificacao.setNomeComercial("Não informado");
-            }
+    private void inativarInternal(UUID id) {
+        if (id == null) {
+            log.warn("ID nulo recebido para exclusão de medicação");
+            throw new BadRequestException("ID da medicação é obrigatório");
         }
 
-        if (medicacao.getDosagemAdministracao() == null) {
-            medicacao.setDosagemAdministracao(DosagemAdministracaoMedicamento.builder()
-                    .dosagem("Não informado")
-                    .build());
-        } else {
-            DosagemAdministracaoMedicamento dosagem = medicacao.getDosagemAdministracao();
-            if (dosagem.getDosagem() == null || dosagem.getDosagem().trim().isEmpty()) {
-                dosagem.setDosagem("Não informado");
-            }
-        }
+        Medicacao medicacao = medicacaoRepository.findById(id)
+            .orElseThrow(() -> new NotFoundException("Medicação não encontrada com ID: " + id));
 
-        if (medicacao.getContraindicacoesPrecaucoes() == null) {
-            medicacao.setContraindicacoesPrecaucoes(ContraindicacoesPrecaucoesMedicamento.builder()
-                    .gestantePode(false)
-                    .lactantePode(false)
-                    .criancaPode(true)
-                    .idosoPode(true)
-                    .build());
-        } else {
-            ContraindicacoesPrecaucoesMedicamento contraindicacoes = medicacao.getContraindicacoesPrecaucoes();
-            if (contraindicacoes.getGestantePode() == null) {
-                contraindicacoes.setGestantePode(false);
-            }
-            if (contraindicacoes.getLactantePode() == null) {
-                contraindicacoes.setLactantePode(false);
-            }
-            if (contraindicacoes.getCriancaPode() == null) {
-                contraindicacoes.setCriancaPode(true);
-            }
-            if (contraindicacoes.getIdosoPode() == null) {
-                contraindicacoes.setIdosoPode(true);
-            }
-        }
-
-        if (medicacao.getConservacaoArmazenamento() == null) {
-            medicacao.setConservacaoArmazenamento(ConservacaoArmazenamentoMedicamento.builder()
-                    .protegerLuz(false)
-                    .protegerUmidade(false)
-                    .build());
-        } else {
-            ConservacaoArmazenamentoMedicamento conservacao = medicacao.getConservacaoArmazenamento();
-            if (conservacao.getProtegerLuz() == null) {
-                conservacao.setProtegerLuz(false);
-            }
-            if (conservacao.getProtegerUmidade() == null) {
-                conservacao.setProtegerUmidade(false);
-            }
-        }
-
-        if (medicacao.getRegistroControle() == null) {
-            medicacao.setRegistroControle(RegistroControleMedicamento.builder()
-                    .controlado(false)
-                    .receitaObrigatoria(false)
-                    .usoContinuo(false)
-                    .medicamentoEspecial(false)
-                    .medicamentoExcepcional(false)
-                    .build());
-        } else {
-            RegistroControleMedicamento registro = medicacao.getRegistroControle();
-            if (registro.getControlado() == null) {
-                registro.setControlado(false);
-            }
-            if (registro.getReceitaObrigatoria() == null) {
-                registro.setReceitaObrigatoria(false);
-            }
-            if (registro.getUsoContinuo() == null) {
-                registro.setUsoContinuo(false);
-            }
-            if (registro.getMedicamentoEspecial() == null) {
-                registro.setMedicamentoEspecial(false);
-            }
-            if (registro.getMedicamentoExcepcional() == null) {
-                registro.setMedicamentoExcepcional(false);
-            }
-        }
+        domainService.validarPodeInativar(medicacao);
+        medicacao.setActive(false);
+        medicacaoRepository.save(Objects.requireNonNull(medicacao));
+        log.info("Medicação excluída (desativada) com sucesso. ID: {}", id);
     }
 
 }

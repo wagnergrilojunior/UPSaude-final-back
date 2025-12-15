@@ -1,21 +1,26 @@
 package com.upsaude.repository;
 
 import com.upsaude.entity.LGPDConsentimento;
-import com.upsaude.entity.Tenant;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import java.util.Optional;
 import java.util.UUID;
 
 public interface LGPDConsentimentoRepository extends JpaRepository<LGPDConsentimento, UUID> {
 
-    Optional<LGPDConsentimento> findByPacienteId(UUID pacienteId);
+    @Query("SELECT l FROM LGPDConsentimento l WHERE l.id = :id AND l.tenant.id = :tenantId")
+    Optional<LGPDConsentimento> findByIdAndTenant(@Param("id") UUID id, @Param("tenantId") UUID tenantId);
 
-    Page<LGPDConsentimento> findByEstabelecimentoId(UUID estabelecimentoId, Pageable pageable);
+    @Query("SELECT l FROM LGPDConsentimento l WHERE l.tenant.id = :tenantId")
+    Page<LGPDConsentimento> findAllByTenant(@Param("tenantId") UUID tenantId, Pageable pageable);
 
-    Page<LGPDConsentimento> findByTenant(Tenant tenant, Pageable pageable);
+    @Query("SELECT l FROM LGPDConsentimento l WHERE l.paciente.id = :pacienteId AND l.tenant.id = :tenantId")
+    Optional<LGPDConsentimento> findByPacienteIdAndTenantId(@Param("pacienteId") UUID pacienteId, @Param("tenantId") UUID tenantId);
 
-    Page<LGPDConsentimento> findByEstabelecimentoIdAndTenant(UUID estabelecimentoId, Tenant tenant, Pageable pageable);
+    @Query("SELECT l FROM LGPDConsentimento l WHERE l.estabelecimento.id = :estabelecimentoId AND l.tenant.id = :tenantId")
+    Page<LGPDConsentimento> findByEstabelecimentoIdAndTenantId(@Param("estabelecimentoId") UUID estabelecimentoId, @Param("tenantId") UUID tenantId, Pageable pageable);
 }

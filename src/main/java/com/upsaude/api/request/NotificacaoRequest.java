@@ -26,6 +26,7 @@ public class NotificacaoRequest {
     private UUID profissional;
     private UUID agendamento;
     private UUID template;
+    private UUID estabelecimento;
 
     @NotNull(message = "Tipo de notificação é obrigatório")
     @JsonDeserialize(using = TipoNotificacaoEnumDeserializer.class)

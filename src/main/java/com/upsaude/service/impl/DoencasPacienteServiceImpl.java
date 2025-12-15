@@ -148,6 +148,7 @@ public class DoencasPacienteServiceImpl implements DoencasPacienteService {
     }
 
     @Override
+    @Transactional
     public Page<DoencasPacienteResponse> listar(Pageable pageable) {
         log.debug("Listando registros de doenças do paciente paginados. Página: {}, Tamanho: {}",
                 pageable.getPageNumber(), pageable.getPageSize());
@@ -157,6 +158,7 @@ public class DoencasPacienteServiceImpl implements DoencasPacienteService {
     }
 
     @Override
+    @Transactional
     public Page<DoencasPacienteResponse> listarPorPaciente(UUID pacienteId, Pageable pageable) {
         log.debug("Listando doenças do paciente: {}. Página: {}, Tamanho: {}",
                 pacienteId, pageable.getPageNumber(), pageable.getPageSize());
@@ -170,6 +172,7 @@ public class DoencasPacienteServiceImpl implements DoencasPacienteService {
     }
 
     @Override
+    @Transactional
     public Page<DoencasPacienteResponse> listarPorDoenca(UUID doencaId, Pageable pageable) {
         log.debug("Listando pacientes com a doença: {}. Página: {}, Tamanho: {}",
                 doencaId, pageable.getPageNumber(), pageable.getPageSize());

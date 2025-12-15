@@ -15,6 +15,7 @@ public class NotificacaoDTO {
     private OffsetDateTime createdAt;
     private OffsetDateTime updatedAt;
     private Boolean active;
+    private EstabelecimentosDTO estabelecimento;
     private PacienteDTO paciente;
     private ProfissionaisSaudeDTO profissional;
     private AgendamentoDTO agendamento;

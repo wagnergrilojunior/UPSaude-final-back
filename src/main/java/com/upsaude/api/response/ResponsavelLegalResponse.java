@@ -14,6 +14,7 @@ public class ResponsavelLegalResponse {
     private OffsetDateTime createdAt;
     private OffsetDateTime updatedAt;
     private Boolean active;
+    private EstabelecimentosResponse estabelecimento;
     private PacienteResponse paciente;
     private String nome;
     private String cpf;

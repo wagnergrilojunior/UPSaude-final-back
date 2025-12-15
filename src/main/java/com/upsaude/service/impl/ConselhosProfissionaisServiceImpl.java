@@ -2,6 +2,7 @@ package com.upsaude.service.impl;
 
 import com.upsaude.api.request.ConselhosProfissionaisRequest;
 import com.upsaude.api.response.ConselhosProfissionaisResponse;
+import com.upsaude.cache.CacheKeyUtil;
 import com.upsaude.entity.ConselhosProfissionais;
 import com.upsaude.exception.BadRequestException;
 import com.upsaude.exception.NotFoundException;
@@ -18,6 +19,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.util.Objects;
 import java.util.UUID;
 
 @Slf4j
@@ -30,7 +32,7 @@ public class ConselhosProfissionaisServiceImpl implements ConselhosProfissionais
 
     @Override
     @Transactional
-    @CacheEvict(value = "conselhosprofissionais", allEntries = true)
+    @CacheEvict(cacheNames = CacheKeyUtil.CACHE_CONSELHOS_PROFISSIONAIS, allEntries = true)
     public ConselhosProfissionaisResponse criar(ConselhosProfissionaisRequest request) {
         log.debug("Criando novo conselhosprofissionais");
 
@@ -45,7 +47,7 @@ public class ConselhosProfissionaisServiceImpl implements ConselhosProfissionais
 
     @Override
     @Transactional
-    @Cacheable(value = "conselhosprofissionais", key = "#id")
+    @Cacheable(cacheNames = CacheKeyUtil.CACHE_CONSELHOS_PROFISSIONAIS, keyGenerator = "conselhosProfissionaisCacheKeyGenerator")
     public ConselhosProfissionaisResponse obterPorId(UUID id) {
         log.debug("Buscando conselhosprofissionais por ID: {} (cache miss)", id);
 
@@ -70,7 +72,7 @@ public class ConselhosProfissionaisServiceImpl implements ConselhosProfissionais
 
     @Override
     @Transactional
-    @CacheEvict(value = "conselhosprofissionais", key = "#id")
+    @CacheEvict(cacheNames = CacheKeyUtil.CACHE_CONSELHOS_PROFISSIONAIS, keyGenerator = "conselhosProfissionaisCacheKeyGenerator")
     public ConselhosProfissionaisResponse atualizar(UUID id, ConselhosProfissionaisRequest request) {
         log.debug("Atualizando conselhosprofissionais. ID: {}", id);
 
@@ -83,7 +85,7 @@ public class ConselhosProfissionaisServiceImpl implements ConselhosProfissionais
 
         atualizarDadosConselhosProfissionais(conselhosProfissionaisExistente, request);
 
-        ConselhosProfissionais conselhosProfissionaisAtualizado = conselhosProfissionaisRepository.save(conselhosProfissionaisExistente);
+        ConselhosProfissionais conselhosProfissionaisAtualizado = conselhosProfissionaisRepository.save(Objects.requireNonNull(conselhosProfissionaisExistente));
         log.info("ConselhosProfissionais atualizado com sucesso. ID: {}", conselhosProfissionaisAtualizado.getId());
 
         return conselhosProfissionaisMapper.toResponse(conselhosProfissionaisAtualizado);
@@ -91,7 +93,7 @@ public class ConselhosProfissionaisServiceImpl implements ConselhosProfissionais
 
     @Override
     @Transactional
-    @CacheEvict(value = "conselhosprofissionais", key = "#id")
+    @CacheEvict(cacheNames = CacheKeyUtil.CACHE_CONSELHOS_PROFISSIONAIS, keyGenerator = "conselhosProfissionaisCacheKeyGenerator")
     public void excluir(UUID id) {
         log.debug("Excluindo conselhosprofissionais. ID: {}", id);
 
@@ -112,13 +114,13 @@ public class ConselhosProfissionaisServiceImpl implements ConselhosProfissionais
     }
 
     private void atualizarDadosConselhosProfissionais(ConselhosProfissionais conselhosProfissionais, ConselhosProfissionaisRequest request) {
-        ConselhosProfissionais conselhosProfissionaisAtualizado = conselhosProfissionaisMapper.fromRequest(request);
+        ConselhosProfissionais conselhosProfissionaisAtualizado = Objects.requireNonNull(conselhosProfissionaisMapper.fromRequest(request));
 
         java.util.UUID idOriginal = conselhosProfissionais.getId();
         Boolean activeOriginal = conselhosProfissionais.getActive();
         java.time.OffsetDateTime createdAtOriginal = conselhosProfissionais.getCreatedAt();
 
-        BeanUtils.copyProperties(conselhosProfissionaisAtualizado, conselhosProfissionais);
+        BeanUtils.copyProperties(conselhosProfissionaisAtualizado, Objects.requireNonNull(conselhosProfissionais));
 
         conselhosProfissionais.setId(idOriginal);
         conselhosProfissionais.setActive(activeOriginal);

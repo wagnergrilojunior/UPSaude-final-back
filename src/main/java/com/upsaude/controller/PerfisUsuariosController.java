@@ -64,10 +64,12 @@ public class PerfisUsuariosController {
     })
     public ResponseEntity<Page<PerfisUsuariosResponse>> listar(
             @Parameter(description = "Parâmetros de paginação (page, size, sort)")
-            Pageable pageable) {
-        log.debug("REQUEST GET /v1/perfis-usuarios - pageable: {}", pageable);
+            Pageable pageable,
+            @RequestParam(required = false) UUID usuarioId,
+            @RequestParam(required = false) UUID estabelecimentoId) {
+        log.debug("REQUEST GET /v1/perfis-usuarios - pageable: {}, usuarioId: {}, estabelecimentoId: {}", pageable, usuarioId, estabelecimentoId);
         try {
-            Page<PerfisUsuariosResponse> response = perfisUsuariosService.listar(pageable);
+            Page<PerfisUsuariosResponse> response = perfisUsuariosService.listar(pageable, usuarioId, estabelecimentoId);
             return ResponseEntity.ok(response);
         } catch (Exception ex) {
             log.error("Erro inesperado ao listar perfis de usuários — pageable: {}", pageable, ex);

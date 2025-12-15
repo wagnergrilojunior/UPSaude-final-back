@@ -2,32 +2,37 @@ package com.upsaude.service.impl;
 
 import com.upsaude.api.request.ReceitasMedicasRequest;
 import com.upsaude.api.response.ReceitasMedicasResponse;
-import com.upsaude.entity.CidDoencas;
-import com.upsaude.entity.Estabelecimentos;
-import com.upsaude.entity.Medicacao;
-import com.upsaude.entity.Medicos;
-import com.upsaude.entity.Paciente;
+import com.upsaude.cache.CacheKeyUtil;
 import com.upsaude.entity.ReceitasMedicas;
+import com.upsaude.entity.Tenant;
 import com.upsaude.exception.BadRequestException;
+import com.upsaude.exception.InternalServerErrorException;
 import com.upsaude.exception.NotFoundException;
-import com.upsaude.mapper.ReceitasMedicasMapper;
-import com.upsaude.repository.CidDoencasRepository;
-import com.upsaude.repository.EstabelecimentosRepository;
-import com.upsaude.repository.MedicacaoRepository;
-import com.upsaude.repository.MedicosRepository;
-import com.upsaude.repository.PacienteRepository;
 import com.upsaude.repository.ReceitasMedicasRepository;
 import com.upsaude.service.ReceitasMedicasService;
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.BeanUtils;
+import org.springframework.cache.Cache;
+import org.springframework.cache.CacheManager;
 import org.springframework.data.domain.Page;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.CachePut;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import com.upsaude.enums.StatusReceitaEnum;
+import com.upsaude.service.TenantService;
+import com.upsaude.service.support.receitasmedicas.ReceitasMedicasCreator;
+import com.upsaude.service.support.receitasmedicas.ReceitasMedicasDomainService;
+import com.upsaude.service.support.receitasmedicas.ReceitasMedicasResponseBuilder;
+import com.upsaude.service.support.receitasmedicas.ReceitasMedicasTenantEnforcer;
+import com.upsaude.service.support.receitasmedicas.ReceitasMedicasUpdater;
+import com.upsaude.service.support.receitasmedicas.ReceitasMedicasValidationService;
+
+import java.time.OffsetDateTime;
+import java.util.Objects;
 import java.util.UUID;
 
 @Slf4j
@@ -36,83 +41,72 @@ import java.util.UUID;
 public class ReceitasMedicasServiceImpl implements ReceitasMedicasService {
 
     private final ReceitasMedicasRepository receitasMedicasRepository;
-    private final ReceitasMedicasMapper receitasMedicasMapper;
-    private final EstabelecimentosRepository estabelecimentosRepository;
-    private final MedicosRepository medicosRepository;
-    private final PacienteRepository pacienteRepository;
-    private final CidDoencasRepository cidDoencasRepository;
-    private final MedicacaoRepository medicacaoRepository;
+    private final CacheManager cacheManager;
+    private final TenantService tenantService;
+
+    private final ReceitasMedicasCreator creator;
+    private final ReceitasMedicasUpdater updater;
+    private final ReceitasMedicasResponseBuilder responseBuilder;
+    private final ReceitasMedicasDomainService domainService;
+    private final ReceitasMedicasTenantEnforcer tenantEnforcer;
+    private final ReceitasMedicasValidationService validationService;
 
     @Override
     @Transactional
-    @CacheEvict(value = "receitasmedicas", allEntries = true)
     public ReceitasMedicasResponse criar(ReceitasMedicasRequest request) {
         log.debug("Criando novo receitasmedicas");
 
-        ReceitasMedicas receitasMedicas = receitasMedicasMapper.fromRequest(request);
+        try {
+            UUID tenantId = tenantService.validarTenantAtual();
+            Tenant tenant = tenantService.obterTenantDoUsuarioAutenticado();
+            validarTenantAutenticadoOrThrow(tenantId, tenant);
 
-        Medicos medico = medicosRepository.findById(request.getMedico())
-                .orElseThrow(() -> new NotFoundException("Médico não encontrado com ID: " + request.getMedico()));
-        receitasMedicas.setMedico(medico);
+            ReceitasMedicas saved = creator.criar(request, tenantId, tenant);
+            ReceitasMedicasResponse response = responseBuilder.build(saved);
 
-        Paciente paciente = pacienteRepository.findById(request.getPaciente())
-                .orElseThrow(() -> new NotFoundException("Paciente não encontrado com ID: " + request.getPaciente()));
-        receitasMedicas.setPaciente(paciente);
+            Cache cache = cacheManager.getCache(CacheKeyUtil.CACHE_RECEITAS_MEDICAS);
+            if (cache != null) {
+                Object key = Objects.requireNonNull((Object) CacheKeyUtil.receitaMedica(tenantId, saved.getId()));
+                cache.put(key, response);
+            }
 
-        if (request.getCidPrincipal() != null) {
-            CidDoencas cidPrincipal = cidDoencasRepository.findById(request.getCidPrincipal())
-                    .orElseThrow(() -> new NotFoundException("CID não encontrado com ID: " + request.getCidPrincipal()));
-            receitasMedicas.setCidPrincipal(cidPrincipal);
+            return response;
+        } catch (BadRequestException | NotFoundException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new InternalServerErrorException("Erro ao criar receita médica", e);
         }
-
-        receitasMedicas.setActive(true);
-
-        ReceitasMedicas receitasMedicasSalvo = receitasMedicasRepository.save(receitasMedicas);
-        log.info("ReceitasMedicas criado com sucesso. ID: {}", receitasMedicasSalvo.getId());
-
-        return receitasMedicasMapper.toResponse(receitasMedicasSalvo);
     }
 
     @Override
-    @Transactional
-    @Cacheable(value = "receitasmedicas", key = "#id")
+    @Transactional(readOnly = true)
+    @Cacheable(cacheNames = CacheKeyUtil.CACHE_RECEITAS_MEDICAS, keyGenerator = "receitasMedicasCacheKeyGenerator")
     public ReceitasMedicasResponse obterPorId(UUID id) {
         log.debug("Buscando receitasmedicas por ID: {} (cache miss)", id);
         if (id == null) {
             throw new BadRequestException("ID do receitasmedicas é obrigatório");
         }
 
-        ReceitasMedicas receitasMedicas = receitasMedicasRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("ReceitasMedicas não encontrado com ID: " + id));
-
-        return receitasMedicasMapper.toResponse(receitasMedicas);
+        UUID tenantId = tenantService.validarTenantAtual();
+        ReceitasMedicas entity = tenantEnforcer.validarAcessoCompleto(id, tenantId);
+        return responseBuilder.build(entity);
     }
 
     @Override
+    @Transactional(readOnly = true)
     public Page<ReceitasMedicasResponse> listar(Pageable pageable) {
-        log.debug("Listando ReceitasMedicas paginados. Página: {}, Tamanho: {}",
-                pageable.getPageNumber(), pageable.getPageSize());
-
-        Page<ReceitasMedicas> receitasMedicas = receitasMedicasRepository.findAll(pageable);
-        return receitasMedicas.map(receitasMedicasMapper::toResponse);
+        return listar(pageable, null, null, null, null, null, null, null, null, null, null);
     }
 
     @Override
+    @Transactional(readOnly = true)
     public Page<ReceitasMedicasResponse> listarPorEstabelecimento(UUID estabelecimentoId, Pageable pageable) {
-        log.debug("Listando receitas do estabelecimento: {}. Página: {}, Tamanho: {}",
-                estabelecimentoId, pageable.getPageNumber(), pageable.getPageSize());
-
-        if (estabelecimentoId == null) {
-            throw new BadRequestException("ID do estabelecimento é obrigatório");
-        }
-
-        Page<ReceitasMedicas> receitas = receitasMedicasRepository.findByEstabelecimentoIdOrderByDataPrescricaoDesc(estabelecimentoId, pageable);
-        return receitas.map(receitasMedicasMapper::toResponse);
+        return listar(pageable, estabelecimentoId, null, null, null, null, null, null, null, null, null);
     }
 
     @Override
     @Transactional
-    @CacheEvict(value = "receitasmedicas", key = "#id")
+    @CachePut(cacheNames = CacheKeyUtil.CACHE_RECEITAS_MEDICAS, keyGenerator = "receitasMedicasCacheKeyGenerator")
     public ReceitasMedicasResponse atualizar(UUID id, ReceitasMedicasRequest request) {
         log.debug("Atualizando receitasmedicas. ID: {}", id);
 
@@ -120,81 +114,81 @@ public class ReceitasMedicasServiceImpl implements ReceitasMedicasService {
             throw new BadRequestException("ID do receitasmedicas é obrigatório");
         }
 
-        ReceitasMedicas receitasMedicasExistente = receitasMedicasRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("ReceitasMedicas não encontrado com ID: " + id));
+        UUID tenantId = tenantService.validarTenantAtual();
+        Tenant tenant = tenantService.obterTenantDoUsuarioAutenticado();
+        validarTenantAutenticadoOrThrow(tenantId, tenant);
 
-        atualizarDadosReceitasMedicas(receitasMedicasExistente, request);
-
-        ReceitasMedicas receitasMedicasAtualizado = receitasMedicasRepository.save(receitasMedicasExistente);
-        log.info("ReceitasMedicas atualizado com sucesso. ID: {}", receitasMedicasAtualizado.getId());
-
-        return receitasMedicasMapper.toResponse(receitasMedicasAtualizado);
+        ReceitasMedicas updated = updater.atualizar(id, request, tenantId, tenant);
+        return responseBuilder.build(updated);
     }
 
     @Override
     @Transactional
-    @CacheEvict(value = "receitasmedicas", key = "#id")
+    @CacheEvict(cacheNames = CacheKeyUtil.CACHE_RECEITAS_MEDICAS, keyGenerator = "receitasMedicasCacheKeyGenerator", beforeInvocation = false)
     public void excluir(UUID id) {
         log.debug("Excluindo receitasmedicas. ID: {}", id);
+        UUID tenantId = tenantService.validarTenantAtual();
+        inativarInternal(id, tenantId);
+    }
 
+    @Override
+    @Transactional(readOnly = true)
+    public Page<ReceitasMedicasResponse> listar(Pageable pageable,
+        UUID estabelecimentoId,
+        UUID pacienteId,
+        UUID medicoId,
+        StatusReceitaEnum status,
+        OffsetDateTime inicio,
+        OffsetDateTime fim,
+        String numeroReceita,
+        Boolean usoContinuo,
+        String origemReceita,
+        UUID cidPrincipalId) {
+
+        UUID tenantId = tenantService.validarTenantAtual();
+
+        Page<ReceitasMedicas> page;
+        if (estabelecimentoId != null) {
+            page = receitasMedicasRepository.findByEstabelecimentoIdAndTenantIdOrderByDataPrescricaoDesc(estabelecimentoId, tenantId, pageable);
+        } else if (pacienteId != null) {
+            page = receitasMedicasRepository.findByPacienteIdAndTenantIdOrderByDataPrescricaoDesc(pacienteId, tenantId, pageable);
+        } else if (medicoId != null) {
+            page = receitasMedicasRepository.findByMedicoIdAndTenantIdOrderByDataPrescricaoDesc(medicoId, tenantId, pageable);
+        } else if (status != null) {
+            page = receitasMedicasRepository.findByStatusAndTenantIdOrderByDataPrescricaoDesc(status, tenantId, pageable);
+        } else if (inicio != null || fim != null) {
+            validationService.validarPeriodo(inicio, fim);
+            page = receitasMedicasRepository.findByDataPrescricaoBetweenAndTenantIdOrderByDataPrescricaoDesc(inicio, fim, tenantId, pageable);
+        } else if (numeroReceita != null && !numeroReceita.isBlank()) {
+            page = receitasMedicasRepository.findByNumeroReceitaContainingIgnoreCaseAndTenantId(numeroReceita, tenantId, pageable);
+        } else if (usoContinuo != null) {
+            page = receitasMedicasRepository.findByUsoContinuoAndTenantId(usoContinuo, tenantId, pageable);
+        } else if (origemReceita != null && !origemReceita.isBlank()) {
+            page = receitasMedicasRepository.findByOrigemReceitaContainingIgnoreCaseAndTenantId(origemReceita, tenantId, pageable);
+        } else if (cidPrincipalId != null) {
+            page = receitasMedicasRepository.findByCidPrincipalIdAndTenantId(cidPrincipalId, tenantId, pageable);
+        } else {
+            page = receitasMedicasRepository.findAllByTenant(tenantId, pageable);
+        }
+
+        return page.map(responseBuilder::build);
+    }
+
+    private void inativarInternal(UUID id, UUID tenantId) {
         if (id == null) {
             throw new BadRequestException("ID do receitasmedicas é obrigatório");
         }
 
-        ReceitasMedicas receitasMedicas = receitasMedicasRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("ReceitasMedicas não encontrado com ID: " + id));
-
-        if (Boolean.FALSE.equals(receitasMedicas.getActive())) {
-            throw new BadRequestException("ReceitasMedicas já está inativo");
-        }
-
-        receitasMedicas.setActive(false);
-        receitasMedicasRepository.save(receitasMedicas);
+        ReceitasMedicas entity = tenantEnforcer.validarAcesso(id, tenantId);
+        domainService.validarPodeInativar(entity);
+        entity.setActive(false);
+        receitasMedicasRepository.save(Objects.requireNonNull(entity));
         log.info("ReceitasMedicas excluído (desativado) com sucesso. ID: {}", id);
     }
 
-    private void atualizarDadosReceitasMedicas(ReceitasMedicas receitasMedicas, ReceitasMedicasRequest request) {
-
-        if (request.getMedico() != null) {
-            Medicos medico = medicosRepository.findById(request.getMedico())
-                    .orElseThrow(() -> new NotFoundException("Médico não encontrado com ID: " + request.getMedico()));
-            receitasMedicas.setMedico(medico);
-        }
-
-        if (request.getPaciente() != null) {
-            Paciente paciente = pacienteRepository.findById(request.getPaciente())
-                    .orElseThrow(() -> new NotFoundException("Paciente não encontrado com ID: " + request.getPaciente()));
-            receitasMedicas.setPaciente(paciente);
-        }
-
-        if (request.getCidPrincipal() != null) {
-            CidDoencas cidPrincipal = cidDoencasRepository.findById(request.getCidPrincipal())
-                    .orElseThrow(() -> new NotFoundException("CID não encontrado com ID: " + request.getCidPrincipal()));
-            receitasMedicas.setCidPrincipal(cidPrincipal);
-        } else {
-            receitasMedicas.setCidPrincipal(null);
-        }
-
-        if (request.getNumeroReceita() != null) {
-            receitasMedicas.setNumeroReceita(request.getNumeroReceita());
-        }
-        if (request.getDataPrescricao() != null) {
-            receitasMedicas.setDataPrescricao(request.getDataPrescricao());
-        }
-        if (request.getDataValidade() != null) {
-            receitasMedicas.setDataValidade(request.getDataValidade());
-        }
-        if (request.getUsoContinuo() != null) {
-            receitasMedicas.setUsoContinuo(request.getUsoContinuo());
-        }
-        if (request.getStatus() != null) {
-            receitasMedicas.setStatus(request.getStatus());
-        }
-        if (request.getObservacoes() != null) {
-            receitasMedicas.setObservacoes(request.getObservacoes());
-        }
-        if (request.getOrigemReceita() != null) {
-            receitasMedicas.setOrigemReceita(request.getOrigemReceita());
+    private void validarTenantAutenticadoOrThrow(UUID tenantId, Tenant tenant) {
+        if (tenantId == null || tenant == null || tenant.getId() == null || !tenantId.equals(tenant.getId())) {
+            throw new BadRequestException("Não foi possível obter tenant do usuário autenticado");
         }
     }
 }

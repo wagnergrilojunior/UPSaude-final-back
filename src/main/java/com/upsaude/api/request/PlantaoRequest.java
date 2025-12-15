@@ -13,6 +13,7 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 public class PlantaoRequest {
+    private UUID estabelecimento;
     private UUID profissional;
     private UUID medico;
     private OffsetDateTime dataHoraInicio;

@@ -2,28 +2,32 @@ package com.upsaude.service.impl;
 
 import com.upsaude.api.request.DispensacoesMedicamentosRequest;
 import com.upsaude.api.response.DispensacoesMedicamentosResponse;
+import com.upsaude.cache.CacheKeyUtil;
 import com.upsaude.entity.DispensacoesMedicamentos;
-import com.upsaude.entity.Estabelecimentos;
-import com.upsaude.entity.Medicacao;
-import com.upsaude.entity.Paciente;
 import com.upsaude.exception.BadRequestException;
+import com.upsaude.exception.InternalServerErrorException;
 import com.upsaude.exception.NotFoundException;
-import com.upsaude.mapper.DispensacoesMedicamentosMapper;
 import com.upsaude.repository.DispensacoesMedicamentosRepository;
-import com.upsaude.repository.EstabelecimentosRepository;
-import com.upsaude.repository.MedicacaoRepository;
-import com.upsaude.repository.PacienteRepository;
 import com.upsaude.service.DispensacoesMedicamentosService;
-import jakarta.transaction.Transactional;
+import com.upsaude.service.TenantService;
+import com.upsaude.entity.Tenant;
+import com.upsaude.service.support.dispensacoesmedicamentos.DispensacoesMedicamentosCreator;
+import com.upsaude.service.support.dispensacoesmedicamentos.DispensacoesMedicamentosResponseBuilder;
+import com.upsaude.service.support.dispensacoesmedicamentos.DispensacoesMedicamentosTenantEnforcer;
+import com.upsaude.service.support.dispensacoesmedicamentos.DispensacoesMedicamentosUpdater;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.BeanUtils;
+import org.springframework.cache.Cache;
+import org.springframework.cache.CacheManager;
 import org.springframework.data.domain.Page;
 import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Objects;
 import java.util.UUID;
 
 @Slf4j
@@ -31,138 +35,120 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class DispensacoesMedicamentosServiceImpl implements DispensacoesMedicamentosService {
 
-    private final DispensacoesMedicamentosRepository dispensacoesMedicamentosRepository;
-    private final DispensacoesMedicamentosMapper dispensacoesMedicamentosMapper;
-    private final EstabelecimentosRepository estabelecimentosRepository;
-    private final PacienteRepository pacienteRepository;
-    private final MedicacaoRepository medicacaoRepository;
+    private final DispensacoesMedicamentosRepository repository;
+    private final CacheManager cacheManager;
+    private final TenantService tenantService;
+
+    private final DispensacoesMedicamentosCreator creator;
+    private final DispensacoesMedicamentosUpdater updater;
+    private final DispensacoesMedicamentosResponseBuilder responseBuilder;
+    private final DispensacoesMedicamentosTenantEnforcer tenantEnforcer;
 
     @Override
     @Transactional
-    @CacheEvict(value = "dispensacoesmedicamentos", allEntries = true)
     public DispensacoesMedicamentosResponse criar(DispensacoesMedicamentosRequest request) {
-        log.debug("Criando novo dispensacoesmedicamentos");
+        try {
+            UUID tenantId = tenantService.validarTenantAtual();
+            Tenant tenant = tenantService.obterTenantDoUsuarioAutenticado();
+            validarTenantAutenticadoOrThrow(tenantId, tenant);
 
-        DispensacoesMedicamentos dispensacoesMedicamentos = dispensacoesMedicamentosMapper.fromRequest(request);
+            DispensacoesMedicamentos saved = creator.criar(request, tenantId, tenant);
+            DispensacoesMedicamentosResponse response = responseBuilder.build(saved);
 
-        Paciente paciente = pacienteRepository.findById(request.getPaciente())
-                .orElseThrow(() -> new NotFoundException("Paciente não encontrado com ID: " + request.getPaciente()));
-        dispensacoesMedicamentos.setPaciente(paciente);
+            Cache cache = cacheManager.getCache(CacheKeyUtil.CACHE_DISPENSACOES_MEDICAMENTOS);
+            if (cache != null) {
+                Object key = Objects.requireNonNull((Object) CacheKeyUtil.dispensacaoMedicamento(tenantId, saved.getId()));
+                cache.put(key, response);
+            }
 
-        Medicacao medicacao = medicacaoRepository.findById(request.getMedicacao())
-                .orElseThrow(() -> new NotFoundException("Medicamento não encontrado com ID: " + request.getMedicacao()));
-        dispensacoesMedicamentos.setMedicacao(medicacao);
-
-        dispensacoesMedicamentos.setActive(true);
-
-        DispensacoesMedicamentos dispensacoesMedicamentosSalvo = dispensacoesMedicamentosRepository.save(dispensacoesMedicamentos);
-        log.info("DispensacoesMedicamentos criado com sucesso. ID: {}", dispensacoesMedicamentosSalvo.getId());
-
-        return dispensacoesMedicamentosMapper.toResponse(dispensacoesMedicamentosSalvo);
+            return response;
+        } catch (BadRequestException | NotFoundException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new InternalServerErrorException("Erro ao criar dispensação de medicamento", e);
+        }
     }
 
     @Override
-    @Transactional
-    @Cacheable(value = "dispensacoesmedicamentos", key = "#id")
+    @Transactional(readOnly = true)
+    @Cacheable(cacheNames = CacheKeyUtil.CACHE_DISPENSACOES_MEDICAMENTOS, keyGenerator = "dispensacoesMedicamentosCacheKeyGenerator")
     public DispensacoesMedicamentosResponse obterPorId(UUID id) {
-        log.debug("Buscando dispensacoesmedicamentos por ID: {} (cache miss)", id);
         if (id == null) {
-            throw new BadRequestException("ID do dispensacoesmedicamentos é obrigatório");
+            throw new BadRequestException("ID da dispensação de medicamento é obrigatório");
         }
 
-        DispensacoesMedicamentos dispensacoesMedicamentos = dispensacoesMedicamentosRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("DispensacoesMedicamentos não encontrado com ID: " + id));
-
-        return dispensacoesMedicamentosMapper.toResponse(dispensacoesMedicamentos);
+        UUID tenantId = tenantService.validarTenantAtual();
+        DispensacoesMedicamentos entity = tenantEnforcer.validarAcessoCompleto(id, tenantId);
+        return responseBuilder.build(entity);
     }
 
     @Override
+    @Transactional(readOnly = true)
     public Page<DispensacoesMedicamentosResponse> listar(Pageable pageable) {
-        log.debug("Listando DispensacoesMedicamentos paginados. Página: {}, Tamanho: {}",
-                pageable.getPageNumber(), pageable.getPageSize());
-
-        Page<DispensacoesMedicamentos> dispensacoesMedicamentos = dispensacoesMedicamentosRepository.findAll(pageable);
-        return dispensacoesMedicamentos.map(dispensacoesMedicamentosMapper::toResponse);
+        UUID tenantId = tenantService.validarTenantAtual();
+        Page<DispensacoesMedicamentos> page = repository.findAllByTenant(tenantId, pageable);
+        return page.map(responseBuilder::build);
     }
 
     @Override
+    @Transactional(readOnly = true)
     public Page<DispensacoesMedicamentosResponse> listarPorEstabelecimento(UUID estabelecimentoId, Pageable pageable) {
-        log.debug("Listando dispensações do estabelecimento: {}. Página: {}, Tamanho: {}",
-                estabelecimentoId, pageable.getPageNumber(), pageable.getPageSize());
-
         if (estabelecimentoId == null) {
             throw new BadRequestException("ID do estabelecimento é obrigatório");
         }
 
-        Page<DispensacoesMedicamentos> dispensacoes = dispensacoesMedicamentosRepository.findByEstabelecimentoIdOrderByDataDispensacaoDesc(estabelecimentoId, pageable);
-        return dispensacoes.map(dispensacoesMedicamentosMapper::toResponse);
+        UUID tenantId = tenantService.validarTenantAtual();
+        Page<DispensacoesMedicamentos> page = repository.findByEstabelecimentoIdAndTenantIdOrderByDataDispensacaoDesc(estabelecimentoId, tenantId, pageable);
+        return page.map(responseBuilder::build);
     }
 
     @Override
     @Transactional
-    @CacheEvict(value = "dispensacoesmedicamentos", key = "#id")
+    @CachePut(cacheNames = CacheKeyUtil.CACHE_DISPENSACOES_MEDICAMENTOS, keyGenerator = "dispensacoesMedicamentosCacheKeyGenerator")
     public DispensacoesMedicamentosResponse atualizar(UUID id, DispensacoesMedicamentosRequest request) {
-        log.debug("Atualizando dispensacoesmedicamentos. ID: {}", id);
-
         if (id == null) {
-            throw new BadRequestException("ID do dispensacoesmedicamentos é obrigatório");
+            throw new BadRequestException("ID da dispensação de medicamento é obrigatório");
         }
+        try {
+            UUID tenantId = tenantService.validarTenantAtual();
+            Tenant tenant = tenantService.obterTenantDoUsuarioAutenticado();
+            validarTenantAutenticadoOrThrow(tenantId, tenant);
 
-        DispensacoesMedicamentos dispensacoesMedicamentosExistente = dispensacoesMedicamentosRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("DispensacoesMedicamentos não encontrado com ID: " + id));
-
-        atualizarDadosDispensacoesMedicamentos(dispensacoesMedicamentosExistente, request);
-
-        DispensacoesMedicamentos dispensacoesMedicamentosAtualizado = dispensacoesMedicamentosRepository.save(dispensacoesMedicamentosExistente);
-        log.info("DispensacoesMedicamentos atualizado com sucesso. ID: {}", dispensacoesMedicamentosAtualizado.getId());
-
-        return dispensacoesMedicamentosMapper.toResponse(dispensacoesMedicamentosAtualizado);
+            DispensacoesMedicamentos updated = updater.atualizar(id, request, tenantId, tenant);
+            return responseBuilder.build(updated);
+        } catch (BadRequestException | NotFoundException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new InternalServerErrorException("Erro ao atualizar dispensação de medicamento", e);
+        }
     }
 
     @Override
     @Transactional
-    @CacheEvict(value = "dispensacoesmedicamentos", key = "#id")
+    @CacheEvict(cacheNames = CacheKeyUtil.CACHE_DISPENSACOES_MEDICAMENTOS, keyGenerator = "dispensacoesMedicamentosCacheKeyGenerator", beforeInvocation = false)
     public void excluir(UUID id) {
-        log.debug("Excluindo dispensacoesmedicamentos. ID: {}", id);
-
-        if (id == null) {
-            throw new BadRequestException("ID do dispensacoesmedicamentos é obrigatório");
-        }
-
-        DispensacoesMedicamentos dispensacoesMedicamentos = dispensacoesMedicamentosRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("DispensacoesMedicamentos não encontrado com ID: " + id));
-
-        if (Boolean.FALSE.equals(dispensacoesMedicamentos.getActive())) {
-            throw new BadRequestException("DispensacoesMedicamentos já está inativo");
-        }
-
-        dispensacoesMedicamentos.setActive(false);
-        dispensacoesMedicamentosRepository.save(dispensacoesMedicamentos);
-        log.info("DispensacoesMedicamentos excluído (desativado) com sucesso. ID: {}", id);
+        UUID tenantId = tenantService.validarTenantAtual();
+        inativarInternal(id, tenantId);
     }
 
-    private void atualizarDadosDispensacoesMedicamentos(DispensacoesMedicamentos dispensacoesMedicamentos, DispensacoesMedicamentosRequest request) {
-
-        if (request.getPaciente() != null) {
-            Paciente paciente = pacienteRepository.findById(request.getPaciente())
-                    .orElseThrow(() -> new NotFoundException("Paciente não encontrado com ID: " + request.getPaciente()));
-            dispensacoesMedicamentos.setPaciente(paciente);
+    private void inativarInternal(UUID id, UUID tenantId) {
+        if (id == null) {
+            throw new BadRequestException("ID da dispensação de medicamento é obrigatório");
         }
 
-        if (request.getMedicacao() != null) {
-            Medicacao medicacao = medicacaoRepository.findById(request.getMedicacao())
-                    .orElseThrow(() -> new NotFoundException("Medicamento não encontrado com ID: " + request.getMedicacao()));
-            dispensacoesMedicamentos.setMedicacao(medicacao);
+        DispensacoesMedicamentos entity = tenantEnforcer.validarAcesso(id, tenantId);
+        if (Boolean.FALSE.equals(entity.getActive())) {
+            throw new BadRequestException("Dispensação de medicamento já está inativa");
         }
 
-        if (request.getQuantidade() != null) {
-            dispensacoesMedicamentos.setQuantidade(request.getQuantidade());
-        }
-        if (request.getDataDispensacao() != null) {
-            dispensacoesMedicamentos.setDataDispensacao(request.getDataDispensacao());
-        }
-        if (request.getObservacoes() != null) {
-            dispensacoesMedicamentos.setObservacoes(request.getObservacoes());
+        entity.setActive(false);
+        repository.save(Objects.requireNonNull(entity));
+        log.info("Dispensação de medicamento excluída (desativada) com sucesso. ID: {}", id);
+    }
+
+    private void validarTenantAutenticadoOrThrow(UUID tenantId, Tenant tenant) {
+        if (tenantId == null || tenant == null || tenant.getId() == null || !tenantId.equals(tenant.getId())) {
+            throw new BadRequestException("Não foi possível obter tenant do usuário autenticado");
         }
     }
 }

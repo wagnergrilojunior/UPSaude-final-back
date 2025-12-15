@@ -1,0 +1,38 @@
+package com.upsaude.service.support.receitasmedicas;
+
+import com.upsaude.api.request.ReceitasMedicasRequest;
+import com.upsaude.entity.ReceitasMedicas;
+import com.upsaude.entity.Tenant;
+import com.upsaude.mapper.ReceitasMedicasMapper;
+import com.upsaude.repository.ReceitasMedicasRepository;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
+
+import java.util.Objects;
+import java.util.UUID;
+
+@Slf4j
+@Service
+@RequiredArgsConstructor
+public class ReceitasMedicasCreator {
+
+    private final ReceitasMedicasRepository repository;
+    private final ReceitasMedicasMapper mapper;
+    private final ReceitasMedicasValidationService validationService;
+    private final ReceitasMedicasRelacionamentosHandler relacionamentosHandler;
+
+    public ReceitasMedicas criar(ReceitasMedicasRequest request, UUID tenantId, Tenant tenant) {
+        validationService.validarObrigatorios(request);
+
+        ReceitasMedicas entity = mapper.fromRequest(request);
+        entity.setActive(true);
+
+        relacionamentosHandler.resolver(entity, request, tenantId, tenant);
+
+        ReceitasMedicas saved = repository.save(Objects.requireNonNull(entity));
+        log.info("Receita médica criada com sucesso. ID: {}, tenant: {}", saved.getId(), tenantId);
+        return saved;
+    }
+}
+

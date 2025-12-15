@@ -15,6 +15,8 @@ public interface PermissoesService {
 
     Page<PermissoesResponse> listar(Pageable pageable);
 
+    Page<PermissoesResponse> listar(Pageable pageable, UUID estabelecimentoId, String modulo, String nome);
+
     PermissoesResponse atualizar(UUID id, PermissoesRequest request);
 
     void excluir(UUID id);

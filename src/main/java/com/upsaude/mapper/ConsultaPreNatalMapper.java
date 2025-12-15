@@ -4,8 +4,6 @@ import com.upsaude.api.request.ConsultaPreNatalRequest;
 import com.upsaude.api.response.ConsultaPreNatalResponse;
 import com.upsaude.dto.ConsultaPreNatalDTO;
 import com.upsaude.entity.ConsultaPreNatal;
-import com.upsaude.entity.PreNatal;
-import com.upsaude.entity.ProfissionaisSaude;
 import com.upsaude.mapper.config.MappingConfig;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -35,5 +33,8 @@ public interface ConsultaPreNatalMapper extends EntityMapper<ConsultaPreNatal, C
     @Mapping(target = "profissional", ignore = true)
     void updateFromRequest(ConsultaPreNatalRequest request, @MappingTarget ConsultaPreNatal entity);
 
+    // Evita ciclos/recursões via PreNatalResponse/PacienteResponse e grafos grandes.
+    @Mapping(target = "preNatal", ignore = true)
+    @Mapping(target = "profissional", ignore = true)
     ConsultaPreNatalResponse toResponse(ConsultaPreNatal entity);
 }

@@ -12,6 +12,7 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
@@ -264,8 +265,10 @@ public class ApiExceptionHandler {
 
         String mensagemErro = ex.getMessage();
         String nomeParametro = ex.getName();
-        String valorRecebido = ex.getValue() != null ? ex.getValue().toString() : "null";
-        String tipoEsperado = ex.getRequiredType() != null ? ex.getRequiredType().getSimpleName() : "desconhecido";
+        Object valor = ex.getValue();
+        Class<?> requiredType = ex.getRequiredType();
+        String valorRecebido = valor != null ? valor.toString() : "null";
+        String tipoEsperado = requiredType != null ? requiredType.getSimpleName() : "desconhecido";
 
         if (tipoEsperado.equals("UUID")) {
             mensagemErro = String.format("ID inválido: '%s'. O ID deve ser um UUID válido no formato xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx", valorRecebido);
@@ -275,6 +278,31 @@ public class ApiExceptionHandler {
 
         log.warn("Erro de tipo de argumento - Path: {}, Method: {}, Parâmetro: {}, Valor: {}, Tipo esperado: {}",
             request.getRequestURI(), request.getMethod(), nomeParametro, valorRecebido, tipoEsperado);
+
+        return buildErrorResponse(
+                HttpStatus.BAD_REQUEST,
+                "Requisição Inválida",
+                mensagemErro,
+                request.getRequestURI()
+        );
+    }
+
+    @ExceptionHandler(MissingServletRequestParameterException.class)
+    public ResponseEntity<Map<String, Object>> handleMissingServletRequestParameterException(
+            MissingServletRequestParameterException ex, HttpServletRequest request) {
+
+        if (shouldIgnoreEndpoint(request.getRequestURI())) {
+            RuntimeException runtimeEx = new RuntimeException("Actuator endpoint exception", ex);
+            throw runtimeEx;
+        }
+
+        String mensagemErro = ex.getMessage();
+        if (mensagemErro == null || mensagemErro.trim().isEmpty()) {
+            mensagemErro = "Parâmetro obrigatório ausente na requisição.";
+        }
+
+        log.warn("Parâmetro obrigatório ausente - Path: {}, Method: {}, Message: {}",
+            request.getRequestURI(), request.getMethod(), mensagemErro);
 
         return buildErrorResponse(
                 HttpStatus.BAD_REQUEST,

@@ -16,6 +16,7 @@ public class VisitasDomiciliaresRequest {
     private UUID paciente;
     private UUID profissional;
     private UUID equipeSaude;
+    private UUID estabelecimento;
     @JsonDeserialize(using = TipoVisitaDomiciliarEnumDeserializer.class)
     private TipoVisitaDomiciliarEnum tipoVisita;
     private OffsetDateTime dataVisita;

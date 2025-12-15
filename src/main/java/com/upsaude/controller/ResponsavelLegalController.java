@@ -64,10 +64,13 @@ public class ResponsavelLegalController {
     })
     public ResponseEntity<Page<ResponsavelLegalResponse>> listar(
             @Parameter(description = "Parâmetros de paginação (page, size, sort)")
-            Pageable pageable) {
-        log.debug("REQUEST GET /v1/responsaveis-legais - pageable: {}", pageable);
+            Pageable pageable,
+            @RequestParam(required = false) UUID estabelecimentoId,
+            @RequestParam(required = false) String cpf,
+            @RequestParam(required = false) String nome) {
+        log.debug("REQUEST GET /v1/responsaveis-legais - pageable: {}, estabelecimentoId: {}, cpf: {}, nome: {}", pageable, estabelecimentoId, cpf, nome);
         try {
-            Page<ResponsavelLegalResponse> response = service.listar(pageable);
+            Page<ResponsavelLegalResponse> response = service.listar(pageable, estabelecimentoId, cpf, nome);
             return ResponseEntity.ok(response);
         } catch (Exception ex) {
             log.error("Erro inesperado ao listar responsáveis legais — pageable: {}", pageable, ex);

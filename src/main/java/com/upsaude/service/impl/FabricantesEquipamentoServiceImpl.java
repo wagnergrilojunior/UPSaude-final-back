@@ -2,22 +2,29 @@ package com.upsaude.service.impl;
 
 import com.upsaude.api.request.FabricantesEquipamentoRequest;
 import com.upsaude.api.response.FabricantesEquipamentoResponse;
+import com.upsaude.cache.CacheKeyUtil;
 import com.upsaude.entity.FabricantesEquipamento;
 import com.upsaude.exception.BadRequestException;
 import com.upsaude.exception.NotFoundException;
-import com.upsaude.mapper.FabricantesEquipamentoMapper;
 import com.upsaude.repository.FabricantesEquipamentoRepository;
 import com.upsaude.service.FabricantesEquipamentoService;
-import jakarta.transaction.Transactional;
+import com.upsaude.service.support.fabricantesequipamento.FabricantesEquipamentoCreator;
+import com.upsaude.service.support.fabricantesequipamento.FabricantesEquipamentoDomainService;
+import com.upsaude.service.support.fabricantesequipamento.FabricantesEquipamentoResponseBuilder;
+import com.upsaude.service.support.fabricantesequipamento.FabricantesEquipamentoUpdater;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.BeanUtils;
+import org.springframework.cache.Cache;
+import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Objects;
 import java.util.UUID;
 
 @Slf4j
@@ -26,28 +33,32 @@ import java.util.UUID;
 public class FabricantesEquipamentoServiceImpl implements FabricantesEquipamentoService {
 
     private final FabricantesEquipamentoRepository fabricantesEquipamentoRepository;
-    private final FabricantesEquipamentoMapper fabricantesEquipamentoMapper;
+    private final CacheManager cacheManager;
+
+    private final FabricantesEquipamentoCreator creator;
+    private final FabricantesEquipamentoUpdater updater;
+    private final FabricantesEquipamentoResponseBuilder responseBuilder;
+    private final FabricantesEquipamentoDomainService domainService;
 
     @Override
     @Transactional
-    @CacheEvict(value = "fabricantesequipamento", allEntries = true)
     public FabricantesEquipamentoResponse criar(FabricantesEquipamentoRequest request) {
         log.debug("Criando novo fabricante de equipamento");
+        FabricantesEquipamento saved = creator.criar(request);
+        FabricantesEquipamentoResponse response = responseBuilder.build(saved);
 
-        validarDuplicidade(null, request);
+        Cache cache = cacheManager.getCache(CacheKeyUtil.CACHE_FABRICANTES_EQUIPAMENTO);
+        if (cache != null) {
+            Object key = Objects.requireNonNull((Object) CacheKeyUtil.fabricanteEquipamento(saved.getId()));
+            cache.put(key, response);
+        }
 
-        FabricantesEquipamento fabricantesEquipamento = fabricantesEquipamentoMapper.fromRequest(request);
-        fabricantesEquipamento.setActive(true);
-
-        FabricantesEquipamento fabricantesEquipamentoSalvo = fabricantesEquipamentoRepository.save(fabricantesEquipamento);
-        log.info("Fabricante de equipamento criado com sucesso. ID: {}", fabricantesEquipamentoSalvo.getId());
-
-        return fabricantesEquipamentoMapper.toResponse(fabricantesEquipamentoSalvo);
+        return response;
     }
 
     @Override
     @Transactional
-    @Cacheable(value = "fabricantesequipamento", key = "#id")
+    @Cacheable(cacheNames = CacheKeyUtil.CACHE_FABRICANTES_EQUIPAMENTO, keyGenerator = "fabricantesEquipamentoCacheKeyGenerator")
     public FabricantesEquipamentoResponse obterPorId(UUID id) {
         log.debug("Buscando fabricante de equipamento por ID: {} (cache miss)", id);
         if (id == null) {
@@ -57,7 +68,7 @@ public class FabricantesEquipamentoServiceImpl implements FabricantesEquipamento
         FabricantesEquipamento fabricantesEquipamento = fabricantesEquipamentoRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Fabricante de equipamento não encontrado com ID: " + id));
 
-        return fabricantesEquipamentoMapper.toResponse(fabricantesEquipamento);
+        return responseBuilder.build(fabricantesEquipamento);
     }
 
     @Override
@@ -66,12 +77,12 @@ public class FabricantesEquipamentoServiceImpl implements FabricantesEquipamento
                 pageable.getPageNumber(), pageable.getPageSize());
 
         Page<FabricantesEquipamento> fabricantesEquipamentos = fabricantesEquipamentoRepository.findAll(pageable);
-        return fabricantesEquipamentos.map(fabricantesEquipamentoMapper::toResponse);
+        return fabricantesEquipamentos.map(responseBuilder::build);
     }
 
     @Override
     @Transactional
-    @CacheEvict(value = "fabricantesequipamento", key = "#id")
+    @CachePut(cacheNames = CacheKeyUtil.CACHE_FABRICANTES_EQUIPAMENTO, keyGenerator = "fabricantesEquipamentoCacheKeyGenerator")
     public FabricantesEquipamentoResponse atualizar(UUID id, FabricantesEquipamentoRequest request) {
         log.debug("Atualizando fabricante de equipamento. ID: {}", id);
 
@@ -79,94 +90,29 @@ public class FabricantesEquipamentoServiceImpl implements FabricantesEquipamento
             throw new BadRequestException("ID do fabricante de equipamento é obrigatório");
         }
 
-        FabricantesEquipamento fabricantesEquipamentoExistente = fabricantesEquipamentoRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("Fabricante de equipamento não encontrado com ID: " + id));
-
-        validarDuplicidade(id, request);
-
-        atualizarDadosFabricantesEquipamento(fabricantesEquipamentoExistente, request);
-
-        FabricantesEquipamento fabricantesEquipamentoAtualizado = fabricantesEquipamentoRepository.save(fabricantesEquipamentoExistente);
-        log.info("Fabricante de equipamento atualizado com sucesso. ID: {}", fabricantesEquipamentoAtualizado.getId());
-
-        return fabricantesEquipamentoMapper.toResponse(fabricantesEquipamentoAtualizado);
+        FabricantesEquipamento updated = updater.atualizar(id, request);
+        return responseBuilder.build(updated);
     }
 
     @Override
     @Transactional
-    @CacheEvict(value = "fabricantesequipamento", key = "#id")
+    @CacheEvict(cacheNames = CacheKeyUtil.CACHE_FABRICANTES_EQUIPAMENTO, keyGenerator = "fabricantesEquipamentoCacheKeyGenerator", beforeInvocation = false)
     public void excluir(UUID id) {
         log.debug("Excluindo fabricante de equipamento. ID: {}", id);
+        inativarInternal(id);
+    }
 
+    private void inativarInternal(UUID id) {
         if (id == null) {
             throw new BadRequestException("ID do fabricante de equipamento é obrigatório");
         }
 
-        FabricantesEquipamento fabricantesEquipamento = fabricantesEquipamentoRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("Fabricante de equipamento não encontrado com ID: " + id));
+        FabricantesEquipamento entity = fabricantesEquipamentoRepository.findById(id)
+            .orElseThrow(() -> new NotFoundException("Fabricante de equipamento não encontrado com ID: " + id));
 
-        if (Boolean.FALSE.equals(fabricantesEquipamento.getActive())) {
-            throw new BadRequestException("Fabricante de equipamento já está inativo");
-        }
-
-        fabricantesEquipamento.setActive(false);
-        fabricantesEquipamentoRepository.save(fabricantesEquipamento);
+        domainService.validarPodeInativar(entity);
+        entity.setActive(false);
+        fabricantesEquipamentoRepository.save(Objects.requireNonNull(entity));
         log.info("Fabricante de equipamento excluído (desativado) com sucesso. ID: {}", id);
-    }
-
-    private void validarDuplicidade(UUID id, FabricantesEquipamentoRequest request) {
-        if (request == null) {
-            return;
-        }
-
-        if (request.getNome() != null && !request.getNome().trim().isEmpty()) {
-            boolean nomeDuplicado;
-            if (id == null) {
-
-                nomeDuplicado = fabricantesEquipamentoRepository.existsByNome(request.getNome().trim());
-            } else {
-
-                nomeDuplicado = fabricantesEquipamentoRepository.existsByNomeAndIdNot(request.getNome().trim(), id);
-            }
-
-            if (nomeDuplicado) {
-                log.warn("Tentativa de cadastrar/atualizar fabricante de equipamento com nome duplicado. Nome: {}", request.getNome());
-                throw new BadRequestException(
-                    String.format("Já existe um fabricante de equipamento cadastrado com o nome '%s' no banco de dados", request.getNome())
-                );
-            }
-        }
-
-        if (request.getCnpj() != null && !request.getCnpj().trim().isEmpty()) {
-            boolean cnpjDuplicado;
-            if (id == null) {
-
-                cnpjDuplicado = fabricantesEquipamentoRepository.existsByCnpj(request.getCnpj().trim());
-            } else {
-
-                cnpjDuplicado = fabricantesEquipamentoRepository.existsByCnpjAndIdNot(request.getCnpj().trim(), id);
-            }
-
-            if (cnpjDuplicado) {
-                log.warn("Tentativa de cadastrar/atualizar fabricante de equipamento com CNPJ duplicado. CNPJ: {}", request.getCnpj());
-                throw new BadRequestException(
-                    String.format("Já existe um fabricante de equipamento cadastrado com o CNPJ '%s' no banco de dados", request.getCnpj())
-                );
-            }
-        }
-    }
-
-    private void atualizarDadosFabricantesEquipamento(FabricantesEquipamento fabricantesEquipamento, FabricantesEquipamentoRequest request) {
-        FabricantesEquipamento fabricantesEquipamentoAtualizado = fabricantesEquipamentoMapper.fromRequest(request);
-
-        UUID idOriginal = fabricantesEquipamento.getId();
-        Boolean activeOriginal = fabricantesEquipamento.getActive();
-        java.time.OffsetDateTime createdAtOriginal = fabricantesEquipamento.getCreatedAt();
-
-        BeanUtils.copyProperties(fabricantesEquipamentoAtualizado, fabricantesEquipamento);
-
-        fabricantesEquipamento.setId(idOriginal);
-        fabricantesEquipamento.setActive(activeOriginal);
-        fabricantesEquipamento.setCreatedAt(createdAtOriginal);
     }
 }

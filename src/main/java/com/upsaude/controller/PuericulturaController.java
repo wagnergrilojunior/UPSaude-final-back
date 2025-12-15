@@ -22,6 +22,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 
@@ -135,6 +136,14 @@ public class PuericulturaController {
         }
     }
 
+    @GetMapping("/paciente/{pacienteId}/ativo")
+    @Operation(summary = "Obter puericultura ativa por paciente", description = "Retorna o acompanhamento de puericultura ativo de um paciente")
+    public ResponseEntity<PuericulturaResponse> obterAtivoPorPaciente(@PathVariable UUID pacienteId) {
+        log.debug("REQUEST GET /v1/puericultura/paciente/{}/ativo", pacienteId);
+        PuericulturaResponse response = puericulturaService.obterAtivoPorPaciente(pacienteId);
+        return ResponseEntity.ok(response);
+    }
+
     @GetMapping("/ativos/{estabelecimentoId}")
     @Operation(summary = "Listar puericulturas ativas", description = "Retorna uma lista paginada de puericulturas com acompanhamento ativo")
     public ResponseEntity<Page<PuericulturaResponse>> listarAtivos(
@@ -151,6 +160,19 @@ public class PuericulturaController {
             log.error("Erro inesperado ao listar puericulturas ativas — estabelecimentoId: {}, pageable: {}", estabelecimentoId, pageable, ex);
             throw ex;
         }
+    }
+
+    @GetMapping("/estabelecimento/{estabelecimentoId}/periodo")
+    @Operation(summary = "Listar puericulturas por período", description = "Retorna uma lista paginada de puericulturas por período (dataInicioAcompanhamento)")
+    public ResponseEntity<Page<PuericulturaResponse>> listarPorPeriodo(
+        @PathVariable UUID estabelecimentoId,
+        @RequestParam LocalDate inicio,
+        @RequestParam LocalDate fim,
+        Pageable pageable) {
+        log.debug("REQUEST GET /v1/puericultura/estabelecimento/{}/periodo - inicio: {}, fim: {}, pageable: {}",
+            estabelecimentoId, inicio, fim, pageable);
+        Page<PuericulturaResponse> response = puericulturaService.listarPorPeriodo(estabelecimentoId, inicio, fim, pageable);
+        return ResponseEntity.ok(response);
     }
 
     @PutMapping("/{id}")

@@ -28,6 +28,9 @@ public class ReceitasMedicasRequest {
     @NotNull(message = "Paciente é obrigatório")
     private UUID paciente;
 
+    @NotNull(message = "Estabelecimento é obrigatório")
+    private UUID estabelecimento;
+
     @NotBlank(message = "Número da receita é obrigatório")
     @Size(max = 50, message = "Número da receita deve ter no máximo 50 caracteres")
     private String numeroReceita;

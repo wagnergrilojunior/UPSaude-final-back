@@ -1,22 +1,32 @@
 package com.upsaude.service.impl;
 
+import com.upsaude.cache.CacheKeyUtil;
 import com.upsaude.api.request.LogsAuditoriaRequest;
 import com.upsaude.api.response.LogsAuditoriaResponse;
 import com.upsaude.entity.LogsAuditoria;
+import com.upsaude.entity.Tenant;
 import com.upsaude.exception.BadRequestException;
-import com.upsaude.exception.NotFoundException;
-import com.upsaude.mapper.LogsAuditoriaMapper;
 import com.upsaude.repository.LogsAuditoriaRepository;
 import com.upsaude.service.LogsAuditoriaService;
+import com.upsaude.service.TenantService;
+import com.upsaude.service.support.logsauditoria.LogsAuditoriaCreator;
+import com.upsaude.service.support.logsauditoria.LogsAuditoriaResponseBuilder;
+import com.upsaude.service.support.logsauditoria.LogsAuditoriaTenantEnforcer;
+import com.upsaude.service.support.logsauditoria.LogsAuditoriaUpdater;
+import com.upsaude.service.support.logsauditoria.LogsAuditoriaValidationService;
+import org.springframework.cache.Cache;
+import org.springframework.cache.CacheManager;
 import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.util.Objects;
 import java.util.UUID;
 
 @Slf4j
@@ -25,44 +35,44 @@ import java.util.UUID;
 public class LogsAuditoriaServiceImpl implements LogsAuditoriaService {
 
     private final LogsAuditoriaRepository logsAuditoriaRepository;
-    private final LogsAuditoriaMapper logsAuditoriaMapper;
+    private final TenantService tenantService;
+    private final CacheManager cacheManager;
+
+    private final LogsAuditoriaValidationService validationService;
+    private final LogsAuditoriaTenantEnforcer tenantEnforcer;
+    private final LogsAuditoriaCreator creator;
+    private final LogsAuditoriaUpdater updater;
+    private final LogsAuditoriaResponseBuilder responseBuilder;
 
     @Override
     @Transactional
-    @CacheEvict(value = "logsauditoria", allEntries = true)
     public LogsAuditoriaResponse criar(LogsAuditoriaRequest request) {
         log.debug("Criando novo LogsAuditoria");
+        validationService.validarObrigatorios(request);
 
-        if (request == null) {
-            log.warn("Request nulo recebido para criação de LogsAuditoria");
-            throw new BadRequestException("Dados do log de auditoria são obrigatórios");
+        UUID tenantId = tenantService.validarTenantAtual();
+        Tenant tenant = tenantService.obterTenantDoUsuarioAutenticado();
+
+        LogsAuditoria saved = creator.criar(request, tenantId, tenant);
+        LogsAuditoriaResponse response = responseBuilder.build(saved);
+
+        Cache cache = cacheManager.getCache(CacheKeyUtil.CACHE_LOGS_AUDITORIA);
+        if (cache != null && response != null && response.getId() != null) {
+            cache.put(Objects.requireNonNull((Object) CacheKeyUtil.logAuditoria(tenantId, response.getId())), response);
         }
 
-        LogsAuditoria logsAuditoria = logsAuditoriaMapper.fromRequest(request);
-        logsAuditoria.setActive(true);
-
-        LogsAuditoria logsAuditoriaSalvo = logsAuditoriaRepository.save(logsAuditoria);
-        log.info("LogsAuditoria criado com sucesso. ID: {}", logsAuditoriaSalvo.getId());
-
-        return logsAuditoriaMapper.toResponse(logsAuditoriaSalvo);
+        return response;
     }
 
     @Override
     @Transactional(readOnly = true)
-    @Cacheable(value = "logsauditoria", key = "#id")
+    @Cacheable(cacheNames = CacheKeyUtil.CACHE_LOGS_AUDITORIA, keyGenerator = "logsAuditoriaCacheKeyGenerator")
     public LogsAuditoriaResponse obterPorId(UUID id) {
         log.debug("Buscando LogsAuditoria por ID: {} (cache miss)", id);
 
-        if (id == null) {
-            log.warn("ID nulo recebido para busca de LogsAuditoria");
-            throw new BadRequestException("ID do log de auditoria é obrigatório");
-        }
-
-        LogsAuditoria logsAuditoria = logsAuditoriaRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("LogsAuditoria não encontrado com ID: " + id));
-
-        log.debug("LogsAuditoria encontrado. ID: {}", id);
-        return logsAuditoriaMapper.toResponse(logsAuditoria);
+        validationService.validarId(id);
+        UUID tenantId = tenantService.validarTenantAtual();
+        return responseBuilder.build(tenantEnforcer.validarAcessoCompleto(id, tenantId));
     }
 
     @Override
@@ -71,64 +81,48 @@ public class LogsAuditoriaServiceImpl implements LogsAuditoriaService {
         log.debug("Listando LogsAuditorias paginados. Página: {}, Tamanho: {}",
                 pageable.getPageNumber(), pageable.getPageSize());
 
-        Page<LogsAuditoria> logsAuditorias = logsAuditoriaRepository.findAll(pageable);
+        UUID tenantId = tenantService.validarTenantAtual();
+        Page<LogsAuditoria> logsAuditorias = logsAuditoriaRepository.findAllByTenant(tenantId, pageable);
         log.debug("Listagem de LogsAuditorias concluída. Total de elementos: {}", logsAuditorias.getTotalElements());
-        return logsAuditorias.map(logsAuditoriaMapper::toResponse);
+        return logsAuditorias.map(responseBuilder::build);
     }
 
     @Override
     @Transactional
-    @CacheEvict(value = "logsauditoria", key = "#id")
+    @CachePut(cacheNames = CacheKeyUtil.CACHE_LOGS_AUDITORIA, keyGenerator = "logsAuditoriaCacheKeyGenerator")
     public LogsAuditoriaResponse atualizar(UUID id, LogsAuditoriaRequest request) {
         log.debug("Atualizando LogsAuditoria. ID: {}", id);
 
-        if (id == null) {
-            log.warn("ID nulo recebido para atualização de LogsAuditoria");
-            throw new BadRequestException("ID do log de auditoria é obrigatório");
-        }
+        validationService.validarId(id);
+        validationService.validarObrigatorios(request);
 
-        if (request == null) {
-            log.warn("Request nulo recebido para atualização de LogsAuditoria. ID: {}", id);
-            throw new BadRequestException("Dados do log de auditoria são obrigatórios");
-        }
+        UUID tenantId = tenantService.validarTenantAtual();
+        Tenant tenant = tenantService.obterTenantDoUsuarioAutenticado();
 
-        LogsAuditoria logsAuditoriaExistente = logsAuditoriaRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("LogsAuditoria não encontrado com ID: " + id));
-
-        atualizarDadosLogsAuditoria(logsAuditoriaExistente, request);
-
-        LogsAuditoria logsAuditoriaAtualizado = logsAuditoriaRepository.save(logsAuditoriaExistente);
-        log.info("LogsAuditoria atualizado com sucesso. ID: {}", logsAuditoriaAtualizado.getId());
-
-        return logsAuditoriaMapper.toResponse(logsAuditoriaAtualizado);
+        LogsAuditoria updated = updater.atualizar(id, request, tenantId, tenant);
+        return responseBuilder.build(updated);
     }
 
     @Override
     @Transactional
-    @CacheEvict(value = "logsauditoria", key = "#id")
+    @CacheEvict(cacheNames = CacheKeyUtil.CACHE_LOGS_AUDITORIA, keyGenerator = "logsAuditoriaCacheKeyGenerator", beforeInvocation = false)
     public void excluir(UUID id) {
         log.debug("Excluindo LogsAuditoria. ID: {}", id);
 
-        if (id == null) {
-            log.warn("ID nulo recebido para exclusão de LogsAuditoria");
-            throw new BadRequestException("ID do log de auditoria é obrigatório");
-        }
-
-        LogsAuditoria logsAuditoria = logsAuditoriaRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("LogsAuditoria não encontrado com ID: " + id));
-
-        if (Boolean.FALSE.equals(logsAuditoria.getActive())) {
-            log.warn("Tentativa de excluir LogsAuditoria já inativo. ID: {}", id);
-            throw new BadRequestException("LogsAuditoria já está inativo");
-        }
-
-        logsAuditoria.setActive(false);
-        logsAuditoriaRepository.save(logsAuditoria);
-        log.info("LogsAuditoria excluído (desativado) com sucesso. ID: {}", id);
+        validationService.validarId(id);
+        UUID tenantId = tenantService.validarTenantAtual();
+        inativarInternal(id, tenantId);
     }
 
-    private void atualizarDadosLogsAuditoria(LogsAuditoria logsAuditoria, LogsAuditoriaRequest request) {
+    private void inativarInternal(UUID id, UUID tenantId) {
+        LogsAuditoria entity = tenantEnforcer.validarAcesso(id, tenantId);
 
-        logsAuditoriaMapper.updateFromRequest(request, logsAuditoria);
+        if (Boolean.FALSE.equals(entity.getActive())) {
+            throw new BadRequestException("Log de auditoria já está inativo");
+        }
+
+        entity.setActive(false);
+        logsAuditoriaRepository.save(entity);
+        log.info("Log de auditoria excluído (desativado) com sucesso. ID: {}, tenant: {}", id, tenantId);
     }
 }

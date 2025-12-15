@@ -15,6 +15,8 @@ public interface PerfisUsuariosService {
 
     Page<PerfisUsuariosResponse> listar(Pageable pageable);
 
+    Page<PerfisUsuariosResponse> listar(Pageable pageable, UUID usuarioId, UUID estabelecimentoId);
+
     PerfisUsuariosResponse atualizar(UUID id, PerfisUsuariosRequest request);
 
     void excluir(UUID id);

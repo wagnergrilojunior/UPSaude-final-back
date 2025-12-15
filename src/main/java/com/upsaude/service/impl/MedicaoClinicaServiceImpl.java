@@ -1,26 +1,32 @@
 package com.upsaude.service.impl;
 
+import com.upsaude.cache.CacheKeyUtil;
 import com.upsaude.api.request.MedicaoClinicaRequest;
 import com.upsaude.api.response.MedicaoClinicaResponse;
 import com.upsaude.entity.MedicaoClinica;
-import com.upsaude.entity.Paciente;
+import com.upsaude.entity.Tenant;
 import com.upsaude.exception.BadRequestException;
-import com.upsaude.exception.NotFoundException;
-import com.upsaude.mapper.MedicaoClinicaMapper;
 import com.upsaude.repository.MedicaoClinicaRepository;
-import com.upsaude.repository.PacienteRepository;
 import com.upsaude.service.MedicaoClinicaService;
-import jakarta.transaction.Transactional;
+import com.upsaude.service.TenantService;
+import com.upsaude.service.support.medicaoclinica.MedicaoClinicaCreator;
+import com.upsaude.service.support.medicaoclinica.MedicaoClinicaResponseBuilder;
+import com.upsaude.service.support.medicaoclinica.MedicaoClinicaTenantEnforcer;
+import com.upsaude.service.support.medicaoclinica.MedicaoClinicaUpdater;
+import com.upsaude.service.support.medicaoclinica.MedicaoClinicaValidationService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
+import org.springframework.cache.Cache;
+import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import java.math.BigDecimal;
-import java.math.RoundingMode;
+import java.util.Objects;
 import java.util.UUID;
 
 @Slf4j
@@ -29,172 +35,100 @@ import java.util.UUID;
 public class MedicaoClinicaServiceImpl implements MedicaoClinicaService {
 
     private final MedicaoClinicaRepository medicaoClinicaRepository;
-    private final MedicaoClinicaMapper medicaoClinicaMapper;
-    private final PacienteRepository pacienteRepository;
+    private final TenantService tenantService;
+    private final CacheManager cacheManager;
+
+    private final MedicaoClinicaValidationService validationService;
+    private final MedicaoClinicaTenantEnforcer tenantEnforcer;
+    private final MedicaoClinicaCreator creator;
+    private final MedicaoClinicaUpdater updater;
+    private final MedicaoClinicaResponseBuilder responseBuilder;
 
     @Override
     @Transactional
-    @CacheEvict(value = "medicaoclinica", allEntries = true)
     public MedicaoClinicaResponse criar(MedicaoClinicaRequest request) {
-        log.debug("Criando nova medição clínica para paciente: {}", request.getPaciente());
+        log.debug("Criando nova medição clínica. Request: {}", request);
+        validationService.validarObrigatorios(request);
 
-        MedicaoClinica medicaoClinica = medicaoClinicaMapper.fromRequest(request);
+        UUID tenantId = tenantService.validarTenantAtual();
+        Tenant tenant = tenantService.obterTenantDoUsuarioAutenticado();
 
-        Paciente paciente = pacienteRepository.findById(request.getPaciente())
-                .orElseThrow(() -> new NotFoundException("Paciente não encontrado com ID: " + request.getPaciente()));
-        medicaoClinica.setPaciente(paciente);
+        MedicaoClinica saved = creator.criar(request, tenantId, tenant);
+        MedicaoClinicaResponse response = responseBuilder.build(saved);
 
-        calcularImc(medicaoClinica);
+        Cache cache = cacheManager.getCache(CacheKeyUtil.CACHE_MEDICAO_CLINICA);
+        if (cache != null && response != null && response.getId() != null) {
+            cache.put(Objects.requireNonNull((Object) CacheKeyUtil.medicaoClinica(tenantId, response.getId())), response);
+        }
 
-        medicaoClinica.setActive(true);
-
-        MedicaoClinica medicaoClinicaSalva = medicaoClinicaRepository.save(medicaoClinica);
-        log.info("Medição clínica criada com sucesso. ID: {}", medicaoClinicaSalva.getId());
-
-        return medicaoClinicaMapper.toResponse(medicaoClinicaSalva);
+        return response;
     }
 
     @Override
-    @Transactional
-    @Cacheable(value = "medicaoclinica", key = "#id")
+    @Transactional(readOnly = true)
+    @Cacheable(cacheNames = CacheKeyUtil.CACHE_MEDICAO_CLINICA, keyGenerator = "medicaoClinicaCacheKeyGenerator")
     public MedicaoClinicaResponse obterPorId(UUID id) {
         log.debug("Buscando medição clínica por ID: {} (cache miss)", id);
-        if (id == null) {
-            throw new BadRequestException("ID da medição clínica é obrigatório");
-        }
+        validationService.validarId(id);
 
-        MedicaoClinica medicaoClinica = medicaoClinicaRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("Medição clínica não encontrada com ID: " + id));
-
-        return medicaoClinicaMapper.toResponse(medicaoClinica);
+        UUID tenantId = tenantService.validarTenantAtual();
+        MedicaoClinica medicaoClinica = tenantEnforcer.validarAcessoCompleto(id, tenantId);
+        return responseBuilder.build(medicaoClinica);
     }
 
     @Override
+    @Transactional(readOnly = true)
     public Page<MedicaoClinicaResponse> listar(Pageable pageable) {
-        log.debug("Listando medições clínicas paginadas. Página: {}, Tamanho: {}",
-                pageable.getPageNumber(), pageable.getPageSize());
-
-        Page<MedicaoClinica> medicoesClinicas = medicaoClinicaRepository.findAll(pageable);
-        return medicoesClinicas.map(medicaoClinicaMapper::toResponse);
+        log.debug("Listando medições clínicas paginadas. Pageable: {}", pageable);
+        UUID tenantId = tenantService.validarTenantAtual();
+        return medicaoClinicaRepository.findAllByTenant(tenantId, pageable).map(responseBuilder::build);
     }
 
     @Override
+    @Transactional(readOnly = true)
     public Page<MedicaoClinicaResponse> listarPorPaciente(UUID pacienteId, Pageable pageable) {
-        log.debug("Listando medições clínicas do paciente: {}. Página: {}, Tamanho: {}",
-                pacienteId, pageable.getPageNumber(), pageable.getPageSize());
-
-        if (pacienteId == null) {
-            throw new BadRequestException("ID do paciente é obrigatório");
-        }
-
-        Page<MedicaoClinica> medicoesClinicas = medicaoClinicaRepository.findByPacienteIdOrderByDataHoraDesc(pacienteId, pageable);
-        return medicoesClinicas.map(medicaoClinicaMapper::toResponse);
+        log.debug("Listando medições clínicas do paciente: {}. Pageable: {}", pacienteId, pageable);
+        validationService.validarPacienteId(pacienteId);
+        UUID tenantId = tenantService.validarTenantAtual();
+        return medicaoClinicaRepository.findByPacienteIdAndTenantIdOrderByDataHoraDesc(pacienteId, tenantId, pageable).map(responseBuilder::build);
     }
 
     @Override
     @Transactional
-    @CacheEvict(value = "medicaoclinica", key = "#id")
+    @CachePut(cacheNames = CacheKeyUtil.CACHE_MEDICAO_CLINICA, keyGenerator = "medicaoClinicaCacheKeyGenerator")
     public MedicaoClinicaResponse atualizar(UUID id, MedicaoClinicaRequest request) {
         log.debug("Atualizando medição clínica. ID: {}", id);
 
-        if (id == null) {
-            throw new BadRequestException("ID da medição clínica é obrigatório");
-        }
+        validationService.validarId(id);
+        validationService.validarObrigatorios(request);
 
-        MedicaoClinica medicaoClinicaExistente = medicaoClinicaRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("Medição clínica não encontrada com ID: " + id));
+        UUID tenantId = tenantService.validarTenantAtual();
+        Tenant tenant = tenantService.obterTenantDoUsuarioAutenticado();
 
-        atualizarDadosMedicaoClinica(medicaoClinicaExistente, request);
-
-        calcularImc(medicaoClinicaExistente);
-
-        MedicaoClinica medicaoClinicaAtualizada = medicaoClinicaRepository.save(medicaoClinicaExistente);
-        log.info("Medição clínica atualizada com sucesso. ID: {}", medicaoClinicaAtualizada.getId());
-
-        return medicaoClinicaMapper.toResponse(medicaoClinicaAtualizada);
+        MedicaoClinica updated = updater.atualizar(id, request, tenantId, tenant);
+        return responseBuilder.build(updated);
     }
 
     @Override
     @Transactional
-    @CacheEvict(value = "medicaoclinica", key = "#id")
+    @CacheEvict(cacheNames = CacheKeyUtil.CACHE_MEDICAO_CLINICA, keyGenerator = "medicaoClinicaCacheKeyGenerator", beforeInvocation = false)
     public void excluir(UUID id) {
         log.debug("Excluindo medição clínica. ID: {}", id);
 
-        if (id == null) {
-            throw new BadRequestException("ID da medição clínica é obrigatório");
-        }
+        validationService.validarId(id);
+        UUID tenantId = tenantService.validarTenantAtual();
+        inativarInternal(id, tenantId);
+    }
 
-        MedicaoClinica medicaoClinica = medicaoClinicaRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("Medição clínica não encontrada com ID: " + id));
+    private void inativarInternal(UUID id, UUID tenantId) {
+        MedicaoClinica entity = tenantEnforcer.validarAcesso(id, tenantId);
 
-        if (Boolean.FALSE.equals(medicaoClinica.getActive())) {
+        if (Boolean.FALSE.equals(entity.getActive())) {
             throw new BadRequestException("Medição clínica já está inativa");
         }
 
-        medicaoClinica.setActive(false);
-        medicaoClinicaRepository.save(medicaoClinica);
-        log.info("Medição clínica excluída (desativada) com sucesso. ID: {}", id);
-    }
-
-    private void atualizarDadosMedicaoClinica(MedicaoClinica medicaoClinica, MedicaoClinicaRequest request) {
-
-        if (request.getDataHora() != null) {
-            medicaoClinica.setDataHora(request.getDataHora());
-        }
-
-        if (request.getPressaoSistolica() != null) {
-            medicaoClinica.setPressaoSistolica(request.getPressaoSistolica());
-        }
-        if (request.getPressaoDiastolica() != null) {
-            medicaoClinica.setPressaoDiastolica(request.getPressaoDiastolica());
-        }
-        if (request.getFrequenciaCardiaca() != null) {
-            medicaoClinica.setFrequenciaCardiaca(request.getFrequenciaCardiaca());
-        }
-        if (request.getFrequenciaRespiratoria() != null) {
-            medicaoClinica.setFrequenciaRespiratoria(request.getFrequenciaRespiratoria());
-        }
-        if (request.getTemperatura() != null) {
-            medicaoClinica.setTemperatura(request.getTemperatura());
-        }
-        if (request.getSaturacaoOxigenio() != null) {
-            medicaoClinica.setSaturacaoOxigenio(request.getSaturacaoOxigenio());
-        }
-        if (request.getGlicemiaCapilar() != null) {
-            medicaoClinica.setGlicemiaCapilar(request.getGlicemiaCapilar());
-        }
-
-        if (request.getPeso() != null) {
-            medicaoClinica.setPeso(request.getPeso());
-        }
-        if (request.getAltura() != null) {
-            medicaoClinica.setAltura(request.getAltura());
-        }
-        if (request.getCircunferenciaAbdominal() != null) {
-            medicaoClinica.setCircunferenciaAbdominal(request.getCircunferenciaAbdominal());
-        }
-        if (request.getImc() != null) {
-            medicaoClinica.setImc(request.getImc());
-        }
-
-        if (request.getObservacoes() != null) {
-            medicaoClinica.setObservacoes(request.getObservacoes());
-        }
-
-        if (request.getPaciente() != null) {
-            Paciente paciente = pacienteRepository.findById(request.getPaciente())
-                    .orElseThrow(() -> new NotFoundException("Paciente não encontrado com ID: " + request.getPaciente()));
-            medicaoClinica.setPaciente(paciente);
-        }
-    }
-
-    private void calcularImc(MedicaoClinica medicaoClinica) {
-        if (medicaoClinica.getPeso() != null && medicaoClinica.getAltura() != null
-                && medicaoClinica.getAltura().compareTo(BigDecimal.ZERO) > 0) {
-            BigDecimal alturaQuadrado = medicaoClinica.getAltura().multiply(medicaoClinica.getAltura());
-            medicaoClinica.setImc(medicaoClinica.getPeso().divide(alturaQuadrado, 2, RoundingMode.HALF_UP));
-        } else {
-            medicaoClinica.setImc(null);
-        }
+        entity.setActive(false);
+        medicaoClinicaRepository.save(entity);
+        log.info("Medição clínica excluída (desativada) com sucesso. ID: {}, tenant: {}", id, tenantId);
     }
 }

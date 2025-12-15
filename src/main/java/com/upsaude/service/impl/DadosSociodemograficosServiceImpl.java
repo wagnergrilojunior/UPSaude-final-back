@@ -2,28 +2,35 @@ package com.upsaude.service.impl;
 
 import com.upsaude.api.request.DadosSociodemograficosRequest;
 import com.upsaude.api.response.DadosSociodemograficosResponse;
-import com.upsaude.api.response.PacienteResponse;
+import com.upsaude.cache.CacheKeyUtil;
 import com.upsaude.entity.DadosSociodemograficos;
-import com.upsaude.entity.Paciente;
 import com.upsaude.entity.Tenant;
 import com.upsaude.exception.BadRequestException;
 import com.upsaude.exception.ConflictException;
 import com.upsaude.exception.InternalServerErrorException;
 import com.upsaude.exception.NotFoundException;
-import com.upsaude.mapper.DadosSociodemograficosMapper;
 import com.upsaude.repository.DadosSociodemograficosRepository;
-import com.upsaude.repository.PacienteRepository;
 import com.upsaude.service.DadosSociodemograficosService;
 import com.upsaude.service.TenantService;
+import com.upsaude.service.support.dadossociodemograficos.DadosSociodemograficosCreator;
+import com.upsaude.service.support.dadossociodemograficos.DadosSociodemograficosDomainService;
+import com.upsaude.service.support.dadossociodemograficos.DadosSociodemograficosResponseBuilder;
+import com.upsaude.service.support.dadossociodemograficos.DadosSociodemograficosTenantEnforcer;
+import com.upsaude.service.support.dadossociodemograficos.DadosSociodemograficosUpdater;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.Cache;
+import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.dao.DataAccessException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Objects;
 import java.util.UUID;
 
 @Slf4j
@@ -32,54 +39,36 @@ import java.util.UUID;
 public class DadosSociodemograficosServiceImpl implements DadosSociodemograficosService {
 
     private final DadosSociodemograficosRepository repository;
-    private final DadosSociodemograficosMapper mapper;
-    private final PacienteRepository pacienteRepository;
+    private final CacheManager cacheManager;
     private final TenantService tenantService;
+
+    private final DadosSociodemograficosCreator creator;
+    private final DadosSociodemograficosUpdater updater;
+    private final DadosSociodemograficosTenantEnforcer tenantEnforcer;
+    private final DadosSociodemograficosResponseBuilder responseBuilder;
+    private final DadosSociodemograficosDomainService domainService;
 
     @Override
     @Transactional
-    @CacheEvict(value = "dadossociodemograficos", allEntries = true)
     public DadosSociodemograficosResponse criar(DadosSociodemograficosRequest request) {
-        log.debug("Criando dados sociodemográficos para paciente: {}", request.getPaciente());
-
-        if (request == null) {
-            log.warn("Tentativa de criar dados sociodemográficos com request nulo");
-            throw new BadRequestException("Dados sociodemográficos são obrigatórios");
-        }
-        if (request.getPaciente() == null) {
-            log.warn("ID de paciente nulo recebido para criação de dados sociodemográficos");
-            throw new BadRequestException("ID do paciente é obrigatório");
-        }
+        log.debug("Criando dados sociodemográficos. Request: {}", request);
 
         try {
-            repository.findByPacienteId(request.getPaciente())
-                    .ifPresent(d -> {
-                        log.warn("Tentativa de criar dados sociodemográficos duplicados para paciente. Paciente ID: {}", request.getPaciente());
-                        throw new ConflictException("Dados sociodemográficos já existem para este paciente");
-                    });
+            UUID tenantId = tenantService.validarTenantAtual();
+            Tenant tenant = obterTenantAutenticadoOrThrow(tenantId);
 
-            Paciente paciente = pacienteRepository.findById(request.getPaciente())
-                    .orElseThrow(() -> new NotFoundException("Paciente não encontrado com ID: " + request.getPaciente()));
+            DadosSociodemograficos saved = creator.criar(request, tenantId, tenant);
+            DadosSociodemograficosResponse response = responseBuilder.build(saved);
 
-            DadosSociodemograficos entity = mapper.fromRequest(request);
-            entity.setActive(true);
-            entity.setPaciente(paciente);
-
-            Tenant tenant = tenantService.obterTenantDoUsuarioAutenticado();
-            if (tenant == null) {
-                throw new BadRequestException("Não foi possível obter tenant do usuário autenticado. É necessário estar autenticado para criar dados sociodemográficos.");
+            Cache cache = cacheManager.getCache(CacheKeyUtil.CACHE_DADOS_SOCIODEMOGRAFICOS);
+            if (cache != null) {
+                Object key = Objects.requireNonNull((Object) CacheKeyUtil.dadosSociodemograficos(tenantId, saved.getId()));
+                cache.put(key, response);
             }
-            entity.setTenant(tenant);
 
-            DadosSociodemograficos saved = repository.save(entity);
-            log.info("Dados sociodemográficos criados. ID: {}", saved.getId());
-
-            DadosSociodemograficosResponse response = mapper.toResponse(saved);
-
-            response.setPaciente(createPacienteResponseMinimal(saved.getPaciente()));
             return response;
         } catch (BadRequestException | ConflictException | NotFoundException e) {
-            log.warn("Erro de validação ao criar dados sociodemográficos. Request: {}. Erro: {}", request, e.getMessage());
+            log.warn("Erro de validação ao criar dados sociodemográficos. Erro: {}", e.getMessage());
             throw e;
         } catch (DataAccessException e) {
             log.error("Erro de acesso a dados ao criar DadosSociodemograficos. Exception: {}", e.getClass().getSimpleName(), e);
@@ -92,8 +81,9 @@ public class DadosSociodemograficosServiceImpl implements DadosSociodemograficos
 
     @Override
     @Transactional(readOnly = true)
+    @Cacheable(cacheNames = CacheKeyUtil.CACHE_DADOS_SOCIODEMOGRAFICOS, keyGenerator = "dadosSociodemograficosCacheKeyGenerator")
     public DadosSociodemograficosResponse obterPorId(UUID id) {
-        log.debug("Buscando dados sociodemográficos por ID: {}", id);
+        log.debug("Buscando dados sociodemográficos por ID: {} (cache miss)", id);
 
         if (id == null) {
             log.warn("ID nulo recebido para busca de dados sociodemográficos");
@@ -101,14 +91,11 @@ public class DadosSociodemograficosServiceImpl implements DadosSociodemograficos
         }
 
         try {
-            DadosSociodemograficos entity = repository.findById(id)
-                    .orElseThrow(() -> new NotFoundException("Dados sociodemográficos não encontrados com ID: " + id));
+            UUID tenantId = tenantService.validarTenantAtual();
+            DadosSociodemograficos entity = tenantEnforcer.validarAcessoCompleto(id, tenantId);
 
             log.debug("Dados sociodemográficos encontrados. ID: {}", id);
-            DadosSociodemograficosResponse response = mapper.toResponse(entity);
-
-            response.setPaciente(createPacienteResponseMinimal(entity.getPaciente()));
-            return response;
+            return responseBuilder.build(entity);
         } catch (NotFoundException e) {
             log.warn("Dados sociodemográficos não encontrados. ID: {}", id);
             throw e;
@@ -132,14 +119,12 @@ public class DadosSociodemograficosServiceImpl implements DadosSociodemograficos
         }
 
         try {
-            DadosSociodemograficos entity = repository.findByPacienteId(pacienteId)
-                    .orElseThrow(() -> new NotFoundException("Dados sociodemográficos não encontrados para o paciente: " + pacienteId));
+            UUID tenantId = tenantService.validarTenantAtual();
+            DadosSociodemograficos entity = repository.findByPacienteIdAndTenantId(pacienteId, tenantId)
+                .orElseThrow(() -> new NotFoundException("Dados sociodemográficos não encontrados para o paciente: " + pacienteId));
 
             log.debug("Dados sociodemográficos encontrados para paciente. Paciente ID: {}", pacienteId);
-            DadosSociodemograficosResponse response = mapper.toResponse(entity);
-
-            response.setPaciente(createPacienteResponseMinimal(entity.getPaciente()));
-            return response;
+            return responseBuilder.build(entity);
         } catch (NotFoundException e) {
             log.warn("Dados sociodemográficos não encontrados para paciente. Paciente ID: {}", pacienteId);
             throw e;
@@ -159,14 +144,10 @@ public class DadosSociodemograficosServiceImpl implements DadosSociodemograficos
                 pageable.getPageNumber(), pageable.getPageSize());
 
         try {
-            Page<DadosSociodemograficos> entities = repository.findAll(pageable);
+            UUID tenantId = tenantService.validarTenantAtual();
+            Page<DadosSociodemograficos> entities = repository.findAllByTenant(tenantId, pageable);
             log.debug("Listagem de dados sociodemográficos concluída. Total de elementos: {}", entities.getTotalElements());
-            return entities.map(entity -> {
-                DadosSociodemograficosResponse response = mapper.toResponse(entity);
-
-                response.setPaciente(createPacienteResponseMinimal(entity.getPaciente()));
-                return response;
-            });
+            return entities.map(responseBuilder::build);
         } catch (DataAccessException e) {
             log.error("Erro de acesso a dados ao listar DadosSociodemograficos. Exception: {}", e.getClass().getSimpleName(), e);
             throw new InternalServerErrorException("Erro ao listar DadosSociodemograficos", e);
@@ -178,7 +159,7 @@ public class DadosSociodemograficosServiceImpl implements DadosSociodemograficos
 
     @Override
     @Transactional
-    @CacheEvict(value = "dadossociodemograficos", key = "#id")
+    @CachePut(cacheNames = CacheKeyUtil.CACHE_DADOS_SOCIODEMOGRAFICOS, keyGenerator = "dadosSociodemograficosCacheKeyGenerator")
     public DadosSociodemograficosResponse atualizar(UUID id, DadosSociodemograficosRequest request) {
         log.debug("Atualizando dados sociodemográficos. ID: {}, Request: {}", id, request);
 
@@ -192,31 +173,11 @@ public class DadosSociodemograficosServiceImpl implements DadosSociodemograficos
         }
 
         try {
-            DadosSociodemograficos entity = repository.findById(id)
-                    .orElseThrow(() -> new NotFoundException("Dados sociodemográficos não encontrados com ID: " + id));
+            UUID tenantId = tenantService.validarTenantAtual();
+            Tenant tenant = obterTenantAutenticadoOrThrow(tenantId);
 
-            if (request.getPaciente() != null && !request.getPaciente().equals(entity.getPaciente().getId())) {
-                repository.findByPacienteId(request.getPaciente())
-                        .ifPresent(d -> {
-                            if (!d.getId().equals(id)) {
-                                log.warn("Tentativa de atualizar dados sociodemográficos com paciente duplicado. ID: {}, Paciente ID: {}", id, request.getPaciente());
-                                throw new ConflictException("Dados sociodemográficos já existem para este paciente");
-                            }
-                        });
-
-                Paciente paciente = pacienteRepository.findById(request.getPaciente())
-                        .orElseThrow(() -> new NotFoundException("Paciente não encontrado com ID: " + request.getPaciente()));
-                entity.setPaciente(paciente);
-            }
-
-            atualizarDados(entity, request);
-            DadosSociodemograficos updated = repository.save(entity);
-            log.info("Dados sociodemográficos atualizados. ID: {}", updated.getId());
-
-            DadosSociodemograficosResponse response = mapper.toResponse(updated);
-
-            response.setPaciente(createPacienteResponseMinimal(updated.getPaciente()));
-            return response;
+            DadosSociodemograficos updated = updater.atualizar(id, request, tenantId, tenant);
+            return responseBuilder.build(updated);
         } catch (NotFoundException e) {
             log.warn("Tentativa de atualizar dados sociodemográficos não existentes. ID: {}", id);
             throw e;
@@ -234,27 +195,13 @@ public class DadosSociodemograficosServiceImpl implements DadosSociodemograficos
 
     @Override
     @Transactional
-    @CacheEvict(value = "dadossociodemograficos", key = "#id")
+    @CacheEvict(cacheNames = CacheKeyUtil.CACHE_DADOS_SOCIODEMOGRAFICOS, keyGenerator = "dadosSociodemograficosCacheKeyGenerator", beforeInvocation = false)
     public void excluir(UUID id) {
         log.debug("Excluindo dados sociodemográficos. ID: {}", id);
 
-        if (id == null) {
-            log.warn("ID nulo recebido para exclusão de dados sociodemográficos");
-            throw new BadRequestException("ID é obrigatório");
-        }
-
         try {
-            DadosSociodemograficos entity = repository.findById(id)
-                    .orElseThrow(() -> new NotFoundException("Dados sociodemográficos não encontrados com ID: " + id));
-
-            if (Boolean.FALSE.equals(entity.getActive())) {
-                log.warn("Tentativa de excluir dados sociodemográficos já inativos. ID: {}", id);
-                throw new BadRequestException("Dados sociodemográficos já estão inativos");
-            }
-
-            entity.setActive(false);
-            repository.save(entity);
-            log.info("Dados sociodemográficos excluídos. ID: {}", id);
+            UUID tenantId = tenantService.validarTenantAtual();
+            inativarInternal(id, tenantId);
         } catch (NotFoundException e) {
             log.warn("Tentativa de excluir dados sociodemográficos não existentes. ID: {}", id);
             throw e;
@@ -270,17 +217,24 @@ public class DadosSociodemograficosServiceImpl implements DadosSociodemograficos
         }
     }
 
-    private void atualizarDados(DadosSociodemograficos entity, DadosSociodemograficosRequest request) {
+    private void inativarInternal(UUID id, UUID tenantId) {
+        if (id == null) {
+            log.warn("ID nulo recebido para exclusão de dados sociodemográficos");
+            throw new BadRequestException("ID é obrigatório");
+        }
 
-        mapper.updateFromRequest(request, entity);
+        DadosSociodemograficos entity = tenantEnforcer.validarAcesso(id, tenantId);
+        domainService.validarPodeInativar(entity);
+        entity.setActive(false);
+        repository.save(Objects.requireNonNull(entity));
+        log.info("Dados sociodemográficos excluídos. ID: {}", id);
     }
 
-    private PacienteResponse createPacienteResponseMinimal(Paciente paciente) {
-        if (paciente == null) {
-            return null;
+    private Tenant obterTenantAutenticadoOrThrow(UUID tenantId) {
+        Tenant tenant = tenantService.obterTenantDoUsuarioAutenticado();
+        if (tenant == null || tenant.getId() == null || !tenant.getId().equals(tenantId)) {
+            throw new BadRequestException("Não foi possível obter tenant do usuário autenticado");
         }
-        PacienteResponse response = new PacienteResponse();
-        response.setId(paciente.getId());
-        return response;
+        return tenant;
     }
 }
