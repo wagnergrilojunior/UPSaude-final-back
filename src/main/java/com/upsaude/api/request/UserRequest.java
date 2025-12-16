@@ -1,6 +1,6 @@
 package com.upsaude.api.request;
 
-import jakarta.validation.constraints.Email;
+import com.upsaude.validation.annotation.EmailValido;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -16,7 +16,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 @AllArgsConstructor
 @Schema(description = "Dados de user")
 public class UserRequest {
-    @Email(message = "Email inválido")
+    @EmailValido
     @Size(max = 255, message = "Email deve ter no máximo 255 caracteres")
     private String email;
 

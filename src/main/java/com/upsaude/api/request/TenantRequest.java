@@ -1,11 +1,14 @@
 package com.upsaude.api.request;
 
-import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
-import java.util.ArrayList;
-import java.util.UUID;
+import com.upsaude.validation.annotation.CNPJValido;
+import com.upsaude.validation.annotation.CNESValido;
+import com.upsaude.validation.annotation.CPFValido;
+import com.upsaude.validation.annotation.EmailValido;
+import com.upsaude.validation.annotation.SiteValido;
+import com.upsaude.validation.annotation.TelefoneValido;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -32,23 +35,25 @@ public class TenantRequest {
     private String urlLogo;
     private String metadados;
     private Boolean ativo;
-    @Pattern(regexp = "^$|^\\d{14}$", message = "CNPJ deve ter 14 dígitos")
+    @CNPJValido
     private String cnpj;
 
     @Size(max = 7, message = "CNES deve ter no máximo 7 caracteres")
+    @CNESValido
     private String cnes;
 
     @Size(max = 100, message = "Tipo de instituição deve ter no máximo 100 caracteres")
     private String tipoInstituicao;
 
-    @Pattern(regexp = "^$|^\\d{10,11}$", message = "Telefone deve ter 10 ou 11 dígitos")
+    @TelefoneValido
     private String telefone;
 
-    @Email(message = "Email inválido")
+    @EmailValido
     @Size(max = 255, message = "Email deve ter no máximo 255 caracteres")
     private String email;
 
     @Size(max = 255, message = "Site deve ter no máximo 255 caracteres")
+    @SiteValido
     private String site;
 
     @Size(max = 20, message = "Inscrição estadual deve ter no máximo 20 caracteres")
@@ -60,10 +65,10 @@ public class TenantRequest {
     @Size(max = 255, message = "Nome do responsável deve ter no máximo 255 caracteres")
     private String responsavelNome;
 
-    @Pattern(regexp = "^$|^\\d{11}$", message = "CPF do responsável deve ter 11 dígitos")
+    @CPFValido
     private String responsavelCpf;
 
-    @Pattern(regexp = "^$|^\\d{10,11}$", message = "Telefone do responsável deve ter 10 ou 11 dígitos")
+    @TelefoneValido
     private String responsavelTelefone;
     private String horarioFuncionamento;
     @Size(max = 1000, message = "Observações deve ter no máximo 1000 caracteres")

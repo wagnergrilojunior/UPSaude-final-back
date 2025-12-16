@@ -12,8 +12,13 @@ import com.upsaude.enums.TipoEstabelecimentoEnum;
 import com.upsaude.util.converter.NaturezaJuridicaEnumDeserializer;
 import com.upsaude.util.converter.StatusFuncionamentoEnumDeserializer;
 import com.upsaude.util.converter.TipoEstabelecimentoEnumDeserializer;
+import com.upsaude.validation.annotation.CNPJValido;
+import com.upsaude.validation.annotation.CNESValido;
+import com.upsaude.validation.annotation.CPFValido;
+import com.upsaude.validation.annotation.EmailValido;
+import com.upsaude.validation.annotation.SiteValido;
+import com.upsaude.validation.annotation.TelefoneValido;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
@@ -54,11 +59,11 @@ public class EstabelecimentosRequest {
     @JsonDeserialize(using = TipoEstabelecimentoEnumDeserializer.class)
     private TipoEstabelecimentoEnum tipo;
 
-    @Pattern(regexp = "^$|^[0-9]{7}$", message = "CNES deve conter 7 dígitos")
+    @CNESValido
     @Size(max = 7, message = "Código CNES deve ter no máximo 7 caracteres")
     private String codigoCnes;
 
-    @Pattern(regexp = "^$|^[0-9]{14}$", message = "CNPJ deve conter 14 dígitos")
+    @CNPJValido
     private String cnpj;
 
     @JsonDeserialize(using = NaturezaJuridicaEnumDeserializer.class)
@@ -109,20 +114,20 @@ public class EstabelecimentosRequest {
         }
     }
 
-    @Pattern(regexp = "^$|^[0-9]{10,11}$", message = "Telefone deve conter DDD + número (10 ou 11 dígitos)")
+    @TelefoneValido
     private String telefone;
 
-    @Pattern(regexp = "^$|^[0-9]{10,11}$", message = "Telefone secundário deve conter DDD + número (10 ou 11 dígitos)")
+    @TelefoneValido
     private String telefoneSecundario;
 
-    @Pattern(regexp = "^$|^[0-9]{10,11}$", message = "Fax deve conter DDD + número (10 ou 11 dígitos)")
+    @TelefoneValido
     private String fax;
 
-    @Email(message = "Email inválido")
+    @EmailValido
     @Size(max = 255, message = "Email deve ter no máximo 255 caracteres")
     private String email;
 
-    @Pattern(regexp = "^$|^(https?://).+", message = "URL inválida, deve iniciar com http:// ou https://")
+    @SiteValido
     @Size(max = 255, message = "Site deve ter no máximo 255 caracteres")
     private String site;
     private UUID responsavelTecnico;
@@ -130,7 +135,7 @@ public class EstabelecimentosRequest {
     @Size(max = 255, message = "Nome do responsável legal deve ter no máximo 255 caracteres")
     private String responsavelLegalNome;
 
-    @Pattern(regexp = "^$|^[0-9]{11}$", message = "CPF do responsável legal deve conter 11 dígitos")
+    @CPFValido
     private String responsavelLegalCpf;
     @JsonDeserialize(using = StatusFuncionamentoEnumDeserializer.class)
     private StatusFuncionamentoEnum statusFuncionamento;

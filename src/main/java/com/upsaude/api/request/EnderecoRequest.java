@@ -9,6 +9,7 @@ import com.upsaude.enums.ZonaDomicilioEnum;
 import com.upsaude.util.converter.TipoEnderecoEnumDeserializer;
 import com.upsaude.util.converter.TipoLogradouroEnumDeserializer;
 import com.upsaude.util.converter.ZonaDomicilioEnumDeserializer;
+import com.upsaude.validation.annotation.CEPValido;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
@@ -45,7 +46,7 @@ public class EnderecoRequest {
     @Size(max = 100, message = "Bairro deve ter no máximo 100 caracteres")
     private String bairro;
 
-    @Pattern(regexp = "^$|^[0-9]{8}$", message = "CEP deve conter 8 dígitos")
+    @CEPValido
     private String cep;
     private String pais;
     private String distrito;

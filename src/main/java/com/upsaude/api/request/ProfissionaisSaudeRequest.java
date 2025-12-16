@@ -20,8 +20,11 @@ import com.upsaude.util.converter.SexoEnumDeserializer;
 import com.upsaude.util.converter.StatusAtivoEnumDeserializer;
 import com.upsaude.util.converter.TipoDeficienciaEnumDeserializer;
 import com.upsaude.util.converter.TipoProfissionalEnumDeserializer;
+import com.upsaude.validation.annotation.CNSValido;
+import com.upsaude.validation.annotation.CPFValido;
+import com.upsaude.validation.annotation.EmailValido;
+import com.upsaude.validation.annotation.TelefoneValido;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
@@ -60,7 +63,7 @@ public class ProfissionaisSaudeRequest {
     @NotNull(message = "Conselho profissional é obrigatório")
     private UUID conselho;
 
-    @Pattern(regexp = "^$|^[0-9]{11}$", message = "CPF deve conter 11 dígitos")
+    @CPFValido
     private String cpf;
     private LocalDate dataNascimento;
     @JsonDeserialize(using = SexoEnumDeserializer.class)
@@ -98,7 +101,7 @@ public class ProfissionaisSaudeRequest {
     private StatusAtivoEnum statusRegistro;
     @JsonDeserialize(using = TipoProfissionalEnumDeserializer.class)
     private TipoProfissionalEnum tipoProfissional;
-    @Pattern(regexp = "^$|^[0-9]{15}$", message = "CNS deve conter 15 dígitos")
+    @CNSValido
     private String cns;
 
     @Size(max = 10, message = "Código CBO deve ter no máximo 10 caracteres")
@@ -110,17 +113,17 @@ public class ProfissionaisSaudeRequest {
     @Size(max = 10, message = "Código ocupacional deve ter no máximo 10 caracteres")
     private String codigoOcupacional;
 
-    @Pattern(regexp = "^$|^[0-9]{10,11}$", message = "Telefone deve conter DDD + número (10 ou 11 dígitos)")
+    @TelefoneValido
     private String telefone;
 
-    @Email(message = "Email inválido")
+    @EmailValido
     @Size(max = 255, message = "Email deve ter no máximo 255 caracteres")
     private String email;
 
-    @Pattern(regexp = "^$|^[0-9]{10,11}$", message = "Telefone institucional deve conter DDD + número (10 ou 11 dígitos)")
+    @TelefoneValido
     private String telefoneInstitucional;
 
-    @Email(message = "Email institucional inválido")
+    @EmailValido
     @Size(max = 255, message = "Email institucional deve ter no máximo 255 caracteres")
     private String emailInstitucional;
 

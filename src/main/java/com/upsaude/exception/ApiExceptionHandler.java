@@ -1,6 +1,10 @@
 package com.upsaude.exception;
 
+import com.upsaude.exception.mapper.ApiErrorFactory;
+import com.upsaude.exception.model.ApiErrorCode;
+import com.upsaude.exception.model.ApiErrorResponse;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -10,8 +14,10 @@ import org.springframework.security.authentication.InsufficientAuthenticationExc
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.validation.BindException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.MissingRequestHeaderException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -47,93 +53,79 @@ public class ApiExceptionHandler {
     }
 
     @ExceptionHandler(BadRequestException.class)
-    public ResponseEntity<Map<String, Object>> handleBadRequestException(
+    public ResponseEntity<ApiErrorResponse> handleBadRequestException(
             BadRequestException ex, HttpServletRequest request) {
 
         if (shouldIgnoreEndpoint(request.getRequestURI())) {
             throw new RuntimeException("Actuator or error endpoint exception", ex);
         }
-        return buildErrorResponse(
-                HttpStatus.BAD_REQUEST,
-                "Requisição Inválida",
-                ex.getMessage(),
-                request.getRequestURI()
+        ApiErrorResponse body = ApiErrorFactory.badRequest(
+            request.getRequestURI(),
+            ApiErrorCode.BAD_REQUEST,
+            "Requisição Inválida",
+            ex.getMessage()
         );
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(body);
     }
 
     @ExceptionHandler(UnauthorizedException.class)
-    public ResponseEntity<Map<String, Object>> handleUnauthorizedException(
+    public ResponseEntity<ApiErrorResponse> handleUnauthorizedException(
             UnauthorizedException ex, HttpServletRequest request) {
 
         if (shouldIgnoreEndpoint(request.getRequestURI())) {
             throw new RuntimeException("Actuator or error endpoint exception", ex);
         }
-        return buildErrorResponse(
-                HttpStatus.UNAUTHORIZED,
-                "Não Autorizado",
-                ex.getMessage(),
-                request.getRequestURI()
-        );
+        ApiErrorResponse body = ApiErrorResponse.of(HttpStatus.UNAUTHORIZED.value(), request.getRequestURI())
+            .setMensagensCompat("Não Autorizado", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(body);
     }
 
     @ExceptionHandler(ForbiddenException.class)
-    public ResponseEntity<Map<String, Object>> handleForbiddenException(
+    public ResponseEntity<ApiErrorResponse> handleForbiddenException(
             ForbiddenException ex, HttpServletRequest request) {
 
         if (shouldIgnoreEndpoint(request.getRequestURI())) {
             throw new RuntimeException("Actuator or error endpoint exception", ex);
         }
-        return buildErrorResponse(
-                HttpStatus.FORBIDDEN,
-                "Acesso Proibido",
-                ex.getMessage(),
-                request.getRequestURI()
-        );
+        ApiErrorResponse body = ApiErrorResponse.of(HttpStatus.FORBIDDEN.value(), request.getRequestURI())
+            .setMensagensCompat("Acesso Proibido", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(body);
     }
 
     @ExceptionHandler(NotFoundException.class)
-    public ResponseEntity<Map<String, Object>> handleNotFoundException(
+    public ResponseEntity<ApiErrorResponse> handleNotFoundException(
             NotFoundException ex, HttpServletRequest request) {
 
         if (shouldIgnoreEndpoint(request.getRequestURI())) {
             throw new RuntimeException("Actuator or error endpoint exception", ex);
         }
-        return buildErrorResponse(
-                HttpStatus.NOT_FOUND,
-                "Recurso Não Encontrado",
-                ex.getMessage(),
-                request.getRequestURI()
-        );
+        ApiErrorResponse body = ApiErrorResponse.of(HttpStatus.NOT_FOUND.value(), request.getRequestURI())
+            .setMensagensCompat("Recurso Não Encontrado", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(body);
     }
 
     @ExceptionHandler(ConflictException.class)
-    public ResponseEntity<Map<String, Object>> handleConflictException(
+    public ResponseEntity<ApiErrorResponse> handleConflictException(
             ConflictException ex, HttpServletRequest request) {
 
         if (shouldIgnoreEndpoint(request.getRequestURI())) {
             throw new RuntimeException("Actuator or error endpoint exception", ex);
         }
-        return buildErrorResponse(
-                HttpStatus.CONFLICT,
-                "Conflito",
-                ex.getMessage(),
-                request.getRequestURI()
-        );
+        ApiErrorResponse body = ApiErrorResponse.of(HttpStatus.CONFLICT.value(), request.getRequestURI())
+            .setMensagensCompat("Conflito", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(body);
     }
 
     @ExceptionHandler(UnprocessableEntityException.class)
-    public ResponseEntity<Map<String, Object>> handleUnprocessableEntityException(
+    public ResponseEntity<ApiErrorResponse> handleUnprocessableEntityException(
             UnprocessableEntityException ex, HttpServletRequest request) {
 
         if (shouldIgnoreEndpoint(request.getRequestURI())) {
             throw new RuntimeException("Actuator or error endpoint exception", ex);
         }
-        return buildErrorResponse(
-                HttpStatus.UNPROCESSABLE_ENTITY,
-                "Entidade Não Processável",
-                ex.getMessage(),
-                request.getRequestURI()
-        );
+        ApiErrorResponse body = ApiErrorResponse.of(HttpStatus.UNPROCESSABLE_ENTITY.value(), request.getRequestURI())
+            .setMensagensCompat("Entidade Não Processável", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body(body);
     }
 
     @ExceptionHandler(InternalServerErrorException.class)
@@ -158,7 +150,7 @@ public class ApiExceptionHandler {
     }
 
     @ExceptionHandler(HttpMessageNotReadableException.class)
-    public ResponseEntity<Map<String, Object>> handleHttpMessageNotReadableException(
+    public ResponseEntity<ApiErrorResponse> handleHttpMessageNotReadableException(
             HttpMessageNotReadableException ex, HttpServletRequest request) {
 
         if (shouldIgnoreEndpoint(request.getRequestURI())) {
@@ -166,36 +158,15 @@ public class ApiExceptionHandler {
             throw runtimeEx;
         }
 
-        String mensagemErro = ex.getMessage();
-        if (mensagemErro != null && mensagemErro.contains("JSON parse error:")) {
-
-            int index = mensagemErro.indexOf("JSON parse error:");
-            if (index >= 0) {
-                mensagemErro = mensagemErro.substring(index);
-
-                if (mensagemErro.length() > 200) {
-                    mensagemErro = mensagemErro.substring(0, 200) + "...";
-                }
-            }
-        }
-
-        if (mensagemErro == null || mensagemErro.trim().isEmpty()) {
-            mensagemErro = "Erro ao processar JSON da requisição. Verifique os tipos de dados e formatos enviados.";
-        }
-
-        log.warn("Erro de deserialização JSON - Path: {}, Method: {}, Message: {}",
-            request.getRequestURI(), request.getMethod(), mensagemErro);
-
-        return buildErrorResponse(
-                HttpStatus.BAD_REQUEST,
-                "Requisição Inválida",
-                mensagemErro,
-                request.getRequestURI()
-        );
+        Throwable root = ex.getMostSpecificCause() != null ? ex.getMostSpecificCause() : ex.getCause();
+        ApiErrorResponse body = ApiErrorFactory.fromJackson(request.getRequestURI(), root);
+        log.warn("Erro de deserialização JSON - Path: {}, Method: {}, Codigo: {}, Message: {}",
+            request.getRequestURI(), request.getMethod(), body.getCodigo(), body.getMensagem());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(body);
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<Map<String, Object>> handleValidationException(
+    public ResponseEntity<ApiErrorResponse> handleValidationException(
             MethodArgumentNotValidException ex, HttpServletRequest request) {
 
         if (shouldIgnoreEndpoint(request.getRequestURI())) {
@@ -203,59 +174,45 @@ public class ApiExceptionHandler {
             throw runtimeEx;
         }
 
-        List<Map<String, String>> erros = ex.getBindingResult().getAllErrors().stream()
-                .map(error -> {
-                    Map<String, String> erro = new HashMap<>();
-                    String campo = error instanceof FieldError
-                            ? ((FieldError) error).getField()
-                            : error.getObjectName();
-                    String mensagem = error.getDefaultMessage();
-                    erro.put("campo", campo);
-                    erro.put("mensagem", mensagem != null ? mensagem : "Erro de validação");
-                    return erro;
-                })
-                .collect(Collectors.toList());
-
-        Map<String, Object> resposta = new HashMap<>();
-        resposta.put("status", HttpStatus.BAD_REQUEST.value());
-        resposta.put("message", "Erro de validação");
-        resposta.put("errors", erros);
-
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(resposta);
+        ApiErrorResponse body = ApiErrorResponse.of(HttpStatus.BAD_REQUEST.value(), request.getRequestURI());
+        body.setCodigo(ApiErrorCode.VALIDATION_ERROR);
+        body.setMensagensCompat("Requisição Inválida", "Erro de validação");
+        if (ex.getBindingResult() != null) {
+            ex.getBindingResult().getAllErrors().forEach(error -> {
+                String campo = error instanceof FieldError ? ((FieldError) error).getField() : error.getObjectName();
+                String mensagem = error.getDefaultMessage() != null ? error.getDefaultMessage() : "Erro de validação";
+                body.addError(new com.upsaude.exception.model.ApiFieldError(campo, mensagem, ApiErrorCode.VALIDATION_ERROR, null));
+            });
+        }
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(body);
     }
 
     @ExceptionHandler({AuthenticationException.class, InsufficientAuthenticationException.class, AuthenticationCredentialsNotFoundException.class})
-    public ResponseEntity<Map<String, Object>> handleAuthenticationException(
+    public ResponseEntity<ApiErrorResponse> handleAuthenticationException(
             Exception ex, HttpServletRequest request) {
 
         if (shouldIgnoreEndpoint(request.getRequestURI())) {
             throw new RuntimeException(ex);
         }
-        return buildErrorResponse(
-                HttpStatus.UNAUTHORIZED,
-                "Não Autorizado",
-                "Token de autenticação inválido ou não fornecido",
-                request.getRequestURI()
-        );
+        ApiErrorResponse body = ApiErrorResponse.of(HttpStatus.UNAUTHORIZED.value(), request.getRequestURI())
+            .setMensagensCompat("Não Autorizado", "Token de autenticação inválido ou não fornecido");
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(body);
     }
 
     @ExceptionHandler(AccessDeniedException.class)
-    public ResponseEntity<Map<String, Object>> handleAccessDeniedException(
+    public ResponseEntity<ApiErrorResponse> handleAccessDeniedException(
             AccessDeniedException ex, HttpServletRequest request) {
 
         if (shouldIgnoreEndpoint(request.getRequestURI())) {
             throw new RuntimeException("Actuator or error endpoint exception", ex);
         }
-        return buildErrorResponse(
-                HttpStatus.FORBIDDEN,
-                "Acesso Proibido",
-                "Você não tem permissão para acessar este recurso",
-                request.getRequestURI()
-        );
+        ApiErrorResponse body = ApiErrorResponse.of(HttpStatus.FORBIDDEN.value(), request.getRequestURI())
+            .setMensagensCompat("Acesso Proibido", "Você não tem permissão para acessar este recurso");
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(body);
     }
 
     @ExceptionHandler(MethodArgumentTypeMismatchException.class)
-    public ResponseEntity<Map<String, Object>> handleMethodArgumentTypeMismatchException(
+    public ResponseEntity<ApiErrorResponse> handleMethodArgumentTypeMismatchException(
             MethodArgumentTypeMismatchException ex, HttpServletRequest request) {
 
         if (shouldIgnoreEndpoint(request.getRequestURI())) {
@@ -263,32 +220,14 @@ public class ApiExceptionHandler {
             throw runtimeEx;
         }
 
-        String mensagemErro = ex.getMessage();
-        String nomeParametro = ex.getName();
-        Object valor = ex.getValue();
-        Class<?> requiredType = ex.getRequiredType();
-        String valorRecebido = valor != null ? valor.toString() : "null";
-        String tipoEsperado = requiredType != null ? requiredType.getSimpleName() : "desconhecido";
-
-        if (tipoEsperado.equals("UUID")) {
-            mensagemErro = String.format("ID inválido: '%s'. O ID deve ser um UUID válido no formato xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx", valorRecebido);
-        } else {
-            mensagemErro = String.format("Parâmetro '%s' com valor '%s' não pode ser convertido para %s", nomeParametro, valorRecebido, tipoEsperado);
-        }
-
-        log.warn("Erro de tipo de argumento - Path: {}, Method: {}, Parâmetro: {}, Valor: {}, Tipo esperado: {}",
-            request.getRequestURI(), request.getMethod(), nomeParametro, valorRecebido, tipoEsperado);
-
-        return buildErrorResponse(
-                HttpStatus.BAD_REQUEST,
-                "Requisição Inválida",
-                mensagemErro,
-                request.getRequestURI()
-        );
+        ApiErrorResponse body = ApiErrorFactory.fromTypeMismatch(request.getRequestURI(), ex);
+        log.warn("Erro de tipo de argumento - Path: {}, Method: {}, Param: {}, Codigo: {}",
+            request.getRequestURI(), request.getMethod(), ex.getName(), body.getCodigo());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(body);
     }
 
     @ExceptionHandler(MissingServletRequestParameterException.class)
-    public ResponseEntity<Map<String, Object>> handleMissingServletRequestParameterException(
+    public ResponseEntity<ApiErrorResponse> handleMissingServletRequestParameterException(
             MissingServletRequestParameterException ex, HttpServletRequest request) {
 
         if (shouldIgnoreEndpoint(request.getRequestURI())) {
@@ -296,20 +235,66 @@ public class ApiExceptionHandler {
             throw runtimeEx;
         }
 
-        String mensagemErro = ex.getMessage();
-        if (mensagemErro == null || mensagemErro.trim().isEmpty()) {
-            mensagemErro = "Parâmetro obrigatório ausente na requisição.";
+        ApiErrorResponse body = ApiErrorFactory.fromMissingParameter(request.getRequestURI(), ex);
+        log.warn("Parâmetro obrigatório ausente - Path: {}, Method: {}, Param: {}",
+            request.getRequestURI(), request.getMethod(), ex.getParameterName());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(body);
+    }
+
+    @ExceptionHandler(MissingRequestHeaderException.class)
+    public ResponseEntity<ApiErrorResponse> handleMissingRequestHeaderException(
+            MissingRequestHeaderException ex, HttpServletRequest request) {
+
+        if (shouldIgnoreEndpoint(request.getRequestURI())) {
+            RuntimeException runtimeEx = new RuntimeException("Actuator endpoint exception", ex);
+            throw runtimeEx;
         }
 
-        log.warn("Parâmetro obrigatório ausente - Path: {}, Method: {}, Message: {}",
-            request.getRequestURI(), request.getMethod(), mensagemErro);
+        String header = ex.getHeaderName();
+        String msg = String.format("Header obrigatório ausente: '%s'", header);
+        ApiErrorResponse body = ApiErrorFactory.badRequest(
+            request.getRequestURI(), ApiErrorCode.MISSING_HEADER, "Requisição Inválida", msg);
+        body.addError(new com.upsaude.exception.model.ApiFieldError(header, msg, ApiErrorCode.MISSING_HEADER, null));
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(body);
+    }
 
-        return buildErrorResponse(
-                HttpStatus.BAD_REQUEST,
-                "Requisição Inválida",
-                mensagemErro,
-                request.getRequestURI()
-        );
+    @ExceptionHandler(BindException.class)
+    public ResponseEntity<ApiErrorResponse> handleBindException(
+            BindException ex, HttpServletRequest request) {
+
+        if (shouldIgnoreEndpoint(request.getRequestURI())) {
+            RuntimeException runtimeEx = new RuntimeException("Actuator endpoint exception", ex);
+            throw runtimeEx;
+        }
+
+        ApiErrorResponse body = ApiErrorFactory.fromBindException(request.getRequestURI(), ex);
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(body);
+    }
+
+    @ExceptionHandler(ConstraintViolationException.class)
+    public ResponseEntity<ApiErrorResponse> handleConstraintViolationException(
+            ConstraintViolationException ex, HttpServletRequest request) {
+
+        if (shouldIgnoreEndpoint(request.getRequestURI())) {
+            RuntimeException runtimeEx = new RuntimeException("Actuator endpoint exception", ex);
+            throw runtimeEx;
+        }
+
+        ApiErrorResponse body = ApiErrorFactory.fromConstraintViolation(request.getRequestURI(), ex);
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(body);
+    }
+
+    @ExceptionHandler(InvalidArgumentException.class)
+    public ResponseEntity<ApiErrorResponse> handleInvalidArgumentException(
+            InvalidArgumentException ex, HttpServletRequest request) {
+
+        if (shouldIgnoreEndpoint(request.getRequestURI())) {
+            RuntimeException runtimeEx = new RuntimeException("Actuator endpoint exception", ex);
+            throw runtimeEx;
+        }
+
+        ApiErrorResponse body = ApiErrorFactory.fromInvalidArgument(request.getRequestURI(), ex);
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(body);
     }
 
     @ExceptionHandler(DataIntegrityViolationException.class)

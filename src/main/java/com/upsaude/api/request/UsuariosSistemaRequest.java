@@ -3,7 +3,7 @@ package com.upsaude.api.request;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.upsaude.enums.TipoUsuarioSistemaEnum;
 import com.upsaude.util.converter.TipoUsuarioSistemaEnumDeserializer;
-import jakarta.validation.constraints.Email;
+import com.upsaude.validation.annotation.EmailValido;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -43,7 +43,7 @@ public class UsuariosSistemaRequest {
     @Size(max = 100, message = "Username deve ter no máximo 100 caracteres")
     private String username;
 
-    @Email(message = "Email inválido")
+    @EmailValido
     @Size(max = 255, message = "Email deve ter no máximo 255 caracteres")
     private String email;
 

@@ -19,7 +19,10 @@ import com.upsaude.util.converter.OrientacaoSexualEnumDeserializer;
 import com.upsaude.util.converter.RacaCorEnumDeserializer;
 import com.upsaude.util.converter.SexoEnumDeserializer;
 import com.upsaude.util.converter.StatusPacienteEnumDeserializer;
-import jakarta.validation.constraints.Email;
+import com.upsaude.validation.annotation.CNSValido;
+import com.upsaude.validation.annotation.CPFValido;
+import com.upsaude.validation.annotation.EmailValido;
+import com.upsaude.validation.annotation.TelefoneValido;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
@@ -49,13 +52,14 @@ public class PacienteRequest {
     @Size(max = 255, message = "Nome completo deve ter no máximo 255 caracteres")
     private String nomeCompleto;
 
-    @Pattern(regexp = "^$|^[0-9]{11}$", message = "CPF deve conter 11 dígitos")
+    @CPFValido
+    @NotNull(message = "CPF do paciente é obrigatório")
     private String cpf;
 
     @Size(max = 20, message = "RG deve ter no máximo 20 caracteres")
     private String rg;
 
-    @Pattern(regexp = "^$|^[0-9]{15}$", message = "CNS deve conter 15 dígitos")
+    @CNSValido
     private String cns;
 
     private LocalDate dataNascimento;
@@ -103,10 +107,10 @@ public class PacienteRequest {
 
     private Boolean cnsValidado;
 
-    @Pattern(regexp = "^$|^[0-9]{10,11}$", message = "Telefone deve conter DDD + número (10 ou 11 dígitos)")
+    @TelefoneValido
     private String telefone;
 
-    @Email(message = "Email inválido")
+    @EmailValido
     @Size(max = 255, message = "Email deve ter no máximo 255 caracteres")
     private String email;
 
@@ -122,10 +126,11 @@ public class PacienteRequest {
     @Size(max = 255, message = "Nome do responsável deve ter no máximo 255 caracteres")
     private String responsavelNome;
 
-    @Pattern(regexp = "^$|^[0-9]{11}$", message = "CPF do responsável deve conter 11 dígitos")
+    @NotNull(message = "CPF do responsável é obrigatório")
+    @CPFValido
     private String responsavelCpf;
 
-    @Pattern(regexp = "^$|^[0-9]{10,11}$", message = "Telefone do responsável deve conter DDD + número (10 ou 11 dígitos)")
+    @TelefoneValido
     private String responsavelTelefone;
 
     @Size(max = 50, message = "Número da carteirinha deve ter no máximo 50 caracteres")

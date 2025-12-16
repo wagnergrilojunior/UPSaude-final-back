@@ -12,10 +12,10 @@ import com.upsaude.enums.TipoConvenioEnum;
 import com.upsaude.util.converter.ModalidadeConvenioEnumDeserializer;
 import com.upsaude.util.converter.StatusAtivoEnumDeserializer;
 import com.upsaude.util.converter.TipoConvenioEnumDeserializer;
+import com.upsaude.validation.annotation.CNPJValido;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import java.time.LocalDate;
 import java.util.UUID;
@@ -43,7 +43,7 @@ public class ConvenioRequest {
     @Size(max = 50, message = "Código deve ter no máximo 50 caracteres")
     private String codigo;
 
-    @Pattern(regexp = "^$|^\\d{14}$", message = "CNPJ deve ter 14 dígitos")
+    @CNPJValido
     private String cnpj;
 
     @Size(max = 20, message = "Inscrição estadual deve ter no máximo 20 caracteres")

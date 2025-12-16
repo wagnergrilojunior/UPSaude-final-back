@@ -5,9 +5,11 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.OffsetDateTime;
 import java.util.UUID;
+import com.upsaude.validation.annotation.IntervaloDataValido;
 import lombok.*;
 import io.swagger.v3.oas.annotations.media.Schema;
 
+@IntervaloDataValido(inicio = "dataInicio", fim = "dataFim", message = "Data fim não pode ser anterior à data início")
 @Data
 @Builder
 @NoArgsConstructor
