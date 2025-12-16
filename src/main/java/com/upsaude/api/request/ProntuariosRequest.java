@@ -5,11 +5,13 @@ import jakarta.validation.constraints.Size;
 import java.time.OffsetDateTime;
 import java.util.UUID;
 import lombok.*;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@Schema(description = "Dados de prontuarios")
 public class ProntuariosRequest {
     @NotNull(message = "Paciente é obrigatório")
     @NotNull(message = "Paciente é obrigatório")

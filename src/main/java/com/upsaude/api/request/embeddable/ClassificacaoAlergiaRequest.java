@@ -10,12 +10,14 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 @Getter
 @Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@Schema(description = "Dados de classificacao alergia")
 public class ClassificacaoAlergiaRequest {
     @JsonDeserialize(using = TipoAlergiaEnumDeserializer.class)
     private TipoAlergiaEnum tipoAlergia;

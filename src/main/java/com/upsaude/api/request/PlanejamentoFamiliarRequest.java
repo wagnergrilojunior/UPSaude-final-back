@@ -7,11 +7,13 @@ import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.UUID;
 import lombok.*;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@Schema(description = "Dados de planejamento familiar")
 public class PlanejamentoFamiliarRequest {
     private UUID paciente;
     private UUID profissionalResponsavel;

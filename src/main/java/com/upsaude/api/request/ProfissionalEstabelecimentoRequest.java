@@ -7,11 +7,13 @@ import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 import java.util.UUID;
 import lombok.*;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@Schema(description = "Dados de profissional estabelecimento")
 public class ProfissionalEstabelecimentoRequest {
     private UUID profissional;
     private UUID estabelecimento;

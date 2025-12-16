@@ -14,12 +14,14 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.OffsetDateTime;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 @Getter
 @Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@Schema(description = "Dados de informacoes atendimento")
 public class InformacoesAtendimentoRequest {
     @NotNull(message = "Data e hora do atendimento são obrigatórias")
     private OffsetDateTime dataHora;

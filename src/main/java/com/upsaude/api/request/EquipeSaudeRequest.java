@@ -15,12 +15,14 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 @Getter
 @Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@Schema(description = "Dados de equipe de saúde")
 public class EquipeSaudeRequest {
     @NotBlank(message = "INE é obrigatório")
     @Size(max = 15, message = "INE deve ter no máximo 15 caracteres")

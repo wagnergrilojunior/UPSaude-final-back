@@ -11,12 +11,14 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 @Getter
 @Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@Schema(description = "Dados de equipe cirúrgica")
 public class EquipeCirurgicaRequest {
     @NotNull(message = "Cirurgia é obrigatória")
     private UUID cirurgia;

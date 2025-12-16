@@ -8,11 +8,13 @@ import com.upsaude.util.converter.TipoNotificacaoEnumDeserializer;
 import java.time.OffsetDateTime;
 import java.util.UUID;
 import lombok.*;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@Schema(description = "Dados de template notificação")
 public class TemplateNotificacaoRequest {
     private UUID estabelecimento;
     private String nome;

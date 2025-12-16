@@ -12,12 +12,14 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDate;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 @Getter
 @Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@Schema(description = "Dados de registro ANS convênio")
 public class RegistroANSConvenioRequest {
     @Size(max = 50, message = "Registro ANS deve ter no máximo 50 caracteres")
     private String registroAns;

@@ -1,11 +1,13 @@
 package com.upsaude.api.request;
 
 import lombok.*;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@Schema(description = "Dados de fabricantes vacina")
 public class FabricantesVacinaRequest {
     private String nome;
     private String cnpj;

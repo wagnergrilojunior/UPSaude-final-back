@@ -9,12 +9,14 @@ import lombok.Setter;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 @Getter
 @Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@Schema(description = "Dados de informacoes financeiras convênio")
 public class InformacoesFinanceirasConvenioRequest {
     private LocalDate dataInicioContrato;
     private LocalDate dataFimContrato;

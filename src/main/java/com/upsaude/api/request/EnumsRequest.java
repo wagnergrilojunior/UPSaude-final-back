@@ -9,6 +9,7 @@ import lombok.*;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@Schema(description = "Dados de enums")
 public class EnumsRequest {
     private List<UUID> enums;
     private Integer totalEnums;

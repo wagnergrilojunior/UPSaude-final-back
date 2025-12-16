@@ -9,12 +9,14 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDate;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 @Getter
 @Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@Schema(description = "Dados de formacao médico")
 public class FormacaoMedicoRequest {
     @Size(max = 255, message = "Instituição de ensino deve ter no máximo 255 caracteres")
     private String instituicaoEnsino;
