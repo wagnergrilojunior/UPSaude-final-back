@@ -13,12 +13,14 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDate;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 @Getter
 @Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@Schema(description = "Dados de registro profissional médico")
 public class RegistroProfissionalMedicoRequest {
     @NotBlank(message = "CRM é obrigatório")
     @Pattern(regexp = "^\\d{4,10}$", message = "CRM deve ter entre 4 e 10 dígitos")

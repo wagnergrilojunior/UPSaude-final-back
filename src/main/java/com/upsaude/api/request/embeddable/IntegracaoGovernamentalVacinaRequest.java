@@ -9,12 +9,14 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.OffsetDateTime;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 @Getter
 @Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@Schema(description = "Dados de integracao governamental vacina")
 public class IntegracaoGovernamentalVacinaRequest {
     @Size(max = 50, message = "Código SI PNI deve ter no máximo 50 caracteres")
     private String codigoSiPni;

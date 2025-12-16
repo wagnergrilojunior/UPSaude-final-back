@@ -32,6 +32,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 @Getter
 @Setter
@@ -39,6 +40,7 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
+@Schema(description = "Dados de vacinas")
 public class VacinasRequest {
     @NotBlank(message = "Nome da vacina é obrigatório")
     @Size(max = 255, message = "Nome da vacina deve ter no máximo 255 caracteres")

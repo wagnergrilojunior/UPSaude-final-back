@@ -33,6 +33,7 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 @Data
 @Builder
@@ -40,6 +41,7 @@ import java.util.UUID;
 @AllArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
+@Schema(description = "Dados de paciente")
 public class PacienteRequest {
 
     @NotBlank(message = "Nome completo é obrigatório")

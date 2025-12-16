@@ -11,12 +11,14 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.math.BigDecimal;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 @Getter
 @Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@Schema(description = "Dados de conservacao armazenamento medicamento")
 public class ConservacaoArmazenamentoMedicamentoRequest {
     @DecimalMin(value = "-100.00", message = "Temperatura mínima de conservação deve ser maior ou igual a -100°C")
     @DecimalMax(value = "100.00", message = "Temperatura máxima de conservação deve ser menor ou igual a 100°C")

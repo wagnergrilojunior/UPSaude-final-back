@@ -16,12 +16,14 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.math.BigDecimal;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 @Getter
 @Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@Schema(description = "Dados de dosagem administracao medicamento")
 public class DosagemAdministracaoMedicamentoRequest {
     @NotBlank(message = "Dosagem é obrigatória")
     @Size(max = 50, message = "Dosagem deve ter no máximo 50 caracteres")

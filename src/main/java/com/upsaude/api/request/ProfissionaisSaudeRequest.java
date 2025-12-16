@@ -36,6 +36,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 @Getter
 @Setter
@@ -44,6 +45,7 @@ import lombok.Setter;
 @AllArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
+@Schema(description = "Dados de profissionais de saúde")
 public class ProfissionaisSaudeRequest {
 
     @NotBlank(message = "Nome completo é obrigatório")

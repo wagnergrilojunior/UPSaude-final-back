@@ -9,12 +9,14 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.math.BigDecimal;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 @Getter
 @Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@Schema(description = "Dados de conservacao vacina")
 public class ConservacaoVacinaRequest {
     private BigDecimal temperaturaConservacaoMin;
     private BigDecimal temperaturaConservacaoMax;

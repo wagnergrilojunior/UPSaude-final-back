@@ -7,12 +7,14 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 @Getter
 @Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@Schema(description = "Dados de identificacao medicamento")
 public class IdentificacaoMedicamentoRequest {
     @NotBlank(message = "Princípio ativo é obrigatório")
     @Size(max = 255, message = "Princípio ativo deve ter no máximo 255 caracteres")

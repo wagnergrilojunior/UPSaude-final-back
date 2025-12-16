@@ -7,12 +7,14 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 @Getter
 @Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@Schema(description = "Dados de contato convênio")
 public class ContatoConvenioRequest {
     @Size(max = 20, message = "Telefone principal deve ter no máximo 20 caracteres")
     private String telefonePrincipal;

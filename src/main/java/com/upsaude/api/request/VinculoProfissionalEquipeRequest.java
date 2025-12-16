@@ -9,11 +9,13 @@ import java.time.OffsetDateTime;
 import java.util.UUID;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@Schema(description = "Dados de vínculo profissional equipe")
 public class VinculoProfissionalEquipeRequest {
     @NotNull(message = "Profissional é obrigatório")
     private UUID profissional;

@@ -13,12 +13,14 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDate;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 @Getter
 @Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@Schema(description = "Dados de historico reacoes alergia paciente")
 public class HistoricoReacoesAlergiaPacienteRequest {
     private LocalDate dataUltimaReacao;
     private Integer numeroReacoes;

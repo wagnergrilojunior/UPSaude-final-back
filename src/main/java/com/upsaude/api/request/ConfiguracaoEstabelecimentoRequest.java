@@ -4,11 +4,13 @@ import java.time.LocalTime;
 import java.time.OffsetDateTime;
 import java.util.UUID;
 import lombok.*;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@Schema(description = "Dados de configuracao estabelecimento")
 public class ConfiguracaoEstabelecimentoRequest {
     private UUID estabelecimento;
     private Integer duracaoPadraoAtendimentoMinutos;

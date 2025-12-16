@@ -5,11 +5,13 @@ import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.UUID;
 import lombok.*;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@Schema(description = "Dados de equipamentos estabelecimento")
 public class EquipamentosEstabelecimentoRequest {
     private UUID estabelecimento;
     private UUID equipamento;

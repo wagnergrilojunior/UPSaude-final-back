@@ -3,11 +3,13 @@ package com.upsaude.api.request;
 import java.time.OffsetDateTime;
 import java.util.UUID;
 import lombok.*;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@Schema(description = "Dados de logs auditoria")
 public class LogsAuditoriaRequest {
     private String acao;
     private String entidade;

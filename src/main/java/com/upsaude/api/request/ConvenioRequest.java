@@ -24,12 +24,14 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 @Getter
 @Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@Schema(description = "Dados de convênio")
 public class ConvenioRequest {
     @NotBlank(message = "Nome do convênio é obrigatório")
     @Size(max = 255, message = "Nome deve ter no máximo 255 caracteres")

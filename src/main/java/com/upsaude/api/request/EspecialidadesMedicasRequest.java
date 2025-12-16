@@ -9,12 +9,14 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 @Getter
 @Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@Schema(description = "Dados de especialidades médicas")
 public class EspecialidadesMedicasRequest {
     @NotBlank(message = "Nome da especialidade é obrigatório")
     @Size(max = 255, message = "Nome deve ter no máximo 255 caracteres")

@@ -7,12 +7,14 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 @Getter
 @Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@Schema(description = "Dados de classificacao risco atendimento")
 public class ClassificacaoRiscoAtendimentoRequest {
     @Size(max = 50, message = "Classificação de risco deve ter no máximo 50 caracteres")
     private String classificacaoRisco;
