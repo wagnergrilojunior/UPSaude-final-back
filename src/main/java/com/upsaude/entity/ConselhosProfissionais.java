@@ -28,5 +28,4 @@ public class ConselhosProfissionais extends BaseEntityWithoutTenant {
     @Size(max = 1000, message = "Descrição deve ter no máximo 1000 caracteres")
     private String descricao;
 
-    
 }

@@ -18,6 +18,7 @@ public class VacinacoesResponse {
     private OffsetDateTime createdAt;
     private OffsetDateTime updatedAt;
     private Boolean active;
+    private EstabelecimentosResponse estabelecimento;
     private PacienteResponse paciente;
     private VacinasResponse vacina;
     private FabricantesVacinaResponse fabricante;

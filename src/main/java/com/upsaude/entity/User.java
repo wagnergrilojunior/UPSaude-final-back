@@ -120,4 +120,3 @@ public class User {
     @Column(name = "is_anonymous", nullable = false)
     private Boolean isAnonymous;
 }
-

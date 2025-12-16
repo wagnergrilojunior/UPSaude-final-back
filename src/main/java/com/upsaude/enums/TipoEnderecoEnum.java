@@ -3,11 +3,6 @@ package com.upsaude.enums;
 import java.util.Arrays;
 import java.util.Locale;
 
-/**
- * Enum para classificação de tipo de endereço.
- * Utilizado para identificar a finalidade do endereço (residencial, comercial, correspondência, etc.).
- * Compatível com padrões e-SUS/SISAB.
- */
 public enum TipoEnderecoEnum {
     RESIDENCIAL(1, "Residencial"),
     COMERCIAL(2, "Comercial"),
@@ -48,4 +43,3 @@ public enum TipoEnderecoEnum {
                 .orElse(null);
     }
 }
-

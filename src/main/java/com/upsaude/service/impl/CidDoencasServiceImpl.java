@@ -2,16 +2,24 @@ package com.upsaude.service.impl;
 
 import com.upsaude.api.request.CidDoencasRequest;
 import com.upsaude.api.response.CidDoencasResponse;
+import com.upsaude.cache.CacheKeyUtil;
 import com.upsaude.entity.CidDoencas;
 import com.upsaude.exception.BadRequestException;
+import com.upsaude.exception.ConflictException;
 import com.upsaude.exception.InternalServerErrorException;
 import com.upsaude.exception.NotFoundException;
-import com.upsaude.mapper.CidDoencasMapper;
 import com.upsaude.repository.CidDoencasRepository;
 import com.upsaude.service.CidDoencasService;
+import com.upsaude.service.support.ciddoencas.CidDoencasCreator;
+import com.upsaude.service.support.ciddoencas.CidDoencasDomainService;
+import com.upsaude.service.support.ciddoencas.CidDoencasResponseBuilder;
+import com.upsaude.service.support.ciddoencas.CidDoencasUpdater;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.Cache;
+import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.dao.DataAccessException;
 import org.springframework.data.domain.Page;
@@ -19,43 +27,38 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Objects;
 import java.util.UUID;
 
-/**
- * Implementação do serviço de gerenciamento de CidDoencas.
- *
- * @author UPSaúde
- */
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class CidDoencasServiceImpl implements CidDoencasService {
 
     private final CidDoencasRepository cidDoencasRepository;
-    private final CidDoencasMapper cidDoencasMapper;
+    private final CacheManager cacheManager;
+    private final CidDoencasCreator creator;
+    private final CidDoencasUpdater updater;
+    private final CidDoencasResponseBuilder responseBuilder;
+    private final CidDoencasDomainService domainService;
 
     @Override
     @Transactional
-    @CacheEvict(value = "ciddoencas", allEntries = true)
     public CidDoencasResponse criar(CidDoencasRequest request) {
         log.debug("Criando novo CID de doença. Request: {}", request);
-        
-        if (request == null) {
-            log.warn("Tentativa de criar CID de doença com request nulo");
-            throw new BadRequestException("Dados do CID de doença são obrigatórios");
-        }
 
         try {
-            validarDadosBasicos(request);
+            CidDoencas saved = creator.criar(request);
+            CidDoencasResponse response = responseBuilder.build(saved);
 
-            CidDoencas cidDoencas = cidDoencasMapper.fromRequest(request);
-            cidDoencas.setActive(true);
+            Cache cache = cacheManager.getCache(CacheKeyUtil.CACHE_CID_DOENCAS);
+            if (cache != null) {
+                Object key = Objects.requireNonNull((Object) CacheKeyUtil.cidDoenca(saved.getId()));
+                cache.put(key, response);
+            }
 
-            CidDoencas cidDoencasSalvo = cidDoencasRepository.save(cidDoencas);
-            log.info("CID de doença criado com sucesso. ID: {}", cidDoencasSalvo.getId());
-
-            return cidDoencasMapper.toResponse(cidDoencasSalvo);
-        } catch (BadRequestException e) {
+            return response;
+        } catch (BadRequestException | ConflictException e) {
             log.warn("Erro de validação ao criar CID de doença. Request: {}. Erro: {}", request, e.getMessage());
             throw e;
         } catch (DataAccessException e) {
@@ -69,10 +72,10 @@ public class CidDoencasServiceImpl implements CidDoencasService {
 
     @Override
     @Transactional(readOnly = true)
-    @Cacheable(value = "ciddoencas", key = "#id")
+    @Cacheable(cacheNames = CacheKeyUtil.CACHE_CID_DOENCAS, keyGenerator = "cidDoencasCacheKeyGenerator")
     public CidDoencasResponse obterPorId(UUID id) {
         log.debug("Buscando CID de doença por ID: {} (cache miss)", id);
-        
+
         if (id == null) {
             log.warn("ID nulo recebido para busca de CID de doença");
             throw new BadRequestException("ID do CID de doença é obrigatório");
@@ -83,7 +86,7 @@ public class CidDoencasServiceImpl implements CidDoencasService {
                     .orElseThrow(() -> new NotFoundException("CID de doença não encontrado com ID: " + id));
 
             log.debug("CID de doença encontrado. ID: {}", id);
-            return cidDoencasMapper.toResponse(cidDoencas);
+            return responseBuilder.build(cidDoencas);
         } catch (NotFoundException e) {
             log.warn("CID de doença não encontrado. ID: {}", id);
             throw e;
@@ -105,7 +108,7 @@ public class CidDoencasServiceImpl implements CidDoencasService {
         try {
             Page<CidDoencas> cidDoencas = cidDoencasRepository.findAll(pageable);
             log.debug("Listagem de CID de doenças concluída. Total de elementos: {}", cidDoencas.getTotalElements());
-            return cidDoencas.map(cidDoencasMapper::toResponse);
+            return cidDoencas.map(responseBuilder::build);
         } catch (DataAccessException e) {
             log.error("Erro de acesso a dados ao listar CID de doenças. Pageable: {}", pageable, e);
             throw new InternalServerErrorException("Erro ao listar CID de doenças", e);
@@ -117,7 +120,7 @@ public class CidDoencasServiceImpl implements CidDoencasService {
 
     @Override
     @Transactional
-    @CacheEvict(value = "ciddoencas", key = "#id")
+    @CachePut(cacheNames = CacheKeyUtil.CACHE_CID_DOENCAS, keyGenerator = "cidDoencasCacheKeyGenerator")
     public CidDoencasResponse atualizar(UUID id, CidDoencasRequest request) {
         log.debug("Atualizando CID de doença. ID: {}, Request: {}", id, request);
 
@@ -131,22 +134,12 @@ public class CidDoencasServiceImpl implements CidDoencasService {
         }
 
         try {
-            validarDadosBasicos(request);
-
-            CidDoencas cidDoencasExistente = cidDoencasRepository.findById(id)
-                    .orElseThrow(() -> new NotFoundException("CID de doença não encontrado com ID: " + id));
-
-            // Usa mapper do MapStruct que preserva campos de controle automaticamente
-            cidDoencasMapper.updateFromRequest(request, cidDoencasExistente);
-
-            CidDoencas cidDoencasAtualizado = cidDoencasRepository.save(cidDoencasExistente);
-            log.info("CID de doença atualizado com sucesso. ID: {}", cidDoencasAtualizado.getId());
-
-            return cidDoencasMapper.toResponse(cidDoencasAtualizado);
+            CidDoencas updated = updater.atualizar(id, request);
+            return responseBuilder.build(updated);
         } catch (NotFoundException e) {
             log.warn("Tentativa de atualizar CID de doença não existente. ID: {}", id);
             throw e;
-        } catch (BadRequestException e) {
+        } catch (BadRequestException | ConflictException e) {
             log.warn("Erro de validação ao atualizar CID de doença. ID: {}, Request: {}. Erro: {}", id, request, e.getMessage());
             throw e;
         } catch (DataAccessException e) {
@@ -160,27 +153,12 @@ public class CidDoencasServiceImpl implements CidDoencasService {
 
     @Override
     @Transactional
-    @CacheEvict(value = "ciddoencas", key = "#id")
+    @CacheEvict(cacheNames = CacheKeyUtil.CACHE_CID_DOENCAS, keyGenerator = "cidDoencasCacheKeyGenerator", beforeInvocation = false)
     public void excluir(UUID id) {
         log.debug("Excluindo CID de doença. ID: {}", id);
 
-        if (id == null) {
-            log.warn("ID nulo recebido para exclusão de CID de doença");
-            throw new BadRequestException("ID do CID de doença é obrigatório");
-        }
-
         try {
-            CidDoencas cidDoencas = cidDoencasRepository.findById(id)
-                    .orElseThrow(() -> new NotFoundException("CID de doença não encontrado com ID: " + id));
-
-            if (Boolean.FALSE.equals(cidDoencas.getActive())) {
-                log.warn("Tentativa de excluir CID de doença já inativo. ID: {}", id);
-                throw new BadRequestException("CID de doença já está inativo");
-            }
-
-            cidDoencas.setActive(false);
-            cidDoencasRepository.save(cidDoencas);
-            log.info("CID de doença excluído (desativado) com sucesso. ID: {}", id);
+            inativarInternal(id);
         } catch (NotFoundException e) {
             log.warn("Tentativa de excluir CID de doença não existente. ID: {}", id);
             throw e;
@@ -196,12 +174,19 @@ public class CidDoencasServiceImpl implements CidDoencasService {
         }
     }
 
-    private void validarDadosBasicos(CidDoencasRequest request) {
-        if (request == null) {
-            throw new BadRequestException("Dados do ciddoencas são obrigatórios");
+    private void inativarInternal(UUID id) {
+        if (id == null) {
+            log.warn("ID nulo recebido para exclusão de CID de doença");
+            throw new BadRequestException("ID do CID de doença é obrigatório");
         }
+
+        CidDoencas cidDoencas = cidDoencasRepository.findById(id)
+            .orElseThrow(() -> new NotFoundException("CID de doença não encontrado com ID: " + id));
+
+        domainService.validarPodeInativar(cidDoencas);
+        cidDoencas.setActive(false);
+        cidDoencasRepository.save(Objects.requireNonNull(cidDoencas));
+        log.info("CID de doença excluído (desativado) com sucesso. ID: {}", id);
     }
 
-    // Método removido - agora usa cidDoencasMapper.updateFromRequest diretamente
-    // O MapStruct já preserva campos de controle automaticamente
 }

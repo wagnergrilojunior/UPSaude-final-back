@@ -14,7 +14,6 @@ public interface EpidemiologiaDoencaMapper {
     EpidemiologiaDoencaResponse toResponse(EpidemiologiaDoenca entity);
     void updateFromRequest(EpidemiologiaDoencaRequest request, @MappingTarget EpidemiologiaDoenca entity);
 
-    // Mapeamento entre DTO e Entity
     EpidemiologiaDoenca toEntity(com.upsaude.dto.embeddable.EpidemiologiaDoencaDTO dto);
     com.upsaude.dto.embeddable.EpidemiologiaDoencaDTO toDTO(EpidemiologiaDoenca entity);
     void updateFromDTO(com.upsaude.dto.embeddable.EpidemiologiaDoencaDTO dto, @MappingTarget EpidemiologiaDoenca entity);

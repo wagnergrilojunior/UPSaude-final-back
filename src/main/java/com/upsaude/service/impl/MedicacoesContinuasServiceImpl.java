@@ -20,11 +20,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.UUID;
 
-/**
- * Implementação do serviço de gerenciamento de MedicacoesContinuas.
- *
- * @author UPSaúde
- */
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -38,8 +33,6 @@ public class MedicacoesContinuasServiceImpl implements MedicacoesContinuasServic
     @CacheEvict(value = "medicacoescontinuas", allEntries = true)
     public MedicacoesContinuasResponse criar(MedicacoesContinuasRequest request) {
         log.debug("Criando novo medicacoescontinuas");
-
-        validarDadosBasicos(request);
 
         MedicacoesContinuas medicacoesContinuas = medicacoesContinuasMapper.fromRequest(request);
         medicacoesContinuas.setActive(true);
@@ -84,8 +77,6 @@ public class MedicacoesContinuasServiceImpl implements MedicacoesContinuasServic
             throw new BadRequestException("ID do medicacoescontinuas é obrigatório");
         }
 
-        validarDadosBasicos(request);
-
         MedicacoesContinuas medicacoesContinuasExistente = medicacoesContinuasRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("MedicacoesContinuas não encontrado com ID: " + id));
 
@@ -119,24 +110,15 @@ public class MedicacoesContinuasServiceImpl implements MedicacoesContinuasServic
         log.info("MedicacoesContinuas excluído (desativado) com sucesso. ID: {}", id);
     }
 
-    private void validarDadosBasicos(MedicacoesContinuasRequest request) {
-        if (request == null) {
-            throw new BadRequestException("Dados do medicacoescontinuas são obrigatórios");
-        }
-    }
-
     private void atualizarDadosMedicacoesContinuas(MedicacoesContinuas medicacoesContinuas, MedicacoesContinuasRequest request) {
         MedicacoesContinuas medicacoesContinuasAtualizado = medicacoesContinuasMapper.fromRequest(request);
-        
-        // Preserva campos de controle
+
         java.util.UUID idOriginal = medicacoesContinuas.getId();
         Boolean activeOriginal = medicacoesContinuas.getActive();
         java.time.OffsetDateTime createdAtOriginal = medicacoesContinuas.getCreatedAt();
-        
-        // Copia todas as propriedades do objeto atualizado
+
         BeanUtils.copyProperties(medicacoesContinuasAtualizado, medicacoesContinuas);
-        
-        // Restaura campos de controle
+
         medicacoesContinuas.setId(idOriginal);
         medicacoesContinuas.setActive(activeOriginal);
         medicacoesContinuas.setCreatedAt(createdAtOriginal);

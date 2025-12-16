@@ -38,9 +38,9 @@ public class TenantResponse {
     private String responsavelCpf;
     private String responsavelTelefone;
     private String horarioFuncionamento;
-    
+
     @Builder.Default
     private List<EnderecoResponse> enderecos = new ArrayList<>();
-    
+
     private String observacoes;
 }

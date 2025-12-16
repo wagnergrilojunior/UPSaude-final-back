@@ -2,81 +2,104 @@ package com.upsaude.service.impl;
 
 import com.upsaude.api.request.PermissoesRequest;
 import com.upsaude.api.response.PermissoesResponse;
+import com.upsaude.cache.CacheKeyUtil;
 import com.upsaude.entity.Permissoes;
+import com.upsaude.entity.Tenant;
 import com.upsaude.exception.BadRequestException;
+import com.upsaude.exception.InternalServerErrorException;
 import com.upsaude.exception.NotFoundException;
-import com.upsaude.mapper.PermissoesMapper;
 import com.upsaude.repository.PermissoesRepository;
 import com.upsaude.service.PermissoesService;
-import jakarta.transaction.Transactional;
+import com.upsaude.service.TenantService;
+import com.upsaude.service.support.permissoes.PermissoesCreator;
+import com.upsaude.service.support.permissoes.PermissoesDomainService;
+import com.upsaude.service.support.permissoes.PermissoesResponseBuilder;
+import com.upsaude.service.support.permissoes.PermissoesTenantEnforcer;
+import com.upsaude.service.support.permissoes.PermissoesUpdater;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.BeanUtils;
+import org.springframework.cache.Cache;
+import org.springframework.cache.CacheManager;
 import org.springframework.data.domain.Page;
 import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.dao.DataAccessException;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Objects;
 import java.util.UUID;
 
-/**
- * Implementação do serviço de gerenciamento de Permissoes.
- *
- * @author UPSaúde
- */
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class PermissoesServiceImpl implements PermissoesService {
 
     private final PermissoesRepository permissoesRepository;
-    private final PermissoesMapper permissoesMapper;
+    private final CacheManager cacheManager;
+    private final TenantService tenantService;
+
+    private final PermissoesCreator creator;
+    private final PermissoesUpdater updater;
+    private final PermissoesResponseBuilder responseBuilder;
+    private final PermissoesDomainService domainService;
+    private final PermissoesTenantEnforcer tenantEnforcer;
 
     @Override
     @Transactional
-    @CacheEvict(value = "permissoes", allEntries = true)
     public PermissoesResponse criar(PermissoesRequest request) {
         log.debug("Criando novo permissoes");
 
-        validarDadosBasicos(request);
+        try {
+            UUID tenantId = tenantService.validarTenantAtual();
+            Tenant tenant = tenantService.obterTenantDoUsuarioAutenticado();
+            validarTenantAutenticadoOrThrow(tenantId, tenant);
 
-        Permissoes permissoes = permissoesMapper.fromRequest(request);
-        permissoes.setActive(true);
+            Permissoes saved = creator.criar(request, tenantId, tenant);
+            PermissoesResponse response = responseBuilder.build(saved);
 
-        Permissoes permissoesSalvo = permissoesRepository.save(permissoes);
-        log.info("Permissoes criado com sucesso. ID: {}", permissoesSalvo.getId());
+            Cache cache = cacheManager.getCache(CacheKeyUtil.CACHE_PERMISSOES);
+            if (cache != null) {
+                Object key = Objects.requireNonNull((Object) CacheKeyUtil.permissao(tenantId, saved.getId()));
+                cache.put(key, response);
+            }
 
-        return permissoesMapper.toResponse(permissoesSalvo);
+            return response;
+        } catch (BadRequestException | NotFoundException e) {
+            throw e;
+        } catch (DataAccessException e) {
+            log.error("Erro de acesso a dados ao criar permissão. Request: {}", request, e);
+            throw new InternalServerErrorException("Erro ao persistir permissão", e);
+        } catch (Exception e) {
+            throw new InternalServerErrorException("Erro ao criar permissão", e);
+        }
     }
 
     @Override
-    @Transactional
-    @Cacheable(value = "permissoes", key = "#id")
+    @Transactional(readOnly = true)
+    @Cacheable(cacheNames = CacheKeyUtil.CACHE_PERMISSOES, keyGenerator = "permissoesCacheKeyGenerator")
     public PermissoesResponse obterPorId(UUID id) {
         log.debug("Buscando permissoes por ID: {} (cache miss)", id);
         if (id == null) {
             throw new BadRequestException("ID do permissoes é obrigatório");
         }
 
-        Permissoes permissoes = permissoesRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("Permissoes não encontrado com ID: " + id));
-
-        return permissoesMapper.toResponse(permissoes);
+        UUID tenantId = tenantService.validarTenantAtual();
+        Permissoes permissoes = tenantEnforcer.validarAcessoCompleto(id, tenantId);
+        return responseBuilder.build(permissoes);
     }
 
     @Override
+    @Transactional(readOnly = true)
     public Page<PermissoesResponse> listar(Pageable pageable) {
-        log.debug("Listando Permissoes paginados. Página: {}, Tamanho: {}",
-                pageable.getPageNumber(), pageable.getPageSize());
-
-        Page<Permissoes> permissoes = permissoesRepository.findAll(pageable);
-        return permissoes.map(permissoesMapper::toResponse);
+        return listar(pageable, null, null, null);
     }
 
     @Override
     @Transactional
-    @CacheEvict(value = "permissoes", key = "#id")
+    @CachePut(cacheNames = CacheKeyUtil.CACHE_PERMISSOES, keyGenerator = "permissoesCacheKeyGenerator")
     public PermissoesResponse atualizar(UUID id, PermissoesRequest request) {
         log.debug("Atualizando permissoes. ID: {}", id);
 
@@ -84,63 +107,60 @@ public class PermissoesServiceImpl implements PermissoesService {
             throw new BadRequestException("ID do permissoes é obrigatório");
         }
 
-        validarDadosBasicos(request);
+        UUID tenantId = tenantService.validarTenantAtual();
+        Tenant tenant = tenantService.obterTenantDoUsuarioAutenticado();
+        validarTenantAutenticadoOrThrow(tenantId, tenant);
 
-        Permissoes permissoesExistente = permissoesRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("Permissoes não encontrado com ID: " + id));
-
-        atualizarDadosPermissoes(permissoesExistente, request);
-
-        Permissoes permissoesAtualizado = permissoesRepository.save(permissoesExistente);
-        log.info("Permissoes atualizado com sucesso. ID: {}", permissoesAtualizado.getId());
-
-        return permissoesMapper.toResponse(permissoesAtualizado);
+        Permissoes updated = updater.atualizar(id, request, tenantId, tenant);
+        return responseBuilder.build(updated);
     }
 
     @Override
     @Transactional
-    @CacheEvict(value = "permissoes", key = "#id")
+    @CacheEvict(cacheNames = CacheKeyUtil.CACHE_PERMISSOES, keyGenerator = "permissoesCacheKeyGenerator", beforeInvocation = false)
     public void excluir(UUID id) {
         log.debug("Excluindo permissoes. ID: {}", id);
 
+        UUID tenantId = tenantService.validarTenantAtual();
+        inativarInternal(id, tenantId);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Page<PermissoesResponse> listar(Pageable pageable, UUID estabelecimentoId, String modulo, String nome) {
+        log.debug("Listando permissões. pageable: {}, estabelecimentoId: {}, modulo: {}, nome: {}", pageable, estabelecimentoId, modulo, nome);
+
+        UUID tenantId = tenantService.validarTenantAtual();
+
+        Page<Permissoes> page;
+        if (estabelecimentoId != null) {
+            page = permissoesRepository.findByEstabelecimentoIdAndTenantId(estabelecimentoId, tenantId, pageable);
+        } else if (modulo != null && !modulo.isBlank()) {
+            page = permissoesRepository.findByModuloAndTenantId(modulo, tenantId, pageable);
+        } else if (nome != null && !nome.isBlank()) {
+            page = permissoesRepository.findByNomeContainingIgnoreCaseAndTenantId(nome, tenantId, pageable);
+        } else {
+            page = permissoesRepository.findAllByTenant(tenantId, pageable);
+        }
+
+        return page.map(responseBuilder::build);
+    }
+
+    private void inativarInternal(UUID id, UUID tenantId) {
         if (id == null) {
             throw new BadRequestException("ID do permissoes é obrigatório");
         }
 
-        Permissoes permissoes = permissoesRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("Permissoes não encontrado com ID: " + id));
-
-        if (Boolean.FALSE.equals(permissoes.getActive())) {
-            throw new BadRequestException("Permissoes já está inativo");
-        }
-
-        permissoes.setActive(false);
-        permissoesRepository.save(permissoes);
+        Permissoes entity = tenantEnforcer.validarAcesso(id, tenantId);
+        domainService.validarPodeInativar(entity);
+        entity.setActive(false);
+        permissoesRepository.save(Objects.requireNonNull(entity));
         log.info("Permissoes excluído (desativado) com sucesso. ID: {}", id);
     }
 
-    private void validarDadosBasicos(PermissoesRequest request) {
-        if (request == null) {
-            throw new BadRequestException("Dados do permissoes são obrigatórios");
+    private void validarTenantAutenticadoOrThrow(UUID tenantId, Tenant tenant) {
+        if (tenantId == null || tenant == null || tenant.getId() == null || !tenantId.equals(tenant.getId())) {
+            throw new BadRequestException("Não foi possível obter tenant do usuário autenticado");
         }
-    }
-
-        private void atualizarDadosPermissoes(Permissoes permissoes, PermissoesRequest request) {
-        Permissoes permissoesAtualizado = permissoesMapper.fromRequest(request);
-        
-        // Preserva campos de controle
-        java.util.UUID idOriginal = permissoes.getId();
-        com.upsaude.entity.Tenant tenantOriginal = permissoes.getTenant();
-        Boolean activeOriginal = permissoes.getActive();
-        java.time.OffsetDateTime createdAtOriginal = permissoes.getCreatedAt();
-        
-        // Copia todas as propriedades do objeto atualizado
-        BeanUtils.copyProperties(permissoesAtualizado, permissoes);
-        
-        // Restaura campos de controle
-        permissoes.setId(idOriginal);
-        permissoes.setTenant(tenantOriginal);
-        permissoes.setActive(activeOriginal);
-        permissoes.setCreatedAt(createdAtOriginal);
     }
 }

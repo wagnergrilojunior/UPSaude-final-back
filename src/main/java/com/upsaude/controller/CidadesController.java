@@ -24,11 +24,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
 
-/**
- * Controlador REST para operações relacionadas a Cidades.
- *
- * @author UPSaúde
- */
 @RestController
 @RequestMapping("/v1/cidades")
 @Tag(name = "Cidades", description = "API para gerenciamento de Cidades")

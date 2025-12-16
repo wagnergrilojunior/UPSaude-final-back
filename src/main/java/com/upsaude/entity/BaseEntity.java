@@ -42,8 +42,8 @@ public abstract class BaseEntity {
     @JoinColumn(name = "tenant_id", nullable = false)
     private Tenant tenant;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "estabelecimento_id")
+    @ManyToOne(fetch = FetchType.LAZY, optional = true)
+    @JoinColumn(name = "estabelecimento_id", nullable = true)
     private Estabelecimentos estabelecimento;
 
     @Column(name = "ativo", nullable = false)

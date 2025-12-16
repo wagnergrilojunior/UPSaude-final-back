@@ -1,41 +1,24 @@
 package com.upsaude.repository;
 
 import java.util.UUID;
+import java.util.Optional;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import com.upsaude.entity.LogsAuditoria;
-import com.upsaude.entity.Tenant;
 
 public interface LogsAuditoriaRepository extends JpaRepository<LogsAuditoria, UUID> {
-    
-    /**
-     * Busca todos os logs de auditoria de um estabelecimento, ordenados por data de criação decrescente.
-     *
-     * @param estabelecimentoId ID do estabelecimento
-     * @param pageable informações de paginação
-     * @return página de logs do estabelecimento
-     */
-    Page<LogsAuditoria> findByEstabelecimentoIdOrderByCreatedAtDesc(UUID estabelecimentoId, Pageable pageable);
 
-    /**
-     * Busca todos os logs de auditoria de um tenant, ordenados por data de criação decrescente.
-     *
-     * @param tenant tenant
-     * @param pageable informações de paginação
-     * @return página de logs do tenant
-     */
-    Page<LogsAuditoria> findByTenantOrderByCreatedAtDesc(Tenant tenant, Pageable pageable);
+    @Query("SELECT l FROM LogsAuditoria l WHERE l.id = :id AND l.tenant.id = :tenantId")
+    Optional<LogsAuditoria> findByIdAndTenant(@Param("id") UUID id, @Param("tenantId") UUID tenantId);
 
-    /**
-     * Busca todos os logs de auditoria de um estabelecimento e tenant, ordenados por data de criação decrescente.
-     *
-     * @param estabelecimentoId ID do estabelecimento
-     * @param tenant tenant
-     * @param pageable informações de paginação
-     * @return página de logs
-     */
-    Page<LogsAuditoria> findByEstabelecimentoIdAndTenantOrderByCreatedAtDesc(UUID estabelecimentoId, Tenant tenant, Pageable pageable);
+    @Query("SELECT l FROM LogsAuditoria l WHERE l.tenant.id = :tenantId")
+    Page<LogsAuditoria> findAllByTenant(@Param("tenantId") UUID tenantId, Pageable pageable);
+
+    @Query("SELECT l FROM LogsAuditoria l WHERE l.estabelecimento.id = :estabelecimentoId AND l.tenant.id = :tenantId ORDER BY l.createdAt DESC")
+    Page<LogsAuditoria> findByEstabelecimentoIdAndTenantIdOrderByCreatedAtDesc(@Param("estabelecimentoId") UUID estabelecimentoId, @Param("tenantId") UUID tenantId, Pageable pageable);
 }

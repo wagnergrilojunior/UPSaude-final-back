@@ -2,194 +2,175 @@ package com.upsaude.service.impl;
 
 import com.upsaude.api.request.AcaoPromocaoPrevencaoRequest;
 import com.upsaude.api.response.AcaoPromocaoPrevencaoResponse;
-import com.upsaude.entity.AcaoPromocaoPrevencao;
 import com.upsaude.exception.BadRequestException;
+import com.upsaude.exception.InternalServerErrorException;
 import com.upsaude.exception.NotFoundException;
-import com.upsaude.mapper.AcaoPromocaoPrevencaoMapper;
+import com.upsaude.cache.CacheKeyUtil;
+import com.upsaude.entity.AcaoPromocaoPrevencao;
 import com.upsaude.repository.AcaoPromocaoPrevencaoRepository;
 import com.upsaude.service.AcaoPromocaoPrevencaoService;
+import com.upsaude.service.TenantService;
+import com.upsaude.service.support.acaopromocaoprevencao.AcaoPromocaoPrevencaoCreator;
+import com.upsaude.service.support.acaopromocaoprevencao.AcaoPromocaoPrevencaoDomainService;
+import com.upsaude.service.support.acaopromocaoprevencao.AcaoPromocaoPrevencaoResponseBuilder;
+import com.upsaude.service.support.acaopromocaoprevencao.AcaoPromocaoPrevencaoTenantEnforcer;
+import com.upsaude.service.support.acaopromocaoprevencao.AcaoPromocaoPrevencaoUpdater;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.BeanUtils;
-import org.springframework.data.domain.Page;
 import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.Cache;
+import org.springframework.cache.CacheManager;
+import org.springframework.dao.DataAccessException;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.util.Objects;
 import java.util.UUID;
 
-/**
- * Implementação do serviço de gerenciamento de Ação de Promoção e Prevenção.
- *
- * @author UPSaúde
- */
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class AcaoPromocaoPrevencaoServiceImpl implements AcaoPromocaoPrevencaoService {
 
     private final AcaoPromocaoPrevencaoRepository acaoPromocaoPrevencaoRepository;
-    private final AcaoPromocaoPrevencaoMapper acaoPromocaoPrevencaoMapper;
+    private final TenantService tenantService;
+    private final CacheManager cacheManager;
+
+    private final AcaoPromocaoPrevencaoCreator creator;
+    private final AcaoPromocaoPrevencaoUpdater updater;
+    private final AcaoPromocaoPrevencaoTenantEnforcer tenantEnforcer;
+    private final AcaoPromocaoPrevencaoDomainService domainService;
+    private final AcaoPromocaoPrevencaoResponseBuilder responseBuilder;
 
     @Override
     @Transactional
-    @CacheEvict(value = "acaopromocaoprevencao", allEntries = true)
     public AcaoPromocaoPrevencaoResponse criar(AcaoPromocaoPrevencaoRequest request) {
-        log.debug("Criando nova ação de promoção e prevenção");
+        try {
+            UUID tenantId = tenantService.validarTenantAtual();
+            AcaoPromocaoPrevencao acao = creator.criar(request, tenantId);
+            AcaoPromocaoPrevencaoResponse response = responseBuilder.build(acao);
 
-        validarDadosBasicos(request);
+            Cache cache = cacheManager.getCache(CacheKeyUtil.CACHE_ACOES_PROMOCAO_PREVENCAO);
+            if (cache != null) {
+                Object key = Objects.requireNonNull((Object) CacheKeyUtil.acaoPromocaoPrevencao(tenantId, acao.getId()));
+                cache.put(key, response);
+            }
 
-        AcaoPromocaoPrevencao acaoPromocaoPrevencao = acaoPromocaoPrevencaoMapper.fromRequest(request);
-        acaoPromocaoPrevencao.setActive(true);
-
-        if (acaoPromocaoPrevencao.getStatusAcao() == null) {
-            acaoPromocaoPrevencao.setStatusAcao("PLANEJADA");
+            return response;
+        } catch (BadRequestException | NotFoundException e) {
+            throw e;
+        } catch (DataAccessException e) {
+            log.error("Erro de persistência ao criar ação promoção/prevenção.", e);
+            throw new InternalServerErrorException("Erro ao criar ação de promoção e prevenção");
+        } catch (Exception e) {
+            log.error("Erro inesperado ao criar ação promoção/prevenção.", e);
+            throw e;
         }
-
-        if (acaoPromocaoPrevencao.getAcaoContinua() == null) {
-            acaoPromocaoPrevencao.setAcaoContinua(false);
-        }
-
-        AcaoPromocaoPrevencao acaoSalva = acaoPromocaoPrevencaoRepository.save(acaoPromocaoPrevencao);
-        log.info("Ação de promoção e prevenção criada com sucesso. ID: {}", acaoSalva.getId());
-
-        return acaoPromocaoPrevencaoMapper.toResponse(acaoSalva);
     }
 
     @Override
     @Transactional
-    @Cacheable(value = "acaopromocaoprevencao", key = "#id")
+    @Cacheable(cacheNames = CacheKeyUtil.CACHE_ACOES_PROMOCAO_PREVENCAO, keyGenerator = "acaoPromocaoPrevencaoCacheKeyGenerator")
     public AcaoPromocaoPrevencaoResponse obterPorId(UUID id) {
-        log.debug("Buscando ação de promoção e prevenção por ID: {} (cache miss)", id);
-        if (id == null) {
-            throw new BadRequestException("ID da ação de promoção e prevenção é obrigatório");
-        }
+        UUID tenantId = tenantService.validarTenantAtual();
+        if (id == null) throw new BadRequestException("ID da ação de promoção e prevenção é obrigatório");
 
-        AcaoPromocaoPrevencao acaoPromocaoPrevencao = acaoPromocaoPrevencaoRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("Ação de promoção e prevenção não encontrada com ID: " + id));
-
-        return acaoPromocaoPrevencaoMapper.toResponse(acaoPromocaoPrevencao);
+        AcaoPromocaoPrevencao acao = tenantEnforcer.validarAcessoCompleto(id, tenantId);
+        return responseBuilder.build(acao);
     }
 
     @Override
+    @Transactional
     public Page<AcaoPromocaoPrevencaoResponse> listar(Pageable pageable) {
-        log.debug("Listando ações de promoção e prevenção paginadas");
-
-        Page<AcaoPromocaoPrevencao> acoes = acaoPromocaoPrevencaoRepository.findAll(pageable);
-        return acoes.map(acaoPromocaoPrevencaoMapper::toResponse);
+        UUID tenantId = tenantService.validarTenantAtual();
+        return acaoPromocaoPrevencaoRepository.findAllByTenant(tenantId, pageable).map(responseBuilder::build);
     }
 
     @Override
+    @Transactional
     public Page<AcaoPromocaoPrevencaoResponse> listarPorEstabelecimento(UUID estabelecimentoId, Pageable pageable) {
-        log.debug("Listando ações de promoção e prevenção por estabelecimento: {}", estabelecimentoId);
-
-        Page<AcaoPromocaoPrevencao> acoes = acaoPromocaoPrevencaoRepository.findByEstabelecimentoIdOrderByDataInicioDesc(estabelecimentoId, pageable);
-        return acoes.map(acaoPromocaoPrevencaoMapper::toResponse);
+        UUID tenantId = tenantService.validarTenantAtual();
+        return acaoPromocaoPrevencaoRepository.findByEstabelecimentoIdAndTenantIdOrderByDataInicioDesc(estabelecimentoId, tenantId, pageable)
+                .map(responseBuilder::build);
     }
 
     @Override
+    @Transactional
     public Page<AcaoPromocaoPrevencaoResponse> listarPorProfissionalResponsavel(UUID profissionalId, Pageable pageable) {
-        log.debug("Listando ações de promoção e prevenção por profissional: {}", profissionalId);
-
-        Page<AcaoPromocaoPrevencao> acoes = acaoPromocaoPrevencaoRepository.findByProfissionalResponsavelIdOrderByDataInicioDesc(profissionalId, pageable);
-        return acoes.map(acaoPromocaoPrevencaoMapper::toResponse);
+        UUID tenantId = tenantService.validarTenantAtual();
+        return acaoPromocaoPrevencaoRepository.findByProfissionalResponsavelIdAndTenantIdOrderByDataInicioDesc(profissionalId, tenantId, pageable)
+                .map(responseBuilder::build);
     }
 
     @Override
+    @Transactional
     public Page<AcaoPromocaoPrevencaoResponse> listarPorStatus(String status, UUID estabelecimentoId, Pageable pageable) {
-        log.debug("Listando ações de promoção e prevenção por status: {}", status);
-
-        Page<AcaoPromocaoPrevencao> acoes = acaoPromocaoPrevencaoRepository.findByStatusAcaoAndEstabelecimentoIdOrderByDataInicioDesc(status, estabelecimentoId, pageable);
-        return acoes.map(acaoPromocaoPrevencaoMapper::toResponse);
+        UUID tenantId = tenantService.validarTenantAtual();
+        return acaoPromocaoPrevencaoRepository
+                .findByStatusAcaoAndEstabelecimentoIdAndTenantIdOrderByDataInicioDesc(status, estabelecimentoId, tenantId, pageable)
+                .map(responseBuilder::build);
     }
 
     @Override
+    @Transactional
     public Page<AcaoPromocaoPrevencaoResponse> listarContinuas(UUID estabelecimentoId, Pageable pageable) {
-        log.debug("Listando ações de promoção e prevenção contínuas: {}", estabelecimentoId);
-
-        Page<AcaoPromocaoPrevencao> acoes = acaoPromocaoPrevencaoRepository.findByAcaoContinuaAndEstabelecimentoIdOrderByDataInicioDesc(true, estabelecimentoId, pageable);
-        return acoes.map(acaoPromocaoPrevencaoMapper::toResponse);
+        UUID tenantId = tenantService.validarTenantAtual();
+        return acaoPromocaoPrevencaoRepository
+                .findByAcaoContinuaAndEstabelecimentoIdAndTenantIdOrderByDataInicioDesc(true, estabelecimentoId, tenantId, pageable)
+                .map(responseBuilder::build);
     }
 
     @Override
     @Transactional
-    @CacheEvict(value = "acaopromocaoprevencao", key = "#id")
+    @CachePut(cacheNames = CacheKeyUtil.CACHE_ACOES_PROMOCAO_PREVENCAO, keyGenerator = "acaoPromocaoPrevencaoCacheKeyGenerator")
     public AcaoPromocaoPrevencaoResponse atualizar(UUID id, AcaoPromocaoPrevencaoRequest request) {
-        log.debug("Atualizando ação de promoção e prevenção. ID: {}", id);
+        try {
+            UUID tenantId = tenantService.validarTenantAtual();
+            if (id == null) throw new BadRequestException("ID da ação de promoção e prevenção é obrigatório");
 
-        if (id == null) {
-            throw new BadRequestException("ID da ação de promoção e prevenção é obrigatório");
+            AcaoPromocaoPrevencao atualizado = updater.atualizar(id, request, tenantId);
+            return responseBuilder.build(atualizado);
+        } catch (BadRequestException | NotFoundException e) {
+            throw e;
+        } catch (DataAccessException e) {
+            log.error("Erro de persistência ao atualizar ação promoção/prevenção. ID: {}", id, e);
+            throw new InternalServerErrorException("Erro ao atualizar ação de promoção e prevenção");
+        } catch (Exception e) {
+            log.error("Erro inesperado ao atualizar ação promoção/prevenção. ID: {}", id, e);
+            throw e;
         }
-
-        validarDadosBasicos(request);
-
-        AcaoPromocaoPrevencao acaoExistente = acaoPromocaoPrevencaoRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("Ação de promoção e prevenção não encontrada com ID: " + id));
-
-        atualizarDadosAcaoPromocaoPrevencao(acaoExistente, request);
-
-        AcaoPromocaoPrevencao acaoAtualizada = acaoPromocaoPrevencaoRepository.save(acaoExistente);
-        log.info("Ação de promoção e prevenção atualizada com sucesso. ID: {}", acaoAtualizada.getId());
-
-        return acaoPromocaoPrevencaoMapper.toResponse(acaoAtualizada);
     }
 
     @Override
     @Transactional
-    @CacheEvict(value = "acaopromocaoprevencao", key = "#id")
+    @CacheEvict(cacheNames = CacheKeyUtil.CACHE_ACOES_PROMOCAO_PREVENCAO, keyGenerator = "acaoPromocaoPrevencaoCacheKeyGenerator", beforeInvocation = false)
     public void excluir(UUID id) {
-        log.debug("Excluindo ação de promoção e prevenção. ID: {}", id);
-
-        if (id == null) {
-            throw new BadRequestException("ID da ação de promoção e prevenção é obrigatório");
-        }
-
-        AcaoPromocaoPrevencao acaoPromocaoPrevencao = acaoPromocaoPrevencaoRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("Ação de promoção e prevenção não encontrada com ID: " + id));
-
-        if (Boolean.FALSE.equals(acaoPromocaoPrevencao.getActive())) {
-            throw new BadRequestException("Ação de promoção e prevenção já está inativa");
-        }
-
-        acaoPromocaoPrevencao.setActive(false);
-        acaoPromocaoPrevencaoRepository.save(acaoPromocaoPrevencao);
-        log.info("Ação de promoção e prevenção excluída (desativada) com sucesso. ID: {}", id);
-    }
-
-    private void validarDadosBasicos(AcaoPromocaoPrevencaoRequest request) {
-        if (request == null) {
-            throw new BadRequestException("Dados da ação de promoção e prevenção são obrigatórios");
-        }
-        if (request.getProfissionalResponsavel() == null) {
-            throw new BadRequestException("Profissional responsável é obrigatório");
-        }
-        if (request.getTipoAcao() == null) {
-            throw new BadRequestException("Tipo de ação é obrigatório");
-        }
-        if (request.getNome() == null || request.getNome().isBlank()) {
-            throw new BadRequestException("Nome é obrigatório");
-        }
-        if (request.getDataInicio() == null) {
-            throw new BadRequestException("Data de início é obrigatória");
+        try {
+            UUID tenantId = tenantService.validarTenantAtual();
+            inativarInternal(id, tenantId);
+        } catch (BadRequestException | NotFoundException e) {
+            throw e;
+        } catch (DataAccessException e) {
+            log.error("Erro de persistência ao excluir(inativar) ação promoção/prevenção. ID: {}", id, e);
+            throw new InternalServerErrorException("Erro ao excluir ação de promoção e prevenção");
+        } catch (Exception e) {
+            log.error("Erro inesperado ao excluir(inativar) ação promoção/prevenção. ID: {}", id, e);
+            throw e;
         }
     }
 
-    private void atualizarDadosAcaoPromocaoPrevencao(AcaoPromocaoPrevencao acao, AcaoPromocaoPrevencaoRequest request) {
-        AcaoPromocaoPrevencao acaoAtualizada = acaoPromocaoPrevencaoMapper.fromRequest(request);
+    private void inativarInternal(UUID id, UUID tenantId) {
+        if (id == null) throw new BadRequestException("ID da ação de promoção e prevenção é obrigatório");
 
-        UUID idOriginal = acao.getId();
-        com.upsaude.entity.Tenant tenantOriginal = acao.getTenant();
-        Boolean activeOriginal = acao.getActive();
-        java.time.OffsetDateTime createdAtOriginal = acao.getCreatedAt();
+        AcaoPromocaoPrevencao acao = tenantEnforcer.validarAcesso(id, tenantId);
+        domainService.validarPodeInativar(acao);
 
-        BeanUtils.copyProperties(acaoAtualizada, acao);
-
-        acao.setId(idOriginal);
-        acao.setTenant(tenantOriginal);
-        acao.setActive(activeOriginal);
-        acao.setCreatedAt(createdAtOriginal);
+        acao.setActive(false);
+        acaoPromocaoPrevencaoRepository.save(Objects.requireNonNull(acao));
+        log.info("Ação de promoção e prevenção inativada com sucesso. ID: {}, Tenant: {}", id, tenantId);
     }
 }
-

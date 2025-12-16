@@ -7,11 +7,6 @@ import org.springframework.data.domain.Pageable;
 
 import java.util.UUID;
 
-/**
- * Interface de serviço para operações CRUD relacionadas a ProcedimentosOdontologicos.
- *
- * @author UPSaúde
- */
 public interface ProcedimentosOdontologicosService {
 
     ProcedimentosOdontologicosResponse criar(ProcedimentosOdontologicosRequest request);
@@ -19,6 +14,8 @@ public interface ProcedimentosOdontologicosService {
     ProcedimentosOdontologicosResponse obterPorId(UUID id);
 
     Page<ProcedimentosOdontologicosResponse> listar(Pageable pageable);
+
+    Page<ProcedimentosOdontologicosResponse> listar(Pageable pageable, String codigo, String nome);
 
     ProcedimentosOdontologicosResponse atualizar(UUID id, ProcedimentosOdontologicosRequest request);
 

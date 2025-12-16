@@ -21,6 +21,7 @@ public class ReceitasMedicasResponse {
     private OffsetDateTime createdAt;
     private OffsetDateTime updatedAt;
     private Boolean active;
+    private EstabelecimentosResponse estabelecimento;
     private MedicosResponse medico;
     private PacienteResponse paciente;
     private String numeroReceita;
@@ -31,7 +32,7 @@ public class ReceitasMedicasResponse {
     private StatusReceitaEnum status;
     private String origemReceita;
     private CidDoencasResponse cidPrincipal;
-    
+
     @Builder.Default
     private List<MedicacaoResponse> medicacoes = new ArrayList<>();
 }

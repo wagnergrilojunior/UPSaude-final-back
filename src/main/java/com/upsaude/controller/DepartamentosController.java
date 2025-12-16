@@ -24,11 +24,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
 
-/**
- * Controlador REST para operações relacionadas a Departamentos.
- *
- * @author UPSaúde
- */
 @RestController
 @RequestMapping("/v1/departamentos")
 @Tag(name = "Departamentos", description = "API para gerenciamento de Departamentos")

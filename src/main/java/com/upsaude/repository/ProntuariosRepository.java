@@ -1,41 +1,36 @@
 package com.upsaude.repository;
 
+import java.util.Optional;
 import java.util.UUID;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import com.upsaude.entity.Prontuarios;
 import com.upsaude.entity.Tenant;
 
 public interface ProntuariosRepository extends JpaRepository<Prontuarios, UUID> {
-    
-    /**
-     * Busca todos os prontuários de um estabelecimento.
-     *
-     * @param estabelecimentoId ID do estabelecimento
-     * @param pageable informações de paginação
-     * @return página de prontuários do estabelecimento
-     */
+
     Page<Prontuarios> findByEstabelecimentoId(UUID estabelecimentoId, Pageable pageable);
 
-    /**
-     * Busca todos os prontuários de um tenant.
-     *
-     * @param tenant tenant
-     * @param pageable informações de paginação
-     * @return página de prontuários do tenant
-     */
     Page<Prontuarios> findByTenant(Tenant tenant, Pageable pageable);
 
-    /**
-     * Busca todos os prontuários de um estabelecimento e tenant.
-     *
-     * @param estabelecimentoId ID do estabelecimento
-     * @param tenant tenant
-     * @param pageable informações de paginação
-     * @return página de prontuários
-     */
     Page<Prontuarios> findByEstabelecimentoIdAndTenant(UUID estabelecimentoId, Tenant tenant, Pageable pageable);
+
+    @Query("SELECT p FROM Prontuarios p WHERE p.id = :id AND p.tenant.id = :tenantId")
+    Optional<Prontuarios> findByIdAndTenant(@Param("id") UUID id, @Param("tenantId") UUID tenantId);
+
+    @Query("SELECT p FROM Prontuarios p WHERE p.tenant.id = :tenantId")
+    Page<Prontuarios> findAllByTenant(@Param("tenantId") UUID tenantId, Pageable pageable);
+
+    Page<Prontuarios> findByPacienteIdAndTenantId(UUID pacienteId, UUID tenantId, Pageable pageable);
+
+    Page<Prontuarios> findByEstabelecimentoIdAndTenantId(UUID estabelecimentoId, UUID tenantId, Pageable pageable);
+
+    Page<Prontuarios> findByTipoRegistroContainingIgnoreCaseAndTenantId(String tipoRegistro, UUID tenantId, Pageable pageable);
+
+    Page<Prontuarios> findByCriadoPorAndTenantId(UUID criadoPor, UUID tenantId, Pageable pageable);
 }

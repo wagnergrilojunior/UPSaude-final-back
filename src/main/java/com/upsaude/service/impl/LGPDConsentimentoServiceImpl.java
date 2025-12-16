@@ -1,23 +1,33 @@
 package com.upsaude.service.impl;
 
+import com.upsaude.cache.CacheKeyUtil;
 import com.upsaude.api.request.LGPDConsentimentoRequest;
 import com.upsaude.api.response.LGPDConsentimentoResponse;
 import com.upsaude.entity.LGPDConsentimento;
+import com.upsaude.entity.Tenant;
 import com.upsaude.exception.BadRequestException;
-import com.upsaude.exception.ConflictException;
 import com.upsaude.exception.NotFoundException;
-import com.upsaude.mapper.LGPDConsentimentoMapper;
 import com.upsaude.repository.LGPDConsentimentoRepository;
 import com.upsaude.service.LGPDConsentimentoService;
-import jakarta.transaction.Transactional;
+import com.upsaude.service.TenantService;
+import com.upsaude.service.support.lgpdconsentimento.LGPDConsentimentoCreator;
+import com.upsaude.service.support.lgpdconsentimento.LGPDConsentimentoResponseBuilder;
+import com.upsaude.service.support.lgpdconsentimento.LGPDConsentimentoTenantEnforcer;
+import com.upsaude.service.support.lgpdconsentimento.LGPDConsentimentoUpdater;
+import com.upsaude.service.support.lgpdconsentimento.LGPDConsentimentoValidationService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.Cache;
+import org.springframework.cache.CacheManager;
 import org.springframework.data.domain.Page;
 import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Objects;
 import java.util.UUID;
 
 @Slf4j
@@ -26,109 +36,96 @@ import java.util.UUID;
 public class LGPDConsentimentoServiceImpl implements LGPDConsentimentoService {
 
     private final LGPDConsentimentoRepository repository;
-    private final LGPDConsentimentoMapper mapper;
+    private final TenantService tenantService;
+    private final CacheManager cacheManager;
+
+    private final LGPDConsentimentoValidationService validationService;
+    private final LGPDConsentimentoTenantEnforcer tenantEnforcer;
+    private final LGPDConsentimentoCreator creator;
+    private final LGPDConsentimentoUpdater updater;
+    private final LGPDConsentimentoResponseBuilder responseBuilder;
 
     @Override
     @Transactional
-    @CacheEvict(value = "lgpdconsentimento", allEntries = true)
     public LGPDConsentimentoResponse criar(LGPDConsentimentoRequest request) {
-        log.debug("Criando consentimento LGPD para paciente: {}", request.getPaciente());
+        log.debug("Criando consentimento LGPD. Request: {}", request);
+        validationService.validarObrigatorios(request);
 
-        if (request.getPaciente() == null) {
-            throw new BadRequestException("ID do paciente é obrigatório");
+        UUID tenantId = tenantService.validarTenantAtual();
+        Tenant tenant = tenantService.obterTenantDoUsuarioAutenticado();
+
+        LGPDConsentimento saved = creator.criar(request, tenantId, tenant);
+        LGPDConsentimentoResponse response = responseBuilder.build(saved);
+
+        Cache cache = cacheManager.getCache(CacheKeyUtil.CACHE_LGPD_CONSENTIMENTO);
+        if (cache != null && response != null && response.getId() != null) {
+            cache.put(Objects.requireNonNull((Object) CacheKeyUtil.lgpdConsentimento(tenantId, response.getId())), response);
         }
 
-        repository.findByPacienteId(request.getPaciente())
-                .ifPresent(d -> {
-                    throw new ConflictException("Consentimento LGPD já existe para este paciente");
-                });
-
-        LGPDConsentimento entity = mapper.fromRequest(request);
-        entity.setActive(true);
-
-        LGPDConsentimento saved = repository.save(entity);
-        log.info("Consentimento LGPD criado. ID: {}", saved.getId());
-
-        return mapper.toResponse(saved);
+        return response;
     }
 
     @Override
+    @Transactional(readOnly = true)
+    @Cacheable(cacheNames = CacheKeyUtil.CACHE_LGPD_CONSENTIMENTO, keyGenerator = "lgpdConsentimentoCacheKeyGenerator")
     public LGPDConsentimentoResponse obterPorId(UUID id) {
-        log.debug("Buscando consentimento LGPD por ID: {}", id);
-
-        if (id == null) {
-            throw new BadRequestException("ID é obrigatório");
-        }
-
-        LGPDConsentimento entity = repository.findById(id)
-                .orElseThrow(() -> new NotFoundException("Consentimento LGPD não encontrado com ID: " + id));
-
-        return mapper.toResponse(entity);
+        log.debug("Buscando consentimento LGPD por ID: {} (cache miss)", id);
+        validationService.validarId(id);
+        UUID tenantId = tenantService.validarTenantAtual();
+        return responseBuilder.build(tenantEnforcer.validarAcessoCompleto(id, tenantId));
     }
 
     @Override
+    @Transactional(readOnly = true)
     public LGPDConsentimentoResponse obterPorPacienteId(UUID pacienteId) {
         log.debug("Buscando consentimento LGPD por paciente ID: {}", pacienteId);
 
-        if (pacienteId == null) {
-            throw new BadRequestException("ID do paciente é obrigatório");
-        }
+        validationService.validarPacienteId(pacienteId);
+        UUID tenantId = tenantService.validarTenantAtual();
 
-        LGPDConsentimento entity = repository.findByPacienteId(pacienteId)
-                .orElseThrow(() -> new NotFoundException("Consentimento LGPD não encontrado para o paciente: " + pacienteId));
+        LGPDConsentimento entity = repository.findByPacienteIdAndTenantId(pacienteId, tenantId)
+            .orElseThrow(() -> new NotFoundException("Consentimento LGPD não encontrado para o paciente: " + pacienteId));
 
-        return mapper.toResponse(entity);
+        return responseBuilder.build(entity);
     }
 
     @Override
+    @Transactional(readOnly = true)
     public Page<LGPDConsentimentoResponse> listar(Pageable pageable) {
-        log.debug("Listando consentimentos LGPD paginados");
-
-        Page<LGPDConsentimento> entities = repository.findAll(pageable);
-        return entities.map(mapper::toResponse);
+        log.debug("Listando consentimentos LGPD paginados. Pageable: {}", pageable);
+        UUID tenantId = tenantService.validarTenantAtual();
+        return repository.findAllByTenant(tenantId, pageable).map(responseBuilder::build);
     }
 
     @Override
     @Transactional
-    @CacheEvict(value = "lgpdconsentimento", key = "#id")
+    @CachePut(cacheNames = CacheKeyUtil.CACHE_LGPD_CONSENTIMENTO, keyGenerator = "lgpdConsentimentoCacheKeyGenerator")
     public LGPDConsentimentoResponse atualizar(UUID id, LGPDConsentimentoRequest request) {
         log.debug("Atualizando consentimento LGPD. ID: {}", id);
 
-        if (id == null) {
-            throw new BadRequestException("ID é obrigatório");
-        }
+        validationService.validarId(id);
+        validationService.validarObrigatorios(request);
 
-        LGPDConsentimento entity = repository.findById(id)
-                .orElseThrow(() -> new NotFoundException("Consentimento LGPD não encontrado com ID: " + id));
+        UUID tenantId = tenantService.validarTenantAtual();
+        Tenant tenant = tenantService.obterTenantDoUsuarioAutenticado();
 
-        if (request.getPaciente() != null && !request.getPaciente().equals(entity.getPaciente().getId())) {
-            repository.findByPacienteId(request.getPaciente())
-                    .ifPresent(d -> {
-                        if (!d.getId().equals(id)) {
-                            throw new ConflictException("Consentimento LGPD já existe para este paciente");
-                        }
-                    });
-        }
-
-        atualizarDados(entity, request);
-        LGPDConsentimento updated = repository.save(entity);
-        log.info("Consentimento LGPD atualizado. ID: {}", updated.getId());
-
-        return mapper.toResponse(updated);
+        LGPDConsentimento updated = updater.atualizar(id, request, tenantId, tenant);
+        return responseBuilder.build(updated);
     }
 
     @Override
     @Transactional
-    @CacheEvict(value = "lgpdconsentimento", key = "#id")
+    @CacheEvict(cacheNames = CacheKeyUtil.CACHE_LGPD_CONSENTIMENTO, keyGenerator = "lgpdConsentimentoCacheKeyGenerator", beforeInvocation = false)
     public void excluir(UUID id) {
         log.debug("Excluindo consentimento LGPD. ID: {}", id);
 
-        if (id == null) {
-            throw new BadRequestException("ID é obrigatório");
-        }
+        validationService.validarId(id);
+        UUID tenantId = tenantService.validarTenantAtual();
+        inativarInternal(id, tenantId);
+    }
 
-        LGPDConsentimento entity = repository.findById(id)
-                .orElseThrow(() -> new NotFoundException("Consentimento LGPD não encontrado com ID: " + id));
+    private void inativarInternal(UUID id, UUID tenantId) {
+        LGPDConsentimento entity = tenantEnforcer.validarAcesso(id, tenantId);
 
         if (Boolean.FALSE.equals(entity.getActive())) {
             throw new BadRequestException("Consentimento LGPD já está inativo");
@@ -136,16 +133,6 @@ public class LGPDConsentimentoServiceImpl implements LGPDConsentimentoService {
 
         entity.setActive(false);
         repository.save(entity);
-        log.info("Consentimento LGPD excluído. ID: {}", id);
-    }
-
-    private void atualizarDados(LGPDConsentimento entity, LGPDConsentimentoRequest request) {
-        LGPDConsentimento updated = mapper.fromRequest(request);
-        
-        entity.setAutorizacaoUsoDados(updated.getAutorizacaoUsoDados());
-        entity.setAutorizacaoContatoWhatsApp(updated.getAutorizacaoContatoWhatsApp());
-        entity.setAutorizacaoContatoEmail(updated.getAutorizacaoContatoEmail());
-        entity.setDataConsentimento(updated.getDataConsentimento());
+        log.info("Consentimento LGPD excluído (desativado) com sucesso. ID: {}, tenant: {}", id, tenantId);
     }
 }
-

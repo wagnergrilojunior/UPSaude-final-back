@@ -38,4 +38,3 @@ public enum NaturezaJuridicaEnum {
         return Arrays.stream(values()).filter(v -> v.descricao.toLowerCase(Locale.ROOT).equals(d)).findFirst().orElse(null);
     }
 }
-

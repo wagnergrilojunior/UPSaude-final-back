@@ -24,11 +24,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
 
-/**
- * Controlador REST para operações relacionadas a Estados.
- *
- * @author UPSaúde
- */
 @RestController
 @RequestMapping("/v1/estados")
 @Tag(name = "Estados", description = "API para gerenciamento de Estados")

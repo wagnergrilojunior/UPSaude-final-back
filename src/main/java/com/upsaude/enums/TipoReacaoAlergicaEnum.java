@@ -3,11 +3,6 @@ package com.upsaude.enums;
 import java.util.Arrays;
 import java.util.Locale;
 
-/**
- * Enum para classificação de tipos de reações alérgicas.
- *
- * @author UPSaúde
- */
 public enum TipoReacaoAlergicaEnum {
     URTICARIA(1, "Urticária"),
     ANGIOEDEMA(2, "Angioedema"),
@@ -64,4 +59,3 @@ public enum TipoReacaoAlergicaEnum {
                 .orElse(null);
     }
 }
-

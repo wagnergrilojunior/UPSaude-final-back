@@ -11,30 +11,14 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 
-/**
- * Mapper para conversões de UsuarioEstabelecimento.
- * Entity ↔ DTO ↔ Request/Response
- */
 @Mapper(config = MappingConfig.class)
 public interface UsuarioEstabelecimentoMapper extends EntityMapper<UsuarioEstabelecimento, UsuarioEstabelecimentoDTO> {
 
-    /**
-     * Converte DTO para Entity.
-     * O campo 'active' é ignorado (gerenciado pelo sistema).
-     */
     @Mapping(target = "active", ignore = true)
     UsuarioEstabelecimento toEntity(UsuarioEstabelecimentoDTO dto);
 
-    /**
-     * Converte Entity para DTO.
-     */
     UsuarioEstabelecimentoDTO toDTO(UsuarioEstabelecimento entity);
 
-    /**
-     * Converte Request para Entity.
-     * Os campos 'id', 'createdAt', 'updatedAt', 'active' são ignorados.
-     * Relacionamentos (UUID) devem ser tratados manualmente no Service.
-     */
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
@@ -43,11 +27,6 @@ public interface UsuarioEstabelecimentoMapper extends EntityMapper<UsuarioEstabe
     @Mapping(target = "usuario", ignore = true)
     UsuarioEstabelecimento fromRequest(UsuarioEstabelecimentoRequest request);
 
-    /**
-     * Atualiza Entity existente com dados do Request.
-     * Os campos 'id', 'createdAt', 'updatedAt', 'active' são ignorados.
-     * Relacionamentos (UUID) devem ser tratados manualmente no Service.
-     */
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
@@ -56,8 +35,5 @@ public interface UsuarioEstabelecimentoMapper extends EntityMapper<UsuarioEstabe
     @Mapping(target = "usuario", ignore = true)
     void updateFromRequest(UsuarioEstabelecimentoRequest request, @MappingTarget UsuarioEstabelecimento entity);
 
-    /**
-     * Converte Entity para Response.
-     */
     UsuarioEstabelecimentoResponse toResponse(UsuarioEstabelecimento entity);
 }

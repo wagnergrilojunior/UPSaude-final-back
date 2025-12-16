@@ -1,22 +1,29 @@
 package com.upsaude.api.request;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.upsaude.enums.TipoMetodoContraceptivoEnum;
+import com.upsaude.util.converter.TipoMetodoContraceptivoEnumDeserializer;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.UUID;
 import lombok.*;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@Schema(description = "Dados de planejamento familiar")
 public class PlanejamentoFamiliarRequest {
     private UUID paciente;
     private UUID profissionalResponsavel;
     private UUID equipeSaude;
+    @JsonDeserialize(using = TipoMetodoContraceptivoEnumDeserializer.class)
     private TipoMetodoContraceptivoEnum metodoAtual;
     private LocalDate dataInicioMetodo;
     private String nomeComercialMetodo;
+
+    @JsonDeserialize(using = TipoMetodoContraceptivoEnumDeserializer.class)
     private TipoMetodoContraceptivoEnum metodoAnterior;
     private String motivoTrocaMetodo;
     private Integer numeroGestacoes;

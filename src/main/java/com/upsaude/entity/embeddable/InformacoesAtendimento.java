@@ -14,11 +14,6 @@ import lombok.Data;
 
 import java.time.OffsetDateTime;
 
-/**
- * Classe embeddable para informações básicas do atendimento.
- *
- * @author UPSaúde
- */
 @Embeddable
 @Data
 @Builder
@@ -33,22 +28,22 @@ public class InformacoesAtendimento {
 
     @Column(name = "data_hora", nullable = false)
     @NotNull(message = "Data e hora do atendimento são obrigatórias")
-    private OffsetDateTime dataHora; // Data e hora do atendimento
+    private OffsetDateTime dataHora;
 
     @Column(name = "data_agendamento")
-    private OffsetDateTime dataAgendamento; // Data em que foi agendado
+    private OffsetDateTime dataAgendamento;
 
     @Column(name = "data_inicio")
-    private OffsetDateTime dataInicio; // Data e hora de início real do atendimento
+    private OffsetDateTime dataInicio;
 
     @Column(name = "data_fim")
-    private OffsetDateTime dataFim; // Data e hora de término real do atendimento
+    private OffsetDateTime dataFim;
 
     @Column(name = "duracao_minutos")
-    private Integer duracaoMinutos; // Duração prevista em minutos
+    private Integer duracaoMinutos;
 
     @Column(name = "duracao_real_minutos")
-    private Integer duracaoRealMinutos; // Duração real em minutos
+    private Integer duracaoRealMinutos;
 
     @Convert(converter = TipoAtendimentoEnumConverter.class)
     @Column(name = "tipo_atendimento")
@@ -60,12 +55,11 @@ public class InformacoesAtendimento {
     private StatusAtendimentoEnum statusAtendimento = StatusAtendimentoEnum.AGENDADO;
 
     @Column(name = "motivo", columnDefinition = "TEXT")
-    private String motivo; // Motivo do atendimento / queixa principal
+    private String motivo;
 
     @Column(name = "local_atendimento", length = 255)
-    private String localAtendimento; // Local onde foi realizado (ex: Sala 1, Consultório 2, Domicílio)
+    private String localAtendimento;
 
     @Column(name = "numero_atendimento", length = 50)
-    private String numeroAtendimento; // Número do atendimento (controle interno)
+    private String numeroAtendimento;
 }
-

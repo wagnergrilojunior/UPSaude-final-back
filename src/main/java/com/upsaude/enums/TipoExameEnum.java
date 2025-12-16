@@ -44,4 +44,3 @@ public enum TipoExameEnum {
                 .orElse(null);
     }
 }
-

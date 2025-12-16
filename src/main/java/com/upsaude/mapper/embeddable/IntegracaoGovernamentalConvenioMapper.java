@@ -14,7 +14,6 @@ public interface IntegracaoGovernamentalConvenioMapper {
     IntegracaoGovernamentalConvenioResponse toResponse(IntegracaoGovernamentalConvenio entity);
     void updateFromRequest(IntegracaoGovernamentalConvenioRequest request, @MappingTarget IntegracaoGovernamentalConvenio entity);
 
-    // Mapeamento entre DTO e Entity
     IntegracaoGovernamentalConvenio toEntity(com.upsaude.dto.embeddable.IntegracaoGovernamentalConvenioDTO dto);
     com.upsaude.dto.embeddable.IntegracaoGovernamentalConvenioDTO toDTO(IntegracaoGovernamentalConvenio entity);
     void updateFromDTO(com.upsaude.dto.embeddable.IntegracaoGovernamentalConvenioDTO dto, @MappingTarget IntegracaoGovernamentalConvenio entity);

@@ -33,9 +33,6 @@ import java.util.List;
 @Data
 public class Tenant extends BaseEntity {
 
-    /**
-     * Construtor padrão que inicializa as coleções para evitar NullPointerException.
-     */
     public Tenant() {
         this.enderecos = new ArrayList<>();
     }
@@ -63,10 +60,6 @@ public class Tenant extends BaseEntity {
     @Column(name = "is_active")
     private Boolean ativo;
 
-    /**
-     * Endereços do tenant.
-     * Cascade PERSIST/MERGE para gerenciar associações.
-     */
     @OneToMany(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinTable(
         name = "tenants_enderecos",
@@ -120,12 +113,6 @@ public class Tenant extends BaseEntity {
     @Column(name = "observacoes", columnDefinition = "TEXT")
     private String observacoes;
 
-    // ========== MÉTODOS DE CICLO DE VIDA ==========
-
-    /**
-     * Garante que as coleções não sejam nulas antes de persistir ou atualizar.
-     * Recria a lista se estiver nula.
-     */
     @PrePersist
     @PreUpdate
     public void validateCollections() {

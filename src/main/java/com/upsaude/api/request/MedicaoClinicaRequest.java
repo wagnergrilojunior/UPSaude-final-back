@@ -4,11 +4,13 @@ import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 import java.util.UUID;
 import lombok.*;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@Schema(description = "Dados de medicao clinica")
 public class MedicaoClinicaRequest {
     private UUID paciente;
     private OffsetDateTime dataHora;

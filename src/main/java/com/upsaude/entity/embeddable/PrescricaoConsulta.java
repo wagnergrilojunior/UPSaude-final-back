@@ -6,11 +6,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 
-/**
- * Classe embeddable para informações de prescrição da consulta.
- *
- * @author UPSaúde
- */
 @Embeddable
 @Data
 @Builder
@@ -27,21 +22,20 @@ public class PrescricaoConsulta {
     }
 
     @Column(name = "medicamentos_prescritos", columnDefinition = "TEXT")
-    private String medicamentosPrescritos; // Medicamentos prescritos
+    private String medicamentosPrescritos;
 
     @Column(name = "orientacoes", columnDefinition = "TEXT")
-    private String orientacoes; // Orientações dadas ao paciente
+    private String orientacoes;
 
     @Column(name = "dieta", columnDefinition = "TEXT")
-    private String dieta; // Orientações dietéticas
+    private String dieta;
 
     @Column(name = "atividade_fisica", columnDefinition = "TEXT")
-    private String atividadeFisica; // Orientações sobre atividade física
+    private String atividadeFisica;
 
     @Column(name = "repouso", columnDefinition = "TEXT")
-    private String repouso; // Orientações sobre repouso
+    private String repouso;
 
     @Column(name = "outras_orientacoes", columnDefinition = "TEXT")
-    private String outrasOrientacoes; // Outras orientações
+    private String outrasOrientacoes;
 }
-

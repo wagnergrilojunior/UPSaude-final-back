@@ -13,6 +13,7 @@ public class VacinacoesDTO {
     private OffsetDateTime createdAt;
     private OffsetDateTime updatedAt;
     private Boolean active;
+    private EstabelecimentosDTO estabelecimento;
     private PacienteDTO paciente;
     private VacinasDTO vacina;
     private FabricantesVacinaDTO fabricante;

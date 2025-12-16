@@ -20,11 +20,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.UUID;
 
-/**
- * Implementação do serviço de gerenciamento de EstoquesVacina.
- *
- * @author UPSaúde
- */
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -38,8 +33,6 @@ public class EstoquesVacinaServiceImpl implements EstoquesVacinaService {
     @CacheEvict(value = "estoquesvacina", allEntries = true)
     public EstoquesVacinaResponse criar(EstoquesVacinaRequest request) {
         log.debug("Criando novo estoquesvacina");
-
-        validarDadosBasicos(request);
 
         EstoquesVacina estoquesVacina = estoquesVacinaMapper.fromRequest(request);
         estoquesVacina.setActive(true);
@@ -84,8 +77,6 @@ public class EstoquesVacinaServiceImpl implements EstoquesVacinaService {
             throw new BadRequestException("ID do estoquesvacina é obrigatório");
         }
 
-        validarDadosBasicos(request);
-
         EstoquesVacina estoquesVacinaExistente = estoquesVacinaRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("EstoquesVacina não encontrado com ID: " + id));
 
@@ -119,25 +110,16 @@ public class EstoquesVacinaServiceImpl implements EstoquesVacinaService {
         log.info("EstoquesVacina excluído (desativado) com sucesso. ID: {}", id);
     }
 
-    private void validarDadosBasicos(EstoquesVacinaRequest request) {
-        if (request == null) {
-            throw new BadRequestException("Dados do estoquesvacina são obrigatórios");
-        }
-    }
-
         private void atualizarDadosEstoquesVacina(EstoquesVacina estoquesVacina, EstoquesVacinaRequest request) {
         EstoquesVacina estoquesVacinaAtualizado = estoquesVacinaMapper.fromRequest(request);
-        
-        // Preserva campos de controle
+
         java.util.UUID idOriginal = estoquesVacina.getId();
         com.upsaude.entity.Tenant tenantOriginal = estoquesVacina.getTenant();
         Boolean activeOriginal = estoquesVacina.getActive();
         java.time.OffsetDateTime createdAtOriginal = estoquesVacina.getCreatedAt();
-        
-        // Copia todas as propriedades do objeto atualizado
+
         BeanUtils.copyProperties(estoquesVacinaAtualizado, estoquesVacina);
-        
-        // Restaura campos de controle
+
         estoquesVacina.setId(idOriginal);
         estoquesVacina.setTenant(tenantOriginal);
         estoquesVacina.setActive(activeOriginal);

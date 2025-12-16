@@ -63,12 +63,12 @@ public class ProfissionaisSaudeResponse {
     private String telefoneInstitucional;
     private String emailInstitucional;
     private EnderecoResponse enderecoProfissional;
-    
+
     @Builder.Default
     private List<EspecialidadesMedicasResponse> especialidades = new ArrayList<>();
-    
+
     @Builder.Default
     private Set<HistoricoHabilitacaoProfissionalResponse> historicoHabilitacao = new HashSet<>();
-    
+
     private String observacoes;
 }

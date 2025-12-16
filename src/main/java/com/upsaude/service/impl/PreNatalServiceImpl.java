@@ -2,112 +2,135 @@ package com.upsaude.service.impl;
 
 import com.upsaude.api.request.PreNatalRequest;
 import com.upsaude.api.response.PreNatalResponse;
+import com.upsaude.cache.CacheKeyUtil;
 import com.upsaude.entity.PreNatal;
+import com.upsaude.entity.Tenant;
 import com.upsaude.enums.StatusPreNatalEnum;
 import com.upsaude.exception.BadRequestException;
+import com.upsaude.exception.InternalServerErrorException;
 import com.upsaude.exception.NotFoundException;
-import com.upsaude.mapper.PreNatalMapper;
 import com.upsaude.repository.PreNatalRepository;
 import com.upsaude.service.PreNatalService;
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.BeanUtils;
+import org.springframework.cache.Cache;
+import org.springframework.cache.CacheManager;
 import org.springframework.data.domain.Page;
 import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import com.upsaude.service.TenantService;
+import com.upsaude.service.support.prenatal.PreNatalCreator;
+import com.upsaude.service.support.prenatal.PreNatalDomainService;
+import com.upsaude.service.support.prenatal.PreNatalResponseBuilder;
+import com.upsaude.service.support.prenatal.PreNatalTenantEnforcer;
+import com.upsaude.service.support.prenatal.PreNatalUpdater;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-/**
- * Implementação do serviço de gerenciamento de Pré-Natal.
- *
- * @author UPSaúde
- */
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class PreNatalServiceImpl implements PreNatalService {
 
     private final PreNatalRepository preNatalRepository;
-    private final PreNatalMapper preNatalMapper;
+    private final CacheManager cacheManager;
+    private final TenantService tenantService;
+
+    private final PreNatalCreator creator;
+    private final PreNatalUpdater updater;
+    private final PreNatalResponseBuilder responseBuilder;
+    private final PreNatalDomainService domainService;
+    private final PreNatalTenantEnforcer tenantEnforcer;
 
     @Override
     @Transactional
-    @CacheEvict(value = "prenatal", allEntries = true)
     public PreNatalResponse criar(PreNatalRequest request) {
         log.debug("Criando novo pré-natal");
+        try {
+            UUID tenantId = tenantService.validarTenantAtual();
+            Tenant tenant = tenantService.obterTenantDoUsuarioAutenticado();
+            validarTenantAutenticadoOrThrow(tenantId, tenant);
 
-        validarDadosBasicos(request);
+            PreNatal saved = creator.criar(request, tenantId, tenant);
+            PreNatalResponse response = responseBuilder.build(saved);
 
-        PreNatal preNatal = preNatalMapper.fromRequest(request);
-        preNatal.setActive(true);
+            Cache cache = cacheManager.getCache(CacheKeyUtil.CACHE_PRE_NATAL);
+            if (cache != null) {
+                Object key = Objects.requireNonNull((Object) CacheKeyUtil.preNatal(tenantId, saved.getId()));
+                cache.put(key, response);
+            }
 
-        if (preNatal.getStatusPreNatal() == null) {
-            preNatal.setStatusPreNatal(StatusPreNatalEnum.EM_ACOMPANHAMENTO);
+            return response;
+        } catch (BadRequestException | NotFoundException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new InternalServerErrorException("Erro ao criar pré-natal", e);
         }
-
-        PreNatal preNatalSalvo = preNatalRepository.save(preNatal);
-        log.info("Pré-natal criado com sucesso. ID: {}", preNatalSalvo.getId());
-
-        return preNatalMapper.toResponse(preNatalSalvo);
     }
 
     @Override
-    @Transactional
-    @Cacheable(value = "prenatal", key = "#id")
+    @Transactional(readOnly = true)
+    @Cacheable(cacheNames = CacheKeyUtil.CACHE_PRE_NATAL, keyGenerator = "preNatalCacheKeyGenerator")
     public PreNatalResponse obterPorId(UUID id) {
         log.debug("Buscando pré-natal por ID: {} (cache miss)", id);
         if (id == null) {
             throw new BadRequestException("ID do pré-natal é obrigatório");
         }
 
-        PreNatal preNatal = preNatalRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("Pré-natal não encontrado com ID: " + id));
-
-        return preNatalMapper.toResponse(preNatal);
+        UUID tenantId = tenantService.validarTenantAtual();
+        PreNatal preNatal = tenantEnforcer.validarAcessoCompleto(id, tenantId);
+        return responseBuilder.build(preNatal);
     }
 
     @Override
+    @Transactional(readOnly = true)
     public Page<PreNatalResponse> listar(Pageable pageable) {
         log.debug("Listando pré-natais paginados");
 
-        Page<PreNatal> preNatais = preNatalRepository.findAll(pageable);
-        return preNatais.map(preNatalMapper::toResponse);
+        UUID tenantId = tenantService.validarTenantAtual();
+        Page<PreNatal> preNatais = preNatalRepository.findAllByTenant(tenantId, pageable);
+        return preNatais.map(responseBuilder::build);
     }
 
     @Override
+    @Transactional(readOnly = true)
     public Page<PreNatalResponse> listarPorEstabelecimento(UUID estabelecimentoId, Pageable pageable) {
         log.debug("Listando pré-natais por estabelecimento: {}", estabelecimentoId);
 
-        Page<PreNatal> preNatais = preNatalRepository.findByEstabelecimentoIdOrderByDataInicioAcompanhamentoDesc(estabelecimentoId, pageable);
-        return preNatais.map(preNatalMapper::toResponse);
+        UUID tenantId = tenantService.validarTenantAtual();
+        Page<PreNatal> preNatais = preNatalRepository.findByEstabelecimentoIdAndTenantIdOrderByDataInicioAcompanhamentoDesc(estabelecimentoId, tenantId, pageable);
+        return preNatais.map(responseBuilder::build);
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<PreNatalResponse> listarPorPaciente(UUID pacienteId) {
         log.debug("Listando pré-natais por paciente: {}", pacienteId);
 
-        List<PreNatal> preNatais = preNatalRepository.findByPacienteIdOrderByDataInicioAcompanhamentoDesc(pacienteId);
-        return preNatais.stream().map(preNatalMapper::toResponse).collect(Collectors.toList());
+        UUID tenantId = tenantService.validarTenantAtual();
+        List<PreNatal> preNatais = preNatalRepository.findByPacienteIdAndTenantIdOrderByDataInicioAcompanhamentoDesc(pacienteId, tenantId);
+        return preNatais.stream().map(responseBuilder::build).collect(Collectors.toList());
     }
 
     @Override
+    @Transactional(readOnly = true)
     public Page<PreNatalResponse> listarEmAcompanhamento(UUID estabelecimentoId, Pageable pageable) {
         log.debug("Listando pré-natais em acompanhamento: {}", estabelecimentoId);
 
-        Page<PreNatal> preNatais = preNatalRepository.findByStatusPreNatalAndEstabelecimentoId(
-                StatusPreNatalEnum.EM_ACOMPANHAMENTO, estabelecimentoId, pageable);
-        return preNatais.map(preNatalMapper::toResponse);
+        return listarPorStatus(estabelecimentoId, StatusPreNatalEnum.EM_ACOMPANHAMENTO, pageable);
     }
 
     @Override
     @Transactional
-    @CacheEvict(value = "prenatal", key = "#id")
+    @CachePut(cacheNames = CacheKeyUtil.CACHE_PRE_NATAL, keyGenerator = "preNatalCacheKeyGenerator")
     public PreNatalResponse atualizar(UUID id, PreNatalRequest request) {
         log.debug("Atualizando pré-natal. ID: {}", id);
 
@@ -115,64 +138,46 @@ public class PreNatalServiceImpl implements PreNatalService {
             throw new BadRequestException("ID do pré-natal é obrigatório");
         }
 
-        validarDadosBasicos(request);
+        UUID tenantId = tenantService.validarTenantAtual();
+        Tenant tenant = tenantService.obterTenantDoUsuarioAutenticado();
+        validarTenantAutenticadoOrThrow(tenantId, tenant);
 
-        PreNatal preNatalExistente = preNatalRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("Pré-natal não encontrado com ID: " + id));
-
-        atualizarDadosPreNatal(preNatalExistente, request);
-
-        PreNatal preNatalAtualizado = preNatalRepository.save(preNatalExistente);
-        log.info("Pré-natal atualizado com sucesso. ID: {}", preNatalAtualizado.getId());
-
-        return preNatalMapper.toResponse(preNatalAtualizado);
+        PreNatal updated = updater.atualizar(id, request, tenantId, tenant);
+        return responseBuilder.build(updated);
     }
 
     @Override
     @Transactional
-    @CacheEvict(value = "prenatal", key = "#id")
+    @CacheEvict(cacheNames = CacheKeyUtil.CACHE_PRE_NATAL, keyGenerator = "preNatalCacheKeyGenerator", beforeInvocation = false)
     public void excluir(UUID id) {
         log.debug("Excluindo pré-natal. ID: {}", id);
+        UUID tenantId = tenantService.validarTenantAtual();
+        inativarInternal(id, tenantId);
+    }
 
+    @Override
+    @Transactional(readOnly = true)
+    public Page<PreNatalResponse> listarPorStatus(UUID estabelecimentoId, StatusPreNatalEnum status, Pageable pageable) {
+        UUID tenantId = tenantService.validarTenantAtual();
+        Page<PreNatal> preNatais = preNatalRepository.findByStatusPreNatalAndEstabelecimentoIdAndTenantId(status, estabelecimentoId, tenantId, pageable);
+        return preNatais.map(responseBuilder::build);
+    }
+
+    private void inativarInternal(UUID id, UUID tenantId) {
         if (id == null) {
             throw new BadRequestException("ID do pré-natal é obrigatório");
         }
 
-        PreNatal preNatal = preNatalRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("Pré-natal não encontrado com ID: " + id));
-
-        if (Boolean.FALSE.equals(preNatal.getActive())) {
-            throw new BadRequestException("Pré-natal já está inativo");
-        }
-
-        preNatal.setActive(false);
-        preNatalRepository.save(preNatal);
+        PreNatal entity = tenantEnforcer.validarAcesso(id, tenantId);
+        domainService.validarPodeInativar(entity);
+        entity.setActive(false);
+        preNatalRepository.save(Objects.requireNonNull(entity));
         log.info("Pré-natal excluído (desativado) com sucesso. ID: {}", id);
     }
 
-    private void validarDadosBasicos(PreNatalRequest request) {
-        if (request == null) {
-            throw new BadRequestException("Dados do pré-natal são obrigatórios");
+    private void validarTenantAutenticadoOrThrow(UUID tenantId, Tenant tenant) {
+        if (tenantId == null || tenant == null || tenant.getId() == null || !tenantId.equals(tenant.getId())) {
+            throw new BadRequestException("Não foi possível obter tenant do usuário autenticado");
         }
-        if (request.getPaciente() == null) {
-            throw new BadRequestException("Paciente é obrigatório");
-        }
-    }
-
-    private void atualizarDadosPreNatal(PreNatal preNatal, PreNatalRequest request) {
-        PreNatal preNatalAtualizado = preNatalMapper.fromRequest(request);
-
-        UUID idOriginal = preNatal.getId();
-        com.upsaude.entity.Tenant tenantOriginal = preNatal.getTenant();
-        Boolean activeOriginal = preNatal.getActive();
-        java.time.OffsetDateTime createdAtOriginal = preNatal.getCreatedAt();
-
-        BeanUtils.copyProperties(preNatalAtualizado, preNatal);
-
-        preNatal.setId(idOriginal);
-        preNatal.setTenant(tenantOriginal);
-        preNatal.setActive(activeOriginal);
-        preNatal.setCreatedAt(createdAtOriginal);
     }
 }
-

@@ -3,10 +3,6 @@ package com.upsaude.enums;
 import java.util.Arrays;
 import java.util.Locale;
 
-/**
- * Enum para status do paciente no sistema de saúde.
- * Utilizado para controle do ciclo de vida do paciente (ativo, óbito, transferido, etc.).
- */
 public enum StatusPacienteEnum {
     ATIVO(1, "Ativo"),
     INATIVO(2, "Inativo"),
@@ -48,4 +44,3 @@ public enum StatusPacienteEnum {
                 .orElse(null);
     }
 }
-

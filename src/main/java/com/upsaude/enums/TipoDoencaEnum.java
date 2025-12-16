@@ -3,12 +3,6 @@ package com.upsaude.enums;
 import java.util.Arrays;
 import java.util.Locale;
 
-/**
- * Enum para classificação de tipos de doenças.
- * Baseado em padrões da OMS e CID-10.
- *
- * @author UPSaúde
- */
 public enum TipoDoencaEnum {
     CRONICA(1, "Doença Crônica"),
     AGUDA(2, "Doença Aguda"),
@@ -76,4 +70,3 @@ public enum TipoDoencaEnum {
                 .orElse(null);
     }
 }
-

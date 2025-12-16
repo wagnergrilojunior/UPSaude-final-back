@@ -24,11 +24,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
 
-/**
- * Controlador REST para operações relacionadas a Atendimentos.
- *
- * @author UPSaúde
- */
 @RestController
 @RequestMapping("/v1/atendimentos")
 @Tag(name = "Atendimentos", description = "API para gerenciamento de Atendimentos")

@@ -14,7 +14,6 @@ public interface CalendarioVacinalMapper {
     CalendarioVacinalResponse toResponse(CalendarioVacinal entity);
     void updateFromRequest(CalendarioVacinalRequest request, @MappingTarget CalendarioVacinal entity);
 
-    // Mapeamento entre DTO e Entity
     CalendarioVacinal toEntity(com.upsaude.dto.embeddable.CalendarioVacinalDTO dto);
     com.upsaude.dto.embeddable.CalendarioVacinalDTO toDTO(CalendarioVacinal entity);
     void updateFromDTO(com.upsaude.dto.embeddable.CalendarioVacinalDTO dto, @MappingTarget CalendarioVacinal entity);

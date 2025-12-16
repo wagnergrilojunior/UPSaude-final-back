@@ -44,10 +44,10 @@ public class CirurgiaResponse {
     private String observacoesPosOperatorio;
     private String observacoes;
     private String observacoesInternas;
-    
+
     @Builder.Default
     private List<ProcedimentoCirurgicoResponse> procedimentos = new ArrayList<>();
-    
+
     @Builder.Default
     private List<EquipeCirurgicaResponse> equipe = new ArrayList<>();
 }

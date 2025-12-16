@@ -23,4 +23,3 @@ public class EstadoCivilEnumConverter implements AttributeConverter<EstadoCivilE
         return EstadoCivilEnum.fromCodigo(dbData);
     }
 }
-

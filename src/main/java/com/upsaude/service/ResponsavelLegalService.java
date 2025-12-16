@@ -15,10 +15,9 @@ public interface ResponsavelLegalService {
 
     ResponsavelLegalResponse obterPorPacienteId(UUID pacienteId);
 
-    Page<ResponsavelLegalResponse> listar(Pageable pageable);
+    Page<ResponsavelLegalResponse> listar(Pageable pageable, UUID estabelecimentoId, String cpf, String nome);
 
     ResponsavelLegalResponse atualizar(UUID id, ResponsavelLegalRequest request);
 
     void excluir(UUID id);
 }
-

@@ -3,12 +3,6 @@ package com.upsaude.enums;
 import java.util.Arrays;
 import java.util.Locale;
 
-/**
- * Enum para classificação de tipos de profissionais de saúde.
- * Baseado em categorias profissionais do CNES e SUS/e-SUS.
- *
- * @author UPSaúde
- */
 public enum TipoProfissionalEnum {
     ENFERMEIRO(1, "Enfermeiro"),
     TECNICO_ENFERMAGEM(2, "Técnico de Enfermagem"),
@@ -129,4 +123,3 @@ public enum TipoProfissionalEnum {
                 .orElse(null);
     }
 }
-

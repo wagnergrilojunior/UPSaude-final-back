@@ -14,6 +14,7 @@ public class ReceitasMedicasDTO {
     private OffsetDateTime createdAt;
     private OffsetDateTime updatedAt;
     private Boolean active;
+    private EstabelecimentosDTO estabelecimento;
     private MedicosDTO medico;
     private PacienteDTO paciente;
     private String numeroReceita;

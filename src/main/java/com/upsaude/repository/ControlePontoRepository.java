@@ -4,47 +4,32 @@ import com.upsaude.entity.ControlePonto;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
+import java.util.Optional;
 import java.util.UUID;
 
-/**
- * Repositório para operações de banco de dados relacionadas a ControlePonto.
- *
- * @author UPSaúde
- */
 @Repository
 public interface ControlePontoRepository extends JpaRepository<ControlePonto, UUID> {
 
-    /**
-     * Busca todos os registros de ponto de um profissional, ordenados por data/hora decrescente.
-     */
-    Page<ControlePonto> findByProfissionalIdOrderByDataHoraDesc(UUID profissionalId, Pageable pageable);
+    @Query("SELECT c FROM ControlePonto c WHERE c.id = :id AND c.tenant.id = :tenantId")
+    Optional<ControlePonto> findByIdAndTenant(@Param("id") UUID id, @Param("tenantId") UUID tenantId);
 
-    /**
-     * Busca todos os registros de ponto de um médico, ordenados por data/hora decrescente.
-     */
-    Page<ControlePonto> findByMedicoIdOrderByDataHoraDesc(UUID medicoId, Pageable pageable);
+    @Query("SELECT c FROM ControlePonto c WHERE c.tenant.id = :tenantId")
+    Page<ControlePonto> findAllByTenant(@Param("tenantId") UUID tenantId, Pageable pageable);
 
-    /**
-     * Busca todos os registros de ponto de um estabelecimento, ordenados por data/hora decrescente.
-     */
-    Page<ControlePonto> findByEstabelecimentoIdOrderByDataHoraDesc(UUID estabelecimentoId, Pageable pageable);
+    Page<ControlePonto> findByProfissionalIdAndTenantIdOrderByDataHoraDesc(UUID profissionalId, UUID tenantId, Pageable pageable);
 
-    /**
-     * Busca todos os registros de ponto de um profissional em uma data específica.
-     */
-    Page<ControlePonto> findByProfissionalIdAndDataPontoOrderByDataHoraAsc(UUID profissionalId, LocalDate dataPonto, Pageable pageable);
+    Page<ControlePonto> findByMedicoIdAndTenantIdOrderByDataHoraDesc(UUID medicoId, UUID tenantId, Pageable pageable);
 
-    /**
-     * Busca todos os registros de ponto de um profissional em um período.
-     */
-    Page<ControlePonto> findByProfissionalIdAndDataPontoBetweenOrderByDataHoraAsc(UUID profissionalId, LocalDate dataInicio, LocalDate dataFim, Pageable pageable);
+    Page<ControlePonto> findByEstabelecimentoIdAndTenantIdOrderByDataHoraDesc(UUID estabelecimentoId, UUID tenantId, Pageable pageable);
 
-    /**
-     * Busca todos os registros de ponto de um estabelecimento em um período.
-     */
-    Page<ControlePonto> findByEstabelecimentoIdAndDataPontoBetweenOrderByDataHoraAsc(UUID estabelecimentoId, LocalDate dataInicio, LocalDate dataFim, Pageable pageable);
+    Page<ControlePonto> findByProfissionalIdAndTenantIdAndDataPontoOrderByDataHoraAsc(UUID profissionalId, UUID tenantId, LocalDate dataPonto, Pageable pageable);
+
+    Page<ControlePonto> findByProfissionalIdAndTenantIdAndDataPontoBetweenOrderByDataHoraAsc(UUID profissionalId, UUID tenantId, LocalDate dataInicio, LocalDate dataFim, Pageable pageable);
+
+    Page<ControlePonto> findByEstabelecimentoIdAndTenantIdAndDataPontoBetweenOrderByDataHoraAsc(UUID estabelecimentoId, UUID tenantId, LocalDate dataInicio, LocalDate dataFim, Pageable pageable);
 }
-

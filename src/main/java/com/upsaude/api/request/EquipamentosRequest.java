@@ -1,23 +1,29 @@
 package com.upsaude.api.request;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.upsaude.enums.StatusAtivoEnum;
 import com.upsaude.enums.TipoEquipamentoEnum;
+import com.upsaude.util.converter.StatusAtivoEnumDeserializer;
+import com.upsaude.util.converter.TipoEquipamentoEnumDeserializer;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.UUID;
 import lombok.*;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@Schema(description = "Dados de equipamentos")
 public class EquipamentosRequest {
     private String nome;
     private String nomeComercial;
     private String codigoInterno;
     private String codigoCnes;
     private String registroAnvisa;
+    @JsonDeserialize(using = TipoEquipamentoEnumDeserializer.class)
     private TipoEquipamentoEnum tipo;
     private String categoria;
     private String subcategoria;
@@ -52,6 +58,7 @@ public class EquipamentosRequest {
     private LocalDate dataInicioGarantia;
     private LocalDate dataFimGarantia;
     private String condicoesGarantia;
+    @JsonDeserialize(using = StatusAtivoEnumDeserializer.class)
     private StatusAtivoEnum status;
     private String manualTecnico;
     private String manualUsuario;

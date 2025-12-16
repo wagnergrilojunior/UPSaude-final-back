@@ -23,4 +23,3 @@ public class NacionalidadeEnumConverter implements AttributeConverter<Nacionalid
         return NacionalidadeEnum.fromCodigo(dbData);
     }
 }
-

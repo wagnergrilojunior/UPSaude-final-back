@@ -10,31 +10,33 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 @Getter
 @Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@Schema(description = "Dados de procedimento cirúrgico")
 public class ProcedimentoCirurgicoRequest {
     @NotNull(message = "Cirurgia é obrigatória")
     private UUID cirurgia;
-    
+
     @NotBlank(message = "Descrição do procedimento é obrigatória")
     private String descricao;
     @Size(max = 50, message = "Código procedimento deve ter no máximo 50 caracteres")
     private String codigoProcedimento;
-    
+
     @Size(max = 500, message = "Nome procedimento deve ter no máximo 500 caracteres")
     private String nomeProcedimento;
-    
+
     @NotNull(message = "Quantidade é obrigatória")
     @Builder.Default
     private Integer quantidade = 1;
-    
+
     private BigDecimal valorUnitario;
     private BigDecimal valorTotal;
-    
+
     @Size(max = 20, message = "Lado deve ter no máximo 20 caracteres")
     private String lado;
     private String observacoes;

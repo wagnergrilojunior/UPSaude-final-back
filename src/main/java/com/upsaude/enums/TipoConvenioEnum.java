@@ -3,12 +3,6 @@ package com.upsaude.enums;
 import java.util.Arrays;
 import java.util.Locale;
 
-/**
- * Enum para classificação de tipos de convênios/planos de saúde.
- * Baseado em padrões da ANS (Agência Nacional de Saúde Suplementar).
- *
- * @author UPSaúde
- */
 public enum TipoConvenioEnum {
     PLANO_SAUDE(1, "Plano de Saúde"),
     OPERADORA_PLANO_SAUDE(2, "Operadora de Plano de Saúde"),
@@ -66,4 +60,3 @@ public enum TipoConvenioEnum {
                 .orElse(null);
     }
 }
-

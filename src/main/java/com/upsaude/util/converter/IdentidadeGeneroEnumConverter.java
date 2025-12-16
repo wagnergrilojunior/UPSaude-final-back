@@ -23,4 +23,3 @@ public class IdentidadeGeneroEnumConverter implements AttributeConverter<Identid
         return IdentidadeGeneroEnum.fromCodigo(dbData);
     }
 }
-

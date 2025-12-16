@@ -6,11 +6,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 
-/**
- * Classe embeddable para informações de cobertura e rede credenciada do convênio.
- *
- * @author UPSaúde
- */
 @Embeddable
 @Data
 @Builder
@@ -47,101 +42,100 @@ public class CoberturaConvenio {
 
     @Column(name = "cobertura_nacional", nullable = false)
     @Builder.Default
-    private Boolean coberturaNacional = false; // Se tem cobertura nacional
+    private Boolean coberturaNacional = false;
 
     @Column(name = "cobertura_regional", nullable = false)
     @Builder.Default
-    private Boolean coberturaRegional = false; // Se tem cobertura regional
+    private Boolean coberturaRegional = false;
 
     @Column(name = "cobertura_local", nullable = false)
     @Builder.Default
-    private Boolean coberturaLocal = false; // Se tem cobertura local
+    private Boolean coberturaLocal = false;
 
     @Column(name = "cobertura_emergencia", nullable = false)
     @Builder.Default
-    private Boolean coberturaEmergencia = false; // Se cobre emergências
+    private Boolean coberturaEmergencia = false;
 
     @Column(name = "cobertura_urgencia", nullable = false)
     @Builder.Default
-    private Boolean coberturaUrgencia = false; // Se cobre urgências
+    private Boolean coberturaUrgencia = false;
 
     @Column(name = "cobertura_internacao", nullable = false)
     @Builder.Default
-    private Boolean coberturaInternacao = false; // Se cobre internações
+    private Boolean coberturaInternacao = false;
 
     @Column(name = "cobertura_ambulatorial", nullable = false)
     @Builder.Default
-    private Boolean coberturaAmbulatorial = false; // Se cobre atendimento ambulatorial
+    private Boolean coberturaAmbulatorial = false;
 
     @Column(name = "cobertura_exames", nullable = false)
     @Builder.Default
-    private Boolean coberturaExames = false; // Se cobre exames
+    private Boolean coberturaExames = false;
 
     @Column(name = "cobertura_cirurgias", nullable = false)
     @Builder.Default
-    private Boolean coberturaCirurgias = false; // Se cobre cirurgias
+    private Boolean coberturaCirurgias = false;
 
     @Column(name = "cobertura_medicamentos", nullable = false)
     @Builder.Default
-    private Boolean coberturaMedicamentos = false; // Se cobre medicamentos
+    private Boolean coberturaMedicamentos = false;
 
     @Column(name = "cobertura_odontologia", nullable = false)
     @Builder.Default
-    private Boolean coberturaOdontologia = false; // Se cobre odontologia
+    private Boolean coberturaOdontologia = false;
 
     @Column(name = "cobertura_fisioterapia", nullable = false)
     @Builder.Default
-    private Boolean coberturaFisioterapia = false; // Se cobre fisioterapia
+    private Boolean coberturaFisioterapia = false;
 
     @Column(name = "cobertura_psicologia", nullable = false)
     @Builder.Default
-    private Boolean coberturaPsicologia = false; // Se cobre psicologia
+    private Boolean coberturaPsicologia = false;
 
     @Column(name = "cobertura_nutricao", nullable = false)
     @Builder.Default
-    private Boolean coberturaNutricao = false; // Se cobre nutrição
+    private Boolean coberturaNutricao = false;
 
     @Column(name = "cobertura_fonoaudiologia", nullable = false)
     @Builder.Default
-    private Boolean coberturaFonoaudiologia = false; // Se cobre fonoaudiologia
+    private Boolean coberturaFonoaudiologia = false;
 
     @Column(name = "cobertura_terapia_ocupacional", nullable = false)
     @Builder.Default
-    private Boolean coberturaTerapiaOcupacional = false; // Se cobre terapia ocupacional
+    private Boolean coberturaTerapiaOcupacional = false;
 
     @Column(name = "cobertura_transplantes", nullable = false)
     @Builder.Default
-    private Boolean coberturaTransplantes = false; // Se cobre transplantes
+    private Boolean coberturaTransplantes = false;
 
     @Column(name = "cobertura_quimioterapia", nullable = false)
     @Builder.Default
-    private Boolean coberturaQuimioterapia = false; // Se cobre quimioterapia
+    private Boolean coberturaQuimioterapia = false;
 
     @Column(name = "cobertura_radioterapia", nullable = false)
     @Builder.Default
-    private Boolean coberturaRadioterapia = false; // Se cobre radioterapia
+    private Boolean coberturaRadioterapia = false;
 
     @Column(name = "cobertura_hemodialise", nullable = false)
     @Builder.Default
-    private Boolean coberturaHemodialise = false; // Se cobre hemodiálise
+    private Boolean coberturaHemodialise = false;
 
     @Column(name = "cobertura_obstetricia", nullable = false)
     @Builder.Default
-    private Boolean coberturaObstetricia = false; // Se cobre obstetrícia
+    private Boolean coberturaObstetricia = false;
 
     @Column(name = "cobertura_pediatria", nullable = false)
     @Builder.Default
-    private Boolean coberturaPediatria = false; // Se cobre pediatria
+    private Boolean coberturaPediatria = false;
 
     @Column(name = "cobertura_geriatria", nullable = false)
     @Builder.Default
-    private Boolean coberturaGeriatria = false; // Se cobre geriatria
+    private Boolean coberturaGeriatria = false;
 
     @Column(name = "cobertura_psiquiatria", nullable = false)
     @Builder.Default
-    private Boolean coberturaPsiquiatria = false; // Se cobre psiquiatria
+    private Boolean coberturaPsiquiatria = false;
 
     @Column(name = "cobertura_outras", columnDefinition = "TEXT")
-    private String coberturaOutras; // Outras coberturas específicas
+    private String coberturaOutras;
 }
-

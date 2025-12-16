@@ -4,12 +4,6 @@ import com.upsaude.enums.TipoNotificacaoEnum;
 import jakarta.persistence.AttributeConverter;
 import jakarta.persistence.Converter;
 
-/**
- * Converter para TipoNotificacaoEnum.
- * Converte entre o enum e o código Integer no banco de dados.
- *
- * @author UPSaúde
- */
 @Converter(autoApply = false)
 public class TipoNotificacaoEnumConverter implements AttributeConverter<TipoNotificacaoEnum, Integer> {
 
@@ -29,4 +23,3 @@ public class TipoNotificacaoEnumConverter implements AttributeConverter<TipoNoti
         return TipoNotificacaoEnum.fromCodigo(dbData);
     }
 }
-

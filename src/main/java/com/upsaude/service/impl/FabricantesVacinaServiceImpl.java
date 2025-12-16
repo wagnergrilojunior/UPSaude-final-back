@@ -2,143 +2,140 @@ package com.upsaude.service.impl;
 
 import com.upsaude.api.request.FabricantesVacinaRequest;
 import com.upsaude.api.response.FabricantesVacinaResponse;
+import com.upsaude.cache.CacheKeyUtil;
 import com.upsaude.entity.FabricantesVacina;
 import com.upsaude.exception.BadRequestException;
 import com.upsaude.exception.NotFoundException;
-import com.upsaude.mapper.FabricantesVacinaMapper;
 import com.upsaude.repository.FabricantesVacinaRepository;
 import com.upsaude.service.FabricantesVacinaService;
-import jakarta.transaction.Transactional;
+import com.upsaude.service.TenantService;
+import com.upsaude.service.support.fabricantesvacina.FabricantesVacinaCreator;
+import com.upsaude.service.support.fabricantesvacina.FabricantesVacinaDomainService;
+import com.upsaude.service.support.fabricantesvacina.FabricantesVacinaResponseBuilder;
+import com.upsaude.service.support.fabricantesvacina.FabricantesVacinaUpdater;
+import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.BeanUtils;
 import org.springframework.data.domain.Page;
+import org.springframework.cache.Cache;
+import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.util.Objects;
 import java.util.UUID;
 
-/**
- * Implementação do serviço de gerenciamento de FabricantesVacina.
- *
- * @author UPSaúde
- */
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class FabricantesVacinaServiceImpl implements FabricantesVacinaService {
 
     private final FabricantesVacinaRepository fabricantesVacinaRepository;
-    private final FabricantesVacinaMapper fabricantesVacinaMapper;
+    private final CacheManager cacheManager;
+    private final TenantService tenantService;
+
+    private final FabricantesVacinaCreator creator;
+    private final FabricantesVacinaUpdater updater;
+    private final FabricantesVacinaResponseBuilder responseBuilder;
+    private final FabricantesVacinaDomainService domainService;
 
     @Override
     @Transactional
-    @CacheEvict(value = "fabricantesvacina", allEntries = true)
     public FabricantesVacinaResponse criar(FabricantesVacinaRequest request) {
-        log.debug("Criando novo fabricantesvacina");
+        log.debug("Criando novo FabricantesVacina");
+        UUID tenantId = tenantService.validarTenantAtual();
+        var tenant = tenantService.obterTenantDoUsuarioAutenticado();
 
-        validarDadosBasicos(request);
+        FabricantesVacina saved = creator.criar(request, tenantId, tenant);
+        FabricantesVacinaResponse response = responseBuilder.build(saved, tenantId);
 
-        FabricantesVacina fabricantesVacina = fabricantesVacinaMapper.fromRequest(request);
-        fabricantesVacina.setActive(true);
+        Cache cache = cacheManager.getCache(CacheKeyUtil.CACHE_FABRICANTES_VACINA);
+        if (cache != null) {
+            Object key = Objects.requireNonNull((Object) CacheKeyUtil.fabricanteVacina(saved.getId()));
+            cache.put(key, response);
+        }
 
-        FabricantesVacina fabricantesVacinaSalvo = fabricantesVacinaRepository.save(fabricantesVacina);
-        log.info("FabricantesVacina criado com sucesso. ID: {}", fabricantesVacinaSalvo.getId());
-
-        return fabricantesVacinaMapper.toResponse(fabricantesVacinaSalvo);
+        return response;
     }
 
     @Override
-    @Transactional
-    @Cacheable(value = "fabricantesvacina", key = "#id")
+    @Transactional(readOnly = true)
+    @Cacheable(cacheNames = CacheKeyUtil.CACHE_FABRICANTES_VACINA, keyGenerator = "fabricantesVacinaCacheKeyGenerator")
     public FabricantesVacinaResponse obterPorId(UUID id) {
-        log.debug("Buscando fabricantesvacina por ID: {} (cache miss)", id);
+        log.debug("Buscando FabricantesVacina por ID: {} (cache miss)", id);
+
         if (id == null) {
-            throw new BadRequestException("ID do fabricantesvacina é obrigatório");
+            log.warn("ID nulo recebido para busca de FabricantesVacina");
+            throw new BadRequestException("ID do fabricante de vacina é obrigatório");
         }
 
         FabricantesVacina fabricantesVacina = fabricantesVacinaRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("FabricantesVacina não encontrado com ID: " + id));
 
-        return fabricantesVacinaMapper.toResponse(fabricantesVacina);
+        log.debug("FabricantesVacina encontrado. ID: {}", id);
+        UUID tenantId = tenantService.validarTenantAtual();
+        return responseBuilder.build(fabricantesVacina, tenantId);
     }
 
     @Override
+    @Transactional(readOnly = true)
     public Page<FabricantesVacinaResponse> listar(Pageable pageable) {
         log.debug("Listando FabricantesVacinas paginados. Página: {}, Tamanho: {}",
                 pageable.getPageNumber(), pageable.getPageSize());
 
         Page<FabricantesVacina> fabricantesVacinas = fabricantesVacinaRepository.findAll(pageable);
-        return fabricantesVacinas.map(fabricantesVacinaMapper::toResponse);
+        log.debug("Listagem de FabricantesVacinas concluída. Total de elementos: {}", fabricantesVacinas.getTotalElements());
+        UUID tenantId = tenantService.validarTenantAtual();
+        return fabricantesVacinas.map(e -> responseBuilder.build(e, tenantId));
     }
 
     @Override
     @Transactional
-    @CacheEvict(value = "fabricantesvacina", key = "#id")
+    @CachePut(cacheNames = CacheKeyUtil.CACHE_FABRICANTES_VACINA, keyGenerator = "fabricantesVacinaCacheKeyGenerator")
     public FabricantesVacinaResponse atualizar(UUID id, FabricantesVacinaRequest request) {
-        log.debug("Atualizando fabricantesvacina. ID: {}", id);
+        log.debug("Atualizando FabricantesVacina. ID: {}", id);
 
         if (id == null) {
-            throw new BadRequestException("ID do fabricantesvacina é obrigatório");
+            log.warn("ID nulo recebido para atualização de FabricantesVacina");
+            throw new BadRequestException("ID do fabricante de vacina é obrigatório");
         }
 
-        validarDadosBasicos(request);
+        if (request == null) {
+            log.warn("Request nulo recebido para atualização de FabricantesVacina. ID: {}", id);
+            throw new BadRequestException("Dados do fabricante de vacina são obrigatórios");
+        }
 
-        FabricantesVacina fabricantesVacinaExistente = fabricantesVacinaRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("FabricantesVacina não encontrado com ID: " + id));
+        UUID tenantId = tenantService.validarTenantAtual();
+        var tenant = tenantService.obterTenantDoUsuarioAutenticado();
 
-        atualizarDadosFabricantesVacina(fabricantesVacinaExistente, request);
-
-        FabricantesVacina fabricantesVacinaAtualizado = fabricantesVacinaRepository.save(fabricantesVacinaExistente);
-        log.info("FabricantesVacina atualizado com sucesso. ID: {}", fabricantesVacinaAtualizado.getId());
-
-        return fabricantesVacinaMapper.toResponse(fabricantesVacinaAtualizado);
+        FabricantesVacina updated = updater.atualizar(id, request, tenantId, tenant);
+        return responseBuilder.build(updated, tenantId);
     }
 
     @Override
     @Transactional
-    @CacheEvict(value = "fabricantesvacina", key = "#id")
+    @CacheEvict(cacheNames = CacheKeyUtil.CACHE_FABRICANTES_VACINA, keyGenerator = "fabricantesVacinaCacheKeyGenerator", beforeInvocation = false)
     public void excluir(UUID id) {
-        log.debug("Excluindo fabricantesvacina. ID: {}", id);
+        log.debug("Excluindo FabricantesVacina. ID: {}", id);
 
+        inativarInternal(id);
+    }
+
+    private void inativarInternal(UUID id) {
         if (id == null) {
-            throw new BadRequestException("ID do fabricantesvacina é obrigatório");
+            log.warn("ID nulo recebido para exclusão de FabricantesVacina");
+            throw new BadRequestException("ID do fabricante de vacina é obrigatório");
         }
 
-        FabricantesVacina fabricantesVacina = fabricantesVacinaRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("FabricantesVacina não encontrado com ID: " + id));
+        FabricantesVacina entity = fabricantesVacinaRepository.findById(id)
+            .orElseThrow(() -> new NotFoundException("FabricantesVacina não encontrado com ID: " + id));
 
-        if (Boolean.FALSE.equals(fabricantesVacina.getActive())) {
-            throw new BadRequestException("FabricantesVacina já está inativo");
-        }
-
-        fabricantesVacina.setActive(false);
-        fabricantesVacinaRepository.save(fabricantesVacina);
+        domainService.validarPodeInativar(entity);
+        entity.setActive(false);
+        fabricantesVacinaRepository.save(Objects.requireNonNull(entity));
         log.info("FabricantesVacina excluído (desativado) com sucesso. ID: {}", id);
-    }
-
-    private void validarDadosBasicos(FabricantesVacinaRequest request) {
-        if (request == null) {
-            throw new BadRequestException("Dados do fabricantesvacina são obrigatórios");
-        }
-    }
-
-    private void atualizarDadosFabricantesVacina(FabricantesVacina fabricantesVacina, FabricantesVacinaRequest request) {
-        FabricantesVacina fabricantesVacinaAtualizado = fabricantesVacinaMapper.fromRequest(request);
-        
-        // Preserva campos de controle
-        java.util.UUID idOriginal = fabricantesVacina.getId();
-        Boolean activeOriginal = fabricantesVacina.getActive();
-        java.time.OffsetDateTime createdAtOriginal = fabricantesVacina.getCreatedAt();
-        
-        // Copia todas as propriedades do objeto atualizado
-        BeanUtils.copyProperties(fabricantesVacinaAtualizado, fabricantesVacina);
-        
-        // Restaura campos de controle
-        fabricantesVacina.setId(idOriginal);
-        fabricantesVacina.setActive(activeOriginal);
-        fabricantesVacina.setCreatedAt(createdAtOriginal);
     }
 }

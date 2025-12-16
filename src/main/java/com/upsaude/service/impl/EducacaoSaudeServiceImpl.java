@@ -2,179 +2,176 @@ package com.upsaude.service.impl;
 
 import com.upsaude.api.request.EducacaoSaudeRequest;
 import com.upsaude.api.response.EducacaoSaudeResponse;
+import com.upsaude.cache.CacheKeyUtil;
 import com.upsaude.entity.EducacaoSaude;
+import com.upsaude.entity.Tenant;
 import com.upsaude.exception.BadRequestException;
+import com.upsaude.exception.InternalServerErrorException;
 import com.upsaude.exception.NotFoundException;
-import com.upsaude.mapper.EducacaoSaudeMapper;
 import com.upsaude.repository.EducacaoSaudeRepository;
 import com.upsaude.service.EducacaoSaudeService;
-import jakarta.transaction.Transactional;
+import com.upsaude.service.TenantService;
+import com.upsaude.service.support.educacaosaude.EducacaoSaudeCreator;
+import com.upsaude.service.support.educacaosaude.EducacaoSaudeResponseBuilder;
+import com.upsaude.service.support.educacaosaude.EducacaoSaudeTenantEnforcer;
+import com.upsaude.service.support.educacaosaude.EducacaoSaudeUpdater;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.BeanUtils;
+import org.springframework.cache.Cache;
+import org.springframework.cache.CacheManager;
 import org.springframework.data.domain.Page;
 import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Objects;
 import java.util.UUID;
 
-/**
- * Implementação do serviço de gerenciamento de Educação em Saúde.
- *
- * @author UPSaúde
- */
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class EducacaoSaudeServiceImpl implements EducacaoSaudeService {
 
-    private final EducacaoSaudeRepository educacaoSaudeRepository;
-    private final EducacaoSaudeMapper educacaoSaudeMapper;
+    private final EducacaoSaudeRepository repository;
+    private final CacheManager cacheManager;
+    private final TenantService tenantService;
+
+    private final EducacaoSaudeCreator creator;
+    private final EducacaoSaudeUpdater updater;
+    private final EducacaoSaudeResponseBuilder responseBuilder;
+    private final EducacaoSaudeTenantEnforcer tenantEnforcer;
 
     @Override
     @Transactional
-    @CacheEvict(value = "educacaosaude", allEntries = true)
     public EducacaoSaudeResponse criar(EducacaoSaudeRequest request) {
-        log.debug("Criando nova ação de educação em saúde");
+        try {
+            UUID tenantId = tenantService.validarTenantAtual();
+            Tenant tenant = tenantService.obterTenantDoUsuarioAutenticado();
+            validarTenantAutenticadoOrThrow(tenantId, tenant);
 
-        validarDadosBasicos(request);
+            EducacaoSaude saved = creator.criar(request, tenantId, tenant);
+            EducacaoSaudeResponse response = responseBuilder.build(saved);
 
-        EducacaoSaude educacaoSaude = educacaoSaudeMapper.fromRequest(request);
-        educacaoSaude.setActive(true);
+            Cache cache = cacheManager.getCache(CacheKeyUtil.CACHE_EDUCACAO_SAUDE);
+            if (cache != null) {
+                Object key = Objects.requireNonNull((Object) CacheKeyUtil.educacaoSaude(tenantId, saved.getId()));
+                cache.put(key, response);
+            }
 
-        if (educacaoSaude.getAtividadeRealizada() == null) {
-            educacaoSaude.setAtividadeRealizada(false);
+            return response;
+        } catch (BadRequestException | NotFoundException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new InternalServerErrorException("Erro ao criar educação em saúde", e);
         }
-
-        EducacaoSaude educacaoSalva = educacaoSaudeRepository.save(educacaoSaude);
-        log.info("Educação em saúde criada com sucesso. ID: {}", educacaoSalva.getId());
-
-        return educacaoSaudeMapper.toResponse(educacaoSalva);
     }
 
     @Override
-    @Transactional
-    @Cacheable(value = "educacaosaude", key = "#id")
+    @Transactional(readOnly = true)
+    @Cacheable(cacheNames = CacheKeyUtil.CACHE_EDUCACAO_SAUDE, keyGenerator = "educacaoSaudeCacheKeyGenerator")
     public EducacaoSaudeResponse obterPorId(UUID id) {
-        log.debug("Buscando educação em saúde por ID: {} (cache miss)", id);
         if (id == null) {
             throw new BadRequestException("ID da educação em saúde é obrigatório");
         }
-
-        EducacaoSaude educacaoSaude = educacaoSaudeRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("Educação em saúde não encontrada com ID: " + id));
-
-        return educacaoSaudeMapper.toResponse(educacaoSaude);
+        UUID tenantId = tenantService.validarTenantAtual();
+        EducacaoSaude entity = tenantEnforcer.validarAcessoCompleto(id, tenantId);
+        return responseBuilder.build(entity);
     }
 
     @Override
+    @Transactional(readOnly = true)
     public Page<EducacaoSaudeResponse> listar(Pageable pageable) {
-        log.debug("Listando educações em saúde paginadas");
-
-        Page<EducacaoSaude> educacoes = educacaoSaudeRepository.findAll(pageable);
-        return educacoes.map(educacaoSaudeMapper::toResponse);
+        UUID tenantId = tenantService.validarTenantAtual();
+        Page<EducacaoSaude> page = repository.findAllByTenant(tenantId, pageable);
+        return page.map(responseBuilder::build);
     }
 
     @Override
+    @Transactional(readOnly = true)
     public Page<EducacaoSaudeResponse> listarPorEstabelecimento(UUID estabelecimentoId, Pageable pageable) {
-        log.debug("Listando educações em saúde por estabelecimento: {}", estabelecimentoId);
+        if (estabelecimentoId == null) {
+            throw new BadRequestException("ID do estabelecimento é obrigatório");
+        }
 
-        Page<EducacaoSaude> educacoes = educacaoSaudeRepository.findByEstabelecimentoIdOrderByDataHoraInicioDesc(estabelecimentoId, pageable);
-        return educacoes.map(educacaoSaudeMapper::toResponse);
+        UUID tenantId = tenantService.validarTenantAtual();
+        Page<EducacaoSaude> page = repository.findByEstabelecimentoIdAndTenantIdOrderByDataHoraInicioDesc(estabelecimentoId, tenantId, pageable);
+        return page.map(responseBuilder::build);
     }
 
     @Override
+    @Transactional(readOnly = true)
     public Page<EducacaoSaudeResponse> listarPorProfissionalResponsavel(UUID profissionalId, Pageable pageable) {
-        log.debug("Listando educações em saúde por profissional: {}", profissionalId);
+        if (profissionalId == null) {
+            throw new BadRequestException("ID do profissional é obrigatório");
+        }
 
-        Page<EducacaoSaude> educacoes = educacaoSaudeRepository.findByProfissionalResponsavelIdOrderByDataHoraInicioDesc(profissionalId, pageable);
-        return educacoes.map(educacaoSaudeMapper::toResponse);
+        UUID tenantId = tenantService.validarTenantAtual();
+        Page<EducacaoSaude> page = repository.findByProfissionalResponsavelIdAndTenantIdOrderByDataHoraInicioDesc(profissionalId, tenantId, pageable);
+        return page.map(responseBuilder::build);
     }
 
     @Override
+    @Transactional(readOnly = true)
     public Page<EducacaoSaudeResponse> listarRealizadas(UUID estabelecimentoId, Pageable pageable) {
-        log.debug("Listando educações em saúde realizadas: {}", estabelecimentoId);
+        if (estabelecimentoId == null) {
+            throw new BadRequestException("ID do estabelecimento é obrigatório");
+        }
 
-        Page<EducacaoSaude> educacoes = educacaoSaudeRepository.findByAtividadeRealizadaAndEstabelecimentoIdOrderByDataHoraInicioDesc(true, estabelecimentoId, pageable);
-        return educacoes.map(educacaoSaudeMapper::toResponse);
+        UUID tenantId = tenantService.validarTenantAtual();
+        Page<EducacaoSaude> page = repository.findByAtividadeRealizadaAndEstabelecimentoIdAndTenantIdOrderByDataHoraInicioDesc(true, estabelecimentoId, tenantId, pageable);
+        return page.map(responseBuilder::build);
     }
 
     @Override
     @Transactional
-    @CacheEvict(value = "educacaosaude", key = "#id")
+    @CachePut(cacheNames = CacheKeyUtil.CACHE_EDUCACAO_SAUDE, keyGenerator = "educacaoSaudeCacheKeyGenerator")
     public EducacaoSaudeResponse atualizar(UUID id, EducacaoSaudeRequest request) {
-        log.debug("Atualizando educação em saúde. ID: {}", id);
-
         if (id == null) {
             throw new BadRequestException("ID da educação em saúde é obrigatório");
         }
+        try {
+            UUID tenantId = tenantService.validarTenantAtual();
+            Tenant tenant = tenantService.obterTenantDoUsuarioAutenticado();
+            validarTenantAutenticadoOrThrow(tenantId, tenant);
 
-        validarDadosBasicos(request);
-
-        EducacaoSaude educacaoExistente = educacaoSaudeRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("Educação em saúde não encontrada com ID: " + id));
-
-        atualizarDadosEducacaoSaude(educacaoExistente, request);
-
-        EducacaoSaude educacaoAtualizada = educacaoSaudeRepository.save(educacaoExistente);
-        log.info("Educação em saúde atualizada com sucesso. ID: {}", educacaoAtualizada.getId());
-
-        return educacaoSaudeMapper.toResponse(educacaoAtualizada);
+            EducacaoSaude updated = updater.atualizar(id, request, tenantId, tenant);
+            return responseBuilder.build(updated);
+        } catch (BadRequestException | NotFoundException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new InternalServerErrorException("Erro ao atualizar educação em saúde", e);
+        }
     }
 
     @Override
     @Transactional
-    @CacheEvict(value = "educacaosaude", key = "#id")
+    @CacheEvict(cacheNames = CacheKeyUtil.CACHE_EDUCACAO_SAUDE, keyGenerator = "educacaoSaudeCacheKeyGenerator", beforeInvocation = false)
     public void excluir(UUID id) {
-        log.debug("Excluindo educação em saúde. ID: {}", id);
+        UUID tenantId = tenantService.validarTenantAtual();
+        inativarInternal(id, tenantId);
+    }
 
+    private void inativarInternal(UUID id, UUID tenantId) {
         if (id == null) {
             throw new BadRequestException("ID da educação em saúde é obrigatório");
         }
 
-        EducacaoSaude educacaoSaude = educacaoSaudeRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("Educação em saúde não encontrada com ID: " + id));
-
-        if (Boolean.FALSE.equals(educacaoSaude.getActive())) {
+        EducacaoSaude entity = tenantEnforcer.validarAcesso(id, tenantId);
+        if (Boolean.FALSE.equals(entity.getActive())) {
             throw new BadRequestException("Educação em saúde já está inativa");
         }
 
-        educacaoSaude.setActive(false);
-        educacaoSaudeRepository.save(educacaoSaude);
+        entity.setActive(false);
+        repository.save(Objects.requireNonNull(entity));
         log.info("Educação em saúde excluída (desativada) com sucesso. ID: {}", id);
     }
 
-    private void validarDadosBasicos(EducacaoSaudeRequest request) {
-        if (request == null) {
-            throw new BadRequestException("Dados da educação em saúde são obrigatórios");
+    private void validarTenantAutenticadoOrThrow(UUID tenantId, Tenant tenant) {
+        if (tenantId == null || tenant == null || tenant.getId() == null || !tenantId.equals(tenant.getId())) {
+            throw new BadRequestException("Não foi possível obter tenant do usuário autenticado");
         }
-        if (request.getProfissionalResponsavel() == null) {
-            throw new BadRequestException("Profissional responsável é obrigatório");
-        }
-        if (request.getTipoAtividade() == null) {
-            throw new BadRequestException("Tipo de atividade é obrigatório");
-        }
-        if (request.getTitulo() == null || request.getTitulo().isBlank()) {
-            throw new BadRequestException("Título é obrigatório");
-        }
-    }
-
-    private void atualizarDadosEducacaoSaude(EducacaoSaude educacao, EducacaoSaudeRequest request) {
-        EducacaoSaude educacaoAtualizada = educacaoSaudeMapper.fromRequest(request);
-
-        UUID idOriginal = educacao.getId();
-        com.upsaude.entity.Tenant tenantOriginal = educacao.getTenant();
-        Boolean activeOriginal = educacao.getActive();
-        java.time.OffsetDateTime createdAtOriginal = educacao.getCreatedAt();
-
-        BeanUtils.copyProperties(educacaoAtualizada, educacao);
-
-        educacao.setId(idOriginal);
-        educacao.setTenant(tenantOriginal);
-        educacao.setActive(activeOriginal);
-        educacao.setCreatedAt(createdAtOriginal);
     }
 }
-

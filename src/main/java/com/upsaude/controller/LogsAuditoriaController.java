@@ -24,11 +24,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
 
-/**
- * Controlador REST para operações relacionadas a Logs de Auditoria.
- *
- * @author UPSaúde
- */
 @Slf4j
 @RestController
 @RequestMapping("/v1/logs-auditoria")
@@ -155,4 +150,3 @@ public class LogsAuditoriaController {
         }
     }
 }
-

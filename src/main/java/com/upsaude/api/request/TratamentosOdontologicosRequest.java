@@ -11,19 +11,23 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 @Getter
 @Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@Schema(description = "Dados de tratamentos odontológicos")
 public class TratamentosOdontologicosRequest {
     @NotNull(message = "Paciente é obrigatório")
     private UUID paciente;
-    
+
     @NotNull(message = "Profissional é obrigatório")
     private UUID profissional;
-    
+
+    private UUID estabelecimento;
+
     @NotBlank(message = "Título é obrigatório")
     @Size(max = 255, message = "Título deve ter no máximo 255 caracteres")
     private String titulo;

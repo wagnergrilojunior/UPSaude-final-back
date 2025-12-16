@@ -1,16 +1,20 @@
 package com.upsaude.api.request;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.upsaude.enums.ClassificacaoRiscoGestacionalEnum;
+import com.upsaude.util.converter.ClassificacaoRiscoGestacionalEnumDeserializer;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.UUID;
 import lombok.*;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@Schema(description = "Dados de pré-natal")
 public class PreNatalRequest {
     private UUID paciente;
     private UUID profissionalResponsavel;
@@ -26,6 +30,7 @@ public class PreNatalRequest {
     private Integer cesareas;
     private Integer partosPrematuros;
     private Integer natimortos;
+    @JsonDeserialize(using = ClassificacaoRiscoGestacionalEnumDeserializer.class)
     private ClassificacaoRiscoGestacionalEnum classificacaoRisco;
     private String motivosAltoRisco;
     private LocalDate dataInicioAcompanhamento;

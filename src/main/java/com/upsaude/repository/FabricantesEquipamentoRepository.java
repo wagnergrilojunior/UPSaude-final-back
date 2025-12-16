@@ -9,28 +9,20 @@ import org.springframework.stereotype.Repository;
 import java.util.Optional;
 import java.util.UUID;
 
-/**
- * Repositório para operações de banco de dados relacionadas a FabricantesEquipamento.
- * Esta entidade é de escopo global e não possui relacionamento com Tenant ou Estabelecimento.
- *
- * @author UPSaúde
- */
 @Repository
 public interface FabricantesEquipamentoRepository extends JpaRepository<FabricantesEquipamento, UUID> {
 
-    /**
-     * Busca fabricante por CNPJ.
-     */
     Optional<FabricantesEquipamento> findByCnpj(String cnpj);
 
-    /**
-     * Busca fabricantes por nome (busca parcial).
-     */
     Page<FabricantesEquipamento> findByNomeContainingIgnoreCaseOrderByNomeAsc(String nome, Pageable pageable);
 
-    /**
-     * Busca todos os fabricantes, ordenados por nome.
-     */
     Page<FabricantesEquipamento> findAllByOrderByNomeAsc(Pageable pageable);
-}
 
+    boolean existsByNome(String nome);
+
+    boolean existsByNomeAndIdNot(String nome, UUID id);
+
+    boolean existsByCnpj(String cnpj);
+
+    boolean existsByCnpjAndIdNot(String cnpj, UUID id);
+}

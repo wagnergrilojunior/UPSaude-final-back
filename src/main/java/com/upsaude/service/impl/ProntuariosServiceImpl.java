@@ -2,106 +2,128 @@ package com.upsaude.service.impl;
 
 import com.upsaude.api.request.ProntuariosRequest;
 import com.upsaude.api.response.ProntuariosResponse;
-import com.upsaude.entity.Estabelecimentos;
-import com.upsaude.entity.Paciente;
+import com.upsaude.cache.CacheKeyUtil;
 import com.upsaude.entity.Prontuarios;
+import com.upsaude.entity.Tenant;
 import com.upsaude.exception.BadRequestException;
+import com.upsaude.exception.InternalServerErrorException;
 import com.upsaude.exception.NotFoundException;
-import com.upsaude.mapper.ProntuariosMapper;
-import com.upsaude.repository.EstabelecimentosRepository;
-import com.upsaude.repository.PacienteRepository;
 import com.upsaude.repository.ProntuariosRepository;
 import com.upsaude.service.ProntuariosService;
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.BeanUtils;
+import org.springframework.cache.Cache;
+import org.springframework.cache.CacheManager;
 import org.springframework.data.domain.Page;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.CachePut;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import com.upsaude.service.TenantService;
+import com.upsaude.service.support.prontuarios.ProntuariosCreator;
+import com.upsaude.service.support.prontuarios.ProntuariosDomainService;
+import com.upsaude.service.support.prontuarios.ProntuariosResponseBuilder;
+import com.upsaude.service.support.prontuarios.ProntuariosTenantEnforcer;
+import com.upsaude.service.support.prontuarios.ProntuariosUpdater;
+
+import java.util.Objects;
 import java.util.UUID;
 
-/**
- * Implementação do serviço de gerenciamento de Prontuarios.
- *
- * @author UPSaúde
- */
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class ProntuariosServiceImpl implements ProntuariosService {
 
     private final ProntuariosRepository prontuariosRepository;
-    private final ProntuariosMapper prontuariosMapper;
-    private final EstabelecimentosRepository estabelecimentosRepository;
-    private final PacienteRepository pacienteRepository;
+    private final CacheManager cacheManager;
+    private final TenantService tenantService;
+
+    private final ProntuariosCreator creator;
+    private final ProntuariosUpdater updater;
+    private final ProntuariosResponseBuilder responseBuilder;
+    private final ProntuariosDomainService domainService;
+    private final ProntuariosTenantEnforcer tenantEnforcer;
 
     @Override
     @Transactional
-    @CacheEvict(value = "prontuarios", allEntries = true)
     public ProntuariosResponse criar(ProntuariosRequest request) {
         log.debug("Criando novo prontuarios");
 
-        validarDadosBasicos(request);
+        try {
+            UUID tenantId = tenantService.validarTenantAtual();
+            Tenant tenant = tenantService.obterTenantDoUsuarioAutenticado();
+            validarTenantAutenticadoOrThrow(tenantId, tenant);
 
-        Prontuarios prontuarios = prontuariosMapper.fromRequest(request);
+            Prontuarios saved = creator.criar(request, tenantId, tenant);
+            ProntuariosResponse response = responseBuilder.build(saved);
 
-        // Carrega e define o paciente
-        Paciente paciente = pacienteRepository.findById(request.getPaciente())
-                .orElseThrow(() -> new NotFoundException("Paciente não encontrado com ID: " + request.getPaciente()));
-        prontuarios.setPaciente(paciente);
+            Cache cache = cacheManager.getCache(CacheKeyUtil.CACHE_PRONTUARIOS);
+            if (cache != null) {
+                Object key = Objects.requireNonNull((Object) CacheKeyUtil.prontuario(tenantId, saved.getId()));
+                cache.put(key, response);
+            }
 
-        prontuarios.setActive(true);
-
-        Prontuarios prontuariosSalvo = prontuariosRepository.save(prontuarios);
-        log.info("Prontuarios criado com sucesso. ID: {}", prontuariosSalvo.getId());
-
-        return prontuariosMapper.toResponse(prontuariosSalvo);
+            return response;
+        } catch (BadRequestException | NotFoundException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new InternalServerErrorException("Erro ao criar prontuário", e);
+        }
     }
 
     @Override
-    @Transactional
-    @Cacheable(value = "prontuarios", key = "#id")
+    @Transactional(readOnly = true)
+    @Cacheable(cacheNames = CacheKeyUtil.CACHE_PRONTUARIOS, keyGenerator = "prontuariosCacheKeyGenerator")
     public ProntuariosResponse obterPorId(UUID id) {
         log.debug("Buscando prontuarios por ID: {} (cache miss)", id);
         if (id == null) {
             throw new BadRequestException("ID do prontuarios é obrigatório");
         }
 
-        Prontuarios prontuarios = prontuariosRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("Prontuarios não encontrado com ID: " + id));
-
-        return prontuariosMapper.toResponse(prontuarios);
+        UUID tenantId = tenantService.validarTenantAtual();
+        Prontuarios entity = tenantEnforcer.validarAcessoCompleto(id, tenantId);
+        return responseBuilder.build(entity);
     }
 
     @Override
+    @Transactional(readOnly = true)
     public Page<ProntuariosResponse> listar(Pageable pageable) {
-        log.debug("Listando Prontuarios paginados. Página: {}, Tamanho: {}",
-                pageable.getPageNumber(), pageable.getPageSize());
-
-        Page<Prontuarios> prontuarios = prontuariosRepository.findAll(pageable);
-        return prontuarios.map(prontuariosMapper::toResponse);
+        return listar(pageable, null, null, null, null);
     }
 
     @Override
-    public Page<ProntuariosResponse> listarPorEstabelecimento(UUID estabelecimentoId, Pageable pageable) {
-        log.debug("Listando prontuários do estabelecimento: {}. Página: {}, Tamanho: {}",
-                estabelecimentoId, pageable.getPageNumber(), pageable.getPageSize());
+    @Transactional(readOnly = true)
+    public Page<ProntuariosResponse> listar(Pageable pageable, UUID pacienteId, UUID estabelecimentoId, String tipoRegistro, UUID criadoPor) {
+        UUID tenantId = tenantService.validarTenantAtual();
 
-        if (estabelecimentoId == null) {
-            throw new BadRequestException("ID do estabelecimento é obrigatório");
+        Page<Prontuarios> page;
+        if (pacienteId != null) {
+            page = prontuariosRepository.findByPacienteIdAndTenantId(pacienteId, tenantId, pageable);
+        } else if (estabelecimentoId != null) {
+            page = prontuariosRepository.findByEstabelecimentoIdAndTenantId(estabelecimentoId, tenantId, pageable);
+        } else if (tipoRegistro != null && !tipoRegistro.isBlank()) {
+            page = prontuariosRepository.findByTipoRegistroContainingIgnoreCaseAndTenantId(tipoRegistro, tenantId, pageable);
+        } else if (criadoPor != null) {
+            page = prontuariosRepository.findByCriadoPorAndTenantId(criadoPor, tenantId, pageable);
+        } else {
+            page = prontuariosRepository.findAllByTenant(tenantId, pageable);
         }
 
-        Page<Prontuarios> prontuarios = prontuariosRepository.findByEstabelecimentoId(estabelecimentoId, pageable);
-        return prontuarios.map(prontuariosMapper::toResponse);
+        return page.map(responseBuilder::build);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Page<ProntuariosResponse> listarPorEstabelecimento(UUID estabelecimentoId, Pageable pageable) {
+        return listar(pageable, null, estabelecimentoId, null, null);
     }
 
     @Override
     @Transactional
-    @CacheEvict(value = "prontuarios", key = "#id")
+    @CachePut(cacheNames = CacheKeyUtil.CACHE_PRONTUARIOS, keyGenerator = "prontuariosCacheKeyGenerator")
     public ProntuariosResponse atualizar(UUID id, ProntuariosRequest request) {
         log.debug("Atualizando prontuarios. ID: {}", id);
 
@@ -109,70 +131,38 @@ public class ProntuariosServiceImpl implements ProntuariosService {
             throw new BadRequestException("ID do prontuarios é obrigatório");
         }
 
-        validarDadosBasicos(request);
+        UUID tenantId = tenantService.validarTenantAtual();
+        Tenant tenant = tenantService.obterTenantDoUsuarioAutenticado();
+        validarTenantAutenticadoOrThrow(tenantId, tenant);
 
-        Prontuarios prontuariosExistente = prontuariosRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("Prontuarios não encontrado com ID: " + id));
-
-        atualizarDadosProntuarios(prontuariosExistente, request);
-
-        Prontuarios prontuariosAtualizado = prontuariosRepository.save(prontuariosExistente);
-        log.info("Prontuarios atualizado com sucesso. ID: {}", prontuariosAtualizado.getId());
-
-        return prontuariosMapper.toResponse(prontuariosAtualizado);
+        Prontuarios updated = updater.atualizar(id, request, tenantId, tenant);
+        return responseBuilder.build(updated);
     }
 
     @Override
     @Transactional
-    @CacheEvict(value = "prontuarios", key = "#id")
+    @CacheEvict(cacheNames = CacheKeyUtil.CACHE_PRONTUARIOS, keyGenerator = "prontuariosCacheKeyGenerator", beforeInvocation = false)
     public void excluir(UUID id) {
         log.debug("Excluindo prontuarios. ID: {}", id);
+        UUID tenantId = tenantService.validarTenantAtual();
+        inativarInternal(id, tenantId);
+    }
 
+    private void inativarInternal(UUID id, UUID tenantId) {
         if (id == null) {
             throw new BadRequestException("ID do prontuarios é obrigatório");
         }
 
-        Prontuarios prontuarios = prontuariosRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("Prontuarios não encontrado com ID: " + id));
-
-        if (Boolean.FALSE.equals(prontuarios.getActive())) {
-            throw new BadRequestException("Prontuarios já está inativo");
-        }
-
-        prontuarios.setActive(false);
-        prontuariosRepository.save(prontuarios);
+        Prontuarios entity = tenantEnforcer.validarAcesso(id, tenantId);
+        domainService.validarPodeInativar(entity);
+        entity.setActive(false);
+        prontuariosRepository.save(Objects.requireNonNull(entity));
         log.info("Prontuarios excluído (desativado) com sucesso. ID: {}", id);
     }
 
-    private void validarDadosBasicos(ProntuariosRequest request) {
-        if (request == null) {
-            throw new BadRequestException("Dados do prontuarios são obrigatórios");
-        }
-        // estabelecimento não faz parte do Request
-        if (request.getPaciente() == null) {
-            throw new BadRequestException("ID do paciente é obrigatório");
-        }
-    }
-
-    private void atualizarDadosProntuarios(Prontuarios prontuarios, ProntuariosRequest request) {
-        // estabelecimento não faz parte do Request
-
-        // Atualiza paciente se fornecido
-        if (request.getPaciente() != null) {
-            Paciente paciente = pacienteRepository.findById(request.getPaciente())
-                    .orElseThrow(() -> new NotFoundException("Paciente não encontrado com ID: " + request.getPaciente()));
-            prontuarios.setPaciente(paciente);
-        }
-
-        // Atualiza outros campos
-        if (request.getTipoRegistro() != null) {
-            prontuarios.setTipoRegistro(request.getTipoRegistro());
-        }
-        if (request.getConteudo() != null) {
-            prontuarios.setConteudo(request.getConteudo());
-        }
-        if (request.getCriadoPor() != null) {
-            prontuarios.setCriadoPor(request.getCriadoPor());
+    private void validarTenantAutenticadoOrThrow(UUID tenantId, Tenant tenant) {
+        if (tenantId == null || tenant == null || tenant.getId() == null || !tenantId.equals(tenant.getId())) {
+            throw new BadRequestException("Não foi possível obter tenant do usuário autenticado");
         }
     }
 }

@@ -7,11 +7,6 @@ import lombok.Builder;
 import lombok.Builder.Default;
 import lombok.Data;
 
-/**
- * Classe embeddable para informações de contraindicações e precauções da vacina.
- *
- * @author UPSaúde
- */
 @Embeddable
 @Data
 @Builder
@@ -27,21 +22,20 @@ public class ContraindicacoesVacina {
     }
 
     @Column(name = "contraindicacoes", columnDefinition = "TEXT")
-    private String contraindicacoes; // Contraindicações gerais
+    private String contraindicacoes;
 
     @Column(name = "precaucoes", columnDefinition = "TEXT")
-    private String precaucoes; // Precauções especiais
+    private String precaucoes;
 
     @Column(name = "gestante_pode", nullable = false)
     @Default
-    private Boolean gestantePode = false; // Se gestante pode receber
+    private Boolean gestantePode = false;
 
     @Column(name = "lactante_pode", nullable = false)
     @Default
-    private Boolean lactantePode = false; // Se lactante pode receber
+    private Boolean lactantePode = false;
 
     @Column(name = "imunocomprometido_pode", nullable = false)
     @Default
-    private Boolean imunocomprometidoPode = false; // Se imunocomprometido pode receber
+    private Boolean imunocomprometidoPode = false;
 }
-

@@ -3,12 +3,6 @@ package com.upsaude.enums;
 import java.util.Arrays;
 import java.util.Locale;
 
-/**
- * Enum para classificação de tipos de serviços de saúde oferecidos em UBS/UPA.
- * Baseado nos serviços típicos da Atenção Básica do SUS.
- *
- * @author UPSaúde
- */
 public enum TipoServicoSaudeEnum {
     CONSULTA_MEDICA(1, "Consulta Médica"),
     CONSULTA_ENFERMAGEM(2, "Consulta de Enfermagem"),
@@ -74,4 +68,3 @@ public enum TipoServicoSaudeEnum {
                 .orElse(null);
     }
 }
-

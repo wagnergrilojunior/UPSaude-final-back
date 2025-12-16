@@ -5,20 +5,21 @@ import com.upsaude.api.response.VacinacoesResponse;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
+import java.time.OffsetDateTime;
 import java.util.UUID;
 
-/**
- * Interface de serviço para operações CRUD relacionadas a Vacinacoes.
- *
- * @author UPSaúde
- */
 public interface VacinacoesService {
 
     VacinacoesResponse criar(VacinacoesRequest request);
 
     VacinacoesResponse obterPorId(UUID id);
 
-    Page<VacinacoesResponse> listar(Pageable pageable);
+    Page<VacinacoesResponse> listar(Pageable pageable,
+                                   UUID estabelecimentoId,
+                                   UUID pacienteId,
+                                   UUID vacinaId,
+                                   OffsetDateTime inicio,
+                                   OffsetDateTime fim);
 
     VacinacoesResponse atualizar(UUID id, VacinacoesRequest request);
 

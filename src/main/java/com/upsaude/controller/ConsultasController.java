@@ -24,11 +24,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
 
-/**
- * Controlador REST para operações relacionadas a Consultas.
- *
- * @author UPSaúde
- */
 @RestController
 @RequestMapping("/v1/consultas")
 @Tag(name = "Consultas", description = "API para gerenciamento de Consultas")

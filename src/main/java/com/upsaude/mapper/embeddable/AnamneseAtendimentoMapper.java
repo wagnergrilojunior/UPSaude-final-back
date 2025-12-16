@@ -14,7 +14,6 @@ public interface AnamneseAtendimentoMapper {
     AnamneseAtendimentoResponse toResponse(AnamneseAtendimento entity);
     void updateFromRequest(AnamneseAtendimentoRequest request, @MappingTarget AnamneseAtendimento entity);
 
-    // Mapeamento entre DTO e Entity
     AnamneseAtendimento toEntity(com.upsaude.dto.embeddable.AnamneseAtendimentoDTO dto);
     com.upsaude.dto.embeddable.AnamneseAtendimentoDTO toDTO(AnamneseAtendimento entity);
     void updateFromDTO(com.upsaude.dto.embeddable.AnamneseAtendimentoDTO dto, @MappingTarget AnamneseAtendimento entity);

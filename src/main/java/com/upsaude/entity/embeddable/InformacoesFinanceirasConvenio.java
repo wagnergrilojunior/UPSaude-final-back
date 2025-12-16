@@ -10,11 +10,6 @@ import lombok.Data;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
-/**
- * Classe embeddable para informações financeiras e contratuais do convênio.
- *
- * @author UPSaúde
- */
 @Embeddable
 @Data
 @Builder
@@ -28,63 +23,62 @@ public class InformacoesFinanceirasConvenio {
     }
 
     @Column(name = "data_inicio_contrato")
-    private LocalDate dataInicioContrato; // Data de início do contrato com o estabelecimento
+    private LocalDate dataInicioContrato;
 
     @Column(name = "data_fim_contrato")
-    private LocalDate dataFimContrato; // Data de fim do contrato (se houver)
+    private LocalDate dataFimContrato;
 
     @Column(name = "data_renovacao_contrato")
-    private LocalDate dataRenovacaoContrato; // Data de renovação do contrato
+    private LocalDate dataRenovacaoContrato;
 
     @Column(name = "prazo_contrato_meses")
-    private Integer prazoContratoMeses; // Prazo do contrato em meses
+    private Integer prazoContratoMeses;
 
     @Column(name = "valor_contrato_mensal", precision = 12, scale = 2)
-    private BigDecimal valorContratoMensal; // Valor mensal do contrato
+    private BigDecimal valorContratoMensal;
 
     @Column(name = "valor_contrato_anual", precision = 12, scale = 2)
-    private BigDecimal valorContratoAnual; // Valor anual do contrato
+    private BigDecimal valorContratoAnual;
 
     @Column(name = "percentual_desconto", precision = 5, scale = 2)
-    private BigDecimal percentualDesconto; // Percentual de desconto oferecido
+    private BigDecimal percentualDesconto;
 
     @Column(name = "percentual_coparticipacao", precision = 5, scale = 2)
-    private BigDecimal percentualCoparticipacao; // Percentual de coparticipação do paciente
+    private BigDecimal percentualCoparticipacao;
 
     @Column(name = "franquia_anual", precision = 12, scale = 2)
-    private BigDecimal franquiaAnual; // Franquia anual (se aplicável)
+    private BigDecimal franquiaAnual;
 
     @Column(name = "carencia_geral_dias")
-    private Integer carenciaGeralDias; // Carência geral em dias
+    private Integer carenciaGeralDias;
 
     @Column(name = "carencia_partos_dias")
-    private Integer carenciaPartosDias; // Carência para partos em dias
+    private Integer carenciaPartosDias;
 
     @Column(name = "carencia_cirurgias_dias")
-    private Integer carenciaCirurgiasDias; // Carência para cirurgias em dias
+    private Integer carenciaCirurgiasDias;
 
     @Column(name = "carencia_exames_dias")
-    private Integer carenciaExamesDias; // Carência para exames em dias
+    private Integer carenciaExamesDias;
 
     @Column(name = "limite_anual_consultas")
-    private Integer limiteAnualConsultas; // Limite anual de consultas
+    private Integer limiteAnualConsultas;
 
     @Column(name = "limite_anual_exames")
-    private Integer limiteAnualExames; // Limite anual de exames
+    private Integer limiteAnualExames;
 
     @Column(name = "limite_anual_internacoes")
-    private Integer limiteAnualInternacoes; // Limite anual de internações
+    private Integer limiteAnualInternacoes;
 
     @Size(max = 50, message = "Forma de pagamento deve ter no máximo 50 caracteres")
     @Column(name = "forma_pagamento", length = 50)
-    private String formaPagamento; // Ex: Boleto, Débito automático, Transferência
+    private String formaPagamento;
 
     @Size(max = 50, message = "Dia de vencimento deve ter no máximo 50 caracteres")
     @Column(name = "dia_vencimento", length = 50)
-    private String diaVencimento; // Dia de vencimento do pagamento
+    private String diaVencimento;
 
     @Size(max = 255, message = "Observações financeiras deve ter no máximo 255 caracteres")
     @Column(name = "observacoes_financeiras", length = 255)
-    private String observacoesFinanceiras; // Observações sobre aspectos financeiros
+    private String observacoesFinanceiras;
 }
-

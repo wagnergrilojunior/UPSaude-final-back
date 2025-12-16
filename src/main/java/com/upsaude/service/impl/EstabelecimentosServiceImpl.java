@@ -2,20 +2,27 @@ package com.upsaude.service.impl;
 
 import com.upsaude.api.request.EstabelecimentosRequest;
 import com.upsaude.api.response.EstabelecimentosResponse;
-import com.upsaude.entity.Endereco;
+import com.upsaude.cache.CacheKeyUtil;
 import com.upsaude.entity.Estabelecimentos;
-import com.upsaude.entity.ProfissionaisSaude;
+import com.upsaude.entity.Tenant;
 import com.upsaude.exception.BadRequestException;
+import com.upsaude.exception.ConflictException;
 import com.upsaude.exception.InternalServerErrorException;
 import com.upsaude.exception.NotFoundException;
-import com.upsaude.mapper.EstabelecimentosMapper;
-import com.upsaude.repository.EnderecoRepository;
 import com.upsaude.repository.EstabelecimentosRepository;
-import com.upsaude.repository.ProfissionaisSaudeRepository;
 import com.upsaude.service.EstabelecimentosService;
+import com.upsaude.service.TenantService;
+import com.upsaude.service.support.estabelecimentos.EstabelecimentosCreator;
+import com.upsaude.service.support.estabelecimentos.EstabelecimentosDomainService;
+import com.upsaude.service.support.estabelecimentos.EstabelecimentosResponseBuilder;
+import com.upsaude.service.support.estabelecimentos.EstabelecimentosTenantEnforcer;
+import com.upsaude.service.support.estabelecimentos.EstabelecimentosUpdater;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.Cache;
+import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.dao.DataAccessException;
 import org.springframework.data.domain.Page;
@@ -23,68 +30,46 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Objects;
 import java.util.UUID;
 
-/**
- * Implementação do serviço de gerenciamento de Estabelecimentos.
- *
- * @author UPSaúde
- */
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class EstabelecimentosServiceImpl implements EstabelecimentosService {
 
     private final EstabelecimentosRepository estabelecimentosRepository;
-    private final EstabelecimentosMapper estabelecimentosMapper;
-    private final EnderecoRepository enderecoRepository;
-    private final ProfissionaisSaudeRepository profissionaisSaudeRepository;
+    private final CacheManager cacheManager;
+    private final TenantService tenantService;
+
+    private final EstabelecimentosCreator creator;
+    private final EstabelecimentosUpdater updater;
+    private final EstabelecimentosTenantEnforcer tenantEnforcer;
+    private final EstabelecimentosResponseBuilder responseBuilder;
+    private final EstabelecimentosDomainService domainService;
 
     @Override
     @Transactional
-    @CacheEvict(value = "estabelecimentos", allEntries = true)
     public EstabelecimentosResponse criar(EstabelecimentosRequest request) {
         log.debug("Criando novo estabelecimento. Request: {}", request);
-        
-        if (request == null) {
-            log.warn("Tentativa de criar estabelecimento com request nulo");
-            throw new BadRequestException("Dados do estabelecimento são obrigatórios");
-        }
 
         try {
-            validarDadosBasicos(request);
+            UUID tenantId = tenantService.validarTenantAtual();
+            Tenant tenant = tenantService.obterTenantDoUsuarioAutenticado();
+            validarTenantAutenticadoOrThrow(tenantId, tenant);
 
-            Estabelecimentos estabelecimento = estabelecimentosMapper.fromRequest(request);
-            
-            // Carrega e valida endereço principal
-            if (request.getEnderecoPrincipal() != null) {
-                Endereco enderecoPrincipal = enderecoRepository.findById(request.getEnderecoPrincipal())
-                        .orElseThrow(() -> new NotFoundException("Endereço principal não encontrado com ID: " + request.getEnderecoPrincipal()));
-                estabelecimento.setEnderecoPrincipal(enderecoPrincipal);
+            Estabelecimentos saved = creator.criar(request, tenantId, tenant);
+            EstabelecimentosResponse response = responseBuilder.build(saved);
+
+            Cache cache = cacheManager.getCache(CacheKeyUtil.CACHE_ESTABELECIMENTOS);
+            if (cache != null) {
+                Object key = Objects.requireNonNull((Object) CacheKeyUtil.estabelecimento(tenantId, saved.getId()));
+                cache.put(key, response);
             }
 
-            // Carrega e valida responsável técnico
-            if (request.getResponsavelTecnico() != null) {
-                ProfissionaisSaude responsavelTecnico = profissionaisSaudeRepository.findById(request.getResponsavelTecnico())
-                        .orElseThrow(() -> new NotFoundException("Responsável técnico não encontrado com ID: " + request.getResponsavelTecnico()));
-                estabelecimento.setResponsavelTecnico(responsavelTecnico);
-            }
-
-            // Carrega e valida responsável administrativo
-            if (request.getResponsavelAdministrativo() != null) {
-                ProfissionaisSaude responsavelAdmin = profissionaisSaudeRepository.findById(request.getResponsavelAdministrativo())
-                        .orElseThrow(() -> new NotFoundException("Responsável administrativo não encontrado com ID: " + request.getResponsavelAdministrativo()));
-                estabelecimento.setResponsavelAdministrativo(responsavelAdmin);
-            }
-
-            estabelecimento.setActive(true);
-
-            Estabelecimentos estabelecimentoSalvo = estabelecimentosRepository.save(estabelecimento);
-            log.info("Estabelecimento criado com sucesso. ID: {}", estabelecimentoSalvo.getId());
-
-            return estabelecimentosMapper.toResponse(estabelecimentoSalvo);
-        } catch (BadRequestException | NotFoundException e) {
-            log.warn("Erro de validação ao criar estabelecimento. Request: {}. Erro: {}", request, e.getMessage());
+            return response;
+        } catch (BadRequestException | NotFoundException | ConflictException e) {
+            log.warn("Erro de validação ao criar estabelecimento. Erro: {}", e.getMessage());
             throw e;
         } catch (DataAccessException e) {
             log.error("Erro de acesso a dados ao criar estabelecimento. Request: {}", request, e);
@@ -97,21 +82,21 @@ public class EstabelecimentosServiceImpl implements EstabelecimentosService {
 
     @Override
     @Transactional(readOnly = true)
-    @Cacheable(value = "estabelecimentos", key = "#id")
+    @Cacheable(cacheNames = CacheKeyUtil.CACHE_ESTABELECIMENTOS, keyGenerator = "estabelecimentosCacheKeyGenerator")
     public EstabelecimentosResponse obterPorId(UUID id) {
         log.debug("Buscando estabelecimento por ID: {} (cache miss)", id);
-        
+
         if (id == null) {
             log.warn("ID nulo recebido para busca de estabelecimento");
             throw new BadRequestException("ID do estabelecimento é obrigatório");
         }
 
         try {
-            Estabelecimentos estabelecimento = estabelecimentosRepository.findById(id)
-                    .orElseThrow(() -> new NotFoundException("Estabelecimento não encontrado com ID: " + id));
+            UUID tenantId = tenantService.validarTenantAtual();
+            Estabelecimentos estabelecimento = tenantEnforcer.validarAcessoCompleto(id, tenantId);
 
             log.debug("Estabelecimento encontrado. ID: {}", id);
-            return estabelecimentosMapper.toResponse(estabelecimento);
+            return responseBuilder.build(estabelecimento);
         } catch (NotFoundException e) {
             log.warn("Estabelecimento não encontrado. ID: {}", id);
             throw e;
@@ -131,9 +116,10 @@ public class EstabelecimentosServiceImpl implements EstabelecimentosService {
                 pageable.getPageNumber(), pageable.getPageSize());
 
         try {
-            Page<Estabelecimentos> estabelecimentos = estabelecimentosRepository.findAll(pageable);
+            UUID tenantId = tenantService.validarTenantAtual();
+            Page<Estabelecimentos> estabelecimentos = estabelecimentosRepository.findAllByTenant(tenantId, pageable);
             log.debug("Listagem de estabelecimentos concluída. Total de elementos: {}", estabelecimentos.getTotalElements());
-            return estabelecimentos.map(estabelecimentosMapper::toResponse);
+            return estabelecimentos.map(responseBuilder::build);
         } catch (DataAccessException e) {
             log.error("Erro de acesso a dados ao listar estabelecimentos. Pageable: {}", pageable, e);
             throw new InternalServerErrorException("Erro ao listar estabelecimentos", e);
@@ -145,7 +131,7 @@ public class EstabelecimentosServiceImpl implements EstabelecimentosService {
 
     @Override
     @Transactional
-    @CacheEvict(value = "estabelecimentos", key = "#id")
+    @CachePut(cacheNames = CacheKeyUtil.CACHE_ESTABELECIMENTOS, keyGenerator = "estabelecimentosCacheKeyGenerator")
     public EstabelecimentosResponse atualizar(UUID id, EstabelecimentosRequest request) {
         log.debug("Atualizando estabelecimento. ID: {}, Request: {}", id, request);
 
@@ -159,47 +145,16 @@ public class EstabelecimentosServiceImpl implements EstabelecimentosService {
         }
 
         try {
-            validarDadosBasicos(request);
+            UUID tenantId = tenantService.validarTenantAtual();
+            Tenant tenant = tenantService.obterTenantDoUsuarioAutenticado();
+            validarTenantAutenticadoOrThrow(tenantId, tenant);
 
-            Estabelecimentos estabelecimentoExistente = estabelecimentosRepository.findById(id)
-                    .orElseThrow(() -> new NotFoundException("Estabelecimento não encontrado com ID: " + id));
-
-            // Usa mapper do MapStruct que preserva campos de controle automaticamente
-            estabelecimentosMapper.updateFromRequest(request, estabelecimentoExistente);
-            
-            // Atualiza relacionamentos manualmente (endereço principal, responsáveis)
-            if (request.getEnderecoPrincipal() != null) {
-                Endereco enderecoPrincipal = enderecoRepository.findById(request.getEnderecoPrincipal())
-                        .orElseThrow(() -> new NotFoundException("Endereço principal não encontrado com ID: " + request.getEnderecoPrincipal()));
-                estabelecimentoExistente.setEnderecoPrincipal(enderecoPrincipal);
-            } else {
-                estabelecimentoExistente.setEnderecoPrincipal(null);
-            }
-
-            if (request.getResponsavelTecnico() != null) {
-                ProfissionaisSaude responsavelTecnico = profissionaisSaudeRepository.findById(request.getResponsavelTecnico())
-                        .orElseThrow(() -> new NotFoundException("Responsável técnico não encontrado com ID: " + request.getResponsavelTecnico()));
-                estabelecimentoExistente.setResponsavelTecnico(responsavelTecnico);
-            } else {
-                estabelecimentoExistente.setResponsavelTecnico(null);
-            }
-
-            if (request.getResponsavelAdministrativo() != null) {
-                ProfissionaisSaude responsavelAdmin = profissionaisSaudeRepository.findById(request.getResponsavelAdministrativo())
-                        .orElseThrow(() -> new NotFoundException("Responsável administrativo não encontrado com ID: " + request.getResponsavelAdministrativo()));
-                estabelecimentoExistente.setResponsavelAdministrativo(responsavelAdmin);
-            } else {
-                estabelecimentoExistente.setResponsavelAdministrativo(null);
-            }
-
-            Estabelecimentos estabelecimentoAtualizado = estabelecimentosRepository.save(estabelecimentoExistente);
-            log.info("Estabelecimento atualizado com sucesso. ID: {}", estabelecimentoAtualizado.getId());
-
-            return estabelecimentosMapper.toResponse(estabelecimentoAtualizado);
+            Estabelecimentos updated = updater.atualizar(id, request, tenantId, tenant);
+            return responseBuilder.build(updated);
         } catch (NotFoundException e) {
             log.warn("Tentativa de atualizar estabelecimento não existente. ID: {}", id);
             throw e;
-        } catch (BadRequestException e) {
+        } catch (BadRequestException | ConflictException e) {
             log.warn("Erro de validação ao atualizar estabelecimento. ID: {}, Request: {}. Erro: {}", id, request, e.getMessage());
             throw e;
         } catch (DataAccessException e) {
@@ -213,27 +168,13 @@ public class EstabelecimentosServiceImpl implements EstabelecimentosService {
 
     @Override
     @Transactional
-    @CacheEvict(value = "estabelecimentos", key = "#id")
+    @CacheEvict(cacheNames = CacheKeyUtil.CACHE_ESTABELECIMENTOS, keyGenerator = "estabelecimentosCacheKeyGenerator", beforeInvocation = false)
     public void excluir(UUID id) {
         log.debug("Excluindo estabelecimento. ID: {}", id);
 
-        if (id == null) {
-            log.warn("ID nulo recebido para exclusão de estabelecimento");
-            throw new BadRequestException("ID do estabelecimento é obrigatório");
-        }
-
         try {
-            Estabelecimentos estabelecimento = estabelecimentosRepository.findById(id)
-                    .orElseThrow(() -> new NotFoundException("Estabelecimento não encontrado com ID: " + id));
-
-            if (Boolean.FALSE.equals(estabelecimento.getActive())) {
-                log.warn("Tentativa de excluir estabelecimento já inativo. ID: {}", id);
-                throw new BadRequestException("Estabelecimento já está inativo");
-            }
-
-            estabelecimento.setActive(false);
-            estabelecimentosRepository.save(estabelecimento);
-            log.info("Estabelecimento excluído (desativado) com sucesso. ID: {}", id);
+            UUID tenantId = tenantService.validarTenantAtual();
+            inativarInternal(id, tenantId);
         } catch (NotFoundException e) {
             log.warn("Tentativa de excluir estabelecimento não existente. ID: {}", id);
             throw e;
@@ -248,21 +189,23 @@ public class EstabelecimentosServiceImpl implements EstabelecimentosService {
             throw e;
         }
     }
+    private void inativarInternal(UUID id, UUID tenantId) {
+        if (id == null) {
+            log.warn("ID nulo recebido para exclusão de estabelecimento");
+            throw new BadRequestException("ID do estabelecimento é obrigatório");
+        }
 
-    private void validarDadosBasicos(EstabelecimentosRequest request) {
-        if (request == null) {
-            throw new BadRequestException("Dados do estabelecimento são obrigatórios");
-        }
-        if (request.getNome() == null || request.getNome().trim().isEmpty()) {
-            throw new BadRequestException("Nome do estabelecimento é obrigatório");
-        }
-        if (request.getTipo() == null) {
-            throw new BadRequestException("Tipo do estabelecimento é obrigatório");
+        Estabelecimentos entity = tenantEnforcer.validarAcesso(id, tenantId);
+        domainService.validarPodeInativar(entity);
+        entity.setActive(false);
+        estabelecimentosRepository.save(Objects.requireNonNull(entity));
+        log.info("Estabelecimento excluído (desativado) com sucesso. ID: {}", id);
+    }
+
+    private void validarTenantAutenticadoOrThrow(UUID tenantId, Tenant tenant) {
+        if (tenant == null || tenant.getId() == null || !tenant.getId().equals(tenantId)) {
+            throw new BadRequestException("Não foi possível obter tenant do usuário autenticado");
         }
     }
 
-    // Método removido - agora usa estabelecimentosMapper.updateFromRequest diretamente
-    // O MapStruct já preserva campos de controle automaticamente
-    // A lógica de atualização de relacionamentos (endereço principal, responsáveis) foi movida para o método atualizar
 }
-

@@ -24,11 +24,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
 
-/**
- * Controlador REST para operações relacionadas a Médicos.
- *
- * @author UPSaúde
- */
 @RestController
 @RequestMapping("/v1/medicos")
 @Tag(name = "Médicos", description = "API para gerenciamento de Médicos")
@@ -56,7 +51,8 @@ public class MedicosController {
             log.warn("Falha ao criar médico — mensagem: {}, payload: {}", ex.getMessage(), request);
             throw ex;
         } catch (Exception ex) {
-            log.error("Erro inesperado ao criar médico — payload: {}", request, ex);
+            log.error("Erro inesperado ao criar médico — Path: /v1/medicos, Method: POST, payload: {}, Exception: {}",
+                request, ex.getClass().getName(), ex);
             throw ex;
         }
     }
@@ -75,7 +71,8 @@ public class MedicosController {
             Page<MedicosResponse> response = medicosService.listar(pageable);
             return ResponseEntity.ok(response);
         } catch (Exception ex) {
-            log.error("Erro inesperado ao listar médicos — pageable: {}", pageable, ex);
+            log.error("Erro inesperado ao listar médicos — Path: /v1/medicos, Method: GET, pageable: {}, Exception: {}",
+                pageable, ex.getClass().getName(), ex);
             throw ex;
         }
     }
@@ -99,7 +96,8 @@ public class MedicosController {
             log.warn("Médico não encontrado — ID: {}, mensagem: {}", id, ex.getMessage());
             throw ex;
         } catch (Exception ex) {
-            log.error("Erro inesperado ao obter médico por ID — ID: {}", id, ex);
+            log.error("Erro inesperado ao obter médico por ID — Path: /v1/medicos/{}, Method: GET, ID: {}, Exception: {}",
+                id, id, ex.getClass().getName(), ex);
             throw ex;
         }
     }
@@ -126,13 +124,14 @@ public class MedicosController {
             log.warn("Falha ao atualizar médico — ID: {}, mensagem: {}, payload: {}", id, ex.getMessage(), request);
             throw ex;
         } catch (Exception ex) {
-            log.error("Erro inesperado ao atualizar médico — ID: {}, payload: {}", id, request, ex);
+            log.error("Erro inesperado ao atualizar médico — Path: /v1/medicos/{}, Method: PUT, ID: {}, payload: {}, Exception: {}",
+                id, id, request, ex.getClass().getName(), ex);
             throw ex;
         }
     }
 
     @DeleteMapping("/{id}")
-    @Operation(summary = "Excluir médico", description = "Exclui (desativa) um médico do sistema")
+    @Operation(summary = "Excluir médico", description = "Exclui (inativa) um médico do sistema")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "204", description = "Médico excluído com sucesso"),
             @ApiResponse(responseCode = "404", description = "Médico não encontrado"),
@@ -150,7 +149,59 @@ public class MedicosController {
             log.warn("Médico não encontrado para exclusão — ID: {}, mensagem: {}", id, ex.getMessage());
             throw ex;
         } catch (Exception ex) {
-            log.error("Erro inesperado ao excluir médico — ID: {}", id, ex);
+            log.error("Erro inesperado ao excluir médico — Path: /v1/medicos/{}, Method: DELETE, ID: {}, Exception: {}",
+                id, id, ex.getClass().getName(), ex);
+            throw ex;
+        }
+    }
+
+    @PatchMapping("/{id}/inativar")
+    @Operation(summary = "Inativar médico", description = "Inativa um médico no sistema (soft delete)")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "204", description = "Médico inativado com sucesso"),
+            @ApiResponse(responseCode = "404", description = "Médico não encontrado"),
+            @ApiResponse(responseCode = "400", description = "Médico já está inativo"),
+            @ApiResponse(responseCode = "403", description = "Acesso negado")
+    })
+    public ResponseEntity<Void> inativar(
+            @Parameter(description = "ID do médico", required = true)
+            @PathVariable UUID id) {
+        log.debug("REQUEST PATCH /v1/medicos/{}/inativar", id);
+        try {
+            medicosService.inativar(id);
+            log.info("Médico inativado com sucesso. ID: {}", id);
+            return ResponseEntity.noContent().build();
+        } catch (NotFoundException ex) {
+            log.warn("Médico não encontrado para inativação — ID: {}, mensagem: {}", id, ex.getMessage());
+            throw ex;
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao inativar médico — Path: /v1/medicos/{}/inativar, Method: PATCH, ID: {}, Exception: {}",
+                id, id, ex.getClass().getName(), ex);
+            throw ex;
+        }
+    }
+
+    @DeleteMapping("/{id}/permanente")
+    @Operation(summary = "Deletar médico permanentemente", description = "Remove permanentemente um médico do banco de dados (hard delete)")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "204", description = "Médico deletado permanentemente com sucesso"),
+            @ApiResponse(responseCode = "404", description = "Médico não encontrado"),
+            @ApiResponse(responseCode = "403", description = "Acesso negado")
+    })
+    public ResponseEntity<Void> deletarPermanentemente(
+            @Parameter(description = "ID do médico", required = true)
+            @PathVariable UUID id) {
+        log.debug("REQUEST DELETE /v1/medicos/{}/permanente", id);
+        try {
+            medicosService.deletarPermanentemente(id);
+            log.info("Médico deletado permanentemente com sucesso. ID: {}", id);
+            return ResponseEntity.noContent().build();
+        } catch (NotFoundException ex) {
+            log.warn("Médico não encontrado para exclusão permanente — ID: {}, mensagem: {}", id, ex.getMessage());
+            throw ex;
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao deletar médico permanentemente — Path: /v1/medicos/{}/permanente, Method: DELETE, ID: {}, Exception: {}",
+                id, id, ex.getClass().getName(), ex);
             throw ex;
         }
     }

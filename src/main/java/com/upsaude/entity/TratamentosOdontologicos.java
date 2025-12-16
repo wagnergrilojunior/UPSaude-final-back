@@ -4,6 +4,7 @@ import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -22,9 +23,6 @@ import lombok.Data;
 @Data
 public class TratamentosOdontologicos extends BaseEntity {
 
-    /**
-     * Construtor padrão que inicializa as coleções para evitar NullPointerException.
-     */
     public TratamentosOdontologicos() {
         this.procedimentos = new ArrayList<>();
     }
@@ -56,15 +54,9 @@ public class TratamentosOdontologicos extends BaseEntity {
     @Column(name = "observacoes", columnDefinition = "TEXT")
     private String observacoes;
 
-    @OneToMany(mappedBy = "tratamento", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "tratamento", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     private List<TratamentosProcedimentos> procedimentos = new ArrayList<>();
 
-    // ========== MÉTODOS DE CICLO DE VIDA ==========
-
-    /**
-     * Garante que as coleções não sejam nulas antes de persistir ou atualizar.
-     * Recria a lista se estiver nula.
-     */
     @PrePersist
     @PreUpdate
     public void validateCollections() {
@@ -73,14 +65,6 @@ public class TratamentosOdontologicos extends BaseEntity {
         }
     }
 
-    // ========== MÉTODOS UTILITÁRIOS - PROCEDIMENTOS ==========
-
-    /**
-     * Adiciona um procedimento ao tratamento com sincronização bidirecional.
-     * Garante que o procedimento também referencia este tratamento.
-     *
-     * @param procedimento O procedimento a ser adicionado
-     */
     public void addProcedimento(TratamentosProcedimentos procedimento) {
         if (procedimento == null) {
             return;
@@ -94,12 +78,6 @@ public class TratamentosOdontologicos extends BaseEntity {
         }
     }
 
-    /**
-     * Remove um procedimento do tratamento com sincronização bidirecional.
-     * Remove a referência do procedimento para este tratamento.
-     *
-     * @param procedimento O procedimento a ser removido
-     */
     public void removeProcedimento(TratamentosProcedimentos procedimento) {
         if (procedimento == null || procedimentos == null) {
             return;

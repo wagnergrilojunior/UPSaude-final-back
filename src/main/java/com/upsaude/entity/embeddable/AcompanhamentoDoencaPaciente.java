@@ -8,11 +8,6 @@ import lombok.Data;
 
 import java.time.LocalDate;
 
-/**
- * Classe embeddable para informações de acompanhamento da doença no paciente.
- *
- * @author UPSaúde
- */
 @Embeddable
 @Data
 @Builder
@@ -28,24 +23,23 @@ public class AcompanhamentoDoencaPaciente {
     }
 
     @Column(name = "data_ultima_consulta")
-    private LocalDate dataUltimaConsulta; // Data da última consulta relacionada à doença
+    private LocalDate dataUltimaConsulta;
 
     @Column(name = "data_proxima_consulta")
-    private LocalDate dataProximaConsulta; // Data da próxima consulta agendada
+    private LocalDate dataProximaConsulta;
 
     @Column(name = "frequencia_acompanhamento", length = 50)
-    private String frequenciaAcompanhamento; // Ex: Mensal, Trimestral, Semestral, Anual
+    private String frequenciaAcompanhamento;
 
     @Column(name = "especialista_responsavel", length = 255)
-    private String especialistaResponsavel; // Nome do especialista responsável pelo acompanhamento
+    private String especialistaResponsavel;
 
     @Column(name = "estabelecimento_acompanhamento", length = 255)
-    private String estabelecimentoAcompanhamento; // Estabelecimento onde é feito o acompanhamento
+    private String estabelecimentoAcompanhamento;
 
     @Column(name = "evolucao_clinica", columnDefinition = "TEXT")
-    private String evolucaoClinica; // Evolução clínica da doença
+    private String evolucaoClinica;
 
     @Column(name = "complicacoes", columnDefinition = "TEXT")
-    private String complicacoes; // Complicações apresentadas
+    private String complicacoes;
 }
-

@@ -3,7 +3,41 @@ package com.upsaude.config;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.upsaude.enums.EscolaridadeEnum;
+import com.upsaude.enums.EstadoCivilEnum;
+import com.upsaude.enums.IdentidadeGeneroEnum;
+import com.upsaude.enums.NacionalidadeEnum;
+import com.upsaude.enums.OrientacaoSexualEnum;
+import com.upsaude.enums.RacaCorEnum;
+import com.upsaude.enums.SexoEnum;
+import com.upsaude.enums.StatusPacienteEnum;
+import com.upsaude.enums.TipoAtendimentoPreferencialEnum;
+import com.upsaude.enums.TipoCnsEnum;
+import com.upsaude.enums.TipoLogradouroEnum;
+import com.upsaude.util.converter.EscolaridadeEnumDeserializer;
+import com.upsaude.util.converter.EscolaridadeEnumSerializer;
+import com.upsaude.util.converter.EstadoCivilEnumDeserializer;
+import com.upsaude.util.converter.EstadoCivilEnumSerializer;
+import com.upsaude.util.converter.IdentidadeGeneroEnumDeserializer;
+import com.upsaude.util.converter.IdentidadeGeneroEnumSerializer;
+import com.upsaude.util.converter.NacionalidadeEnumDeserializer;
+import com.upsaude.util.converter.NacionalidadeEnumSerializer;
+import com.upsaude.util.converter.OrientacaoSexualEnumDeserializer;
+import com.upsaude.util.converter.OrientacaoSexualEnumSerializer;
+import com.upsaude.util.converter.RacaCorEnumDeserializer;
+import com.upsaude.util.converter.RacaCorEnumSerializer;
+import com.upsaude.util.converter.SexoEnumDeserializer;
+import com.upsaude.util.converter.SexoEnumSerializer;
+import com.upsaude.util.converter.StatusPacienteEnumDeserializer;
+import com.upsaude.util.converter.StatusPacienteEnumSerializer;
+import com.upsaude.util.converter.TipoAtendimentoPreferencialEnumDeserializer;
+import com.upsaude.util.converter.TipoAtendimentoPreferencialEnumSerializer;
+import com.upsaude.util.converter.TipoCnsEnumDeserializer;
+import com.upsaude.util.converter.TipoCnsEnumSerializer;
+import com.upsaude.util.converter.TipoLogradouroEnumDeserializer;
+import com.upsaude.util.converter.TipoLogradouroEnumSerializer;
 import io.lettuce.core.ClientOptions;
 import io.lettuce.core.SocketOptions;
 import io.lettuce.core.TimeoutOptions;
@@ -26,47 +60,22 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.time.Duration;
 
-/**
- * Configuração do Redis/Valkey para cache da aplicação.
- * 
- * Compatível com Redis e Valkey (fork do Redis usado pelo Render).
- * Esta configuração utiliza Lettuce como cliente e configura:
- * - TTL padrão de 5 minutos
- * - Serialização JSON para valores
- * - Prefixo de chave "upsaude::"
- * - Suporte a tipos Java modernos (LocalDateTime, OffsetDateTime, etc.)
- * 
- * Nota: Valkey é 100% compatível com Redis e funciona com a mesma configuração.
- * O Render usa Valkey nas novas instâncias Key-Value.
- * 
- * OBSERVABILIDADE: As métricas do Redis são coletadas automaticamente pelo Micrometer
- * quando as configurações de métricas estão habilitadas no application-prod.properties:
- * - Métricas de conexão (pool de conexões Lettuce)
- * - Métricas de comandos (latência, contadores por comando)
- * - Métricas de cache (hit/miss ratio, tamanho, evictions)
- * - Métricas do Spring Data Redis (operações de repositório)
- * 
- * IMPORTANTE: Esta configuração é desabilitada no profile 'local' para permitir
- * desenvolvimento sem Redis. Use @Profile("!local") para desabilitar.
- * 
- * @author UPSaúde
- */
 @Slf4j
 @Configuration
 @EnableCaching
 @Profile("!local")
 public class RedisConfig {
 
-    @Value("${spring.redis.host:localhost}")
+    @Value("${spring.data.redis.host:localhost}")
     private String redisHost;
 
-    @Value("${spring.redis.port:6379}")
+    @Value("${spring.data.redis.port:6379}")
     private int redisPort;
 
-    @Value("${spring.redis.password:}")
+    @Value("${spring.data.redis.password:}")
     private String redisPassword;
 
-    @Value("${spring.redis.ssl.enabled:false}")
+    @Value("${spring.data.redis.ssl.enabled:false}")
     private boolean sslEnabled;
 
     @Value("${spring.cache.redis.time-to-live:300000}")
@@ -75,94 +84,107 @@ public class RedisConfig {
     @Value("${spring.cache.redis.key-prefix:upsaude::}")
     private String keyPrefix;
 
-    /**
-     * Configura a conexão com o Redis/Valkey usando Lettuce.
-     * Configurado para não bloquear a inicialização da aplicação.
-     * 
-     * Compatível com Redis e Valkey (protocolo RESP).
-     * 
-     * @return RedisConnectionFactory configurado
-     */
     @Bean
     public RedisConnectionFactory redisConnectionFactory() {
         RedisStandaloneConfiguration config = new RedisStandaloneConfiguration();
         config.setHostName(redisHost);
         config.setPort(redisPort);
-        config.setDatabase(0); // Database padrão
-        
+        config.setDatabase(0);
+
         if (redisPassword != null && !redisPassword.isEmpty()) {
             config.setPassword(redisPassword);
         }
 
-        // Configuração do cliente Lettuce com timeouts adequados
         SocketOptions socketOptions = SocketOptions.builder()
-            .connectTimeout(Duration.ofSeconds(5)) // Timeout de conexão aumentado
-            .keepAlive(true) // Mantém conexão viva
+            .connectTimeout(Duration.ofSeconds(10))
+            .keepAlive(true)
             .build();
 
         TimeoutOptions timeoutOptions = TimeoutOptions.builder()
-            .fixedTimeout(Duration.ofSeconds(5)) // Timeout de comandos aumentado
+            .fixedTimeout(Duration.ofSeconds(10))
             .build();
 
         ClientOptions clientOptions = ClientOptions.builder()
             .socketOptions(socketOptions)
             .timeoutOptions(timeoutOptions)
-            .autoReconnect(true) // Reconecta automaticamente
-            .pingBeforeActivateConnection(true) // Valida conexão antes de usar
+            .autoReconnect(true)
+            .pingBeforeActivateConnection(false)
             .build();
 
-        LettuceClientConfiguration clientConfig = LettuceClientConfiguration.builder()
-            .clientOptions(clientOptions)
-            .commandTimeout(Duration.ofSeconds(5)) // Timeout de comandos aumentado
-            .shutdownTimeout(Duration.ofSeconds(2)) // Tempo para fechar conexões
-            .build();
+        LettuceClientConfiguration.LettuceClientConfigurationBuilder clientConfigBuilder =
+            LettuceClientConfiguration.builder()
+                .clientOptions(clientOptions)
+                .commandTimeout(Duration.ofSeconds(10))
+                .shutdownTimeout(Duration.ofSeconds(5));
+
+        if (sslEnabled) {
+            clientConfigBuilder.useSsl();
+        }
+
+        LettuceClientConfiguration clientConfig = clientConfigBuilder.build();
 
         LettuceConnectionFactory factory = new LettuceConnectionFactory(config, clientConfig);
-        // Não valida no startup para não bloquear, mas valida quando usar
+
         factory.setValidateConnection(false);
         factory.afterPropertiesSet();
-        
-        // Tenta validar a conexão de forma assíncrona e loga o resultado
-        try {
-            var connection = factory.getConnection();
-            connection.ping();
-            connection.close();
-            log.info("✅ Redis conectado com sucesso - Host: {}, Port: {}, SSL: {}", 
-                redisHost, redisPort, sslEnabled);
-        } catch (Exception e) {
-            log.warn("⚠️  Redis não está disponível no momento - Host: {}, Port: {}, SSL: {}. " +
-                "A aplicação continuará sem cache. Erro: {}. " +
-                "Verifique se o Redis está rodando e se as configurações estão corretas.", 
-                redisHost, redisPort, sslEnabled, e.getMessage());
-            // Não lança exceção para não bloquear startup - aplicação funciona sem cache
-        }
-        
+
+        log.info("Redis ConnectionFactory configurado - Host: {}, Port: {}, SSL: {}. " +
+            "A conexão será validada automaticamente quando necessário.",
+            redisHost, redisPort, sslEnabled);
+
         return factory;
     }
 
-    /**
-     * Configura o CacheManager global com TTL padrão e serialização JSON.
-     * 
-     * IMPORTANTE: Cria um ObjectMapper específico para Redis diretamente aqui,
-     * sem criar um bean separado, para evitar conflitos com o ObjectMapper padrão
-     * usado pelo Spring Boot para requisições HTTP.
-     * 
-     * @param connectionFactory Factory de conexão Redis
-     * @return CacheManager configurado
-     */
     @Bean
     public CacheManager cacheManager(RedisConnectionFactory connectionFactory) {
-        // Cria ObjectMapper específico para Redis (não é um bean para evitar conflitos)
+
         ObjectMapper redisObjectMapper = new ObjectMapper();
         redisObjectMapper.setVisibility(PropertyAccessor.ALL, JsonAutoDetect.Visibility.ANY);
         redisObjectMapper.registerModule(new JavaTimeModule());
+
+        SimpleModule enumModule = new SimpleModule("EnumModule");
+
+        enumModule.addSerializer(SexoEnum.class, new SexoEnumSerializer());
+        enumModule.addDeserializer(SexoEnum.class, new SexoEnumDeserializer());
+
+        enumModule.addSerializer(EstadoCivilEnum.class, new EstadoCivilEnumSerializer());
+        enumModule.addDeserializer(EstadoCivilEnum.class, new EstadoCivilEnumDeserializer());
+
+        enumModule.addSerializer(EscolaridadeEnum.class, new EscolaridadeEnumSerializer());
+        enumModule.addDeserializer(EscolaridadeEnum.class, new EscolaridadeEnumDeserializer());
+
+        enumModule.addSerializer(IdentidadeGeneroEnum.class, new IdentidadeGeneroEnumSerializer());
+        enumModule.addDeserializer(IdentidadeGeneroEnum.class, new IdentidadeGeneroEnumDeserializer());
+
+        enumModule.addSerializer(NacionalidadeEnum.class, new NacionalidadeEnumSerializer());
+        enumModule.addDeserializer(NacionalidadeEnum.class, new NacionalidadeEnumDeserializer());
+
+        enumModule.addSerializer(OrientacaoSexualEnum.class, new OrientacaoSexualEnumSerializer());
+        enumModule.addDeserializer(OrientacaoSexualEnum.class, new OrientacaoSexualEnumDeserializer());
+
+        enumModule.addSerializer(RacaCorEnum.class, new RacaCorEnumSerializer());
+        enumModule.addDeserializer(RacaCorEnum.class, new RacaCorEnumDeserializer());
+
+        enumModule.addSerializer(StatusPacienteEnum.class, new StatusPacienteEnumSerializer());
+        enumModule.addDeserializer(StatusPacienteEnum.class, new StatusPacienteEnumDeserializer());
+
+        enumModule.addSerializer(TipoAtendimentoPreferencialEnum.class, new TipoAtendimentoPreferencialEnumSerializer());
+        enumModule.addDeserializer(TipoAtendimentoPreferencialEnum.class, new TipoAtendimentoPreferencialEnumDeserializer());
+
+        enumModule.addSerializer(TipoCnsEnum.class, new TipoCnsEnumSerializer());
+        enumModule.addDeserializer(TipoCnsEnum.class, new TipoCnsEnumDeserializer());
+
+        enumModule.addSerializer(TipoLogradouroEnum.class, new TipoLogradouroEnumSerializer());
+        enumModule.addDeserializer(TipoLogradouroEnum.class, new TipoLogradouroEnumDeserializer());
+
+        redisObjectMapper.registerModule(enumModule);
         redisObjectMapper.activateDefaultTyping(
             redisObjectMapper.getPolymorphicTypeValidator(),
             ObjectMapper.DefaultTyping.NON_FINAL
         );
-        
+
         GenericJackson2JsonRedisSerializer jsonSerializer = new GenericJackson2JsonRedisSerializer(redisObjectMapper);
-        
+
         RedisCacheConfiguration cacheConfig = RedisCacheConfiguration.defaultCacheConfig()
             .entryTtl(Duration.ofMillis(cacheTtl))
             .prefixCacheNameWith(keyPrefix)
@@ -182,4 +204,3 @@ public class RedisConfig {
             .build();
     }
 }
-

@@ -21,9 +21,6 @@ import com.upsaude.util.converter.StatusPacienteEnumConverter;
 import com.upsaude.util.converter.TipoAtendimentoPreferencialEnumConverter;
 import com.upsaude.util.converter.TipoCnsEnumConverter;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Pattern;
-import jakarta.validation.constraints.Size;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -39,15 +36,141 @@ import java.util.List;
            @UniqueConstraint(name = "uk_pacientes_email", columnNames = {"email"})
        },
        indexes = {
-           @Index(name = "idx_pacientes_cpf", columnList = "cpf")
+
+           @Index(name = "idx_pacientes_cpf", columnList = "cpf"),
+           @Index(name = "idx_pacientes_email", columnList = "email"),
+           @Index(name = "idx_pacientes_cns", columnList = "cns"),
+           @Index(name = "idx_pacientes_rg", columnList = "rg"),
+           @Index(name = "idx_pacientes_nome_completo", columnList = "nome_completo"),
+           @Index(name = "idx_pacientes_data_nascimento", columnList = "data_nascimento"),
+           @Index(name = "idx_pacientes_status_paciente", columnList = "status_paciente"),
+           @Index(name = "idx_pacientes_ativo", columnList = "ativo"),
+           @Index(name = "idx_pacientes_convenio", columnList = "convenio_id"),
+           @Index(name = "idx_pacientes_criado_em", columnList = "criado_em"),
+           @Index(name = "idx_pacientes_atualizado_em", columnList = "atualizado_em"),
+
+           @Index(name = "idx_pacientes_ativo_nome", columnList = "ativo, nome_completo"),
+           @Index(name = "idx_pacientes_status_ativo", columnList = "status_paciente, ativo"),
+           @Index(name = "idx_pacientes_ativo_criado_em", columnList = "ativo, criado_em"),
+           @Index(name = "idx_pacientes_ativo_data_nascimento", columnList = "ativo, data_nascimento"),
+
+           @Index(name = "idx_pacientes_situacao_rua", columnList = "situacao_rua"),
+           @Index(name = "idx_pacientes_cartao_sus_ativo", columnList = "cartao_sus_ativo"),
+           @Index(name = "idx_pacientes_possui_deficiencia", columnList = "possui_deficiencia"),
+           @Index(name = "idx_pacientes_cns_validado", columnList = "cns_validado"),
+           @Index(name = "idx_pacientes_acompanhado_esf", columnList = "acompanhado_por_equipe_esf")
        })
+@NamedEntityGraphs({
+    @NamedEntityGraph(
+        name = "Paciente.basic",
+        attributeNodes = {
+            @NamedAttributeNode("convenio")
+        }
+    ),
+    @NamedEntityGraph(
+        name = "Paciente.enderecos", 
+        attributeNodes = {
+            @NamedAttributeNode("enderecos")
+        }
+    ),
+    @NamedEntityGraph(
+        name = "Paciente.infoClinica",
+        attributeNodes = {
+            @NamedAttributeNode("dadosSociodemograficos"),
+            @NamedAttributeNode("dadosClinicosBasicos"),
+            @NamedAttributeNode("responsavelLegal"),
+            @NamedAttributeNode("lgpdConsentimento"),
+            @NamedAttributeNode("integracaoGov")
+        }
+    ),
+    @NamedEntityGraph(
+        name = "Paciente.comAlergias",
+        attributeNodes = {
+            @NamedAttributeNode(value = "alergias", subgraph = "alergiasSubgraph")
+        },
+        subgraphs = {
+            @NamedSubgraph(name = "alergiasSubgraph", type = AlergiasPaciente.class, attributeNodes = {
+                @NamedAttributeNode("alergia")
+            })
+        }
+    ),
+    @NamedEntityGraph(
+        name = "Paciente.comDoencas",
+        attributeNodes = {
+            @NamedAttributeNode(value = "doencas", subgraph = "doencasSubgraph")
+        },
+        subgraphs = {
+            @NamedSubgraph(name = "doencasSubgraph", type = DoencasPaciente.class, attributeNodes = {
+                @NamedAttributeNode("doenca"),
+                @NamedAttributeNode("cidPrincipal")
+            })
+        }
+    ),
+    @NamedEntityGraph(
+        name = "Paciente.comMedicacoes",
+        attributeNodes = {
+            @NamedAttributeNode(value = "medicacoes", subgraph = "medicacoesSubgraph")
+        },
+        subgraphs = {
+            @NamedSubgraph(name = "medicacoesSubgraph", type = MedicacaoPaciente.class, attributeNodes = {
+                @NamedAttributeNode(value = "medicacao", subgraph = "medicacaoDetalhes"),
+                @NamedAttributeNode("cidRelacionado")
+            }),
+            @NamedSubgraph(name = "medicacaoDetalhes", type = Medicacao.class, attributeNodes = {
+                @NamedAttributeNode("identificacao"),
+                @NamedAttributeNode("fabricanteEntity")
+            })
+        }
+    ),
+    @NamedEntityGraph(
+        name = "Paciente.completo",
+        attributeNodes = {
+            @NamedAttributeNode("convenio"),
+            @NamedAttributeNode("enderecos"),
+            @NamedAttributeNode(value = "doencas", subgraph = "doencasSubgraph"),
+            @NamedAttributeNode(value = "alergias", subgraph = "alergiasSubgraph"),
+            @NamedAttributeNode("deficiencias"),
+            @NamedAttributeNode(value = "medicacoes", subgraph = "medicacoesSubgraph"),
+            @NamedAttributeNode("dadosSociodemograficos"),
+            @NamedAttributeNode("dadosClinicosBasicos"),
+            @NamedAttributeNode("responsavelLegal"),
+            @NamedAttributeNode("lgpdConsentimento"),
+            @NamedAttributeNode("integracaoGov")
+        },
+        subgraphs = {
+            @NamedSubgraph(name = "alergiasSubgraph", type = AlergiasPaciente.class, attributeNodes = {
+                @NamedAttributeNode("alergia")
+            }),
+            @NamedSubgraph(name = "doencasSubgraph", type = DoencasPaciente.class, attributeNodes = {
+                @NamedAttributeNode("doenca"),
+                @NamedAttributeNode("cidPrincipal")
+            }),
+            @NamedSubgraph(name = "medicacoesSubgraph", type = MedicacaoPaciente.class, attributeNodes = {
+                @NamedAttributeNode(value = "medicacao", subgraph = "medicacaoDetalhes"),
+                @NamedAttributeNode("cidRelacionado")
+            }),
+            @NamedSubgraph(name = "medicacaoDetalhes", type = Medicacao.class, attributeNodes = {
+                @NamedAttributeNode("identificacao"),
+                @NamedAttributeNode("fabricanteEntity")
+            })
+        }
+    ),
+    @NamedEntityGraph(
+        name = "Paciente.listagemCompleta",
+        attributeNodes = {
+            @NamedAttributeNode("convenio"),
+            @NamedAttributeNode("enderecos"),
+            @NamedAttributeNode("doencas"),
+            @NamedAttributeNode("alergias"),
+            @NamedAttributeNode("deficiencias"),
+            @NamedAttributeNode("medicacoes")
+        }
+    )
+})
 @Data
 @EqualsAndHashCode(callSuper = true)
 public class Paciente extends BaseEntityWithoutTenant {
 
-    /**
-     * Construtor padrão que inicializa as coleções para evitar NullPointerException.
-     */
     public Paciente() {
         this.enderecos = new ArrayList<>();
         this.doencas = new ArrayList<>();
@@ -56,19 +179,15 @@ public class Paciente extends BaseEntityWithoutTenant {
         this.medicacoes = new ArrayList<>();
     }
 
-    @NotBlank(message = "Nome completo é obrigatório")
-    @Size(max = 255, message = "Nome completo deve ter no máximo 255 caracteres")
     @Column(name = "nome_completo", nullable = false, length = 255)
     private String nomeCompleto;
 
-    @Pattern(regexp = "^\\d{11}$", message = "CPF deve ter 11 dígitos")
     @Column(name = "cpf", length = 11)
     private String cpf;
 
     @Column(name = "rg", length = 20)
     private String rg;
 
-    @Pattern(regexp = "^\\d{15}$", message = "CNS deve ter 15 dígitos")
     @Column(name = "cns", length = 15)
     private String cns;
 
@@ -98,11 +217,9 @@ public class Paciente extends BaseEntityWithoutTenant {
     @Column(name = "responsavel_nome", length = 255)
     private String responsavelNome;
 
-    @Pattern(regexp = "^\\d{11}$", message = "CPF do responsável deve ter 11 dígitos")
     @Column(name = "responsavel_cpf", length = 11)
     private String responsavelCpf;
 
-    @Pattern(regexp = "^\\d{10,11}$", message = "Telefone do responsável deve ter 10 ou 11 dígitos")
     @Column(name = "responsavel_telefone", length = 20)
     private String responsavelTelefone;
 
@@ -119,12 +236,6 @@ public class Paciente extends BaseEntityWithoutTenant {
     @Column(name = "observacoes", columnDefinition = "TEXT")
     private String observacoes;
 
-    /**
-     * Endereços do paciente.
-     * Relacionamento OneToMany usando JoinTable.
-     * Usa cascade PERSIST e MERGE para gerenciar endereços associados,
-     * mas não remove endereços que podem ser compartilhados.
-     */
     @OneToMany(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinTable(
         name = "pacientes_enderecos",
@@ -132,80 +243,60 @@ public class Paciente extends BaseEntityWithoutTenant {
         joinColumns = @JoinColumn(name = "paciente_id"),
         inverseJoinColumns = @JoinColumn(name = "endereco_id")
     )
+    @org.hibernate.annotations.BatchSize(size = 50)
+    @org.hibernate.annotations.Fetch(org.hibernate.annotations.FetchMode.SUBSELECT)
     private List<Endereco> enderecos = new ArrayList<>();
-    
-    /** Raça/Cor conforme classificação IBGE */
+
     @Convert(converter = RacaCorEnumConverter.class)
     @Column(name = "raca_cor")
     private RacaCorEnum racaCor;
 
-    /** Nacionalidade do paciente */
     @Convert(converter = NacionalidadeEnumConverter.class)
     @Column(name = "nacionalidade")
     private NacionalidadeEnum nacionalidade;
 
-    /** País de nascimento */
-    @Size(max = 100, message = "País de nascimento deve ter no máximo 100 caracteres")
     @Column(name = "pais_nascimento", length = 100)
     private String paisNascimento;
 
-    /** Naturalidade (cidade de nascimento) */
-    @Size(max = 100, message = "Naturalidade deve ter no máximo 100 caracteres")
     @Column(name = "naturalidade", length = 100)
     private String naturalidade;
 
-    /** Código IBGE do município de nascimento */
-    @Size(max = 7, message = "Código IBGE do município deve ter no máximo 7 caracteres")
     @Column(name = "municipio_nascimento_ibge", length = 7)
     private String municipioNascimentoIbge;
 
-    /** Escolaridade do paciente */
     @Convert(converter = EscolaridadeEnumConverter.class)
     @Column(name = "escolaridade")
     private EscolaridadeEnum escolaridade;
 
-    /** Ocupação/Profissão do paciente */
-    @Size(max = 150, message = "Ocupação/Profissão deve ter no máximo 150 caracteres")
     @Column(name = "ocupacao_profissao", length = 150)
     private String ocupacaoProfissao;
 
-    /** Indica se paciente está em situação de rua */
     @Column(name = "situacao_rua", nullable = false)
     private Boolean situacaoRua = false;
 
-    /** Status do paciente no sistema de saúde */
     @Convert(converter = StatusPacienteEnumConverter.class)
     @Column(name = "status_paciente", nullable = false)
     private StatusPacienteEnum statusPaciente = StatusPacienteEnum.ATIVO;
 
-    /** Data do óbito (quando statusPaciente = OBITO) */
     @Column(name = "data_obito")
     private LocalDate dataObito;
 
-    /** CID-10 da causa do óbito */
-    @Size(max = 10, message = "CID-10 da causa do óbito deve ter no máximo 10 caracteres")
     @Column(name = "causa_obito_cid10", length = 10)
     private String causaObitoCid10;
 
-    /** Indica se CNS está ativo */
     @Column(name = "cartao_sus_ativo", nullable = false)
     private Boolean cartaoSusAtivo = true;
 
-    /** Data da última atualização do CNS */
     @Column(name = "data_atualizacao_cns")
     private LocalDate dataAtualizacaoCns;
 
-    /** Tipo de atendimento preferencial */
     @Convert(converter = TipoAtendimentoPreferencialEnumConverter.class)
     @Column(name = "tipo_atendimento_preferencial")
     private TipoAtendimentoPreferencialEnum tipoAtendimentoPreferencial;
 
-    /** Origem do cadastro (e-SUS, SISAB, etc.) */
-    @Size(max = 30, message = "Origem do cadastro deve ter no máximo 30 caracteres")
     @Column(name = "origem_cadastro", length = 30)
     private String origemCadastro;
 
-    @Size(max = 255, message = "Nome social deve ter no máximo 255 caracteres")
     @Column(name = "nome_social", length = 255)
     private String nomeSocial;
 
@@ -220,7 +311,6 @@ public class Paciente extends BaseEntityWithoutTenant {
     @Column(name = "possui_deficiencia", nullable = false)
     private Boolean possuiDeficiencia = false;
 
-    @Size(max = 255, message = "Tipo de deficiência deve ter no máximo 255 caracteres")
     @Column(name = "tipo_deficiencia", length = 255)
     private String tipoDeficiencia;
 
@@ -234,87 +324,41 @@ public class Paciente extends BaseEntityWithoutTenant {
     @Column(name = "acompanhado_por_equipe_esf", nullable = false)
     private Boolean acompanhadoPorEquipeEsf = false;
 
-    /** 
-     * Dados sociodemográficos do paciente.
-     * Relacionamento OneToOne bidirecional com cascade completo e remoção de órfãos.
-     * O JPA gerencia automaticamente a persistência e sincronização.
-     */
     @OneToOne(mappedBy = "paciente", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
     private DadosSociodemograficos dadosSociodemograficos;
 
-    /** 
-     * Dados clínicos básicos do paciente.
-     * Relacionamento OneToOne bidirecional com cascade completo e remoção de órfãos.
-     * O JPA gerencia automaticamente a persistência e sincronização.
-     */
     @OneToOne(mappedBy = "paciente", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
     private DadosClinicosBasicos dadosClinicosBasicos;
 
-    /** 
-     * Responsável legal do paciente.
-     * Relacionamento OneToOne bidirecional com cascade completo e remoção de órfãos.
-     * O JPA gerencia automaticamente a persistência e sincronização.
-     */
     @OneToOne(mappedBy = "paciente", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
     private ResponsavelLegal responsavelLegal;
 
-    /** 
-     * Consentimentos LGPD do paciente.
-     * Relacionamento OneToOne bidirecional com cascade completo e remoção de órfãos.
-     * O JPA gerencia automaticamente a persistência e sincronização.
-     */
     @OneToOne(mappedBy = "paciente", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
     private LGPDConsentimento lgpdConsentimento;
 
-    /** 
-     * Informações de integração com sistemas governamentais.
-     * Relacionamento OneToOne bidirecional com cascade completo e remoção de órfãos.
-     * O JPA gerencia automaticamente a persistência e sincronização.
-     */
     @OneToOne(mappedBy = "paciente", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
     private IntegracaoGov integracaoGov;
 
-    /** 
-     * Doenças do paciente.
-     * Relacionamento OneToMany bidirecional com cascade completo e remoção de órfãos.
-     * Permite registrar múltiplas doenças/comorbidades com informações de diagnóstico, 
-     * acompanhamento e tratamento.
-     */
     @OneToMany(mappedBy = "paciente", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
+    @org.hibernate.annotations.BatchSize(size = 50)
+    @org.hibernate.annotations.Fetch(org.hibernate.annotations.FetchMode.SUBSELECT)
     private List<DoencasPaciente> doencas = new ArrayList<>();
 
-    /** 
-     * Alergias do paciente.
-     * Relacionamento OneToMany bidirecional com cascade completo e remoção de órfãos.
-     * Permite registrar múltiplas alergias com informações de diagnóstico e histórico de reações.
-     * Alertas médicos importantes são exibidos no prontuário.
-     */
     @OneToMany(mappedBy = "paciente", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
+    @org.hibernate.annotations.BatchSize(size = 50)
+    @org.hibernate.annotations.Fetch(org.hibernate.annotations.FetchMode.SUBSELECT)
     private List<AlergiasPaciente> alergias = new ArrayList<>();
 
-    /** 
-     * Deficiências do paciente.
-     * Relacionamento OneToMany bidirecional com cascade completo e remoção de órfãos.
-     * Permite registrar múltiplas deficiências com informações de laudo e diagnóstico.
-     */
     @OneToMany(mappedBy = "paciente", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
+    @org.hibernate.annotations.BatchSize(size = 50)
+    @org.hibernate.annotations.Fetch(org.hibernate.annotations.FetchMode.SUBSELECT)
     private List<DeficienciasPaciente> deficiencias = new ArrayList<>();
 
-    /** 
-     * Medicações contínuas do paciente.
-     * Relacionamento OneToMany bidirecional com cascade completo e remoção de órfãos.
-     * Permite registrar múltiplas medicações em uso contínuo com informações de dose, 
-     * frequência, via de administração e período de uso.
-     */
     @OneToMany(mappedBy = "paciente", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
+    @org.hibernate.annotations.BatchSize(size = 50)
+    @org.hibernate.annotations.Fetch(org.hibernate.annotations.FetchMode.SUBSELECT)
     private List<MedicacaoPaciente> medicacoes = new ArrayList<>();
 
-    // ========== MÉTODOS DE CICLO DE VIDA ==========
-
-    /**
-     * Garante que as coleções não sejam nulas antes de persistir ou atualizar.
-     * Recria as listas se estiverem nulas.
-     */
     @PrePersist
     @PreUpdate
     public void validateCollections() {
@@ -335,14 +379,6 @@ public class Paciente extends BaseEntityWithoutTenant {
         }
     }
 
-    // ========== MÉTODOS UTILITÁRIOS - DOENÇAS ==========
-
-    /**
-     * Adiciona uma doença ao paciente com sincronização bidirecional.
-     * Garante que a doença também referencia este paciente.
-     *
-     * @param doenca A doença a ser adicionada
-     */
     public void addDoenca(DoencasPaciente doenca) {
         if (doenca == null) {
             return;
@@ -356,12 +392,6 @@ public class Paciente extends BaseEntityWithoutTenant {
         }
     }
 
-    /**
-     * Remove uma doença do paciente com sincronização bidirecional.
-     * Remove a referência da doença para este paciente.
-     *
-     * @param doenca A doença a ser removida
-     */
     public void removeDoenca(DoencasPaciente doenca) {
         if (doenca == null || doencas == null) {
             return;
@@ -371,14 +401,6 @@ public class Paciente extends BaseEntityWithoutTenant {
         }
     }
 
-    // ========== MÉTODOS UTILITÁRIOS - ALERGIAS ==========
-
-    /**
-     * Adiciona uma alergia ao paciente com sincronização bidirecional.
-     * Garante que a alergia também referencia este paciente.
-     *
-     * @param alergia A alergia a ser adicionada
-     */
     public void addAlergia(AlergiasPaciente alergia) {
         if (alergia == null) {
             return;
@@ -392,12 +414,6 @@ public class Paciente extends BaseEntityWithoutTenant {
         }
     }
 
-    /**
-     * Remove uma alergia do paciente com sincronização bidirecional.
-     * Remove a referência da alergia para este paciente.
-     *
-     * @param alergia A alergia a ser removida
-     */
     public void removeAlergia(AlergiasPaciente alergia) {
         if (alergia == null || alergias == null) {
             return;
@@ -407,14 +423,6 @@ public class Paciente extends BaseEntityWithoutTenant {
         }
     }
 
-    // ========== MÉTODOS UTILITÁRIOS - DEFICIÊNCIAS ==========
-
-    /**
-     * Adiciona uma deficiência ao paciente com sincronização bidirecional.
-     * Garante que a deficiência também referencia este paciente.
-     *
-     * @param deficiencia A deficiência a ser adicionada
-     */
     public void addDeficiencia(DeficienciasPaciente deficiencia) {
         if (deficiencia == null) {
             return;
@@ -428,12 +436,6 @@ public class Paciente extends BaseEntityWithoutTenant {
         }
     }
 
-    /**
-     * Remove uma deficiência do paciente com sincronização bidirecional.
-     * Remove a referência da deficiência para este paciente.
-     *
-     * @param deficiencia A deficiência a ser removida
-     */
     public void removeDeficiencia(DeficienciasPaciente deficiencia) {
         if (deficiencia == null || deficiencias == null) {
             return;
@@ -443,14 +445,6 @@ public class Paciente extends BaseEntityWithoutTenant {
         }
     }
 
-    // ========== MÉTODOS UTILITÁRIOS - MEDICAÇÕES ==========
-
-    /**
-     * Adiciona uma medicação ao paciente com sincronização bidirecional.
-     * Garante que a medicação também referencia este paciente.
-     *
-     * @param medicacao A medicação a ser adicionada
-     */
     public void addMedicacao(MedicacaoPaciente medicacao) {
         if (medicacao == null) {
             return;
@@ -464,12 +458,6 @@ public class Paciente extends BaseEntityWithoutTenant {
         }
     }
 
-    /**
-     * Remove uma medicação do paciente com sincronização bidirecional.
-     * Remove a referência da medicação para este paciente.
-     *
-     * @param medicacao A medicação a ser removida
-     */
     public void removeMedicacao(MedicacaoPaciente medicacao) {
         if (medicacao == null || medicacoes == null) {
             return;

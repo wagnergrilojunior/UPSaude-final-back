@@ -10,11 +10,6 @@ import org.springframework.data.domain.Pageable;
 import java.time.OffsetDateTime;
 import java.util.UUID;
 
-/**
- * Interface de serviço para operações CRUD relacionadas a Agendamento.
- *
- * @author UPSaúde
- */
 public interface AgendamentoService {
 
     AgendamentoResponse criar(AgendamentoRequest request);
@@ -49,4 +44,3 @@ public interface AgendamentoService {
 
     void excluir(UUID id);
 }
-

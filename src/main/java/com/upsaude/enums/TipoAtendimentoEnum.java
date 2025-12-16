@@ -3,12 +3,6 @@ package com.upsaude.enums;
 import java.util.Arrays;
 import java.util.Locale;
 
-/**
- * Enum para classificação de tipos de atendimento.
- * Baseado em padrões de sistemas de saúde e prontuário eletrônico.
- *
- * @author UPSaúde
- */
 public enum TipoAtendimentoEnum {
     CONSULTA_MEDICA(1, "Consulta Médica"),
     CONSULTA_ENFERMAGEM(2, "Consulta de Enfermagem"),
@@ -70,4 +64,3 @@ public enum TipoAtendimentoEnum {
                 .orElse(null);
     }
 }
-

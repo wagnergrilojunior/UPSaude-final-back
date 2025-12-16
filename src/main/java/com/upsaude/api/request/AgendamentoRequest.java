@@ -1,7 +1,10 @@
 package com.upsaude.api.request;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.upsaude.enums.PrioridadeAtendimentoEnum;
 import com.upsaude.enums.StatusAgendamentoEnum;
+import com.upsaude.util.converter.PrioridadeAtendimentoEnumDeserializer;
+import com.upsaude.util.converter.StatusAgendamentoEnumDeserializer;
 import jakarta.validation.constraints.NotNull;
 import java.time.OffsetDateTime;
 import java.util.UUID;
@@ -10,30 +13,35 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 @Getter
 @Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@Schema(description = "Dados de agendamento")
 public class AgendamentoRequest {
     @NotNull(message = "Paciente é obrigatório")
     private UUID paciente;
-    
+
     private UUID profissional;
     private UUID medico;
     private UUID especialidade;
     private UUID convenio;
     private UUID atendimento;
     private UUID agendamentoOriginal;
-    
+
     @NotNull(message = "Data e hora são obrigatórias")
     private OffsetDateTime dataHora;
     private OffsetDateTime dataHoraFim;
     private Integer duracaoPrevistaMinutos;
-    
+
     @NotNull(message = "Status do agendamento é obrigatório")
+    @JsonDeserialize(using = StatusAgendamentoEnumDeserializer.class)
     private StatusAgendamentoEnum status;
+
+    @JsonDeserialize(using = PrioridadeAtendimentoEnumDeserializer.class)
     private PrioridadeAtendimentoEnum prioridade;
     private Boolean ehEncaixe;
     private Boolean ehRetorno;

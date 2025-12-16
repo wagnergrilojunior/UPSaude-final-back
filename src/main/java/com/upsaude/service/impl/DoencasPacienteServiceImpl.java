@@ -19,8 +19,8 @@ import com.upsaude.repository.DoencasPacienteRepository;
 import com.upsaude.repository.DoencasRepository;
 import com.upsaude.repository.PacienteRepository;
 import com.upsaude.repository.TenantRepository;
-import com.upsaude.repository.UsuariosSistemaRepository;
 import com.upsaude.service.DoencasPacienteService;
+import com.upsaude.service.TenantService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -28,17 +28,10 @@ import org.springframework.data.domain.Page;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Pageable;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.util.UUID;
 
-/**
- * Implementação do serviço de gerenciamento de DoencasPaciente.
- *
- * @author UPSaúde
- */
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -53,7 +46,7 @@ public class DoencasPacienteServiceImpl implements DoencasPacienteService {
     private final DoencasRepository doencasRepository;
     private final CidDoencasRepository cidDoencasRepository;
     private final TenantRepository tenantRepository;
-    private final UsuariosSistemaRepository usuariosSistemaRepository;
+    private final TenantService tenantService;
 
     @Override
     @Transactional
@@ -61,11 +54,8 @@ public class DoencasPacienteServiceImpl implements DoencasPacienteService {
     public DoencasPacienteResponse criar(DoencasPacienteRequest request) {
         log.debug("Criando novo registro de doença do paciente");
 
-        validarDadosBasicos(request);
-
         DoencasPaciente doencasPaciente = doencasPacienteMapper.fromRequest(request);
 
-        // Carrega e define relacionamentos se fornecidos (opcionais)
         if (request.getPaciente() != null) {
             Paciente paciente = pacienteRepository.findById(request.getPaciente())
                     .orElseThrow(() -> new NotFoundException("Paciente não encontrado com ID: " + request.getPaciente()));
@@ -78,18 +68,13 @@ public class DoencasPacienteServiceImpl implements DoencasPacienteService {
             doencasPaciente.setDoenca(doenca);
         }
 
-        // Paciente não possui estabelecimento nem tenant
-        // O estabelecimento e tenant devem ser definidos de outra forma se necessário
-
-        // Carrega CID principal se fornecido
         if (request.getCidPrincipal() != null) {
             CidDoencas cidPrincipal = cidDoencasRepository.findById(request.getCidPrincipal())
                     .orElseThrow(() -> new NotFoundException("CID não encontrado com ID: " + request.getCidPrincipal()));
             doencasPaciente.setCidPrincipal(cidPrincipal);
         }
 
-        // Obtém o tenant do usuário autenticado (obrigatório para DoencasPaciente que estende BaseEntity)
-        Tenant tenant = obterTenantDoUsuarioAutenticado();
+        Tenant tenant = tenantService.obterTenantDoUsuarioAutenticado();
         if (tenant == null) {
             throw new BadRequestException("Não foi possível obter tenant do usuário autenticado. É necessário estar autenticado para criar relacionamentos de doenças.");
         }
@@ -107,7 +92,7 @@ public class DoencasPacienteServiceImpl implements DoencasPacienteService {
     @Transactional
     @CacheEvict(value = "doencaspaciente", allEntries = true)
     public DoencasPacienteResponse criarSimplificado(DoencasPacienteSimplificadoRequest request) {
-        log.debug("Criando novo registro de doença do paciente simplificado - Paciente: {}, Tenant: {}, Doença: {}", 
+        log.debug("Criando novo registro de doença do paciente simplificado - Paciente: {}, Tenant: {}, Doença: {}",
                 request.getPaciente(), request.getTenant(), request.getDoenca());
 
         if (request == null) {
@@ -126,26 +111,20 @@ public class DoencasPacienteServiceImpl implements DoencasPacienteService {
             throw new BadRequestException("ID da doença é obrigatório");
         }
 
-        // Busca paciente
         Paciente paciente = pacienteRepository.findById(request.getPaciente())
                 .orElseThrow(() -> new NotFoundException("Paciente não encontrado com ID: " + request.getPaciente()));
 
-        // Busca tenant
         Tenant tenant = tenantRepository.findById(request.getTenant())
                 .orElseThrow(() -> new NotFoundException("Tenant não encontrado com ID: " + request.getTenant()));
 
-        // Busca doença
         Doencas doenca = doencasRepository.findById(request.getDoenca())
                 .orElseThrow(() -> new NotFoundException("Doença não encontrada com ID: " + request.getDoenca()));
 
-        // Cria nova entidade com valores padrão
         DoencasPaciente doencasPaciente = new DoencasPaciente();
         doencasPaciente.setPaciente(paciente);
         doencasPaciente.setTenant(tenant);
         doencasPaciente.setDoenca(doenca);
         doencasPaciente.setActive(true);
-        // diagnostico, acompanhamento e tratamentoAtual são inicializados no construtor
-        // observacoes e cidPrincipal ficam null
 
         DoencasPaciente doencasPacienteSalvo = doencasPacienteRepository.save(doencasPaciente);
         log.info("Registro de doença do paciente criado com sucesso (simplificado). ID: {}", doencasPacienteSalvo.getId());
@@ -169,6 +148,7 @@ public class DoencasPacienteServiceImpl implements DoencasPacienteService {
     }
 
     @Override
+    @Transactional
     public Page<DoencasPacienteResponse> listar(Pageable pageable) {
         log.debug("Listando registros de doenças do paciente paginados. Página: {}, Tamanho: {}",
                 pageable.getPageNumber(), pageable.getPageSize());
@@ -178,6 +158,7 @@ public class DoencasPacienteServiceImpl implements DoencasPacienteService {
     }
 
     @Override
+    @Transactional
     public Page<DoencasPacienteResponse> listarPorPaciente(UUID pacienteId, Pageable pageable) {
         log.debug("Listando doenças do paciente: {}. Página: {}, Tamanho: {}",
                 pacienteId, pageable.getPageNumber(), pageable.getPageSize());
@@ -191,6 +172,7 @@ public class DoencasPacienteServiceImpl implements DoencasPacienteService {
     }
 
     @Override
+    @Transactional
     public Page<DoencasPacienteResponse> listarPorDoenca(UUID doencaId, Pageable pageable) {
         log.debug("Listando pacientes com a doença: {}. Página: {}, Tamanho: {}",
                 doencaId, pageable.getPageNumber(), pageable.getPageSize());
@@ -212,8 +194,6 @@ public class DoencasPacienteServiceImpl implements DoencasPacienteService {
         if (id == null) {
             throw new BadRequestException("ID do registro é obrigatório");
         }
-
-        validarDadosBasicos(request);
 
         DoencasPaciente doencasPacienteExistente = doencasPacienteRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Registro de doença do paciente não encontrado com ID: " + id));
@@ -248,17 +228,8 @@ public class DoencasPacienteServiceImpl implements DoencasPacienteService {
         log.info("Registro de doença do paciente excluído (desativado) com sucesso. ID: {}", id);
     }
 
-    private void validarDadosBasicos(DoencasPacienteRequest request) {
-        if (request == null) {
-            throw new BadRequestException("Dados do registro são obrigatórios");
-        }
-        // Removidas validações obrigatórias: paciente e doença
-        // Esses campos são opcionais pois nem sempre o paciente tem doenças cadastradas
-        // Se paciente ou doença forem fornecidos, serão validados no momento do relacionamento
-    }
-
     private void atualizarDadosDoencasPaciente(DoencasPaciente doencasPaciente, DoencasPacienteRequest request) {
-        // Atualiza embeddables usando mappers
+
         if (request.getDiagnostico() != null) {
             if (doencasPaciente.getDiagnostico() == null) {
                 doencasPaciente.setDiagnostico(diagnosticoDoencaPacienteMapper.toEntity(request.getDiagnostico()));
@@ -284,7 +255,6 @@ public class DoencasPacienteServiceImpl implements DoencasPacienteService {
             doencasPaciente.setObservacoes(request.getObservacoes());
         }
 
-        // Atualiza relacionamentos se fornecidos
         if (request.getCidPrincipal() != null) {
             CidDoencas cidPrincipal = cidDoencasRepository.findById(request.getCidPrincipal())
                     .orElseThrow(() -> new NotFoundException("CID não encontrado com ID: " + request.getCidPrincipal()));
@@ -292,60 +262,4 @@ public class DoencasPacienteServiceImpl implements DoencasPacienteService {
         }
     }
 
-    /**
-     * Obtém o tenant do usuário autenticado.
-     * 
-     * @return Tenant do usuário autenticado ou null se não encontrado
-     */
-    private Tenant obterTenantDoUsuarioAutenticado() {
-        try {
-            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-            if (authentication == null || !authentication.isAuthenticated()) {
-                log.warn("Usuário não autenticado. Não é possível obter tenant.");
-                return null;
-            }
-
-            // Obtém o userId do token JWT
-            UUID userId = null;
-            Object details = authentication.getDetails();
-            if (details instanceof com.upsaude.integration.supabase.SupabaseAuthResponse.User) {
-                com.upsaude.integration.supabase.SupabaseAuthResponse.User user = 
-                    (com.upsaude.integration.supabase.SupabaseAuthResponse.User) details;
-                userId = user.getId();
-                log.debug("UserId obtido do SupabaseAuthResponse.User: {}", userId);
-            } else if (authentication.getPrincipal() instanceof String) {
-                try {
-                    userId = UUID.fromString(authentication.getPrincipal().toString());
-                    log.debug("UserId obtido do Principal (String): {}", userId);
-                } catch (IllegalArgumentException e) {
-                    log.warn("Principal não é um UUID válido: {}", authentication.getPrincipal());
-                    return null;
-                }
-            } else {
-                log.warn("Tipo de Principal não reconhecido: {}", authentication.getPrincipal() != null ? authentication.getPrincipal().getClass().getName() : "null");
-            }
-
-            if (userId != null) {
-                java.util.Optional<com.upsaude.entity.UsuariosSistema> usuarioOpt = usuariosSistemaRepository.findByUserId(userId);
-                if (usuarioOpt.isPresent()) {
-                    com.upsaude.entity.UsuariosSistema usuario = usuarioOpt.get();
-                    Tenant tenant = usuario.getTenant();
-                    if (tenant != null) {
-                        log.debug("Tenant obtido com sucesso: {} (ID: {})", tenant.getNome(), tenant.getId());
-                        return tenant;
-                    } else {
-                        log.warn("Usuário encontrado mas sem tenant associado. UserId: {}", userId);
-                    }
-                } else {
-                    log.warn("Usuário não encontrado no sistema. UserId: {}", userId);
-                }
-            } else {
-                log.warn("Não foi possível obter userId do contexto de autenticação");
-            }
-        } catch (Exception e) {
-            log.error("Erro ao obter tenant do usuário autenticado", e);
-        }
-        return null;
-    }
 }
-

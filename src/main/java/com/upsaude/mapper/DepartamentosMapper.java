@@ -10,30 +10,14 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 
-/**
- * Mapper para conversões de Departamentos.
- * Entity ↔ DTO ↔ Request/Response
- */
 @Mapper(config = MappingConfig.class, uses = {EstabelecimentosMapper.class})
 public interface DepartamentosMapper extends EntityMapper<Departamentos, DepartamentosDTO> {
 
-    /**
-     * Converte DTO para Entity.
-     * O campo 'active' é ignorado (gerenciado pelo sistema).
-     */
     @Mapping(target = "active", ignore = true)
     Departamentos toEntity(DepartamentosDTO dto);
 
-    /**
-     * Converte Entity para DTO.
-     */
     DepartamentosDTO toDTO(Departamentos entity);
 
-    /**
-     * Converte Request para Entity.
-     * Os campos 'id', 'createdAt', 'updatedAt', 'active' são ignorados.
-     * Relacionamentos (UUID) devem ser tratados manualmente no Service.
-     */
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
@@ -41,11 +25,6 @@ public interface DepartamentosMapper extends EntityMapper<Departamentos, Departa
     @Mapping(target = "estabelecimento", ignore = true)
     Departamentos fromRequest(DepartamentosRequest request);
 
-    /**
-     * Atualiza Entity existente com dados do Request.
-     * Os campos 'id', 'createdAt', 'updatedAt', 'active' são ignorados.
-     * Relacionamentos (UUID) devem ser tratados manualmente no Service.
-     */
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
@@ -53,8 +32,5 @@ public interface DepartamentosMapper extends EntityMapper<Departamentos, Departa
     @Mapping(target = "estabelecimento", ignore = true)
     void updateFromRequest(DepartamentosRequest request, @MappingTarget Departamentos entity);
 
-    /**
-     * Converte Entity para Response.
-     */
     DepartamentosResponse toResponse(Departamentos entity);
 }

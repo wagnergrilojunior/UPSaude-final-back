@@ -7,35 +7,27 @@ import org.springframework.context.annotation.Configuration;
 
 import java.util.List;
 
-/**
- * Configuração do OpenAPI/Swagger para documentação da API.
- * Configura os 3 ambientes: local, dev e prod, todos com /api no path.
- * 
- * @author UPSaúde
- */
 @Configuration
 public class OpenApiConfig {
 
     @Bean
     public OpenAPI customOpenAPI() {
         OpenAPI openAPI = new OpenAPI();
-        
-        // Configura os 3 servidores para os diferentes ambientes
+
         Server localServer = new Server();
         localServer.setUrl("http://localhost:8080/api");
         localServer.setDescription("Ambiente Local");
-        
+
         Server devServer = new Server();
         devServer.setUrl("https://api-dev.upsaude.wgbsolucoes.com.br/api");
         devServer.setDescription("Ambiente de Desenvolvimento");
-        
+
         Server prodServer = new Server();
         prodServer.setUrl("https://api.upsaude.wgbsolucoes.com.br/api");
         prodServer.setDescription("Ambiente de Produção");
-        
+
         openAPI.setServers(List.of(localServer, devServer, prodServer));
-        
+
         return openAPI;
     }
 }
-

@@ -26,11 +26,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.UUID;
 
-/**
- * Implementação do serviço de gerenciamento de Deficiências de Paciente.
- *
- * @author UPSaúde
- */
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -48,11 +43,8 @@ public class DeficienciasPacienteServiceImpl implements DeficienciasPacienteServ
     public DeficienciasPacienteResponse criar(DeficienciasPacienteRequest request) {
         log.debug("Criando nova ligação paciente-deficiência");
 
-        validarDadosBasicos(request);
-
         DeficienciasPaciente deficienciasPaciente = deficienciasPacienteMapper.fromRequest(request);
-        
-        // Carrega e define as entidades relacionadas
+
         Paciente paciente = pacienteRepository.findById(request.getPaciente())
                 .orElseThrow(() -> new NotFoundException("Paciente não encontrado com ID: " + request.getPaciente()));
         deficienciasPaciente.setPaciente(paciente);
@@ -73,7 +65,7 @@ public class DeficienciasPacienteServiceImpl implements DeficienciasPacienteServ
     @Transactional
     @CacheEvict(value = "deficienciaspaciente", allEntries = true)
     public DeficienciasPacienteResponse criarSimplificado(DeficienciasPacienteSimplificadoRequest request) {
-        log.debug("Criando nova ligação paciente-deficiência simplificada - Paciente: {}, Tenant: {}, Deficiência: {}", 
+        log.debug("Criando nova ligação paciente-deficiência simplificada - Paciente: {}, Tenant: {}, Deficiência: {}",
                 request.getPaciente(), request.getTenant(), request.getDeficiencia());
 
         if (request == null) {
@@ -92,26 +84,21 @@ public class DeficienciasPacienteServiceImpl implements DeficienciasPacienteServ
             throw new BadRequestException("ID da deficiência é obrigatório");
         }
 
-        // Busca paciente
         Paciente paciente = pacienteRepository.findById(request.getPaciente())
                 .orElseThrow(() -> new NotFoundException("Paciente não encontrado com ID: " + request.getPaciente()));
 
-        // Busca tenant
         Tenant tenant = tenantRepository.findById(request.getTenant())
                 .orElseThrow(() -> new NotFoundException("Tenant não encontrado com ID: " + request.getTenant()));
 
-        // Busca deficiência
         Deficiencias deficiencia = deficienciasRepository.findById(request.getDeficiencia())
                 .orElseThrow(() -> new NotFoundException("Deficiência não encontrada com ID: " + request.getDeficiencia()));
 
-        // Cria nova entidade com valores padrão
         DeficienciasPaciente deficienciasPaciente = new DeficienciasPaciente();
         deficienciasPaciente.setPaciente(paciente);
         deficienciasPaciente.setTenant(tenant);
         deficienciasPaciente.setDeficiencia(deficiencia);
         deficienciasPaciente.setActive(true);
-        deficienciasPaciente.setPossuiLaudo(false); // Valor padrão
-        // dataDiagnostico e observacoes ficam null
+        deficienciasPaciente.setPossuiLaudo(false);
 
         DeficienciasPaciente deficienciasPacienteSalvo = deficienciasPacienteRepository.save(deficienciasPaciente);
         log.info("Ligação paciente-deficiência criada com sucesso (simplificado). ID: {}", deficienciasPacienteSalvo.getId());
@@ -153,8 +140,6 @@ public class DeficienciasPacienteServiceImpl implements DeficienciasPacienteServ
             throw new BadRequestException("ID da ligação paciente-deficiência é obrigatório");
         }
 
-        validarDadosBasicos(request);
-
         DeficienciasPaciente deficienciasPacienteExistente = deficienciasPacienteRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Ligação paciente-deficiência não encontrada com ID: " + id));
 
@@ -188,29 +173,16 @@ public class DeficienciasPacienteServiceImpl implements DeficienciasPacienteServ
         log.info("Ligação paciente-deficiência excluída (desativada) com sucesso. ID: {}", id);
     }
 
-    private void validarDadosBasicos(DeficienciasPacienteRequest request) {
-        if (request == null) {
-            throw new BadRequestException("Dados da ligação paciente-deficiência são obrigatórios");
-        }
-        if (request.getPaciente() == null) {
-            throw new BadRequestException("ID do paciente é obrigatório");
-        }
-        if (request.getDeficiencia() == null) {
-            throw new BadRequestException("ID da deficiência é obrigatório");
-        }
-    }
-
     private void atualizarDadosDeficienciasPaciente(DeficienciasPaciente deficienciasPaciente, DeficienciasPacienteRequest request) {
-        // Atualiza campos simples
+
         if (request.getDataDiagnostico() != null) {
             deficienciasPaciente.setDataDiagnostico(request.getDataDiagnostico());
         }
-        // possuiLaudo não faz parte do Request
+
         if (request.getObservacoes() != null) {
             deficienciasPaciente.setObservacoes(request.getObservacoes());
         }
 
-        // Atualiza relacionamentos se fornecidos
         if (request.getPaciente() != null) {
             Paciente paciente = pacienteRepository.findById(request.getPaciente())
                     .orElseThrow(() -> new NotFoundException("Paciente não encontrado com ID: " + request.getPaciente()));
@@ -224,4 +196,3 @@ public class DeficienciasPacienteServiceImpl implements DeficienciasPacienteServ
         }
     }
 }
-

@@ -4,11 +4,13 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Map;
 import lombok.*;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@Schema(description = "Dados de relatorio estatisticas")
 public class RelatorioEstatisticasRequest {
     private LocalDate dataInicio;
     private LocalDate dataFim;

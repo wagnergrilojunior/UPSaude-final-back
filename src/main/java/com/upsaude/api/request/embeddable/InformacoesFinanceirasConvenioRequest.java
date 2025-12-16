@@ -9,12 +9,14 @@ import lombok.Setter;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 @Getter
 @Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@Schema(description = "Dados de informacoes financeiras convênio")
 public class InformacoesFinanceirasConvenioRequest {
     private LocalDate dataInicioContrato;
     private LocalDate dataFimContrato;
@@ -32,13 +34,13 @@ public class InformacoesFinanceirasConvenioRequest {
     private Integer limiteAnualConsultas;
     private Integer limiteAnualExames;
     private Integer limiteAnualInternacoes;
-    
+
     @Size(max = 50, message = "Forma de pagamento deve ter no máximo 50 caracteres")
     private String formaPagamento;
-    
+
     @Size(max = 50, message = "Dia de vencimento deve ter no máximo 50 caracteres")
     private String diaVencimento;
-    
+
     @Size(max = 255, message = "Observações financeiras deve ter no máximo 255 caracteres")
     private String observacoesFinanceiras;
 }

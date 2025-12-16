@@ -6,13 +6,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 import java.util.List;
+import java.time.LocalDate;
 import java.util.UUID;
 
-/**
- * Interface de serviço para operações relacionadas a Puericultura.
- *
- * @author UPSaúde
- */
 public interface PuericulturaService {
 
     PuericulturaResponse criar(PuericulturaRequest request);
@@ -27,8 +23,11 @@ public interface PuericulturaService {
 
     Page<PuericulturaResponse> listarAtivos(UUID estabelecimentoId, Pageable pageable);
 
+    PuericulturaResponse obterAtivoPorPaciente(UUID pacienteId);
+
+    Page<PuericulturaResponse> listarPorPeriodo(UUID estabelecimentoId, LocalDate inicio, LocalDate fim, Pageable pageable);
+
     PuericulturaResponse atualizar(UUID id, PuericulturaRequest request);
 
     void excluir(UUID id);
 }
-

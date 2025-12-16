@@ -24,18 +24,21 @@ public class MedicosResponse {
     private OffsetDateTime createdAt;
     private OffsetDateTime updatedAt;
     private Boolean active;
-    private EspecialidadesMedicasResponse especialidade;
+
+    @Builder.Default
+    private List<EspecialidadesMedicasResponse> especialidades = new ArrayList<>();
+
     private String nomeCompleto;
     private DadosPessoaisMedicoResponse dadosPessoais;
     private RegistroProfissionalMedicoResponse registroProfissional;
     private FormacaoMedicoResponse formacao;
     private ContatoMedicoResponse contato;
-    
+
     @Builder.Default
     private List<EnderecoResponse> enderecos = new ArrayList<>();
-    
+
     @Builder.Default
     private List<MedicoEstabelecimentoResponse> medicosEstabelecimentos = new ArrayList<>();
-    
+
     private String observacoes;
 }

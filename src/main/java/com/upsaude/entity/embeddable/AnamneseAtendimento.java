@@ -6,11 +6,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 
-/**
- * Classe embeddable para informações de anamnese do atendimento.
- *
- * @author UPSaúde
- */
 @Embeddable
 @Data
 @Builder
@@ -29,27 +24,26 @@ public class AnamneseAtendimento {
     }
 
     @Column(name = "queixa_principal", columnDefinition = "TEXT")
-    private String queixaPrincipal; // Queixa principal do paciente
+    private String queixaPrincipal;
 
     @Column(name = "historia_doenca_atual", columnDefinition = "TEXT")
-    private String historiaDoencaAtual; // História da doença atual (HDA)
+    private String historiaDoencaAtual;
 
     @Column(name = "antecedentes_relevantes", columnDefinition = "TEXT")
-    private String antecedentesRelevantes; // Antecedentes relevantes para o atendimento
+    private String antecedentesRelevantes;
 
     @Column(name = "medicamentos_uso", columnDefinition = "TEXT")
-    private String medicamentosUso; // Medicamentos em uso
+    private String medicamentosUso;
 
     @Column(name = "alergias_conhecidas", columnDefinition = "TEXT")
-    private String alergiasConhecidas; // Alergias conhecidas
+    private String alergiasConhecidas;
 
     @Column(name = "exame_fisico", columnDefinition = "TEXT")
-    private String exameFisico; // Exame físico realizado
+    private String exameFisico;
 
     @Column(name = "sinais_vitais", columnDefinition = "TEXT")
-    private String sinaisVitais; // Sinais vitais (PA, FC, FR, T, SatO2, etc.)
+    private String sinaisVitais;
 
     @Column(name = "observacoes_anamnese", columnDefinition = "TEXT")
-    private String observacoesAnamnese; // Observações adicionais da anamnese
+    private String observacoesAnamnese;
 }
-

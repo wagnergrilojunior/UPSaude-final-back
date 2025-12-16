@@ -24,11 +24,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
 
-/**
- * Controlador REST para operações relacionadas a Catálogo de Exames.
- *
- * @author UPSaúde
- */
 @RestController
 @RequestMapping("/v1/catalogo-exames")
 @Tag(name = "Catálogo de Exames", description = "API para gerenciamento de Catálogo de Exames")
@@ -155,4 +150,3 @@ public class CatalogoExamesController {
         }
     }
 }
-

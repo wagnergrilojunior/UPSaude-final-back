@@ -1,19 +1,31 @@
 package com.upsaude.api.request;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.upsaude.enums.TipoCuidadoEnfermagemEnum;
+import com.upsaude.util.converter.TipoCuidadoEnfermagemEnumDeserializer;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 import java.util.UUID;
 import lombok.*;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@Schema(description = "Dados de cuidados enfermagem")
 public class CuidadosEnfermagemRequest {
+    @NotNull(message = "Paciente é obrigatório")
     private UUID paciente;
+
+    @NotNull(message = "Profissional é obrigatório")
     private UUID profissional;
     private UUID atendimento;
+
+    @NotNull(message = "Tipo de cuidado é obrigatório")
+    @JsonDeserialize(using = TipoCuidadoEnfermagemEnumDeserializer.class)
     private TipoCuidadoEnfermagemEnum tipoCuidado;
     private String descricaoProcedimento;
     private OffsetDateTime dataHora;

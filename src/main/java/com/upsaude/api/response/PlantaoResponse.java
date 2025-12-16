@@ -15,6 +15,7 @@ public class PlantaoResponse {
     private OffsetDateTime createdAt;
     private OffsetDateTime updatedAt;
     private Boolean active;
+    private EstabelecimentosResponse estabelecimento;
     private ProfissionaisSaudeResponse profissional;
     private MedicosResponse medico;
     private OffsetDateTime dataHoraInicio;

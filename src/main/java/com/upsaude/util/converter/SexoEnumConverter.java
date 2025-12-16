@@ -23,4 +23,3 @@ public class SexoEnumConverter implements AttributeConverter<SexoEnum, Integer> 
         return SexoEnum.fromCodigo(dbData);
     }
 }
-

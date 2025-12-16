@@ -12,11 +12,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 
-/**
- * Classe embeddable para classificação da doença.
- *
- * @author UPSaúde
- */
 @Embeddable
 @Data
 @Builder
@@ -41,7 +36,7 @@ public class ClassificacaoDoenca {
 
     @Size(max = 100, message = "Categoria deve ter no máximo 100 caracteres")
     @Column(name = "categoria", length = 100)
-    private String categoria; // Ex: Doenças do aparelho circulatório
+    private String categoria;
 
     @Size(max = 100, message = "Subcategoria deve ter no máximo 100 caracteres")
     @Column(name = "subcategoria", length = 100)
@@ -49,14 +44,13 @@ public class ClassificacaoDoenca {
 
     @Size(max = 50, message = "Código CID principal deve ter no máximo 50 caracteres")
     @Column(name = "codigo_cid_principal", length = 50)
-    private String codigoCidPrincipal; // Código CID-10 principal
+    private String codigoCidPrincipal;
 
     @Column(name = "doenca_notificavel", nullable = false)
     @Builder.Default
-    private Boolean doencaNotificavel = false; // Se é doença de notificação compulsória
+    private Boolean doencaNotificavel = false;
 
     @Column(name = "doenca_transmissivel", nullable = false)
     @Builder.Default
-    private Boolean doencaTransmissivel = false; // Se é doença transmissível
+    private Boolean doencaTransmissivel = false;
 }
-

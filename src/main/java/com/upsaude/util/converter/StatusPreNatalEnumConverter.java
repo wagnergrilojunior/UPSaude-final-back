@@ -23,4 +23,3 @@ public class StatusPreNatalEnumConverter implements AttributeConverter<StatusPre
         return StatusPreNatalEnum.fromCodigo(dbData);
     }
 }
-

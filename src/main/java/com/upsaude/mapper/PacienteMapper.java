@@ -2,37 +2,23 @@ package com.upsaude.mapper;
 
 import com.upsaude.api.request.PacienteRequest;
 import com.upsaude.api.response.PacienteResponse;
+import com.upsaude.api.response.PacienteSimplificadoResponse;
 import com.upsaude.dto.PacienteDTO;
 import com.upsaude.entity.Paciente;
 import com.upsaude.mapper.config.MappingConfig;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
+import com.upsaude.repository.projection.PacienteSimplificadoProjection;
 
-/**
- * Mapper para conversões de Paciente.
- * Entity ↔ DTO ↔ Request/Response
- */
-@Mapper(config = MappingConfig.class, uses = {ConvenioMapper.class, DadosClinicosBasicosMapper.class, DadosSociodemograficosMapper.class, IntegracaoGovMapper.class, LGPDConsentimentoMapper.class, ResponsavelLegalMapper.class})
+@Mapper(config = MappingConfig.class, uses = {ConvenioMapper.class, DadosClinicosBasicosMapper.class, DadosSociodemograficosMapper.class, IntegracaoGovMapper.class, LGPDConsentimentoMapper.class, ResponsavelLegalMapper.class, DoencasPacienteMapper.class, AlergiasPacienteMapper.class, DeficienciasPacienteMapper.class, MedicacaoPacienteMapper.class})
 public interface PacienteMapper extends EntityMapper<Paciente, PacienteDTO> {
 
-    /**
-     * Converte DTO para Entity.
-     * O campo 'active' é ignorado (gerenciado pelo sistema).
-     */
     @Mapping(target = "active", ignore = true)
     Paciente toEntity(PacienteDTO dto);
 
-    /**
-     * Converte Entity para DTO.
-     */
     PacienteDTO toDTO(Paciente entity);
 
-    /**
-     * Converte Request para Entity.
-     * Os campos 'id', 'createdAt', 'updatedAt', 'active' são ignorados.
-     * Relacionamentos (UUID) e listas devem ser tratados manualmente no Service.
-     */
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
@@ -50,11 +36,6 @@ public interface PacienteMapper extends EntityMapper<Paciente, PacienteDTO> {
     @Mapping(target = "medicacoes", ignore = true)
     Paciente fromRequest(PacienteRequest request);
 
-    /**
-     * Atualiza Entity existente com dados do Request.
-     * Os campos 'id', 'createdAt', 'updatedAt', 'active' são ignorados.
-     * Relacionamentos (UUID) e listas devem ser tratados manualmente no Service.
-     */
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
@@ -72,8 +53,105 @@ public interface PacienteMapper extends EntityMapper<Paciente, PacienteDTO> {
     @Mapping(target = "medicacoes", ignore = true)
     void updateFromRequest(PacienteRequest request, @MappingTarget Paciente entity);
 
-    /**
-     * Converte Entity para Response.
-     */
     PacienteResponse toResponse(Paciente entity);
+
+    default PacienteSimplificadoResponse toSimplified(Paciente paciente) {
+        if (paciente == null) return null;
+        return PacienteSimplificadoResponse.builder()
+                .id(paciente.getId())
+                .createdAt(paciente.getCreatedAt())
+                .updatedAt(paciente.getUpdatedAt())
+                .active(paciente.getActive())
+                .nomeCompleto(paciente.getNomeCompleto())
+                .cpf(paciente.getCpf())
+                .rg(paciente.getRg())
+                .cns(paciente.getCns())
+                .dataNascimento(paciente.getDataNascimento())
+                .sexo(paciente.getSexo())
+                .estadoCivil(paciente.getEstadoCivil())
+                .telefone(paciente.getTelefone())
+                .email(paciente.getEmail())
+                .nomeMae(paciente.getNomeMae())
+                .nomePai(paciente.getNomePai())
+                .responsavelNome(paciente.getResponsavelNome())
+                .responsavelCpf(paciente.getResponsavelCpf())
+                .responsavelTelefone(paciente.getResponsavelTelefone())
+                .numeroCarteirinha(paciente.getNumeroCarteirinha())
+                .dataValidadeCarteirinha(paciente.getDataValidadeCarteirinha())
+                .observacoes(paciente.getObservacoes())
+                .racaCor(paciente.getRacaCor())
+                .nacionalidade(paciente.getNacionalidade())
+                .paisNascimento(paciente.getPaisNascimento())
+                .naturalidade(paciente.getNaturalidade())
+                .municipioNascimentoIbge(paciente.getMunicipioNascimentoIbge())
+                .escolaridade(paciente.getEscolaridade())
+                .ocupacaoProfissao(paciente.getOcupacaoProfissao())
+                .situacaoRua(paciente.getSituacaoRua())
+                .statusPaciente(paciente.getStatusPaciente())
+                .dataObito(paciente.getDataObito())
+                .causaObitoCid10(paciente.getCausaObitoCid10())
+                .cartaoSusAtivo(paciente.getCartaoSusAtivo())
+                .dataAtualizacaoCns(paciente.getDataAtualizacaoCns())
+                .tipoAtendimentoPreferencial(paciente.getTipoAtendimentoPreferencial())
+                .origemCadastro(paciente.getOrigemCadastro())
+                .nomeSocial(paciente.getNomeSocial())
+                .identidadeGenero(paciente.getIdentidadeGenero())
+                .orientacaoSexual(paciente.getOrientacaoSexual())
+                .possuiDeficiencia(paciente.getPossuiDeficiencia())
+                .tipoDeficiencia(paciente.getTipoDeficiencia())
+                .cnsValidado(paciente.getCnsValidado())
+                .tipoCns(paciente.getTipoCns())
+                .acompanhadoPorEquipeEsf(paciente.getAcompanhadoPorEquipeEsf())
+                .build();
+    }
+
+    default PacienteSimplificadoResponse fromProjection(PacienteSimplificadoProjection projecao) {
+        if (projecao == null) return null;
+        return PacienteSimplificadoResponse.builder()
+                .id(projecao.getId())
+                .createdAt(projecao.getCreatedAt())
+                .updatedAt(projecao.getUpdatedAt())
+                .active(projecao.getActive())
+                .nomeCompleto(projecao.getNomeCompleto())
+                .cpf(projecao.getCpf())
+                .rg(projecao.getRg())
+                .cns(projecao.getCns())
+                .dataNascimento(projecao.getDataNascimento())
+                .sexo(projecao.getSexo())
+                .estadoCivil(projecao.getEstadoCivil())
+                .telefone(projecao.getTelefone())
+                .email(projecao.getEmail())
+                .nomeMae(projecao.getNomeMae())
+                .nomePai(projecao.getNomePai())
+                .responsavelNome(projecao.getResponsavelNome())
+                .responsavelCpf(projecao.getResponsavelCpf())
+                .responsavelTelefone(projecao.getResponsavelTelefone())
+                .numeroCarteirinha(projecao.getNumeroCarteirinha())
+                .dataValidadeCarteirinha(projecao.getDataValidadeCarteirinha())
+                .observacoes(projecao.getObservacoes())
+                .racaCor(projecao.getRacaCor())
+                .nacionalidade(projecao.getNacionalidade())
+                .paisNascimento(projecao.getPaisNascimento())
+                .naturalidade(projecao.getNaturalidade())
+                .municipioNascimentoIbge(projecao.getMunicipioNascimentoIbge())
+                .escolaridade(projecao.getEscolaridade())
+                .ocupacaoProfissao(projecao.getOcupacaoProfissao())
+                .situacaoRua(projecao.getSituacaoRua())
+                .statusPaciente(projecao.getStatusPaciente())
+                .dataObito(projecao.getDataObito())
+                .causaObitoCid10(projecao.getCausaObitoCid10())
+                .cartaoSusAtivo(projecao.getCartaoSusAtivo())
+                .dataAtualizacaoCns(projecao.getDataAtualizacaoCns())
+                .tipoAtendimentoPreferencial(projecao.getTipoAtendimentoPreferencial())
+                .origemCadastro(projecao.getOrigemCadastro())
+                .nomeSocial(projecao.getNomeSocial())
+                .identidadeGenero(projecao.getIdentidadeGenero())
+                .orientacaoSexual(projecao.getOrientacaoSexual())
+                .possuiDeficiencia(projecao.getPossuiDeficiencia())
+                .tipoDeficiencia(projecao.getTipoDeficiencia())
+                .cnsValidado(projecao.getCnsValidado())
+                .tipoCns(projecao.getTipoCns())
+                .acompanhadoPorEquipeEsf(projecao.getAcompanhadoPorEquipeEsf())
+                .build();
+    }
 }

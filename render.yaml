@@ -27,15 +27,18 @@ services:
         sync: false
       - key: JWT_EXPIRATION
         value: 86400000
-      # Variáveis de ambiente do Redis/Valkey para Cache
-      # Configure estas variáveis no painel do Render após criar a instância Key-Value (Valkey)
-      # Nota: O Render agora usa Valkey nas novas instâncias, mas é 100% compatível com Redis
+      # Variáveis de ambiente do Redis/Upstash para Cache
+      # Configure estas variáveis no painel do Render com as credenciais do Upstash
+      # Upstash Redis requer SSL/TLS (rediss://) - configurado via spring.data.redis.ssl.enabled=true
+      # Host: popular-anteater-8367.upstash.io
+      # Port: 6379
+      # Password: ASCvAAImcDE2MGM1ZmRmNWE4OGQ0NzllODg1NzQyZmIyNmUzZGFmZXAxODM2Nw
       - key: REDIS_HOST
-        sync: false
+        value: popular-anteater-8367.upstash.io
       - key: REDIS_PORT
         value: 6379
       - key: REDIS_PASSWORD
-        sync: false
+        value: ASCvAAImcDE2MGM1ZmRmNWE4OGQ0NzllODg1NzQyZmIyNmUzZGFmZXAxODM2Nw
       - key: REDIS_DATABASE
         value: 0
       # Variáveis de ambiente do Supabase

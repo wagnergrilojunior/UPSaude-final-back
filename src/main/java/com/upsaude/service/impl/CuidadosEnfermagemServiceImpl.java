@@ -2,175 +2,177 @@ package com.upsaude.service.impl;
 
 import com.upsaude.api.request.CuidadosEnfermagemRequest;
 import com.upsaude.api.response.CuidadosEnfermagemResponse;
+import com.upsaude.cache.CacheKeyUtil;
 import com.upsaude.entity.CuidadosEnfermagem;
 import com.upsaude.exception.BadRequestException;
+import com.upsaude.exception.InternalServerErrorException;
 import com.upsaude.exception.NotFoundException;
-import com.upsaude.mapper.CuidadosEnfermagemMapper;
 import com.upsaude.repository.CuidadosEnfermagemRepository;
 import com.upsaude.service.CuidadosEnfermagemService;
-import jakarta.transaction.Transactional;
+import com.upsaude.service.TenantService;
+import com.upsaude.entity.Tenant;
+import com.upsaude.service.support.cuidadosenfermagem.CuidadosEnfermagemCreator;
+import com.upsaude.service.support.cuidadosenfermagem.CuidadosEnfermagemResponseBuilder;
+import com.upsaude.service.support.cuidadosenfermagem.CuidadosEnfermagemTenantEnforcer;
+import com.upsaude.service.support.cuidadosenfermagem.CuidadosEnfermagemUpdater;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.BeanUtils;
+import org.springframework.cache.Cache;
+import org.springframework.cache.CacheManager;
 import org.springframework.data.domain.Page;
 import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Objects;
 import java.util.UUID;
 
-/**
- * Implementação do serviço de gerenciamento de Cuidados de Enfermagem.
- *
- * @author UPSaúde
- */
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class CuidadosEnfermagemServiceImpl implements CuidadosEnfermagemService {
 
-    private final CuidadosEnfermagemRepository cuidadosEnfermagemRepository;
-    private final CuidadosEnfermagemMapper cuidadosEnfermagemMapper;
+    private final CuidadosEnfermagemRepository repository;
+    private final CacheManager cacheManager;
+    private final TenantService tenantService;
+
+    private final CuidadosEnfermagemCreator creator;
+    private final CuidadosEnfermagemUpdater updater;
+    private final CuidadosEnfermagemResponseBuilder responseBuilder;
+    private final CuidadosEnfermagemTenantEnforcer tenantEnforcer;
 
     @Override
     @Transactional
-    @CacheEvict(value = "cuidadosenfermagem", allEntries = true)
     public CuidadosEnfermagemResponse criar(CuidadosEnfermagemRequest request) {
-        log.debug("Criando novo cuidado de enfermagem");
+        try {
+            UUID tenantId = tenantService.validarTenantAtual();
+            Tenant tenant = tenantService.obterTenantDoUsuarioAutenticado();
+            validarTenantAutenticadoOrThrow(tenantId, tenant);
 
-        validarDadosBasicos(request);
+            CuidadosEnfermagem saved = creator.criar(request, tenantId, tenant);
+            CuidadosEnfermagemResponse response = responseBuilder.build(saved);
 
-        CuidadosEnfermagem cuidadosEnfermagem = cuidadosEnfermagemMapper.fromRequest(request);
-        cuidadosEnfermagem.setActive(true);
+            Cache cache = cacheManager.getCache(CacheKeyUtil.CACHE_CUIDADOS_ENFERMAGEM);
+            if (cache != null) {
+                Object key = Objects.requireNonNull((Object) CacheKeyUtil.cuidadoEnfermagem(tenantId, saved.getId()));
+                cache.put(key, response);
+            }
 
-        CuidadosEnfermagem cuidadosSalvo = cuidadosEnfermagemRepository.save(cuidadosEnfermagem);
-        log.info("Cuidado de enfermagem criado com sucesso. ID: {}", cuidadosSalvo.getId());
-
-        return cuidadosEnfermagemMapper.toResponse(cuidadosSalvo);
+            return response;
+        } catch (BadRequestException | NotFoundException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new InternalServerErrorException("Erro ao criar cuidado de enfermagem", e);
+        }
     }
 
     @Override
-    @Transactional
-    @Cacheable(value = "cuidadosenfermagem", key = "#id")
+    @Transactional(readOnly = true)
+    @Cacheable(cacheNames = CacheKeyUtil.CACHE_CUIDADOS_ENFERMAGEM, keyGenerator = "cuidadosEnfermagemCacheKeyGenerator")
     public CuidadosEnfermagemResponse obterPorId(UUID id) {
-        log.debug("Buscando cuidado de enfermagem por ID: {} (cache miss)", id);
         if (id == null) {
             throw new BadRequestException("ID do cuidado de enfermagem é obrigatório");
         }
 
-        CuidadosEnfermagem cuidadosEnfermagem = cuidadosEnfermagemRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("Cuidado de enfermagem não encontrado com ID: " + id));
-
-        return cuidadosEnfermagemMapper.toResponse(cuidadosEnfermagem);
+        UUID tenantId = tenantService.validarTenantAtual();
+        CuidadosEnfermagem entity = tenantEnforcer.validarAcessoCompleto(id, tenantId);
+        return responseBuilder.build(entity);
     }
 
     @Override
+    @Transactional(readOnly = true)
     public Page<CuidadosEnfermagemResponse> listar(Pageable pageable) {
-        log.debug("Listando cuidados de enfermagem paginados");
-
-        Page<CuidadosEnfermagem> cuidados = cuidadosEnfermagemRepository.findAll(pageable);
-        return cuidados.map(cuidadosEnfermagemMapper::toResponse);
+        UUID tenantId = tenantService.validarTenantAtual();
+        Page<CuidadosEnfermagem> page = repository.findAllByTenant(tenantId, pageable);
+        return page.map(responseBuilder::build);
     }
 
     @Override
+    @Transactional(readOnly = true)
     public Page<CuidadosEnfermagemResponse> listarPorEstabelecimento(UUID estabelecimentoId, Pageable pageable) {
-        log.debug("Listando cuidados de enfermagem por estabelecimento: {}", estabelecimentoId);
+        if (estabelecimentoId == null) {
+            throw new BadRequestException("ID do estabelecimento é obrigatório");
+        }
 
-        Page<CuidadosEnfermagem> cuidados = cuidadosEnfermagemRepository.findByEstabelecimentoIdOrderByDataHoraDesc(estabelecimentoId, pageable);
-        return cuidados.map(cuidadosEnfermagemMapper::toResponse);
+        UUID tenantId = tenantService.validarTenantAtual();
+        Page<CuidadosEnfermagem> page = repository.findByEstabelecimentoIdAndTenantIdOrderByDataHoraDesc(estabelecimentoId, tenantId, pageable);
+        return page.map(responseBuilder::build);
     }
 
     @Override
+    @Transactional(readOnly = true)
     public Page<CuidadosEnfermagemResponse> listarPorPaciente(UUID pacienteId, Pageable pageable) {
-        log.debug("Listando cuidados de enfermagem por paciente: {}", pacienteId);
+        if (pacienteId == null) {
+            throw new BadRequestException("ID do paciente é obrigatório");
+        }
 
-        Page<CuidadosEnfermagem> cuidados = cuidadosEnfermagemRepository.findByPacienteIdOrderByDataHoraDesc(pacienteId, pageable);
-        return cuidados.map(cuidadosEnfermagemMapper::toResponse);
+        UUID tenantId = tenantService.validarTenantAtual();
+        Page<CuidadosEnfermagem> page = repository.findByPacienteIdAndTenantIdOrderByDataHoraDesc(pacienteId, tenantId, pageable);
+        return page.map(responseBuilder::build);
     }
 
     @Override
+    @Transactional(readOnly = true)
     public Page<CuidadosEnfermagemResponse> listarPorProfissional(UUID profissionalId, Pageable pageable) {
-        log.debug("Listando cuidados de enfermagem por profissional: {}", profissionalId);
+        if (profissionalId == null) {
+            throw new BadRequestException("ID do profissional é obrigatório");
+        }
 
-        Page<CuidadosEnfermagem> cuidados = cuidadosEnfermagemRepository.findByProfissionalIdOrderByDataHoraDesc(profissionalId, pageable);
-        return cuidados.map(cuidadosEnfermagemMapper::toResponse);
+        UUID tenantId = tenantService.validarTenantAtual();
+        Page<CuidadosEnfermagem> page = repository.findByProfissionalIdAndTenantIdOrderByDataHoraDesc(profissionalId, tenantId, pageable);
+        return page.map(responseBuilder::build);
     }
 
     @Override
     @Transactional
-    @CacheEvict(value = "cuidadosenfermagem", key = "#id")
+    @CachePut(cacheNames = CacheKeyUtil.CACHE_CUIDADOS_ENFERMAGEM, keyGenerator = "cuidadosEnfermagemCacheKeyGenerator")
     public CuidadosEnfermagemResponse atualizar(UUID id, CuidadosEnfermagemRequest request) {
-        log.debug("Atualizando cuidado de enfermagem. ID: {}", id);
-
         if (id == null) {
             throw new BadRequestException("ID do cuidado de enfermagem é obrigatório");
         }
+        try {
+            UUID tenantId = tenantService.validarTenantAtual();
+            Tenant tenant = tenantService.obterTenantDoUsuarioAutenticado();
+            validarTenantAutenticadoOrThrow(tenantId, tenant);
 
-        validarDadosBasicos(request);
-
-        CuidadosEnfermagem cuidadosExistente = cuidadosEnfermagemRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("Cuidado de enfermagem não encontrado com ID: " + id));
-
-        atualizarDadosCuidadosEnfermagem(cuidadosExistente, request);
-
-        CuidadosEnfermagem cuidadosAtualizado = cuidadosEnfermagemRepository.save(cuidadosExistente);
-        log.info("Cuidado de enfermagem atualizado com sucesso. ID: {}", cuidadosAtualizado.getId());
-
-        return cuidadosEnfermagemMapper.toResponse(cuidadosAtualizado);
+            CuidadosEnfermagem updated = updater.atualizar(id, request, tenantId, tenant);
+            return responseBuilder.build(updated);
+        } catch (BadRequestException | NotFoundException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new InternalServerErrorException("Erro ao atualizar cuidado de enfermagem", e);
+        }
     }
 
     @Override
     @Transactional
-    @CacheEvict(value = "cuidadosenfermagem", key = "#id")
+    @CacheEvict(cacheNames = CacheKeyUtil.CACHE_CUIDADOS_ENFERMAGEM, keyGenerator = "cuidadosEnfermagemCacheKeyGenerator", beforeInvocation = false)
     public void excluir(UUID id) {
-        log.debug("Excluindo cuidado de enfermagem. ID: {}", id);
+        UUID tenantId = tenantService.validarTenantAtual();
+        inativarInternal(id, tenantId);
+    }
 
+    private void inativarInternal(UUID id, UUID tenantId) {
         if (id == null) {
             throw new BadRequestException("ID do cuidado de enfermagem é obrigatório");
         }
 
-        CuidadosEnfermagem cuidadosEnfermagem = cuidadosEnfermagemRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("Cuidado de enfermagem não encontrado com ID: " + id));
-
-        if (Boolean.FALSE.equals(cuidadosEnfermagem.getActive())) {
+        CuidadosEnfermagem entity = tenantEnforcer.validarAcesso(id, tenantId);
+        if (Boolean.FALSE.equals(entity.getActive())) {
             throw new BadRequestException("Cuidado de enfermagem já está inativo");
         }
 
-        cuidadosEnfermagem.setActive(false);
-        cuidadosEnfermagemRepository.save(cuidadosEnfermagem);
+        entity.setActive(false);
+        repository.save(Objects.requireNonNull(entity));
         log.info("Cuidado de enfermagem excluído (desativado) com sucesso. ID: {}", id);
     }
 
-    private void validarDadosBasicos(CuidadosEnfermagemRequest request) {
-        if (request == null) {
-            throw new BadRequestException("Dados do cuidado de enfermagem são obrigatórios");
+    private void validarTenantAutenticadoOrThrow(UUID tenantId, Tenant tenant) {
+        if (tenantId == null || tenant == null || tenant.getId() == null || !tenantId.equals(tenant.getId())) {
+            throw new BadRequestException("Não foi possível obter tenant do usuário autenticado");
         }
-        if (request.getPaciente() == null) {
-            throw new BadRequestException("Paciente é obrigatório");
-        }
-        if (request.getProfissional() == null) {
-            throw new BadRequestException("Profissional é obrigatório");
-        }
-        if (request.getTipoCuidado() == null) {
-            throw new BadRequestException("Tipo de cuidado é obrigatório");
-        }
-    }
-
-    private void atualizarDadosCuidadosEnfermagem(CuidadosEnfermagem cuidados, CuidadosEnfermagemRequest request) {
-        CuidadosEnfermagem cuidadosAtualizado = cuidadosEnfermagemMapper.fromRequest(request);
-
-        UUID idOriginal = cuidados.getId();
-        com.upsaude.entity.Tenant tenantOriginal = cuidados.getTenant();
-        Boolean activeOriginal = cuidados.getActive();
-        java.time.OffsetDateTime createdAtOriginal = cuidados.getCreatedAt();
-
-        BeanUtils.copyProperties(cuidadosAtualizado, cuidados);
-
-        cuidados.setId(idOriginal);
-        cuidados.setTenant(tenantOriginal);
-        cuidados.setActive(activeOriginal);
-        cuidados.setCreatedAt(createdAtOriginal);
     }
 }
-

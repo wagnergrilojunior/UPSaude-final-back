@@ -29,12 +29,6 @@ import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Entidade que representa um estabelecimento de saúde.
- * Armazena dados completos para integração com CNES e gestão de unidades de saúde.
- *
- * @author UPSaúde
- */
 @Entity
 @Table(name = "estabelecimentos", schema = "public",
        uniqueConstraints = {
@@ -50,9 +44,6 @@ import java.util.List;
 @EqualsAndHashCode(callSuper = true)
 public class Estabelecimentos extends BaseEntityWithoutEstabelecimento {
 
-    /**
-     * Construtor padrão que inicializa as coleções para evitar NullPointerException.
-     */
     public Estabelecimentos() {
         this.enderecosSecundarios = new ArrayList<>();
         this.servicos = new ArrayList<>();
@@ -61,8 +52,6 @@ public class Estabelecimentos extends BaseEntityWithoutEstabelecimento {
         this.equipes = new ArrayList<>();
     }
 
-    // ========== IDENTIFICAÇÃO BÁSICA ==========
-    
     @NotBlank(message = "Nome é obrigatório")
     @Size(max = 255, message = "Nome deve ter no máximo 255 caracteres")
     @Column(name = "nome", nullable = false, length = 255)
@@ -77,8 +66,6 @@ public class Estabelecimentos extends BaseEntityWithoutEstabelecimento {
     @Column(name = "tipo", nullable = false, length = 100)
     private TipoEstabelecimentoEnum tipo;
 
-    // ========== IDENTIFICAÇÃO OFICIAL (CNES) ==========
-    
     @Size(max = 7, message = "Código CNES deve ter no máximo 7 caracteres")
     @Column(name = "codigo_cnes", length = 7, unique = false)
     private String codigoCnes;
@@ -95,16 +82,10 @@ public class Estabelecimentos extends BaseEntityWithoutEstabelecimento {
     @Column(name = "registro_oficial", length = 50)
     private String registroOficial;
 
-    // ========== ENDEREÇO PRINCIPAL ==========
-    
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "endereco_principal_id")
     private Endereco enderecoPrincipal;
 
-    /**
-     * Endereços secundários (para casos de múltiplas unidades no mesmo estabelecimento).
-     * Cascade PERSIST/MERGE para gerenciar associações.
-     */
     @OneToMany(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @jakarta.persistence.JoinTable(
         name = "estabelecimentos_enderecos_secundarios",
@@ -114,8 +95,6 @@ public class Estabelecimentos extends BaseEntityWithoutEstabelecimento {
     )
     private List<Endereco> enderecosSecundarios = new ArrayList<>();
 
-    // ========== CONTATO INSTITUCIONAL ==========
-    
     @Pattern(regexp = "^\\d{10,11}$", message = "Telefone deve ter 10 ou 11 dígitos")
     @Column(name = "telefone", length = 20)
     private String telefone;
@@ -137,8 +116,6 @@ public class Estabelecimentos extends BaseEntityWithoutEstabelecimento {
     @Column(name = "site", length = 500)
     private String site;
 
-    // ========== RESPONSÁVEIS ==========
-    
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "responsavel_tecnico_id")
     private ProfissionaisSaude responsavelTecnico;
@@ -155,8 +132,6 @@ public class Estabelecimentos extends BaseEntityWithoutEstabelecimento {
     @Column(name = "responsavel_legal_cpf", length = 11)
     private String responsavelLegalCpf;
 
-    // ========== STATUS E LICENCIAMENTO ==========
-    
     @Enumerated(EnumType.STRING)
     @Column(name = "status_funcionamento", length = 50)
     private StatusFuncionamentoEnum statusFuncionamento;
@@ -181,8 +156,6 @@ public class Estabelecimentos extends BaseEntityWithoutEstabelecimento {
     @Column(name = "data_validade_licenca_sanitaria")
     private OffsetDateTime dataValidadeLicencaSanitaria;
 
-    // ========== CAPACIDADE E INFRAESTRUTURA ==========
-    
     @Column(name = "quantidade_leitos")
     private Integer quantidadeLeitos;
 
@@ -201,58 +174,27 @@ public class Estabelecimentos extends BaseEntityWithoutEstabelecimento {
     @Column(name = "area_total_metros_quadrados")
     private Double areaTotalMetrosQuadrados;
 
-    // ========== ESPECIALIDADES E SERVIÇOS ==========
-    
-    /**
-     * Serviços oferecidos pelo estabelecimento.
-     * OneToMany bidirecional com cascade completo - JPA gerencia automaticamente.
-     */
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "estabelecimento", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ServicosEstabelecimento> servicos = new ArrayList<>();
 
-    /**
-     * Equipamentos do estabelecimento.
-     * OneToMany bidirecional com cascade completo - JPA gerencia automaticamente.
-     */
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "estabelecimento", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<EquipamentosEstabelecimento> equipamentos = new ArrayList<>();
 
-    /**
-     * Infraestrutura do estabelecimento.
-     * OneToMany bidirecional com cascade completo - JPA gerencia automaticamente.
-     */
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "estabelecimento", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<InfraestruturaEstabelecimento> infraestrutura = new ArrayList<>();
 
-    /**
-     * Equipes de saúde do estabelecimento.
-     * OneToMany bidirecional com cascade completo - JPA gerencia automaticamente.
-     */
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "estabelecimento", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<EquipeSaude> equipes = new ArrayList<>();
 
-    // ========== GEOLOCALIZAÇÃO ==========
-    
     @Column(name = "latitude")
     private Double latitude;
 
     @Column(name = "longitude")
     private Double longitude;
 
-    // ========== OBSERVAÇÕES E DADOS COMPLEMENTARES ==========
-    
     @Column(name = "observacoes", columnDefinition = "TEXT")
     private String observacoes;
 
-    @Column(name = "dados_complementares", columnDefinition = "jsonb")
-    private String dadosComplementares;
-
-    // ========== MÉTODOS DE CICLO DE VIDA ==========
-
-    /**
-     * Garante que as coleções não sejam nulas antes de persistir ou atualizar.
-     * Recria as listas se estiverem nulas.
-     */
     @PrePersist
     @PreUpdate
     public void validateCollections() {
@@ -273,14 +215,6 @@ public class Estabelecimentos extends BaseEntityWithoutEstabelecimento {
         }
     }
 
-    // ========== MÉTODOS UTILITÁRIOS - SERVIÇOS ==========
-
-    /**
-     * Adiciona um serviço ao estabelecimento com sincronização bidirecional.
-     * Garante que o serviço também referencia este estabelecimento.
-     *
-     * @param servico O serviço a ser adicionado
-     */
     public void addServico(ServicosEstabelecimento servico) {
         if (servico == null) {
             return;
@@ -294,12 +228,6 @@ public class Estabelecimentos extends BaseEntityWithoutEstabelecimento {
         }
     }
 
-    /**
-     * Remove um serviço do estabelecimento com sincronização bidirecional.
-     * Remove a referência do serviço para este estabelecimento.
-     *
-     * @param servico O serviço a ser removido
-     */
     public void removeServico(ServicosEstabelecimento servico) {
         if (servico == null || servicos == null) {
             return;
@@ -309,14 +237,6 @@ public class Estabelecimentos extends BaseEntityWithoutEstabelecimento {
         }
     }
 
-    // ========== MÉTODOS UTILITÁRIOS - EQUIPAMENTOS ==========
-
-    /**
-     * Adiciona um equipamento ao estabelecimento com sincronização bidirecional.
-     * Garante que o equipamento também referencia este estabelecimento.
-     *
-     * @param equipamento O equipamento a ser adicionado
-     */
     public void addEquipamento(EquipamentosEstabelecimento equipamento) {
         if (equipamento == null) {
             return;
@@ -330,12 +250,6 @@ public class Estabelecimentos extends BaseEntityWithoutEstabelecimento {
         }
     }
 
-    /**
-     * Remove um equipamento do estabelecimento com sincronização bidirecional.
-     * Remove a referência do equipamento para este estabelecimento.
-     *
-     * @param equipamento O equipamento a ser removido
-     */
     public void removeEquipamento(EquipamentosEstabelecimento equipamento) {
         if (equipamento == null || equipamentos == null) {
             return;
@@ -345,14 +259,6 @@ public class Estabelecimentos extends BaseEntityWithoutEstabelecimento {
         }
     }
 
-    // ========== MÉTODOS UTILITÁRIOS - INFRAESTRUTURA ==========
-
-    /**
-     * Adiciona uma infraestrutura ao estabelecimento com sincronização bidirecional.
-     * Garante que a infraestrutura também referencia este estabelecimento.
-     *
-     * @param infraestruturaItem A infraestrutura a ser adicionada
-     */
     public void addInfraestrutura(InfraestruturaEstabelecimento infraestruturaItem) {
         if (infraestruturaItem == null) {
             return;
@@ -366,12 +272,6 @@ public class Estabelecimentos extends BaseEntityWithoutEstabelecimento {
         }
     }
 
-    /**
-     * Remove uma infraestrutura do estabelecimento com sincronização bidirecional.
-     * Remove a referência da infraestrutura para este estabelecimento.
-     *
-     * @param infraestruturaItem A infraestrutura a ser removida
-     */
     public void removeInfraestrutura(InfraestruturaEstabelecimento infraestruturaItem) {
         if (infraestruturaItem == null || infraestrutura == null) {
             return;
@@ -381,14 +281,6 @@ public class Estabelecimentos extends BaseEntityWithoutEstabelecimento {
         }
     }
 
-    // ========== MÉTODOS UTILITÁRIOS - EQUIPES ==========
-
-    /**
-     * Adiciona uma equipe ao estabelecimento com sincronização bidirecional.
-     * Garante que a equipe também referencia este estabelecimento.
-     *
-     * @param equipe A equipe a ser adicionada
-     */
     public void addEquipe(EquipeSaude equipe) {
         if (equipe == null) {
             return;
@@ -402,12 +294,6 @@ public class Estabelecimentos extends BaseEntityWithoutEstabelecimento {
         }
     }
 
-    /**
-     * Remove uma equipe do estabelecimento com sincronização bidirecional.
-     * Remove a referência da equipe para este estabelecimento.
-     *
-     * @param equipe A equipe a ser removida
-     */
     public void removeEquipe(EquipeSaude equipe) {
         if (equipe == null || equipes == null) {
             return;

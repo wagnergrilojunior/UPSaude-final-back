@@ -24,11 +24,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
 
-/**
- * Controlador REST para operações relacionadas a Doencas.
- *
- * @author UPSaúde
- */
 @RestController
 @RequestMapping("/v1/doencas")
 @Tag(name = "Doenças", description = "API para gerenciamento de Doenças")
@@ -118,6 +113,12 @@ public class DoencasController {
             @Parameter(description = "Parâmetros de paginação (page, size, sort)")
             Pageable pageable) {
         log.debug("REQUEST GET /v1/doencas/cid/{} - pageable: {}", codigoCid, pageable);
+
+        if (codigoCid == null || codigoCid.trim().isEmpty()) {
+            log.warn("Código CID vazio ou nulo recebido para busca de doenças");
+            throw new BadRequestException("Código CID é obrigatório para busca");
+        }
+
         try {
             Page<DoencasResponse> response = doencasService.listarPorCodigoCid(codigoCid, pageable);
             return ResponseEntity.ok(response);

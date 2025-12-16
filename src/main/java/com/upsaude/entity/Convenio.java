@@ -32,13 +32,6 @@ import lombok.EqualsAndHashCode;
 
 import java.time.LocalDate;
 
-/**
- * Entidade que representa um convênio/plano de saúde.
- * Armazena informações completas sobre convênios para sistemas de gestão de saúde.
- * Baseado em padrões da ANS (Agência Nacional de Saúde Suplementar) e TISS.
- *
- * @author UPSaúde
- */
 @Entity
 @Table(name = "convenios", schema = "public",
        uniqueConstraints = {
@@ -66,8 +59,6 @@ public class Convenio extends BaseEntity {
         this.integracaoGovernamental = new IntegracaoGovernamentalConvenio();
     }
 
-    // ========== IDENTIFICAÇÃO BÁSICA ==========
-
     @NotBlank(message = "Nome do convênio é obrigatório")
     @Size(max = 255, message = "Nome deve ter no máximo 255 caracteres")
     @Column(name = "nome", nullable = false, length = 255)
@@ -79,7 +70,7 @@ public class Convenio extends BaseEntity {
 
     @Size(max = 50, message = "Código deve ter no máximo 50 caracteres")
     @Column(name = "codigo", length = 50)
-    private String codigo; // Código interno do convênio
+    private String codigo;
 
     @Pattern(regexp = "^\\d{14}$", message = "CNPJ deve ter 14 dígitos")
     @Column(name = "cnpj", length = 14)
@@ -93,8 +84,6 @@ public class Convenio extends BaseEntity {
     @Column(name = "inscricao_municipal", length = 20)
     private String inscricaoMunicipal;
 
-    // ========== CLASSIFICAÇÃO ==========
-
     @Convert(converter = TipoConvenioEnumConverter.class)
     @Column(name = "tipo", nullable = false)
     @NotNull(message = "Tipo de convênio é obrigatório")
@@ -106,35 +95,23 @@ public class Convenio extends BaseEntity {
 
     @Size(max = 100, message = "Categoria deve ter no máximo 100 caracteres")
     @Column(name = "categoria", length = 100)
-    private String categoria; // Ex: Básico, Intermediário, Premium
-
-    // ========== ENDEREÇO ==========
+    private String categoria;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "endereco_id")
     private Endereco endereco;
 
-    // ========== CONTATO ==========
-
     @Embedded
     private ContatoConvenio contato;
-
-    // ========== REGISTRO ANS ==========
 
     @Embedded
     private RegistroANSConvenio registroAns;
 
-    // ========== COBERTURA ==========
-
     @Embedded
     private CoberturaConvenio cobertura;
 
-    // ========== INFORMAÇÕES FINANCEIRAS ==========
-
     @Embedded
     private InformacoesFinanceirasConvenio informacoesFinanceiras;
-
-    // ========== STATUS ==========
 
     @Convert(converter = StatusAtivoEnumConverter.class)
     @Column(name = "status", nullable = false)
@@ -142,59 +119,49 @@ public class Convenio extends BaseEntity {
     private StatusAtivoEnum status;
 
     @Column(name = "ativo_comercial", nullable = false)
-    private Boolean ativoComercial = true; // Se está ativo comercialmente
+    private Boolean ativoComercial = true;
 
     @Column(name = "aceita_novos_clientes", nullable = false)
-    private Boolean aceitaNovosClientes = true; // Se aceita novos clientes
-
-    // ========== DATAS IMPORTANTES ==========
+    private Boolean aceitaNovosClientes = true;
 
     @Column(name = "data_cadastro")
-    private LocalDate dataCadastro; // Data de cadastro do convênio
+    private LocalDate dataCadastro;
 
     @Column(name = "data_ativacao")
-    private LocalDate dataAtivacao; // Data de ativação
+    private LocalDate dataAtivacao;
 
     @Column(name = "data_desativacao")
-    private LocalDate dataDesativacao; // Data de desativação
-
-    // ========== REDE CREDENCIADA ==========
+    private LocalDate dataDesativacao;
 
     @Column(name = "rede_credenciada_nacional", nullable = false)
-    private Boolean redeCredenciadaNacional = false; // Se tem rede credenciada nacional
+    private Boolean redeCredenciadaNacional = false;
 
     @Column(name = "rede_credenciada_regional", nullable = false)
-    private Boolean redeCredenciadaRegional = false; // Se tem rede credenciada regional
+    private Boolean redeCredenciadaRegional = false;
 
     @Column(name = "quantidade_estabelecimentos_credenciados")
-    private Integer quantidadeEstabelecimentosCredenciados; // Quantidade de estabelecimentos credenciados
+    private Integer quantidadeEstabelecimentosCredenciados;
 
     @Column(name = "quantidade_profissionais_credenciados")
-    private Integer quantidadeProfissionaisCredenciados; // Quantidade de profissionais credenciados
-
-    // ========== DOCUMENTAÇÃO ==========
+    private Integer quantidadeProfissionaisCredenciados;
 
     @Size(max = 255, message = "Contrato deve ter no máximo 255 caracteres")
     @Column(name = "contrato", length = 255)
-    private String contrato; // URL ou caminho do contrato
+    private String contrato;
 
     @Size(max = 255, message = "Tabela de preços deve ter no máximo 255 caracteres")
     @Column(name = "tabela_precos", length = 255)
-    private String tabelaPrecos; // URL ou caminho da tabela de preços
+    private String tabelaPrecos;
 
     @Size(max = 255, message = "Manual do convênio deve ter no máximo 255 caracteres")
     @Column(name = "manual_convenio", length = 255)
-    private String manualConvenio; // URL ou caminho do manual
-
-    // ========== DESCRIÇÃO E OBSERVAÇÕES ==========
+    private String manualConvenio;
 
     @Column(name = "descricao", columnDefinition = "TEXT")
     private String descricao;
 
     @Column(name = "observacoes", columnDefinition = "TEXT")
     private String observacoes;
-
-    // ========== INTEGRAÇÃO COM SISTEMAS GOVERNAMENTAIS ==========
 
     @Embedded
     private IntegracaoGovernamentalConvenio integracaoGovernamental;

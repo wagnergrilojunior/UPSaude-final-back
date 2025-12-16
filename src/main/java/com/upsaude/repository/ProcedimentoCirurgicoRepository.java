@@ -5,37 +5,32 @@ import com.upsaude.entity.Tenant;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
-/**
- * Repositório para operações de banco de dados relacionadas a ProcedimentoCirurgico.
- *
- * @author UPSaúde
- */
 @Repository
 public interface ProcedimentoCirurgicoRepository extends JpaRepository<ProcedimentoCirurgico, UUID> {
 
-    /**
-     * Busca todos os procedimentos de uma cirurgia, ordenados por criação.
-     */
     List<ProcedimentoCirurgico> findByCirurgiaIdOrderByCreatedAtAsc(UUID cirurgiaId);
 
-    /**
-     * Busca todos os procedimentos de uma cirurgia com paginação.
-     */
     Page<ProcedimentoCirurgico> findByCirurgiaIdOrderByCreatedAtAsc(UUID cirurgiaId, Pageable pageable);
 
-    /**
-     * Busca procedimentos por código do procedimento.
-     */
     Page<ProcedimentoCirurgico> findByCodigoProcedimentoOrderByCreatedAtDesc(String codigoProcedimento, Pageable pageable);
 
-    /**
-     * Busca todos os procedimentos de um tenant.
-     */
     Page<ProcedimentoCirurgico> findByTenantOrderByCreatedAtDesc(Tenant tenant, Pageable pageable);
-}
 
+    @Query("SELECT p FROM ProcedimentoCirurgico p WHERE p.id = :id AND p.tenant.id = :tenantId")
+    Optional<ProcedimentoCirurgico> findByIdAndTenant(@Param("id") UUID id, @Param("tenantId") UUID tenantId);
+
+    @Query("SELECT p FROM ProcedimentoCirurgico p WHERE p.tenant.id = :tenantId")
+    Page<ProcedimentoCirurgico> findAllByTenant(@Param("tenantId") UUID tenantId, Pageable pageable);
+
+    Page<ProcedimentoCirurgico> findByCirurgiaIdAndTenantIdOrderByCreatedAtAsc(UUID cirurgiaId, UUID tenantId, Pageable pageable);
+
+    Page<ProcedimentoCirurgico> findByCodigoProcedimentoAndTenantIdOrderByCreatedAtDesc(String codigoProcedimento, UUID tenantId, Pageable pageable);
+}

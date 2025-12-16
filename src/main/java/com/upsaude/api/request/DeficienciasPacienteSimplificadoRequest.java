@@ -8,6 +8,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 @Getter
 @Setter
@@ -15,13 +16,14 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
+@Schema(description = "Dados de deficiências paciente simplificado")
 public class DeficienciasPacienteSimplificadoRequest {
     @NotNull(message = "Paciente é obrigatório")
     private UUID paciente;
-    
+
     @NotNull(message = "Tenant é obrigatório")
     private UUID tenant;
-    
+
     @NotNull(message = "Deficiência é obrigatória")
     private UUID deficiencia;
 }

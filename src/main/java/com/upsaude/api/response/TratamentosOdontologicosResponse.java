@@ -21,6 +21,7 @@ public class TratamentosOdontologicosResponse {
     private OffsetDateTime createdAt;
     private OffsetDateTime updatedAt;
     private Boolean active;
+    private EstabelecimentosResponse estabelecimento;
     private PacienteResponse paciente;
     private ProfissionaisSaudeResponse profissional;
     private String titulo;
@@ -28,9 +29,9 @@ public class TratamentosOdontologicosResponse {
     private OffsetDateTime dataInicio;
     private OffsetDateTime dataFim;
     private StatusTratamento status;
-    
+
     @Builder.Default
     private List<TratamentosProcedimentosResponse> procedimentos = new ArrayList<>();
-    
+
     private String observacoes;
 }

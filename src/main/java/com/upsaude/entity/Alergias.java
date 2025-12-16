@@ -16,13 +16,6 @@ import jakarta.validation.constraints.Size;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
-/**
- * Entidade que representa um catálogo de alergias.
- * Armazena informações completas sobre alergias para sistemas de gestão de saúde.
- * Baseado em padrões médicos e sistemas de saúde.
- *
- * @author UPSaúde
- */
 @Entity
 @Table(name = "alergias", schema = "public",
        indexes = {
@@ -33,14 +26,12 @@ import lombok.EqualsAndHashCode;
 @Data
 @EqualsAndHashCode(callSuper = true)
 public class Alergias extends BaseEntityWithoutTenant {
-	
+
 	public Alergias() {
         this.classificacao = new ClassificacaoAlergia();
         this.reacoes = new ReacoesAlergia();
         this.prevencaoTratamento = new PrevencaoTratamentoAlergia();
     }
-
-    // ========== IDENTIFICAÇÃO BÁSICA ==========
 
     @NotBlank(message = "Nome da alergia é obrigatório")
     @Size(max = 255, message = "Nome deve ter no máximo 255 caracteres")
@@ -49,37 +40,29 @@ public class Alergias extends BaseEntityWithoutTenant {
 
     @Size(max = 255, message = "Nome científico deve ter no máximo 255 caracteres")
     @Column(name = "nome_cientifico", length = 255)
-    private String nomeCientifico; // Nome científico da substância alergênica
+    private String nomeCientifico;
 
     @Size(max = 50, message = "Código interno deve ter no máximo 50 caracteres")
     @Column(name = "codigo_interno", length = 50)
-    private String codigoInterno; // Código interno do sistema
-
-    // ========== CLASSIFICAÇÃO ==========
+    private String codigoInterno;
 
     @Embedded
     private ClassificacaoAlergia classificacao;
 
-    // ========== REAÇÕES ==========
-
     @Embedded
     private ReacoesAlergia reacoes;
-
-    // ========== PREVENÇÃO E TRATAMENTO ==========
 
     @Embedded
     private PrevencaoTratamentoAlergia prevencaoTratamento;
 
-    // ========== DESCRIÇÃO E OBSERVAÇÕES ==========
-
     @Column(name = "descricao", columnDefinition = "TEXT")
-    private String descricao; // Descrição geral da alergia
+    private String descricao;
 
     @Column(name = "substancias_relacionadas", columnDefinition = "TEXT")
-    private String substanciasRelacionadas; // Substâncias relacionadas que também podem causar alergia
+    private String substanciasRelacionadas;
 
     @Column(name = "observacoes", columnDefinition = "TEXT")
-    private String observacoes; // Observações gerais
+    private String observacoes;
 
     @PrePersist
     @PreUpdate

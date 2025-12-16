@@ -14,7 +14,6 @@ public interface EficaciaVacinaMapper {
     EficaciaVacinaResponse toResponse(EficaciaVacina entity);
     void updateFromRequest(EficaciaVacinaRequest request, @MappingTarget EficaciaVacina entity);
 
-    // Mapeamento entre DTO e Entity
     EficaciaVacina toEntity(com.upsaude.dto.embeddable.EficaciaVacinaDTO dto);
     com.upsaude.dto.embeddable.EficaciaVacinaDTO toDTO(EficaciaVacina entity);
     void updateFromDTO(com.upsaude.dto.embeddable.EficaciaVacinaDTO dto, @MappingTarget EficaciaVacina entity);

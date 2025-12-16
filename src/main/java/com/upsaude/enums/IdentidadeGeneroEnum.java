@@ -42,4 +42,3 @@ public enum IdentidadeGeneroEnum {
                 .orElse(null);
     }
 }
-

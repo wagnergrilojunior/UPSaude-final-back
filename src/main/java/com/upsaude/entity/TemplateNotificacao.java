@@ -16,12 +16,6 @@ import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
-/**
- * Entidade que representa um template de notificação.
- * Permite criar templates personalizados de mensagens para diferentes tipos de notificações.
- *
- * @author UPSaúde
- */
 @Entity
 @Table(name = "templates_notificacao", schema = "public",
        indexes = {
@@ -34,20 +28,16 @@ import lombok.EqualsAndHashCode;
 @EqualsAndHashCode(callSuper = true)
 public class TemplateNotificacao extends BaseEntity {
 
-    // ========== RELACIONAMENTOS ==========
-
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "estabelecimento_id")
-    private Estabelecimentos estabelecimento; // Opcional: template específico do estabelecimento
-
-    // ========== DADOS DO TEMPLATE ==========
+    private Estabelecimentos estabelecimento;
 
     @Column(name = "nome", nullable = false, length = 255)
     @NotNull(message = "Nome do template é obrigatório")
-    private String nome; // Nome identificador do template
+    private String nome;
 
     @Column(name = "descricao", columnDefinition = "TEXT")
-    private String descricao; // Descrição do template
+    private String descricao;
 
     @Convert(converter = TipoNotificacaoEnumConverter.class)
     @Column(name = "tipo_notificacao", nullable = false)
@@ -59,41 +49,34 @@ public class TemplateNotificacao extends BaseEntity {
     @NotNull(message = "Canal é obrigatório")
     private CanalNotificacaoEnum canal;
 
-    // ========== CONTEÚDO DO TEMPLATE ==========
-
     @Column(name = "assunto", length = 500)
-    private String assunto; // Assunto (para e-mail)
+    private String assunto;
 
     @Column(name = "mensagem", nullable = false, columnDefinition = "TEXT")
     @NotNull(message = "Mensagem do template é obrigatória")
-    private String mensagem; // Corpo da mensagem
+    private String mensagem;
 
     @Column(name = "variaveis_disponiveis", length = 1000)
-    private String variaveisDisponiveis; // Variáveis disponíveis para substituição (ex: {{paciente_nome}}, {{data_hora}})
+    private String variaveisDisponiveis;
 
     @Column(name = "exemplo_mensagem", columnDefinition = "TEXT")
-    private String exemploMensagem; // Exemplo de mensagem preenchida
-
-    // ========== CONFIGURAÇÕES ==========
+    private String exemploMensagem;
 
     @Column(name = "horario_envio_previsto_horas")
-    private Integer horarioEnvioPrevistoHoras; // Horas antes do evento para enviar (ex: 24h antes)
+    private Integer horarioEnvioPrevistoHoras;
 
     @Column(name = "permite_edicao")
-    private Boolean permiteEdicao; // Se permite edição ao usar
+    private Boolean permiteEdicao;
 
     @Column(name = "ordem_prioridade")
-    private Integer ordemPrioridade; // Ordem de prioridade (menor = maior prioridade)
-
-    // ========== CONFIGURAÇÕES DE ENVIO ==========
+    private Integer ordemPrioridade;
 
     @Column(name = "envia_automaticamente")
-    private Boolean enviaAutomaticamente; // Se envia automaticamente quando condições são atendidas
+    private Boolean enviaAutomaticamente;
 
     @Column(name = "condicoes_envio_json", columnDefinition = "TEXT")
-    private String condicoesEnvioJson; // Condições para envio automático em JSON
+    private String condicoesEnvioJson;
 
     @Column(name = "observacoes", columnDefinition = "TEXT")
     private String observacoes;
 }
-

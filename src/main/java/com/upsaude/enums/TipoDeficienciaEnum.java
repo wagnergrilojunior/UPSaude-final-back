@@ -3,10 +3,6 @@ package com.upsaude.enums;
 import java.util.Arrays;
 import java.util.Locale;
 
-/**
- * Enum para classificação de tipo de deficiência conforme padrão SUS/e-SUS/APS.
- * Baseado na Classificação Internacional de Funcionalidade, Incapacidade e Saúde (CIF).
- */
 public enum TipoDeficienciaEnum {
     FISICA(1, "Física"),
     AUDITIVA(2, "Auditiva"),
@@ -50,4 +46,3 @@ public enum TipoDeficienciaEnum {
                 .orElse(null);
     }
 }
-

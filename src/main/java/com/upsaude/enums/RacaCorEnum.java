@@ -3,10 +3,6 @@ package com.upsaude.enums;
 import java.util.Arrays;
 import java.util.Locale;
 
-/**
- * Enum para classificação de raça/cor conforme IBGE e SUS/e-SUS.
- * Baseado no padrão brasileiro de autoidentificação étnico-racial.
- */
 public enum RacaCorEnum {
     BRANCA(1, "Branca"),
     PRETA(2, "Preta"),
@@ -49,4 +45,3 @@ public enum RacaCorEnum {
                 .orElse(null);
     }
 }
-

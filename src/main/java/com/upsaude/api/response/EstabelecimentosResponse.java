@@ -56,20 +56,19 @@ public class EstabelecimentosResponse {
     private Double latitude;
     private Double longitude;
     private String observacoes;
-    private String dadosComplementares;
-    
+
     @Builder.Default
     private List<EnderecoResponse> enderecosSecundarios = new ArrayList<>();
-    
+
     @Builder.Default
     private List<ServicosEstabelecimentoResponse> servicos = new ArrayList<>();
-    
+
     @Builder.Default
     private List<EquipamentosEstabelecimentoResponse> equipamentos = new ArrayList<>();
-    
+
     @Builder.Default
     private List<InfraestruturaEstabelecimentoResponse> infraestrutura = new ArrayList<>();
-    
+
     @Builder.Default
     private List<EquipeSaudeResponse> equipes = new ArrayList<>();
 }

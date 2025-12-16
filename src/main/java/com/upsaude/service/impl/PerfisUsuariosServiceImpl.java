@@ -2,81 +2,100 @@ package com.upsaude.service.impl;
 
 import com.upsaude.api.request.PerfisUsuariosRequest;
 import com.upsaude.api.response.PerfisUsuariosResponse;
+import com.upsaude.cache.CacheKeyUtil;
 import com.upsaude.entity.PerfisUsuarios;
+import com.upsaude.entity.Tenant;
 import com.upsaude.exception.BadRequestException;
+import com.upsaude.exception.InternalServerErrorException;
 import com.upsaude.exception.NotFoundException;
-import com.upsaude.mapper.PerfisUsuariosMapper;
 import com.upsaude.repository.PerfisUsuariosRepository;
 import com.upsaude.service.PerfisUsuariosService;
-import jakarta.transaction.Transactional;
+import com.upsaude.service.TenantService;
+import com.upsaude.service.support.perfisusuarios.PerfisUsuariosCreator;
+import com.upsaude.service.support.perfisusuarios.PerfisUsuariosDomainService;
+import com.upsaude.service.support.perfisusuarios.PerfisUsuariosResponseBuilder;
+import com.upsaude.service.support.perfisusuarios.PerfisUsuariosTenantEnforcer;
+import com.upsaude.service.support.perfisusuarios.PerfisUsuariosUpdater;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.BeanUtils;
+import org.springframework.cache.Cache;
+import org.springframework.cache.CacheManager;
 import org.springframework.data.domain.Page;
 import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Objects;
 import java.util.UUID;
 
-/**
- * Implementação do serviço de gerenciamento de PerfisUsuarios.
- *
- * @author UPSaúde
- */
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class PerfisUsuariosServiceImpl implements PerfisUsuariosService {
 
     private final PerfisUsuariosRepository perfisUsuariosRepository;
-    private final PerfisUsuariosMapper perfisUsuariosMapper;
+    private final CacheManager cacheManager;
+    private final TenantService tenantService;
+
+    private final PerfisUsuariosCreator creator;
+    private final PerfisUsuariosUpdater updater;
+    private final PerfisUsuariosResponseBuilder responseBuilder;
+    private final PerfisUsuariosDomainService domainService;
+    private final PerfisUsuariosTenantEnforcer tenantEnforcer;
 
     @Override
     @Transactional
-    @CacheEvict(value = "perfisusuarios", allEntries = true)
     public PerfisUsuariosResponse criar(PerfisUsuariosRequest request) {
         log.debug("Criando novo perfisusuarios");
 
-        validarDadosBasicos(request);
+        try {
+            UUID tenantId = tenantService.validarTenantAtual();
+            Tenant tenant = tenantService.obterTenantDoUsuarioAutenticado();
+            validarTenantAutenticadoOrThrow(tenantId, tenant);
 
-        PerfisUsuarios perfisUsuarios = perfisUsuariosMapper.fromRequest(request);
-        perfisUsuarios.setActive(true);
+            PerfisUsuarios saved = creator.criar(request, tenantId, tenant);
+            PerfisUsuariosResponse response = responseBuilder.build(saved);
 
-        PerfisUsuarios perfisUsuariosSalvo = perfisUsuariosRepository.save(perfisUsuarios);
-        log.info("PerfisUsuarios criado com sucesso. ID: {}", perfisUsuariosSalvo.getId());
+            Cache cache = cacheManager.getCache(CacheKeyUtil.CACHE_PERFIS_USUARIOS);
+            if (cache != null) {
+                Object key = Objects.requireNonNull((Object) CacheKeyUtil.perfilUsuario(tenantId, saved.getId()));
+                cache.put(key, response);
+            }
 
-        return perfisUsuariosMapper.toResponse(perfisUsuariosSalvo);
+            return response;
+        } catch (BadRequestException | NotFoundException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new InternalServerErrorException("Erro ao criar perfil de usuário", e);
+        }
     }
 
     @Override
-    @Transactional
-    @Cacheable(value = "perfisusuarios", key = "#id")
+    @Transactional(readOnly = true)
+    @Cacheable(cacheNames = CacheKeyUtil.CACHE_PERFIS_USUARIOS, keyGenerator = "perfisUsuariosCacheKeyGenerator")
     public PerfisUsuariosResponse obterPorId(UUID id) {
         log.debug("Buscando perfisusuarios por ID: {} (cache miss)", id);
         if (id == null) {
             throw new BadRequestException("ID do perfisusuarios é obrigatório");
         }
 
-        PerfisUsuarios perfisUsuarios = perfisUsuariosRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("PerfisUsuarios não encontrado com ID: " + id));
-
-        return perfisUsuariosMapper.toResponse(perfisUsuarios);
+        UUID tenantId = tenantService.validarTenantAtual();
+        PerfisUsuarios perfisUsuarios = tenantEnforcer.validarAcessoCompleto(id, tenantId);
+        return responseBuilder.build(perfisUsuarios);
     }
 
     @Override
+    @Transactional(readOnly = true)
     public Page<PerfisUsuariosResponse> listar(Pageable pageable) {
-        log.debug("Listando PerfisUsuarios paginados. Página: {}, Tamanho: {}",
-                pageable.getPageNumber(), pageable.getPageSize());
-
-        Page<PerfisUsuarios> perfisUsuarios = perfisUsuariosRepository.findAll(pageable);
-        return perfisUsuarios.map(perfisUsuariosMapper::toResponse);
+        return listar(pageable, null, null);
     }
 
     @Override
     @Transactional
-    @CacheEvict(value = "perfisusuarios", key = "#id")
+    @CachePut(cacheNames = CacheKeyUtil.CACHE_PERFIS_USUARIOS, keyGenerator = "perfisUsuariosCacheKeyGenerator")
     public PerfisUsuariosResponse atualizar(UUID id, PerfisUsuariosRequest request) {
         log.debug("Atualizando perfisusuarios. ID: {}", id);
 
@@ -84,63 +103,59 @@ public class PerfisUsuariosServiceImpl implements PerfisUsuariosService {
             throw new BadRequestException("ID do perfisusuarios é obrigatório");
         }
 
-        validarDadosBasicos(request);
+        UUID tenantId = tenantService.validarTenantAtual();
+        Tenant tenant = tenantService.obterTenantDoUsuarioAutenticado();
+        validarTenantAutenticadoOrThrow(tenantId, tenant);
 
-        PerfisUsuarios perfisUsuariosExistente = perfisUsuariosRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("PerfisUsuarios não encontrado com ID: " + id));
-
-        atualizarDadosPerfisUsuarios(perfisUsuariosExistente, request);
-
-        PerfisUsuarios perfisUsuariosAtualizado = perfisUsuariosRepository.save(perfisUsuariosExistente);
-        log.info("PerfisUsuarios atualizado com sucesso. ID: {}", perfisUsuariosAtualizado.getId());
-
-        return perfisUsuariosMapper.toResponse(perfisUsuariosAtualizado);
+        PerfisUsuarios updated = updater.atualizar(id, request, tenantId, tenant);
+        return responseBuilder.build(updated);
     }
 
     @Override
     @Transactional
-    @CacheEvict(value = "perfisusuarios", key = "#id")
+    @CacheEvict(cacheNames = CacheKeyUtil.CACHE_PERFIS_USUARIOS, keyGenerator = "perfisUsuariosCacheKeyGenerator", beforeInvocation = false)
     public void excluir(UUID id) {
         log.debug("Excluindo perfisusuarios. ID: {}", id);
 
+        UUID tenantId = tenantService.validarTenantAtual();
+        inativarInternal(id, tenantId);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Page<PerfisUsuariosResponse> listar(Pageable pageable, UUID usuarioId, UUID estabelecimentoId) {
+        log.debug("Listando PerfisUsuarios. Página: {}, Tamanho: {}, usuarioId: {}, estabelecimentoId: {}",
+            pageable.getPageNumber(), pageable.getPageSize(), usuarioId, estabelecimentoId);
+
+        UUID tenantId = tenantService.validarTenantAtual();
+
+        Page<PerfisUsuarios> page;
+        if (usuarioId != null) {
+            page = perfisUsuariosRepository.findByUsuarioIdAndTenantId(usuarioId, tenantId, pageable);
+        } else if (estabelecimentoId != null) {
+            page = perfisUsuariosRepository.findByEstabelecimentoIdAndTenantId(estabelecimentoId, tenantId, pageable);
+        } else {
+            page = perfisUsuariosRepository.findAllByTenant(tenantId, pageable);
+        }
+
+        return page.map(responseBuilder::build);
+    }
+
+    private void inativarInternal(UUID id, UUID tenantId) {
         if (id == null) {
             throw new BadRequestException("ID do perfisusuarios é obrigatório");
         }
 
-        PerfisUsuarios perfisUsuarios = perfisUsuariosRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("PerfisUsuarios não encontrado com ID: " + id));
-
-        if (Boolean.FALSE.equals(perfisUsuarios.getActive())) {
-            throw new BadRequestException("PerfisUsuarios já está inativo");
-        }
-
-        perfisUsuarios.setActive(false);
-        perfisUsuariosRepository.save(perfisUsuarios);
+        PerfisUsuarios entity = tenantEnforcer.validarAcesso(id, tenantId);
+        domainService.validarPodeInativar(entity);
+        entity.setActive(false);
+        perfisUsuariosRepository.save(Objects.requireNonNull(entity));
         log.info("PerfisUsuarios excluído (desativado) com sucesso. ID: {}", id);
     }
 
-    private void validarDadosBasicos(PerfisUsuariosRequest request) {
-        if (request == null) {
-            throw new BadRequestException("Dados do perfisusuarios são obrigatórios");
+    private void validarTenantAutenticadoOrThrow(UUID tenantId, Tenant tenant) {
+        if (tenantId == null || tenant == null || tenant.getId() == null || !tenantId.equals(tenant.getId())) {
+            throw new BadRequestException("Não foi possível obter tenant do usuário autenticado");
         }
-    }
-
-        private void atualizarDadosPerfisUsuarios(PerfisUsuarios perfisUsuarios, PerfisUsuariosRequest request) {
-        PerfisUsuarios perfisUsuariosAtualizado = perfisUsuariosMapper.fromRequest(request);
-        
-        // Preserva campos de controle
-        java.util.UUID idOriginal = perfisUsuarios.getId();
-        com.upsaude.entity.Tenant tenantOriginal = perfisUsuarios.getTenant();
-        Boolean activeOriginal = perfisUsuarios.getActive();
-        java.time.OffsetDateTime createdAtOriginal = perfisUsuarios.getCreatedAt();
-        
-        // Copia todas as propriedades do objeto atualizado
-        BeanUtils.copyProperties(perfisUsuariosAtualizado, perfisUsuarios);
-        
-        // Restaura campos de controle
-        perfisUsuarios.setId(idOriginal);
-        perfisUsuarios.setTenant(tenantOriginal);
-        perfisUsuarios.setActive(activeOriginal);
-        perfisUsuarios.setCreatedAt(createdAtOriginal);
     }
 }

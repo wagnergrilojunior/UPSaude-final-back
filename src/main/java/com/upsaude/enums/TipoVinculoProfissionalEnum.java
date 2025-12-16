@@ -3,12 +3,6 @@ package com.upsaude.enums;
 import java.util.Arrays;
 import java.util.Locale;
 
-/**
- * Enum para tipos de vínculo entre profissional de saúde e estabelecimento.
- * Define as diferentes formas de contratação ou associação profissional.
- *
- * @author UPSaúde
- */
 public enum TipoVinculoProfissionalEnum {
     EFETIVO(1, "Efetivo"),
     CONTRATO(2, "Contrato"),
@@ -53,4 +47,3 @@ public enum TipoVinculoProfissionalEnum {
                 .orElse(null);
     }
 }
-

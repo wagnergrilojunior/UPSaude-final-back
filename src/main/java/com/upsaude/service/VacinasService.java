@@ -7,11 +7,6 @@ import org.springframework.data.domain.Pageable;
 
 import java.util.UUID;
 
-/**
- * Interface de serviço para operações CRUD relacionadas a Vacinas.
- *
- * @author UPSaúde
- */
 public interface VacinasService {
 
     VacinasResponse criar(VacinasRequest request);

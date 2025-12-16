@@ -14,7 +14,6 @@ public interface IntegracaoGovernamentalVacinaMapper {
     IntegracaoGovernamentalVacinaResponse toResponse(IntegracaoGovernamentalVacina entity);
     void updateFromRequest(IntegracaoGovernamentalVacinaRequest request, @MappingTarget IntegracaoGovernamentalVacina entity);
 
-    // Mapeamento entre DTO e Entity
     IntegracaoGovernamentalVacina toEntity(com.upsaude.dto.embeddable.IntegracaoGovernamentalVacinaDTO dto);
     com.upsaude.dto.embeddable.IntegracaoGovernamentalVacinaDTO toDTO(IntegracaoGovernamentalVacina entity);
     void updateFromDTO(com.upsaude.dto.embeddable.IntegracaoGovernamentalVacinaDTO dto, @MappingTarget IntegracaoGovernamentalVacina entity);

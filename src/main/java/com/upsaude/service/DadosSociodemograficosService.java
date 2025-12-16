@@ -21,4 +21,3 @@ public interface DadosSociodemograficosService {
 
     void excluir(UUID id);
 }
-

@@ -2,23 +2,33 @@ package com.upsaude.service.impl;
 
 import com.upsaude.api.request.ResponsavelLegalRequest;
 import com.upsaude.api.response.ResponsavelLegalResponse;
+import com.upsaude.cache.CacheKeyUtil;
 import com.upsaude.entity.ResponsavelLegal;
+import com.upsaude.entity.Tenant;
 import com.upsaude.exception.BadRequestException;
-import com.upsaude.exception.ConflictException;
-import com.upsaude.exception.NotFoundException;
-import com.upsaude.mapper.ResponsavelLegalMapper;
 import com.upsaude.repository.ResponsavelLegalRepository;
 import com.upsaude.service.ResponsavelLegalService;
-import jakarta.transaction.Transactional;
+import com.upsaude.service.TenantService;
+import com.upsaude.service.support.responsavellegal.ResponsavelLegalCreator;
+import com.upsaude.service.support.responsavellegal.ResponsavelLegalDomainService;
+import com.upsaude.service.support.responsavellegal.ResponsavelLegalResponseBuilder;
+import com.upsaude.service.support.responsavellegal.ResponsavelLegalTenantEnforcer;
+import com.upsaude.service.support.responsavellegal.ResponsavelLegalUpdater;
+import com.upsaude.service.support.responsavellegal.ResponsavelLegalValidationService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.Page;
+import org.springframework.cache.Cache;
+import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
+import java.util.Objects;
 import java.util.UUID;
 
 @Slf4j
@@ -27,144 +37,117 @@ import java.util.UUID;
 public class ResponsavelLegalServiceImpl implements ResponsavelLegalService {
 
     private final ResponsavelLegalRepository repository;
-    private final ResponsavelLegalMapper mapper;
+    private final CacheManager cacheManager;
+    private final TenantService tenantService;
+
+    private final ResponsavelLegalCreator creator;
+    private final ResponsavelLegalUpdater updater;
+    private final ResponsavelLegalResponseBuilder responseBuilder;
+    private final ResponsavelLegalDomainService domainService;
+    private final ResponsavelLegalTenantEnforcer tenantEnforcer;
+    private final ResponsavelLegalValidationService validationService;
 
     @Override
     @Transactional
-    @CacheEvict(value = "responsavellegal", allEntries = true)
     public ResponsavelLegalResponse criar(ResponsavelLegalRequest request) {
-        log.debug("Criando responsável legal para paciente: {}", request.getPaciente());
+        UUID tenantId = tenantService.validarTenantAtual();
+        Tenant tenant = tenantService.obterTenantDoUsuarioAutenticado();
+        validarTenantAutenticadoOrThrow(tenantId, tenant);
 
-        if (request.getPaciente() == null) {
-            throw new BadRequestException("ID do paciente é obrigatório");
+        ResponsavelLegal saved = creator.criar(request, tenantId, tenant);
+        ResponsavelLegalResponse response = responseBuilder.build(saved);
+
+        Cache cache = cacheManager.getCache(CacheKeyUtil.CACHE_RESPONSAVEIS_LEGAIS);
+        if (cache != null) {
+            Object key = Objects.requireNonNull((Object) CacheKeyUtil.responsavelLegal(tenantId, saved.getId()));
+            cache.put(key, response);
         }
 
-        if (!StringUtils.hasText(request.getNome())) {
-            throw new BadRequestException("Nome do responsável legal é obrigatório");
-        }
-
-        repository.findByPacienteId(request.getPaciente())
-                .ifPresent(d -> {
-                    throw new ConflictException("Responsável legal já existe para este paciente");
-                });
-
-        if (StringUtils.hasText(request.getCpf()) && !request.getCpf().matches("^\\d{11}$")) {
-            throw new BadRequestException("CPF deve conter exatamente 11 dígitos numéricos");
-        }
-
-        ResponsavelLegal entity = mapper.fromRequest(request);
-        entity.setActive(true);
-
-        ResponsavelLegal saved = repository.save(entity);
-        log.info("Responsável legal criado. ID: {}", saved.getId());
-
-        return mapper.toResponse(saved);
+        return response;
     }
 
     @Override
+    @Transactional(readOnly = true)
+    @Cacheable(cacheNames = CacheKeyUtil.CACHE_RESPONSAVEIS_LEGAIS, keyGenerator = "responsavelLegalCacheKeyGenerator")
     public ResponsavelLegalResponse obterPorId(UUID id) {
-        log.debug("Buscando responsável legal por ID: {}", id);
-
         if (id == null) {
-            throw new BadRequestException("ID é obrigatório");
+            throw new BadRequestException("ID do responsável legal é obrigatório");
         }
 
-        ResponsavelLegal entity = repository.findById(id)
-                .orElseThrow(() -> new NotFoundException("Responsável legal não encontrado com ID: " + id));
-
-        return mapper.toResponse(entity);
+        UUID tenantId = tenantService.validarTenantAtual();
+        return responseBuilder.build(tenantEnforcer.validarAcessoCompleto(id, tenantId));
     }
 
     @Override
+    @Transactional(readOnly = true)
     public ResponsavelLegalResponse obterPorPacienteId(UUID pacienteId) {
-        log.debug("Buscando responsável legal por paciente ID: {}", pacienteId);
-
         if (pacienteId == null) {
             throw new BadRequestException("ID do paciente é obrigatório");
         }
 
-        ResponsavelLegal entity = repository.findByPacienteId(pacienteId)
-                .orElseThrow(() -> new NotFoundException("Responsável legal não encontrado para o paciente: " + pacienteId));
-
-        return mapper.toResponse(entity);
+        UUID tenantId = tenantService.validarTenantAtual();
+        ResponsavelLegal entity = repository.findByPacienteIdAndTenantId(pacienteId, tenantId)
+            .orElseThrow(() -> new com.upsaude.exception.NotFoundException("Responsável legal não encontrado para o paciente: " + pacienteId));
+        return responseBuilder.build(entity);
     }
 
     @Override
-    public Page<ResponsavelLegalResponse> listar(Pageable pageable) {
-        log.debug("Listando responsáveis legais paginados");
+    @Transactional(readOnly = true)
+    public Page<ResponsavelLegalResponse> listar(Pageable pageable, UUID estabelecimentoId, String cpf, String nome) {
+        UUID tenantId = tenantService.validarTenantAtual();
 
-        Page<ResponsavelLegal> entities = repository.findAll(pageable);
-        return entities.map(mapper::toResponse);
+        Page<ResponsavelLegal> page;
+        if (estabelecimentoId != null) {
+            page = repository.findByEstabelecimentoIdAndTenantId(estabelecimentoId, tenantId, pageable);
+        } else if (StringUtils.hasText(cpf)) {
+            String cpfLimpo = validationService.normalizarCpf(cpf);
+            page = repository.findByCpfContainingIgnoreCaseAndTenantId(cpfLimpo, tenantId, pageable);
+        } else if (StringUtils.hasText(nome)) {
+            page = repository.findByNomeContainingIgnoreCaseAndTenantId(nome, tenantId, pageable);
+        } else {
+            page = repository.findAllByTenant(tenantId, pageable);
+        }
+
+        return page.map(responseBuilder::build);
     }
 
     @Override
     @Transactional
-    @CacheEvict(value = "responsavellegal", key = "#id")
+    @CachePut(cacheNames = CacheKeyUtil.CACHE_RESPONSAVEIS_LEGAIS, keyGenerator = "responsavelLegalCacheKeyGenerator")
     public ResponsavelLegalResponse atualizar(UUID id, ResponsavelLegalRequest request) {
-        log.debug("Atualizando responsável legal. ID: {}", id);
-
         if (id == null) {
-            throw new BadRequestException("ID é obrigatório");
+            throw new BadRequestException("ID do responsável legal é obrigatório");
         }
 
-        if (!StringUtils.hasText(request.getNome())) {
-            throw new BadRequestException("Nome do responsável legal é obrigatório");
-        }
+        UUID tenantId = tenantService.validarTenantAtual();
+        Tenant tenant = tenantService.obterTenantDoUsuarioAutenticado();
+        validarTenantAutenticadoOrThrow(tenantId, tenant);
 
-        ResponsavelLegal entity = repository.findById(id)
-                .orElseThrow(() -> new NotFoundException("Responsável legal não encontrado com ID: " + id));
-
-        if (request.getPaciente() != null && !request.getPaciente().equals(entity.getPaciente().getId())) {
-            repository.findByPacienteId(request.getPaciente())
-                    .ifPresent(d -> {
-                        if (!d.getId().equals(id)) {
-                            throw new ConflictException("Responsável legal já existe para este paciente");
-                        }
-                    });
-        }
-
-        if (StringUtils.hasText(request.getCpf()) && !request.getCpf().matches("^\\d{11}$")) {
-            throw new BadRequestException("CPF deve conter exatamente 11 dígitos numéricos");
-        }
-
-        atualizarDados(entity, request);
-        ResponsavelLegal updated = repository.save(entity);
-        log.info("Responsável legal atualizado. ID: {}", updated.getId());
-
-        return mapper.toResponse(updated);
+        return responseBuilder.build(updater.atualizar(id, request, tenantId, tenant));
     }
 
     @Override
     @Transactional
-    @CacheEvict(value = "responsavellegal", key = "#id")
+    @CacheEvict(cacheNames = CacheKeyUtil.CACHE_RESPONSAVEIS_LEGAIS, keyGenerator = "responsavelLegalCacheKeyGenerator", beforeInvocation = false)
     public void excluir(UUID id) {
-        log.debug("Excluindo responsável legal. ID: {}", id);
-
-        if (id == null) {
-            throw new BadRequestException("ID é obrigatório");
-        }
-
-        ResponsavelLegal entity = repository.findById(id)
-                .orElseThrow(() -> new NotFoundException("Responsável legal não encontrado com ID: " + id));
-
-        if (Boolean.FALSE.equals(entity.getActive())) {
-            throw new BadRequestException("Responsável legal já está inativo");
-        }
-
-        entity.setActive(false);
-        repository.save(entity);
-        log.info("Responsável legal excluído. ID: {}", id);
+        UUID tenantId = tenantService.validarTenantAtual();
+        inativarInternal(id, tenantId);
     }
 
-    private void atualizarDados(ResponsavelLegal entity, ResponsavelLegalRequest request) {
-        ResponsavelLegal updated = mapper.fromRequest(request);
-        
-        entity.setNome(updated.getNome());
-        entity.setCpf(updated.getCpf());
-        entity.setTelefone(updated.getTelefone());
-        entity.setTipoResponsavel(updated.getTipoResponsavel());
-        entity.setAutorizacaoUsoDadosLGPD(updated.getAutorizacaoUsoDadosLGPD());
-        entity.setAutorizacaoResponsavel(updated.getAutorizacaoResponsavel());
+    private void inativarInternal(UUID id, UUID tenantId) {
+        if (id == null) {
+            throw new BadRequestException("ID do responsável legal é obrigatório");
+        }
+
+        ResponsavelLegal entity = tenantEnforcer.validarAcesso(id, tenantId);
+        domainService.validarPodeInativar(entity);
+        entity.setActive(false);
+        repository.save(Objects.requireNonNull(entity));
+    }
+
+    private void validarTenantAutenticadoOrThrow(UUID tenantId, Tenant tenant) {
+        if (tenantId == null || tenant == null || tenant.getId() == null || !tenantId.equals(tenant.getId())) {
+            throw new BadRequestException("Não foi possível obter tenant do usuário autenticado");
+        }
     }
 }
-

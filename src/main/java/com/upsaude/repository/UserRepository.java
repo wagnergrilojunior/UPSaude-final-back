@@ -4,15 +4,11 @@ import com.upsaude.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import java.util.Optional;
 import java.util.UUID;
 
-/**
- * Repositório para User (tabela auth.users do Supabase).
- *
- * @author UPSaúde
- */
 @Repository
 public interface UserRepository extends JpaRepository<User, UUID> {
-    
-}
 
+    Optional<User> findByEmail(String email);
+}

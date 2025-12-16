@@ -7,11 +7,6 @@ import org.springframework.data.domain.Pageable;
 
 import java.util.UUID;
 
-/**
- * Interface de serviço para operações relacionadas a Ação de Promoção e Prevenção.
- *
- * @author UPSaúde
- */
 public interface AcaoPromocaoPrevencaoService {
 
     AcaoPromocaoPrevencaoResponse criar(AcaoPromocaoPrevencaoRequest request);
@@ -32,4 +27,3 @@ public interface AcaoPromocaoPrevencaoService {
 
     void excluir(UUID id);
 }
-

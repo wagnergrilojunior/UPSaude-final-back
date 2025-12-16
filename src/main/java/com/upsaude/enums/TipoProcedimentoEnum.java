@@ -51,4 +51,3 @@ public enum TipoProcedimentoEnum {
                 .orElse(null);
     }
 }
-

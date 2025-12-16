@@ -7,27 +7,29 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 @Getter
 @Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@Schema(description = "Dados de calendario vacinal")
 public class CalendarioVacinalRequest {
     @NotNull(message = "Calendário básico é obrigatório")
     @Builder.Default
     private Boolean calendarioBasico = false;
-    
+
     @NotNull(message = "Calendário campanha é obrigatório")
     @Builder.Default
     private Boolean calendarioCampanha = false;
-    
+
     @Size(max = 100, message = "Faixa etária calendário deve ter no máximo 100 caracteres")
     private String faixaEtariaCalendario;
-    
+
     @Size(max = 50, message = "Situação epidemiológica deve ter no máximo 50 caracteres")
     private String situacaoEpidemiologica;
-    
+
     @NotNull(message = "Obrigatória é obrigatório")
     @Builder.Default
     private Boolean obrigatoria = false;

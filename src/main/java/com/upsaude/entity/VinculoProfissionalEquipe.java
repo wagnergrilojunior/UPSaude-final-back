@@ -21,14 +21,6 @@ import lombok.EqualsAndHashCode;
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 
-/**
- * Entidade que representa o vínculo entre um profissional de saúde e uma equipe de saúde.
- * Permite associar um profissional a múltiplas equipes com datas de início e fim,
- * tipo de vínculo, função na equipe e demais informações importantes.
- * Mantém histórico completo de vínculos para rastreabilidade.
- *
- * @author UPSaúde
- */
 @Entity
 @Table(name = "vinculos_profissional_equipe", schema = "public",
        uniqueConstraints = {
@@ -45,8 +37,6 @@ import java.time.OffsetDateTime;
 @EqualsAndHashCode(callSuper = true)
 public class VinculoProfissionalEquipe extends BaseEntity {
 
-    // ========== RELACIONAMENTOS ==========
-
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "profissional_id", nullable = false)
     @NotNull(message = "Profissional é obrigatório")
@@ -57,8 +47,6 @@ public class VinculoProfissionalEquipe extends BaseEntity {
     @NotNull(message = "Equipe é obrigatória")
     private EquipeSaude equipe;
 
-    // ========== DATAS DO VÍNCULO ==========
-
     @Column(name = "data_inicio", nullable = false)
     @NotNull(message = "Data de início do vínculo é obrigatória")
     private OffsetDateTime dataInicio;
@@ -66,32 +54,23 @@ public class VinculoProfissionalEquipe extends BaseEntity {
     @Column(name = "data_fim")
     private OffsetDateTime dataFim;
 
-    // ========== TIPO DE VÍNCULO ==========
-
     @Convert(converter = TipoVinculoProfissionalEnumConverter.class)
     @Column(name = "tipo_vinculo", nullable = false)
     @NotNull(message = "Tipo de vínculo é obrigatório")
     private TipoVinculoProfissionalEnum tipoVinculo;
 
-    // ========== FUNÇÃO E CARGA HORÁRIA ==========
-
     @Column(name = "funcao_equipe", length = 255)
     @Size(max = 255, message = "Função na equipe deve ter no máximo 255 caracteres")
-    private String funcaoEquipe; // Função específica do profissional na equipe
+    private String funcaoEquipe;
 
     @Column(name = "carga_horaria_semanal")
-    private Integer cargaHorariaSemanal; // em horas
-
-    // ========== STATUS ==========
+    private Integer cargaHorariaSemanal;
 
     @Convert(converter = StatusAtivoEnumConverter.class)
     @Column(name = "status", nullable = false)
     @NotNull(message = "Status é obrigatório")
     private StatusAtivoEnum status;
 
-    // ========== INFORMAÇÕES COMPLEMENTARES ==========
-
     @Column(name = "observacoes", columnDefinition = "TEXT")
     private String observacoes;
 }
-

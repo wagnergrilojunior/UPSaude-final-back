@@ -6,11 +6,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 
-/**
- * Classe embeddable para informações de diagnóstico do atendimento.
- *
- * @author UPSaúde
- */
 @Embeddable
 @Data
 @Builder
@@ -26,18 +21,17 @@ public class DiagnosticoAtendimento {
     }
 
     @Column(name = "diagnostico", columnDefinition = "TEXT")
-    private String diagnostico; // Diagnóstico principal
+    private String diagnostico;
 
     @Column(name = "diagnosticos_secundarios", columnDefinition = "TEXT")
-    private String diagnosticosSecundarios; // Diagnósticos secundários
+    private String diagnosticosSecundarios;
 
     @Column(name = "hipotese_diagnostica", columnDefinition = "TEXT")
-    private String hipoteseDiagnostica; // Hipótese diagnóstica
+    private String hipoteseDiagnostica;
 
     @Column(name = "conduta", columnDefinition = "TEXT")
-    private String conduta; // Conduta adotada
+    private String conduta;
 
     @Column(name = "evolucao", columnDefinition = "TEXT")
-    private String evolucao; // Evolução do paciente durante o atendimento
+    private String evolucao;
 }
-

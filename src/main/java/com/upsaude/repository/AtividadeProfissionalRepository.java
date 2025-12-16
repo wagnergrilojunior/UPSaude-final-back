@@ -6,55 +6,51 @@ import com.upsaude.enums.TipoAtividadeProfissionalEnum;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.time.OffsetDateTime;
+import java.util.Optional;
 import java.util.UUID;
 
-/**
- * Repositório para operações de banco de dados relacionadas a AtividadeProfissional.
- *
- * @author UPSaúde
- */
 @Repository
 public interface AtividadeProfissionalRepository extends JpaRepository<AtividadeProfissional, UUID> {
 
-    /**
-     * Busca todas as atividades de um profissional, ordenadas por data/hora decrescente.
-     */
     Page<AtividadeProfissional> findByProfissionalIdOrderByDataHoraDesc(UUID profissionalId, Pageable pageable);
 
-    /**
-     * Busca todas as atividades de um médico, ordenadas por data/hora decrescente.
-     */
     Page<AtividadeProfissional> findByMedicoIdOrderByDataHoraDesc(UUID medicoId, Pageable pageable);
 
-    /**
-     * Busca todas as atividades de um estabelecimento, ordenadas por data/hora decrescente.
-     */
     Page<AtividadeProfissional> findByEstabelecimentoIdOrderByDataHoraDesc(UUID estabelecimentoId, Pageable pageable);
 
-    /**
-     * Busca todas as atividades por tipo, ordenadas por data/hora decrescente.
-     */
     Page<AtividadeProfissional> findByTipoAtividadeOrderByDataHoraDesc(
             TipoAtividadeProfissionalEnum tipoAtividade, Pageable pageable);
 
-    /**
-     * Busca todas as atividades de um profissional em um período.
-     */
     Page<AtividadeProfissional> findByProfissionalIdAndDataHoraBetweenOrderByDataHoraDesc(
             UUID profissionalId, OffsetDateTime dataInicio, OffsetDateTime dataFim, Pageable pageable);
 
-    /**
-     * Busca todas as atividades de um profissional por tipo.
-     */
     Page<AtividadeProfissional> findByProfissionalIdAndTipoAtividadeOrderByDataHoraDesc(
             UUID profissionalId, TipoAtividadeProfissionalEnum tipoAtividade, Pageable pageable);
 
-    /**
-     * Busca todas as atividades de um tenant.
-     */
     Page<AtividadeProfissional> findByTenantOrderByDataHoraDesc(Tenant tenant, Pageable pageable);
-}
 
+    @Query("SELECT a FROM AtividadeProfissional a WHERE a.id = :id AND a.tenant.id = :tenantId")
+    Optional<AtividadeProfissional> findByIdAndTenant(@Param("id") UUID id, @Param("tenantId") UUID tenantId);
+
+    @Query("SELECT a FROM AtividadeProfissional a WHERE a.tenant.id = :tenantId")
+    Page<AtividadeProfissional> findAllByTenant(@Param("tenantId") UUID tenantId, Pageable pageable);
+
+    Page<AtividadeProfissional> findByProfissionalIdAndTenantIdOrderByDataHoraDesc(UUID profissionalId, UUID tenantId, Pageable pageable);
+
+    Page<AtividadeProfissional> findByMedicoIdAndTenantIdOrderByDataHoraDesc(UUID medicoId, UUID tenantId, Pageable pageable);
+
+    Page<AtividadeProfissional> findByEstabelecimentoIdAndTenantIdOrderByDataHoraDesc(UUID estabelecimentoId, UUID tenantId, Pageable pageable);
+
+    Page<AtividadeProfissional> findByTipoAtividadeAndTenantIdOrderByDataHoraDesc(TipoAtividadeProfissionalEnum tipoAtividade, UUID tenantId, Pageable pageable);
+
+    Page<AtividadeProfissional> findByProfissionalIdAndDataHoraBetweenAndTenantIdOrderByDataHoraDesc(
+        UUID profissionalId, OffsetDateTime dataInicio, OffsetDateTime dataFim, UUID tenantId, Pageable pageable);
+
+    Page<AtividadeProfissional> findByProfissionalIdAndTipoAtividadeAndTenantIdOrderByDataHoraDesc(
+        UUID profissionalId, TipoAtividadeProfissionalEnum tipoAtividade, UUID tenantId, Pageable pageable);
+}

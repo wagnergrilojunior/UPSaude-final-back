@@ -6,11 +6,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 
-/**
- * Classe embeddable para informações de idade mínima e máxima para aplicação da vacina.
- *
- * @author UPSaúde
- */
 @Embeddable
 @Data
 @Builder
@@ -18,25 +13,24 @@ import lombok.Data;
 public class IdadeAplicacaoVacina {
 
     public IdadeAplicacaoVacina() {
-        // Não há campos String ou Boolean NOT NULL para inicializar
+
     }
 
     @Column(name = "idade_minima_dias")
-    private Integer idadeMinimaDias; // Idade mínima para aplicação em dias
+    private Integer idadeMinimaDias;
 
     @Column(name = "idade_maxima_dias")
-    private Integer idadeMaximaDias; // Idade máxima para aplicação em dias (se houver)
+    private Integer idadeMaximaDias;
 
     @Column(name = "idade_minima_meses")
-    private Integer idadeMinimaMeses; // Idade mínima em meses (alternativa)
+    private Integer idadeMinimaMeses;
 
     @Column(name = "idade_maxima_meses")
-    private Integer idadeMaximaMeses; // Idade máxima em meses (alternativa)
+    private Integer idadeMaximaMeses;
 
     @Column(name = "idade_minima_anos")
-    private Integer idadeMinimaAnos; // Idade mínima em anos (alternativa)
+    private Integer idadeMinimaAnos;
 
     @Column(name = "idade_maxima_anos")
-    private Integer idadeMaximaAnos; // Idade máxima em anos (alternativa)
+    private Integer idadeMaximaAnos;
 }
-

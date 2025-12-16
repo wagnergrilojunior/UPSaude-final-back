@@ -3,10 +3,6 @@ package com.upsaude.enums;
 import java.util.Arrays;
 import java.util.Locale;
 
-/**
- * Enum para classificação de classes terapêuticas conforme padrão SUS/SIGTAP.
- * Baseado na Classificação Anatômica, Terapêutica e Química (ATC) adaptada para o Brasil.
- */
 public enum ClasseTerapeuticaEnum {
     ANALGESICO_ANTIPIRETICO(1, "Analgésico/Antipirético"),
     ANTIINFLAMATORIO(2, "Anti-inflamatório"),
@@ -68,4 +64,3 @@ public enum ClasseTerapeuticaEnum {
                 .orElse(null);
     }
 }
-

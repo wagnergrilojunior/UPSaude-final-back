@@ -1,0 +1,31 @@
+package com.upsaude.service.support.notificacao;
+
+import com.upsaude.api.request.NotificacaoRequest;
+import com.upsaude.exception.BadRequestException;
+import org.springframework.stereotype.Service;
+
+@Service
+public class NotificacaoValidationService {
+
+    public void validarObrigatorios(NotificacaoRequest request) {
+        if (request == null) {
+            throw new BadRequestException("Dados da notificação são obrigatórios");
+        }
+        if (request.getTipoNotificacao() == null) {
+            throw new BadRequestException("Tipo de notificação é obrigatório");
+        }
+        if (request.getCanal() == null) {
+            throw new BadRequestException("Canal de notificação é obrigatório");
+        }
+        if (request.getDestinatario() == null || request.getDestinatario().isBlank()) {
+            throw new BadRequestException("Destinatário é obrigatório");
+        }
+        if (request.getMensagem() == null || request.getMensagem().isBlank()) {
+            throw new BadRequestException("Mensagem é obrigatória");
+        }
+        if (request.getStatusEnvio() == null || request.getStatusEnvio().isBlank()) {
+            throw new BadRequestException("Status de envio é obrigatório");
+        }
+    }
+}
+

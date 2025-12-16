@@ -2,6 +2,7 @@ package com.upsaude.service.impl;
 
 import com.upsaude.api.request.ConselhosProfissionaisRequest;
 import com.upsaude.api.response.ConselhosProfissionaisResponse;
+import com.upsaude.cache.CacheKeyUtil;
 import com.upsaude.entity.ConselhosProfissionais;
 import com.upsaude.exception.BadRequestException;
 import com.upsaude.exception.NotFoundException;
@@ -18,13 +19,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.util.Objects;
 import java.util.UUID;
 
-/**
- * Implementação do serviço de gerenciamento de ConselhosProfissionais.
- *
- * @author UPSaúde
- */
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -35,11 +32,9 @@ public class ConselhosProfissionaisServiceImpl implements ConselhosProfissionais
 
     @Override
     @Transactional
-    @CacheEvict(value = "conselhosprofissionais", allEntries = true)
+    @CacheEvict(cacheNames = CacheKeyUtil.CACHE_CONSELHOS_PROFISSIONAIS, allEntries = true)
     public ConselhosProfissionaisResponse criar(ConselhosProfissionaisRequest request) {
         log.debug("Criando novo conselhosprofissionais");
-
-        validarDadosBasicos(request);
 
         ConselhosProfissionais conselhosProfissionais = conselhosProfissionaisMapper.fromRequest(request);
         conselhosProfissionais.setActive(true);
@@ -52,7 +47,7 @@ public class ConselhosProfissionaisServiceImpl implements ConselhosProfissionais
 
     @Override
     @Transactional
-    @Cacheable(value = "conselhosprofissionais", key = "#id")
+    @Cacheable(cacheNames = CacheKeyUtil.CACHE_CONSELHOS_PROFISSIONAIS, keyGenerator = "conselhosProfissionaisCacheKeyGenerator")
     public ConselhosProfissionaisResponse obterPorId(UUID id) {
         log.debug("Buscando conselhosprofissionais por ID: {} (cache miss)", id);
 
@@ -77,7 +72,7 @@ public class ConselhosProfissionaisServiceImpl implements ConselhosProfissionais
 
     @Override
     @Transactional
-    @CacheEvict(value = "conselhosprofissionais", key = "#id")
+    @CacheEvict(cacheNames = CacheKeyUtil.CACHE_CONSELHOS_PROFISSIONAIS, keyGenerator = "conselhosProfissionaisCacheKeyGenerator")
     public ConselhosProfissionaisResponse atualizar(UUID id, ConselhosProfissionaisRequest request) {
         log.debug("Atualizando conselhosprofissionais. ID: {}", id);
 
@@ -85,14 +80,12 @@ public class ConselhosProfissionaisServiceImpl implements ConselhosProfissionais
             throw new BadRequestException("ID do conselhosprofissionais é obrigatório");
         }
 
-        validarDadosBasicos(request);
-
         ConselhosProfissionais conselhosProfissionaisExistente = conselhosProfissionaisRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("ConselhosProfissionais não encontrado com ID: " + id));
 
         atualizarDadosConselhosProfissionais(conselhosProfissionaisExistente, request);
 
-        ConselhosProfissionais conselhosProfissionaisAtualizado = conselhosProfissionaisRepository.save(conselhosProfissionaisExistente);
+        ConselhosProfissionais conselhosProfissionaisAtualizado = conselhosProfissionaisRepository.save(Objects.requireNonNull(conselhosProfissionaisExistente));
         log.info("ConselhosProfissionais atualizado com sucesso. ID: {}", conselhosProfissionaisAtualizado.getId());
 
         return conselhosProfissionaisMapper.toResponse(conselhosProfissionaisAtualizado);
@@ -100,7 +93,7 @@ public class ConselhosProfissionaisServiceImpl implements ConselhosProfissionais
 
     @Override
     @Transactional
-    @CacheEvict(value = "conselhosprofissionais", key = "#id")
+    @CacheEvict(cacheNames = CacheKeyUtil.CACHE_CONSELHOS_PROFISSIONAIS, keyGenerator = "conselhosProfissionaisCacheKeyGenerator")
     public void excluir(UUID id) {
         log.debug("Excluindo conselhosprofissionais. ID: {}", id);
 
@@ -120,24 +113,15 @@ public class ConselhosProfissionaisServiceImpl implements ConselhosProfissionais
         log.info("ConselhosProfissionais excluído (desativado) com sucesso. ID: {}", id);
     }
 
-    private void validarDadosBasicos(ConselhosProfissionaisRequest request) {
-        if (request == null) {
-            throw new BadRequestException("Dados do conselhosprofissionais são obrigatórios");
-        }
-    }
-
     private void atualizarDadosConselhosProfissionais(ConselhosProfissionais conselhosProfissionais, ConselhosProfissionaisRequest request) {
-        ConselhosProfissionais conselhosProfissionaisAtualizado = conselhosProfissionaisMapper.fromRequest(request);
-        
-        // Preserva campos de controle
+        ConselhosProfissionais conselhosProfissionaisAtualizado = Objects.requireNonNull(conselhosProfissionaisMapper.fromRequest(request));
+
         java.util.UUID idOriginal = conselhosProfissionais.getId();
         Boolean activeOriginal = conselhosProfissionais.getActive();
         java.time.OffsetDateTime createdAtOriginal = conselhosProfissionais.getCreatedAt();
-        
-        // Copia todas as propriedades do objeto atualizado
-        BeanUtils.copyProperties(conselhosProfissionaisAtualizado, conselhosProfissionais);
-        
-        // Restaura campos de controle
+
+        BeanUtils.copyProperties(conselhosProfissionaisAtualizado, Objects.requireNonNull(conselhosProfissionais));
+
         conselhosProfissionais.setId(idOriginal);
         conselhosProfissionais.setActive(activeOriginal);
         conselhosProfissionais.setCreatedAt(createdAtOriginal);

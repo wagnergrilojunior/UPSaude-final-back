@@ -6,6 +6,7 @@ import com.upsaude.exception.BadRequestException;
 import com.upsaude.exception.ConflictException;
 import com.upsaude.exception.NotFoundException;
 import com.upsaude.service.ReceitasMedicasService;
+import com.upsaude.enums.StatusReceitaEnum;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -22,13 +23,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.OffsetDateTime;
 import java.util.UUID;
 
-/**
- * Controlador REST para operações relacionadas a Receitas Médicas.
- *
- * @author UPSaúde
- */
 @RestController
 @RequestMapping("/v1/receitas-medicas")
 @Tag(name = "Receitas Médicas", description = "API para gerenciamento de Receitas Médicas")
@@ -69,10 +66,22 @@ public class ReceitasMedicasController {
     })
     public ResponseEntity<Page<ReceitasMedicasResponse>> listar(
             @Parameter(description = "Parâmetros de paginação (page, size, sort)")
-            Pageable pageable) {
-        log.debug("REQUEST GET /v1/receitas-medicas - pageable: {}", pageable);
+            Pageable pageable,
+            @RequestParam(required = false) UUID estabelecimentoId,
+            @RequestParam(required = false) UUID pacienteId,
+            @RequestParam(required = false) UUID medicoId,
+            @RequestParam(required = false) StatusReceitaEnum status,
+            @RequestParam(required = false) OffsetDateTime inicio,
+            @RequestParam(required = false) OffsetDateTime fim,
+            @RequestParam(required = false) String numeroReceita,
+            @RequestParam(required = false) Boolean usoContinuo,
+            @RequestParam(required = false) String origemReceita,
+            @RequestParam(required = false) UUID cidPrincipalId) {
+        log.debug("REQUEST GET /v1/receitas-medicas - pageable: {}, estabelecimentoId: {}, pacienteId: {}, medicoId: {}, status: {}, inicio: {}, fim: {}, numeroReceita: {}, usoContinuo: {}, origemReceita: {}, cidPrincipalId: {}",
+            pageable, estabelecimentoId, pacienteId, medicoId, status, inicio, fim, numeroReceita, usoContinuo, origemReceita, cidPrincipalId);
         try {
-            Page<ReceitasMedicasResponse> response = receitasMedicasService.listar(pageable);
+            Page<ReceitasMedicasResponse> response = receitasMedicasService.listar(pageable,
+                estabelecimentoId, pacienteId, medicoId, status, inicio, fim, numeroReceita, usoContinuo, origemReceita, cidPrincipalId);
             return ResponseEntity.ok(response);
         } catch (Exception ex) {
             log.error("Erro inesperado ao listar receitas médicas — pageable: {}", pageable, ex);

@@ -3,6 +3,8 @@ package com.upsaude.service.impl;
 import com.upsaude.api.response.EnumInfoResponse;
 import com.upsaude.api.response.EnumItemResponse;
 import com.upsaude.api.response.EnumsResponse;
+import com.upsaude.exception.BadRequestException;
+import com.upsaude.exception.InternalServerErrorException;
 import com.upsaude.service.EnumsService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -10,11 +12,6 @@ import org.springframework.stereotype.Service;
 import java.lang.reflect.Method;
 import java.util.*;
 
-/**
- * Implementação do serviço de gerenciamento de Enums.
- *
- * @author UPSaúde
- */
 @Slf4j
 @Service
 public class EnumsServiceImpl implements EnumsService {
@@ -28,7 +25,7 @@ public class EnumsServiceImpl implements EnumsService {
         List<EnumInfoResponse> enumsInfo = new ArrayList<>();
 
         try {
-            // Obtém todas as classes do pacote de enums
+
             Set<Class<?>> enumClasses = getEnumClasses();
 
             for (Class<?> enumClass : enumClasses) {
@@ -42,7 +39,6 @@ public class EnumsServiceImpl implements EnumsService {
                 }
             }
 
-            // Ordena por nome do enum
             enumsInfo.sort(Comparator.comparing(EnumInfoResponse::getNomeEnum));
 
             log.info("Total de {} enums processados com sucesso", enumsInfo.size());
@@ -53,15 +49,11 @@ public class EnumsServiceImpl implements EnumsService {
                     .build();
 
         } catch (Exception e) {
-            log.error("Erro ao listar enums: {}", e.getMessage(), e);
-            throw new RuntimeException("Erro ao listar enums do sistema", e);
+            log.error("Erro inesperado ao listar enums do sistema. Exception: {}", e.getClass().getSimpleName(), e);
+            throw new InternalServerErrorException("Erro ao listar enums do sistema", e);
         }
     }
 
-    /**
-     * Obtém todas as classes enum do pacote de enums.
-     * Funciona tanto em desenvolvimento quanto em produção (JAR).
-     */
     private Set<Class<?>> getEnumClasses() {
         Set<Class<?>> enumClasses = new HashSet<>();
 
@@ -71,7 +63,7 @@ public class EnumsServiceImpl implements EnumsService {
             java.net.URL resource = classLoader.getResource(packagePath);
 
             if (resource != null) {
-                // Tenta abordagem para sistema de arquivos (desenvolvimento)
+
                 if ("file".equals(resource.getProtocol())) {
                     try {
                         java.io.File directory = new java.io.File(resource.toURI());
@@ -97,7 +89,7 @@ public class EnumsServiceImpl implements EnumsService {
                         log.debug("Erro ao converter URL para URI: {}", e.getMessage());
                     }
                 }
-                // Abordagem para JAR (produção)
+
                 else if ("jar".equals(resource.getProtocol())) {
                     String jarPath = resource.getPath().substring(5, resource.getPath().indexOf("!"));
                     try (java.util.jar.JarFile jar = new java.util.jar.JarFile(java.net.URLDecoder.decode(jarPath, "UTF-8"))) {
@@ -121,7 +113,6 @@ public class EnumsServiceImpl implements EnumsService {
                 }
             }
 
-            // Fallback: lista hardcoded dos enums conhecidos (caso as abordagens acima falhem)
             if (enumClasses.isEmpty()) {
                 log.warn("Não foi possível descobrir enums automaticamente. Usando lista hardcoded.");
                 enumClasses = getEnumsHardcoded();
@@ -129,16 +120,13 @@ public class EnumsServiceImpl implements EnumsService {
 
         } catch (Exception e) {
             log.error("Erro ao buscar classes enum: {}", e.getMessage(), e);
-            // Fallback para lista hardcoded
+
             enumClasses = getEnumsHardcoded();
         }
 
         return enumClasses;
     }
 
-    /**
-     * Lista hardcoded dos enums conhecidos (fallback).
-     */
     private Set<Class<?>> getEnumsHardcoded() {
         Set<Class<?>> enumClasses = new HashSet<>();
         String[] enumNames = {
@@ -180,9 +168,6 @@ public class EnumsServiceImpl implements EnumsService {
         return enumClasses;
     }
 
-    /**
-     * Processa um enum e retorna suas informações.
-     */
     private EnumInfoResponse processarEnum(Class<?> enumClass) {
         try {
             if (!enumClass.isEnum()) {
@@ -192,7 +177,6 @@ public class EnumsServiceImpl implements EnumsService {
             String nomeClasse = enumClass.getSimpleName();
             String nomeEnum = formatarNomeEnum(nomeClasse);
 
-            // Obtém todos os valores do enum
             Object[] enumValues = enumClass.getEnumConstants();
             List<EnumItemResponse> valores = new ArrayList<>();
 
@@ -215,16 +199,12 @@ public class EnumsServiceImpl implements EnumsService {
         }
     }
 
-    /**
-     * Extrai informações de um valor de enum específico.
-     */
     private EnumItemResponse extrairItemEnum(Object enumValue) {
         try {
             String nome = enumValue.toString();
             Integer codigo = null;
             String descricao = null;
 
-            // Tenta obter o código usando reflexão
             try {
                 Method getCodigoMethod = enumValue.getClass().getMethod("getCodigo");
                 Object codigoObj = getCodigoMethod.invoke(enumValue);
@@ -232,12 +212,11 @@ public class EnumsServiceImpl implements EnumsService {
                     codigo = (Integer) codigoObj;
                 }
             } catch (NoSuchMethodException e) {
-                // Enum não tem método getCodigo, isso é normal
+
             } catch (Exception e) {
                 log.debug("Erro ao obter código do enum: {}", e.getMessage());
             }
 
-            // Tenta obter a descrição usando reflexão
             try {
                 Method getDescricaoMethod = enumValue.getClass().getMethod("getDescricao");
                 Object descricaoObj = getDescricaoMethod.invoke(enumValue);
@@ -245,7 +224,7 @@ public class EnumsServiceImpl implements EnumsService {
                     descricao = (String) descricaoObj;
                 }
             } catch (NoSuchMethodException e) {
-                // Enum não tem método getDescricao, isso é normal
+
             } catch (Exception e) {
                 log.debug("Erro ao obter descrição do enum: {}", e.getMessage());
             }
@@ -262,17 +241,13 @@ public class EnumsServiceImpl implements EnumsService {
         }
     }
 
-    /**
-     * Formata o nome do enum para exibição mais amigável.
-     */
     private String formatarNomeEnum(String nomeClasse) {
-        // Remove o sufixo "Enum" se existir
+
         String nome = nomeClasse;
         if (nome.endsWith("Enum")) {
             nome = nome.substring(0, nome.length() - 4);
         }
 
-        // Adiciona espaços antes de letras maiúsculas (exceto a primeira)
         StringBuilder resultado = new StringBuilder();
         for (int i = 0; i < nome.length(); i++) {
             char c = nome.charAt(i);
@@ -305,10 +280,10 @@ public class EnumsServiceImpl implements EnumsService {
         log.debug("Buscando enum por nome: {}", nomeEnum);
 
         if (nomeEnum == null || nomeEnum.trim().isEmpty()) {
-            throw new IllegalArgumentException("Nome do enum não pode ser vazio");
+            log.warn("Tentativa de buscar enum com nome vazio");
+            throw new BadRequestException("Nome do enum não pode ser vazio");
         }
 
-        // Normaliza o nome (remove espaços, garante que termina com Enum se necessário)
         String nomeNormalizado = nomeEnum.trim();
         if (!nomeNormalizado.endsWith("Enum")) {
             nomeNormalizado = nomeNormalizado + "Enum";
@@ -319,15 +294,18 @@ public class EnumsServiceImpl implements EnumsService {
             if (enumClass.isEnum()) {
                 return processarEnum(enumClass);
             } else {
-                throw new IllegalArgumentException("Classe encontrada não é um enum: " + nomeNormalizado);
+                log.warn("Classe encontrada não é um enum. Nome: {}", nomeNormalizado);
+                throw new BadRequestException("Classe encontrada não é um enum: " + nomeNormalizado);
             }
         } catch (ClassNotFoundException e) {
-            log.warn("Enum não encontrado: {}", nomeNormalizado);
-            throw new IllegalArgumentException("Enum não encontrado: " + nomeNormalizado);
+            log.warn("Enum não encontrado. Nome: {}", nomeNormalizado);
+            throw new BadRequestException("Enum não encontrado: " + nomeNormalizado);
+        } catch (BadRequestException e) {
+            log.warn("Erro de validação ao buscar enum. Nome: {}, Erro: {}", nomeNormalizado, e.getMessage());
+            throw e;
         } catch (Exception e) {
-            log.error("Erro ao buscar enum {}: {}", nomeNormalizado, e.getMessage(), e);
-            throw new RuntimeException("Erro ao buscar enum: " + nomeNormalizado, e);
+            log.error("Erro inesperado ao buscar enum. Nome: {}, Exception: {}", nomeNormalizado, e.getClass().getSimpleName(), e);
+            throw new InternalServerErrorException("Erro ao buscar enum: " + nomeNormalizado, e);
         }
     }
 }
-

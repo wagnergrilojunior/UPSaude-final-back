@@ -24,11 +24,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
 
-/**
- * Controlador REST para operações relacionadas a Ações de Promoção e Prevenção.
- *
- * @author UPSaúde
- */
 @Slf4j
 @RestController
 @RequestMapping("/v1/acoes-promocao-prevencao")
@@ -216,4 +211,3 @@ public class AcaoPromocaoPrevencaoController {
         }
     }
 }
-

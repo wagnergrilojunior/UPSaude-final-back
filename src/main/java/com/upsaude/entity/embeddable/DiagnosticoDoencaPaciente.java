@@ -13,11 +13,6 @@ import lombok.Data;
 
 import java.time.LocalDate;
 
-/**
- * Classe embeddable para informações de diagnóstico da doença no paciente.
- *
- * @author UPSaúde
- */
 @Embeddable
 @Data
 @Builder
@@ -30,23 +25,22 @@ public class DiagnosticoDoencaPaciente {
     }
 
     @Column(name = "data_diagnostico")
-    private LocalDate dataDiagnostico; // Data do diagnóstico
+    private LocalDate dataDiagnostico;
 
     @Column(name = "data_inicio_sintomas")
-    private LocalDate dataInicioSintomas; // Data de início dos sintomas
+    private LocalDate dataInicioSintomas;
 
     @Convert(converter = StatusDiagnosticoEnumConverter.class)
     @Column(name = "status_diagnostico")
-    private StatusDiagnosticoEnum statusDiagnostico; // Status do diagnóstico
+    private StatusDiagnosticoEnum statusDiagnostico;
 
     @Convert(converter = GravidadeDoencaEnumConverter.class)
     @Column(name = "gravidade_atual")
-    private GravidadeDoencaEnum gravidadeAtual; // Gravidade atual da doença no paciente
+    private GravidadeDoencaEnum gravidadeAtual;
 
     @Column(name = "local_diagnostico", length = 255)
-    private String localDiagnostico; // Local onde foi feito o diagnóstico
+    private String localDiagnostico;
 
     @Column(name = "metodo_diagnostico", length = 255)
-    private String metodoDiagnostico; // Método utilizado para diagnóstico (ex: Exame clínico, Laboratorial, Imagem)
+    private String metodoDiagnostico;
 }
-

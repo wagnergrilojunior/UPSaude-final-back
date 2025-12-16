@@ -3,9 +3,6 @@ package com.upsaude.enums;
 import java.util.Arrays;
 import java.util.Locale;
 
-/**
- * Enum para classificação de status de receita médica.
- */
 public enum StatusReceitaEnum {
     ATIVA(1, "Ativa"),
     UTILIZADA(2, "Utilizada"),
@@ -45,4 +42,3 @@ public enum StatusReceitaEnum {
                 .orElse(null);
     }
 }
-

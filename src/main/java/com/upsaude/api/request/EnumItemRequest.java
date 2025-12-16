@@ -7,6 +7,7 @@ import lombok.*;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@Schema(description = "Dados de enum item")
 public class EnumItemRequest {
     private String nome;
     private Integer codigo;

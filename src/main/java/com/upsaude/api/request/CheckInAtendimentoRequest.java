@@ -9,21 +9,23 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 @Getter
 @Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@Schema(description = "Dados de check-in atendimento")
 public class CheckInAtendimentoRequest {
     @NotNull(message = "Agendamento é obrigatório")
     private UUID agendamento;
-    
+
     private UUID atendimento;
-    
+
     @NotNull(message = "Paciente é obrigatório")
     private UUID paciente;
-    
+
     @NotNull(message = "Data do check-in é obrigatória")
     private OffsetDateTime dataCheckin;
     private OffsetDateTime dataCheckout;

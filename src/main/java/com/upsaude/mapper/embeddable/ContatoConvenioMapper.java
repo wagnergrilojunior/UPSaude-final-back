@@ -14,7 +14,6 @@ public interface ContatoConvenioMapper {
     ContatoConvenioResponse toResponse(ContatoConvenio entity);
     void updateFromRequest(ContatoConvenioRequest request, @MappingTarget ContatoConvenio entity);
 
-    // Mapeamento entre DTO e Entity
     ContatoConvenio toEntity(com.upsaude.dto.embeddable.ContatoConvenioDTO dto);
     com.upsaude.dto.embeddable.ContatoConvenioDTO toDTO(ContatoConvenio entity);
     void updateFromDTO(com.upsaude.dto.embeddable.ContatoConvenioDTO dto, @MappingTarget ContatoConvenio entity);

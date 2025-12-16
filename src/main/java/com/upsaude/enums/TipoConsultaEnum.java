@@ -3,11 +3,6 @@ package com.upsaude.enums;
 import java.util.Arrays;
 import java.util.Locale;
 
-/**
- * Enum para classificação de tipos de consulta médica.
- *
- * @author UPSaúde
- */
 public enum TipoConsultaEnum {
     PRIMEIRA_VEZ(1, "Primeira Vez"),
     RETORNO(2, "Retorno"),
@@ -68,4 +63,3 @@ public enum TipoConsultaEnum {
                 .orElse(null);
     }
 }
-

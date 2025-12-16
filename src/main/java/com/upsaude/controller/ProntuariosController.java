@@ -24,11 +24,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
 
-/**
- * Controlador REST para operações relacionadas a Prontuários.
- *
- * @author UPSaúde
- */
 @RestController
 @RequestMapping("/v1/prontuarios")
 @Tag(name = "Prontuários", description = "API para gerenciamento de Prontuários")
@@ -69,10 +64,15 @@ public class ProntuariosController {
     })
     public ResponseEntity<Page<ProntuariosResponse>> listar(
             @Parameter(description = "Parâmetros de paginação (page, size, sort)")
-            Pageable pageable) {
-        log.debug("REQUEST GET /v1/prontuarios - pageable: {}", pageable);
+            Pageable pageable,
+            @RequestParam(required = false) UUID pacienteId,
+            @RequestParam(required = false) UUID estabelecimentoId,
+            @RequestParam(required = false) String tipoRegistro,
+            @RequestParam(required = false) UUID criadoPor) {
+        log.debug("REQUEST GET /v1/prontuarios - pageable: {}, pacienteId: {}, estabelecimentoId: {}, tipoRegistro: {}, criadoPor: {}",
+            pageable, pacienteId, estabelecimentoId, tipoRegistro, criadoPor);
         try {
-            Page<ProntuariosResponse> response = prontuariosService.listar(pageable);
+            Page<ProntuariosResponse> response = prontuariosService.listar(pageable, pacienteId, estabelecimentoId, tipoRegistro, criadoPor);
             return ResponseEntity.ok(response);
         } catch (Exception ex) {
             log.error("Erro inesperado ao listar prontuários — pageable: {}", pageable, ex);

@@ -24,11 +24,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
 
-/**
- * Controlador REST para operações relacionadas a Medicações Contínuas de Paciente.
- *
- * @author UPSaúde
- */
 @RestController
 @RequestMapping("/v1/medicacoes-continuas-paciente")
 @Tag(name = "Medicações Contínuas de Paciente", description = "API para gerenciamento de Medicações Contínuas de Paciente")

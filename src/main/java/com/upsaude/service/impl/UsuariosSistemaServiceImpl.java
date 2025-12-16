@@ -7,10 +7,13 @@ import com.upsaude.entity.Medicos;
 import com.upsaude.entity.Paciente;
 import com.upsaude.entity.ProfissionaisSaude;
 import com.upsaude.entity.Tenant;
+import com.upsaude.entity.User;
 import com.upsaude.entity.UsuarioEstabelecimento;
 import com.upsaude.entity.UsuariosSistema;
 import com.upsaude.exception.BadRequestException;
+import com.upsaude.exception.InternalServerErrorException;
 import com.upsaude.exception.NotFoundException;
+import org.springframework.dao.DataAccessException;
 import com.upsaude.integration.supabase.SupabaseStorageService;
 import com.upsaude.mapper.UsuariosSistemaMapper;
 import com.upsaude.repository.EstabelecimentosRepository;
@@ -18,29 +21,25 @@ import com.upsaude.repository.MedicosRepository;
 import com.upsaude.repository.PacienteRepository;
 import com.upsaude.repository.ProfissionaisSaudeRepository;
 import com.upsaude.repository.TenantRepository;
+import com.upsaude.repository.UserRepository;
 import com.upsaude.repository.UsuarioEstabelecimentoRepository;
 import com.upsaude.repository.UsuariosSistemaRepository;
 import com.upsaude.service.UsuariosSistemaService;
 import org.springframework.web.multipart.MultipartFile;
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.BeanUtils;
+import org.hibernate.Hibernate;
 import org.springframework.data.domain.Page;
-import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-/**
- * Implementação do serviço de gerenciamento de UsuariosSistema.
- *
- * @author UPSaúde
- */
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -54,6 +53,7 @@ public class UsuariosSistemaServiceImpl implements UsuariosSistemaService {
     private final MedicosRepository medicosRepository;
     private final ProfissionaisSaudeRepository profissionaisSaudeRepository;
     private final PacienteRepository pacienteRepository;
+    private final UserRepository userRepository;
     private final SupabaseStorageService supabaseStorageService;
     private final com.upsaude.integration.supabase.SupabaseAuthService supabaseAuthService;
 
@@ -62,49 +62,69 @@ public class UsuariosSistemaServiceImpl implements UsuariosSistemaService {
     public UsuariosSistemaResponse criar(UsuariosSistemaRequest request) {
         log.debug("Criando novo usuariossistema");
 
-        validarDadosBasicos(request);
+        try {
 
-        UsuariosSistema usuariosSistema = usuariosSistemaMapper.fromRequest(request);
-        usuariosSistema.setActive(true);
-        
-        // Setar tenant
-        if (request.getTenantId() != null) {
-            Tenant tenant = tenantRepository.findById(request.getTenantId())
-                    .orElseThrow(() -> new NotFoundException("Tenant não encontrado com ID: " + request.getTenantId()));
-            usuariosSistema.setTenant(tenant);
-        }
-        
-        // Setar relacionamentos se fornecidos
-        if (request.getMedico() != null) {
-            Medicos medico = medicosRepository.findById(request.getMedico())
-                    .orElseThrow(() -> new NotFoundException("Médico não encontrado com ID: " + request.getMedico()));
-            usuariosSistema.setMedico(medico);
-        }
-        
-        if (request.getProfissionalSaude() != null) {
-            ProfissionaisSaude profissional = profissionaisSaudeRepository.findById(request.getProfissionalSaude())
-                    .orElseThrow(() -> new NotFoundException("Profissional de saúde não encontrado com ID: " + request.getProfissionalSaude()));
-            usuariosSistema.setProfissionalSaude(profissional);
-        }
-        
-        if (request.getPaciente() != null) {
-            Paciente paciente = pacienteRepository.findById(request.getPaciente())
-                    .orElseThrow(() -> new NotFoundException("Paciente não encontrado com ID: " + request.getPaciente()));
-            usuariosSistema.setPaciente(paciente);
-        }
+            if (request.getUserId() != null) {
+                User user = userRepository.findById(request.getUserId())
+                        .orElseThrow(() -> new NotFoundException("User não encontrado com ID: " + request.getUserId()));
 
-        UsuariosSistema usuariosSistemaSalvo = usuariosSistemaRepository.save(usuariosSistema);
-        log.info("UsuariosSistema criado com sucesso. ID: {}", usuariosSistemaSalvo.getId());
-        
-        // Criar vínculos com estabelecimentos (novo formato com papel)
-        if (request.getEstabelecimentos() != null && !request.getEstabelecimentos().isEmpty()) {
-            criarVinculosComPapel(usuariosSistemaSalvo, request.getEstabelecimentos());
-        } else if (request.getEstabelecimentosIds() != null && !request.getEstabelecimentosIds().isEmpty()) {
-            // Fallback para compatibilidade (deprecated)
-            criarVinculosEstabelecimentos(usuariosSistemaSalvo, request.getEstabelecimentosIds());
-        }
+                if (request.getEmail() != null && user.getEmail() != null &&
+                    !user.getEmail().equalsIgnoreCase(request.getEmail())) {
+                    throw new BadRequestException("O email informado não corresponde ao userId fornecido. Email do userId: " + user.getEmail());
+                }
+            }
 
-        return enrichResponseWithEntity(usuariosSistemaSalvo);
+            validarEmailUnico(null, request.getEmail(), request.getUserId());
+            validarUsernameUnico(null, request.getUsername());
+
+            UsuariosSistema usuariosSistema = usuariosSistemaMapper.fromRequest(request);
+            usuariosSistema.setActive(true);
+
+            if (request.getTenantId() != null) {
+                Tenant tenant = tenantRepository.findById(request.getTenantId())
+                        .orElseThrow(() -> new NotFoundException("Tenant não encontrado com ID: " + request.getTenantId()));
+                usuariosSistema.setTenant(tenant);
+            }
+
+            if (request.getMedico() != null) {
+                Medicos medico = medicosRepository.findById(request.getMedico())
+                        .orElseThrow(() -> new NotFoundException("Médico não encontrado com ID: " + request.getMedico()));
+                usuariosSistema.setMedico(medico);
+            }
+
+            if (request.getProfissionalSaude() != null) {
+                ProfissionaisSaude profissional = profissionaisSaudeRepository.findById(request.getProfissionalSaude())
+                        .orElseThrow(() -> new NotFoundException("Profissional de saúde não encontrado com ID: " + request.getProfissionalSaude()));
+                usuariosSistema.setProfissionalSaude(profissional);
+            }
+
+            if (request.getPaciente() != null) {
+                Paciente paciente = pacienteRepository.findById(request.getPaciente())
+                        .orElseThrow(() -> new NotFoundException("Paciente não encontrado com ID: " + request.getPaciente()));
+                usuariosSistema.setPaciente(paciente);
+            }
+
+            UsuariosSistema usuariosSistemaSalvo = usuariosSistemaRepository.save(usuariosSistema);
+            log.info("UsuariosSistema criado com sucesso. ID: {}", usuariosSistemaSalvo.getId());
+
+            if (request.getEstabelecimentos() != null && !request.getEstabelecimentos().isEmpty()) {
+                criarVinculosComPapel(usuariosSistemaSalvo, request.getEstabelecimentos());
+            } else if (request.getEstabelecimentosIds() != null && !request.getEstabelecimentosIds().isEmpty()) {
+
+                criarVinculosEstabelecimentos(usuariosSistemaSalvo, request.getEstabelecimentosIds());
+            }
+
+            return enrichResponseWithEntity(usuariosSistemaSalvo);
+        } catch (BadRequestException | NotFoundException e) {
+            log.warn("Erro de validação ao criar UsuariosSistema. Erro: {}", e.getMessage());
+            throw e;
+        } catch (DataAccessException e) {
+            log.error("Erro de acesso a dados ao criar UsuariosSistema. Exception: {}", e.getClass().getSimpleName(), e);
+            throw new InternalServerErrorException("Erro ao persistir UsuariosSistema", e);
+        } catch (RuntimeException e) {
+            log.error("Erro inesperado ao criar UsuariosSistema. Exception: {}", e.getClass().getSimpleName(), e);
+            throw e;
+        }
     }
 
     @Override
@@ -122,12 +142,27 @@ public class UsuariosSistemaServiceImpl implements UsuariosSistemaService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public Page<UsuariosSistemaResponse> listar(Pageable pageable) {
         log.debug("Listando UsuariosSistemas paginados. Página: {}, Tamanho: {}",
                 pageable.getPageNumber(), pageable.getPageSize());
 
-        Page<UsuariosSistema> usuariosSistemas = usuariosSistemaRepository.findAll(pageable);
-        return usuariosSistemas.map(us -> enrichResponse(usuariosSistemaMapper.toResponse(us)));
+        try {
+            Page<UsuariosSistema> usuariosSistemas = usuariosSistemaRepository.findAll(pageable);
+
+            usuariosSistemas.getContent().forEach(us -> {
+                Hibernate.initialize(us.getEstabelecimentosVinculados());
+            });
+
+            log.debug("Listagem de usuários do sistema concluída. Total de elementos: {}", usuariosSistemas.getTotalElements());
+            return usuariosSistemas.map(us -> enrichResponse(usuariosSistemaMapper.toResponse(us)));
+        } catch (DataAccessException e) {
+            log.error("Erro de acesso a dados ao listar UsuariosSistema. Exception: {}", e.getClass().getSimpleName(), e);
+            throw new InternalServerErrorException("Erro ao listar UsuariosSistema", e);
+        } catch (RuntimeException e) {
+            log.error("Erro inesperado ao listar UsuariosSistema. Exception: {}", e.getClass().getSimpleName(), e);
+            throw e;
+        }
     }
 
     @Override
@@ -139,21 +174,21 @@ public class UsuariosSistemaServiceImpl implements UsuariosSistemaService {
             throw new BadRequestException("ID do usuariossistema é obrigatório");
         }
 
-        validarDadosBasicos(request);
-
         UsuariosSistema usuariosSistemaExistente = usuariosSistemaRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("UsuariosSistema não encontrado com ID: " + id));
+
+        validarEmailUnico(id, request.getEmail(), request.getUserId());
+        validarUsernameUnico(id, request.getUsername());
 
         atualizarDadosUsuariosSistema(usuariosSistemaExistente, request);
 
         UsuariosSistema usuariosSistemaAtualizado = usuariosSistemaRepository.save(usuariosSistemaExistente);
         log.info("UsuariosSistema atualizado com sucesso. ID: {}", usuariosSistemaAtualizado.getId());
 
-        // Atualizar vínculos de estabelecimentos (novo formato com papel)
         if (request.getEstabelecimentos() != null && !request.getEstabelecimentos().isEmpty()) {
             atualizarVinculosComPapel(usuariosSistemaAtualizado, request.getEstabelecimentos());
         } else if (request.getEstabelecimentosIds() != null) {
-            // Fallback para compatibilidade (deprecated)
+
             atualizarVinculosEstabelecimentos(usuariosSistemaAtualizado, request.getEstabelecimentosIds());
         }
 
@@ -174,111 +209,131 @@ public class UsuariosSistemaServiceImpl implements UsuariosSistemaService {
 
         UUID userId = usuariosSistema.getUserId();
 
-        // ETAPA 1: Deletar UsuariosSistema e seus vínculos do banco (CASCADE vai deletar vínculos automaticamente)
         usuariosSistemaRepository.delete(usuariosSistema);
         log.info("ETAPA 1: UsuariosSistema e vínculos deletados PERMANENTEMENTE. ID: {}", id);
 
-        // ETAPA 2: Deletar User do Supabase Auth via API
         try {
             supabaseAuthService.deleteUser(userId);
             log.info("ETAPA 2: User deletado PERMANENTEMENTE do Supabase Auth. UserID: {}", userId);
         } catch (Exception e) {
-            log.error("Erro ao deletar User do Supabase Auth. UserID: {}", userId, e);
-            // Não lançar exceção - UsuariosSistema já foi deletado
+            log.error("Erro ao deletar User do Supabase Auth. UserID: {}, Exception: {}", userId, e.getClass().getName(), e);
+
             log.warn("UsuariosSistema foi deletado mas User não foi removido do Supabase (pode não existir)");
         }
     }
 
-    private void validarDadosBasicos(UsuariosSistemaRequest request) {
-        if (request == null) {
-            throw new BadRequestException("Dados do usuariossistema são obrigatórios");
+    private void validarEmailUnico(UUID usuariosSistemaId, String email, UUID userId) {
+        if (!StringUtils.hasText(email)) {
+            return;
         }
-        if (request.getUserId() == null) {
-            throw new BadRequestException("ID do usuário Supabase é obrigatório");
+
+        Optional<User> userExistente = userRepository.findByEmail(email);
+
+        if (userExistente.isPresent()) {
+            User userEncontrado = userExistente.get();
+
+            if (usuariosSistemaId != null) {
+                UsuariosSistema usuariosSistemaExistente = usuariosSistemaRepository.findById(usuariosSistemaId)
+                        .orElseThrow(() -> new NotFoundException("UsuariosSistema não encontrado com ID: " + usuariosSistemaId));
+
+                if (!userEncontrado.getId().equals(usuariosSistemaExistente.getUserId())) {
+                    throw new BadRequestException("Já existe um usuário cadastrado com o email: " + email);
+                }
+            } else {
+
+                if (userId != null) {
+
+                    Optional<UsuariosSistema> usuariosSistemaExistente = usuariosSistemaRepository.findByUserId(userId);
+                    if (usuariosSistemaExistente.isPresent()) {
+                        throw new BadRequestException("Já existe um usuário do sistema cadastrado com este userId: " + userId);
+                    }
+
+                    if (!userEncontrado.getId().equals(userId)) {
+                        throw new BadRequestException("O email informado pertence a outro usuário. Email: " + email);
+                    }
+
+                    log.debug("Email {} existe em auth.users e corresponde ao userId {}, mas ainda não existe em usuarios_sistema. Permitindo cadastro.", email, userId);
+                } else {
+
+                    Optional<UsuariosSistema> usuariosSistemaExistente = usuariosSistemaRepository.findByUserId(userEncontrado.getId());
+                    if (usuariosSistemaExistente.isPresent()) {
+                        throw new BadRequestException("Já existe um usuário cadastrado com o email: " + email);
+                    }
+
+                    log.debug("Email {} existe em auth.users mas não existe em usuarios_sistema. Permitindo cadastro.", email);
+                }
+            }
         }
-        if (request.getAdminTenant() == null) {
-            throw new BadRequestException("Campo adminTenant é obrigatório");
+    }
+
+    private void validarUsernameUnico(UUID usuariosSistemaId, String username) {
+        if (!StringUtils.hasText(username)) {
+            return;
         }
-        // Se não for admin do tenant, deve ter pelo menos um vínculo com estabelecimento
-        // (validação será feita no controller ao criar vínculos)
+
+        Optional<UsuariosSistema> usuariosSistemaExistente = usuariosSistemaRepository.findByUsername(username);
+
+        if (usuariosSistemaExistente.isPresent()) {
+            UsuariosSistema usuarioEncontrado = usuariosSistemaExistente.get();
+
+            if (usuariosSistemaId != null && !usuarioEncontrado.getId().equals(usuariosSistemaId)) {
+                throw new BadRequestException("Já existe um usuário cadastrado com o username: " + username);
+            }
+
+            if (usuariosSistemaId == null) {
+                throw new BadRequestException("Já existe um usuário cadastrado com o username: " + username);
+            }
+        }
     }
 
     private void atualizarDadosUsuariosSistema(UsuariosSistema usuariosSistema, UsuariosSistemaRequest request) {
-        // Atualizar campos diretamente sem usar BeanUtils.copyProperties
-        // Isso evita problemas com coleções gerenciadas pelo JPA (cascade="all-delete-orphan")
-        
-        if (request.getNomeExibicao() != null) {
-            usuariosSistema.setNomeExibicao(request.getNomeExibicao());
-        }
-        
-        if (request.getUsername() != null) {
-            usuariosSistema.setUsername(request.getUsername());
-        }
-        
-        if (request.getFotoUrl() != null) {
-            usuariosSistema.setFotoUrl(request.getFotoUrl());
-        }
-        
-        if (request.getAdminTenant() != null) {
-            usuariosSistema.setAdminTenant(request.getAdminTenant());
-        }
-        
-        if (request.getTipoVinculo() != null) {
-            usuariosSistema.setTipoVinculo(request.getTipoVinculo());
-        }
-        
-        // Atualizar tenant se fornecido
+
+        usuariosSistemaMapper.updateFromRequest(request, usuariosSistema);
+
         if (request.getTenantId() != null) {
             Tenant tenant = tenantRepository.findById(request.getTenantId())
                     .orElseThrow(() -> new NotFoundException("Tenant não encontrado com ID: " + request.getTenantId()));
             usuariosSistema.setTenant(tenant);
         }
-        
-        // Atualizar relacionamentos se fornecidos
+
         if (request.getMedico() != null) {
             Medicos medico = medicosRepository.findById(request.getMedico())
                     .orElseThrow(() -> new NotFoundException("Médico não encontrado com ID: " + request.getMedico()));
             usuariosSistema.setMedico(medico);
         }
-        
+
         if (request.getProfissionalSaude() != null) {
             ProfissionaisSaude profissional = profissionaisSaudeRepository.findById(request.getProfissionalSaude())
                     .orElseThrow(() -> new NotFoundException("Profissional de saúde não encontrado com ID: " + request.getProfissionalSaude()));
             usuariosSistema.setProfissionalSaude(profissional);
         }
-        
+
         if (request.getPaciente() != null) {
             Paciente paciente = pacienteRepository.findById(request.getPaciente())
                     .orElseThrow(() -> new NotFoundException("Paciente não encontrado com ID: " + request.getPaciente()));
             usuariosSistema.setPaciente(paciente);
         }
-        
-        // IMPORTANTE: NÃO modificar estabelecimentosVinculados aqui
-        // Essa coleção é gerenciada separadamente no método atualizarVinculosEstabelecimentos
+
     }
 
-    /**
-     * Cria vínculos entre o usuário e os estabelecimentos com seus respectivos papéis.
-     * NOVO FORMATO: Inclui o papel (tipoUsuario) de cada vínculo.
-     */
     private void criarVinculosComPapel(UsuariosSistema usuario, List<UsuariosSistemaRequest.EstabelecimentoVinculoRequest> vinculos) {
         for (UsuariosSistemaRequest.EstabelecimentoVinculoRequest vinculoRequest : vinculos) {
-            // Verificar se já existe vínculo
+
             usuarioEstabelecimentoRepository
                     .findByUsuarioUserIdAndEstabelecimentoId(usuario.getUserId(), vinculoRequest.getEstabelecimentoId())
                     .ifPresentOrElse(
                             vinculoExistente -> {
                                 if (Boolean.FALSE.equals(vinculoExistente.getActive())) {
-                                    // Reativar vínculo existente e atualizar papel
+
                                     vinculoExistente.setActive(true);
                                     vinculoExistente.setTipoUsuario(vinculoRequest.getTipoUsuario());
                                     usuarioEstabelecimentoRepository.save(vinculoExistente);
-                                    log.debug("Vínculo reativado com papel {} para usuário {} e estabelecimento {}", 
+                                    log.debug("Vínculo reativado com papel {} para usuário {} e estabelecimento {}",
                                             vinculoRequest.getTipoUsuario(), usuario.getId(), vinculoRequest.getEstabelecimentoId());
                                 }
                             },
                             () -> {
-                                // Criar novo vínculo
+
                                 Estabelecimentos estabelecimento = estabelecimentosRepository.findById(vinculoRequest.getEstabelecimentoId())
                                         .orElseThrow(() -> new NotFoundException("Estabelecimento não encontrado com ID: " + vinculoRequest.getEstabelecimentoId()));
 
@@ -286,38 +341,34 @@ public class UsuariosSistemaServiceImpl implements UsuariosSistemaService {
                                 vinculo.setUsuario(usuario);
                                 vinculo.setEstabelecimento(estabelecimento);
                                 vinculo.setTenant(usuario.getTenant());
-                                vinculo.setTipoUsuario(vinculoRequest.getTipoUsuario()); // ← DEFINIR O PAPEL
+                                vinculo.setTipoUsuario(vinculoRequest.getTipoUsuario());
                                 vinculo.setActive(true);
 
                                 usuarioEstabelecimentoRepository.save(vinculo);
-                                log.debug("Vínculo criado com papel {} para usuário {} e estabelecimento {}", 
+                                log.debug("Vínculo criado com papel {} para usuário {} e estabelecimento {}",
                                         vinculoRequest.getTipoUsuario(), usuario.getId(), vinculoRequest.getEstabelecimentoId());
                             }
                     );
         }
     }
 
-    /**
-     * Cria vínculos entre o usuário e os estabelecimentos informados.
-     * DEPRECATED: Usar criarVinculosComPapel() com o papel especificado.
-     */
     @Deprecated
     private void criarVinculosEstabelecimentos(UsuariosSistema usuario, List<UUID> estabelecimentosIds) {
         for (UUID estabelecimentoId : estabelecimentosIds) {
-            // Verificar se já existe vínculo
+
             usuarioEstabelecimentoRepository
                     .findByUsuarioUserIdAndEstabelecimentoId(usuario.getUserId(), estabelecimentoId)
                     .ifPresentOrElse(
                             vinculoExistente -> {
                                 if (Boolean.FALSE.equals(vinculoExistente.getActive())) {
-                                    // Reativar vínculo existente
+
                                     vinculoExistente.setActive(true);
                                     usuarioEstabelecimentoRepository.save(vinculoExistente);
                                     log.debug("Vínculo reativado para usuário {} e estabelecimento {}", usuario.getId(), estabelecimentoId);
                                 }
                             },
                             () -> {
-                                // Criar novo vínculo
+
                                 Estabelecimentos estabelecimento = estabelecimentosRepository.findById(estabelecimentoId)
                                         .orElseThrow(() -> new NotFoundException("Estabelecimento não encontrado com ID: " + estabelecimentoId));
 
@@ -334,69 +385,59 @@ public class UsuariosSistemaServiceImpl implements UsuariosSistemaService {
         }
     }
 
-    /**
-     * Atualiza os vínculos de estabelecimentos com seus respectivos papéis.
-     * NOVO FORMATO: Inclui o papel (tipoUsuario) de cada vínculo.
-     */
     private void atualizarVinculosComPapel(UsuariosSistema usuario, List<UsuariosSistemaRequest.EstabelecimentoVinculoRequest> vinculos) {
-        // Buscar vínculos existentes
+
         List<UsuarioEstabelecimento> vinculosExistentes = usuarioEstabelecimentoRepository
                 .findByUsuarioUserId(usuario.getUserId());
-        
+
         List<UUID> novosIds = vinculos.stream()
                 .map(UsuariosSistemaRequest.EstabelecimentoVinculoRequest::getEstabelecimentoId)
                 .collect(java.util.stream.Collectors.toList());
-        
-        // Desativar vínculos que não estão mais na lista
+
         for (UsuarioEstabelecimento vinculo : vinculosExistentes) {
-            if (Boolean.TRUE.equals(vinculo.getActive()) && 
+            if (Boolean.TRUE.equals(vinculo.getActive()) &&
                 !novosIds.contains(vinculo.getEstabelecimento().getId())) {
                 vinculo.setActive(false);
                 usuarioEstabelecimentoRepository.save(vinculo);
                 log.debug("Vínculo desativado para estabelecimento {}", vinculo.getEstabelecimento().getId());
             }
         }
-        
-        // Criar ou atualizar vínculos
+
         for (UsuariosSistemaRequest.EstabelecimentoVinculoRequest vinculoRequest : vinculos) {
             usuarioEstabelecimentoRepository
                     .findByUsuarioUserIdAndEstabelecimentoId(usuario.getUserId(), vinculoRequest.getEstabelecimentoId())
                     .ifPresentOrElse(
                             vinculoExistente -> {
-                                // Atualizar papel do vínculo existente
+
                                 vinculoExistente.setActive(true);
                                 vinculoExistente.setTipoUsuario(vinculoRequest.getTipoUsuario());
                                 usuarioEstabelecimentoRepository.save(vinculoExistente);
-                                log.debug("Vínculo atualizado com papel {} para estabelecimento {}", 
+                                log.debug("Vínculo atualizado com papel {} para estabelecimento {}",
                                         vinculoRequest.getTipoUsuario(), vinculoRequest.getEstabelecimentoId());
                             },
                             () -> {
-                                // Criar novo vínculo
+
                                 Estabelecimentos estabelecimento = estabelecimentosRepository.findById(vinculoRequest.getEstabelecimentoId())
                                         .orElseThrow(() -> new NotFoundException("Estabelecimento não encontrado"));
-                                
+
                                 UsuarioEstabelecimento vinculo = new UsuarioEstabelecimento();
                                 vinculo.setUsuario(usuario);
                                 vinculo.setEstabelecimento(estabelecimento);
                                 vinculo.setTenant(usuario.getTenant());
-                                vinculo.setTipoUsuario(vinculoRequest.getTipoUsuario()); // ← DEFINIR O PAPEL
+                                vinculo.setTipoUsuario(vinculoRequest.getTipoUsuario());
                                 vinculo.setActive(true);
-                                
+
                                 usuarioEstabelecimentoRepository.save(vinculo);
-                                log.debug("Novo vínculo criado com papel {} para estabelecimento {}", 
+                                log.debug("Novo vínculo criado com papel {} para estabelecimento {}",
                                         vinculoRequest.getTipoUsuario(), vinculoRequest.getEstabelecimentoId());
                             }
                     );
         }
     }
 
-    /**
-     * Atualiza os vínculos entre o usuário e os estabelecimentos informados.
-     * DEPRECATED: Usar atualizarVinculosComPapel() com o papel especificado.
-     */
     @Deprecated
     private void atualizarVinculosEstabelecimentos(UsuariosSistema usuario, List<UUID> estabelecimentosIds) {
-        // Buscar vínculos ativos existentes
+
         List<UsuarioEstabelecimento> vinculosExistentes = usuarioEstabelecimentoRepository
                 .findByUsuarioUserId(usuario.getUserId());
 
@@ -405,9 +446,8 @@ public class UsuariosSistemaServiceImpl implements UsuariosSistemaService {
                 .map(v -> v.getEstabelecimento().getId())
                 .collect(Collectors.toList());
 
-        // Desativar vínculos que não estão mais na lista
         for (UsuarioEstabelecimento vinculo : vinculosExistentes) {
-            if (Boolean.TRUE.equals(vinculo.getActive()) && 
+            if (Boolean.TRUE.equals(vinculo.getActive()) &&
                 !estabelecimentosIds.contains(vinculo.getEstabelecimento().getId())) {
                 vinculo.setActive(false);
                 usuarioEstabelecimentoRepository.save(vinculo);
@@ -415,7 +455,6 @@ public class UsuariosSistemaServiceImpl implements UsuariosSistemaService {
             }
         }
 
-        // Criar novos vínculos
         List<UUID> idsParaCriar = estabelecimentosIds.stream()
                 .filter(id -> !idsExistentes.contains(id))
                 .collect(Collectors.toList());
@@ -431,15 +470,12 @@ public class UsuariosSistemaServiceImpl implements UsuariosSistemaService {
         UsuariosSistema usuario = usuariosSistemaRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Usuário não encontrado com ID: " + id));
 
-        // Deletar foto antiga se existir
         if (usuario.getFotoUrl() != null && !usuario.getFotoUrl().isEmpty()) {
             supabaseStorageService.deletarFotoUsuario(usuario.getFotoUrl());
         }
 
-        // Fazer upload da nova foto
         String fotoUrl = supabaseStorageService.uploadFotoUsuario(file, usuario.getUserId());
 
-        // Atualizar URL da foto no banco
         usuario.setFotoUrl(fotoUrl);
         usuariosSistemaRepository.save(usuario);
 
@@ -475,24 +511,18 @@ public class UsuariosSistemaServiceImpl implements UsuariosSistemaService {
         }
     }
 
-    /**
-     * Enriquece o Response com informações adicionais do tenant, tipo de usuário, email e vínculos.
-     * Versão otimizada que recebe a entidade diretamente.
-     */
     private UsuariosSistemaResponse enrichResponseWithEntity(UsuariosSistema usuario) {
         UsuariosSistemaResponse response = usuariosSistemaMapper.toResponse(usuario);
-        
-        // Dados do Tenant
+
         if (usuario.getTenant() != null) {
             response.setTenantId(usuario.getTenant().getId());
             response.setTenantNome(usuario.getTenant().getNome());
             response.setTenantSlug(usuario.getTenant().getSlug());
         }
-        
-        // Buscar email do Supabase Auth
+
         if (usuario.getUserId() != null) {
             try {
-                com.upsaude.integration.supabase.SupabaseAuthResponse.User supabaseUser = 
+                com.upsaude.integration.supabase.SupabaseAuthResponse.User supabaseUser =
                         supabaseAuthService.getUserById(usuario.getUserId());
                 if (supabaseUser != null && supabaseUser.getEmail() != null) {
                     response.setEmail(supabaseUser.getEmail());
@@ -500,12 +530,13 @@ public class UsuariosSistemaServiceImpl implements UsuariosSistemaService {
                 } else {
                     log.warn("Email não encontrado no Supabase para userId: {}", usuario.getUserId());
                 }
-            } catch (Exception e) {
-                log.error("Erro ao buscar email do Supabase para userId: {}", usuario.getUserId(), e);
+            } catch (RuntimeException e) {
+                log.error("Erro ao buscar email do Supabase para userId: {}, Exception: {}",
+                    usuario.getUserId(), e.getClass().getSimpleName(), e);
+
             }
         }
-        
-        // Buscar vínculos com estabelecimentos
+
         List<UsuarioEstabelecimento> vinculos = usuarioEstabelecimentoRepository.findByUsuarioUserId(usuario.getUserId());
         if (vinculos != null && !vinculos.isEmpty()) {
             List<UsuariosSistemaResponse.EstabelecimentoVinculoSimples> vinculosResponse = vinculos.stream()
@@ -521,8 +552,7 @@ public class UsuariosSistemaServiceImpl implements UsuariosSistemaService {
             response.setEstabelecimentosVinculados(vinculosResponse);
             log.debug("Vínculos de estabelecimentos carregados: {} ativos", vinculosResponse.size());
         }
-        
-        // Determinar tipo de usuário baseado em vínculos (retorna ENUM)
+
         if (Boolean.TRUE.equals(usuario.getAdminTenant())) {
             response.setTipoUsuario(com.upsaude.enums.TipoUsuarioSistemaEnum.ADMIN_TENANT);
         } else if (usuario.getMedico() != null) {
@@ -534,22 +564,18 @@ public class UsuariosSistemaServiceImpl implements UsuariosSistemaService {
         } else {
             response.setTipoUsuario(null);
         }
-        
+
         return response;
     }
-    
-    /**
-     * Enriquece o Response quando só temos o Response (para listagens).
-     * Busca a entidade para pegar dados completos.
-     */
+
     private UsuariosSistemaResponse enrichResponse(UsuariosSistemaResponse response) {
         UsuariosSistema usuario = usuariosSistemaRepository.findById(response.getId())
                 .orElse(null);
-        
+
         if (usuario != null) {
             return enrichResponseWithEntity(usuario);
         }
-        
+
         return response;
     }
 }

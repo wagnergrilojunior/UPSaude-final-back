@@ -3,12 +3,6 @@ package com.upsaude.enums;
 import java.util.Arrays;
 import java.util.Locale;
 
-/**
- * Enum para classificação de canais de notificação.
- * Baseado em padrões de sistemas de gestão de notificações.
- *
- * @author UPSaúde
- */
 public enum CanalNotificacaoEnum {
     EMAIL(1, "E-mail"),
     SMS(2, "SMS"),
@@ -51,4 +45,3 @@ public enum CanalNotificacaoEnum {
                 .orElse(null);
     }
 }
-

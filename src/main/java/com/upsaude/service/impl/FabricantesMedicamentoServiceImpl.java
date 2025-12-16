@@ -2,57 +2,63 @@ package com.upsaude.service.impl;
 
 import com.upsaude.api.request.FabricantesMedicamentoRequest;
 import com.upsaude.api.response.FabricantesMedicamentoResponse;
+import com.upsaude.cache.CacheKeyUtil;
 import com.upsaude.entity.FabricantesMedicamento;
 import com.upsaude.exception.BadRequestException;
 import com.upsaude.exception.NotFoundException;
-import com.upsaude.mapper.FabricantesMedicamentoMapper;
 import com.upsaude.repository.FabricantesMedicamentoRepository;
 import com.upsaude.service.FabricantesMedicamentoService;
-import jakarta.transaction.Transactional;
+import com.upsaude.service.support.fabricantesmedicamento.FabricantesMedicamentoCreator;
+import com.upsaude.service.support.fabricantesmedicamento.FabricantesMedicamentoDomainService;
+import com.upsaude.service.support.fabricantesmedicamento.FabricantesMedicamentoResponseBuilder;
+import com.upsaude.service.support.fabricantesmedicamento.FabricantesMedicamentoUpdater;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.BeanUtils;
+import org.springframework.cache.Cache;
+import org.springframework.cache.CacheManager;
 import org.springframework.data.domain.Page;
 import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Objects;
 import java.util.UUID;
 
-/**
- * Implementação do serviço de gerenciamento de FabricantesMedicamento.
- *
- * @author UPSaúde
- */
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class FabricantesMedicamentoServiceImpl implements FabricantesMedicamentoService {
 
     private final FabricantesMedicamentoRepository fabricantesMedicamentoRepository;
-    private final FabricantesMedicamentoMapper fabricantesMedicamentoMapper;
+    private final CacheManager cacheManager;
+
+    private final FabricantesMedicamentoCreator creator;
+    private final FabricantesMedicamentoUpdater updater;
+    private final FabricantesMedicamentoResponseBuilder responseBuilder;
+    private final FabricantesMedicamentoDomainService domainService;
 
     @Override
     @Transactional
-    @CacheEvict(value = "fabricantesmedicamento", allEntries = true)
     public FabricantesMedicamentoResponse criar(FabricantesMedicamentoRequest request) {
         log.debug("Criando novo fabricantesmedicamento");
+        FabricantesMedicamento saved = creator.criar(request);
+        FabricantesMedicamentoResponse response = responseBuilder.build(saved);
 
-        validarDadosBasicos(request);
+        Cache cache = cacheManager.getCache(CacheKeyUtil.CACHE_FABRICANTES_MEDICAMENTO);
+        if (cache != null) {
+            Object key = Objects.requireNonNull((Object) CacheKeyUtil.fabricanteMedicamento(saved.getId()));
+            cache.put(key, response);
+        }
 
-        FabricantesMedicamento fabricantesMedicamento = fabricantesMedicamentoMapper.fromRequest(request);
-        fabricantesMedicamento.setActive(true);
-
-        FabricantesMedicamento fabricantesMedicamentoSalvo = fabricantesMedicamentoRepository.save(fabricantesMedicamento);
-        log.info("FabricantesMedicamento criado com sucesso. ID: {}", fabricantesMedicamentoSalvo.getId());
-
-        return fabricantesMedicamentoMapper.toResponse(fabricantesMedicamentoSalvo);
+        return response;
     }
 
     @Override
     @Transactional
-    @Cacheable(value = "fabricantesmedicamento", key = "#id")
+    @Cacheable(cacheNames = CacheKeyUtil.CACHE_FABRICANTES_MEDICAMENTO, keyGenerator = "fabricantesMedicamentoCacheKeyGenerator")
     public FabricantesMedicamentoResponse obterPorId(UUID id) {
         log.debug("Buscando fabricantesmedicamento por ID: {} (cache miss)", id);
         if (id == null) {
@@ -62,7 +68,7 @@ public class FabricantesMedicamentoServiceImpl implements FabricantesMedicamento
         FabricantesMedicamento fabricantesMedicamento = fabricantesMedicamentoRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("FabricantesMedicamento não encontrado com ID: " + id));
 
-        return fabricantesMedicamentoMapper.toResponse(fabricantesMedicamento);
+        return responseBuilder.build(fabricantesMedicamento);
     }
 
     @Override
@@ -71,12 +77,12 @@ public class FabricantesMedicamentoServiceImpl implements FabricantesMedicamento
                 pageable.getPageNumber(), pageable.getPageSize());
 
         Page<FabricantesMedicamento> fabricantesMedicamentos = fabricantesMedicamentoRepository.findAll(pageable);
-        return fabricantesMedicamentos.map(fabricantesMedicamentoMapper::toResponse);
+        return fabricantesMedicamentos.map(responseBuilder::build);
     }
 
     @Override
     @Transactional
-    @CacheEvict(value = "fabricantesmedicamento", key = "#id")
+    @CachePut(cacheNames = CacheKeyUtil.CACHE_FABRICANTES_MEDICAMENTO, keyGenerator = "fabricantesMedicamentoCacheKeyGenerator")
     public FabricantesMedicamentoResponse atualizar(UUID id, FabricantesMedicamentoRequest request) {
         log.debug("Atualizando fabricantesmedicamento. ID: {}", id);
 
@@ -84,61 +90,29 @@ public class FabricantesMedicamentoServiceImpl implements FabricantesMedicamento
             throw new BadRequestException("ID do fabricantesmedicamento é obrigatório");
         }
 
-        validarDadosBasicos(request);
-
-        FabricantesMedicamento fabricantesMedicamentoExistente = fabricantesMedicamentoRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("FabricantesMedicamento não encontrado com ID: " + id));
-
-        atualizarDadosFabricantesMedicamento(fabricantesMedicamentoExistente, request);
-
-        FabricantesMedicamento fabricantesMedicamentoAtualizado = fabricantesMedicamentoRepository.save(fabricantesMedicamentoExistente);
-        log.info("FabricantesMedicamento atualizado com sucesso. ID: {}", fabricantesMedicamentoAtualizado.getId());
-
-        return fabricantesMedicamentoMapper.toResponse(fabricantesMedicamentoAtualizado);
+        FabricantesMedicamento updated = updater.atualizar(id, request);
+        return responseBuilder.build(updated);
     }
 
     @Override
     @Transactional
-    @CacheEvict(value = "fabricantesmedicamento", key = "#id")
+    @CacheEvict(cacheNames = CacheKeyUtil.CACHE_FABRICANTES_MEDICAMENTO, keyGenerator = "fabricantesMedicamentoCacheKeyGenerator", beforeInvocation = false)
     public void excluir(UUID id) {
         log.debug("Excluindo fabricantesmedicamento. ID: {}", id);
+        inativarInternal(id);
+    }
 
+    private void inativarInternal(UUID id) {
         if (id == null) {
             throw new BadRequestException("ID do fabricantesmedicamento é obrigatório");
         }
 
-        FabricantesMedicamento fabricantesMedicamento = fabricantesMedicamentoRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("FabricantesMedicamento não encontrado com ID: " + id));
+        FabricantesMedicamento entity = fabricantesMedicamentoRepository.findById(id)
+            .orElseThrow(() -> new NotFoundException("FabricantesMedicamento não encontrado com ID: " + id));
 
-        if (Boolean.FALSE.equals(fabricantesMedicamento.getActive())) {
-            throw new BadRequestException("FabricantesMedicamento já está inativo");
-        }
-
-        fabricantesMedicamento.setActive(false);
-        fabricantesMedicamentoRepository.save(fabricantesMedicamento);
+        domainService.validarPodeInativar(entity);
+        entity.setActive(false);
+        fabricantesMedicamentoRepository.save(Objects.requireNonNull(entity));
         log.info("FabricantesMedicamento excluído (desativado) com sucesso. ID: {}", id);
-    }
-
-    private void validarDadosBasicos(FabricantesMedicamentoRequest request) {
-        if (request == null) {
-            throw new BadRequestException("Dados do fabricantesmedicamento são obrigatórios");
-        }
-    }
-
-    private void atualizarDadosFabricantesMedicamento(FabricantesMedicamento fabricantesMedicamento, FabricantesMedicamentoRequest request) {
-        FabricantesMedicamento fabricantesMedicamentoAtualizado = fabricantesMedicamentoMapper.fromRequest(request);
-        
-        // Preserva campos de controle
-        java.util.UUID idOriginal = fabricantesMedicamento.getId();
-        Boolean activeOriginal = fabricantesMedicamento.getActive();
-        java.time.OffsetDateTime createdAtOriginal = fabricantesMedicamento.getCreatedAt();
-        
-        // Copia todas as propriedades do objeto atualizado
-        BeanUtils.copyProperties(fabricantesMedicamentoAtualizado, fabricantesMedicamento);
-        
-        // Restaura campos de controle
-        fabricantesMedicamento.setId(idOriginal);
-        fabricantesMedicamento.setActive(activeOriginal);
-        fabricantesMedicamento.setCreatedAt(createdAtOriginal);
     }
 }

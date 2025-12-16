@@ -11,30 +11,14 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 
-/**
- * Mapper para conversões de AcaoPromocaoPrevencao.
- * Entity ↔ DTO ↔ Request/Response
- */
 @Mapper(config = MappingConfig.class, uses = {EquipeSaudeMapper.class, ProfissionaisSaudeMapper.class})
 public interface AcaoPromocaoPrevencaoMapper extends EntityMapper<AcaoPromocaoPrevencao, AcaoPromocaoPrevencaoDTO> {
 
-    /**
-     * Converte DTO para Entity.
-     * O campo 'active' é ignorado (gerenciado pelo sistema).
-     */
     @Mapping(target = "active", ignore = true)
     AcaoPromocaoPrevencao toEntity(AcaoPromocaoPrevencaoDTO dto);
 
-    /**
-     * Converte Entity para DTO.
-     */
     AcaoPromocaoPrevencaoDTO toDTO(AcaoPromocaoPrevencao entity);
 
-    /**
-     * Converte Request para Entity.
-     * Os campos 'id', 'createdAt', 'updatedAt', 'active' são ignorados.
-     * Relacionamentos (UUID) devem ser tratados manualmente no Service.
-     */
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
@@ -44,11 +28,6 @@ public interface AcaoPromocaoPrevencaoMapper extends EntityMapper<AcaoPromocaoPr
     @Mapping(target = "profissionaisParticipantes", ignore = true)
     AcaoPromocaoPrevencao fromRequest(AcaoPromocaoPrevencaoRequest request);
 
-    /**
-     * Atualiza Entity existente com dados do Request.
-     * Os campos 'id', 'createdAt', 'updatedAt', 'active' são ignorados.
-     * Relacionamentos (UUID) devem ser tratados manualmente no Service.
-     */
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
@@ -58,8 +37,5 @@ public interface AcaoPromocaoPrevencaoMapper extends EntityMapper<AcaoPromocaoPr
     @Mapping(target = "profissionaisParticipantes", ignore = true)
     void updateFromRequest(AcaoPromocaoPrevencaoRequest request, @MappingTarget AcaoPromocaoPrevencao entity);
 
-    /**
-     * Converte Entity para Response.
-     */
     AcaoPromocaoPrevencaoResponse toResponse(AcaoPromocaoPrevencao entity);
 }

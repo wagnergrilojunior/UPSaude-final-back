@@ -23,4 +23,3 @@ public class TipoMetodoContraceptivoEnumConverter implements AttributeConverter<
         return TipoMetodoContraceptivoEnum.fromCodigo(dbData);
     }
 }
-

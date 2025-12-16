@@ -12,13 +12,6 @@ import jakarta.validation.constraints.Size;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
-/**
- * Entidade que representa um fabricante de vacinas.
- * Permite cadastrar fabricantes para referência em vacinas.
- * Baseado em padrões do PNI e ANVISA.
- *
- * @author UPSaúde
- */
 @Entity
 @Table(name = "fabricantes_vacina", schema = "public",
        indexes = {
@@ -73,7 +66,7 @@ public class FabricantesVacina extends BaseEntityWithoutTenant {
 
     @Size(max = 50, message = "Registro MS deve ter no máximo 50 caracteres")
     @Column(name = "registro_ms", length = 50)
-    private String registroMs; // Registro no Ministério da Saúde
+    private String registroMs;
 
     @Column(name = "observacoes", columnDefinition = "TEXT")
     private String observacoes;

@@ -1,6 +1,8 @@
 package com.upsaude.api.request.embeddable;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.upsaude.enums.StatusRegistroMedicoEnum;
+import com.upsaude.util.converter.StatusRegistroMedicoEnumDeserializer;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
@@ -11,29 +13,32 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDate;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 @Getter
 @Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@Schema(description = "Dados de registro profissional médico")
 public class RegistroProfissionalMedicoRequest {
     @NotBlank(message = "CRM é obrigatório")
     @Pattern(regexp = "^\\d{4,10}$", message = "CRM deve ter entre 4 e 10 dígitos")
     private String crm;
-    
-    @Pattern(regexp = "^[A-Z]{2}$", message = "UF do CRM deve ter 2 letras maiúsculas")
+
+    @Pattern(regexp = "^$|^[A-Z]{2}$", message = "UF do CRM deve ter exatamente 2 letras maiúsculas")
     private String crmUf;
-    
+
+    @JsonDeserialize(using = StatusRegistroMedicoEnumDeserializer.class)
     private StatusRegistroMedicoEnum statusCrm;
-    
+
     private LocalDate dataEmissaoCrm;
-    
+
     private LocalDate dataValidadeCrm;
-    
+
     @Size(max = 50, message = "CRM complementar deve ter no máximo 50 caracteres")
     private String crmComplementar;
-    
+
     @Size(max = 255, message = "Observações CRM deve ter no máximo 255 caracteres")
     private String observacoesCrm;
 }

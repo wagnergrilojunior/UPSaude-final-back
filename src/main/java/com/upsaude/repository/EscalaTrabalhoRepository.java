@@ -1,60 +1,57 @@
 package com.upsaude.repository;
 
 import com.upsaude.entity.EscalaTrabalho;
-import com.upsaude.entity.Tenant;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
-/**
- * Repositório para operações de banco de dados relacionadas a EscalaTrabalho.
- *
- * @author UPSaúde
- */
 @Repository
 public interface EscalaTrabalhoRepository extends JpaRepository<EscalaTrabalho, UUID> {
 
-    /**
-     * Busca todas as escalas de um profissional, ordenadas por dia da semana.
-     */
-    Page<EscalaTrabalho> findByProfissionalIdOrderByDiaSemanaAsc(UUID profissionalId, Pageable pageable);
+    @Query("SELECT e FROM EscalaTrabalho e WHERE e.id = :id AND e.tenant.id = :tenantId")
+    Optional<EscalaTrabalho> findByIdAndTenant(@Param("id") UUID id, @Param("tenantId") UUID tenantId);
 
-    /**
-     * Busca todas as escalas de um médico, ordenadas por dia da semana.
-     */
-    Page<EscalaTrabalho> findByMedicoIdOrderByDiaSemanaAsc(UUID medicoId, Pageable pageable);
+    @Query("SELECT e FROM EscalaTrabalho e WHERE e.tenant.id = :tenantId")
+    Page<EscalaTrabalho> findAllByTenant(@Param("tenantId") UUID tenantId, Pageable pageable);
 
-    /**
-     * Busca todas as escalas de um estabelecimento, ordenadas por profissional e dia da semana.
-     */
-    Page<EscalaTrabalho> findByEstabelecimentoIdOrderByProfissionalIdAscDiaSemanaAsc(
-            UUID estabelecimentoId, Pageable pageable);
+    @Query("""
+        SELECT e FROM EscalaTrabalho e
+        WHERE e.tenant.id = :tenantId
+          AND (:profissionalId IS NULL OR e.profissional.id = :profissionalId)
+          AND (:medicoId IS NULL OR e.medico.id = :medicoId)
+          AND (:estabelecimentoId IS NULL OR e.estabelecimento.id = :estabelecimentoId)
+          AND (:diaSemana IS NULL OR e.diaSemana = :diaSemana)
+          AND (:apenasAtivos IS NULL OR e.active = :apenasAtivos)
+          AND (:vigentesEm IS NULL OR ((e.dataInicio IS NULL OR e.dataInicio <= :vigentesEm) AND (e.dataFim IS NULL OR e.dataFim >= :vigentesEm)))
+        ORDER BY e.profissional.id ASC, e.diaSemana ASC
+        """)
+    Page<EscalaTrabalho> filtrar(
+        @Param("tenantId") UUID tenantId,
+        @Param("profissionalId") UUID profissionalId,
+        @Param("medicoId") UUID medicoId,
+        @Param("estabelecimentoId") UUID estabelecimentoId,
+        @Param("diaSemana") DayOfWeek diaSemana,
+        @Param("vigentesEm") LocalDate vigentesEm,
+        @Param("apenasAtivos") Boolean apenasAtivos,
+        Pageable pageable
+    );
 
-    /**
-     * Busca todas as escalas de um profissional em um dia da semana específico.
-     */
-    List<EscalaTrabalho> findByProfissionalIdAndDiaSemana(UUID profissionalId, DayOfWeek diaSemana);
+    Page<EscalaTrabalho> findByProfissionalIdAndTenantIdOrderByDiaSemanaAsc(UUID profissionalId, UUID tenantId, Pageable pageable);
 
-    /**
-     * Busca todas as escalas de um estabelecimento em um dia da semana específico.
-     */
-    List<EscalaTrabalho> findByEstabelecimentoIdAndDiaSemana(UUID estabelecimentoId, DayOfWeek diaSemana);
+    Page<EscalaTrabalho> findByMedicoIdAndTenantIdOrderByDiaSemanaAsc(UUID medicoId, UUID tenantId, Pageable pageable);
 
-    /**
-     * Busca todas as escalas vigentes de um profissional (sem data fim ou data fim no futuro).
-     */
-    List<EscalaTrabalho> findByProfissionalIdAndDataFimIsNullOrProfissionalIdAndDataFimAfter(
-            UUID profissionalId, UUID profissionalId2, LocalDate data);
+    Page<EscalaTrabalho> findByEstabelecimentoIdAndTenantIdOrderByProfissionalIdAscDiaSemanaAsc(UUID estabelecimentoId, UUID tenantId, Pageable pageable);
 
-    /**
-     * Busca todas as escalas de um tenant.
-     */
-    Page<EscalaTrabalho> findByTenantOrderByProfissionalIdAscDiaSemanaAsc(Tenant tenant, Pageable pageable);
+    List<EscalaTrabalho> findByProfissionalIdAndDiaSemanaAndTenantId(UUID profissionalId, DayOfWeek diaSemana, UUID tenantId);
+
+    List<EscalaTrabalho> findByEstabelecimentoIdAndDiaSemanaAndTenantId(UUID estabelecimentoId, DayOfWeek diaSemana, UUID tenantId);
 }
-

@@ -21,13 +21,6 @@ import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
-/**
- * Entidade que representa uma consulta médica.
- * Armazena informações completas sobre consultas para sistemas de gestão de saúde.
- * Baseado em padrões de prontuário eletrônico e sistemas de saúde.
- *
- * @author UPSaúde
- */
 @Entity
 @Table(name = "consultas", schema = "public",
        indexes = {
@@ -51,8 +44,6 @@ public class Consultas extends BaseEntity {
         this.atestado = new AtestadoConsulta();
     }
 
-    // ========== RELACIONAMENTOS ==========
-
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "paciente_id", nullable = false)
     @NotNull(message = "Paciente é obrigatório")
@@ -64,64 +55,46 @@ public class Consultas extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "profissional_saude_id")
-    private ProfissionaisSaude profissionalSaude; // Profissional que realizou a consulta (pode ser diferente do médico)
+    private ProfissionaisSaude profissionalSaude;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "especialidade_id")
-    private EspecialidadesMedicas especialidade; // Especialidade da consulta
+    private EspecialidadesMedicas especialidade;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "convenio_id")
-    private Convenio convenio; // Convênio utilizado na consulta
-
-    // ========== INFORMAÇÕES BÁSICAS ==========
+    private Convenio convenio;
 
     @Embedded
     private InformacoesConsulta informacoes;
 
-    // ========== ANAMNESE ==========
-
     @Embedded
     private AnamneseConsulta anamnese;
-
-    // ========== DIAGNÓSTICO ==========
 
     @Embedded
     private DiagnosticoConsulta diagnostico;
 
-    // ========== PRESCRIÇÃO ==========
-
     @Embedded
     private PrescricaoConsulta prescricao;
-
-    // ========== EXAMES SOLICITADOS ==========
 
     @Embedded
     private ExamesSolicitadosConsulta examesSolicitados;
 
-    // ========== ENCAMINHAMENTO ==========
-
     @Embedded
     private EncaminhamentoConsulta encaminhamento;
-
-    // ========== ATESTADO ==========
 
     @Embedded
     private AtestadoConsulta atestado;
 
-    // ========== RELACIONAMENTO COM CID ==========
-
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "cid_principal_id")
-    private CidDoencas cidPrincipal; // CID principal da consulta
-
-    // ========== OBSERVAÇÕES ==========
+    private CidDoencas cidPrincipal;
 
     @Column(name = "observacoes", columnDefinition = "TEXT")
-    private String observacoes; // Observações gerais da consulta
+    private String observacoes;
 
     @Column(name = "observacoes_internas", columnDefinition = "TEXT")
-    private String observacoesInternas; // Observações internas (não visíveis ao paciente)
+    private String observacoesInternas;
 
     @PrePersist
     @PreUpdate

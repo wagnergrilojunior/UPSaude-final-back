@@ -14,7 +14,6 @@ public interface ContraindicacoesPrecaucoesMedicamentoMapper {
     ContraindicacoesPrecaucoesMedicamentoResponse toResponse(ContraindicacoesPrecaucoesMedicamento entity);
     void updateFromRequest(ContraindicacoesPrecaucoesMedicamentoRequest request, @MappingTarget ContraindicacoesPrecaucoesMedicamento entity);
 
-    // Mapeamento entre DTO e Entity
     ContraindicacoesPrecaucoesMedicamento toEntity(com.upsaude.dto.embeddable.ContraindicacoesPrecaucoesMedicamentoDTO dto);
     com.upsaude.dto.embeddable.ContraindicacoesPrecaucoesMedicamentoDTO toDTO(ContraindicacoesPrecaucoesMedicamento entity);
     void updateFromDTO(com.upsaude.dto.embeddable.ContraindicacoesPrecaucoesMedicamentoDTO dto, @MappingTarget ContraindicacoesPrecaucoesMedicamento entity);

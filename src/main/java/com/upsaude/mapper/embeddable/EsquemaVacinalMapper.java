@@ -14,7 +14,6 @@ public interface EsquemaVacinalMapper {
     EsquemaVacinalResponse toResponse(EsquemaVacinal entity);
     void updateFromRequest(EsquemaVacinalRequest request, @MappingTarget EsquemaVacinal entity);
 
-    // Mapeamento entre DTO e Entity
     EsquemaVacinal toEntity(com.upsaude.dto.embeddable.EsquemaVacinalDTO dto);
     com.upsaude.dto.embeddable.EsquemaVacinalDTO toDTO(EsquemaVacinal entity);
     void updateFromDTO(com.upsaude.dto.embeddable.EsquemaVacinalDTO dto, @MappingTarget EsquemaVacinal entity);

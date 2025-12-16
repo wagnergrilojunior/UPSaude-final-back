@@ -2,6 +2,7 @@ package com.upsaude.controller;
 
 import com.upsaude.api.request.VisitasDomiciliaresRequest;
 import com.upsaude.api.response.VisitasDomiciliaresResponse;
+import com.upsaude.enums.TipoVisitaDomiciliarEnum;
 import com.upsaude.exception.BadRequestException;
 import com.upsaude.exception.ConflictException;
 import com.upsaude.exception.NotFoundException;
@@ -22,13 +23,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.OffsetDateTime;
 import java.util.UUID;
 
-/**
- * Controlador REST para operações relacionadas a Visitas Domiciliares.
- *
- * @author UPSaúde
- */
 @RestController
 @RequestMapping("/v1/visitas-domiciliares")
 @Tag(name = "Visitas Domiciliares", description = "API para gerenciamento de Visitas Domiciliares")
@@ -69,10 +66,17 @@ public class VisitasDomiciliaresController {
     })
     public ResponseEntity<Page<VisitasDomiciliaresResponse>> listar(
             @Parameter(description = "Parâmetros de paginação (page, size, sort)")
-            Pageable pageable) {
-        log.debug("REQUEST GET /v1/visitas-domiciliares - pageable: {}", pageable);
+            Pageable pageable,
+            @RequestParam(required = false) UUID estabelecimentoId,
+            @RequestParam(required = false) UUID pacienteId,
+            @RequestParam(required = false) UUID profissionalId,
+            @RequestParam(required = false) TipoVisitaDomiciliarEnum tipoVisita,
+            @RequestParam(required = false) OffsetDateTime inicio,
+            @RequestParam(required = false) OffsetDateTime fim) {
+        log.debug("REQUEST GET /v1/visitas-domiciliares - pageable: {}, estabelecimentoId: {}, pacienteId: {}, profissionalId: {}, tipoVisita: {}, inicio: {}, fim: {}",
+            pageable, estabelecimentoId, pacienteId, profissionalId, tipoVisita, inicio, fim);
         try {
-            Page<VisitasDomiciliaresResponse> response = visitasDomiciliaresService.listar(pageable);
+            Page<VisitasDomiciliaresResponse> response = visitasDomiciliaresService.listar(pageable, estabelecimentoId, pacienteId, profissionalId, tipoVisita, inicio, fim);
             return ResponseEntity.ok(response);
         } catch (Exception ex) {
             log.error("Erro inesperado ao listar visitas domiciliares — pageable: {}", pageable, ex);

@@ -3,11 +3,6 @@ package com.upsaude.enums;
 import java.util.Arrays;
 import java.util.Locale;
 
-/**
- * Enum para status do acompanhamento pré-natal.
- *
- * @author UPSaúde
- */
 public enum StatusPreNatalEnum {
     EM_ACOMPANHAMENTO(1, "Em Acompanhamento"),
     CONCLUIDO_PARTO_NORMAL(2, "Concluído - Parto Normal"),
@@ -51,4 +46,3 @@ public enum StatusPreNatalEnum {
                 .orElse(null);
     }
 }
-

@@ -1,50 +1,46 @@
 package com.upsaude.repository;
 
 import com.upsaude.entity.InfraestruturaEstabelecimento;
-import com.upsaude.entity.Tenant;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
-/**
- * Repositório para operações de banco de dados relacionadas a InfraestruturaEstabelecimento.
- *
- * @author UPSaúde
- */
 @Repository
 public interface InfraestruturaEstabelecimentoRepository extends JpaRepository<InfraestruturaEstabelecimento, UUID> {
 
-    /**
-     * Busca toda a infraestrutura de um estabelecimento, ordenada por tipo.
-     */
-    Page<InfraestruturaEstabelecimento> findByEstabelecimentoIdOrderByTipoAsc(
-            UUID estabelecimentoId, Pageable pageable);
+    @Query("SELECT i FROM InfraestruturaEstabelecimento i WHERE i.id = :id AND i.tenant.id = :tenantId")
+    Optional<InfraestruturaEstabelecimento> findByIdAndTenant(@Param("id") UUID id, @Param("tenantId") UUID tenantId);
 
-    /**
-     * Busca infraestrutura por tipo em um estabelecimento.
-     */
-    List<InfraestruturaEstabelecimento> findByEstabelecimentoIdAndTipo(
-            UUID estabelecimentoId, String tipo);
+    @Query("SELECT i FROM InfraestruturaEstabelecimento i WHERE i.tenant.id = :tenantId")
+    Page<InfraestruturaEstabelecimento> findAllByTenant(@Param("tenantId") UUID tenantId, Pageable pageable);
 
-    /**
-     * Busca infraestrutura por código CNES em um estabelecimento.
-     */
-    List<InfraestruturaEstabelecimento> findByEstabelecimentoIdAndCodigoCnes(
-            UUID estabelecimentoId, String codigoCnes);
+    @Query("SELECT i FROM InfraestruturaEstabelecimento i WHERE i.estabelecimento.id = :estabelecimentoId AND i.tenant.id = :tenantId ORDER BY i.tipo ASC")
+    Page<InfraestruturaEstabelecimento> findByEstabelecimentoIdAndTenantIdOrderByTipoAsc(
+        @Param("estabelecimentoId") UUID estabelecimentoId,
+        @Param("tenantId") UUID tenantId,
+        Pageable pageable);
 
-    /**
-     * Busca toda a infraestrutura ativa de um estabelecimento.
-     */
-    List<InfraestruturaEstabelecimento> findByEstabelecimentoIdAndActiveTrueOrderByTipoAsc(
-            UUID estabelecimentoId);
+    @Query("SELECT i FROM InfraestruturaEstabelecimento i WHERE i.estabelecimento.id = :estabelecimentoId AND i.tipo = :tipo AND i.tenant.id = :tenantId")
+    List<InfraestruturaEstabelecimento> findByEstabelecimentoIdAndTipoAndTenantId(
+        @Param("estabelecimentoId") UUID estabelecimentoId,
+        @Param("tipo") String tipo,
+        @Param("tenantId") UUID tenantId);
 
-    /**
-     * Busca todos os registros de infraestrutura de um tenant.
-     */
-    Page<InfraestruturaEstabelecimento> findByTenantOrderByCreatedAtDesc(Tenant tenant, Pageable pageable);
+    @Query("SELECT i FROM InfraestruturaEstabelecimento i WHERE i.estabelecimento.id = :estabelecimentoId AND i.codigoCnes = :codigoCnes AND i.tenant.id = :tenantId")
+    List<InfraestruturaEstabelecimento> findByEstabelecimentoIdAndCodigoCnesAndTenantId(
+        @Param("estabelecimentoId") UUID estabelecimentoId,
+        @Param("codigoCnes") String codigoCnes,
+        @Param("tenantId") UUID tenantId);
+
+    @Query("SELECT i FROM InfraestruturaEstabelecimento i WHERE i.estabelecimento.id = :estabelecimentoId AND i.active = true AND i.tenant.id = :tenantId ORDER BY i.tipo ASC")
+    List<InfraestruturaEstabelecimento> findByEstabelecimentoIdAndActiveTrueAndTenantIdOrderByTipoAsc(
+        @Param("estabelecimentoId") UUID estabelecimentoId,
+        @Param("tenantId") UUID tenantId);
 }
-

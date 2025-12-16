@@ -10,11 +10,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 
-/**
- * Classe embeddable para classificação da especialidade médica.
- *
- * @author UPSaúde
- */
 @Embeddable
 @Data
 @Builder
@@ -36,26 +31,25 @@ public class ClassificacaoEspecialidadeMedica {
 
     @Size(max = 50, message = "Código CFM deve ter no máximo 50 caracteres")
     @Column(name = "codigo_cfm", length = 50)
-    private String codigoCfm; // Código da especialidade no CFM
+    private String codigoCfm;
 
     @Size(max = 50, message = "Código CNES deve ter no máximo 50 caracteres")
     @Column(name = "codigo_cnes", length = 50)
-    private String codigoCnes; // Código da especialidade no CNES
+    private String codigoCnes;
 
     @Size(max = 100, message = "Área de atuação deve ter no máximo 100 caracteres")
     @Column(name = "area_atuacao", length = 100)
-    private String areaAtuacao; // Ex: Clínica, Cirúrgica, Diagnóstica
+    private String areaAtuacao;
 
     @Size(max = 100, message = "Subárea deve ter no máximo 100 caracteres")
     @Column(name = "subarea", length = 100)
-    private String subarea; // Subárea da especialidade
+    private String subarea;
 
     @Column(name = "requer_residencia", nullable = false)
     @Builder.Default
-    private Boolean requerResidencia = false; // Se requer residência médica
+    private Boolean requerResidencia = false;
 
     @Column(name = "requer_titulo_especialista", nullable = false)
     @Builder.Default
-    private Boolean requerTituloEspecialista = false; // Se requer título de especialista
+    private Boolean requerTituloEspecialista = false;
 }
-

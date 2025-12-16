@@ -14,7 +14,6 @@ public interface RegistroProfissionalMedicoMapper {
     RegistroProfissionalMedicoResponse toResponse(RegistroProfissionalMedico entity);
     void updateFromRequest(RegistroProfissionalMedicoRequest request, @MappingTarget RegistroProfissionalMedico entity);
 
-    // Mapeamento entre DTO e Entity
     RegistroProfissionalMedico toEntity(com.upsaude.dto.embeddable.RegistroProfissionalMedicoDTO dto);
     com.upsaude.dto.embeddable.RegistroProfissionalMedicoDTO toDTO(RegistroProfissionalMedico entity);
     void updateFromDTO(com.upsaude.dto.embeddable.RegistroProfissionalMedicoDTO dto, @MappingTarget RegistroProfissionalMedico entity);

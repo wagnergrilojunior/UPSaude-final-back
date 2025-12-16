@@ -7,11 +7,6 @@ import org.springframework.data.domain.Pageable;
 
 import java.util.UUID;
 
-/**
- * Interface de serviço para operações CRUD relacionadas a Profissionais de Saúde.
- *
- * @author UPSaúde
- */
 public interface ProfissionaisSaudeService {
 
     ProfissionaisSaudeResponse criar(ProfissionaisSaudeRequest request);
@@ -23,5 +18,8 @@ public interface ProfissionaisSaudeService {
     ProfissionaisSaudeResponse atualizar(UUID id, ProfissionaisSaudeRequest request);
 
     void excluir(UUID id);
-}
 
+    void inativar(UUID id);
+
+    void deletarPermanentemente(UUID id);
+}

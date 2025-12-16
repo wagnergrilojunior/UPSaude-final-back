@@ -1,146 +1,123 @@
 package com.upsaude.service.impl;
 
+import com.upsaude.cache.CacheKeyUtil;
 import com.upsaude.api.request.MovimentacoesEstoqueRequest;
 import com.upsaude.api.response.MovimentacoesEstoqueResponse;
 import com.upsaude.entity.MovimentacoesEstoque;
+import com.upsaude.entity.Tenant;
 import com.upsaude.exception.BadRequestException;
-import com.upsaude.exception.NotFoundException;
-import com.upsaude.mapper.MovimentacoesEstoqueMapper;
 import com.upsaude.repository.MovimentacoesEstoqueRepository;
 import com.upsaude.service.MovimentacoesEstoqueService;
-import jakarta.transaction.Transactional;
+import com.upsaude.service.TenantService;
+import com.upsaude.service.support.movimentacoesestoque.MovimentacoesEstoqueCreator;
+import com.upsaude.service.support.movimentacoesestoque.MovimentacoesEstoqueResponseBuilder;
+import com.upsaude.service.support.movimentacoesestoque.MovimentacoesEstoqueTenantEnforcer;
+import com.upsaude.service.support.movimentacoesestoque.MovimentacoesEstoqueUpdater;
+import com.upsaude.service.support.movimentacoesestoque.MovimentacoesEstoqueValidationService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.BeanUtils;
 import org.springframework.data.domain.Page;
+import org.springframework.cache.Cache;
+import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Objects;
 import java.util.UUID;
 
-/**
- * Implementação do serviço de gerenciamento de MovimentacoesEstoque.
- *
- * @author UPSaúde
- */
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class MovimentacoesEstoqueServiceImpl implements MovimentacoesEstoqueService {
 
     private final MovimentacoesEstoqueRepository movimentacoesEstoqueRepository;
-    private final MovimentacoesEstoqueMapper movimentacoesEstoqueMapper;
+    private final TenantService tenantService;
+    private final CacheManager cacheManager;
+
+    private final MovimentacoesEstoqueValidationService validationService;
+    private final MovimentacoesEstoqueTenantEnforcer tenantEnforcer;
+    private final MovimentacoesEstoqueCreator creator;
+    private final MovimentacoesEstoqueUpdater updater;
+    private final MovimentacoesEstoqueResponseBuilder responseBuilder;
 
     @Override
     @Transactional
-    @CacheEvict(value = "movimentacoesestoque", allEntries = true)
     public MovimentacoesEstoqueResponse criar(MovimentacoesEstoqueRequest request) {
-        log.debug("Criando novo movimentacoesestoque");
+        log.debug("Criando nova movimentação de estoque. Request: {}", request);
+        validationService.validarObrigatorios(request);
 
-        validarDadosBasicos(request);
+        UUID tenantId = tenantService.validarTenantAtual();
+        Tenant tenant = tenantService.obterTenantDoUsuarioAutenticado();
 
-        MovimentacoesEstoque movimentacoesEstoque = movimentacoesEstoqueMapper.fromRequest(request);
-        movimentacoesEstoque.setActive(true);
+        MovimentacoesEstoque saved = creator.criar(request, tenantId, tenant);
+        MovimentacoesEstoqueResponse response = responseBuilder.build(saved);
 
-        MovimentacoesEstoque movimentacoesEstoqueSalvo = movimentacoesEstoqueRepository.save(movimentacoesEstoque);
-        log.info("MovimentacoesEstoque criado com sucesso. ID: {}", movimentacoesEstoqueSalvo.getId());
-
-        return movimentacoesEstoqueMapper.toResponse(movimentacoesEstoqueSalvo);
-    }
-
-    @Override
-    @Transactional
-    @Cacheable(value = "movimentacoesestoque", key = "#id")
-    public MovimentacoesEstoqueResponse obterPorId(UUID id) {
-        log.debug("Buscando movimentacoesestoque por ID: {} (cache miss)", id);
-        if (id == null) {
-            throw new BadRequestException("ID do movimentacoesestoque é obrigatório");
+        Cache cache = cacheManager.getCache(CacheKeyUtil.CACHE_MOVIMENTACOES_ESTOQUE);
+        if (cache != null && response != null && response.getId() != null) {
+            cache.put(Objects.requireNonNull((Object) CacheKeyUtil.movimentacaoEstoque(tenantId, response.getId())), response);
         }
 
-        MovimentacoesEstoque movimentacoesEstoque = movimentacoesEstoqueRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("MovimentacoesEstoque não encontrado com ID: " + id));
-
-        return movimentacoesEstoqueMapper.toResponse(movimentacoesEstoque);
+        return response;
     }
 
     @Override
-    public Page<MovimentacoesEstoqueResponse> listar(Pageable pageable) {
-        log.debug("Listando MovimentacoesEstoques paginados. Página: {}, Tamanho: {}",
-                pageable.getPageNumber(), pageable.getPageSize());
+    @Transactional(readOnly = true)
+    @Cacheable(cacheNames = CacheKeyUtil.CACHE_MOVIMENTACOES_ESTOQUE, keyGenerator = "movimentacoesEstoqueCacheKeyGenerator")
+    public MovimentacoesEstoqueResponse obterPorId(UUID id) {
+        log.debug("Buscando movimentacoesestoque por ID: {} (cache miss)", id);
+        validationService.validarId(id);
+        UUID tenantId = tenantService.validarTenantAtual();
+        return responseBuilder.build(tenantEnforcer.validarAcessoCompleto(id, tenantId));
+    }
 
-        Page<MovimentacoesEstoque> movimentacoesEstoques = movimentacoesEstoqueRepository.findAll(pageable);
-        return movimentacoesEstoques.map(movimentacoesEstoqueMapper::toResponse);
+    @Override
+    @Transactional(readOnly = true)
+    public Page<MovimentacoesEstoqueResponse> listar(Pageable pageable) {
+        log.debug("Listando movimentações de estoque paginadas. Pageable: {}", pageable);
+        UUID tenantId = tenantService.validarTenantAtual();
+        return movimentacoesEstoqueRepository.findAllByTenant(tenantId, pageable).map(responseBuilder::build);
     }
 
     @Override
     @Transactional
-    @CacheEvict(value = "movimentacoesestoque", key = "#id")
+    @CachePut(cacheNames = CacheKeyUtil.CACHE_MOVIMENTACOES_ESTOQUE, keyGenerator = "movimentacoesEstoqueCacheKeyGenerator")
     public MovimentacoesEstoqueResponse atualizar(UUID id, MovimentacoesEstoqueRequest request) {
         log.debug("Atualizando movimentacoesestoque. ID: {}", id);
 
-        if (id == null) {
-            throw new BadRequestException("ID do movimentacoesestoque é obrigatório");
-        }
+        validationService.validarId(id);
+        validationService.validarObrigatorios(request);
 
-        validarDadosBasicos(request);
+        UUID tenantId = tenantService.validarTenantAtual();
+        Tenant tenant = tenantService.obterTenantDoUsuarioAutenticado();
 
-        MovimentacoesEstoque movimentacoesEstoqueExistente = movimentacoesEstoqueRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("MovimentacoesEstoque não encontrado com ID: " + id));
-
-        atualizarDadosMovimentacoesEstoque(movimentacoesEstoqueExistente, request);
-
-        MovimentacoesEstoque movimentacoesEstoqueAtualizado = movimentacoesEstoqueRepository.save(movimentacoesEstoqueExistente);
-        log.info("MovimentacoesEstoque atualizado com sucesso. ID: {}", movimentacoesEstoqueAtualizado.getId());
-
-        return movimentacoesEstoqueMapper.toResponse(movimentacoesEstoqueAtualizado);
+        MovimentacoesEstoque updated = updater.atualizar(id, request, tenantId, tenant);
+        return responseBuilder.build(updated);
     }
 
     @Override
     @Transactional
-    @CacheEvict(value = "movimentacoesestoque", key = "#id")
+    @CacheEvict(cacheNames = CacheKeyUtil.CACHE_MOVIMENTACOES_ESTOQUE, keyGenerator = "movimentacoesEstoqueCacheKeyGenerator", beforeInvocation = false)
     public void excluir(UUID id) {
         log.debug("Excluindo movimentacoesestoque. ID: {}", id);
 
-        if (id == null) {
-            throw new BadRequestException("ID do movimentacoesestoque é obrigatório");
-        }
-
-        MovimentacoesEstoque movimentacoesEstoque = movimentacoesEstoqueRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("MovimentacoesEstoque não encontrado com ID: " + id));
-
-        if (Boolean.FALSE.equals(movimentacoesEstoque.getActive())) {
-            throw new BadRequestException("MovimentacoesEstoque já está inativo");
-        }
-
-        movimentacoesEstoque.setActive(false);
-        movimentacoesEstoqueRepository.save(movimentacoesEstoque);
-        log.info("MovimentacoesEstoque excluído (desativado) com sucesso. ID: {}", id);
+        validationService.validarId(id);
+        UUID tenantId = tenantService.validarTenantAtual();
+        inativarInternal(id, tenantId);
     }
 
-    private void validarDadosBasicos(MovimentacoesEstoqueRequest request) {
-        if (request == null) {
-            throw new BadRequestException("Dados do movimentacoesestoque são obrigatórios");
-        }
-    }
+    private void inativarInternal(UUID id, UUID tenantId) {
+        MovimentacoesEstoque entity = tenantEnforcer.validarAcesso(id, tenantId);
 
-        private void atualizarDadosMovimentacoesEstoque(MovimentacoesEstoque movimentacoesEstoque, MovimentacoesEstoqueRequest request) {
-        MovimentacoesEstoque movimentacoesEstoqueAtualizado = movimentacoesEstoqueMapper.fromRequest(request);
-        
-        // Preserva campos de controle
-        java.util.UUID idOriginal = movimentacoesEstoque.getId();
-        com.upsaude.entity.Tenant tenantOriginal = movimentacoesEstoque.getTenant();
-        Boolean activeOriginal = movimentacoesEstoque.getActive();
-        java.time.OffsetDateTime createdAtOriginal = movimentacoesEstoque.getCreatedAt();
-        
-        // Copia todas as propriedades do objeto atualizado
-        BeanUtils.copyProperties(movimentacoesEstoqueAtualizado, movimentacoesEstoque);
-        
-        // Restaura campos de controle
-        movimentacoesEstoque.setId(idOriginal);
-        movimentacoesEstoque.setTenant(tenantOriginal);
-        movimentacoesEstoque.setActive(activeOriginal);
-        movimentacoesEstoque.setCreatedAt(createdAtOriginal);
+        if (Boolean.FALSE.equals(entity.getActive())) {
+            throw new BadRequestException("Movimentação de estoque já está inativa");
+        }
+
+        entity.setActive(false);
+        movimentacoesEstoqueRepository.save(entity);
+        log.info("Movimentação de estoque excluída (desativada) com sucesso. ID: {}, tenant: {}", id, tenantId);
     }
 }

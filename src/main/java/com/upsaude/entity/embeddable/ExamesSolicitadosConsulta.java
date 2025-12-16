@@ -6,11 +6,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 
-/**
- * Classe embeddable para informações de exames solicitados na consulta.
- *
- * @author UPSaúde
- */
 @Embeddable
 @Data
 @Builder
@@ -26,19 +21,18 @@ public class ExamesSolicitadosConsulta {
     }
 
     @Column(name = "exames_solicitados", columnDefinition = "TEXT")
-    private String examesSolicitados; // Exames solicitados
+    private String examesSolicitados;
 
     @Column(name = "exames_laboratoriais", columnDefinition = "TEXT")
-    private String examesLaboratoriais; // Exames laboratoriais solicitados
+    private String examesLaboratoriais;
 
     @Column(name = "exames_imagem", columnDefinition = "TEXT")
-    private String examesImagem; // Exames de imagem solicitados
+    private String examesImagem;
 
     @Column(name = "exames_outros", columnDefinition = "TEXT")
-    private String examesOutros; // Outros exames solicitados
+    private String examesOutros;
 
     @Column(name = "urgencia_exames", nullable = false)
     @Builder.Default
-    private Boolean urgenciaExames = false; // Se os exames são urgentes
+    private Boolean urgenciaExames = false;
 }
-

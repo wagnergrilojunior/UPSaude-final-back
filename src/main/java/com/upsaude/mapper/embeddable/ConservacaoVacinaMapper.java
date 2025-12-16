@@ -14,7 +14,6 @@ public interface ConservacaoVacinaMapper {
     ConservacaoVacinaResponse toResponse(ConservacaoVacina entity);
     void updateFromRequest(ConservacaoVacinaRequest request, @MappingTarget ConservacaoVacina entity);
 
-    // Mapeamento entre DTO e Entity
     ConservacaoVacina toEntity(com.upsaude.dto.embeddable.ConservacaoVacinaDTO dto);
     com.upsaude.dto.embeddable.ConservacaoVacinaDTO toDTO(ConservacaoVacina entity);
     void updateFromDTO(com.upsaude.dto.embeddable.ConservacaoVacinaDTO dto, @MappingTarget ConservacaoVacina entity);

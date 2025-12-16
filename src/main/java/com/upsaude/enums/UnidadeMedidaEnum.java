@@ -3,10 +3,6 @@ package com.upsaude.enums;
 import java.util.Arrays;
 import java.util.Locale;
 
-/**
- * Enum para classificação de unidades de medida de medicamentos conforme padrão SUS/SIGTAP.
- * Baseado no Sistema Internacional de Unidades (SI) e padrões ANVISA.
- */
 public enum UnidadeMedidaEnum {
     MILIGRAMA(1, "mg", "Miligrama"),
     GRAMA(2, "g", "Grama"),
@@ -57,10 +53,9 @@ public enum UnidadeMedidaEnum {
         if (descricao == null) return null;
         String d = descricao.trim().toLowerCase(Locale.ROOT);
         return Arrays.stream(values())
-                .filter(v -> v.descricao.toLowerCase(Locale.ROOT).equals(d) || 
+                .filter(v -> v.descricao.toLowerCase(Locale.ROOT).equals(d) ||
                            v.sigla.toLowerCase(Locale.ROOT).equals(d))
                 .findFirst()
                 .orElse(null);
     }
 }
-

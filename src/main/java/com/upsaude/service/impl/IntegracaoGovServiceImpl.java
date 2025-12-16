@@ -1,23 +1,33 @@
 package com.upsaude.service.impl;
 
+import com.upsaude.cache.CacheKeyUtil;
 import com.upsaude.api.request.IntegracaoGovRequest;
 import com.upsaude.api.response.IntegracaoGovResponse;
 import com.upsaude.entity.IntegracaoGov;
+import com.upsaude.entity.Tenant;
 import com.upsaude.exception.BadRequestException;
-import com.upsaude.exception.ConflictException;
 import com.upsaude.exception.NotFoundException;
-import com.upsaude.mapper.IntegracaoGovMapper;
 import com.upsaude.repository.IntegracaoGovRepository;
 import com.upsaude.service.IntegracaoGovService;
-import jakarta.transaction.Transactional;
+import com.upsaude.service.TenantService;
+import com.upsaude.service.support.integracaogov.IntegracaoGovCreator;
+import com.upsaude.service.support.integracaogov.IntegracaoGovResponseBuilder;
+import com.upsaude.service.support.integracaogov.IntegracaoGovTenantEnforcer;
+import com.upsaude.service.support.integracaogov.IntegracaoGovUpdater;
+import com.upsaude.service.support.integracaogov.IntegracaoGovValidationService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.Cache;
+import org.springframework.cache.CacheManager;
 import org.springframework.data.domain.Page;
 import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Objects;
 import java.util.UUID;
 
 @Slf4j
@@ -26,109 +36,95 @@ import java.util.UUID;
 public class IntegracaoGovServiceImpl implements IntegracaoGovService {
 
     private final IntegracaoGovRepository repository;
-    private final IntegracaoGovMapper mapper;
+    private final TenantService tenantService;
+    private final CacheManager cacheManager;
+
+    private final IntegracaoGovValidationService validationService;
+    private final IntegracaoGovTenantEnforcer tenantEnforcer;
+    private final IntegracaoGovCreator creator;
+    private final IntegracaoGovUpdater updater;
+    private final IntegracaoGovResponseBuilder responseBuilder;
 
     @Override
     @Transactional
-    @CacheEvict(value = "integracaogov", allEntries = true)
     public IntegracaoGovResponse criar(IntegracaoGovRequest request) {
-        log.debug("Criando integração gov para paciente: {}", request.getPaciente());
+        log.debug("Criando integração gov. Request: {}", request);
+        validationService.validarObrigatorios(request);
 
-        if (request.getPaciente() == null) {
-            throw new BadRequestException("ID do paciente é obrigatório");
+        UUID tenantId = tenantService.validarTenantAtual();
+        Tenant tenant = tenantService.obterTenantDoUsuarioAutenticado();
+
+        IntegracaoGov saved = creator.criar(request, tenantId, tenant);
+        IntegracaoGovResponse response = responseBuilder.build(saved);
+
+        Cache cache = cacheManager.getCache(CacheKeyUtil.CACHE_INTEGRACAO_GOV);
+        if (cache != null && response != null && response.getId() != null) {
+            cache.put(Objects.requireNonNull((Object) CacheKeyUtil.integracaoGov(tenantId, response.getId())), response);
         }
 
-        repository.findByPacienteId(request.getPaciente())
-                .ifPresent(d -> {
-                    throw new ConflictException("Integração gov já existe para este paciente");
-                });
-
-        IntegracaoGov entity = mapper.fromRequest(request);
-        entity.setActive(true);
-
-        IntegracaoGov saved = repository.save(entity);
-        log.info("Integração gov criada. ID: {}", saved.getId());
-
-        return mapper.toResponse(saved);
+        return response;
     }
 
     @Override
+    @Transactional(readOnly = true)
+    @Cacheable(cacheNames = CacheKeyUtil.CACHE_INTEGRACAO_GOV, keyGenerator = "integracaoGovCacheKeyGenerator")
     public IntegracaoGovResponse obterPorId(UUID id) {
-        log.debug("Buscando integração gov por ID: {}", id);
+        log.debug("Buscando integração gov por ID: {} (cache miss)", id);
+        validationService.validarId(id);
 
-        if (id == null) {
-            throw new BadRequestException("ID é obrigatório");
-        }
-
-        IntegracaoGov entity = repository.findById(id)
-                .orElseThrow(() -> new NotFoundException("Integração gov não encontrada com ID: " + id));
-
-        return mapper.toResponse(entity);
+        UUID tenantId = tenantService.validarTenantAtual();
+        IntegracaoGov entity = tenantEnforcer.validarAcessoCompleto(id, tenantId);
+        return responseBuilder.build(entity);
     }
 
     @Override
+    @Transactional(readOnly = true)
     public IntegracaoGovResponse obterPorPacienteId(UUID pacienteId) {
         log.debug("Buscando integração gov por paciente ID: {}", pacienteId);
+        validationService.validarPacienteId(pacienteId);
 
-        if (pacienteId == null) {
-            throw new BadRequestException("ID do paciente é obrigatório");
-        }
-
-        IntegracaoGov entity = repository.findByPacienteId(pacienteId)
-                .orElseThrow(() -> new NotFoundException("Integração gov não encontrada para o paciente: " + pacienteId));
-
-        return mapper.toResponse(entity);
+        UUID tenantId = tenantService.validarTenantAtual();
+        IntegracaoGov entity = repository.findByPacienteIdAndTenantId(pacienteId, tenantId)
+            .orElseThrow(() -> new NotFoundException("Integração gov não encontrada para o paciente: " + pacienteId));
+        return responseBuilder.build(entity);
     }
 
     @Override
+    @Transactional(readOnly = true)
     public Page<IntegracaoGovResponse> listar(Pageable pageable) {
-        log.debug("Listando integrações gov paginadas");
-
-        Page<IntegracaoGov> entities = repository.findAll(pageable);
-        return entities.map(mapper::toResponse);
+        log.debug("Listando integrações gov paginadas. Pageable: {}", pageable);
+        UUID tenantId = tenantService.validarTenantAtual();
+        return repository.findAllByTenant(tenantId, pageable).map(responseBuilder::build);
     }
 
     @Override
     @Transactional
-    @CacheEvict(value = "integracaogov", key = "#id")
+    @CachePut(cacheNames = CacheKeyUtil.CACHE_INTEGRACAO_GOV, keyGenerator = "integracaoGovCacheKeyGenerator")
     public IntegracaoGovResponse atualizar(UUID id, IntegracaoGovRequest request) {
         log.debug("Atualizando integração gov. ID: {}", id);
+        validationService.validarId(id);
+        validationService.validarObrigatorios(request);
 
-        if (id == null) {
-            throw new BadRequestException("ID é obrigatório");
-        }
+        UUID tenantId = tenantService.validarTenantAtual();
+        Tenant tenant = tenantService.obterTenantDoUsuarioAutenticado();
 
-        IntegracaoGov entity = repository.findById(id)
-                .orElseThrow(() -> new NotFoundException("Integração gov não encontrada com ID: " + id));
-
-        if (request.getPaciente() != null && !request.getPaciente().equals(entity.getPaciente().getId())) {
-            repository.findByPacienteId(request.getPaciente())
-                    .ifPresent(d -> {
-                        if (!d.getId().equals(id)) {
-                            throw new ConflictException("Integração gov já existe para este paciente");
-                        }
-                    });
-        }
-
-        atualizarDados(entity, request);
-        IntegracaoGov updated = repository.save(entity);
-        log.info("Integração gov atualizada. ID: {}", updated.getId());
-
-        return mapper.toResponse(updated);
+        IntegracaoGov updated = updater.atualizar(id, request, tenantId, tenant);
+        return responseBuilder.build(updated);
     }
 
     @Override
     @Transactional
-    @CacheEvict(value = "integracaogov", key = "#id")
+    @CacheEvict(cacheNames = CacheKeyUtil.CACHE_INTEGRACAO_GOV, keyGenerator = "integracaoGovCacheKeyGenerator", beforeInvocation = false)
     public void excluir(UUID id) {
         log.debug("Excluindo integração gov. ID: {}", id);
+        validationService.validarId(id);
 
-        if (id == null) {
-            throw new BadRequestException("ID é obrigatório");
-        }
+        UUID tenantId = tenantService.validarTenantAtual();
+        inativarInternal(id, tenantId);
+    }
 
-        IntegracaoGov entity = repository.findById(id)
-                .orElseThrow(() -> new NotFoundException("Integração gov não encontrada com ID: " + id));
+    private void inativarInternal(UUID id, UUID tenantId) {
+        IntegracaoGov entity = tenantEnforcer.validarAcesso(id, tenantId);
 
         if (Boolean.FALSE.equals(entity.getActive())) {
             throw new BadRequestException("Integração gov já está inativa");
@@ -136,19 +132,6 @@ public class IntegracaoGovServiceImpl implements IntegracaoGovService {
 
         entity.setActive(false);
         repository.save(entity);
-        log.info("Integração gov excluída. ID: {}", id);
-    }
-
-    private void atualizarDados(IntegracaoGov entity, IntegracaoGovRequest request) {
-        IntegracaoGov updated = mapper.fromRequest(request);
-        
-        entity.setUuidRnds(updated.getUuidRnds());
-        entity.setIdIntegracaoGov(updated.getIdIntegracaoGov());
-        entity.setDataSincronizacaoGov(updated.getDataSincronizacaoGov());
-        entity.setIneEquipe(updated.getIneEquipe());
-        entity.setMicroarea(updated.getMicroarea());
-        entity.setCnesEstabelecimentoOrigem(updated.getCnesEstabelecimentoOrigem());
-        entity.setOrigemCadastro(updated.getOrigemCadastro());
+        log.info("Integração gov excluída (desativada) com sucesso. ID: {}, tenant: {}", id, tenantId);
     }
 }
-

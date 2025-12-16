@@ -30,25 +30,25 @@ public class Endereco extends BaseEntity {
     @Column(name = "logradouro", length = 200)
     private String logradouro;
 
-    @Column(name = "numero", length = 10)
+    @Column(name = "numero", length = 50)
     private String numero;
 
-    @Column(name = "complemento", length = 100)
+    @Column(name = "complemento", length = 150)
     private String complemento;
 
-    @Column(name = "bairro", length = 100)
+    @Column(name = "bairro", length = 200)
     private String bairro;
 
-    @Column(name = "cep", length = 8)
+    @Column(name = "cep", length = 20)
     private String cep;
 
-    @Column(name = "pais", length = 50)
+    @Column(name = "pais", length = 100)
     private String pais;
 
     @Column(name = "distrito", length = 100)
     private String distrito;
 
-    @Column(name = "ponto_referencia", length = 255)
+    @Column(name = "ponto_referencia", length = 300)
     private String pontoReferencia;
 
     @Column(name = "sem_numero", nullable = false)
@@ -68,35 +68,35 @@ public class Endereco extends BaseEntity {
     @Column(name = "zona")
     private ZonaDomicilioEnum zona;
 
-    @Column(name = "codigo_ibge_municipio", length = 7)
+    @Column(name = "codigo_ibge_municipio", length = 20)
     private String codigoIbgeMunicipio;
 
-    @Size(max = 10, message = "Microárea deve ter no máximo 10 caracteres")
-    @Column(name = "microarea", length = 10)
+    @Size(max = 50, message = "Microárea deve ter no máximo 50 caracteres")
+    @Column(name = "microarea", length = 50)
     private String microarea;
 
-    @Size(max = 15, message = "INE da equipe deve ter no máximo 15 caracteres")
-    @Column(name = "ine_equipe", length = 15)
+    @Size(max = 50, message = "INE da equipe deve ter no máximo 50 caracteres")
+    @Column(name = "ine_equipe", length = 50)
     private String ineEquipe;
 
-    @Size(max = 20, message = "Quadra deve ter no máximo 20 caracteres")
-    @Column(name = "quadra", length = 20)
+    @Size(max = 50, message = "Quadra deve ter no máximo 50 caracteres")
+    @Column(name = "quadra", length = 50)
     private String quadra;
 
-    @Size(max = 20, message = "Lote deve ter no máximo 20 caracteres")
-    @Column(name = "lote", length = 20)
+    @Size(max = 50, message = "Lote deve ter no máximo 50 caracteres")
+    @Column(name = "lote", length = 50)
     private String lote;
 
     @Size(max = 200, message = "Descrição da zona rural deve ter no máximo 200 caracteres")
     @Column(name = "zona_rural_descricao", length = 200)
     private String zonaRuralDescricao;
 
-    @Size(max = 5, message = "Andar deve ter no máximo 5 caracteres")
-    @Column(name = "andar", length = 5)
+    @Size(max = 50, message = "Andar deve ter no máximo 50 caracteres")
+    @Column(name = "andar", length = 50)
     private String andar;
 
-    @Size(max = 20, message = "Bloco deve ter no máximo 20 caracteres")
-    @Column(name = "bloco", length = 20)
+    @Size(max = 50, message = "Bloco deve ter no máximo 50 caracteres")
+    @Column(name = "bloco", length = 50)
     private String bloco;
 
     @ManyToOne(fetch = FetchType.LAZY)

@@ -6,60 +6,51 @@ import com.upsaude.enums.TipoFaltaEnum;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
 import java.util.UUID;
+import java.util.Optional;
 
-/**
- * Repositório para operações de banco de dados relacionadas a Falta.
- *
- * @author UPSaúde
- */
 @Repository
 public interface FaltaRepository extends JpaRepository<Falta, UUID> {
 
-    /**
-     * Busca todas as faltas de um profissional, ordenadas por data decrescente.
-     */
     Page<Falta> findByProfissionalIdOrderByDataFaltaDesc(UUID profissionalId, Pageable pageable);
 
-    /**
-     * Busca todas as faltas de um médico, ordenadas por data decrescente.
-     */
     Page<Falta> findByMedicoIdOrderByDataFaltaDesc(UUID medicoId, Pageable pageable);
 
-    /**
-     * Busca todas as faltas de um estabelecimento, ordenadas por data decrescente.
-     */
     Page<Falta> findByEstabelecimentoIdOrderByDataFaltaDesc(UUID estabelecimentoId, Pageable pageable);
 
-    /**
-     * Busca todas as faltas por tipo, ordenadas por data decrescente.
-     */
     Page<Falta> findByTipoFaltaOrderByDataFaltaDesc(TipoFaltaEnum tipoFalta, Pageable pageable);
 
-    /**
-     * Busca todas as faltas de um profissional em um período.
-     */
     Page<Falta> findByProfissionalIdAndDataFaltaBetweenOrderByDataFaltaDesc(
             UUID profissionalId, LocalDate dataInicio, LocalDate dataFim, Pageable pageable);
 
-    /**
-     * Busca todas as faltas de um estabelecimento em um período.
-     */
     Page<Falta> findByEstabelecimentoIdAndDataFaltaBetweenOrderByDataFaltaDesc(
             UUID estabelecimentoId, LocalDate dataInicio, LocalDate dataFim, Pageable pageable);
 
-    /**
-     * Busca todas as faltas de um profissional por tipo.
-     */
     Page<Falta> findByProfissionalIdAndTipoFaltaOrderByDataFaltaDesc(
             UUID profissionalId, TipoFaltaEnum tipoFalta, Pageable pageable);
 
-    /**
-     * Busca todas as faltas de um tenant.
-     */
     Page<Falta> findByTenantOrderByDataFaltaDesc(Tenant tenant, Pageable pageable);
-}
 
+    @Query("SELECT f FROM Falta f WHERE f.id = :id AND f.tenant.id = :tenantId")
+    Optional<Falta> findByIdAndTenant(@Param("id") UUID id, @Param("tenantId") UUID tenantId);
+
+    @Query("SELECT f FROM Falta f WHERE f.tenant.id = :tenantId")
+    Page<Falta> findAllByTenant(@Param("tenantId") UUID tenantId, Pageable pageable);
+
+    Page<Falta> findByProfissionalIdAndTenantIdOrderByDataFaltaDesc(UUID profissionalId, UUID tenantId, Pageable pageable);
+
+    Page<Falta> findByMedicoIdAndTenantIdOrderByDataFaltaDesc(UUID medicoId, UUID tenantId, Pageable pageable);
+
+    Page<Falta> findByEstabelecimentoIdAndTenantIdOrderByDataFaltaDesc(UUID estabelecimentoId, UUID tenantId, Pageable pageable);
+
+    Page<Falta> findByTipoFaltaAndTenantIdOrderByDataFaltaDesc(TipoFaltaEnum tipoFalta, UUID tenantId, Pageable pageable);
+
+    Page<Falta> findByProfissionalIdAndDataFaltaBetweenAndTenantIdOrderByDataFaltaDesc(UUID profissionalId, LocalDate dataInicio, LocalDate dataFim, UUID tenantId, Pageable pageable);
+
+    Page<Falta> findByEstabelecimentoIdAndDataFaltaBetweenAndTenantIdOrderByDataFaltaDesc(UUID estabelecimentoId, LocalDate dataInicio, LocalDate dataFim, UUID tenantId, Pageable pageable);
+}

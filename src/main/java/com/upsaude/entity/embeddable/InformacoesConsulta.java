@@ -13,11 +13,6 @@ import lombok.Data;
 
 import java.time.OffsetDateTime;
 
-/**
- * Classe embeddable para informações básicas da consulta.
- *
- * @author UPSaúde
- */
 @Embeddable
 @Data
 @Builder
@@ -31,22 +26,22 @@ public class InformacoesConsulta {
     }
 
     @Column(name = "data_consulta", nullable = false)
-    private OffsetDateTime dataConsulta; // Data e hora da consulta
+    private OffsetDateTime dataConsulta;
 
     @Column(name = "data_agendamento")
-    private OffsetDateTime dataAgendamento; // Data em que foi agendada
+    private OffsetDateTime dataAgendamento;
 
     @Column(name = "data_inicio")
-    private OffsetDateTime dataInicio; // Data e hora de início real da consulta
+    private OffsetDateTime dataInicio;
 
     @Column(name = "data_fim")
-    private OffsetDateTime dataFim; // Data e hora de término real da consulta
+    private OffsetDateTime dataFim;
 
     @Column(name = "duracao_minutos")
-    private Integer duracaoMinutos; // Duração prevista em minutos
+    private Integer duracaoMinutos;
 
     @Column(name = "duracao_real_minutos")
-    private Integer duracaoRealMinutos; // Duração real em minutos
+    private Integer duracaoRealMinutos;
 
     @Convert(converter = TipoConsultaEnumConverter.class)
     @Column(name = "tipo_consulta")
@@ -58,12 +53,11 @@ public class InformacoesConsulta {
     private StatusConsultaEnum statusConsulta = StatusConsultaEnum.AGENDADA;
 
     @Column(name = "motivo", columnDefinition = "TEXT")
-    private String motivo; // Motivo da consulta / queixa principal
+    private String motivo;
 
     @Column(name = "local_atendimento", length = 255)
-    private String localAtendimento; // Local onde foi realizada (ex: Consultório 1, Sala 2)
+    private String localAtendimento;
 
     @Column(name = "numero_consulta", length = 50)
-    private String numeroConsulta; // Número da consulta (controle interno)
+    private String numeroConsulta;
 }
-

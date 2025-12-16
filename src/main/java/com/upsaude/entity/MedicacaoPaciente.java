@@ -14,12 +14,6 @@ import jakarta.persistence.Table;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
-/**
- * Entidade que representa a ligação entre um paciente e uma medicação contínua.
- * Armazena informações sobre dose, frequência, via, CID relacionado, período de uso e observações.
- *
- * @author UPSaúde
- */
 @Entity
 @Table(name = "medicacoes_paciente", schema = "public")
 @Data
@@ -61,4 +55,3 @@ public class MedicacaoPaciente extends BaseEntity {
     @Column(name = "observacoes", columnDefinition = "TEXT")
     private String observacoes;
 }
-

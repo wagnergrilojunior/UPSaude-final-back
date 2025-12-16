@@ -9,27 +9,13 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 
-/**
- * Mapper para conversões de User.
- * Entity ↔ DTO ↔ Request/Response
- */
 @Mapper(config = MappingConfig.class)
 public interface UserMapper extends EntityMapper<User, UserDTO> {
 
-    /**
-     * Converte DTO para Entity.
-     */
     User toEntity(UserDTO dto);
 
-    /**
-     * Converte Entity para DTO.
-     */
     UserDTO toDTO(User entity);
 
-    /**
-     * Converte Request para Entity.
-     * Campos gerenciados pelo Supabase são ignorados.
-     */
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "instanceId", ignore = true)
     @Mapping(target = "aud", ignore = true)
@@ -64,9 +50,6 @@ public interface UserMapper extends EntityMapper<User, UserDTO> {
     @Mapping(target = "isAnonymous", ignore = true)
     User fromRequest(UserRequest request);
 
-    /**
-     * Atualiza Entity existente com dados do Request.
-     */
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "instanceId", ignore = true)
     @Mapping(target = "aud", ignore = true)
@@ -101,9 +84,5 @@ public interface UserMapper extends EntityMapper<User, UserDTO> {
     @Mapping(target = "isAnonymous", ignore = true)
     void updateFromRequest(UserRequest request, @MappingTarget User entity);
 
-    /**
-     * Converte Entity para Response.
-     */
     UserResponse toResponse(User entity);
 }
-

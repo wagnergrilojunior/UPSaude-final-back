@@ -7,11 +7,6 @@ import lombok.Builder;
 import lombok.Builder.Default;
 import lombok.Data;
 
-/**
- * Classe embeddable para informações de calendário vacinal.
- *
- * @author UPSaúde
- */
 @Embeddable
 @Data
 @Builder
@@ -28,20 +23,19 @@ public class CalendarioVacinal {
 
     @Column(name = "calendario_basico", nullable = false)
     @Builder.Default
-    private Boolean calendarioBasico = false; // Se faz parte do calendário básico
+    private Boolean calendarioBasico = false;
 
     @Column(name = "calendario_campanha", nullable = false)
     @Builder.Default
-    private Boolean calendarioCampanha = false; // Se faz parte de campanhas
+    private Boolean calendarioCampanha = false;
 
     @Column(name = "faixa_etaria_calendario", length = 100)
-    private String faixaEtariaCalendario; // Faixa etária no calendário
+    private String faixaEtariaCalendario;
 
     @Column(name = "situacao_epidemiologica", length = 50)
-    private String situacaoEpidemiologica; // Ex: Endêmica, Epidêmica, Eliminada
+    private String situacaoEpidemiologica;
 
     @Column(name = "obrigatoria", nullable = false)
     @Builder.Default
-    private Boolean obrigatoria = false; // Se é obrigatória no calendário
+    private Boolean obrigatoria = false;
 }
-

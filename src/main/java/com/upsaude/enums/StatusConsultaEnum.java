@@ -3,11 +3,6 @@ package com.upsaude.enums;
 import java.util.Arrays;
 import java.util.Locale;
 
-/**
- * Enum para status de consulta médica.
- *
- * @author UPSaúde
- */
 public enum StatusConsultaEnum {
     AGENDADA(1, "Agendada"),
     CONFIRMADA(2, "Confirmada"),
@@ -55,4 +50,3 @@ public enum StatusConsultaEnum {
                 .orElse(null);
     }
 }
-

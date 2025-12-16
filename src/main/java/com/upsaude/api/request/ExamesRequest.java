@@ -9,12 +9,14 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 @Getter
 @Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@Schema(description = "Dados de exames")
 public class ExamesRequest {
     @NotNull(message = "Paciente é obrigatório")
     private UUID paciente;
@@ -25,7 +27,7 @@ public class ExamesRequest {
     private UUID medicoSolicitante;
     @Size(max = 100, message = "Tipo exame deve ter no máximo 100 caracteres")
     private String tipoExame;
-    
+
     @Size(max = 255, message = "Nome exame deve ter no máximo 255 caracteres")
     private String nomeExame;
     private OffsetDateTime dataSolicitacao;
@@ -36,7 +38,12 @@ public class ExamesRequest {
     private UUID estabelecimentoRealizador;
     private UUID profissionalResponsavel;
     private UUID medicoResponsavel;
+    @Size(max = 5000, message = "Resultados deve ter no máximo 5000 caracteres")
     private String resultados;
+
+    @Size(max = 5000, message = "Laudo deve ter no máximo 5000 caracteres")
     private String laudo;
+
+    @Size(max = 1000, message = "Observações deve ter no máximo 1000 caracteres")
     private String observacoes;
 }

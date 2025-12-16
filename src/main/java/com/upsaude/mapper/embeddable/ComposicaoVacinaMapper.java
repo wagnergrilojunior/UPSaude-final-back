@@ -14,7 +14,6 @@ public interface ComposicaoVacinaMapper {
     ComposicaoVacinaResponse toResponse(ComposicaoVacina entity);
     void updateFromRequest(ComposicaoVacinaRequest request, @MappingTarget ComposicaoVacina entity);
 
-    // Mapeamento entre DTO e Entity
     ComposicaoVacina toEntity(com.upsaude.dto.embeddable.ComposicaoVacinaDTO dto);
     com.upsaude.dto.embeddable.ComposicaoVacinaDTO toDTO(ComposicaoVacina entity);
     void updateFromDTO(com.upsaude.dto.embeddable.ComposicaoVacinaDTO dto, @MappingTarget ComposicaoVacina entity);
