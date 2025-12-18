@@ -51,7 +51,6 @@ public class EnumsServiceImpl implements EnumsService {
 
             return EnumsResponse.builder()
                     .enums(enumsInfo)
-                    .totalEnums(enumsInfo.size())
                     .build();
 
         } catch (Exception e) {
@@ -145,11 +144,11 @@ public class EnumsServiceImpl implements EnumsService {
                 "StatusAtendimentoEnum", "StatusAtivoEnum", "StatusCirurgiaEnum", "StatusConsultaEnum",
                 "StatusDiagnosticoEnum", "StatusFuncionamentoEnum", "StatusManutencaoEnum",
                 "StatusPacienteEnum", "StatusPreNatalEnum", "StatusReceitaEnum",
-                "StatusRegistroMedicoEnum", "TipoAcaoPromocaoSaudeEnum", "TipoAlergiaEnum",
+                "StatusRegistroMedicoEnum", "TipoAlergiaEnum",
                 "TipoAtendimentoEnum", "TipoAtendimentoPreferencialEnum", "TipoAtividadeProfissionalEnum",
                 "TipoCnsEnum", "TipoConsultaEnum", "TipoControleMedicamentoEnum", "TipoConvenioEnum",
                 "TipoCuidadoEnfermagemEnum", "TipoDeficienciaEnum", "TipoDoencaEnum",
-                "TipoEducacaoSaudeEnum", "TipoEnderecoEnum", "TipoEquipamentoEnum", "TipoEquipeEnum",
+                "TipoEnderecoEnum", "TipoEquipamentoEnum", "TipoEquipeEnum",
                 "TipoEspecialidadeMedicaEnum", "TipoEstabelecimentoEnum", "TipoExameEnum",
                 "TipoFaltaEnum", "TipoLogradouroEnum", "TipoMetodoContraceptivoEnum",
                 "TipoNotificacaoEnum", "TipoPlantaoEnum", "TipoPontoEnum", "TipoProcedimentoEnum",

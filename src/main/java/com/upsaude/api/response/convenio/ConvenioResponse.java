@@ -1,24 +1,19 @@
 package com.upsaude.api.response.convenio;
 
-import com.upsaude.api.response.paciente.EnderecoResponse;
-import com.upsaude.api.response.embeddable.CoberturaConvenioResponse;
-import com.upsaude.api.response.embeddable.ContatoConvenioResponse;
-import com.upsaude.api.response.embeddable.InformacoesFinanceirasConvenioResponse;
-import com.upsaude.api.response.embeddable.IntegracaoGovernamentalConvenioResponse;
-import com.upsaude.api.response.embeddable.RegistroANSConvenioResponse;
-
-
-import com.upsaude.api.response.embeddable.CoberturaConvenioResponse;
-import com.upsaude.api.response.embeddable.ContatoConvenioResponse;
-import com.upsaude.api.response.embeddable.InformacoesFinanceirasConvenioResponse;
-import com.upsaude.api.response.embeddable.IntegracaoGovernamentalConvenioResponse;
-import com.upsaude.api.response.embeddable.RegistroANSConvenioResponse;
-import com.upsaude.enums.ModalidadeConvenioEnum;
-import com.upsaude.enums.StatusAtivoEnum;
-import com.upsaude.enums.TipoConvenioEnum;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.UUID;
+
+import com.upsaude.api.response.embeddable.CoberturaConvenioResponse;
+import com.upsaude.api.response.embeddable.ContatoConvenioResponse;
+import com.upsaude.api.response.embeddable.InformacoesFinanceirasConvenioResponse;
+import com.upsaude.api.response.embeddable.IntegracaoGovernamentalConvenioResponse;
+import com.upsaude.api.response.embeddable.RegistroANSConvenioResponse;
+import com.upsaude.api.response.geral.EnderecoResponse;
+import com.upsaude.enums.ModalidadeConvenioEnum;
+import com.upsaude.enums.StatusAtivoEnum;
+import com.upsaude.enums.TipoConvenioEnum;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;

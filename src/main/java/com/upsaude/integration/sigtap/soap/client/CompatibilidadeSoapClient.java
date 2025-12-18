@@ -1,17 +1,15 @@
 package com.upsaude.integration.sigtap.soap.client;
 
+import java.math.BigInteger;
+
+import org.springframework.stereotype.Component;
+import org.springframework.ws.client.core.WebServiceTemplate;
+
 import com.upsaude.config.SigtapProperties;
 import com.upsaude.integration.sigtap.wsdl.PaginacaoType;
 import com.upsaude.integration.sigtap.wsdl.RequestPesquisarCompatibilidades;
 import com.upsaude.integration.sigtap.wsdl.ResponsePesquisarCompatibilidades;
-import org.springframework.stereotype.Component;
-import org.springframework.ws.client.core.WebServiceTemplate;
 
-import java.math.BigInteger;
-
-/**
- * Client SOAP do CompatibilidadeService (SIGTAP).
- */
 @Component
 public class CompatibilidadeSoapClient extends AbstractSigtapSoapClient {
 

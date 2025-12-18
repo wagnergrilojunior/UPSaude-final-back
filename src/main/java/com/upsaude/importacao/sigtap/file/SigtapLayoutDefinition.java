@@ -1,15 +1,12 @@
 package com.upsaude.importacao.sigtap.file;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.ArrayList;
-import java.util.List;
-
-/**
- * Representa a defini??o completa de layout de um arquivo SIGTAP.
- */
 @Data
 @NoArgsConstructor
 @AllArgsConstructor

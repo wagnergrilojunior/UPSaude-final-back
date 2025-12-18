@@ -1,23 +1,19 @@
 package com.upsaude.integration.sigtap.soap;
 
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.ws.client.WebServiceClientException;
-import org.springframework.ws.client.support.interceptor.ClientInterceptor;
-import org.springframework.ws.context.MessageContext;
-import org.springframework.ws.soap.SoapMessage;
+import java.io.StringWriter;
 
 import javax.xml.transform.Source;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.stream.StreamResult;
-import java.io.StringWriter;
 
-/**
- * Interceptor de logging para chamadas SOAP.
- *
- * <p>Importante: loga apenas o <b>payload</b> (Body) para n?o vazar credenciais do WS-Security
- * inseridas no Header (UsernameToken).
- */
+import org.springframework.ws.client.WebServiceClientException;
+import org.springframework.ws.client.support.interceptor.ClientInterceptor;
+import org.springframework.ws.context.MessageContext;
+import org.springframework.ws.soap.SoapMessage;
+
+import lombok.extern.slf4j.Slf4j;
+
 @Slf4j
 public class SigtapSoapLoggingInterceptor implements ClientInterceptor {
 

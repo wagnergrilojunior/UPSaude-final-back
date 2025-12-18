@@ -1,7 +1,13 @@
 package com.upsaude.api.response.profissional;
-import com.upsaude.api.response.profissional.EspecialidadesMedicasResponse;
-import com.upsaude.api.response.paciente.EnderecoResponse;
+import java.time.LocalDate;
+import java.time.OffsetDateTime;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.UUID;
 
+import com.upsaude.api.response.geral.EnderecoResponse;
 import com.upsaude.enums.EscolaridadeEnum;
 import com.upsaude.enums.EstadoCivilEnum;
 import com.upsaude.enums.IdentidadeGeneroEnum;
@@ -11,13 +17,7 @@ import com.upsaude.enums.SexoEnum;
 import com.upsaude.enums.StatusAtivoEnum;
 import com.upsaude.enums.TipoDeficienciaEnum;
 import com.upsaude.enums.TipoProfissionalEnum;
-import java.time.LocalDate;
-import java.time.OffsetDateTime;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;

@@ -14,12 +14,12 @@ import com.upsaude.entity.referencia.geografico.Estados;
 import com.upsaude.entity.sistema.Tenant;
 import com.upsaude.exception.BadRequestException;
 import com.upsaude.exception.NotFoundException;
-import com.upsaude.mapper.paciente.EnderecoMapper;
+import com.upsaude.mapper.geral.EnderecoMapper;
 import com.upsaude.repository.paciente.EnderecoRepository;
 import com.upsaude.repository.profissional.ConselhosProfissionaisRepository;
 import com.upsaude.repository.referencia.geografico.CidadesRepository;
 import com.upsaude.repository.referencia.geografico.EstadosRepository;
-import com.upsaude.service.paciente.EnderecoService;
+import com.upsaude.service.geral.EnderecoService;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

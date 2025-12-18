@@ -20,7 +20,7 @@ public interface DoencasRepository extends JpaRepository<Doencas, UUID> {
 
     Page<Doencas> findByCronica(Boolean cronica, Pageable pageable);
 
-    @Query("SELECT d FROM Doencas d WHERE d.cidPrincipal.codigo = :codigoCid")
+    @Query("SELECT d FROM Doencas d WHERE d.classificacao.codigoCidPrincipal = :codigoCid")
     Page<Doencas> findByCodigoCid(@Param("codigoCid") String codigoCid, Pageable pageable);
 
     boolean existsByNome(String nome);

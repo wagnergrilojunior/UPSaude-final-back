@@ -178,11 +178,8 @@ public class SigtapEntityMapper {
         String codigoSubgrupo = fields.get("CO_SUB_GRUPO");
         SigtapSubgrupo subgrupo;
         try {
-            subgrupo = subgrupoRepository.findByGrupoCodigoOficialAndCodigoOficialIn(
-                    codigoGrupo, java.util.List.of(codigoSubgrupo))
-                    .stream()
-                    .findFirst()
-                    .orElseThrow(() -> new IllegalArgumentException("Subgrupo n?o encontrado: " + codigoGrupo + "/" + codigoSubgrupo));
+            subgrupo = subgrupoRepository.findByGrupoCodigoOficialAndCodigoOficial(codigoGrupo, codigoSubgrupo)
+                    .orElseThrow(() -> new IllegalArgumentException("Subgrupo não encontrado: " + codigoGrupo + "/" + codigoSubgrupo));
         } catch (IllegalStateException e) {
             // Contexto Spring fechado - relançar como IllegalArgumentException para ser capturado pelo tratamento de exceções
             if (e.getMessage() != null && e.getMessage().contains("closed")) {
@@ -385,7 +382,7 @@ public class SigtapEntityMapper {
         // #endregion
         SigtapDescricao descricao = new SigtapDescricao();
         if (codigoProcedimento != null) {
-            var optProcedimento = procedimentoRepository.findByCodigoOficial(codigoProcedimento);
+            java.util.Optional<SigtapProcedimento> optProcedimento = procedimentoRepository.findByCodigoOficial(codigoProcedimento);
             if (optProcedimento.isPresent()) {
                 descricao.setProcedimento(optProcedimento.get());
                 // #region agent log

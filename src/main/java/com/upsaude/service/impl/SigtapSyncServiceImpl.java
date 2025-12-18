@@ -50,7 +50,7 @@ import com.upsaude.repository.referencia.sigtap.SigtapProcedimentoDetalheReposit
 import com.upsaude.repository.referencia.sigtap.SigtapProcedimentoRepository;
 import com.upsaude.repository.referencia.sigtap.SigtapSubgrupoRepository;
 import com.upsaude.repository.referencia.sigtap.SigtapSyncStatusRepository;
-import com.upsaude.service.SigtapSyncService;
+import com.upsaude.service.referencia.sigtap.SigtapSyncService;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

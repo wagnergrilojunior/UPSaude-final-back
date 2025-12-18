@@ -1,6 +1,6 @@
 package com.upsaude.controller.sistema.integracao;
 
-import com.upsaude.service.SigtapSyncService;
+import com.upsaude.service.referencia.sigtap.SigtapSyncService;
 import com.upsaude.service.impl.SigtapFileImportServiceImpl;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -19,7 +19,7 @@ import java.util.Map;
 import java.util.stream.Stream;
 
 @RestController
-@RequestMapping("/api/v1/sigtap")
+@RequestMapping("/v1/sigtap")
 @Tag(name = "SIGTAP Importação", description = "Endpoints para importação de arquivos TXT do SIGTAP")
 @Slf4j
 public class SigtapFileImportController {
@@ -50,7 +50,7 @@ public class SigtapFileImportController {
     public ResponseEntity<Map<String, Object>> sincronizar(
             @Parameter(description = "Competência no formato AAAAMM (ex: 202512)", example = "202512")
             @RequestParam(name = "competencia", required = false) String competencia) {
-        log.debug("REQUEST POST /api/v1/sigtap/sync - competencia: {}", competencia);
+        log.debug("REQUEST POST /v1/sigtap/sync - competencia: {}", competencia);
         try {
             sigtapSyncService.sincronizarTudo(competencia);
             log.info("Sincronização SIGTAP executada com sucesso. Competência: {}", competencia != null ? competencia : "padrão");
@@ -81,7 +81,7 @@ public class SigtapFileImportController {
     public ResponseEntity<Map<String, Object>> importarCompetencia(
             @Parameter(description = "Competência no formato AAAAMM (ex: 202512)", required = true)
             @PathVariable String competencia) {
-        log.debug("REQUEST POST /api/v1/sigtap/import/{}", competencia);
+        log.debug("REQUEST POST /v1/sigtap/import/{}", competencia);
         try {
             SigtapFileImportServiceImpl.ImportResult result = importService.importarCompetencia(competencia);
 
@@ -117,7 +117,7 @@ public class SigtapFileImportController {
     public ResponseEntity<Map<String, Object>> listarArquivos(
             @Parameter(description = "Competência no formato AAAAMM", required = true)
             @PathVariable String competencia) {
-        log.debug("REQUEST GET /api/v1/sigtap/import/arquivos/{}", competencia);
+        log.debug("REQUEST GET /v1/sigtap/import/arquivos/{}", competencia);
         Path competenciaPath = Paths.get(basePath, competencia);
 
         if (!Files.exists(competenciaPath) || !Files.isDirectory(competenciaPath)) {

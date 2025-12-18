@@ -1,14 +1,12 @@
 package com.upsaude.integration.sigtap.soap.client;
 
-import com.upsaude.config.SigtapProperties;
-import com.upsaude.integration.sigtap.wsdl.RequestListarCompatibilidadesPossiveis;
-import com.upsaude.integration.sigtap.wsdl.ResponseListarCompatibilidadesPossiveis;
 import org.springframework.stereotype.Component;
 import org.springframework.ws.client.core.WebServiceTemplate;
 
-/**
- * Client SOAP do CompatibilidadePossivelService (SIGTAP).
- */
+import com.upsaude.config.SigtapProperties;
+import com.upsaude.integration.sigtap.wsdl.RequestListarCompatibilidadesPossiveis;
+import com.upsaude.integration.sigtap.wsdl.ResponseListarCompatibilidadesPossiveis;
+
 @Component
 public class CompatibilidadePossivelSoapClient extends AbstractSigtapSoapClient {
 

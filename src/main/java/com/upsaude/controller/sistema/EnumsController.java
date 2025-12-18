@@ -43,7 +43,6 @@ import com.upsaude.enums.StatusPacienteEnum;
 import com.upsaude.enums.StatusPreNatalEnum;
 import com.upsaude.enums.StatusReceitaEnum;
 import com.upsaude.enums.StatusRegistroMedicoEnum;
-import com.upsaude.enums.TipoAcaoPromocaoSaudeEnum;
 import com.upsaude.enums.TipoAlergiaEnum;
 import com.upsaude.enums.TipoAtendimentoEnum;
 import com.upsaude.enums.TipoAtendimentoPreferencialEnum;
@@ -55,7 +54,6 @@ import com.upsaude.enums.TipoConvenioEnum;
 import com.upsaude.enums.TipoCuidadoEnfermagemEnum;
 import com.upsaude.enums.TipoDeficienciaEnum;
 import com.upsaude.enums.TipoDoencaEnum;
-import com.upsaude.enums.TipoEducacaoSaudeEnum;
 import com.upsaude.enums.TipoEnderecoEnum;
 import com.upsaude.enums.TipoEquipamentoEnum;
 import com.upsaude.enums.TipoEquipeEnum;
@@ -661,21 +659,6 @@ public class EnumsController {
         }
     }
 
-    @GetMapping("/tipo-acao-promocao-saude")
-    @Operation(summary = "Listar valores de TipoAcaoPromocaoSaudeEnum")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Valores do enum retornados com sucesso",
-                    content = @Content(schema = @Schema(implementation = EnumInfoResponse.class)))
-    })
-    public ResponseEntity<EnumInfoResponse> listarTipoAcaoPromocaoSaude() {
-        log.debug("REQUEST GET /v1/enums/tipo-acao-promocao-saude");
-        try {
-            return ResponseEntity.ok(converterEnum(TipoAcaoPromocaoSaudeEnum.class, TipoAcaoPromocaoSaudeEnum.values()));
-        } catch (Exception ex) {
-            log.error("Erro inesperado ao listar TipoAcaoPromocaoSaudeEnum", ex);
-            throw ex;
-        }
-    }
 
     @GetMapping("/tipo-alergia")
     @Operation(summary = "Listar valores de TipoAlergiaEnum")
@@ -853,21 +836,6 @@ public class EnumsController {
         }
     }
 
-    @GetMapping("/tipo-educacao-saude")
-    @Operation(summary = "Listar valores de TipoEducacaoSaudeEnum")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Valores do enum retornados com sucesso",
-                    content = @Content(schema = @Schema(implementation = EnumInfoResponse.class)))
-    })
-    public ResponseEntity<EnumInfoResponse> listarTipoEducacaoSaude() {
-        log.debug("REQUEST GET /v1/enums/tipo-educacao-saude");
-        try {
-            return ResponseEntity.ok(converterEnum(TipoEducacaoSaudeEnum.class, TipoEducacaoSaudeEnum.values()));
-        } catch (Exception ex) {
-            log.error("Erro inesperado ao listar TipoEducacaoSaudeEnum", ex);
-            throw ex;
-        }
-    }
 
     @GetMapping("/tipo-endereco")
     @Operation(summary = "Listar valores de TipoEnderecoEnum")

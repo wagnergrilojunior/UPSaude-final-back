@@ -8,7 +8,7 @@ import com.upsaude.api.request.estabelecimento.EstabelecimentosRequest;
 import com.upsaude.api.response.estabelecimento.EstabelecimentosResponse;
 import com.upsaude.entity.estabelecimento.Estabelecimentos;
 import com.upsaude.mapper.config.MappingConfig;
-import com.upsaude.mapper.paciente.EnderecoMapper;
+import com.upsaude.mapper.geral.EnderecoMapper;
 import com.upsaude.mapper.profissional.ProfissionaisSaudeMapper;
 
 @Mapper(config = MappingConfig.class, uses = {EnderecoMapper.class, ProfissionaisSaudeMapper.class})

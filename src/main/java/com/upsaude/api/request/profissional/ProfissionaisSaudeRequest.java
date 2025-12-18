@@ -1,8 +1,15 @@
 package com.upsaude.api.request.profissional;
 
+import java.time.LocalDate;
+import java.time.OffsetDateTime;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.UUID;
+
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.upsaude.api.request.geral.EnderecoRequest;
 import com.upsaude.enums.EscolaridadeEnum;
 import com.upsaude.enums.EstadoCivilEnum;
 import com.upsaude.enums.IdentidadeGeneroEnum;
@@ -24,23 +31,18 @@ import com.upsaude.validation.annotation.CNSValido;
 import com.upsaude.validation.annotation.CPFValido;
 import com.upsaude.validation.annotation.EmailValido;
 import com.upsaude.validation.annotation.TelefoneValido;
+
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
-import java.time.LocalDate;
-import java.time.OffsetDateTime;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import io.swagger.v3.oas.annotations.media.Schema;
-import com.upsaude.api.request.paciente.EnderecoRequest;
 
 
 @Getter

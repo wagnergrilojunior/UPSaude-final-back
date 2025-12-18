@@ -10,7 +10,7 @@ import com.upsaude.dto.profissional.ProfissionaisSaudeDTO;
 import com.upsaude.entity.profissional.ProfissionaisSaude;
 import com.upsaude.mapper.EntityMapper;
 import com.upsaude.mapper.config.MappingConfig;
-import com.upsaude.mapper.paciente.EnderecoMapper;
+import com.upsaude.mapper.geral.EnderecoMapper;
 
 @Mapper(config = MappingConfig.class, uses = {ConselhosProfissionaisMapper.class, EnderecoMapper.class})
 public interface ProfissionaisSaudeMapper extends EntityMapper<ProfissionaisSaude, ProfissionaisSaudeDTO> {

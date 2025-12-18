@@ -75,13 +75,12 @@ public class ReceitasMedicasController {
             @RequestParam(required = false) OffsetDateTime fim,
             @RequestParam(required = false) String numeroReceita,
             @RequestParam(required = false) Boolean usoContinuo,
-            @RequestParam(required = false) String origemReceita,
-            @RequestParam(required = false) UUID cidPrincipalId) {
-        log.debug("REQUEST GET /v1/receitas-medicas - pageable: {}, estabelecimentoId: {}, pacienteId: {}, medicoId: {}, status: {}, inicio: {}, fim: {}, numeroReceita: {}, usoContinuo: {}, origemReceita: {}, cidPrincipalId: {}",
-            pageable, estabelecimentoId, pacienteId, medicoId, status, inicio, fim, numeroReceita, usoContinuo, origemReceita, cidPrincipalId);
+            @RequestParam(required = false) String origemReceita) {
+        log.debug("REQUEST GET /v1/receitas-medicas - pageable: {}, estabelecimentoId: {}, pacienteId: {}, medicoId: {}, status: {}, inicio: {}, fim: {}, numeroReceita: {}, usoContinuo: {}, origemReceita: {}",
+            pageable, estabelecimentoId, pacienteId, medicoId, status, inicio, fim, numeroReceita, usoContinuo, origemReceita);
         try {
             Page<ReceitasMedicasResponse> response = receitasMedicasService.listar(pageable,
-                estabelecimentoId, pacienteId, medicoId, status, inicio, fim, numeroReceita, usoContinuo, origemReceita, cidPrincipalId);
+                estabelecimentoId, pacienteId, medicoId, status, inicio, fim, numeroReceita, usoContinuo, origemReceita);
             return ResponseEntity.ok(response);
         } catch (Exception ex) {
             log.error("Erro inesperado ao listar receitas médicas — pageable: {}", pageable, ex);

@@ -3,15 +3,6 @@ package com.upsaude.config;
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
-/**
- * Propriedades da integra??o com o SOA-SIGTAP (DATASUS).
- *
- * <p>Boas pr?ticas para sistemas p?blicos:
- * <ul>
- *   <li>Endpoints e timeouts configur?veis por ambiente (profiles/vari?veis)</li>
- *   <li>Credenciais configur?veis (mesmo sendo p?blicas)</li>
- * </ul>
- */
 @Data
 @ConfigurationProperties(prefix = "sigtap")
 public class SigtapProperties {

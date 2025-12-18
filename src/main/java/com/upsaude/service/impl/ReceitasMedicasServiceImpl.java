@@ -95,13 +95,13 @@ public class ReceitasMedicasServiceImpl implements ReceitasMedicasService {
     @Override
     @Transactional(readOnly = true)
     public Page<ReceitasMedicasResponse> listar(Pageable pageable) {
-        return listar(pageable, null, null, null, null, null, null, null, null, null, null);
+        return listar(pageable, null, null, null, null, null, null, null, null, null);
     }
 
     @Override
     @Transactional(readOnly = true)
     public Page<ReceitasMedicasResponse> listarPorEstabelecimento(UUID estabelecimentoId, Pageable pageable) {
-        return listar(pageable, estabelecimentoId, null, null, null, null, null, null, null, null, null);
+        return listar(pageable, estabelecimentoId, null, null, null, null, null, null, null, null);
     }
 
     @Override
@@ -142,8 +142,7 @@ public class ReceitasMedicasServiceImpl implements ReceitasMedicasService {
         OffsetDateTime fim,
         String numeroReceita,
         Boolean usoContinuo,
-        String origemReceita,
-        UUID cidPrincipalId) {
+        String origemReceita) {
 
         UUID tenantId = tenantService.validarTenantAtual();
 
@@ -165,8 +164,6 @@ public class ReceitasMedicasServiceImpl implements ReceitasMedicasService {
             page = receitasMedicasRepository.findByUsoContinuoAndTenantId(usoContinuo, tenantId, pageable);
         } else if (origemReceita != null && !origemReceita.isBlank()) {
             page = receitasMedicasRepository.findByOrigemReceitaContainingIgnoreCaseAndTenantId(origemReceita, tenantId, pageable);
-        } else if (cidPrincipalId != null) {
-            page = receitasMedicasRepository.findByCidPrincipalIdAndTenantId(cidPrincipalId, tenantId, pageable);
         } else {
             page = receitasMedicasRepository.findAllByTenant(tenantId, pageable);
         }

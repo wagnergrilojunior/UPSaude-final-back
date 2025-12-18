@@ -1,17 +1,17 @@
 package com.upsaude.api.response.estabelecimento;
 
-import com.upsaude.api.response.profissional.ProfissionaisSaudeResponse;
-import com.upsaude.api.response.paciente.EnderecoResponse;
-import com.upsaude.api.response.profissional.equipe.EquipeSaudeResponse;
-
-
-import com.upsaude.enums.NaturezaJuridicaEnum;
-import com.upsaude.enums.StatusFuncionamentoEnum;
-import com.upsaude.enums.TipoEstabelecimentoEnum;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+
+import com.upsaude.api.response.geral.EnderecoResponse;
+import com.upsaude.api.response.profissional.ProfissionaisSaudeResponse;
+import com.upsaude.api.response.profissional.equipe.EquipeSaudeResponse;
+import com.upsaude.enums.NaturezaJuridicaEnum;
+import com.upsaude.enums.StatusFuncionamentoEnum;
+import com.upsaude.enums.TipoEstabelecimentoEnum;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;

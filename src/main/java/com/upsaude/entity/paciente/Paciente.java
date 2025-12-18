@@ -116,8 +116,7 @@ import java.util.List;
         },
         subgraphs = {
             @NamedSubgraph(name = "doencasSubgraph", type = DoencasPaciente.class, attributeNodes = {
-                @NamedAttributeNode("doenca"),
-                @NamedAttributeNode("cidPrincipal")
+                @NamedAttributeNode("doenca")
             })
         }
     ),
@@ -128,8 +127,7 @@ import java.util.List;
         },
         subgraphs = {
             @NamedSubgraph(name = "medicacoesSubgraph", type = MedicacaoPaciente.class, attributeNodes = {
-                @NamedAttributeNode(value = "medicacao", subgraph = "medicacaoDetalhes"),
-                @NamedAttributeNode("cidRelacionado")
+                @NamedAttributeNode(value = "medicacao", subgraph = "medicacaoDetalhes")
             }),
             @NamedSubgraph(name = "medicacaoDetalhes", type = Medicacao.class, attributeNodes = {
                 @NamedAttributeNode("identificacao"),
@@ -157,12 +155,10 @@ import java.util.List;
                 @NamedAttributeNode("alergia")
             }),
             @NamedSubgraph(name = "doencasSubgraph", type = DoencasPaciente.class, attributeNodes = {
-                @NamedAttributeNode("doenca"),
-                @NamedAttributeNode("cidPrincipal")
+                @NamedAttributeNode("doenca")
             }),
             @NamedSubgraph(name = "medicacoesSubgraph", type = MedicacaoPaciente.class, attributeNodes = {
-                @NamedAttributeNode(value = "medicacao", subgraph = "medicacaoDetalhes"),
-                @NamedAttributeNode("cidRelacionado")
+                @NamedAttributeNode(value = "medicacao", subgraph = "medicacaoDetalhes")
             }),
             @NamedSubgraph(name = "medicacaoDetalhes", type = Medicacao.class, attributeNodes = {
                 @NamedAttributeNode("identificacao"),

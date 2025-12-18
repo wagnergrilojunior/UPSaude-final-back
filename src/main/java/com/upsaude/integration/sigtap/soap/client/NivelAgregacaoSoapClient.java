@@ -1,5 +1,8 @@
 package com.upsaude.integration.sigtap.soap.client;
 
+import org.springframework.stereotype.Component;
+import org.springframework.ws.client.core.WebServiceTemplate;
+
 import com.upsaude.config.SigtapProperties;
 import com.upsaude.integration.sigtap.wsdl.RequestListarFormaOrganizacao;
 import com.upsaude.integration.sigtap.wsdl.RequestListarGrupos;
@@ -7,12 +10,7 @@ import com.upsaude.integration.sigtap.wsdl.RequestListarSubgrupos;
 import com.upsaude.integration.sigtap.wsdl.ResponseListarFormaOrganizacao;
 import com.upsaude.integration.sigtap.wsdl.ResponseListarGrupos;
 import com.upsaude.integration.sigtap.wsdl.ResponseListarSubgrupos;
-import org.springframework.stereotype.Component;
-import org.springframework.ws.client.core.WebServiceTemplate;
 
-/**
- * Client SOAP do NivelAgregacaoService (SIGTAP).
- */
 @Component
 public class NivelAgregacaoSoapClient extends AbstractSigtapSoapClient {
 

@@ -1,8 +1,14 @@
 package com.upsaude.api.request.paciente;
 
+import java.time.LocalDate;
+import java.util.List;
+import java.util.Set;
+import java.util.UUID;
+
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.upsaude.api.request.geral.EnderecoRequest;
 import com.upsaude.enums.EscolaridadeEnum;
 import com.upsaude.enums.EstadoCivilEnum;
 import com.upsaude.enums.IdentidadeGeneroEnum;
@@ -23,6 +29,8 @@ import com.upsaude.validation.annotation.CNSValido;
 import com.upsaude.validation.annotation.CPFValido;
 import com.upsaude.validation.annotation.EmailValido;
 import com.upsaude.validation.annotation.TelefoneValido;
+
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
@@ -31,12 +39,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-import java.time.LocalDate;
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
-import io.swagger.v3.oas.annotations.media.Schema;
 
 @Data
 @Builder

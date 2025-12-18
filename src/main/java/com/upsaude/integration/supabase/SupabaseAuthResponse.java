@@ -1,11 +1,10 @@
 package com.upsaude.integration.supabase;
-import com.upsaude.entity.sistema.User;
-
-import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.Data;
-
 import java.util.Map;
 import java.util.UUID;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
+
+import lombok.Data;
 
 @Data
 public class SupabaseAuthResponse {

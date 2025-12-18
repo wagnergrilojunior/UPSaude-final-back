@@ -1,5 +1,12 @@
 package com.upsaude.integration.sigtap.soap.client;
 
+import java.math.BigInteger;
+import java.util.Arrays;
+import java.util.List;
+
+import org.springframework.stereotype.Component;
+import org.springframework.ws.client.core.WebServiceTemplate;
+
 import com.upsaude.config.SigtapProperties;
 import com.upsaude.integration.sigtap.wsdl.CategoriaDetalheAdicionalType;
 import com.upsaude.integration.sigtap.wsdl.DetalheAdicionalType;
@@ -8,16 +15,7 @@ import com.upsaude.integration.sigtap.wsdl.RequestDetalharProcedimento;
 import com.upsaude.integration.sigtap.wsdl.RequestPesquisarProcedimentos;
 import com.upsaude.integration.sigtap.wsdl.ResponseDetalharProcedimento;
 import com.upsaude.integration.sigtap.wsdl.ResponsePesquisarProcedimentos;
-import org.springframework.stereotype.Component;
-import org.springframework.ws.client.core.WebServiceTemplate;
 
-import java.math.BigInteger;
-import java.util.Arrays;
-import java.util.List;
-
-/**
- * Client SOAP do ProcedimentoService (SIGTAP).
- */
 @Component
 public class ProcedimentoSoapClient extends AbstractSigtapSoapClient {
 
@@ -48,11 +46,6 @@ public class ProcedimentoSoapClient extends AbstractSigtapSoapClient {
         return call(properties.getSoap().procedimentoEndpoint(), request, ResponsePesquisarProcedimentos.class, "pesquisarProcedimentos");
     }
 
-    /**
-     * Detalha um procedimento, solicitando categorias de detalhe adicionais.
-     *
-     * <p>Por padr?o, usamos todas as categorias suportadas pelo esquema do DATASUS.
-     */
     public ResponseDetalharProcedimento detalharProcedimento(String codigoProcedimento, String competencia) {
         return detalharProcedimento(codigoProcedimento, competencia, categoriasPadraoDetalhe(), 1, 100);
     }
@@ -73,7 +66,6 @@ public class ProcedimentoSoapClient extends AbstractSigtapSoapClient {
             DetalheAdicionalType detalhe = new DetalheAdicionalType();
             detalhe.setCategoriaDetalheAdicional(categoria);
 
-            // Pagina??o ? opcional, mas ajuda em categorias com listas grandes (CIDs, CBOs etc).
             PaginacaoType pag = new PaginacaoType();
             pag.setRegistroInicial(BigInteger.valueOf(registroInicial));
             pag.setQuantidadeRegistros(quantidadeRegistros);

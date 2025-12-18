@@ -6,7 +6,7 @@ import java.util.UUID;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.upsaude.api.request.paciente.EnderecoRequest;
+import com.upsaude.api.request.geral.EnderecoRequest;
 import com.upsaude.entity.paciente.Endereco;
 import com.upsaude.entity.referencia.geografico.Cidades;
 import com.upsaude.entity.referencia.geografico.Estados;
@@ -14,7 +14,7 @@ import com.upsaude.entity.sistema.Tenant;
 import com.upsaude.exception.BadRequestException;
 import com.upsaude.exception.InternalServerErrorException;
 import com.upsaude.exception.NotFoundException;
-import com.upsaude.mapper.paciente.EnderecoMapper;
+import com.upsaude.mapper.geral.EnderecoMapper;
 import com.upsaude.repository.paciente.EnderecoRepository;
 import com.upsaude.repository.referencia.geografico.CidadesRepository;
 import com.upsaude.repository.referencia.geografico.EstadosRepository;

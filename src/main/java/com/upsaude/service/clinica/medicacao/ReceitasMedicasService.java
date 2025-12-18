@@ -26,8 +26,7 @@ public interface ReceitasMedicasService {
         OffsetDateTime fim,
         String numeroReceita,
         Boolean usoContinuo,
-        String origemReceita,
-        UUID cidPrincipalId);
+        String origemReceita);
 
     Page<ReceitasMedicasResponse> listarPorEstabelecimento(UUID estabelecimentoId, Pageable pageable);
 

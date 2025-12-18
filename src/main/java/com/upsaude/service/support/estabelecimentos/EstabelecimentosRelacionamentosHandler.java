@@ -5,7 +5,7 @@ import java.util.UUID;
 import org.springframework.stereotype.Service;
 
 import com.upsaude.api.request.estabelecimento.EstabelecimentosRequest;
-import com.upsaude.api.request.paciente.EnderecoRequest;
+import com.upsaude.api.request.geral.EnderecoRequest;
 import com.upsaude.entity.estabelecimento.Estabelecimentos;
 import com.upsaude.entity.paciente.Endereco;
 import com.upsaude.entity.profissional.ProfissionaisSaude;
@@ -14,11 +14,11 @@ import com.upsaude.entity.referencia.geografico.Estados;
 import com.upsaude.entity.sistema.Tenant;
 import com.upsaude.exception.BadRequestException;
 import com.upsaude.exception.NotFoundException;
-import com.upsaude.mapper.paciente.EnderecoMapper;
+import com.upsaude.mapper.geral.EnderecoMapper;
 import com.upsaude.repository.paciente.EnderecoRepository;
 import com.upsaude.repository.referencia.geografico.CidadesRepository;
 import com.upsaude.repository.referencia.geografico.EstadosRepository;
-import com.upsaude.service.paciente.EnderecoService;
+import com.upsaude.service.geral.EnderecoService;
 import com.upsaude.service.support.profissionaissaude.ProfissionaisSaudeTenantEnforcer;
 
 import lombok.RequiredArgsConstructor;

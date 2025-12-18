@@ -1,0 +1,40 @@
+package com.upsaude.service.support.puericultura;
+
+import java.util.Objects;
+import java.util.UUID;
+
+import org.springframework.stereotype.Service;
+
+import com.upsaude.api.request.saude_publica.puericultura.PuericulturaRequest;
+import com.upsaude.entity.saude_publica.puericultura.Puericultura;
+import com.upsaude.entity.sistema.Tenant;
+import com.upsaude.mapper.saude_publica.puericultura.PuericulturaMapper;
+import com.upsaude.repository.saude_publica.puericultura.PuericulturaRepository;
+
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
+@Service
+@RequiredArgsConstructor
+public class PuericulturaUpdater {
+
+    private final PuericulturaRepository repository;
+    private final PuericulturaMapper mapper;
+    private final PuericulturaTenantEnforcer tenantEnforcer;
+    private final PuericulturaValidationService validationService;
+    private final PuericulturaRelacionamentosHandler relacionamentosHandler;
+
+    public Puericultura atualizar(UUID id, PuericulturaRequest request, UUID tenantId, Tenant tenant) {
+        validationService.validarObrigatorios(request);
+
+        Puericultura entity = tenantEnforcer.validarAcesso(id, tenantId);
+
+        mapper.updateFromRequest(request, entity);
+        relacionamentosHandler.resolver(entity, request, tenantId, tenant);
+
+        Puericultura saved = repository.save(Objects.requireNonNull(entity));
+        log.info("Puericultura atualizada com sucesso. ID: {}, tenant: {}", saved.getId(), tenantId);
+        return saved;
+    }
+}

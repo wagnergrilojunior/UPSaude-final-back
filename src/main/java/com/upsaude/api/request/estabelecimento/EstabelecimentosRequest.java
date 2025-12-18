@@ -1,23 +1,29 @@
 package com.upsaude.api.request.estabelecimento;
 
+import java.time.OffsetDateTime;
+import java.util.UUID;
+
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.upsaude.api.request.geral.EnderecoRequest;
 import com.upsaude.enums.NaturezaJuridicaEnum;
 import com.upsaude.enums.StatusFuncionamentoEnum;
 import com.upsaude.enums.TipoEstabelecimentoEnum;
 import com.upsaude.util.converter.NaturezaJuridicaEnumDeserializer;
 import com.upsaude.util.converter.StatusFuncionamentoEnumDeserializer;
 import com.upsaude.util.converter.TipoEstabelecimentoEnumDeserializer;
-import com.upsaude.validation.annotation.CNPJValido;
 import com.upsaude.validation.annotation.CNESValido;
+import com.upsaude.validation.annotation.CNPJValido;
 import com.upsaude.validation.annotation.CPFValido;
 import com.upsaude.validation.annotation.EmailValido;
 import com.upsaude.validation.annotation.SiteValido;
 import com.upsaude.validation.annotation.TelefoneValido;
+
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
@@ -25,16 +31,12 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
-import java.time.OffsetDateTime;
-import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
-import io.swagger.v3.oas.annotations.media.Schema;
-import com.upsaude.api.request.paciente.EnderecoRequest;
 
 
 @Getter

@@ -4,9 +4,6 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-/**
- * Representa um campo de layout de arquivo SIGTAP.
- */
 @Data
 @NoArgsConstructor
 @AllArgsConstructor

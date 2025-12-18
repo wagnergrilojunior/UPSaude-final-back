@@ -1,22 +1,17 @@
 package com.upsaude.api.response.profissional;
 
-import com.upsaude.api.response.profissional.EspecialidadesMedicasResponse;
-import com.upsaude.api.response.paciente.EnderecoResponse;
-import com.upsaude.api.response.embeddable.ContatoMedicoResponse;
-import com.upsaude.api.response.embeddable.DadosPessoaisMedicoResponse;
-import com.upsaude.api.response.embeddable.FormacaoMedicoResponse;
-import com.upsaude.api.response.estabelecimento.MedicoEstabelecimentoResponse;
-import com.upsaude.api.response.embeddable.RegistroProfissionalMedicoResponse;
-
-
-import com.upsaude.api.response.embeddable.ContatoMedicoResponse;
-import com.upsaude.api.response.embeddable.DadosPessoaisMedicoResponse;
-import com.upsaude.api.response.embeddable.FormacaoMedicoResponse;
-import com.upsaude.api.response.embeddable.RegistroProfissionalMedicoResponse;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+
+import com.upsaude.api.response.embeddable.ContatoMedicoResponse;
+import com.upsaude.api.response.embeddable.DadosPessoaisMedicoResponse;
+import com.upsaude.api.response.embeddable.FormacaoMedicoResponse;
+import com.upsaude.api.response.embeddable.RegistroProfissionalMedicoResponse;
+import com.upsaude.api.response.estabelecimento.MedicoEstabelecimentoResponse;
+import com.upsaude.api.response.geral.EnderecoResponse;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;

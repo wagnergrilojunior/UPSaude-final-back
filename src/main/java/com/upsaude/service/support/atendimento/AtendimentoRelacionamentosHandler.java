@@ -14,8 +14,8 @@ import com.upsaude.entity.profissional.ProfissionaisSaude;
 import com.upsaude.entity.profissional.equipe.EquipeSaude;
 import com.upsaude.entity.sistema.Tenant;
 import com.upsaude.exception.NotFoundException;
+import com.upsaude.repository.convenio.ConvenioRepository;
 import com.upsaude.repository.profissional.EspecialidadesMedicasRepository;
-import com.upsaude.service.support.convenio.ConvenioTenantEnforcer;
 import com.upsaude.service.support.equipesaude.EquipeSaudeTenantEnforcer;
 import com.upsaude.service.support.paciente.PacienteTenantEnforcer;
 import com.upsaude.service.support.profissionaissaude.ProfissionaisSaudeTenantEnforcer;
@@ -29,7 +29,7 @@ public class AtendimentoRelacionamentosHandler {
     private final PacienteTenantEnforcer pacienteTenantEnforcer;
     private final ProfissionaisSaudeTenantEnforcer profissionaisSaudeTenantEnforcer;
     private final EquipeSaudeTenantEnforcer equipeSaudeTenantEnforcer;
-    private final ConvenioTenantEnforcer convenioTenantEnforcer;
+    private final ConvenioRepository convenioRepository;
     private final EspecialidadesMedicasRepository especialidadesMedicasRepository;
 
     public void resolver(Atendimento entity, AtendimentoRequest request, UUID tenantId, Tenant tenant) {
@@ -64,7 +64,8 @@ public class AtendimentoRelacionamentosHandler {
         }
 
         if (request.getConvenio() != null) {
-            Convenio convenio = convenioTenantEnforcer.validarAcesso(request.getConvenio(), tenantId);
+            Convenio convenio = convenioRepository.findByIdAndTenant(request.getConvenio(), tenantId)
+                    .orElseThrow(() -> new NotFoundException("Convênio não encontrado com ID: " + request.getConvenio()));
             entity.setConvenio(convenio);
         } else {
             entity.setConvenio(null);

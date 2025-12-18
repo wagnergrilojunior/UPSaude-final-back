@@ -43,6 +43,4 @@ public interface ReceitasMedicasRepository extends JpaRepository<ReceitasMedicas
     Page<ReceitasMedicas> findByUsoContinuoAndTenantId(Boolean usoContinuo, UUID tenantId, Pageable pageable);
 
     Page<ReceitasMedicas> findByOrigemReceitaContainingIgnoreCaseAndTenantId(String origemReceita, UUID tenantId, Pageable pageable);
-
-    Page<ReceitasMedicas> findByCidPrincipalIdAndTenantId(UUID cidPrincipalId, UUID tenantId, Pageable pageable);
 }

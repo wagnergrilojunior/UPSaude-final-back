@@ -1,23 +1,15 @@
 package com.upsaude.integration.sigtap.soap.client;
 
-import com.upsaude.exception.SigtapSoapException;
-import jakarta.xml.bind.JAXBElement;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.ws.client.WebServiceIOException;
 import org.springframework.ws.client.core.WebServiceTemplate;
 import org.springframework.ws.soap.client.SoapFaultClientException;
 
-/**
- * Base comum para clients SOAP do SIGTAP.
- *
- * <p>Centraliza:
- * <ul>
- *   <li>Envio/recebimento via WebServiceTemplate</li>
- *   <li>Unwrap de JAXBElement</li>
- *   <li>Tratamento consistente de falhas</li>
- * </ul>
- */
+import com.upsaude.exception.SigtapSoapException;
+
+import jakarta.xml.bind.JAXBElement;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+
 @Slf4j
 @RequiredArgsConstructor
 public abstract class AbstractSigtapSoapClient {

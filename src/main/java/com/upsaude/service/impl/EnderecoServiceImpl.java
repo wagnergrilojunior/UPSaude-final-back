@@ -1,5 +1,6 @@
 package com.upsaude.service.impl;
 
+
 import java.util.List;
 import java.util.UUID;
 
@@ -12,19 +13,19 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.upsaude.api.request.paciente.EnderecoRequest;
-import com.upsaude.api.response.paciente.EnderecoResponse;
+import com.upsaude.api.request.geral.EnderecoRequest;
+import com.upsaude.api.response.geral.EnderecoResponse;
 import com.upsaude.entity.paciente.Endereco;
 import com.upsaude.entity.referencia.geografico.Cidades;
 import com.upsaude.entity.referencia.geografico.Estados;
 import com.upsaude.exception.BadRequestException;
 import com.upsaude.exception.InternalServerErrorException;
 import com.upsaude.exception.NotFoundException;
-import com.upsaude.mapper.paciente.EnderecoMapper;
+import com.upsaude.mapper.geral.EnderecoMapper;
 import com.upsaude.repository.paciente.EnderecoRepository;
 import com.upsaude.repository.referencia.geografico.CidadesRepository;
 import com.upsaude.repository.referencia.geografico.EstadosRepository;
-import com.upsaude.service.paciente.EnderecoService;
+import com.upsaude.service.geral.EnderecoService;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

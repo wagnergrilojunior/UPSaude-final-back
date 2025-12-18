@@ -35,4 +35,10 @@ public interface FaltaRepository extends JpaRepository<Falta, UUID> {
 
     @Query("SELECT f FROM Falta f WHERE f.tenant.id = :tenantId")
     Page<Falta> findAllByTenant(@Param("tenantId") UUID tenantId, Pageable pageable);
+
+    @Query("SELECT f FROM Falta f WHERE f.id = :id AND f.tenant.id = :tenantId")
+    java.util.Optional<Falta> findByIdAndTenant(@Param("id") UUID id, @Param("tenantId") UUID tenantId);
+
+    @Query("SELECT f FROM Falta f WHERE f.dataFalta BETWEEN :dataInicio AND :dataFim AND f.tenant.id = :tenantId ORDER BY f.dataFalta DESC")
+    Page<Falta> findByDataFaltaBetweenAndTenantIdOrderByDataFaltaDesc(@Param("dataInicio") LocalDate dataInicio, @Param("dataFim") LocalDate dataFim, @Param("tenantId") UUID tenantId, Pageable pageable);
 }

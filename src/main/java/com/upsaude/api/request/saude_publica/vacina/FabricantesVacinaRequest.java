@@ -1,8 +1,12 @@
 package com.upsaude.api.request.saude_publica.vacina;
 
-import lombok.*;
+import com.upsaude.api.request.geral.EnderecoRequest;
+
 import io.swagger.v3.oas.annotations.media.Schema;
-import com.upsaude.api.request.paciente.EnderecoRequest;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 
 @Data

@@ -13,9 +13,6 @@ public class Cid10CsvParser {
     private static final String DELIMITER = ";";
 
     public Map<String, String> parseLine(String linha, String[] headers) {
-        // A linha já foi lida com o encoding correto (UTF-8) no BufferedReader
-        // Não precisa fazer conversão adicional - Java usa UTF-16 internamente para Strings
-        // e os caracteres já estão corretos quando lidos com o charset apropriado
         Map<String, String> campos = new HashMap<>();
 
         if (linha == null || linha.isEmpty()) {

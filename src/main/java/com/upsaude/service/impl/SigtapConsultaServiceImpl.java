@@ -23,8 +23,9 @@ import com.upsaude.mapper.sigtap.SigtapProcedimentoDetalheMapper;
 import com.upsaude.mapper.sigtap.SigtapProcedimentoMapper;
 import com.upsaude.repository.referencia.sigtap.SigtapCompatibilidadeRepository;
 import com.upsaude.repository.referencia.sigtap.SigtapGrupoRepository;
+import com.upsaude.repository.referencia.sigtap.SigtapProcedimentoDetalheRepository;
 import com.upsaude.repository.referencia.sigtap.SigtapProcedimentoRepository;
-import com.upsaude.service.SigtapConsultaService;
+import com.upsaude.service.referencia.sigtap.SigtapConsultaService;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

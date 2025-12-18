@@ -24,7 +24,7 @@ import com.upsaude.repository.profissional.equipe.EquipeSaudeRepository;
 import com.upsaude.repository.profissional.equipe.VinculoProfissionalEquipeRepository;
 import com.upsaude.service.profissional.equipe.VinculoProfissionalEquipeService;
 
-import jakarta.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 

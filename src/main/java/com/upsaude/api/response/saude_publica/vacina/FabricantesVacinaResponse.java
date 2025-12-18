@@ -1,9 +1,13 @@
 package com.upsaude.api.response.saude_publica.vacina;
-import com.upsaude.api.response.paciente.EnderecoResponse;
-
 import java.time.OffsetDateTime;
 import java.util.UUID;
-import lombok.*;
+
+import com.upsaude.api.response.geral.EnderecoResponse;
+
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
 @Builder
