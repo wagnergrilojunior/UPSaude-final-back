@@ -1,44 +1,46 @@
 package com.upsaude.service.impl;
 
-import com.upsaude.api.request.sistema.UsuariosSistemaRequest;
-import com.upsaude.api.response.sistema.UsuariosSistemaResponse;
-import com.upsaude.entity.estabelecimento.Estabelecimentos;
-import com.upsaude.entity.profissional.Medicos;
-import com.upsaude.entity.paciente.Paciente;
-import com.upsaude.entity.profissional.ProfissionaisSaude;
-import com.upsaude.entity.sistema.Tenant;
-import com.upsaude.entity.sistema.User;
-import com.upsaude.entity.estabelecimento.UsuarioEstabelecimento;
-import com.upsaude.entity.sistema.UsuariosSistema;
-import com.upsaude.exception.BadRequestException;
-import com.upsaude.exception.InternalServerErrorException;
-import com.upsaude.exception.NotFoundException;
-import org.springframework.dao.DataAccessException;
-import com.upsaude.integration.supabase.SupabaseStorageService;
-import com.upsaude.mapper.UsuariosSistemaMapper;
-import com.upsaude.repository.estabelecimento.EstabelecimentosRepository;
-import com.upsaude.repository.profissional.MedicosRepository;
-import com.upsaude.repository.paciente.PacienteRepository;
-import com.upsaude.repository.profissional.ProfissionaisSaudeRepository;
-import com.upsaude.repository.sistema.TenantRepository;
-import com.upsaude.repository.sistema.UserRepository;
-import com.upsaude.repository.estabelecimento.UsuarioEstabelecimentoRepository;
-import com.upsaude.repository.sistema.UsuariosSistemaRepository;
-import com.upsaude.service.sistema.UsuariosSistemaService;
-import org.springframework.web.multipart.MultipartFile;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
+import java.util.stream.Collectors;
+
 import org.hibernate.Hibernate;
+import org.springframework.dao.DataAccessException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
+import org.springframework.web.multipart.MultipartFile;
 
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
-import java.util.stream.Collectors;
+import com.upsaude.api.request.sistema.UsuariosSistemaRequest;
+import com.upsaude.api.response.sistema.UsuariosSistemaResponse;
+import com.upsaude.entity.estabelecimento.Estabelecimentos;
+import com.upsaude.entity.estabelecimento.UsuarioEstabelecimento;
+import com.upsaude.entity.paciente.Paciente;
+import com.upsaude.entity.profissional.Medicos;
+import com.upsaude.entity.profissional.ProfissionaisSaude;
+import com.upsaude.entity.sistema.Tenant;
+import com.upsaude.entity.sistema.User;
+import com.upsaude.entity.sistema.UsuariosSistema;
+import com.upsaude.exception.BadRequestException;
+import com.upsaude.exception.InternalServerErrorException;
+import com.upsaude.exception.NotFoundException;
+import com.upsaude.integration.supabase.SupabaseStorageService;
+import com.upsaude.mapper.sistema.UsuariosSistemaMapper;
+import com.upsaude.repository.estabelecimento.EstabelecimentosRepository;
+import com.upsaude.repository.estabelecimento.UsuarioEstabelecimentoRepository;
+import com.upsaude.repository.paciente.PacienteRepository;
+import com.upsaude.repository.profissional.MedicosRepository;
+import com.upsaude.repository.profissional.ProfissionaisSaudeRepository;
+import com.upsaude.repository.sistema.TenantRepository;
+import com.upsaude.repository.sistema.UserRepository;
+import com.upsaude.repository.sistema.UsuariosSistemaRepository;
+import com.upsaude.service.sistema.UsuariosSistemaService;
+
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Service

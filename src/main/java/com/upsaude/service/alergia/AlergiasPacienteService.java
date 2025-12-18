@@ -1,12 +1,13 @@
 package com.upsaude.service.alergia;
 
-import com.upsaude.api.request.alergia.AlergiasPacienteRequest;
-import com.upsaude.api.request.AlergiasPacienteSimplificadoRequest;
-import com.upsaude.api.response.alergia.AlergiasPacienteResponse;
+import java.util.UUID;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
-import java.util.UUID;
+import com.upsaude.api.request.alergia.AlergiasPacienteRequest;
+import com.upsaude.api.request.alergia.AlergiasPacienteSimplificadoRequest;
+import com.upsaude.api.response.alergia.AlergiasPacienteResponse;
 
 public interface AlergiasPacienteService {
 

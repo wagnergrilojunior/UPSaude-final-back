@@ -5,6 +5,10 @@ import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 import java.util.UUID;
 import lombok.*;
+import com.upsaude.dto.clinica.atendimento.AtendimentoDTO;
+import com.upsaude.dto.paciente.PacienteDTO;
+import com.upsaude.dto.profissional.ProfissionaisSaudeDTO;
+
 
 @Data
 @Builder

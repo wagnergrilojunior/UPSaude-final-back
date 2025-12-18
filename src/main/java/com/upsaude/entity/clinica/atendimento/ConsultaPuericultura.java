@@ -1,9 +1,10 @@
 package com.upsaude.entity.clinica.atendimento;
+import java.math.BigDecimal;
+import java.time.OffsetDateTime;
+
 import com.upsaude.entity.BaseEntity;
-
 import com.upsaude.entity.profissional.ProfissionaisSaude;
-
-import com.upsaude.entity.clinica.atendimento.ConsultaPuericultura;
+import com.upsaude.entity.saude_publica.puericultura.Puericultura;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -16,9 +17,6 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-
-import java.math.BigDecimal;
-import java.time.OffsetDateTime;
 
 @Entity
 @Table(name = "consultas_puericultura", schema = "public",

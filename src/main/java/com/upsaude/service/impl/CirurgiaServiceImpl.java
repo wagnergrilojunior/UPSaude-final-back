@@ -1,16 +1,16 @@
 package com.upsaude.service.impl;
 
-import com.upsaude.api.request.cirurgia.CirurgiaRequest;
-import com.upsaude.api.response.cirurgia.CirurgiaResponse;
+import com.upsaude.api.request.clinica.cirurgia.CirurgiaRequest;
+import com.upsaude.api.response.clinica.cirurgia.CirurgiaResponse;
 import com.upsaude.cache.CacheKeyUtil;
-import com.upsaude.entity.cirurgia.Cirurgia;
+import com.upsaude.entity.clinica.cirurgia.Cirurgia;
 import com.upsaude.entity.sistema.Tenant;
 import com.upsaude.enums.StatusCirurgiaEnum;
 import com.upsaude.exception.BadRequestException;
 import com.upsaude.exception.InternalServerErrorException;
 import com.upsaude.exception.NotFoundException;
-import com.upsaude.repository.cirurgia.CirurgiaRepository;
-import com.upsaude.service.cirurgia.CirurgiaService;
+import com.upsaude.repository.clinica.cirurgia.CirurgiaRepository;
+import com.upsaude.service.clinica.cirurgia.CirurgiaService;
 import com.upsaude.service.sistema.TenantService;
 import com.upsaude.service.support.cirurgia.CirurgiaCreator;
 import com.upsaude.service.support.cirurgia.CirurgiaDomainService;

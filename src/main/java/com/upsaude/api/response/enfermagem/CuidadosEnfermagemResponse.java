@@ -1,6 +1,6 @@
 package com.upsaude.api.response.enfermagem;
 import com.upsaude.api.response.profissional.ProfissionaisSaudeResponse;
-import com.upsaude.api.response.atendimento.AtendimentoResponse;
+import com.upsaude.api.response.clinica.atendimento.AtendimentoResponse;
 import com.upsaude.api.response.paciente.PacienteResponse;
 
 import com.upsaude.enums.TipoCuidadoEnfermagemEnum;

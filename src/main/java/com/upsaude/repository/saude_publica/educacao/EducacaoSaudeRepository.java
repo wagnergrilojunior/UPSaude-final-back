@@ -31,3 +31,4 @@ public interface EducacaoSaudeRepository extends JpaRepository<EducacaoSaude, UU
 
     Page<EducacaoSaude> findByDataHoraInicioBetweenAndEstabelecimentoIdAndTenantIdOrderByDataHoraInicioDesc(OffsetDateTime dataInicio, OffsetDateTime dataFim, UUID estabelecimentoId, UUID tenantId, Pageable pageable);
 }
+

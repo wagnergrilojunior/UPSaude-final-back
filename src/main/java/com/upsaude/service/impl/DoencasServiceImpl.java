@@ -1,20 +1,8 @@
 package com.upsaude.service.impl;
 
-import com.upsaude.api.request.doencas.DoencasRequest;
-import com.upsaude.api.response.doencas.DoencasResponse;
-import com.upsaude.cache.CacheKeyUtil;
-import com.upsaude.entity.doencas.Doencas;
-import com.upsaude.exception.BadRequestException;
-import com.upsaude.exception.InternalServerErrorException;
-import com.upsaude.exception.NotFoundException;
-import com.upsaude.repository.doencas.DoencasRepository;
-import com.upsaude.service.doencas.DoencasService;
-import com.upsaude.service.support.doencas.DoencasCreator;
-import com.upsaude.service.support.doencas.DoencasDomainService;
-import com.upsaude.service.support.doencas.DoencasResponseBuilder;
-import com.upsaude.service.support.doencas.DoencasUpdater;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import java.util.Objects;
+import java.util.UUID;
+
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.CacheEvict;
@@ -26,8 +14,22 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Objects;
-import java.util.UUID;
+import com.upsaude.api.request.clinica.doencas.DoencasRequest;
+import com.upsaude.api.response.clinica.doencas.DoencasResponse;
+import com.upsaude.cache.CacheKeyUtil;
+import com.upsaude.entity.clinica.doencas.Doencas;
+import com.upsaude.exception.BadRequestException;
+import com.upsaude.exception.InternalServerErrorException;
+import com.upsaude.exception.NotFoundException;
+import com.upsaude.repository.clinica.doencas.DoencasRepository;
+import com.upsaude.service.clinica.doencas.DoencasService;
+import com.upsaude.service.support.doencas.DoencasCreator;
+import com.upsaude.service.support.doencas.DoencasDomainService;
+import com.upsaude.service.support.doencas.DoencasResponseBuilder;
+import com.upsaude.service.support.doencas.DoencasUpdater;
+
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Service

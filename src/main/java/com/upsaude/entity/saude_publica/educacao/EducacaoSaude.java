@@ -2,6 +2,7 @@ package com.upsaude.entity.saude_publica.educacao;
 import com.upsaude.entity.BaseEntity;
 
 import com.upsaude.entity.profissional.ProfissionaisSaude;
+import com.upsaude.entity.profissional.equipe.EquipeSaude;
 
 import com.upsaude.entity.paciente.Paciente;
 

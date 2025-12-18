@@ -72,3 +72,4 @@ public interface AcaoPromocaoPrevencaoRepository extends JpaRepository<AcaoPromo
             @Param("tenantId") UUID tenantId,
             Pageable pageable);
 }
+

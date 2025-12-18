@@ -1,15 +1,28 @@
 package com.upsaude.service.impl;
 
+import java.io.FileWriter;
+import java.io.IOException;
+import java.time.OffsetDateTime;
+import java.time.YearMonth;
+import java.time.format.DateTimeFormatter;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.upsaude.config.SigtapProperties;
-import com.upsaude.entity.sigtap.SigtapCompatibilidade;
-import com.upsaude.entity.sigtap.SigtapCompatibilidadePossivel;
-import com.upsaude.entity.sigtap.SigtapFormaOrganizacao;
-import com.upsaude.entity.sigtap.SigtapGrupo;
-import com.upsaude.entity.sigtap.SigtapProcedimento;
-import com.upsaude.entity.sigtap.SigtapProcedimentoDetalhe;
-import com.upsaude.entity.sigtap.SigtapSubgrupo;
+import com.upsaude.entity.referencia.sigtap.SigtapCompatibilidade;
+import com.upsaude.entity.referencia.sigtap.SigtapCompatibilidadePossivel;
+import com.upsaude.entity.referencia.sigtap.SigtapFormaOrganizacao;
+import com.upsaude.entity.referencia.sigtap.SigtapGrupo;
+import com.upsaude.entity.referencia.sigtap.SigtapProcedimento;
+import com.upsaude.entity.referencia.sigtap.SigtapProcedimentoDetalhe;
+import com.upsaude.entity.referencia.sigtap.SigtapSubgrupo;
+import com.upsaude.entity.referencia.sigtap.SigtapSyncStatus;
 import com.upsaude.exception.SigtapSoapException;
 import com.upsaude.integration.sigtap.soap.client.CompatibilidadePossivelSoapClient;
 import com.upsaude.integration.sigtap.soap.client.CompatibilidadeSoapClient;
@@ -29,7 +42,6 @@ import com.upsaude.integration.sigtap.wsdl.ResponseListarGrupos;
 import com.upsaude.integration.sigtap.wsdl.ResponseListarSubgrupos;
 import com.upsaude.integration.sigtap.wsdl.ResponsePesquisarCompatibilidades;
 import com.upsaude.integration.sigtap.wsdl.ResponsePesquisarProcedimentos;
-import com.upsaude.entity.sigtap.SigtapSyncStatus;
 import com.upsaude.repository.referencia.sigtap.SigtapCompatibilidadePossivelRepository;
 import com.upsaude.repository.referencia.sigtap.SigtapCompatibilidadeRepository;
 import com.upsaude.repository.referencia.sigtap.SigtapFormaOrganizacaoRepository;
@@ -39,19 +51,9 @@ import com.upsaude.repository.referencia.sigtap.SigtapProcedimentoRepository;
 import com.upsaude.repository.referencia.sigtap.SigtapSubgrupoRepository;
 import com.upsaude.repository.referencia.sigtap.SigtapSyncStatusRepository;
 import com.upsaude.service.SigtapSyncService;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import java.io.FileWriter;
-import java.io.IOException;
-import java.time.OffsetDateTime;
-import java.time.YearMonth;
-import java.time.format.DateTimeFormatter;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
 
 @Slf4j
 @Service
@@ -78,7 +80,6 @@ public class SigtapSyncServiceImpl implements SigtapSyncService {
     private final SigtapCompatibilidadeRepository compatibilidadeRepository;
     private final SigtapSyncStatusRepository syncStatusRepository;
 
-    // Configuração de retry
     private static final int MAX_RETRIES = 5;
     private static final long INITIAL_RETRY_DELAY_MS = 1000; // 1 segundo
     private static final double RETRY_BACKOFF_MULTIPLIER = 2.0;

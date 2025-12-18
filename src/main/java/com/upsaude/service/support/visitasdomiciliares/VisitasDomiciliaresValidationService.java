@@ -2,7 +2,7 @@ package com.upsaude.service.support.visitasdomiciliares;
 
 import com.upsaude.entity.paciente.Paciente;
 
-import com.upsaude.api.request.visita.VisitasDomiciliaresRequest;
+import com.upsaude.api.request.saude_publica.visita.VisitasDomiciliaresRequest;
 import com.upsaude.exception.BadRequestException;
 import org.springframework.stereotype.Service;
 

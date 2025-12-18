@@ -2,7 +2,7 @@ package com.upsaude.service.odontologia;
 
 import com.upsaude.api.request.odontologia.TratamentosOdontologicosRequest;
 import com.upsaude.api.response.odontologia.TratamentosOdontologicosResponse;
-import com.upsaude.entity.TratamentosOdontologicos.StatusTratamento;
+import com.upsaude.entity.odontologia.TratamentosOdontologicos.StatusTratamento;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 

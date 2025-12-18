@@ -1,5 +1,6 @@
 package com.upsaude.entity.clinica.medicacao;
 import com.upsaude.entity.BaseEntityWithoutTenant;
+import com.upsaude.entity.referencia.fabricante.FabricantesMedicamento;
 
 import com.upsaude.entity.embeddable.ClassificacaoMedicamento;
 import com.upsaude.entity.embeddable.ConservacaoArmazenamentoMedicamento;

@@ -2,7 +2,7 @@ package com.upsaude.api.request.odontologia;
 
 import com.upsaude.entity.paciente.Paciente;
 
-import com.upsaude.entity.TratamentosOdontologicos.StatusTratamento;
+import com.upsaude.entity.odontologia.TratamentosOdontologicos.StatusTratamento;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;

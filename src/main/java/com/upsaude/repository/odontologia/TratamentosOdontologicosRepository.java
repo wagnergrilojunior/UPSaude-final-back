@@ -12,7 +12,7 @@ import org.springframework.data.repository.query.Param;
 
 import com.upsaude.entity.sistema.Tenant;
 import com.upsaude.entity.odontologia.TratamentosOdontologicos;
-import com.upsaude.entity.TratamentosOdontologicos.StatusTratamento;
+import com.upsaude.entity.odontologia.TratamentosOdontologicos.StatusTratamento;
 
 public interface TratamentosOdontologicosRepository extends JpaRepository<TratamentosOdontologicos, UUID> {
 

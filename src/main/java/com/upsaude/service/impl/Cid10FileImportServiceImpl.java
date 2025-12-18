@@ -1,23 +1,5 @@
 package com.upsaude.service.impl;
 
-import com.upsaude.entity.cid.Cid10Capitulos;
-import com.upsaude.entity.cid.Cid10Categorias;
-import com.upsaude.entity.cid.Cid10Grupos;
-import com.upsaude.entity.cid.Cid10Subcategorias;
-import com.upsaude.entity.cid.CidOCategorias;
-import com.upsaude.entity.cid.CidOGrupos;
-import com.upsaude.exception.BadRequestException;
-import com.upsaude.exception.InternalServerErrorException;
-import com.upsaude.exception.InvalidArgumentException;
-import com.upsaude.importacao.cid10.file.Cid10CsvParser;
-import com.upsaude.mapper.cid10.Cid10EntityMapper;
-import com.upsaude.repository.*;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.context.properties.ConfigurationPropertiesBindException;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.nio.charset.Charset;
@@ -31,6 +13,31 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.BiFunction;
 import java.util.function.Function;
+
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.context.properties.ConfigurationPropertiesBindException;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import com.upsaude.entity.referencia.cid.Cid10Capitulos;
+import com.upsaude.entity.referencia.cid.Cid10Categorias;
+import com.upsaude.entity.referencia.cid.Cid10Grupos;
+import com.upsaude.entity.referencia.cid.Cid10Subcategorias;
+import com.upsaude.entity.referencia.cid.CidOCategorias;
+import com.upsaude.entity.referencia.cid.CidOGrupos;
+import com.upsaude.exception.BadRequestException;
+import com.upsaude.exception.InternalServerErrorException;
+import com.upsaude.exception.InvalidArgumentException;
+import com.upsaude.importacao.cid10.file.Cid10CsvParser;
+import com.upsaude.mapper.referencia.cid.Cid10EntityMapper;
+import com.upsaude.repository.referencia.cid.Cid10CapitulosRepository;
+import com.upsaude.repository.referencia.cid.Cid10CategoriasRepository;
+import com.upsaude.repository.referencia.cid.Cid10GruposRepository;
+import com.upsaude.repository.referencia.cid.Cid10SubcategoriasRepository;
+import com.upsaude.repository.referencia.cid.CidOCategoriasRepository;
+import com.upsaude.repository.referencia.cid.CidOGruposRepository;
+
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Service

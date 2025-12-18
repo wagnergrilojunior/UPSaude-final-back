@@ -1,14 +1,14 @@
 package com.upsaude.service.impl;
 
-import com.upsaude.api.request.geografico.CidadesRequest;
-import com.upsaude.api.response.geografico.CidadesResponse;
+import com.upsaude.api.request.referencia.geografico.CidadesRequest;
+import com.upsaude.api.response.referencia.geografico.CidadesResponse;
 import com.upsaude.cache.CacheKeyUtil;
-import com.upsaude.entity.geografico.Cidades;
+import com.upsaude.entity.referencia.geografico.Cidades;
 import com.upsaude.exception.BadRequestException;
 import com.upsaude.exception.InternalServerErrorException;
 import com.upsaude.exception.NotFoundException;
 import com.upsaude.repository.referencia.geografico.CidadesRepository;
-import com.upsaude.service.geografico.CidadesService;
+import com.upsaude.service.referencia.geografico.CidadesService;
 import com.upsaude.service.support.cidades.CidadesCreator;
 import com.upsaude.service.support.cidades.CidadesDomainService;
 import com.upsaude.service.support.cidades.CidadesResponseBuilder;

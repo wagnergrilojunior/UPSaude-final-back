@@ -38,3 +38,4 @@ public interface VisitasDomiciliaresRepository extends JpaRepository<VisitasDomi
 
     Page<VisitasDomiciliares> findByDataVisitaBetweenAndTenantIdOrderByDataVisitaDesc(OffsetDateTime inicio, OffsetDateTime fim, UUID tenantId, Pageable pageable);
 }
+

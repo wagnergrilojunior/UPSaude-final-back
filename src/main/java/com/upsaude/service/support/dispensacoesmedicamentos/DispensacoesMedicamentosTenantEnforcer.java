@@ -1,8 +1,8 @@
 package com.upsaude.service.support.dispensacoesmedicamentos;
 
-import com.upsaude.entity.medicacao.DispensacoesMedicamentos;
+import com.upsaude.entity.clinica.medicacao.DispensacoesMedicamentos;
 import com.upsaude.exception.NotFoundException;
-import com.upsaude.repository.medicacao.DispensacoesMedicamentosRepository;
+import com.upsaude.repository.clinica.medicacao.DispensacoesMedicamentosRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;

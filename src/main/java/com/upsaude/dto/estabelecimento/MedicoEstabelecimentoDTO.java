@@ -5,6 +5,8 @@ import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 import java.util.UUID;
 import lombok.*;
+import com.upsaude.dto.profissional.MedicosDTO;
+
 
 @Data
 @Builder

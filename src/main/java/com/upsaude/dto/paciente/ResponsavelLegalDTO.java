@@ -4,6 +4,8 @@ import com.upsaude.enums.TipoResponsavelEnum;
 import java.time.OffsetDateTime;
 import java.util.UUID;
 import lombok.*;
+import com.upsaude.dto.estabelecimento.EstabelecimentosDTO;
+
 
 @Data
 @Builder

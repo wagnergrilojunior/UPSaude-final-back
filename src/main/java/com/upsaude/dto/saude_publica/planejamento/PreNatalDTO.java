@@ -1,0 +1,60 @@
+package com.upsaude.dto.saude_publica.planejamento;
+
+import com.upsaude.enums.ClassificacaoRiscoGestacionalEnum;
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.OffsetDateTime;
+import java.util.UUID;
+import lombok.*;
+import com.upsaude.dto.profissional.equipe.EquipeSaudeDTO;
+import com.upsaude.dto.paciente.PacienteDTO;
+import com.upsaude.dto.profissional.ProfissionaisSaudeDTO;
+
+
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+public class PreNatalDTO {
+    private UUID id;
+    private OffsetDateTime createdAt;
+    private OffsetDateTime updatedAt;
+    private Boolean active;
+    private PacienteDTO paciente;
+    private ProfissionaisSaudeDTO profissionalResponsavel;
+    private EquipeSaudeDTO equipeSaude;
+    private LocalDate dataUltimaMenstruacao;
+    private LocalDate dataProvavelParto;
+    private Integer idadeGestacionalCadastro;
+    private Integer gestacoesAnteriores;
+    private Integer partos;
+    private Integer abortos;
+    private Integer filhosVivos;
+    private Integer partosVaginais;
+    private Integer cesareas;
+    private Integer partosPrematuros;
+    private Integer natimortos;
+    private ClassificacaoRiscoGestacionalEnum classificacaoRisco;
+    private String motivosAltoRisco;
+    private LocalDate dataInicioAcompanhamento;
+    private LocalDate dataEncerramento;
+    private OffsetDateTime dataParto;
+    private Integer idadeGestacionalParto;
+    private String tipoParto;
+    private String localParto;
+    private BigDecimal pesoNascimento;
+    private BigDecimal comprimentoNascimento;
+    private Integer apgar1Minuto;
+    private Integer apgar5Minutos;
+    private BigDecimal perimetroCefalico;
+    private String tipoSanguineo;
+    private String fatorRh;
+    private BigDecimal pesoPreGestacional;
+    private BigDecimal altura;
+    private BigDecimal imcPreGestacional;
+    private LocalDate dataPrimeiraUltrassonografia;
+    private String antecedentesFamiliares;
+    private String antecedentesPessoais;
+    private String observacoes;
+    private String observacoesInternas;
+}

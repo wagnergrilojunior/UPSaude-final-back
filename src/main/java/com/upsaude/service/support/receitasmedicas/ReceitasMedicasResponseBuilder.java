@@ -1,11 +1,13 @@
 package com.upsaude.service.support.receitasmedicas;
 
-import com.upsaude.api.response.medicacao.ReceitasMedicasResponse;
-import com.upsaude.entity.medicacao.ReceitasMedicas;
-import com.upsaude.mapper.ReceitasMedicasMapper;
-import lombok.RequiredArgsConstructor;
 import org.hibernate.Hibernate;
 import org.springframework.stereotype.Service;
+
+import com.upsaude.api.response.clinica.medicacao.ReceitasMedicasResponse;
+import com.upsaude.entity.clinica.medicacao.ReceitasMedicas;
+import com.upsaude.mapper.clinica.medicacao.ReceitasMedicasMapper;
+
+import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor

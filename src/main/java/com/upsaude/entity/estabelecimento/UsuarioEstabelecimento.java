@@ -2,6 +2,7 @@ package com.upsaude.entity.estabelecimento;
 import com.upsaude.entity.BaseEntity;
 
 import com.upsaude.entity.estabelecimento.Estabelecimentos;
+import com.upsaude.entity.sistema.UsuariosSistema;
 
 import com.upsaude.enums.TipoUsuarioSistemaEnum;
 import jakarta.persistence.Column;

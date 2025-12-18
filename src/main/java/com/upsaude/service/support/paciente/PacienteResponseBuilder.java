@@ -1,12 +1,14 @@
 package com.upsaude.service.support.paciente;
 
-import com.upsaude.api.response.paciente.PacienteResponse;
-import com.upsaude.api.response.PacienteSimplificadoResponse;
-import com.upsaude.entity.paciente.Paciente;
-import com.upsaude.mapper.PacienteMapper;
-import com.upsaude.repository.projection.PacienteSimplificadoProjection;
-import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+
+import com.upsaude.api.response.paciente.PacienteResponse;
+import com.upsaude.api.response.paciente.PacienteSimplificadoResponse;
+import com.upsaude.entity.paciente.Paciente;
+import com.upsaude.mapper.paciente.PacienteMapper;
+import com.upsaude.repository.projection.PacienteSimplificadoProjection;
+
+import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor

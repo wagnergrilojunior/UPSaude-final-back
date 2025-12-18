@@ -2,8 +2,7 @@ package com.upsaude.entity.clinica.atendimento;
 import com.upsaude.entity.BaseEntity;
 
 import com.upsaude.entity.profissional.ProfissionaisSaude;
-
-import com.upsaude.entity.clinica.atendimento.ConsultaPreNatal;
+import com.upsaude.entity.saude_publica.planejamento.PreNatal;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;

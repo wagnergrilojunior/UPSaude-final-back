@@ -6,6 +6,9 @@ import com.upsaude.enums.TipoEstabelecimentoEnum;
 import java.time.OffsetDateTime;
 import java.util.UUID;
 import lombok.*;
+import com.upsaude.dto.paciente.EnderecoDTO;
+import com.upsaude.dto.profissional.ProfissionaisSaudeDTO;
+
 
 @Data
 @Builder

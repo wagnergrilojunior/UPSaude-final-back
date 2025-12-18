@@ -1,5 +1,12 @@
 package com.upsaude.api.response.convenio;
+
 import com.upsaude.api.response.paciente.EnderecoResponse;
+import com.upsaude.api.response.embeddable.CoberturaConvenioResponse;
+import com.upsaude.api.response.embeddable.ContatoConvenioResponse;
+import com.upsaude.api.response.embeddable.InformacoesFinanceirasConvenioResponse;
+import com.upsaude.api.response.embeddable.IntegracaoGovernamentalConvenioResponse;
+import com.upsaude.api.response.embeddable.RegistroANSConvenioResponse;
+
 
 import com.upsaude.api.response.embeddable.CoberturaConvenioResponse;
 import com.upsaude.api.response.embeddable.ContatoConvenioResponse;

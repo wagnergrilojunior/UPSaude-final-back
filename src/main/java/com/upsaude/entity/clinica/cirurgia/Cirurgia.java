@@ -4,6 +4,7 @@ import com.upsaude.entity.profissional.Medicos;
 import com.upsaude.entity.BaseEntity;
 
 import com.upsaude.entity.profissional.ProfissionaisSaude;
+import com.upsaude.entity.convenio.Convenio;
 
 import com.upsaude.entity.paciente.Paciente;
 

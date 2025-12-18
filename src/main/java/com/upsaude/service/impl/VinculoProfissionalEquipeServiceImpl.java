@@ -1,30 +1,32 @@
 package com.upsaude.service.impl;
 
-import com.upsaude.api.request.equipe.VinculoProfissionalEquipeRequest;
-import com.upsaude.api.response.equipe.VinculoProfissionalEquipeResponse;
-import com.upsaude.entity.equipe.EquipeSaude;
+import java.util.Optional;
+import java.util.UUID;
+
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Service;
+
+import com.upsaude.api.request.profissional.equipe.VinculoProfissionalEquipeRequest;
+import com.upsaude.api.response.profissional.equipe.VinculoProfissionalEquipeResponse;
 import com.upsaude.entity.profissional.ProfissionaisSaude;
-import com.upsaude.entity.equipe.VinculoProfissionalEquipe;
+import com.upsaude.entity.profissional.equipe.EquipeSaude;
+import com.upsaude.entity.profissional.equipe.VinculoProfissionalEquipe;
 import com.upsaude.enums.StatusAtivoEnum;
 import com.upsaude.enums.TipoVinculoProfissionalEnum;
 import com.upsaude.exception.BadRequestException;
 import com.upsaude.exception.NotFoundException;
-import com.upsaude.mapper.VinculoProfissionalEquipeMapper;
-import com.upsaude.repository.profissional.equipe.EquipeSaudeRepository;
+import com.upsaude.mapper.profissional.equipe.VinculoProfissionalEquipeMapper;
 import com.upsaude.repository.profissional.ProfissionaisSaudeRepository;
+import com.upsaude.repository.profissional.equipe.EquipeSaudeRepository;
 import com.upsaude.repository.profissional.equipe.VinculoProfissionalEquipeRepository;
-import com.upsaude.service.equipe.VinculoProfissionalEquipeService;
+import com.upsaude.service.profissional.equipe.VinculoProfissionalEquipeService;
+
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.Page;
-import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.Cacheable;
-import org.springframework.data.domain.Pageable;
-import org.springframework.stereotype.Service;
-
-import java.util.Optional;
-import java.util.UUID;
 
 @Slf4j
 @Service

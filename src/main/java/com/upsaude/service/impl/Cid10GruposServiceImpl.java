@@ -1,11 +1,11 @@
 package com.upsaude.service.impl;
 
-import com.upsaude.entity.cid.Cid10Grupos;
+import com.upsaude.entity.referencia.cid.Cid10Grupos;
 import com.upsaude.exception.BadRequestException;
 import com.upsaude.exception.InternalServerErrorException;
 import com.upsaude.exception.NotFoundException;
 import com.upsaude.repository.referencia.cid.Cid10GruposRepository;
-import com.upsaude.service.cid.Cid10GruposService;
+import com.upsaude.service.referencia.cid.Cid10GruposService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataAccessException;

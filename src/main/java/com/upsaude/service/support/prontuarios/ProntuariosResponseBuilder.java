@@ -1,11 +1,13 @@
 package com.upsaude.service.support.prontuarios;
 
-import com.upsaude.api.response.prontuario.ProntuariosResponse;
-import com.upsaude.entity.prontuario.Prontuarios;
-import com.upsaude.mapper.ProntuariosMapper;
-import lombok.RequiredArgsConstructor;
 import org.hibernate.Hibernate;
 import org.springframework.stereotype.Service;
+
+import com.upsaude.api.response.clinica.prontuario.ProntuariosResponse;
+import com.upsaude.entity.clinica.prontuario.Prontuarios;
+import com.upsaude.mapper.clinica.prontuario.ProntuariosMapper;
+
+import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor

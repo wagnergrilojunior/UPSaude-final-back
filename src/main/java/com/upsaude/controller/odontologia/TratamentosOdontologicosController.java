@@ -2,7 +2,7 @@ package com.upsaude.controller.odontologia;
 
 import com.upsaude.api.request.odontologia.TratamentosOdontologicosRequest;
 import com.upsaude.api.response.odontologia.TratamentosOdontologicosResponse;
-import com.upsaude.entity.TratamentosOdontologicos.StatusTratamento;
+import com.upsaude.entity.odontologia.TratamentosOdontologicos.StatusTratamento;
 import com.upsaude.exception.BadRequestException;
 import com.upsaude.exception.ConflictException;
 import com.upsaude.exception.NotFoundException;

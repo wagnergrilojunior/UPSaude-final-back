@@ -36,3 +36,4 @@ public interface EquipamentosRepository extends JpaRepository<Equipamentos, UUID
 
     Page<Equipamentos> findByStatusAndActiveTrueAndTenantIdOrderByNomeAsc(StatusAtivoEnum status, UUID tenantId, Pageable pageable);
 }
+

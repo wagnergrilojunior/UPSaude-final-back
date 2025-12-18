@@ -1,16 +1,18 @@
 package com.upsaude.service.support.vacinacoes;
 
-import com.upsaude.api.request.vacina.VacinacoesRequest;
-import com.upsaude.entity.sistema.Tenant;
-import com.upsaude.entity.vacina.Vacinacoes;
-import com.upsaude.mapper.VacinacoesMapper;
-import com.upsaude.repository.saude_publica.vacina.VacinacoesRepository;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Service;
-
 import java.util.Objects;
 import java.util.UUID;
+
+import org.springframework.stereotype.Service;
+
+import com.upsaude.api.request.saude_publica.vacina.VacinacoesRequest;
+import com.upsaude.entity.saude_publica.vacina.Vacinacoes;
+import com.upsaude.entity.sistema.Tenant;
+import com.upsaude.mapper.saude_publica.vacina.VacinacoesMapper;
+import com.upsaude.repository.saude_publica.vacina.VacinacoesRepository;
+
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Service

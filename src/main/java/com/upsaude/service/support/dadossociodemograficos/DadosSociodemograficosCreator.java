@@ -1,16 +1,18 @@
 package com.upsaude.service.support.dadossociodemograficos;
 
+import java.util.Objects;
+import java.util.UUID;
+
+import org.springframework.stereotype.Service;
+
 import com.upsaude.api.request.paciente.DadosSociodemograficosRequest;
 import com.upsaude.entity.paciente.DadosSociodemograficos;
 import com.upsaude.entity.sistema.Tenant;
-import com.upsaude.mapper.DadosSociodemograficosMapper;
+import com.upsaude.mapper.paciente.DadosSociodemograficosMapper;
 import com.upsaude.repository.paciente.DadosSociodemograficosRepository;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Service;
-
-import java.util.Objects;
-import java.util.UUID;
 
 @Slf4j
 @Service

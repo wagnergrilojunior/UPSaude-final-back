@@ -1,6 +1,7 @@
 package com.upsaude.entity.sistema;
 import com.upsaude.entity.sistema.Tenant;
 import com.upsaude.entity.profissional.Medicos;
+import com.upsaude.entity.estabelecimento.UsuarioEstabelecimento;
 
 import com.upsaude.entity.profissional.ProfissionaisSaude;
 

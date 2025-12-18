@@ -1,15 +1,8 @@
 package com.upsaude.service.impl;
 
-import com.upsaude.api.request.deficiencia.DeficienciasRequest;
-import com.upsaude.api.response.deficiencia.DeficienciasResponse;
-import com.upsaude.cache.CacheKeyUtil;
-import com.upsaude.entity.deficiencia.Deficiencias;
-import com.upsaude.exception.BadRequestException;
-import com.upsaude.exception.NotFoundException;
-import com.upsaude.repository.deficiencia.DeficienciasRepository;
-import com.upsaude.service.deficiencia.DeficienciasService;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import java.util.Objects;
+import java.util.UUID;
+
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.CacheEvict;
@@ -20,13 +13,21 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.upsaude.api.request.deficiencia.DeficienciasRequest;
+import com.upsaude.api.response.deficiencia.DeficienciasResponse;
+import com.upsaude.cache.CacheKeyUtil;
+import com.upsaude.entity.paciente.deficiencia.Deficiencias;
+import com.upsaude.exception.BadRequestException;
+import com.upsaude.exception.NotFoundException;
+import com.upsaude.repository.paciente.deficiencia.DeficienciasRepository;
+import com.upsaude.service.deficiencia.DeficienciasService;
 import com.upsaude.service.support.deficiencias.DeficienciasCreator;
 import com.upsaude.service.support.deficiencias.DeficienciasDomainService;
 import com.upsaude.service.support.deficiencias.DeficienciasResponseBuilder;
 import com.upsaude.service.support.deficiencias.DeficienciasUpdater;
 
-import java.util.Objects;
-import java.util.UUID;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Service

@@ -1,8 +1,9 @@
 package com.upsaude.entity.estabelecimento.estoque;
-import com.upsaude.entity.BaseEntity;
-
 import java.time.OffsetDateTime;
 import java.util.UUID;
+
+import com.upsaude.entity.BaseEntity;
+import com.upsaude.entity.saude_publica.vacina.EstoquesVacina;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;

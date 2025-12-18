@@ -2,7 +2,7 @@ package com.upsaude.service.support.prontuarios;
 
 import com.upsaude.entity.paciente.Paciente;
 
-import com.upsaude.api.request.prontuario.ProntuariosRequest;
+import com.upsaude.api.request.clinica.prontuario.ProntuariosRequest;
 import com.upsaude.exception.BadRequestException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;

@@ -1,26 +1,26 @@
 package com.upsaude.service.support.exames;
-import com.upsaude.entity.BaseEntity;
+import java.util.UUID;
 
-import com.upsaude.api.request.exame.ExamesRequest;
-import com.upsaude.entity.atendimento.Atendimento;
-import com.upsaude.entity.atendimento.Consultas;
+import org.springframework.stereotype.Service;
+
+import com.upsaude.api.request.clinica.exame.ExamesRequest;
+import com.upsaude.entity.clinica.atendimento.Atendimento;
+import com.upsaude.entity.clinica.atendimento.Consultas;
+import com.upsaude.entity.clinica.exame.Exames;
 import com.upsaude.entity.estabelecimento.Estabelecimentos;
-import com.upsaude.entity.exame.Exames;
 import com.upsaude.entity.sistema.Tenant;
 import com.upsaude.exception.BadRequestException;
 import com.upsaude.exception.NotFoundException;
-import com.upsaude.repository.atendimento.AtendimentoRepository;
-import com.upsaude.repository.atendimento.ConsultasRepository;
+import com.upsaude.repository.clinica.atendimento.AtendimentoRepository;
+import com.upsaude.repository.clinica.atendimento.ConsultasRepository;
 import com.upsaude.service.support.catalogoexames.CatalogoExamesTenantEnforcer;
 import com.upsaude.service.support.estabelecimentos.EstabelecimentosTenantEnforcer;
 import com.upsaude.service.support.medico.MedicoTenantEnforcer;
 import com.upsaude.service.support.paciente.PacienteTenantEnforcer;
 import com.upsaude.service.support.profissionaissaude.ProfissionaisSaudeTenantEnforcer;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Service;
-
-import java.util.UUID;
 
 @Slf4j
 @Service

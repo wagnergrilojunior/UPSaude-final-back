@@ -1,10 +1,12 @@
 package com.upsaude.service.support.fabricantesmedicamento;
 
-import com.upsaude.api.response.fabricante.FabricantesMedicamentoResponse;
-import com.upsaude.entity.fabricante.FabricantesMedicamento;
-import com.upsaude.mapper.FabricantesMedicamentoMapper;
-import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+
+import com.upsaude.api.response.referencia.fabricante.FabricantesMedicamentoResponse;
+import com.upsaude.entity.referencia.fabricante.FabricantesMedicamento;
+import com.upsaude.mapper.referencia.fabricante.FabricantesMedicamentoMapper;
+
+import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor

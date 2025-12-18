@@ -1,6 +1,13 @@
 package com.upsaude.api.response.profissional;
+
 import com.upsaude.api.response.profissional.EspecialidadesMedicasResponse;
 import com.upsaude.api.response.paciente.EnderecoResponse;
+import com.upsaude.api.response.embeddable.ContatoMedicoResponse;
+import com.upsaude.api.response.embeddable.DadosPessoaisMedicoResponse;
+import com.upsaude.api.response.embeddable.FormacaoMedicoResponse;
+import com.upsaude.api.response.estabelecimento.MedicoEstabelecimentoResponse;
+import com.upsaude.api.response.embeddable.RegistroProfissionalMedicoResponse;
+
 
 import com.upsaude.api.response.embeddable.ContatoMedicoResponse;
 import com.upsaude.api.response.embeddable.DadosPessoaisMedicoResponse;

@@ -1,16 +1,18 @@
 package com.upsaude.service.support.departamentos;
 
-import com.upsaude.api.request.departamento.DepartamentosRequest;
-import com.upsaude.entity.departamento.Departamentos;
-import com.upsaude.entity.sistema.Tenant;
-import com.upsaude.mapper.DepartamentosMapper;
-import com.upsaude.repository.estabelecimento.departamento.DepartamentosRepository;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Service;
-
 import java.util.Objects;
 import java.util.UUID;
+
+import org.springframework.stereotype.Service;
+
+import com.upsaude.api.request.estabelecimento.departamento.DepartamentosRequest;
+import com.upsaude.entity.estabelecimento.departamento.Departamentos;
+import com.upsaude.entity.sistema.Tenant;
+import com.upsaude.mapper.estabelecimento.departamento.DepartamentosMapper;
+import com.upsaude.repository.estabelecimento.departamento.DepartamentosRepository;
+
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Service

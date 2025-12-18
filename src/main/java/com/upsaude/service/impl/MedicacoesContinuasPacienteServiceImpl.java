@@ -1,25 +1,26 @@
 package com.upsaude.service.impl;
-import com.upsaude.entity.sistema.Tenant;
+import java.util.UUID;
 
-import com.upsaude.api.request.medicacao.MedicacoesContinuasPacienteRequest;
-import com.upsaude.api.response.medicacao.MedicacoesContinuasPacienteResponse;
-import com.upsaude.entity.medicacao.MedicacoesContinuasPaciente;
-import com.upsaude.exception.BadRequestException;
-import com.upsaude.exception.NotFoundException;
-import com.upsaude.mapper.MedicacoesContinuasPacienteMapper;
-import com.upsaude.repository.medicacao.MedicacoesContinuasPacienteRepository;
-import com.upsaude.service.medicacao.MedicacoesContinuasPacienteService;
-import jakarta.transaction.Transactional;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
-import org.springframework.data.domain.Page;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import java.util.UUID;
+import com.upsaude.api.request.clinica.medicacao.MedicacoesContinuasPacienteRequest;
+import com.upsaude.api.response.clinica.medicacao.MedicacoesContinuasPacienteResponse;
+import com.upsaude.entity.clinica.medicacao.MedicacoesContinuasPaciente;
+import com.upsaude.entity.sistema.Tenant;
+import com.upsaude.exception.BadRequestException;
+import com.upsaude.exception.NotFoundException;
+import com.upsaude.mapper.clinica.medicacao.MedicacoesContinuasPacienteMapper;
+import com.upsaude.repository.clinica.medicacao.MedicacoesContinuasPacienteRepository;
+import com.upsaude.service.clinica.medicacao.MedicacoesContinuasPacienteService;
+
+import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Service
@@ -115,7 +116,7 @@ public class MedicacoesContinuasPacienteServiceImpl implements MedicacoesContinu
         MedicacoesContinuasPaciente medicacoesContinuasPacienteAtualizado = medicacoesContinuasPacienteMapper.fromRequest(request);
 
         java.util.UUID idOriginal = medicacoesContinuasPaciente.getId();
-        com.upsaude.entity.Tenant tenantOriginal = medicacoesContinuasPaciente.getTenant();
+        Tenant tenantOriginal = medicacoesContinuasPaciente.getTenant();
         Boolean activeOriginal = medicacoesContinuasPaciente.getActive();
         java.time.OffsetDateTime createdAtOriginal = medicacoesContinuasPaciente.getCreatedAt();
 

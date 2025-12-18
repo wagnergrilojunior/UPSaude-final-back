@@ -1,9 +1,11 @@
 package com.upsaude.service.support.doencas;
 
-import com.upsaude.entity.doencas.Doencas;
-import com.upsaude.exception.BadRequestException;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+
+import com.upsaude.entity.clinica.doencas.Doencas;
+import com.upsaude.exception.BadRequestException;
+
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Service

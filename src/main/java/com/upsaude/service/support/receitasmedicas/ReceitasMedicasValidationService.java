@@ -2,7 +2,7 @@ package com.upsaude.service.support.receitasmedicas;
 
 import com.upsaude.entity.paciente.Paciente;
 
-import com.upsaude.api.request.medicacao.ReceitasMedicasRequest;
+import com.upsaude.api.request.clinica.medicacao.ReceitasMedicasRequest;
 import com.upsaude.exception.BadRequestException;
 import org.springframework.stereotype.Service;
 

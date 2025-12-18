@@ -1,14 +1,15 @@
 package com.upsaude.mapper.profissional;
 
-import com.upsaude.api.request.profissional.HistoricoHabilitacaoProfissionalRequest;
-import com.upsaude.api.response.profissional.HistoricoHabilitacaoProfissionalResponse;
-import com.upsaude.dto.HistoricoHabilitacaoProfissionalDTO;
-import com.upsaude.entity.profissional.HistoricoHabilitacaoProfissional;
-import com.upsaude.entity.profissional.ProfissionaisSaude;
-import com.upsaude.mapper.config.MappingConfig;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
+
+import com.upsaude.api.request.profissional.HistoricoHabilitacaoProfissionalRequest;
+import com.upsaude.api.response.profissional.HistoricoHabilitacaoProfissionalResponse;
+import com.upsaude.dto.profissional.HistoricoHabilitacaoProfissionalDTO;
+import com.upsaude.entity.profissional.HistoricoHabilitacaoProfissional;
+import com.upsaude.mapper.EntityMapper;
+import com.upsaude.mapper.config.MappingConfig;
 
 @Mapper(config = MappingConfig.class, uses = {ProfissionaisSaudeMapper.class})
 public interface HistoricoHabilitacaoProfissionalMapper extends EntityMapper<HistoricoHabilitacaoProfissional, HistoricoHabilitacaoProfissionalDTO> {

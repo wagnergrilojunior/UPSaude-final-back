@@ -1,8 +1,8 @@
 package com.upsaude.service.support.cirurgia;
 
-import com.upsaude.api.response.cirurgia.CirurgiaResponse;
-import com.upsaude.entity.cirurgia.Cirurgia;
-import com.upsaude.mapper.CirurgiaMapper;
+import com.upsaude.api.response.clinica.cirurgia.CirurgiaResponse;
+import com.upsaude.entity.clinica.cirurgia.Cirurgia;
+import com.upsaude.mapper.clinica.cirurgia.CirurgiaMapper;
 import lombok.RequiredArgsConstructor;
 import org.hibernate.Hibernate;
 import org.springframework.stereotype.Service;

@@ -13,6 +13,8 @@ import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.UUID;
 import lombok.*;
+import com.upsaude.dto.paciente.EnderecoDTO;
+
 
 @Data
 @Builder

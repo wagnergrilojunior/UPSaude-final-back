@@ -1,10 +1,14 @@
 package com.upsaude.entity.saude_publica.educacao;
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
+
 import com.upsaude.entity.BaseEntity;
-
 import com.upsaude.entity.profissional.ProfissionaisSaude;
-
+import com.upsaude.entity.profissional.equipe.EquipeSaude;
 import com.upsaude.enums.TipoAcaoPromocaoSaudeEnum;
 import com.upsaude.util.converter.TipoAcaoPromocaoSaudeEnumConverter;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Convert;
 import jakarta.persistence.Entity;
@@ -22,10 +26,6 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-
-import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
 
 @Entity
 @Table(name = "acoes_promocao_prevencao", schema = "public",

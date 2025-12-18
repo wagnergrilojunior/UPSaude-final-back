@@ -1,17 +1,15 @@
 package com.upsaude.mapper.sistema;
 
-import com.upsaude.api.request.sistema.UsuariosSistemaRequest;
-import com.upsaude.api.response.sistema.UsuariosSistemaResponse;
-import com.upsaude.dto.UsuariosSistemaDTO;
-import com.upsaude.entity.sistema.UsuariosSistema;
-import com.upsaude.entity.profissional.Medicos;
-import com.upsaude.entity.paciente.Paciente;
-import com.upsaude.entity.profissional.ProfissionaisSaude;
-import com.upsaude.entity.sistema.Tenant;
-import com.upsaude.mapper.config.MappingConfig;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
+
+import com.upsaude.api.request.sistema.UsuariosSistemaRequest;
+import com.upsaude.api.response.sistema.UsuariosSistemaResponse;
+import com.upsaude.dto.sistema.UsuariosSistemaDTO;
+import com.upsaude.entity.sistema.UsuariosSistema;
+import com.upsaude.mapper.EntityMapper;
+import com.upsaude.mapper.config.MappingConfig;
 
 @Mapper(config = MappingConfig.class)
 public interface UsuariosSistemaMapper extends EntityMapper<UsuariosSistema, UsuariosSistemaDTO> {

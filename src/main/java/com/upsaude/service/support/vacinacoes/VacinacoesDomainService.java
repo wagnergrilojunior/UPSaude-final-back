@@ -1,9 +1,11 @@
 package com.upsaude.service.support.vacinacoes;
 
-import com.upsaude.entity.vacina.Vacinacoes;
-import com.upsaude.exception.BadRequestException;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+
+import com.upsaude.entity.saude_publica.vacina.Vacinacoes;
+import com.upsaude.exception.BadRequestException;
+
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Service

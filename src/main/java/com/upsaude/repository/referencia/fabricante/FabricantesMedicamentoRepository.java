@@ -12,3 +12,4 @@ public interface FabricantesMedicamentoRepository extends JpaRepository<Fabrican
 
     boolean existsByNomeAndIdNot(String nome, UUID id);
 }
+

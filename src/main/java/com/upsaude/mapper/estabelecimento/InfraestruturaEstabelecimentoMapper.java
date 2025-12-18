@@ -1,14 +1,15 @@
 package com.upsaude.mapper.estabelecimento;
 
-import com.upsaude.api.request.estabelecimento.InfraestruturaEstabelecimentoRequest;
-import com.upsaude.api.response.estabelecimento.InfraestruturaEstabelecimentoResponse;
-import com.upsaude.dto.InfraestruturaEstabelecimentoDTO;
-import com.upsaude.entity.estabelecimento.InfraestruturaEstabelecimento;
-import com.upsaude.entity.estabelecimento.Estabelecimentos;
-import com.upsaude.mapper.config.MappingConfig;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
+
+import com.upsaude.api.request.estabelecimento.InfraestruturaEstabelecimentoRequest;
+import com.upsaude.api.response.estabelecimento.InfraestruturaEstabelecimentoResponse;
+import com.upsaude.dto.estabelecimento.InfraestruturaEstabelecimentoDTO;
+import com.upsaude.entity.estabelecimento.InfraestruturaEstabelecimento;
+import com.upsaude.mapper.EntityMapper;
+import com.upsaude.mapper.config.MappingConfig;
 
 @Mapper(config = MappingConfig.class, uses = {EstabelecimentosMapper.class})
 public interface InfraestruturaEstabelecimentoMapper extends EntityMapper<InfraestruturaEstabelecimento, InfraestruturaEstabelecimentoDTO> {

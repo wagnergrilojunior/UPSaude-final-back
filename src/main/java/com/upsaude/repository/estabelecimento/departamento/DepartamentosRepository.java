@@ -31,3 +31,4 @@ public interface DepartamentosRepository extends JpaRepository<Departamentos, UU
                                                            @Param("tenantId") UUID tenantId,
                                                            Pageable pageable);
 }
+

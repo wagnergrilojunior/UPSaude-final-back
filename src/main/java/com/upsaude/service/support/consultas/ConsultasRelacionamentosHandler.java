@@ -1,7 +1,12 @@
 package com.upsaude.service.support.consultas;
 
-import com.upsaude.api.request.atendimento.ConsultasRequest;
-import com.upsaude.entity.atendimento.Consultas;
+import java.util.Objects;
+import java.util.UUID;
+
+import org.springframework.stereotype.Service;
+
+import com.upsaude.api.request.clinica.atendimento.ConsultasRequest;
+import com.upsaude.entity.clinica.atendimento.Consultas;
 import com.upsaude.entity.profissional.EspecialidadesMedicas;
 import com.upsaude.entity.profissional.Medicos;
 import com.upsaude.entity.profissional.ProfissionaisSaude;
@@ -12,11 +17,8 @@ import com.upsaude.service.support.convenio.ConvenioTenantEnforcer;
 import com.upsaude.service.support.medico.MedicoTenantEnforcer;
 import com.upsaude.service.support.paciente.PacienteTenantEnforcer;
 import com.upsaude.service.support.profissionaissaude.ProfissionaisSaudeTenantEnforcer;
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
 
-import java.util.Objects;
-import java.util.UUID;
+import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor

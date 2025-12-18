@@ -5,6 +5,8 @@ import com.upsaude.dto.embeddable.HistoricoReacoesAlergiaPacienteDTO;
 import java.time.OffsetDateTime;
 import java.util.UUID;
 import lombok.*;
+import com.upsaude.dto.paciente.PacienteDTO;
+
 
 @Data
 @Builder

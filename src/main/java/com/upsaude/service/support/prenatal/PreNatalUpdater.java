@@ -1,16 +1,18 @@
 package com.upsaude.service.support.prenatal;
 
-import com.upsaude.api.request.planejamento.PreNatalRequest;
-import com.upsaude.entity.planejamento.PreNatal;
-import com.upsaude.entity.sistema.Tenant;
-import com.upsaude.mapper.PreNatalMapper;
-import com.upsaude.repository.saude_publica.planejamento.PreNatalRepository;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Service;
-
 import java.util.Objects;
 import java.util.UUID;
+
+import org.springframework.stereotype.Service;
+
+import com.upsaude.api.request.saude_publica.planejamento.PreNatalRequest;
+import com.upsaude.entity.saude_publica.planejamento.PreNatal;
+import com.upsaude.entity.sistema.Tenant;
+import com.upsaude.mapper.saude_publica.planejamento.PreNatalMapper;
+import com.upsaude.repository.saude_publica.planejamento.PreNatalRepository;
+
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Service

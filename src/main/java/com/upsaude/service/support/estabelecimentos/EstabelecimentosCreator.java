@@ -3,7 +3,7 @@ package com.upsaude.service.support.estabelecimentos;
 import com.upsaude.api.request.estabelecimento.EstabelecimentosRequest;
 import com.upsaude.entity.estabelecimento.Estabelecimentos;
 import com.upsaude.entity.sistema.Tenant;
-import com.upsaude.mapper.EstabelecimentosMapper;
+import com.upsaude.mapper.estabelecimento.EstabelecimentosMapper;
 import com.upsaude.repository.estabelecimento.EstabelecimentosRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

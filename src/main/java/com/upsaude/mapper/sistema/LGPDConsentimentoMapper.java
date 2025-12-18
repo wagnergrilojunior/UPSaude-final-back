@@ -1,22 +1,21 @@
 package com.upsaude.mapper.sistema;
 
-import com.upsaude.api.request.sistema.LGPDConsentimentoRequest;
-import com.upsaude.api.response.sistema.LGPDConsentimentoResponse;
-import com.upsaude.dto.LGPDConsentimentoDTO;
-import com.upsaude.entity.sistema.LGPDConsentimento;
-import com.upsaude.entity.paciente.Paciente;
-import com.upsaude.mapper.config.MappingConfig;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 
+import com.upsaude.api.request.sistema.LGPDConsentimentoRequest;
+import com.upsaude.api.response.sistema.LGPDConsentimentoResponse;
+import com.upsaude.entity.sistema.LGPDConsentimento;
+import com.upsaude.mapper.EntityMapper;
+import com.upsaude.mapper.config.MappingConfig;
+import com.upsaude.mapper.paciente.PacienteMapper;
+
 @Mapper(config = MappingConfig.class, uses = {PacienteMapper.class})
-public interface LGPDConsentimentoMapper extends EntityMapper<LGPDConsentimento, LGPDConsentimentoDTO> {
+public interface LGPDConsentimentoMapper extends EntityMapper<LGPDConsentimento, LGPDConsentimentoResponse> {
 
     @Mapping(target = "active", ignore = true)
-    LGPDConsentimento toEntity(LGPDConsentimentoDTO dto);
-
-    LGPDConsentimentoDTO toDTO(LGPDConsentimento entity);
+    LGPDConsentimento toEntity(LGPDConsentimentoResponse dto);
 
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "createdAt", ignore = true)

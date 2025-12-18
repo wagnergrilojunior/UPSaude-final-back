@@ -1,11 +1,13 @@
 package com.upsaude.service.support.consultas;
 
-import com.upsaude.api.response.atendimento.ConsultasResponse;
-import com.upsaude.entity.atendimento.Consultas;
-import com.upsaude.mapper.ConsultasMapper;
-import lombok.RequiredArgsConstructor;
 import org.hibernate.Hibernate;
 import org.springframework.stereotype.Service;
+
+import com.upsaude.api.response.clinica.atendimento.ConsultasResponse;
+import com.upsaude.entity.clinica.atendimento.Consultas;
+import com.upsaude.mapper.clinica.atendimento.ConsultasMapper;
+
+import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor

@@ -1,12 +1,14 @@
 package com.upsaude.service.support.vacinas;
 
-import com.upsaude.api.request.vacina.VacinasRequest;
-import com.upsaude.entity.vacina.FabricantesVacina;
-import com.upsaude.entity.vacina.Vacinas;
+import org.springframework.stereotype.Service;
+
+import com.upsaude.api.request.saude_publica.vacina.VacinasRequest;
+import com.upsaude.entity.saude_publica.vacina.FabricantesVacina;
+import com.upsaude.entity.saude_publica.vacina.Vacinas;
 import com.upsaude.exception.NotFoundException;
 import com.upsaude.repository.saude_publica.vacina.FabricantesVacinaRepository;
+
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor

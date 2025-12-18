@@ -1,7 +1,7 @@
 package com.upsaude.service.sistema;
 
-import com.upsaude.api.response.EnumInfoResponse;
-import com.upsaude.api.response.EnumsResponse;
+import com.upsaude.api.response.sistema.EnumInfoResponse;
+import com.upsaude.api.response.sistema.EnumsResponse;
 
 public interface EnumsService {
 

@@ -1,10 +1,12 @@
 package com.upsaude.service.support.atendimento;
 
-import com.upsaude.api.response.atendimento.AtendimentoResponse;
-import com.upsaude.entity.atendimento.Atendimento;
-import com.upsaude.mapper.AtendimentoMapper;
-import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+
+import com.upsaude.api.response.clinica.atendimento.AtendimentoResponse;
+import com.upsaude.entity.clinica.atendimento.Atendimento;
+import com.upsaude.mapper.clinica.atendimento.AtendimentoMapper;
+
+import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor

@@ -6,6 +6,7 @@ import com.upsaude.entity.clinica.atendimento.CheckInAtendimento;
 import com.upsaude.entity.BaseEntity;
 
 import com.upsaude.entity.profissional.ProfissionaisSaude;
+import com.upsaude.entity.convenio.Convenio;
 
 import com.upsaude.entity.clinica.atendimento.Atendimento;
 

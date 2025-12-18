@@ -1,12 +1,17 @@
 package com.upsaude.service.support.atendimento;
 
-import com.upsaude.api.request.atendimento.AtendimentoRequest;
-import com.upsaude.entity.atendimento.Atendimento;
+import java.util.Objects;
+import java.util.UUID;
+
+import org.springframework.stereotype.Service;
+
+import com.upsaude.api.request.clinica.atendimento.AtendimentoRequest;
+import com.upsaude.entity.clinica.atendimento.Atendimento;
 import com.upsaude.entity.convenio.Convenio;
-import com.upsaude.entity.profissional.EspecialidadesMedicas;
-import com.upsaude.entity.equipe.EquipeSaude;
 import com.upsaude.entity.paciente.Paciente;
+import com.upsaude.entity.profissional.EspecialidadesMedicas;
 import com.upsaude.entity.profissional.ProfissionaisSaude;
+import com.upsaude.entity.profissional.equipe.EquipeSaude;
 import com.upsaude.entity.sistema.Tenant;
 import com.upsaude.exception.NotFoundException;
 import com.upsaude.repository.profissional.EspecialidadesMedicasRepository;
@@ -14,11 +19,8 @@ import com.upsaude.service.support.convenio.ConvenioTenantEnforcer;
 import com.upsaude.service.support.equipesaude.EquipeSaudeTenantEnforcer;
 import com.upsaude.service.support.paciente.PacienteTenantEnforcer;
 import com.upsaude.service.support.profissionaissaude.ProfissionaisSaudeTenantEnforcer;
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
 
-import java.util.Objects;
-import java.util.UUID;
+import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor

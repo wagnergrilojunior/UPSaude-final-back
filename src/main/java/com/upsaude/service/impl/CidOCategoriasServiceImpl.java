@@ -1,11 +1,11 @@
 package com.upsaude.service.impl;
 
-import com.upsaude.entity.cid.CidOCategorias;
+import com.upsaude.entity.referencia.cid.CidOCategorias;
 import com.upsaude.exception.BadRequestException;
 import com.upsaude.exception.InternalServerErrorException;
 import com.upsaude.exception.NotFoundException;
 import com.upsaude.repository.referencia.cid.CidOCategoriasRepository;
-import com.upsaude.service.cid.CidOCategoriasService;
+import com.upsaude.service.referencia.cid.CidOCategoriasService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataAccessException;

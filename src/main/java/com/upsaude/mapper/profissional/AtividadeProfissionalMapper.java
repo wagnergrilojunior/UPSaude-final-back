@@ -1,13 +1,19 @@
 package com.upsaude.mapper.profissional;
 
-import com.upsaude.api.request.profissional.AtividadeProfissionalRequest;
-import com.upsaude.api.response.profissional.AtividadeProfissionalResponse;
-import com.upsaude.dto.AtividadeProfissionalDTO;
-import com.upsaude.entity.profissional.AtividadeProfissional;
-import com.upsaude.mapper.config.MappingConfig;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
+
+import com.upsaude.api.request.profissional.AtividadeProfissionalRequest;
+import com.upsaude.api.response.profissional.AtividadeProfissionalResponse;
+import com.upsaude.dto.profissional.AtividadeProfissionalDTO;
+import com.upsaude.entity.profissional.AtividadeProfissional;
+import com.upsaude.mapper.EntityMapper;
+import com.upsaude.mapper.clinica.atendimento.AtendimentoMapper;
+import com.upsaude.mapper.clinica.cirurgia.CirurgiaMapper;
+import com.upsaude.mapper.config.MappingConfig;
+import com.upsaude.mapper.estabelecimento.EstabelecimentosMapper;
+import com.upsaude.mapper.paciente.PacienteMapper;
 
 @Mapper(config = MappingConfig.class, uses = {AtendimentoMapper.class, CirurgiaMapper.class, MedicosMapper.class, PacienteMapper.class, ProfissionaisSaudeMapper.class, EstabelecimentosMapper.class})
 public interface AtividadeProfissionalMapper extends EntityMapper<AtividadeProfissional, AtividadeProfissionalDTO> {

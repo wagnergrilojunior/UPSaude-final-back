@@ -1,9 +1,9 @@
 package com.upsaude.api.response.profissional;
-import com.upsaude.api.response.cirurgia.CirurgiaResponse;
+import com.upsaude.api.response.clinica.cirurgia.CirurgiaResponse;
 import com.upsaude.api.response.estabelecimento.EstabelecimentosResponse;
 import com.upsaude.api.response.profissional.MedicosResponse;
 import com.upsaude.api.response.profissional.ProfissionaisSaudeResponse;
-import com.upsaude.api.response.atendimento.AtendimentoResponse;
+import com.upsaude.api.response.clinica.atendimento.AtendimentoResponse;
 import com.upsaude.api.response.paciente.PacienteResponse;
 
 import com.upsaude.enums.TipoAtividadeProfissionalEnum;

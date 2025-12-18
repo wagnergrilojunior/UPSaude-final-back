@@ -15,3 +15,4 @@ public interface Cid10CategoriasRepository extends JpaRepository<Cid10Categorias
 
     List<Cid10Categorias> findByCatIn(List<String> cats);
 }
+

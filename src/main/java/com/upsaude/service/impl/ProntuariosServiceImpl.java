@@ -1,27 +1,28 @@
 package com.upsaude.service.impl;
 
-import com.upsaude.api.request.prontuario.ProntuariosRequest;
-import com.upsaude.api.response.prontuario.ProntuariosResponse;
-import com.upsaude.cache.CacheKeyUtil;
-import com.upsaude.entity.prontuario.Prontuarios;
-import com.upsaude.entity.sistema.Tenant;
-import com.upsaude.exception.BadRequestException;
-import com.upsaude.exception.InternalServerErrorException;
-import com.upsaude.exception.NotFoundException;
-import com.upsaude.repository.prontuario.ProntuariosRepository;
-import com.upsaude.service.prontuario.ProntuariosService;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import java.util.Objects;
+import java.util.UUID;
+
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
-import org.springframework.data.domain.Page;
 import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.upsaude.api.request.clinica.prontuario.ProntuariosRequest;
+import com.upsaude.api.response.clinica.prontuario.ProntuariosResponse;
+import com.upsaude.cache.CacheKeyUtil;
+import com.upsaude.entity.clinica.prontuario.Prontuarios;
+import com.upsaude.entity.sistema.Tenant;
+import com.upsaude.exception.BadRequestException;
+import com.upsaude.exception.InternalServerErrorException;
+import com.upsaude.exception.NotFoundException;
+import com.upsaude.repository.clinica.prontuario.ProntuariosRepository;
+import com.upsaude.service.clinica.prontuario.ProntuariosService;
 import com.upsaude.service.sistema.TenantService;
 import com.upsaude.service.support.prontuarios.ProntuariosCreator;
 import com.upsaude.service.support.prontuarios.ProntuariosDomainService;
@@ -29,8 +30,8 @@ import com.upsaude.service.support.prontuarios.ProntuariosResponseBuilder;
 import com.upsaude.service.support.prontuarios.ProntuariosTenantEnforcer;
 import com.upsaude.service.support.prontuarios.ProntuariosUpdater;
 
-import java.util.Objects;
-import java.util.UUID;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Service

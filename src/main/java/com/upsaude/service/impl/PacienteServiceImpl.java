@@ -1,24 +1,22 @@
 package com.upsaude.service.impl;
-import com.upsaude.entity.BaseEntityWithoutTenant;
-
 import java.util.Objects;
 import java.util.UUID;
 
+import org.springframework.cache.Cache;
+import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
-import org.springframework.cache.Cache;
-import org.springframework.cache.CacheManager;
 import org.springframework.dao.DataAccessException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.upsaude.cache.CacheKeyUtil;
 import com.upsaude.api.request.paciente.PacienteRequest;
 import com.upsaude.api.response.paciente.PacienteResponse;
-import com.upsaude.api.response.PacienteSimplificadoResponse;
+import com.upsaude.api.response.paciente.PacienteSimplificadoResponse;
+import com.upsaude.cache.CacheKeyUtil;
 import com.upsaude.entity.paciente.Paciente;
 import com.upsaude.exception.BadRequestException;
 import com.upsaude.exception.InternalServerErrorException;

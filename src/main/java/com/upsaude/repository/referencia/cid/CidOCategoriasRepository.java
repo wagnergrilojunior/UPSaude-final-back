@@ -15,3 +15,4 @@ public interface CidOCategoriasRepository extends JpaRepository<CidOCategorias, 
 
     List<CidOCategorias> findByCatIn(List<String> cats);
 }
+

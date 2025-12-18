@@ -1,6 +1,6 @@
 package com.upsaude.service.support.fabricantesmedicamento;
 
-import com.upsaude.api.request.fabricante.FabricantesMedicamentoRequest;
+import com.upsaude.api.request.referencia.fabricante.FabricantesMedicamentoRequest;
 import com.upsaude.exception.BadRequestException;
 import com.upsaude.repository.referencia.fabricante.FabricantesMedicamentoRepository;
 import lombok.RequiredArgsConstructor;

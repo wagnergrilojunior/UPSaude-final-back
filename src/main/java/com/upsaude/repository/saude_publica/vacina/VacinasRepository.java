@@ -16,3 +16,4 @@ public interface VacinasRepository extends JpaRepository<Vacinas, UUID> {
 
     boolean existsByCodigoInternoAndIdNot(String codigoInterno, UUID id);
 }
+

@@ -1,17 +1,19 @@
 package com.upsaude.service.support.responsavellegal;
 
+import java.util.Objects;
+import java.util.UUID;
+
+import org.springframework.stereotype.Service;
+
 import com.upsaude.api.request.paciente.ResponsavelLegalRequest;
 import com.upsaude.entity.paciente.ResponsavelLegal;
 import com.upsaude.entity.sistema.Tenant;
 import com.upsaude.exception.ConflictException;
-import com.upsaude.mapper.ResponsavelLegalMapper;
+import com.upsaude.mapper.paciente.ResponsavelLegalMapper;
 import com.upsaude.repository.paciente.ResponsavelLegalRepository;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Service;
-
-import java.util.Objects;
-import java.util.UUID;
 
 @Slf4j
 @Service

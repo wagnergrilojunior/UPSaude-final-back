@@ -22,3 +22,4 @@ public interface MovimentacoesEstoqueRepository extends JpaRepository<Movimentac
     @Query("SELECT m FROM MovimentacoesEstoque m WHERE m.estabelecimento.id = :estabelecimentoId AND m.tenant.id = :tenantId")
     Page<MovimentacoesEstoque> findByEstabelecimentoIdAndTenantId(@Param("estabelecimentoId") UUID estabelecimentoId, @Param("tenantId") UUID tenantId, Pageable pageable);
 }
+

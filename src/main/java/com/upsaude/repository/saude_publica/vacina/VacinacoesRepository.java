@@ -35,3 +35,4 @@ public interface VacinacoesRepository extends JpaRepository<Vacinacoes, UUID> {
 
     Page<Vacinacoes> findByDataAplicacaoBetweenAndTenantIdOrderByDataAplicacaoDesc(OffsetDateTime inicio, OffsetDateTime fim, UUID tenantId, Pageable pageable);
 }
+

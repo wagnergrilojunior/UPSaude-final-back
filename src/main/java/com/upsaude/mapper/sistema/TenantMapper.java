@@ -1,13 +1,15 @@
 package com.upsaude.mapper.sistema;
 
-import com.upsaude.api.request.sistema.TenantRequest;
-import com.upsaude.api.response.sistema.TenantResponse;
-import com.upsaude.dto.TenantDTO;
-import com.upsaude.entity.sistema.Tenant;
-import com.upsaude.mapper.config.MappingConfig;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
+
+import com.upsaude.api.request.sistema.TenantRequest;
+import com.upsaude.api.response.sistema.TenantResponse;
+import com.upsaude.dto.sistema.TenantDTO;
+import com.upsaude.entity.sistema.Tenant;
+import com.upsaude.mapper.EntityMapper;
+import com.upsaude.mapper.config.MappingConfig;
 
 @Mapper(config = MappingConfig.class)
 public interface TenantMapper extends EntityMapper<Tenant, TenantDTO> {

@@ -1,6 +1,9 @@
 package com.upsaude.api.response.estabelecimento;
+
 import com.upsaude.api.response.profissional.ProfissionaisSaudeResponse;
 import com.upsaude.api.response.paciente.EnderecoResponse;
+import com.upsaude.api.response.profissional.equipe.EquipeSaudeResponse;
+
 
 import com.upsaude.enums.NaturezaJuridicaEnum;
 import com.upsaude.enums.StatusFuncionamentoEnum;

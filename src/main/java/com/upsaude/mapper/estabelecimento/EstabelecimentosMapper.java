@@ -1,21 +1,21 @@
 package com.upsaude.mapper.estabelecimento;
 
-import com.upsaude.api.request.estabelecimento.EstabelecimentosRequest;
-import com.upsaude.api.response.estabelecimento.EstabelecimentosResponse;
-import com.upsaude.dto.EstabelecimentosDTO;
-import com.upsaude.entity.estabelecimento.Estabelecimentos;
-import com.upsaude.mapper.config.MappingConfig;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 
+import com.upsaude.api.request.estabelecimento.EstabelecimentosRequest;
+import com.upsaude.api.response.estabelecimento.EstabelecimentosResponse;
+import com.upsaude.entity.estabelecimento.Estabelecimentos;
+import com.upsaude.mapper.config.MappingConfig;
+import com.upsaude.mapper.paciente.EnderecoMapper;
+import com.upsaude.mapper.profissional.ProfissionaisSaudeMapper;
+
 @Mapper(config = MappingConfig.class, uses = {EnderecoMapper.class, ProfissionaisSaudeMapper.class})
-public interface EstabelecimentosMapper extends EntityMapper<Estabelecimentos, EstabelecimentosDTO> {
+public interface EstabelecimentosMapper {
 
     @Mapping(target = "active", ignore = true)
-    Estabelecimentos toEntity(EstabelecimentosDTO dto);
-
-    EstabelecimentosDTO toDTO(Estabelecimentos entity);
+    Estabelecimentos toEntity(EstabelecimentosResponse dto);
 
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "createdAt", ignore = true)

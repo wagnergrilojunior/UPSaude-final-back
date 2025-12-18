@@ -2,7 +2,7 @@ package com.upsaude.service.support.logsauditoria;
 
 import com.upsaude.api.response.sistema.LogsAuditoriaResponse;
 import com.upsaude.entity.sistema.LogsAuditoria;
-import com.upsaude.mapper.LogsAuditoriaMapper;
+import com.upsaude.mapper.sistema.LogsAuditoriaMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 

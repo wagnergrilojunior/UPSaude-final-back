@@ -1,17 +1,8 @@
 package com.upsaude.service.impl;
 
-import com.upsaude.api.request.profissional.ConselhosProfissionaisRequest;
-import com.upsaude.api.response.profissional.ConselhosProfissionaisResponse;
-import com.upsaude.cache.CacheKeyUtil;
-import com.upsaude.entity.profissional.ConselhosProfissionais;
-import com.upsaude.exception.BadRequestException;
-import com.upsaude.exception.NotFoundException;
-import com.upsaude.mapper.ConselhosProfissionaisMapper;
-import com.upsaude.repository.profissional.ConselhosProfissionaisRepository;
-import com.upsaude.service.profissional.ConselhosProfissionaisService;
-import jakarta.transaction.Transactional;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import java.util.Objects;
+import java.util.UUID;
+
 import org.springframework.beans.BeanUtils;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
@@ -19,8 +10,19 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import java.util.Objects;
-import java.util.UUID;
+import com.upsaude.api.request.profissional.ConselhosProfissionaisRequest;
+import com.upsaude.api.response.profissional.ConselhosProfissionaisResponse;
+import com.upsaude.cache.CacheKeyUtil;
+import com.upsaude.entity.profissional.ConselhosProfissionais;
+import com.upsaude.exception.BadRequestException;
+import com.upsaude.exception.NotFoundException;
+import com.upsaude.mapper.profissional.ConselhosProfissionaisMapper;
+import com.upsaude.repository.profissional.ConselhosProfissionaisRepository;
+import com.upsaude.service.profissional.ConselhosProfissionaisService;
+
+import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Service

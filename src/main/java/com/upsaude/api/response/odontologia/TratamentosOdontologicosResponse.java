@@ -3,7 +3,7 @@ import com.upsaude.api.response.estabelecimento.EstabelecimentosResponse;
 import com.upsaude.api.response.profissional.ProfissionaisSaudeResponse;
 import com.upsaude.api.response.paciente.PacienteResponse;
 
-import com.upsaude.entity.TratamentosOdontologicos.StatusTratamento;
+import com.upsaude.entity.odontologia.TratamentosOdontologicos.StatusTratamento;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;

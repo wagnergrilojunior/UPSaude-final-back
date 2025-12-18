@@ -42,3 +42,4 @@ public interface PuericulturaRepository extends JpaRepository<Puericultura, UUID
 
     Optional<Puericultura> findByPacienteIdAndAcompanhamentoAtivoAndTenantId(UUID pacienteId, Boolean ativo, UUID tenantId);
 }
+

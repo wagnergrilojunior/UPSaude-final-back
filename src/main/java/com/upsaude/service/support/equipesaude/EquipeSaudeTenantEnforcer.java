@@ -1,6 +1,6 @@
 package com.upsaude.service.support.equipesaude;
 
-import com.upsaude.entity.equipe.EquipeSaude;
+import com.upsaude.entity.profissional.equipe.EquipeSaude;
 import com.upsaude.exception.NotFoundException;
 import com.upsaude.repository.profissional.equipe.EquipeSaudeRepository;
 import lombok.RequiredArgsConstructor;

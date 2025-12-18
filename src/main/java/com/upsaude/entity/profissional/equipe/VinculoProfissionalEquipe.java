@@ -1,12 +1,13 @@
 package com.upsaude.entity.profissional.equipe;
+import java.time.OffsetDateTime;
+
 import com.upsaude.entity.BaseEntity;
-
 import com.upsaude.entity.profissional.ProfissionaisSaude;
-
 import com.upsaude.enums.StatusAtivoEnum;
 import com.upsaude.enums.TipoVinculoProfissionalEnum;
 import com.upsaude.util.converter.StatusAtivoEnumConverter;
 import com.upsaude.util.converter.TipoVinculoProfissionalEnumConverter;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Convert;
 import jakarta.persistence.Entity;
@@ -20,9 +21,6 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-
-import java.math.BigDecimal;
-import java.time.OffsetDateTime;
 
 @Entity
 @Table(name = "vinculos_profissional_equipe", schema = "public",

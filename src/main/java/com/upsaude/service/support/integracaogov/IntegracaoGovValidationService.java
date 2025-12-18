@@ -1,6 +1,6 @@
 package com.upsaude.service.support.integracaogov;
 
-import com.upsaude.api.request.integracao.IntegracaoGovRequest;
+import com.upsaude.api.request.sistema.integracao.IntegracaoGovRequest;
 import com.upsaude.exception.BadRequestException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;

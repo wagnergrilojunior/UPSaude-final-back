@@ -5,6 +5,12 @@ import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.UUID;
 import lombok.*;
+import com.upsaude.dto.profissional.EspecialidadesMedicasDTO;
+import com.upsaude.dto.estabelecimento.EstabelecimentosDTO;
+import com.upsaude.dto.profissional.MedicosDTO;
+import com.upsaude.dto.paciente.PacienteDTO;
+import com.upsaude.dto.profissional.ProfissionaisSaudeDTO;
+
 
 @Data
 @Builder

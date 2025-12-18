@@ -1,21 +1,9 @@
 package com.upsaude.service.impl;
 
-import com.upsaude.api.request.vacina.VacinacoesRequest;
-import com.upsaude.api.response.vacina.VacinacoesResponse;
-import com.upsaude.cache.CacheKeyUtil;
-import com.upsaude.entity.sistema.Tenant;
-import com.upsaude.entity.vacina.Vacinacoes;
-import com.upsaude.exception.BadRequestException;
-import com.upsaude.repository.saude_publica.vacina.VacinacoesRepository;
-import com.upsaude.service.sistema.TenantService;
-import com.upsaude.service.vacina.VacinacoesService;
-import com.upsaude.service.support.vacinacoes.VacinacoesCreator;
-import com.upsaude.service.support.vacinacoes.VacinacoesDomainService;
-import com.upsaude.service.support.vacinacoes.VacinacoesResponseBuilder;
-import com.upsaude.service.support.vacinacoes.VacinacoesTenantEnforcer;
-import com.upsaude.service.support.vacinacoes.VacinacoesUpdater;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import java.time.OffsetDateTime;
+import java.util.Objects;
+import java.util.UUID;
+
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.CacheEvict;
@@ -26,9 +14,23 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.OffsetDateTime;
-import java.util.Objects;
-import java.util.UUID;
+import com.upsaude.api.request.saude_publica.vacina.VacinacoesRequest;
+import com.upsaude.api.response.saude_publica.vacina.VacinacoesResponse;
+import com.upsaude.cache.CacheKeyUtil;
+import com.upsaude.entity.saude_publica.vacina.Vacinacoes;
+import com.upsaude.entity.sistema.Tenant;
+import com.upsaude.exception.BadRequestException;
+import com.upsaude.repository.saude_publica.vacina.VacinacoesRepository;
+import com.upsaude.service.saude_publica.vacina.VacinacoesService;
+import com.upsaude.service.sistema.TenantService;
+import com.upsaude.service.support.vacinacoes.VacinacoesCreator;
+import com.upsaude.service.support.vacinacoes.VacinacoesDomainService;
+import com.upsaude.service.support.vacinacoes.VacinacoesResponseBuilder;
+import com.upsaude.service.support.vacinacoes.VacinacoesTenantEnforcer;
+import com.upsaude.service.support.vacinacoes.VacinacoesUpdater;
+
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Service

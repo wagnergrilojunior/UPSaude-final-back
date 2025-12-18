@@ -1,19 +1,21 @@
 package com.upsaude.service.support.doencas;
 
-import com.upsaude.api.request.doencas.DoencasRequest;
-import com.upsaude.entity.doencas.Doencas;
+import java.util.Objects;
+import java.util.UUID;
+
+import org.springframework.stereotype.Service;
+
+import com.upsaude.api.request.clinica.doencas.DoencasRequest;
+import com.upsaude.entity.clinica.doencas.Doencas;
 import com.upsaude.exception.NotFoundException;
 import com.upsaude.mapper.embeddable.ClassificacaoDoencaMapper;
 import com.upsaude.mapper.embeddable.EpidemiologiaDoencaMapper;
 import com.upsaude.mapper.embeddable.SintomasDoencaMapper;
 import com.upsaude.mapper.embeddable.TratamentoPadraoDoencaMapper;
-import com.upsaude.repository.doencas.DoencasRepository;
+import com.upsaude.repository.clinica.doencas.DoencasRepository;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Service;
-
-import java.util.Objects;
-import java.util.UUID;
 
 @Slf4j
 @Service

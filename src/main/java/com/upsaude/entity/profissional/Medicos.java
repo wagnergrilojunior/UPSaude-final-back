@@ -3,6 +3,7 @@ import com.upsaude.entity.profissional.EspecialidadesMedicas;
 import com.upsaude.entity.BaseEntityWithoutEstabelecimento;
 
 import com.upsaude.entity.profissional.Medicos;
+import com.upsaude.entity.estabelecimento.MedicoEstabelecimento;
 
 import com.upsaude.entity.paciente.Endereco;
 

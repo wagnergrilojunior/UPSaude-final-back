@@ -1,20 +1,5 @@
 package com.upsaude.service.impl;
 
-import com.upsaude.entity.agendamento.Agendamento;
-
-import com.upsaude.api.request.RelatorioEstatisticasRequest;
-import com.upsaude.api.response.RelatorioEstatisticasResponse;
-import com.upsaude.entity.*;
-import com.upsaude.repository.*;
-import com.upsaude.service.sistema.RelatoriosService;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.Cacheable;
-import org.springframework.stereotype.Service;
-
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDate;
@@ -23,6 +8,23 @@ import java.time.ZoneOffset;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import org.springframework.data.domain.PageRequest;
+import org.springframework.stereotype.Service;
+
+import com.upsaude.api.request.sistema.RelatorioEstatisticasRequest;
+import com.upsaude.api.response.sistema.RelatorioEstatisticasResponse;
+import com.upsaude.entity.agendamento.Agendamento;
+import com.upsaude.repository.agendamento.AgendamentoRepository;
+import com.upsaude.repository.clinica.atendimento.AtendimentoRepository;
+import com.upsaude.repository.clinica.atendimento.ConsultasRepository;
+import com.upsaude.repository.clinica.exame.ExamesRepository;
+import com.upsaude.repository.paciente.PacienteRepository;
+import com.upsaude.repository.saude_publica.visita.VisitasDomiciliaresRepository;
+import com.upsaude.service.sistema.RelatoriosService;
+
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Service

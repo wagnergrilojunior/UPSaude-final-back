@@ -2,7 +2,7 @@ package com.upsaude.service.support.perfisusuarios;
 
 import com.upsaude.api.response.sistema.PerfisUsuariosResponse;
 import com.upsaude.entity.sistema.PerfisUsuarios;
-import com.upsaude.mapper.PerfisUsuariosMapper;
+import com.upsaude.mapper.sistema.PerfisUsuariosMapper;
 import lombok.RequiredArgsConstructor;
 import org.hibernate.Hibernate;
 import org.springframework.stereotype.Service;

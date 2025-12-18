@@ -5,6 +5,8 @@ import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.UUID;
 import lombok.*;
+import com.upsaude.dto.estabelecimento.equipamento.EquipamentosDTO;
+
 
 @Data
 @Builder

@@ -3,6 +3,8 @@ import com.upsaude.entity.profissional.EspecialidadesMedicas;
 import com.upsaude.entity.BaseEntity;
 
 import com.upsaude.entity.profissional.ProfissionaisSaude;
+import com.upsaude.entity.profissional.equipe.EquipeSaude;
+import com.upsaude.entity.convenio.Convenio;
 
 import com.upsaude.entity.paciente.Paciente;
 

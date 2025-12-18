@@ -57,3 +57,4 @@ public interface NotificacaoRepository extends JpaRepository<Notificacao, UUID> 
 
     Page<Notificacao> findByDataEnvioPrevistaBetweenAndTenantIdOrderByDataEnvioPrevistaDesc(OffsetDateTime dataInicio, OffsetDateTime dataFim, UUID tenantId, Pageable pageable);
 }
+

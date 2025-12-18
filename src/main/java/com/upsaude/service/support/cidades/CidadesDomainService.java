@@ -1,6 +1,6 @@
 package com.upsaude.service.support.cidades;
 
-import com.upsaude.entity.geografico.Cidades;
+import com.upsaude.entity.referencia.geografico.Cidades;
 import com.upsaude.exception.BadRequestException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;

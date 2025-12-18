@@ -40,3 +40,4 @@ public interface PreNatalRepository extends JpaRepository<PreNatal, UUID> {
 
     Page<PreNatal> findByStatusPreNatalAndEstabelecimentoIdAndTenantId(StatusPreNatalEnum status, UUID estabelecimentoId, UUID tenantId, Pageable pageable);
 }
+

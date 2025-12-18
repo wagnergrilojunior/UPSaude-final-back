@@ -53,3 +53,4 @@ public interface TemplateNotificacaoRepository extends JpaRepository<TemplateNot
     Optional<TemplateNotificacao> findByEstabelecimentoIdAndTipoNotificacaoAndCanalAndTenantIdAndActiveTrue(
         UUID estabelecimentoId, TipoNotificacaoEnum tipoNotificacao, CanalNotificacaoEnum canal, UUID tenantId);
 }
+

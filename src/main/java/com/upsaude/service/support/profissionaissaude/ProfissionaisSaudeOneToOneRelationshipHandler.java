@@ -1,26 +1,28 @@
 package com.upsaude.service.support.profissionaissaude;
 
+import java.util.Objects;
+import java.util.UUID;
+
+import org.springframework.stereotype.Service;
+
 import com.upsaude.api.request.profissional.ProfissionaisSaudeRequest;
-import com.upsaude.entity.geografico.Cidades;
-import com.upsaude.entity.profissional.ConselhosProfissionais;
 import com.upsaude.entity.paciente.Endereco;
-import com.upsaude.entity.geografico.Estados;
+import com.upsaude.entity.profissional.ConselhosProfissionais;
 import com.upsaude.entity.profissional.ProfissionaisSaude;
+import com.upsaude.entity.referencia.geografico.Cidades;
+import com.upsaude.entity.referencia.geografico.Estados;
 import com.upsaude.entity.sistema.Tenant;
 import com.upsaude.exception.BadRequestException;
 import com.upsaude.exception.NotFoundException;
-import com.upsaude.mapper.EnderecoMapper;
-import com.upsaude.repository.referencia.geografico.CidadesRepository;
-import com.upsaude.repository.profissional.ConselhosProfissionaisRepository;
+import com.upsaude.mapper.paciente.EnderecoMapper;
 import com.upsaude.repository.paciente.EnderecoRepository;
+import com.upsaude.repository.profissional.ConselhosProfissionaisRepository;
+import com.upsaude.repository.referencia.geografico.CidadesRepository;
 import com.upsaude.repository.referencia.geografico.EstadosRepository;
 import com.upsaude.service.paciente.EnderecoService;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Service;
-
-import java.util.Objects;
-import java.util.UUID;
 
 @Slf4j
 @Service

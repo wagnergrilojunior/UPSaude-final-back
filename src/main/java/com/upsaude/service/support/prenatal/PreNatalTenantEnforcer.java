@@ -1,6 +1,6 @@
 package com.upsaude.service.support.prenatal;
 
-import com.upsaude.entity.planejamento.PreNatal;
+import com.upsaude.entity.saude_publica.planejamento.PreNatal;
 import com.upsaude.exception.NotFoundException;
 import com.upsaude.repository.saude_publica.planejamento.PreNatalRepository;
 import lombok.RequiredArgsConstructor;

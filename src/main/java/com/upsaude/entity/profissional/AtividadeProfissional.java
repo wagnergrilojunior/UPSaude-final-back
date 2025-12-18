@@ -1,15 +1,13 @@
 package com.upsaude.entity.profissional;
-import com.upsaude.entity.profissional.Medicos;
+import java.time.OffsetDateTime;
+
 import com.upsaude.entity.BaseEntity;
-
-import com.upsaude.entity.profissional.ProfissionaisSaude;
-
 import com.upsaude.entity.clinica.atendimento.Atendimento;
-
+import com.upsaude.entity.clinica.cirurgia.Cirurgia;
 import com.upsaude.entity.paciente.Paciente;
-
 import com.upsaude.enums.TipoAtividadeProfissionalEnum;
 import com.upsaude.util.converter.TipoAtividadeProfissionalEnumConverter;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Convert;
 import jakarta.persistence.Entity;
@@ -21,8 +19,6 @@ import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-
-import java.time.OffsetDateTime;
 
 @Entity
 @Table(name = "atividades_profissionais", schema = "public",

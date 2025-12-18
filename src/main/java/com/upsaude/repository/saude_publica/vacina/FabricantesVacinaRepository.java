@@ -16,3 +16,4 @@ public interface FabricantesVacinaRepository extends JpaRepository<FabricantesVa
 
     boolean existsByCnpjAndIdNot(String cnpj, UUID id);
 }
+

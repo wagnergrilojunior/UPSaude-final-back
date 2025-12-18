@@ -1,9 +1,17 @@
 package com.upsaude.api.response.paciente;
-import com.upsaude.api.response.doencas.DoencasPacienteResponse;
+
+import com.upsaude.api.response.clinica.doencas.DoencasPacienteResponse;
 import com.upsaude.api.response.paciente.EnderecoResponse;
 import com.upsaude.api.response.paciente.DadosSociodemograficosResponse;
 import com.upsaude.api.response.paciente.DadosClinicosBasicosResponse;
 import com.upsaude.api.response.paciente.ResponsavelLegalResponse;
+import com.upsaude.api.response.alergia.AlergiasPacienteResponse;
+import com.upsaude.api.response.convenio.ConvenioResponse;
+import com.upsaude.api.response.deficiencia.DeficienciasPacienteResponse;
+import com.upsaude.api.response.sistema.integracao.IntegracaoGovResponse;
+import com.upsaude.api.response.sistema.LGPDConsentimentoResponse;
+import com.upsaude.api.response.clinica.medicacao.MedicacaoPacienteResponse;
+
 
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.upsaude.enums.EscolaridadeEnum;

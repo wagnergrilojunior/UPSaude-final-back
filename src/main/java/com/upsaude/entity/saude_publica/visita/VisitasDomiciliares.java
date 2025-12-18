@@ -1,12 +1,14 @@
 package com.upsaude.entity.saude_publica.visita;
+import java.math.BigDecimal;
+import java.time.OffsetDateTime;
+
 import com.upsaude.entity.BaseEntity;
-
-import com.upsaude.entity.profissional.ProfissionaisSaude;
-
 import com.upsaude.entity.paciente.Paciente;
-
+import com.upsaude.entity.profissional.ProfissionaisSaude;
+import com.upsaude.entity.profissional.equipe.EquipeSaude;
 import com.upsaude.enums.TipoVisitaDomiciliarEnum;
 import com.upsaude.util.converter.TipoVisitaDomiciliarEnumConverter;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Convert;
 import jakarta.persistence.Entity;
@@ -20,9 +22,6 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-
-import java.math.BigDecimal;
-import java.time.OffsetDateTime;
 
 @Entity
 @Table(name = "visitas_domiciliares", schema = "public",

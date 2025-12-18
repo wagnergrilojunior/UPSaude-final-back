@@ -15,3 +15,4 @@ public interface Cid10SubcategoriasRepository extends JpaRepository<Cid10Subcate
 
     List<Cid10Subcategorias> findBySubcatIn(List<String> subcats);
 }
+

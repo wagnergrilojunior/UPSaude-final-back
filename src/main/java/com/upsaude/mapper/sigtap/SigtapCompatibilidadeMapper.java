@@ -1,13 +1,11 @@
 package com.upsaude.mapper.sigtap;
 
-import com.upsaude.dto.sigtap.SigtapCompatibilidadeResponse;
-import com.upsaude.entity.sigtap.SigtapCompatibilidade;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
-/**
- * Mapper (MapStruct) para compatibilidades SIGTAP.
- */
+import com.upsaude.dto.referencia.sigtap.SigtapCompatibilidadeResponse;
+import com.upsaude.entity.referencia.sigtap.SigtapCompatibilidade;
+
 @Mapper(componentModel = "spring")
 public interface SigtapCompatibilidadeMapper {
 

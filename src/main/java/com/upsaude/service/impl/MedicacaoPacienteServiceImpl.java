@@ -1,31 +1,33 @@
 package com.upsaude.service.impl;
 
-import com.upsaude.api.request.medicacao.MedicacaoPacienteRequest;
-import com.upsaude.api.request.MedicacaoPacienteSimplificadoRequest;
-import com.upsaude.api.response.medicacao.MedicacaoPacienteResponse;
-import com.upsaude.entity.medicacao.MedicacaoPaciente;
-import com.upsaude.entity.paciente.Paciente;
-import com.upsaude.entity.medicacao.Medicacao;
-import com.upsaude.entity.sistema.Tenant;
-import com.upsaude.exception.BadRequestException;
-import com.upsaude.exception.NotFoundException;
-import com.upsaude.mapper.MedicacaoPacienteMapper;
-import com.upsaude.repository.medicacao.MedicacaoPacienteRepository;
-import com.upsaude.repository.paciente.PacienteRepository;
-import com.upsaude.repository.medicacao.MedicacaoRepository;
-import com.upsaude.repository.sistema.TenantRepository;
-import com.upsaude.service.medicacao.MedicacaoPacienteService;
-import com.upsaude.service.sistema.TenantService;
-import jakarta.transaction.Transactional;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.Page;
+import java.util.UUID;
+
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import java.util.UUID;
+import com.upsaude.api.request.clinica.medicacao.MedicacaoPacienteRequest;
+import com.upsaude.api.request.clinica.medicacao.MedicacaoPacienteSimplificadoRequest;
+import com.upsaude.api.response.clinica.medicacao.MedicacaoPacienteResponse;
+import com.upsaude.entity.clinica.medicacao.Medicacao;
+import com.upsaude.entity.clinica.medicacao.MedicacaoPaciente;
+import com.upsaude.entity.paciente.Paciente;
+import com.upsaude.entity.sistema.Tenant;
+import com.upsaude.exception.BadRequestException;
+import com.upsaude.exception.NotFoundException;
+import com.upsaude.mapper.clinica.medicacao.MedicacaoPacienteMapper;
+import com.upsaude.repository.clinica.medicacao.MedicacaoPacienteRepository;
+import com.upsaude.repository.clinica.medicacao.MedicacaoRepository;
+import com.upsaude.repository.paciente.PacienteRepository;
+import com.upsaude.repository.sistema.TenantRepository;
+import com.upsaude.service.clinica.medicacao.MedicacaoPacienteService;
+import com.upsaude.service.sistema.TenantService;
+
+import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Service

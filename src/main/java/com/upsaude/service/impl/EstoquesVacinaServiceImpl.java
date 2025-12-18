@@ -1,25 +1,26 @@
 package com.upsaude.service.impl;
-import com.upsaude.entity.sistema.Tenant;
+import java.util.UUID;
 
-import com.upsaude.api.request.vacina.EstoquesVacinaRequest;
-import com.upsaude.api.response.vacina.EstoquesVacinaResponse;
-import com.upsaude.entity.vacina.EstoquesVacina;
-import com.upsaude.exception.BadRequestException;
-import com.upsaude.exception.NotFoundException;
-import com.upsaude.mapper.EstoquesVacinaMapper;
-import com.upsaude.repository.saude_publica.vacina.EstoquesVacinaRepository;
-import com.upsaude.service.vacina.EstoquesVacinaService;
-import jakarta.transaction.Transactional;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
-import org.springframework.data.domain.Page;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import java.util.UUID;
+import com.upsaude.api.request.saude_publica.vacina.EstoquesVacinaRequest;
+import com.upsaude.api.response.saude_publica.vacina.EstoquesVacinaResponse;
+import com.upsaude.entity.saude_publica.vacina.EstoquesVacina;
+import com.upsaude.entity.sistema.Tenant;
+import com.upsaude.exception.BadRequestException;
+import com.upsaude.exception.NotFoundException;
+import com.upsaude.mapper.saude_publica.vacina.EstoquesVacinaMapper;
+import com.upsaude.repository.saude_publica.vacina.EstoquesVacinaRepository;
+import com.upsaude.service.saude_publica.vacina.EstoquesVacinaService;
+
+import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Service
@@ -115,7 +116,7 @@ public class EstoquesVacinaServiceImpl implements EstoquesVacinaService {
         EstoquesVacina estoquesVacinaAtualizado = estoquesVacinaMapper.fromRequest(request);
 
         java.util.UUID idOriginal = estoquesVacina.getId();
-        com.upsaude.entity.Tenant tenantOriginal = estoquesVacina.getTenant();
+        Tenant tenantOriginal = estoquesVacina.getTenant();
         Boolean activeOriginal = estoquesVacina.getActive();
         java.time.OffsetDateTime createdAtOriginal = estoquesVacina.getCreatedAt();
 

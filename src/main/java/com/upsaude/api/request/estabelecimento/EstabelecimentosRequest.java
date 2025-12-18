@@ -34,6 +34,8 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import io.swagger.v3.oas.annotations.media.Schema;
+import com.upsaude.api.request.paciente.EnderecoRequest;
+
 
 @Getter
 @Setter

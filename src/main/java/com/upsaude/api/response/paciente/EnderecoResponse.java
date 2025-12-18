@@ -1,6 +1,6 @@
 package com.upsaude.api.response.paciente;
-import com.upsaude.api.response.geografico.CidadesResponse;
-import com.upsaude.api.response.geografico.EstadosResponse;
+import com.upsaude.api.response.referencia.geografico.CidadesResponse;
+import com.upsaude.api.response.referencia.geografico.EstadosResponse;
 
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.upsaude.enums.TipoEnderecoEnum;

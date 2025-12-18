@@ -1,8 +1,8 @@
 package com.upsaude.service.support.prenatal;
 
-import com.upsaude.api.request.planejamento.PreNatalRequest;
+import com.upsaude.api.request.saude_publica.planejamento.PreNatalRequest;
 import com.upsaude.entity.paciente.Paciente;
-import com.upsaude.entity.planejamento.PreNatal;
+import com.upsaude.entity.saude_publica.planejamento.PreNatal;
 import com.upsaude.entity.sistema.Tenant;
 import com.upsaude.exception.BadRequestException;
 import com.upsaude.service.support.equipesaude.EquipeSaudeTenantEnforcer;

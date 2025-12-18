@@ -4,6 +4,8 @@ import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.UUID;
 import lombok.*;
+import com.upsaude.api.response.paciente.PacienteResponse;
+
 
 @Data
 @Builder

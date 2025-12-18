@@ -1,12 +1,14 @@
 package com.upsaude.service.support.medicacao;
 
-import com.upsaude.api.request.medicacao.MedicacaoRequest;
-import com.upsaude.entity.fabricante.FabricantesMedicamento;
-import com.upsaude.entity.medicacao.Medicacao;
+import org.springframework.stereotype.Service;
+
+import com.upsaude.api.request.clinica.medicacao.MedicacaoRequest;
+import com.upsaude.entity.clinica.medicacao.Medicacao;
+import com.upsaude.entity.referencia.fabricante.FabricantesMedicamento;
 import com.upsaude.exception.NotFoundException;
 import com.upsaude.repository.referencia.fabricante.FabricantesMedicamentoRepository;
+
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor

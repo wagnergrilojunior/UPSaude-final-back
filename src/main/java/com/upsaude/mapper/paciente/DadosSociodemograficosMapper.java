@@ -1,13 +1,15 @@
 package com.upsaude.mapper.paciente;
 
-import com.upsaude.api.request.paciente.DadosSociodemograficosRequest;
-import com.upsaude.api.response.paciente.DadosSociodemograficosResponse;
-import com.upsaude.dto.DadosSociodemograficosDTO;
-import com.upsaude.entity.paciente.DadosSociodemograficos;
-import com.upsaude.mapper.config.MappingConfig;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
+
+import com.upsaude.api.request.paciente.DadosSociodemograficosRequest;
+import com.upsaude.api.response.paciente.DadosSociodemograficosResponse;
+import com.upsaude.dto.paciente.DadosSociodemograficosDTO;
+import com.upsaude.entity.paciente.DadosSociodemograficos;
+import com.upsaude.mapper.EntityMapper;
+import com.upsaude.mapper.config.MappingConfig;
 
 @Mapper(config = MappingConfig.class)
 public interface DadosSociodemograficosMapper extends EntityMapper<DadosSociodemograficos, DadosSociodemograficosDTO> {

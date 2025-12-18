@@ -1,14 +1,14 @@
 package com.upsaude.service.support.receitasmedicas;
 
-import com.upsaude.api.request.medicacao.ReceitasMedicasRequest;
+import com.upsaude.api.request.clinica.medicacao.ReceitasMedicasRequest;
 import com.upsaude.entity.estabelecimento.Estabelecimentos;
-import com.upsaude.entity.medicacao.Medicacao;
+import com.upsaude.entity.clinica.medicacao.Medicacao;
 import com.upsaude.entity.profissional.Medicos;
 import com.upsaude.entity.paciente.Paciente;
-import com.upsaude.entity.medicacao.ReceitasMedicas;
+import com.upsaude.entity.clinica.medicacao.ReceitasMedicas;
 import com.upsaude.entity.sistema.Tenant;
 import com.upsaude.exception.NotFoundException;
-import com.upsaude.repository.medicacao.MedicacaoRepository;
+import com.upsaude.repository.clinica.medicacao.MedicacaoRepository;
 import com.upsaude.service.support.estabelecimentos.EstabelecimentosTenantEnforcer;
 import com.upsaude.service.support.medico.MedicoTenantEnforcer;
 import com.upsaude.service.support.paciente.PacienteTenantEnforcer;

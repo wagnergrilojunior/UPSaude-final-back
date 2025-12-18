@@ -1,9 +1,11 @@
 package com.upsaude.service.support.departamentos;
 
-import com.upsaude.entity.departamento.Departamentos;
-import com.upsaude.exception.BadRequestException;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+
+import com.upsaude.entity.estabelecimento.departamento.Departamentos;
+import com.upsaude.exception.BadRequestException;
+
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Service

@@ -23,3 +23,4 @@ public interface Cid10GruposRepository extends JpaRepository<Cid10Grupos, UUID> 
             "ON g.catinic = pairs.catinic AND g.catfim = pairs.catfim", nativeQuery = true)
     List<Cid10Grupos> findByCatinicAndCatfimPairs(@Param("catinics") List<String> catinics, @Param("catfims") List<String> catfims);
 }
+

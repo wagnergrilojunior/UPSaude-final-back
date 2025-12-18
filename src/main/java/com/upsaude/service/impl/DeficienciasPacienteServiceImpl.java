@@ -1,30 +1,32 @@
 package com.upsaude.service.impl;
 
-import com.upsaude.api.request.deficiencia.DeficienciasPacienteRequest;
-import com.upsaude.api.request.DeficienciasPacienteSimplificadoRequest;
-import com.upsaude.api.response.deficiencia.DeficienciasPacienteResponse;
-import com.upsaude.entity.deficiencia.DeficienciasPaciente;
-import com.upsaude.entity.paciente.Paciente;
-import com.upsaude.entity.deficiencia.Deficiencias;
-import com.upsaude.entity.sistema.Tenant;
-import com.upsaude.exception.BadRequestException;
-import com.upsaude.exception.NotFoundException;
-import com.upsaude.mapper.DeficienciasPacienteMapper;
-import com.upsaude.repository.deficiencia.DeficienciasPacienteRepository;
-import com.upsaude.repository.paciente.PacienteRepository;
-import com.upsaude.repository.deficiencia.DeficienciasRepository;
-import com.upsaude.repository.sistema.TenantRepository;
-import com.upsaude.service.deficiencia.DeficienciasPacienteService;
-import jakarta.transaction.Transactional;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.Page;
+import java.util.UUID;
+
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import java.util.UUID;
+import com.upsaude.api.request.deficiencia.DeficienciasPacienteRequest;
+import com.upsaude.api.request.deficiencia.DeficienciasPacienteSimplificadoRequest;
+import com.upsaude.api.response.deficiencia.DeficienciasPacienteResponse;
+import com.upsaude.entity.paciente.Paciente;
+import com.upsaude.entity.paciente.deficiencia.Deficiencias;
+import com.upsaude.entity.paciente.deficiencia.DeficienciasPaciente;
+import com.upsaude.entity.sistema.Tenant;
+import com.upsaude.exception.BadRequestException;
+import com.upsaude.exception.NotFoundException;
+import com.upsaude.mapper.paciente.deficiencia.DeficienciasPacienteMapper;
+import com.upsaude.repository.paciente.PacienteRepository;
+import com.upsaude.repository.paciente.deficiencia.DeficienciasPacienteRepository;
+import com.upsaude.repository.paciente.deficiencia.DeficienciasRepository;
+import com.upsaude.repository.sistema.TenantRepository;
+import com.upsaude.service.deficiencia.DeficienciasPacienteService;
+
+import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Service

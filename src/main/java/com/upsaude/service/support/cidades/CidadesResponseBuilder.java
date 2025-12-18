@@ -1,11 +1,13 @@
 package com.upsaude.service.support.cidades;
 
-import com.upsaude.api.response.geografico.CidadesResponse;
-import com.upsaude.entity.geografico.Cidades;
-import com.upsaude.mapper.CidadesMapper;
-import lombok.RequiredArgsConstructor;
 import org.hibernate.Hibernate;
 import org.springframework.stereotype.Service;
+
+import com.upsaude.api.response.referencia.geografico.CidadesResponse;
+import com.upsaude.entity.referencia.geografico.Cidades;
+import com.upsaude.mapper.referencia.geografico.CidadesMapper;
+
+import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor

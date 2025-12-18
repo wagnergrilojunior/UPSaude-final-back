@@ -1,23 +1,8 @@
 package com.upsaude.service.impl;
 
-import com.upsaude.dto.sigtap.SigtapCompatibilidadeResponse;
-import com.upsaude.dto.sigtap.SigtapGrupoResponse;
-import com.upsaude.dto.sigtap.SigtapProcedimentoDetalhadoResponse;
-import com.upsaude.dto.sigtap.SigtapProcedimentoResponse;
-import com.upsaude.entity.sigtap.SigtapCompatibilidade;
-import com.upsaude.entity.sigtap.SigtapProcedimento;
-import com.upsaude.exception.NotFoundException;
-import com.upsaude.mapper.sigtap.SigtapCompatibilidadeMapper;
-import com.upsaude.mapper.sigtap.SigtapGrupoMapper;
-import com.upsaude.mapper.sigtap.SigtapProcedimentoDetalheMapper;
-import com.upsaude.mapper.sigtap.SigtapProcedimentoMapper;
-import com.upsaude.repository.referencia.sigtap.SigtapCompatibilidadeRepository;
-import com.upsaude.repository.referencia.sigtap.SigtapGrupoRepository;
-import com.upsaude.repository.referencia.sigtap.SigtapProcedimentoDetalheRepository;
-import com.upsaude.repository.referencia.sigtap.SigtapProcedimentoRepository;
-import com.upsaude.service.SigtapConsultaService;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import java.util.List;
+import java.util.Locale;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -25,8 +10,24 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-import java.util.Locale;
+import com.upsaude.dto.referencia.sigtap.SigtapCompatibilidadeResponse;
+import com.upsaude.dto.referencia.sigtap.SigtapGrupoResponse;
+import com.upsaude.dto.referencia.sigtap.SigtapProcedimentoDetalhadoResponse;
+import com.upsaude.dto.referencia.sigtap.SigtapProcedimentoResponse;
+import com.upsaude.entity.referencia.sigtap.SigtapCompatibilidade;
+import com.upsaude.entity.referencia.sigtap.SigtapProcedimento;
+import com.upsaude.exception.NotFoundException;
+import com.upsaude.mapper.sigtap.SigtapCompatibilidadeMapper;
+import com.upsaude.mapper.sigtap.SigtapGrupoMapper;
+import com.upsaude.mapper.sigtap.SigtapProcedimentoDetalheMapper;
+import com.upsaude.mapper.sigtap.SigtapProcedimentoMapper;
+import com.upsaude.repository.referencia.sigtap.SigtapCompatibilidadeRepository;
+import com.upsaude.repository.referencia.sigtap.SigtapGrupoRepository;
+import com.upsaude.repository.referencia.sigtap.SigtapProcedimentoRepository;
+import com.upsaude.service.SigtapConsultaService;
+
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Service

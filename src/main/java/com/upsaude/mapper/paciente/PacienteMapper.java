@@ -1,25 +1,23 @@
 package com.upsaude.mapper.paciente;
 
-import com.upsaude.api.request.paciente.PacienteRequest;
-import com.upsaude.api.response.paciente.PacienteResponse;
-import com.upsaude.api.response.PacienteSimplificadoResponse;
-import com.upsaude.dto.PacienteDTO;
-import com.upsaude.entity.paciente.Paciente;
-import com.upsaude.mapper.config.MappingConfig;
-import com.upsaude.mapper.EntityMapper;
-import com.upsaude.mapper.convenio.ConvenioMapper;
-import com.upsaude.mapper.paciente.DadosClinicosBasicosMapper;
-import com.upsaude.mapper.paciente.DadosSociodemograficosMapper;
-import com.upsaude.mapper.integracao.IntegracaoGovMapper;
-import com.upsaude.mapper.sistema.LGPDConsentimentoMapper;
-import com.upsaude.mapper.paciente.ResponsavelLegalMapper;
-import com.upsaude.mapper.doencas.DoencasPacienteMapper;
-import com.upsaude.mapper.alergia.AlergiasPacienteMapper;
-import com.upsaude.mapper.deficiencia.DeficienciasPacienteMapper;
-import com.upsaude.mapper.medicacao.MedicacaoPacienteMapper;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
+
+import com.upsaude.api.request.paciente.PacienteRequest;
+import com.upsaude.api.response.paciente.PacienteResponse;
+import com.upsaude.api.response.paciente.PacienteSimplificadoResponse;
+import com.upsaude.dto.paciente.PacienteDTO;
+import com.upsaude.entity.paciente.Paciente;
+import com.upsaude.mapper.EntityMapper;
+import com.upsaude.mapper.clinica.doencas.DoencasPacienteMapper;
+import com.upsaude.mapper.clinica.medicacao.MedicacaoPacienteMapper;
+import com.upsaude.mapper.config.MappingConfig;
+import com.upsaude.mapper.convenio.ConvenioMapper;
+import com.upsaude.mapper.paciente.alergia.AlergiasPacienteMapper;
+import com.upsaude.mapper.paciente.deficiencia.DeficienciasPacienteMapper;
+import com.upsaude.mapper.sistema.LGPDConsentimentoMapper;
+import com.upsaude.mapper.sistema.integracao.IntegracaoGovMapper;
 import com.upsaude.repository.projection.PacienteSimplificadoProjection;
 
 @Mapper(config = MappingConfig.class, uses = {ConvenioMapper.class, DadosClinicosBasicosMapper.class, DadosSociodemograficosMapper.class, IntegracaoGovMapper.class, LGPDConsentimentoMapper.class, ResponsavelLegalMapper.class, DoencasPacienteMapper.class, AlergiasPacienteMapper.class, DeficienciasPacienteMapper.class, MedicacaoPacienteMapper.class})

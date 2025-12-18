@@ -1,12 +1,13 @@
 package com.upsaude.service.paciente;
 
-import com.upsaude.api.request.paciente.PacienteRequest;
-import com.upsaude.api.response.paciente.PacienteResponse;
-import com.upsaude.api.response.PacienteSimplificadoResponse;
+import java.util.UUID;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
-import java.util.UUID;
+import com.upsaude.api.request.paciente.PacienteRequest;
+import com.upsaude.api.response.paciente.PacienteResponse;
+import com.upsaude.api.response.paciente.PacienteSimplificadoResponse;
 
 public interface PacienteService {
 

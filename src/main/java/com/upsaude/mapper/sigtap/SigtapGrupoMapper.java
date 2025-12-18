@@ -1,8 +1,9 @@
 package com.upsaude.mapper.sigtap;
 
-import com.upsaude.dto.sigtap.SigtapGrupoResponse;
-import com.upsaude.entity.sigtap.SigtapGrupo;
 import org.mapstruct.Mapper;
+
+import com.upsaude.dto.referencia.sigtap.SigtapGrupoResponse;
+import com.upsaude.entity.referencia.sigtap.SigtapGrupo;
 
 @Mapper(componentModel = "spring")
 public interface SigtapGrupoMapper {

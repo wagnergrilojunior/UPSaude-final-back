@@ -1,21 +1,23 @@
 package com.upsaude.service.support.visitasdomiciliares;
 
-import com.upsaude.api.request.visita.VisitasDomiciliaresRequest;
-import com.upsaude.entity.equipe.EquipeSaude;
+import java.util.Objects;
+import java.util.UUID;
+
+import org.springframework.stereotype.Service;
+
+import com.upsaude.api.request.saude_publica.visita.VisitasDomiciliaresRequest;
 import com.upsaude.entity.estabelecimento.Estabelecimentos;
 import com.upsaude.entity.paciente.Paciente;
 import com.upsaude.entity.profissional.ProfissionaisSaude;
+import com.upsaude.entity.profissional.equipe.EquipeSaude;
+import com.upsaude.entity.saude_publica.visita.VisitasDomiciliares;
 import com.upsaude.entity.sistema.Tenant;
-import com.upsaude.entity.visita.VisitasDomiciliares;
 import com.upsaude.service.support.equipesaude.EquipeSaudeTenantEnforcer;
 import com.upsaude.service.support.estabelecimentos.EstabelecimentosTenantEnforcer;
 import com.upsaude.service.support.paciente.PacienteTenantEnforcer;
 import com.upsaude.service.support.profissionaissaude.ProfissionaisSaudeTenantEnforcer;
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
 
-import java.util.Objects;
-import java.util.UUID;
+import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor

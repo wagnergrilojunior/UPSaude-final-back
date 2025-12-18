@@ -1,20 +1,8 @@
 package com.upsaude.service.impl;
 
-import com.upsaude.api.request.vacina.VacinasRequest;
-import com.upsaude.api.response.vacina.VacinasResponse;
-import com.upsaude.cache.CacheKeyUtil;
-import com.upsaude.entity.vacina.Vacinas;
-import com.upsaude.exception.BadRequestException;
-import com.upsaude.exception.InternalServerErrorException;
-import com.upsaude.exception.NotFoundException;
-import com.upsaude.repository.saude_publica.vacina.VacinasRepository;
-import com.upsaude.service.vacina.VacinasService;
-import com.upsaude.service.support.vacinas.VacinasCreator;
-import com.upsaude.service.support.vacinas.VacinasDomainService;
-import com.upsaude.service.support.vacinas.VacinasResponseBuilder;
-import com.upsaude.service.support.vacinas.VacinasUpdater;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import java.util.Objects;
+import java.util.UUID;
+
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.CacheEvict;
@@ -26,8 +14,22 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Objects;
-import java.util.UUID;
+import com.upsaude.api.request.saude_publica.vacina.VacinasRequest;
+import com.upsaude.api.response.saude_publica.vacina.VacinasResponse;
+import com.upsaude.cache.CacheKeyUtil;
+import com.upsaude.entity.saude_publica.vacina.Vacinas;
+import com.upsaude.exception.BadRequestException;
+import com.upsaude.exception.InternalServerErrorException;
+import com.upsaude.exception.NotFoundException;
+import com.upsaude.repository.saude_publica.vacina.VacinasRepository;
+import com.upsaude.service.saude_publica.vacina.VacinasService;
+import com.upsaude.service.support.vacinas.VacinasCreator;
+import com.upsaude.service.support.vacinas.VacinasDomainService;
+import com.upsaude.service.support.vacinas.VacinasResponseBuilder;
+import com.upsaude.service.support.vacinas.VacinasUpdater;
+
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Service

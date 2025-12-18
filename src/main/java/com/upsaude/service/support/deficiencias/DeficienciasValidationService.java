@@ -1,14 +1,16 @@
 package com.upsaude.service.support.deficiencias;
 
-import com.upsaude.api.request.deficiencia.DeficienciasRequest;
-import com.upsaude.exception.BadRequestException;
-import com.upsaude.repository.deficiencia.DeficienciasRepository;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import java.util.UUID;
+
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
-import java.util.UUID;
+import com.upsaude.api.request.deficiencia.DeficienciasRequest;
+import com.upsaude.exception.BadRequestException;
+import com.upsaude.repository.paciente.deficiencia.DeficienciasRepository;
+
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Service

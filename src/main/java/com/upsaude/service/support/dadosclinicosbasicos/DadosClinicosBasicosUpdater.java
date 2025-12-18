@@ -3,7 +3,7 @@ package com.upsaude.service.support.dadosclinicosbasicos;
 import com.upsaude.api.request.paciente.DadosClinicosBasicosRequest;
 import com.upsaude.entity.paciente.DadosClinicosBasicos;
 import com.upsaude.entity.sistema.Tenant;
-import com.upsaude.mapper.DadosClinicosBasicosMapper;
+import com.upsaude.mapper.paciente.DadosClinicosBasicosMapper;
 import com.upsaude.repository.paciente.DadosClinicosBasicosRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

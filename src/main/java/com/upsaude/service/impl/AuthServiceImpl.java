@@ -1,9 +1,15 @@
 package com.upsaude.service.impl;
-import com.upsaude.entity.sistema.User;
+import java.util.HashMap;
+import java.util.List;
+import java.util.UUID;
+import java.util.stream.Collectors;
 
-import com.upsaude.api.request.LoginRequest;
-import com.upsaude.api.response.LoginResponse;
-import com.upsaude.api.response.UsuarioSistemaInfoResponse;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import com.upsaude.api.request.sistema.LoginRequest;
+import com.upsaude.api.response.sistema.LoginResponse;
+import com.upsaude.api.response.sistema.UsuarioSistemaInfoResponse;
 import com.upsaude.entity.estabelecimento.UsuarioEstabelecimento;
 import com.upsaude.entity.sistema.UsuariosSistema;
 import com.upsaude.integration.supabase.SupabaseAuthResponse;
@@ -11,15 +17,9 @@ import com.upsaude.integration.supabase.SupabaseAuthService;
 import com.upsaude.repository.estabelecimento.UsuarioEstabelecimentoRepository;
 import com.upsaude.repository.sistema.UsuariosSistemaRepository;
 import com.upsaude.service.AuthService;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import java.util.HashMap;
-import java.util.List;
-import java.util.UUID;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Service

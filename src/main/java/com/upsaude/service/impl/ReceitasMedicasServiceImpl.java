@@ -1,15 +1,15 @@
 package com.upsaude.service.impl;
 
-import com.upsaude.api.request.medicacao.ReceitasMedicasRequest;
-import com.upsaude.api.response.medicacao.ReceitasMedicasResponse;
+import com.upsaude.api.request.clinica.medicacao.ReceitasMedicasRequest;
+import com.upsaude.api.response.clinica.medicacao.ReceitasMedicasResponse;
 import com.upsaude.cache.CacheKeyUtil;
-import com.upsaude.entity.medicacao.ReceitasMedicas;
+import com.upsaude.entity.clinica.medicacao.ReceitasMedicas;
 import com.upsaude.entity.sistema.Tenant;
 import com.upsaude.exception.BadRequestException;
 import com.upsaude.exception.InternalServerErrorException;
 import com.upsaude.exception.NotFoundException;
-import com.upsaude.repository.medicacao.ReceitasMedicasRepository;
-import com.upsaude.service.medicacao.ReceitasMedicasService;
+import com.upsaude.repository.clinica.medicacao.ReceitasMedicasRepository;
+import com.upsaude.service.clinica.medicacao.ReceitasMedicasService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.Cache;

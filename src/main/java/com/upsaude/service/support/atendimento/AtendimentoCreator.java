@@ -1,16 +1,18 @@
 package com.upsaude.service.support.atendimento;
 
-import com.upsaude.api.request.atendimento.AtendimentoRequest;
-import com.upsaude.entity.atendimento.Atendimento;
-import com.upsaude.entity.sistema.Tenant;
-import com.upsaude.mapper.AtendimentoMapper;
-import com.upsaude.repository.atendimento.AtendimentoRepository;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Service;
-
 import java.util.Objects;
 import java.util.UUID;
+
+import org.springframework.stereotype.Service;
+
+import com.upsaude.api.request.clinica.atendimento.AtendimentoRequest;
+import com.upsaude.entity.clinica.atendimento.Atendimento;
+import com.upsaude.entity.sistema.Tenant;
+import com.upsaude.mapper.clinica.atendimento.AtendimentoMapper;
+import com.upsaude.repository.clinica.atendimento.AtendimentoRepository;
+
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Service

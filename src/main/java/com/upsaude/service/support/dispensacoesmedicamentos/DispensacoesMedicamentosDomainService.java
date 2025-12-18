@@ -1,6 +1,6 @@
 package com.upsaude.service.support.dispensacoesmedicamentos;
 
-import com.upsaude.entity.medicacao.DispensacoesMedicamentos;
+import com.upsaude.entity.clinica.medicacao.DispensacoesMedicamentos;
 import org.springframework.stereotype.Service;
 
 @Service

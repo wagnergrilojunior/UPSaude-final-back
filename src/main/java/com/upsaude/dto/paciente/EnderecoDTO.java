@@ -6,6 +6,9 @@ import com.upsaude.enums.ZonaDomicilioEnum;
 import java.time.OffsetDateTime;
 import java.util.UUID;
 import lombok.*;
+import com.upsaude.dto.referencia.geografico.CidadesDTO;
+import com.upsaude.dto.referencia.geografico.EstadosDTO;
+
 
 @Data
 @Builder

@@ -15,3 +15,4 @@ public interface Cid10CapitulosRepository extends JpaRepository<Cid10Capitulos, 
 
     List<Cid10Capitulos> findByNumcapIn(List<Integer> numcaps);
 }
+

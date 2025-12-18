@@ -1,12 +1,13 @@
 package com.upsaude.service.deficiencia;
 
-import com.upsaude.api.request.deficiencia.DeficienciasPacienteRequest;
-import com.upsaude.api.request.DeficienciasPacienteSimplificadoRequest;
-import com.upsaude.api.response.deficiencia.DeficienciasPacienteResponse;
+import java.util.UUID;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
-import java.util.UUID;
+import com.upsaude.api.request.deficiencia.DeficienciasPacienteRequest;
+import com.upsaude.api.request.deficiencia.DeficienciasPacienteSimplificadoRequest;
+import com.upsaude.api.response.deficiencia.DeficienciasPacienteResponse;
 
 public interface DeficienciasPacienteService {
 

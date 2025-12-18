@@ -1,9 +1,16 @@
 package com.upsaude.controller.sistema;
 
-import com.upsaude.api.request.RelatorioEstatisticasRequest;
-import com.upsaude.api.response.RelatorioEstatisticasResponse;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.upsaude.api.request.sistema.RelatorioEstatisticasRequest;
+import com.upsaude.api.response.sistema.RelatorioEstatisticasResponse;
 import com.upsaude.exception.BadRequestException;
 import com.upsaude.service.sistema.RelatoriosService;
+
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -13,8 +20,6 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
 
 @Slf4j
 @RestController

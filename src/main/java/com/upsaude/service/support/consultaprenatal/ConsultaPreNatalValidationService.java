@@ -1,6 +1,6 @@
 package com.upsaude.service.support.consultaprenatal;
 
-import com.upsaude.api.request.atendimento.ConsultaPreNatalRequest;
+import com.upsaude.api.request.clinica.atendimento.ConsultaPreNatalRequest;
 import com.upsaude.exception.BadRequestException;
 import org.springframework.stereotype.Service;
 

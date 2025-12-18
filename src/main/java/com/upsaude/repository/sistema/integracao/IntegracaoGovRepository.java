@@ -27,3 +27,4 @@ public interface IntegracaoGovRepository extends JpaRepository<IntegracaoGov, UU
     @Query("SELECT i FROM IntegracaoGov i WHERE i.estabelecimento.id = :estabelecimentoId AND i.tenant.id = :tenantId")
     Page<IntegracaoGov> findByEstabelecimentoIdAndTenantId(@Param("estabelecimentoId") UUID estabelecimentoId, @Param("tenantId") UUID tenantId, Pageable pageable);
 }
+

@@ -1,34 +1,36 @@
 package com.upsaude.service.impl;
 
-import com.upsaude.api.request.doencas.DoencasPacienteRequest;
-import com.upsaude.api.request.DoencasPacienteSimplificadoRequest;
-import com.upsaude.api.response.doencas.DoencasPacienteResponse;
-import com.upsaude.entity.doencas.Doencas;
-import com.upsaude.entity.doencas.DoencasPaciente;
+import java.util.UUID;
+
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Service;
+
+import com.upsaude.api.request.clinica.doencas.DoencasPacienteRequest;
+import com.upsaude.api.request.clinica.doencas.DoencasPacienteSimplificadoRequest;
+import com.upsaude.api.response.clinica.doencas.DoencasPacienteResponse;
+import com.upsaude.entity.clinica.doencas.Doencas;
+import com.upsaude.entity.clinica.doencas.DoencasPaciente;
 import com.upsaude.entity.paciente.Paciente;
 import com.upsaude.entity.sistema.Tenant;
 import com.upsaude.exception.BadRequestException;
 import com.upsaude.exception.NotFoundException;
-import com.upsaude.mapper.DoencasPacienteMapper;
-import com.upsaude.mapper.embeddable.DiagnosticoDoencaPacienteMapper;
+import com.upsaude.mapper.clinica.doencas.DoencasPacienteMapper;
 import com.upsaude.mapper.embeddable.AcompanhamentoDoencaPacienteMapper;
+import com.upsaude.mapper.embeddable.DiagnosticoDoencaPacienteMapper;
 import com.upsaude.mapper.embeddable.TratamentoAtualDoencaPacienteMapper;
-import com.upsaude.repository.doencas.DoencasPacienteRepository;
-import com.upsaude.repository.doencas.DoencasRepository;
+import com.upsaude.repository.clinica.doencas.DoencasPacienteRepository;
+import com.upsaude.repository.clinica.doencas.DoencasRepository;
 import com.upsaude.repository.paciente.PacienteRepository;
 import com.upsaude.repository.sistema.TenantRepository;
-import com.upsaude.service.doencas.DoencasPacienteService;
+import com.upsaude.service.clinica.doencas.DoencasPacienteService;
 import com.upsaude.service.sistema.TenantService;
+
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.Page;
-import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.Cacheable;
-import org.springframework.data.domain.Pageable;
-import org.springframework.stereotype.Service;
-
-import java.util.UUID;
 
 @Slf4j
 @Service

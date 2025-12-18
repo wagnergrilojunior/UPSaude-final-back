@@ -2,7 +2,6 @@ package com.upsaude.mapper.profissional;
 
 import com.upsaude.api.request.profissional.ConselhosProfissionaisRequest;
 import com.upsaude.api.response.profissional.ConselhosProfissionaisResponse;
-import com.upsaude.dto.ConselhosProfissionaisDTO;
 import com.upsaude.entity.profissional.ConselhosProfissionais;
 import com.upsaude.mapper.config.MappingConfig;
 import org.mapstruct.Mapper;
@@ -10,12 +9,10 @@ import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 
 @Mapper(config = MappingConfig.class)
-public interface ConselhosProfissionaisMapper extends EntityMapper<ConselhosProfissionais, ConselhosProfissionaisDTO> {
+public interface ConselhosProfissionaisMapper {
 
     @Mapping(target = "active", ignore = true)
-    ConselhosProfissionais toEntity(ConselhosProfissionaisDTO dto);
-
-    ConselhosProfissionaisDTO toDTO(ConselhosProfissionais entity);
+    ConselhosProfissionais toEntity(ConselhosProfissionaisResponse dto);
 
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "createdAt", ignore = true)

@@ -13,6 +13,10 @@ import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.UUID;
 import lombok.*;
+import com.upsaude.dto.convenio.ConvenioDTO;
+import com.upsaude.dto.sistema.integracao.IntegracaoGovDTO;
+import com.upsaude.dto.sistema.LGPDConsentimentoDTO;
+
 
 @Data
 @Builder

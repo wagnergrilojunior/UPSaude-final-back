@@ -1,22 +1,20 @@
 package com.upsaude.mapper.profissional;
 
-import com.upsaude.api.request.profissional.MedicosRequest;
-import com.upsaude.api.response.profissional.MedicosResponse;
-import com.upsaude.dto.MedicosDTO;
-import com.upsaude.entity.profissional.Medicos;
-import com.upsaude.entity.profissional.EspecialidadesMedicas;
-import com.upsaude.mapper.config.MappingConfig;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 
+import com.upsaude.api.request.profissional.MedicosRequest;
+import com.upsaude.api.response.profissional.MedicosResponse;
+import com.upsaude.entity.profissional.Medicos;
+import com.upsaude.mapper.config.MappingConfig;
+import com.upsaude.mapper.estabelecimento.MedicoEstabelecimentoMapper;
+
 @Mapper(config = MappingConfig.class, uses = {EspecialidadesMedicasMapper.class, MedicoEstabelecimentoMapper.class, com.upsaude.mapper.embeddable.DadosPessoaisMedicoMapper.class, com.upsaude.mapper.embeddable.RegistroProfissionalMedicoMapper.class, com.upsaude.mapper.embeddable.FormacaoMedicoMapper.class, com.upsaude.mapper.embeddable.ContatoMedicoMapper.class})
-public interface MedicosMapper extends EntityMapper<Medicos, MedicosDTO> {
+public interface MedicosMapper {
 
     @Mapping(target = "active", ignore = true)
-    Medicos toEntity(MedicosDTO dto);
-
-    MedicosDTO toDTO(Medicos entity);
+    Medicos toEntity(MedicosResponse dto);
 
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "createdAt", ignore = true)

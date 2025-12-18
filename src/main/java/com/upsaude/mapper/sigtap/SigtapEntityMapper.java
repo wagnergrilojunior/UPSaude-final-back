@@ -1,18 +1,73 @@
 package com.upsaude.mapper.sigtap;
 
-import com.upsaude.entity.sigtap.*;
-import com.upsaude.importacao.sigtap.file.SigtapFileParser;
-import com.upsaude.repository.*;
-import lombok.extern.slf4j.Slf4j;
+import java.util.Map;
+
 import org.springframework.stereotype.Component;
 
-import java.math.BigDecimal;
-import java.util.Map;
-import java.util.UUID;
+import com.upsaude.entity.referencia.sigtap.SigtapCid;
+import com.upsaude.entity.referencia.sigtap.SigtapComponenteRede;
+import com.upsaude.entity.referencia.sigtap.SigtapDescricao;
+import com.upsaude.entity.referencia.sigtap.SigtapDescricaoDetalhe;
+import com.upsaude.entity.referencia.sigtap.SigtapDetalhe;
+import com.upsaude.entity.referencia.sigtap.SigtapExcecaoCompatibilidade;
+import com.upsaude.entity.referencia.sigtap.SigtapFinanciamento;
+import com.upsaude.entity.referencia.sigtap.SigtapFormaOrganizacao;
+import com.upsaude.entity.referencia.sigtap.SigtapGrupo;
+import com.upsaude.entity.referencia.sigtap.SigtapGrupoHabilitacao;
+import com.upsaude.entity.referencia.sigtap.SigtapHabilitacao;
+import com.upsaude.entity.referencia.sigtap.SigtapModalidade;
+import com.upsaude.entity.referencia.sigtap.SigtapOcupacao;
+import com.upsaude.entity.referencia.sigtap.SigtapProcedimento;
+import com.upsaude.entity.referencia.sigtap.SigtapProcedimentoCid;
+import com.upsaude.entity.referencia.sigtap.SigtapProcedimentoComponenteRede;
+import com.upsaude.entity.referencia.sigtap.SigtapProcedimentoDetalheItem;
+import com.upsaude.entity.referencia.sigtap.SigtapProcedimentoHabilitacao;
+import com.upsaude.entity.referencia.sigtap.SigtapProcedimentoIncremento;
+import com.upsaude.entity.referencia.sigtap.SigtapProcedimentoLeito;
+import com.upsaude.entity.referencia.sigtap.SigtapProcedimentoModalidade;
+import com.upsaude.entity.referencia.sigtap.SigtapProcedimentoOcupacao;
+import com.upsaude.entity.referencia.sigtap.SigtapProcedimentoOrigem;
+import com.upsaude.entity.referencia.sigtap.SigtapProcedimentoRegistro;
+import com.upsaude.entity.referencia.sigtap.SigtapProcedimentoRegraCondicionada;
+import com.upsaude.entity.referencia.sigtap.SigtapProcedimentoRenases;
+import com.upsaude.entity.referencia.sigtap.SigtapProcedimentoServico;
+import com.upsaude.entity.referencia.sigtap.SigtapProcedimentoSiaSih;
+import com.upsaude.entity.referencia.sigtap.SigtapProcedimentoTuss;
+import com.upsaude.entity.referencia.sigtap.SigtapRedeAtencao;
+import com.upsaude.entity.referencia.sigtap.SigtapRegistro;
+import com.upsaude.entity.referencia.sigtap.SigtapRegraCondicionada;
+import com.upsaude.entity.referencia.sigtap.SigtapRenases;
+import com.upsaude.entity.referencia.sigtap.SigtapRubrica;
+import com.upsaude.entity.referencia.sigtap.SigtapServico;
+import com.upsaude.entity.referencia.sigtap.SigtapServicoClassificacao;
+import com.upsaude.entity.referencia.sigtap.SigtapSiaSih;
+import com.upsaude.entity.referencia.sigtap.SigtapSubgrupo;
+import com.upsaude.entity.referencia.sigtap.SigtapTipoLeito;
+import com.upsaude.entity.referencia.sigtap.SigtapTuss;
+import com.upsaude.importacao.sigtap.file.SigtapFileParser;
+import com.upsaude.repository.referencia.sigtap.SigtapCidRepository;
+import com.upsaude.repository.referencia.sigtap.SigtapComponenteRedeRepository;
+import com.upsaude.repository.referencia.sigtap.SigtapDetalheRepository;
+import com.upsaude.repository.referencia.sigtap.SigtapFinanciamentoRepository;
+import com.upsaude.repository.referencia.sigtap.SigtapFormaOrganizacaoRepository;
+import com.upsaude.repository.referencia.sigtap.SigtapGrupoHabilitacaoRepository;
+import com.upsaude.repository.referencia.sigtap.SigtapGrupoRepository;
+import com.upsaude.repository.referencia.sigtap.SigtapHabilitacaoRepository;
+import com.upsaude.repository.referencia.sigtap.SigtapModalidadeRepository;
+import com.upsaude.repository.referencia.sigtap.SigtapOcupacaoRepository;
+import com.upsaude.repository.referencia.sigtap.SigtapProcedimentoRepository;
+import com.upsaude.repository.referencia.sigtap.SigtapRegistroRepository;
+import com.upsaude.repository.referencia.sigtap.SigtapRegraCondicionadaRepository;
+import com.upsaude.repository.referencia.sigtap.SigtapRenasesRepository;
+import com.upsaude.repository.referencia.sigtap.SigtapServicoClassificacaoRepository;
+import com.upsaude.repository.referencia.sigtap.SigtapServicoRepository;
+import com.upsaude.repository.referencia.sigtap.SigtapSiaSihRepository;
+import com.upsaude.repository.referencia.sigtap.SigtapSubgrupoRepository;
+import com.upsaude.repository.referencia.sigtap.SigtapTipoLeitoRepository;
+import com.upsaude.repository.referencia.sigtap.SigtapTussRepository;
 
-/**
- * Mapeia campos parseados de arquivos TXT para entidades JPA do SIGTAP.
- */
+import lombok.extern.slf4j.Slf4j;
+
 @Slf4j
 @Component
 public class SigtapEntityMapper {

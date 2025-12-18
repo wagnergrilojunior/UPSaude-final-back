@@ -1,13 +1,15 @@
 package com.upsaude.mapper.sistema;
 
-import com.upsaude.api.request.sistema.PermissoesRequest;
-import com.upsaude.api.response.sistema.PermissoesResponse;
-import com.upsaude.dto.PermissoesDTO;
-import com.upsaude.entity.sistema.Permissoes;
-import com.upsaude.mapper.config.MappingConfig;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
+
+import com.upsaude.api.request.sistema.PermissoesRequest;
+import com.upsaude.api.response.sistema.PermissoesResponse;
+import com.upsaude.dto.sistema.PermissoesDTO;
+import com.upsaude.entity.sistema.Permissoes;
+import com.upsaude.mapper.EntityMapper;
+import com.upsaude.mapper.config.MappingConfig;
 
 @Mapper(config = MappingConfig.class)
 public interface PermissoesMapper extends EntityMapper<Permissoes, PermissoesDTO> {

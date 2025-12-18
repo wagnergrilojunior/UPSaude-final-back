@@ -26,3 +26,4 @@ public interface EstoquesVacinaRepository extends JpaRepository<EstoquesVacina, 
     @Query("SELECT e FROM EstoquesVacina e WHERE e.tenant.id = :tenantId")
     Page<EstoquesVacina> findAllByTenant(@Param("tenantId") UUID tenantId, Pageable pageable);
 }
+

@@ -44,3 +44,4 @@ public interface PlanejamentoFamiliarRepository extends JpaRepository<Planejamen
 
     Optional<PlanejamentoFamiliar> findByPacienteIdAndAcompanhamentoAtivoAndTenantId(UUID pacienteId, Boolean ativo, UUID tenantId);
 }
+

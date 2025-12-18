@@ -3,6 +3,10 @@ package com.upsaude.dto.sistema;
 import java.time.OffsetDateTime;
 import java.util.UUID;
 import lombok.*;
+import com.upsaude.dto.profissional.MedicosDTO;
+import com.upsaude.dto.paciente.PacienteDTO;
+import com.upsaude.dto.profissional.ProfissionaisSaudeDTO;
+
 
 @Data
 @Builder

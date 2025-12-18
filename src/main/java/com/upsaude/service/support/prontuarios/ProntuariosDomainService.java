@@ -1,6 +1,6 @@
 package com.upsaude.service.support.prontuarios;
 
-import com.upsaude.entity.prontuario.Prontuarios;
+import com.upsaude.entity.clinica.prontuario.Prontuarios;
 import com.upsaude.exception.BadRequestException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;

@@ -1,20 +1,22 @@
 package com.upsaude.service.support.paciente;
 
-import com.upsaude.api.request.AlergiasPacienteSimplificadoRequest;
-import com.upsaude.api.request.DeficienciasPacienteSimplificadoRequest;
-import com.upsaude.api.request.DoencasPacienteSimplificadoRequest;
-import com.upsaude.api.request.MedicacaoPacienteSimplificadoRequest;
+import java.util.UUID;
+
+import org.springframework.stereotype.Service;
+
+import com.upsaude.api.request.alergia.AlergiasPacienteSimplificadoRequest;
+import com.upsaude.api.request.clinica.doencas.DoencasPacienteSimplificadoRequest;
+import com.upsaude.api.request.clinica.medicacao.MedicacaoPacienteSimplificadoRequest;
+import com.upsaude.api.request.deficiencia.DeficienciasPacienteSimplificadoRequest;
 import com.upsaude.api.request.paciente.PacienteRequest;
 import com.upsaude.entity.paciente.Paciente;
 import com.upsaude.service.alergia.AlergiasPacienteService;
+import com.upsaude.service.clinica.doencas.DoencasPacienteService;
+import com.upsaude.service.clinica.medicacao.MedicacaoPacienteService;
 import com.upsaude.service.deficiencia.DeficienciasPacienteService;
-import com.upsaude.service.doencas.DoencasPacienteService;
-import com.upsaude.service.medicacao.MedicacaoPacienteService;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Service;
-
-import java.util.UUID;
 
 @Slf4j
 @Service

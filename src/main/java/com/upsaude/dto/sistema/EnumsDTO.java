@@ -1,9 +1,13 @@
 package com.upsaude.dto.sistema;
 
-import com.upsaude.api.response.EnumInfoResponse;
-import io.swagger.v3.oas.annotations.media.Schema;
 import java.util.List;
-import lombok.*;
+
+import com.upsaude.api.response.sistema.EnumInfoResponse;
+
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
 @Builder

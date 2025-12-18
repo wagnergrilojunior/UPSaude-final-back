@@ -1,10 +1,10 @@
 package com.upsaude.service.support.dispensacoesmedicamentos;
 
-import com.upsaude.api.request.medicacao.DispensacoesMedicamentosRequest;
-import com.upsaude.entity.medicacao.DispensacoesMedicamentos;
+import com.upsaude.api.request.clinica.medicacao.DispensacoesMedicamentosRequest;
+import com.upsaude.entity.clinica.medicacao.DispensacoesMedicamentos;
 import com.upsaude.entity.sistema.Tenant;
-import com.upsaude.mapper.DispensacoesMedicamentosMapper;
-import com.upsaude.repository.medicacao.DispensacoesMedicamentosRepository;
+import com.upsaude.mapper.clinica.medicacao.DispensacoesMedicamentosMapper;
+import com.upsaude.repository.clinica.medicacao.DispensacoesMedicamentosRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;

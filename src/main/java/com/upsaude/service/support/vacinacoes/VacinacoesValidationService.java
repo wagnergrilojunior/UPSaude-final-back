@@ -2,7 +2,7 @@ package com.upsaude.service.support.vacinacoes;
 
 import com.upsaude.entity.paciente.Paciente;
 
-import com.upsaude.api.request.vacina.VacinacoesRequest;
+import com.upsaude.api.request.saude_publica.vacina.VacinacoesRequest;
 import com.upsaude.exception.BadRequestException;
 import org.springframework.stereotype.Service;
 

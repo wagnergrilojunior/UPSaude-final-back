@@ -1,9 +1,9 @@
 package com.upsaude.service;
 
-import com.upsaude.dto.sigtap.SigtapCompatibilidadeResponse;
-import com.upsaude.dto.sigtap.SigtapGrupoResponse;
-import com.upsaude.dto.sigtap.SigtapProcedimentoDetalhadoResponse;
-import com.upsaude.dto.sigtap.SigtapProcedimentoResponse;
+import com.upsaude.dto.referencia.sigtap.SigtapCompatibilidadeResponse;
+import com.upsaude.dto.referencia.sigtap.SigtapGrupoResponse;
+import com.upsaude.dto.referencia.sigtap.SigtapProcedimentoDetalhadoResponse;
+import com.upsaude.dto.referencia.sigtap.SigtapProcedimentoResponse;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 

@@ -1,7 +1,8 @@
 package com.upsaude.service.support.integracaogov;
 
-import com.upsaude.entity.integracao.IntegracaoGov;
 import org.springframework.stereotype.Service;
+
+import com.upsaude.entity.sistema.integracao.IntegracaoGov;
 
 @Service
 public class IntegracaoGovDomainService {

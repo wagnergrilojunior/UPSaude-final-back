@@ -1,12 +1,14 @@
 package com.upsaude.service.support.dadossociodemograficos;
 
+import org.springframework.stereotype.Service;
+
 import com.upsaude.api.response.paciente.DadosSociodemograficosResponse;
 import com.upsaude.api.response.paciente.PacienteResponse;
 import com.upsaude.entity.paciente.DadosSociodemograficos;
 import com.upsaude.entity.paciente.Paciente;
-import com.upsaude.mapper.DadosSociodemograficosMapper;
+import com.upsaude.mapper.paciente.DadosSociodemograficosMapper;
+
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor

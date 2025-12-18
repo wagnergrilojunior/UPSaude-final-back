@@ -1,6 +1,6 @@
 package com.upsaude.service.support.fabricantesvacina;
 
-import com.upsaude.api.request.vacina.FabricantesVacinaRequest;
+import com.upsaude.api.request.saude_publica.vacina.FabricantesVacinaRequest;
 import com.upsaude.exception.BadRequestException;
 import com.upsaude.repository.saude_publica.vacina.FabricantesVacinaRepository;
 import lombok.RequiredArgsConstructor;

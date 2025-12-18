@@ -1,17 +1,8 @@
 package com.upsaude.service.impl;
-import com.upsaude.entity.sistema.User;
+import java.util.List;
+import java.util.UUID;
+import java.util.stream.Collectors;
 
-import com.upsaude.api.request.sistema.TenantRequest;
-import com.upsaude.api.response.sistema.TenantResponse;
-import com.upsaude.entity.sistema.Tenant;
-import com.upsaude.exception.BadRequestException;
-import com.upsaude.exception.NotFoundException;
-import com.upsaude.mapper.TenantMapper;
-import com.upsaude.repository.sistema.TenantRepository;
-import com.upsaude.repository.sistema.UsuariosSistemaRepository;
-import com.upsaude.service.sistema.TenantService;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.hibernate.Hibernate;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
@@ -23,9 +14,19 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
-import java.util.UUID;
-import java.util.stream.Collectors;
+import com.upsaude.api.request.sistema.TenantRequest;
+import com.upsaude.api.response.sistema.TenantResponse;
+import com.upsaude.entity.sistema.Tenant;
+import com.upsaude.entity.sistema.UsuariosSistema;
+import com.upsaude.exception.BadRequestException;
+import com.upsaude.exception.NotFoundException;
+import com.upsaude.mapper.sistema.TenantMapper;
+import com.upsaude.repository.sistema.TenantRepository;
+import com.upsaude.repository.sistema.UsuariosSistemaRepository;
+import com.upsaude.service.sistema.TenantService;
+
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Service
@@ -178,9 +179,9 @@ public class TenantServiceImpl implements TenantService {
             }
 
             if (userId != null) {
-                java.util.Optional<com.upsaude.entity.UsuariosSistema> usuarioOpt = usuariosSistemaRepository.findByUserId(userId);
+                java.util.Optional<UsuariosSistema> usuarioOpt = usuariosSistemaRepository.findByUserId(userId);
                 if (usuarioOpt.isPresent()) {
-                    com.upsaude.entity.UsuariosSistema usuario = usuarioOpt.get();
+                    UsuariosSistema usuario = usuarioOpt.get();
                     Tenant tenant = usuario.getTenant();
                     if (tenant != null) {
                         // Evita LazyInitializationException caso o relacionamento esteja LAZY e fora de transação

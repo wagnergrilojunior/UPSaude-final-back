@@ -1,15 +1,15 @@
 package com.upsaude.mapper.estabelecimento;
 
-import com.upsaude.api.request.estabelecimento.UsuarioEstabelecimentoRequest;
-import com.upsaude.api.response.estabelecimento.UsuarioEstabelecimentoResponse;
-import com.upsaude.dto.UsuarioEstabelecimentoDTO;
-import com.upsaude.entity.estabelecimento.UsuarioEstabelecimento;
-import com.upsaude.entity.estabelecimento.Estabelecimentos;
-import com.upsaude.entity.sistema.UsuariosSistema;
-import com.upsaude.mapper.config.MappingConfig;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
+
+import com.upsaude.api.request.estabelecimento.UsuarioEstabelecimentoRequest;
+import com.upsaude.api.response.estabelecimento.UsuarioEstabelecimentoResponse;
+import com.upsaude.dto.estabelecimento.UsuarioEstabelecimentoDTO;
+import com.upsaude.entity.estabelecimento.UsuarioEstabelecimento;
+import com.upsaude.mapper.EntityMapper;
+import com.upsaude.mapper.config.MappingConfig;
 
 @Mapper(config = MappingConfig.class)
 public interface UsuarioEstabelecimentoMapper extends EntityMapper<UsuarioEstabelecimento, UsuarioEstabelecimentoDTO> {

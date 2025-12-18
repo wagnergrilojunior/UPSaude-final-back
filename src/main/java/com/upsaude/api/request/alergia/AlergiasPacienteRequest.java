@@ -1,6 +1,9 @@
 package com.upsaude.api.request.alergia;
 
 import com.upsaude.entity.paciente.Paciente;
+import com.upsaude.api.request.embeddable.DiagnosticoAlergiaPacienteRequest;
+import com.upsaude.api.request.embeddable.HistoricoReacoesAlergiaPacienteRequest;
+
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.upsaude.api.request.embeddable.DiagnosticoAlergiaPacienteRequest;

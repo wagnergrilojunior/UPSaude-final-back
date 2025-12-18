@@ -23,3 +23,4 @@ public interface CidOGruposRepository extends JpaRepository<CidOGrupos, UUID> {
             "ON g.catinic = pairs.catinic AND g.catfim = pairs.catfim", nativeQuery = true)
     List<CidOGrupos> findByCatinicAndCatfimPairs(@Param("catinics") List<String> catinics, @Param("catfims") List<String> catfims);
 }
+

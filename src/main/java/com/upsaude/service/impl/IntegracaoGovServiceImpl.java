@@ -1,34 +1,36 @@
 package com.upsaude.service.impl;
 
+import java.util.Objects;
+import java.util.UUID;
+
+import org.springframework.cache.Cache;
+import org.springframework.cache.CacheManager;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import com.upsaude.api.request.sistema.integracao.IntegracaoGovRequest;
+import com.upsaude.api.response.sistema.integracao.IntegracaoGovResponse;
 import com.upsaude.cache.CacheKeyUtil;
-import com.upsaude.api.request.integracao.IntegracaoGovRequest;
-import com.upsaude.api.response.integracao.IntegracaoGovResponse;
-import com.upsaude.entity.integracao.IntegracaoGov;
 import com.upsaude.entity.sistema.Tenant;
+import com.upsaude.entity.sistema.integracao.IntegracaoGov;
 import com.upsaude.exception.BadRequestException;
 import com.upsaude.exception.NotFoundException;
 import com.upsaude.repository.sistema.integracao.IntegracaoGovRepository;
-import com.upsaude.service.integracao.IntegracaoGovService;
 import com.upsaude.service.sistema.TenantService;
+import com.upsaude.service.sistema.integracao.IntegracaoGovService;
 import com.upsaude.service.support.integracaogov.IntegracaoGovCreator;
 import com.upsaude.service.support.integracaogov.IntegracaoGovResponseBuilder;
 import com.upsaude.service.support.integracaogov.IntegracaoGovTenantEnforcer;
 import com.upsaude.service.support.integracaogov.IntegracaoGovUpdater;
 import com.upsaude.service.support.integracaogov.IntegracaoGovValidationService;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.cache.Cache;
-import org.springframework.cache.CacheManager;
-import org.springframework.data.domain.Page;
-import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.CachePut;
-import org.springframework.cache.annotation.Cacheable;
-import org.springframework.data.domain.Pageable;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import java.util.Objects;
-import java.util.UUID;
 
 @Slf4j
 @Service

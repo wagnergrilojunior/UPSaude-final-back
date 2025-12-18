@@ -1,10 +1,12 @@
 package com.upsaude.service.support.agendamento;
 
+import org.springframework.stereotype.Service;
+
 import com.upsaude.api.response.agendamento.AgendamentoResponse;
 import com.upsaude.entity.agendamento.Agendamento;
-import com.upsaude.mapper.AgendamentoMapper;
+import com.upsaude.mapper.agendamento.AgendamentoMapper;
+
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor

@@ -5,6 +5,13 @@ import com.upsaude.entity.paciente.ResponsavelLegal;
 import com.upsaude.entity.BaseEntityWithoutTenant;
 
 import com.upsaude.entity.clinica.doencas.DoencasPaciente;
+import com.upsaude.entity.clinica.medicacao.Medicacao;
+import com.upsaude.entity.clinica.medicacao.MedicacaoPaciente;
+import com.upsaude.entity.paciente.alergia.AlergiasPaciente;
+import com.upsaude.entity.paciente.deficiencia.DeficienciasPaciente;
+import com.upsaude.entity.convenio.Convenio;
+import com.upsaude.entity.sistema.LGPDConsentimento;
+import com.upsaude.entity.sistema.integracao.IntegracaoGov;
 
 import com.upsaude.entity.paciente.Endereco;
 

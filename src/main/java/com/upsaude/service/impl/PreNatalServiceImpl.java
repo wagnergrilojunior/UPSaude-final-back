@@ -1,16 +1,16 @@
 package com.upsaude.service.impl;
 
-import com.upsaude.api.request.planejamento.PreNatalRequest;
-import com.upsaude.api.response.planejamento.PreNatalResponse;
+import com.upsaude.api.request.saude_publica.planejamento.PreNatalRequest;
+import com.upsaude.api.response.saude_publica.planejamento.PreNatalResponse;
 import com.upsaude.cache.CacheKeyUtil;
-import com.upsaude.entity.planejamento.PreNatal;
+import com.upsaude.entity.saude_publica.planejamento.PreNatal;
 import com.upsaude.entity.sistema.Tenant;
 import com.upsaude.enums.StatusPreNatalEnum;
 import com.upsaude.exception.BadRequestException;
 import com.upsaude.exception.InternalServerErrorException;
 import com.upsaude.exception.NotFoundException;
 import com.upsaude.repository.saude_publica.planejamento.PreNatalRepository;
-import com.upsaude.service.planejamento.PreNatalService;
+import com.upsaude.service.saude_publica.planejamento.PreNatalService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.Cache;

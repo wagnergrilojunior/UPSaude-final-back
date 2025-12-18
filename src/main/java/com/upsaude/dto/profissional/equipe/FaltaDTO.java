@@ -1,0 +1,36 @@
+package com.upsaude.dto.profissional.equipe;
+
+import com.upsaude.enums.TipoFaltaEnum;
+import java.time.LocalDate;
+import java.time.OffsetDateTime;
+import java.util.UUID;
+import lombok.*;
+import com.upsaude.dto.estabelecimento.EstabelecimentosDTO;
+import com.upsaude.dto.profissional.MedicosDTO;
+import com.upsaude.dto.profissional.ProfissionaisSaudeDTO;
+
+
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+public class FaltaDTO {
+    private UUID id;
+    private OffsetDateTime createdAt;
+    private OffsetDateTime updatedAt;
+    private Boolean active;
+    private EstabelecimentosDTO estabelecimento;
+    private ProfissionaisSaudeDTO profissional;
+    private MedicosDTO medico;
+    private LocalDate dataFalta;
+    private LocalDate dataInicio;
+    private LocalDate dataFim;
+    private TipoFaltaEnum tipoFalta;
+    private String justificativa;
+    private String documentoComprobatorio;
+    private String numeroAtestado;
+    private Boolean aprovado;
+    private UUID aprovadoPor;
+    private OffsetDateTime dataAprovacao;
+    private String observacoes;
+}

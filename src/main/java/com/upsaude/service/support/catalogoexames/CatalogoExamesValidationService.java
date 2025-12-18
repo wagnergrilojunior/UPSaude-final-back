@@ -1,12 +1,13 @@
 package com.upsaude.service.support.catalogoexames;
 
-import com.upsaude.api.request.exame.CatalogoExamesRequest;
-import com.upsaude.exception.BadRequestException;
-import com.upsaude.repository.exame.CatalogoExamesRepository;
+import java.util.UUID;
+
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
-import java.util.UUID;
+import com.upsaude.api.request.clinica.exame.CatalogoExamesRequest;
+import com.upsaude.exception.BadRequestException;
+import com.upsaude.repository.clinica.exame.CatalogoExamesRepository;
 
 @Service
 public class CatalogoExamesValidationService {

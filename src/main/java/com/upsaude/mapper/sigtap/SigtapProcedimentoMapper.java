@@ -1,16 +1,11 @@
 package com.upsaude.mapper.sigtap;
 
-import com.upsaude.dto.sigtap.SigtapProcedimentoResponse;
-import com.upsaude.entity.sigtap.SigtapProcedimento;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
-/**
- * Mapper (MapStruct) para expor Procedimentos SIGTAP via REST interno.
- *
- * <p>Observa??o: usa mapeamentos encadeados (forma -> subgrupo -> grupo) com null-safety
- * gerada automaticamente pelo MapStruct.
- */
+import com.upsaude.dto.referencia.sigtap.SigtapProcedimentoResponse;
+import com.upsaude.entity.referencia.sigtap.SigtapProcedimento;
+
 @Mapper(componentModel = "spring")
 public interface SigtapProcedimentoMapper {
 

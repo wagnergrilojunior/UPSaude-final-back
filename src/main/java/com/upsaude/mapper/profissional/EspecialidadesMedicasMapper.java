@@ -1,13 +1,15 @@
 package com.upsaude.mapper.profissional;
 
-import com.upsaude.api.request.profissional.EspecialidadesMedicasRequest;
-import com.upsaude.api.response.profissional.EspecialidadesMedicasResponse;
-import com.upsaude.dto.EspecialidadesMedicasDTO;
-import com.upsaude.entity.profissional.EspecialidadesMedicas;
-import com.upsaude.mapper.config.MappingConfig;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
+
+import com.upsaude.api.request.profissional.EspecialidadesMedicasRequest;
+import com.upsaude.api.response.profissional.EspecialidadesMedicasResponse;
+import com.upsaude.dto.profissional.EspecialidadesMedicasDTO;
+import com.upsaude.entity.profissional.EspecialidadesMedicas;
+import com.upsaude.mapper.EntityMapper;
+import com.upsaude.mapper.config.MappingConfig;
 
 @Mapper(config = MappingConfig.class, uses = {com.upsaude.mapper.embeddable.ClassificacaoEspecialidadeMedicaMapper.class})
 public interface EspecialidadesMedicasMapper extends EntityMapper<EspecialidadesMedicas, EspecialidadesMedicasDTO> {

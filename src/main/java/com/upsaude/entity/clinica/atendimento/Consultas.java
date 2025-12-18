@@ -1,14 +1,6 @@
 package com.upsaude.entity.clinica.atendimento;
-import com.upsaude.entity.profissional.EspecialidadesMedicas;
-import com.upsaude.entity.profissional.Medicos;
 import com.upsaude.entity.BaseEntity;
-
-import com.upsaude.entity.profissional.ProfissionaisSaude;
-
-import com.upsaude.entity.clinica.atendimento.Consultas;
-
-import com.upsaude.entity.paciente.Paciente;
-
+import com.upsaude.entity.convenio.Convenio;
 import com.upsaude.entity.embeddable.AnamneseConsulta;
 import com.upsaude.entity.embeddable.AtestadoConsulta;
 import com.upsaude.entity.embeddable.DiagnosticoConsulta;
@@ -16,6 +8,11 @@ import com.upsaude.entity.embeddable.EncaminhamentoConsulta;
 import com.upsaude.entity.embeddable.ExamesSolicitadosConsulta;
 import com.upsaude.entity.embeddable.InformacoesConsulta;
 import com.upsaude.entity.embeddable.PrescricaoConsulta;
+import com.upsaude.entity.paciente.Paciente;
+import com.upsaude.entity.profissional.EspecialidadesMedicas;
+import com.upsaude.entity.profissional.Medicos;
+import com.upsaude.entity.profissional.ProfissionaisSaude;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;

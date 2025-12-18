@@ -1,0 +1,62 @@
+package com.upsaude.api.request.saude_publica.planejamento;
+
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.upsaude.enums.TipoMetodoContraceptivoEnum;
+import com.upsaude.util.converter.TipoMetodoContraceptivoEnumDeserializer;
+import java.time.LocalDate;
+import java.time.OffsetDateTime;
+import java.util.UUID;
+import lombok.*;
+import io.swagger.v3.oas.annotations.media.Schema;
+
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+@Schema(description = "Dados de planejamento familiar")
+public class PlanejamentoFamiliarRequest {
+    private UUID paciente;
+    private UUID profissionalResponsavel;
+    private UUID equipeSaude;
+    @JsonDeserialize(using = TipoMetodoContraceptivoEnumDeserializer.class)
+    private TipoMetodoContraceptivoEnum metodoAtual;
+    private LocalDate dataInicioMetodo;
+    private String nomeComercialMetodo;
+
+    @JsonDeserialize(using = TipoMetodoContraceptivoEnumDeserializer.class)
+    private TipoMetodoContraceptivoEnum metodoAnterior;
+    private String motivoTrocaMetodo;
+    private Integer numeroGestacoes;
+    private Integer numeroPartos;
+    private Integer numeroAbortos;
+    private Integer numeroFilhosVivos;
+    private LocalDate dataUltimoParto;
+    private Boolean ultimaGestacaoPlanejada;
+    private Boolean desejaEngravidar;
+    private String prazoDesejoGestacao;
+    private Boolean desejaMetodoDefinitivo;
+    private Boolean temContraindicacoes;
+    private String contraindicacoes;
+    private String doencasPreexistentes;
+    private String medicamentosUso;
+    private String alergias;
+    private Boolean cicloMenstrualRegular;
+    private Integer duracaoCiclo;
+    private LocalDate dataUltimaMenstruacao;
+    private Boolean dismenorreia;
+    private Boolean sangramentoIrregular;
+    private LocalDate dataInicioAcompanhamento;
+    private OffsetDateTime dataProximaConsulta;
+    private LocalDate dataProximaDispensacao;
+    private LocalDate dataInsercaoDiu;
+    private LocalDate dataValidadeDiu;
+    private LocalDate dataCirurgia;
+    private String localCirurgia;
+    private Boolean documentacaoCompleta;
+    private Boolean prazoMinimoCumprido;
+    private Boolean orientacaoMetodosRealizada;
+    private LocalDate dataOrientacao;
+    private Boolean consentimentoInformado;
+    private LocalDate dataConsentimento;
+    private String observacoes;
+}

@@ -1,16 +1,18 @@
 package com.upsaude.mapper.enfermagem;
 
-import com.upsaude.api.request.enfermagem.CuidadosEnfermagemRequest;
-import com.upsaude.api.response.enfermagem.CuidadosEnfermagemResponse;
-import com.upsaude.dto.CuidadosEnfermagemDTO;
-import com.upsaude.entity.enfermagem.CuidadosEnfermagem;
-import com.upsaude.entity.atendimento.Atendimento;
-import com.upsaude.entity.paciente.Paciente;
-import com.upsaude.entity.profissional.ProfissionaisSaude;
-import com.upsaude.mapper.config.MappingConfig;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
+
+import com.upsaude.api.request.enfermagem.CuidadosEnfermagemRequest;
+import com.upsaude.api.response.enfermagem.CuidadosEnfermagemResponse;
+import com.upsaude.dto.enfermagem.CuidadosEnfermagemDTO;
+import com.upsaude.entity.enfermagem.CuidadosEnfermagem;
+import com.upsaude.mapper.EntityMapper;
+import com.upsaude.mapper.clinica.atendimento.AtendimentoMapper;
+import com.upsaude.mapper.config.MappingConfig;
+import com.upsaude.mapper.paciente.PacienteMapper;
+import com.upsaude.mapper.profissional.ProfissionaisSaudeMapper;
 
 @Mapper(config = MappingConfig.class, uses = {AtendimentoMapper.class, PacienteMapper.class, ProfissionaisSaudeMapper.class})
 public interface CuidadosEnfermagemMapper extends EntityMapper<CuidadosEnfermagem, CuidadosEnfermagemDTO> {

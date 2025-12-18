@@ -1,16 +1,18 @@
 package com.upsaude.service.support.catalogoexames;
 
-import com.upsaude.api.request.exame.CatalogoExamesRequest;
-import com.upsaude.entity.exame.CatalogoExames;
-import com.upsaude.entity.sistema.Tenant;
-import com.upsaude.mapper.CatalogoExamesMapper;
-import com.upsaude.repository.exame.CatalogoExamesRepository;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Service;
-
 import java.util.Objects;
 import java.util.UUID;
+
+import org.springframework.stereotype.Service;
+
+import com.upsaude.api.request.clinica.exame.CatalogoExamesRequest;
+import com.upsaude.entity.clinica.exame.CatalogoExames;
+import com.upsaude.entity.sistema.Tenant;
+import com.upsaude.mapper.clinica.exame.CatalogoExamesMapper;
+import com.upsaude.repository.clinica.exame.CatalogoExamesRepository;
+
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Service

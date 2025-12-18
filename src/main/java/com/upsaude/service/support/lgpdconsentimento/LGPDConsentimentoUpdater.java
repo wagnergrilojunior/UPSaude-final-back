@@ -4,7 +4,7 @@ import com.upsaude.api.request.sistema.LGPDConsentimentoRequest;
 import com.upsaude.entity.sistema.LGPDConsentimento;
 import com.upsaude.entity.sistema.Tenant;
 import com.upsaude.exception.ConflictException;
-import com.upsaude.mapper.LGPDConsentimentoMapper;
+import com.upsaude.mapper.sistema.LGPDConsentimentoMapper;
 import com.upsaude.repository.sistema.LGPDConsentimentoRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
