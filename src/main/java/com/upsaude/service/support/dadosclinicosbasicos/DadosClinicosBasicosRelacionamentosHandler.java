@@ -1,8 +1,8 @@
 package com.upsaude.service.support.dadosclinicosbasicos;
 
-import com.upsaude.api.request.DadosClinicosBasicosRequest;
-import com.upsaude.entity.DadosClinicosBasicos;
-import com.upsaude.entity.Paciente;
+import com.upsaude.api.request.paciente.DadosClinicosBasicosRequest;
+import com.upsaude.entity.paciente.DadosClinicosBasicos;
+import com.upsaude.entity.paciente.Paciente;
 import com.upsaude.service.support.paciente.PacienteTenantEnforcer;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;

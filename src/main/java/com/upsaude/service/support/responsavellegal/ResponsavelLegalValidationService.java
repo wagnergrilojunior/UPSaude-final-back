@@ -1,6 +1,6 @@
 package com.upsaude.service.support.responsavellegal;
 
-import com.upsaude.api.request.ResponsavelLegalRequest;
+import com.upsaude.api.request.paciente.ResponsavelLegalRequest;
 import com.upsaude.exception.BadRequestException;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;

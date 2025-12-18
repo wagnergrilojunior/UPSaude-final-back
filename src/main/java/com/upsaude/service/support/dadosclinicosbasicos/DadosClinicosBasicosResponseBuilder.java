@@ -1,10 +1,10 @@
 package com.upsaude.service.support.dadosclinicosbasicos;
 
-import com.upsaude.api.response.DadosClinicosBasicosResponse;
-import com.upsaude.api.response.PacienteResponse;
-import com.upsaude.entity.DadosClinicosBasicos;
-import com.upsaude.entity.Paciente;
-import com.upsaude.mapper.DadosClinicosBasicosMapper;
+import com.upsaude.api.response.paciente.DadosClinicosBasicosResponse;
+import com.upsaude.api.response.paciente.PacienteResponse;
+import com.upsaude.entity.paciente.DadosClinicosBasicos;
+import com.upsaude.entity.paciente.Paciente;
+import com.upsaude.mapper.paciente.DadosClinicosBasicosMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 

@@ -1,8 +1,8 @@
 package com.upsaude.service.support.dadossociodemograficos;
 
-import com.upsaude.api.request.DadosSociodemograficosRequest;
-import com.upsaude.entity.DadosSociodemograficos;
-import com.upsaude.entity.Paciente;
+import com.upsaude.api.request.paciente.DadosSociodemograficosRequest;
+import com.upsaude.entity.paciente.DadosSociodemograficos;
+import com.upsaude.entity.paciente.Paciente;
 import com.upsaude.service.support.paciente.PacienteTenantEnforcer;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;

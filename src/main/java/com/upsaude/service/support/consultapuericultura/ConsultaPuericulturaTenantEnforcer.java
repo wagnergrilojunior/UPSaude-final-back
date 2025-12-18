@@ -1,13 +1,15 @@
 package com.upsaude.service.support.consultapuericultura;
 
-import com.upsaude.entity.ConsultaPuericultura;
-import com.upsaude.exception.NotFoundException;
-import com.upsaude.repository.ConsultaPuericulturaRepository;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import java.util.UUID;
+
 import org.springframework.stereotype.Service;
 
-import java.util.UUID;
+import com.upsaude.entity.clinica.atendimento.ConsultaPuericultura;
+import com.upsaude.exception.NotFoundException;
+import com.upsaude.repository.clinica.atendimento.ConsultaPuericulturaRepository;
+
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Service
@@ -29,4 +31,3 @@ public class ConsultaPuericulturaTenantEnforcer {
         return validarAcesso(id, tenantId);
     }
 }
-

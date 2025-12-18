@@ -1,23 +1,8 @@
 package com.upsaude.service.impl;
 
-import com.upsaude.api.request.PlantaoRequest;
-import com.upsaude.api.response.PlantaoResponse;
-import com.upsaude.cache.CacheKeyUtil;
-import com.upsaude.entity.Plantao;
-import com.upsaude.entity.Tenant;
-import com.upsaude.enums.TipoPlantaoEnum;
-import com.upsaude.exception.BadRequestException;
-import com.upsaude.exception.InternalServerErrorException;
-import com.upsaude.repository.PlantaoRepository;
-import com.upsaude.service.PlantaoService;
-import com.upsaude.service.TenantService;
-import com.upsaude.service.support.plantao.PlantaoCreator;
-import com.upsaude.service.support.plantao.PlantaoDomainService;
-import com.upsaude.service.support.plantao.PlantaoResponseBuilder;
-import com.upsaude.service.support.plantao.PlantaoTenantEnforcer;
-import com.upsaude.service.support.plantao.PlantaoUpdater;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import java.util.Objects;
+import java.util.UUID;
+
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.CacheEvict;
@@ -28,10 +13,25 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.upsaude.api.request.profissional.equipe.PlantaoRequest;
+import com.upsaude.api.response.profissional.equipe.PlantaoResponse;
+import com.upsaude.cache.CacheKeyUtil;
+import com.upsaude.entity.profissional.equipe.Plantao;
+import com.upsaude.entity.sistema.Tenant;
+import com.upsaude.enums.TipoPlantaoEnum;
+import com.upsaude.exception.BadRequestException;
+import com.upsaude.exception.InternalServerErrorException;
+import com.upsaude.repository.profissional.equipe.PlantaoRepository;
+import com.upsaude.service.profissional.equipe.PlantaoService;
+import com.upsaude.service.sistema.TenantService;
+import com.upsaude.service.support.plantao.PlantaoCreator;
+import com.upsaude.service.support.plantao.PlantaoResponseBuilder;
+import com.upsaude.service.support.plantao.PlantaoTenantEnforcer;
+import com.upsaude.service.support.plantao.PlantaoUpdater;
+
 import java.time.OffsetDateTime;
-import java.util.List;
-import java.util.Objects;
-import java.util.UUID;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Service
@@ -45,12 +45,13 @@ public class PlantaoServiceImpl implements PlantaoService {
     private final PlantaoCreator creator;
     private final PlantaoUpdater updater;
     private final PlantaoResponseBuilder responseBuilder;
-    private final PlantaoDomainService domainService;
     private final PlantaoTenantEnforcer tenantEnforcer;
 
     @Override
     @Transactional
     public PlantaoResponse criar(PlantaoRequest request) {
+        log.debug("Criando novo plantão");
+
         try {
             UUID tenantId = tenantService.validarTenantAtual();
             Tenant tenant = tenantService.obterTenantDoUsuarioAutenticado();
@@ -75,8 +76,9 @@ public class PlantaoServiceImpl implements PlantaoService {
 
     @Override
     @Transactional(readOnly = true)
-    @Cacheable(cacheNames = CacheKeyUtil.CACHE_PLANTOES, keyGenerator = "plantaoCacheKeyGenerator")
+    @Cacheable(cacheNames = CacheKeyUtil.CACHE_PLANTOES, keyGenerator = "plantoesCacheKeyGenerator")
     public PlantaoResponse obterPorId(UUID id) {
+        log.debug("Buscando plantão por ID: {} (cache miss)", id);
         if (id == null) {
             throw new BadRequestException("ID do plantão é obrigatório");
         }
@@ -87,9 +89,40 @@ public class PlantaoServiceImpl implements PlantaoService {
     }
 
     @Override
+    @Transactional(readOnly = true)
+    public Page<PlantaoResponse> listar(Pageable pageable, UUID profissionalId, UUID medicoId, UUID estabelecimentoId, TipoPlantaoEnum tipoPlantao, OffsetDateTime dataInicio, OffsetDateTime dataFim, Boolean emAndamento) {
+        log.debug("Listando plantões paginados. Página: {}, Tamanho: {}",
+                pageable.getPageNumber(), pageable.getPageSize());
+
+        UUID tenantId = tenantService.validarTenantAtual();
+        Page<Plantao> page;
+
+        if (profissionalId != null) {
+            page = repository.findByProfissionalIdAndTenantIdOrderByDataHoraInicioDesc(profissionalId, tenantId, pageable);
+        } else if (medicoId != null) {
+            page = repository.findByMedicoIdAndTenantIdOrderByDataHoraInicioDesc(medicoId, tenantId, pageable);
+        } else if (estabelecimentoId != null) {
+            page = repository.findByEstabelecimentoIdAndTenantIdOrderByDataHoraInicioDesc(estabelecimentoId, tenantId, pageable);
+        } else if (tipoPlantao != null) {
+            page = repository.findByTipoPlantaoAndTenantIdOrderByDataHoraInicioDesc(tipoPlantao, tenantId, pageable);
+        } else if (dataInicio != null && dataFim != null) {
+            page = repository.findByDataHoraInicioBetweenAndTenantIdOrderByDataHoraInicioDesc(dataInicio, dataFim, tenantId, pageable);
+        } else if (Boolean.TRUE.equals(emAndamento)) {
+            OffsetDateTime agora = OffsetDateTime.now();
+            page = repository.findEmAndamentoAndTenantIdOrderByDataHoraInicioDesc(agora, tenantId, pageable);
+        } else {
+            page = repository.findAllByTenant(tenantId, pageable);
+        }
+
+        return page.map(responseBuilder::build);
+    }
+
+    @Override
     @Transactional
-    @CachePut(cacheNames = CacheKeyUtil.CACHE_PLANTOES, keyGenerator = "plantaoCacheKeyGenerator")
+    @CachePut(cacheNames = CacheKeyUtil.CACHE_PLANTOES, keyGenerator = "plantoesCacheKeyGenerator")
     public PlantaoResponse atualizar(UUID id, PlantaoRequest request) {
+        log.debug("Atualizando plantão. ID: {}", id);
+
         if (id == null) {
             throw new BadRequestException("ID do plantão é obrigatório");
         }
@@ -104,57 +137,11 @@ public class PlantaoServiceImpl implements PlantaoService {
 
     @Override
     @Transactional
-    @CacheEvict(cacheNames = CacheKeyUtil.CACHE_PLANTOES, keyGenerator = "plantaoCacheKeyGenerator", beforeInvocation = false)
+    @CacheEvict(cacheNames = CacheKeyUtil.CACHE_PLANTOES, keyGenerator = "plantoesCacheKeyGenerator", beforeInvocation = false)
     public void excluir(UUID id) {
+        log.debug("Excluindo plantão. ID: {}", id);
         UUID tenantId = tenantService.validarTenantAtual();
         inativarInternal(id, tenantId);
-    }
-
-    @Override
-    @Transactional(readOnly = true)
-    public Page<PlantaoResponse> listar(Pageable pageable,
-                                       UUID profissionalId,
-                                       UUID medicoId,
-                                       UUID estabelecimentoId,
-                                       TipoPlantaoEnum tipoPlantao,
-                                       OffsetDateTime dataInicio,
-                                       OffsetDateTime dataFim,
-                                       Boolean emAndamento) {
-        UUID tenantId = tenantService.validarTenantAtual();
-
-        if (Boolean.TRUE.equals(emAndamento)) {
-            if (profissionalId == null) {
-                throw new BadRequestException("profissionalId é obrigatório quando emAndamento=true");
-            }
-            OffsetDateTime agora = OffsetDateTime.now();
-            List<Plantao> list = repository.findByProfissionalIdAndTenantIdAndDataHoraInicioLessThanEqualAndDataHoraFimGreaterThanEqual(
-                profissionalId, tenantId, agora, agora);
-            org.springframework.data.domain.Pageable safePageable = (pageable == null)
-                ? org.springframework.data.domain.Pageable.unpaged()
-                : pageable;
-            return new org.springframework.data.domain.PageImpl<>(list, safePageable, list.size()).map(responseBuilder::build);
-        }
-
-        Page<Plantao> page;
-        if (profissionalId != null && dataInicio != null && dataFim != null) {
-            page = repository.findByProfissionalIdAndDataHoraInicioBetweenAndTenantIdOrderByDataHoraInicioAsc(
-                profissionalId, dataInicio, dataFim, tenantId, pageable);
-        } else if (estabelecimentoId != null && dataInicio != null && dataFim != null) {
-            page = repository.findByEstabelecimentoIdAndDataHoraInicioBetweenAndTenantIdOrderByDataHoraInicioAsc(
-                estabelecimentoId, dataInicio, dataFim, tenantId, pageable);
-        } else if (profissionalId != null) {
-            page = repository.findByProfissionalIdAndTenantIdOrderByDataHoraInicioDesc(profissionalId, tenantId, pageable);
-        } else if (medicoId != null) {
-            page = repository.findByMedicoIdAndTenantIdOrderByDataHoraInicioDesc(medicoId, tenantId, pageable);
-        } else if (estabelecimentoId != null) {
-            page = repository.findByEstabelecimentoIdAndTenantIdOrderByDataHoraInicioDesc(estabelecimentoId, tenantId, pageable);
-        } else if (tipoPlantao != null) {
-            page = repository.findByTipoPlantaoAndTenantIdOrderByDataHoraInicioDesc(tipoPlantao, tenantId, pageable);
-        } else {
-            page = repository.findAllByTenant(tenantId, pageable);
-        }
-
-        return page.map(responseBuilder::build);
     }
 
     private void inativarInternal(UUID id, UUID tenantId) {
@@ -163,9 +150,9 @@ public class PlantaoServiceImpl implements PlantaoService {
         }
 
         Plantao entity = tenantEnforcer.validarAcesso(id, tenantId);
-        domainService.validarPodeInativar(entity);
         entity.setActive(false);
         repository.save(Objects.requireNonNull(entity));
+        log.info("Plantão excluído (desativado) com sucesso. ID: {}", id);
     }
 
     private void validarTenantAutenticadoOrThrow(UUID tenantId, Tenant tenant) {
@@ -174,4 +161,3 @@ public class PlantaoServiceImpl implements PlantaoService {
         }
     }
 }
-

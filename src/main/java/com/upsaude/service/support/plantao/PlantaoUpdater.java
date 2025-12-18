@@ -1,16 +1,18 @@
 package com.upsaude.service.support.plantao;
 
-import com.upsaude.api.request.PlantaoRequest;
-import com.upsaude.entity.Plantao;
-import com.upsaude.entity.Tenant;
-import com.upsaude.mapper.PlantaoMapper;
-import com.upsaude.repository.PlantaoRepository;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Service;
-
 import java.util.Objects;
 import java.util.UUID;
+
+import org.springframework.stereotype.Service;
+
+import com.upsaude.api.request.profissional.equipe.PlantaoRequest;
+import com.upsaude.entity.profissional.equipe.Plantao;
+import com.upsaude.entity.sistema.Tenant;
+import com.upsaude.mapper.profissional.equipe.PlantaoMapper;
+import com.upsaude.repository.profissional.equipe.PlantaoRepository;
+
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Service
@@ -21,7 +23,6 @@ public class PlantaoUpdater {
     private final PlantaoMapper mapper;
     private final PlantaoTenantEnforcer tenantEnforcer;
     private final PlantaoValidationService validationService;
-    private final PlantaoDomainService domainService;
     private final PlantaoRelacionamentosHandler relacionamentosHandler;
 
     public Plantao atualizar(UUID id, PlantaoRequest request, UUID tenantId, Tenant tenant) {
@@ -30,12 +31,10 @@ public class PlantaoUpdater {
         Plantao entity = tenantEnforcer.validarAcesso(id, tenantId);
 
         mapper.updateFromRequest(request, entity);
-        relacionamentosHandler.processarRelacionamentos(request, entity, tenantId, tenant);
-        domainService.validarPeriodo(entity);
+        relacionamentosHandler.resolver(entity, request, tenantId, tenant);
 
         Plantao saved = repository.save(Objects.requireNonNull(entity));
         log.info("Plantão atualizado com sucesso. ID: {}, tenant: {}", saved.getId(), tenantId);
         return saved;
     }
 }
-

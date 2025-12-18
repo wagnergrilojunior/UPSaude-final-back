@@ -1,34 +1,35 @@
 package com.upsaude.service.impl;
 
-import com.upsaude.api.request.CuidadosEnfermagemRequest;
-import com.upsaude.api.response.CuidadosEnfermagemResponse;
-import com.upsaude.cache.CacheKeyUtil;
-import com.upsaude.entity.CuidadosEnfermagem;
-import com.upsaude.exception.BadRequestException;
-import com.upsaude.exception.InternalServerErrorException;
-import com.upsaude.exception.NotFoundException;
-import com.upsaude.repository.CuidadosEnfermagemRepository;
-import com.upsaude.service.CuidadosEnfermagemService;
-import com.upsaude.service.TenantService;
-import com.upsaude.entity.Tenant;
-import com.upsaude.service.support.cuidadosenfermagem.CuidadosEnfermagemCreator;
-import com.upsaude.service.support.cuidadosenfermagem.CuidadosEnfermagemResponseBuilder;
-import com.upsaude.service.support.cuidadosenfermagem.CuidadosEnfermagemTenantEnforcer;
-import com.upsaude.service.support.cuidadosenfermagem.CuidadosEnfermagemUpdater;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import java.util.Objects;
+import java.util.UUID;
+
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
-import org.springframework.data.domain.Page;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Objects;
-import java.util.UUID;
+import com.upsaude.api.request.enfermagem.CuidadosEnfermagemRequest;
+import com.upsaude.api.response.enfermagem.CuidadosEnfermagemResponse;
+import com.upsaude.cache.CacheKeyUtil;
+import com.upsaude.entity.enfermagem.CuidadosEnfermagem;
+import com.upsaude.entity.sistema.Tenant;
+import com.upsaude.exception.BadRequestException;
+import com.upsaude.exception.InternalServerErrorException;
+import com.upsaude.repository.enfermagem.CuidadosEnfermagemRepository;
+import com.upsaude.service.enfermagem.CuidadosEnfermagemService;
+import com.upsaude.service.sistema.TenantService;
+import com.upsaude.service.support.cuidadosenfermagem.CuidadosEnfermagemCreator;
+import com.upsaude.service.support.cuidadosenfermagem.CuidadosEnfermagemResponseBuilder;
+import com.upsaude.service.support.cuidadosenfermagem.CuidadosEnfermagemTenantEnforcer;
+import com.upsaude.service.support.cuidadosenfermagem.CuidadosEnfermagemUpdater;
+
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Service
@@ -47,6 +48,8 @@ public class CuidadosEnfermagemServiceImpl implements CuidadosEnfermagemService 
     @Override
     @Transactional
     public CuidadosEnfermagemResponse criar(CuidadosEnfermagemRequest request) {
+        log.debug("Criando novos cuidados de enfermagem");
+
         try {
             UUID tenantId = tenantService.validarTenantAtual();
             Tenant tenant = tenantService.obterTenantDoUsuarioAutenticado();
@@ -57,15 +60,15 @@ public class CuidadosEnfermagemServiceImpl implements CuidadosEnfermagemService 
 
             Cache cache = cacheManager.getCache(CacheKeyUtil.CACHE_CUIDADOS_ENFERMAGEM);
             if (cache != null) {
-                Object key = Objects.requireNonNull((Object) CacheKeyUtil.cuidadoEnfermagem(tenantId, saved.getId()));
+                Object key = Objects.requireNonNull((Object) CacheKeyUtil.cuidadosEnfermagem(tenantId, saved.getId()));
                 cache.put(key, response);
             }
 
             return response;
-        } catch (BadRequestException | NotFoundException e) {
+        } catch (BadRequestException e) {
             throw e;
         } catch (Exception e) {
-            throw new InternalServerErrorException("Erro ao criar cuidado de enfermagem", e);
+            throw new InternalServerErrorException("Erro ao criar cuidados de enfermagem", e);
         }
     }
 
@@ -73,8 +76,9 @@ public class CuidadosEnfermagemServiceImpl implements CuidadosEnfermagemService 
     @Transactional(readOnly = true)
     @Cacheable(cacheNames = CacheKeyUtil.CACHE_CUIDADOS_ENFERMAGEM, keyGenerator = "cuidadosEnfermagemCacheKeyGenerator")
     public CuidadosEnfermagemResponse obterPorId(UUID id) {
+        log.debug("Buscando cuidados de enfermagem por ID: {} (cache miss)", id);
         if (id == null) {
-            throw new BadRequestException("ID do cuidado de enfermagem é obrigatório");
+            throw new BadRequestException("ID dos cuidados de enfermagem é obrigatório");
         }
 
         UUID tenantId = tenantService.validarTenantAtual();
@@ -85,6 +89,9 @@ public class CuidadosEnfermagemServiceImpl implements CuidadosEnfermagemService 
     @Override
     @Transactional(readOnly = true)
     public Page<CuidadosEnfermagemResponse> listar(Pageable pageable) {
+        log.debug("Listando cuidados de enfermagem paginados. Página: {}, Tamanho: {}",
+                pageable.getPageNumber(), pageable.getPageSize());
+
         UUID tenantId = tenantService.validarTenantAtual();
         Page<CuidadosEnfermagem> page = repository.findAllByTenant(tenantId, pageable);
         return page.map(responseBuilder::build);
@@ -96,7 +103,6 @@ public class CuidadosEnfermagemServiceImpl implements CuidadosEnfermagemService 
         if (estabelecimentoId == null) {
             throw new BadRequestException("ID do estabelecimento é obrigatório");
         }
-
         UUID tenantId = tenantService.validarTenantAtual();
         Page<CuidadosEnfermagem> page = repository.findByEstabelecimentoIdAndTenantIdOrderByDataHoraDesc(estabelecimentoId, tenantId, pageable);
         return page.map(responseBuilder::build);
@@ -108,7 +114,6 @@ public class CuidadosEnfermagemServiceImpl implements CuidadosEnfermagemService 
         if (pacienteId == null) {
             throw new BadRequestException("ID do paciente é obrigatório");
         }
-
         UUID tenantId = tenantService.validarTenantAtual();
         Page<CuidadosEnfermagem> page = repository.findByPacienteIdAndTenantIdOrderByDataHoraDesc(pacienteId, tenantId, pageable);
         return page.map(responseBuilder::build);
@@ -120,7 +125,6 @@ public class CuidadosEnfermagemServiceImpl implements CuidadosEnfermagemService 
         if (profissionalId == null) {
             throw new BadRequestException("ID do profissional é obrigatório");
         }
-
         UUID tenantId = tenantService.validarTenantAtual();
         Page<CuidadosEnfermagem> page = repository.findByProfissionalIdAndTenantIdOrderByDataHoraDesc(profissionalId, tenantId, pageable);
         return page.map(responseBuilder::build);
@@ -130,44 +134,38 @@ public class CuidadosEnfermagemServiceImpl implements CuidadosEnfermagemService 
     @Transactional
     @CachePut(cacheNames = CacheKeyUtil.CACHE_CUIDADOS_ENFERMAGEM, keyGenerator = "cuidadosEnfermagemCacheKeyGenerator")
     public CuidadosEnfermagemResponse atualizar(UUID id, CuidadosEnfermagemRequest request) {
-        if (id == null) {
-            throw new BadRequestException("ID do cuidado de enfermagem é obrigatório");
-        }
-        try {
-            UUID tenantId = tenantService.validarTenantAtual();
-            Tenant tenant = tenantService.obterTenantDoUsuarioAutenticado();
-            validarTenantAutenticadoOrThrow(tenantId, tenant);
+        log.debug("Atualizando cuidados de enfermagem. ID: {}", id);
 
-            CuidadosEnfermagem updated = updater.atualizar(id, request, tenantId, tenant);
-            return responseBuilder.build(updated);
-        } catch (BadRequestException | NotFoundException e) {
-            throw e;
-        } catch (Exception e) {
-            throw new InternalServerErrorException("Erro ao atualizar cuidado de enfermagem", e);
+        if (id == null) {
+            throw new BadRequestException("ID dos cuidados de enfermagem é obrigatório");
         }
+
+        UUID tenantId = tenantService.validarTenantAtual();
+        Tenant tenant = tenantService.obterTenantDoUsuarioAutenticado();
+        validarTenantAutenticadoOrThrow(tenantId, tenant);
+
+        CuidadosEnfermagem updated = updater.atualizar(id, request, tenantId, tenant);
+        return responseBuilder.build(updated);
     }
 
     @Override
     @Transactional
     @CacheEvict(cacheNames = CacheKeyUtil.CACHE_CUIDADOS_ENFERMAGEM, keyGenerator = "cuidadosEnfermagemCacheKeyGenerator", beforeInvocation = false)
     public void excluir(UUID id) {
+        log.debug("Excluindo cuidados de enfermagem. ID: {}", id);
         UUID tenantId = tenantService.validarTenantAtual();
         inativarInternal(id, tenantId);
     }
 
     private void inativarInternal(UUID id, UUID tenantId) {
         if (id == null) {
-            throw new BadRequestException("ID do cuidado de enfermagem é obrigatório");
+            throw new BadRequestException("ID dos cuidados de enfermagem é obrigatório");
         }
 
         CuidadosEnfermagem entity = tenantEnforcer.validarAcesso(id, tenantId);
-        if (Boolean.FALSE.equals(entity.getActive())) {
-            throw new BadRequestException("Cuidado de enfermagem já está inativo");
-        }
-
         entity.setActive(false);
         repository.save(Objects.requireNonNull(entity));
-        log.info("Cuidado de enfermagem excluído (desativado) com sucesso. ID: {}", id);
+        log.info("Cuidados de enfermagem excluídos (desativados) com sucesso. ID: {}", id);
     }
 
     private void validarTenantAutenticadoOrThrow(UUID tenantId, Tenant tenant) {

@@ -1,9 +1,9 @@
 package com.upsaude.service.support.alergias;
 
-import com.upsaude.api.request.AlergiasRequest;
-import com.upsaude.entity.Alergias;
-import com.upsaude.mapper.AlergiasMapper;
-import com.upsaude.repository.AlergiasRepository;
+import com.upsaude.api.request.alergia.AlergiasRequest;
+import com.upsaude.entity.paciente.alergia.Alergias;
+import com.upsaude.mapper.paciente.alergia.AlergiasMapper;
+import com.upsaude.repository.paciente.alergia.AlergiasRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;

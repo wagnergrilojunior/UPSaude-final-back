@@ -1,10 +1,10 @@
 package com.upsaude.service.support.profissionaissaude;
 
-import com.upsaude.api.request.ProfissionaisSaudeRequest;
-import com.upsaude.entity.EspecialidadesMedicas;
-import com.upsaude.entity.ProfissionaisSaude;
+import com.upsaude.api.request.profissional.ProfissionaisSaudeRequest;
+import com.upsaude.entity.profissional.EspecialidadesMedicas;
+import com.upsaude.entity.profissional.ProfissionaisSaude;
 import com.upsaude.exception.NotFoundException;
-import com.upsaude.repository.EspecialidadesMedicasRepository;
+import com.upsaude.repository.profissional.EspecialidadesMedicasRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;

@@ -1,13 +1,15 @@
 package com.upsaude.service.support.notificacao;
 
-import com.upsaude.entity.Notificacao;
-import com.upsaude.exception.NotFoundException;
-import com.upsaude.repository.NotificacaoRepository;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import java.util.UUID;
+
 import org.springframework.stereotype.Service;
 
-import java.util.UUID;
+import com.upsaude.entity.sistema.notificacao.Notificacao;
+import com.upsaude.exception.NotFoundException;
+import com.upsaude.repository.sistema.notificacao.NotificacaoRepository;
+
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Service
@@ -29,4 +31,3 @@ public class NotificacaoTenantEnforcer {
         return validarAcesso(id, tenantId);
     }
 }
-

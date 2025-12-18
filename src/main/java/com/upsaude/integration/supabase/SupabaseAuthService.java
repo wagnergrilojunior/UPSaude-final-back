@@ -1,18 +1,23 @@
 package com.upsaude.integration.supabase;
+import java.util.HashMap;
+import java.util.Map;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.upsaude.config.SupabaseConfig;
-import com.upsaude.exception.UnauthorizedException;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.http.*;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
-import java.util.HashMap;
-import java.util.Map;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.upsaude.config.SupabaseConfig;
+import com.upsaude.exception.UnauthorizedException;
+
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Service
 @RequiredArgsConstructor
@@ -21,32 +26,21 @@ public class SupabaseAuthService {
 
     private final SupabaseConfig supabaseConfig;
     private final RestTemplate restTemplate;
-    private final ObjectMapper objectMapper; // Usa @Primary do supabaseObjectMapper
+    private final ObjectMapper objectMapper; 
 
-    /**
-     * Autentica um usuário usando email e senha através do Supabase Auth
-     * 
-     * @param email Email do usuário
-     * @param password Senha do usuário
-     * @return Resposta de autenticação com token e informações do usuário
-     * @throws UnauthorizedException se as credenciais forem inválidas
-     */
     public SupabaseAuthResponse signInWithEmail(String email, String password) {
-        // Garantir que a URL não tenha barra dupla
         String baseUrl = supabaseConfig.getUrl();
         if (baseUrl == null || baseUrl.isEmpty()) {
             log.error("URL do Supabase não configurada!");
             throw new RuntimeException("Configuração do Supabase inválida: URL não definida");
         }
         
-        // Remover barra final se existir
         if (baseUrl.endsWith("/")) {
             baseUrl = baseUrl.substring(0, baseUrl.length() - 1);
         }
         
         String url = baseUrl + "/auth/v1/token?grant_type=password";
         
-        // Validar chaves do Supabase
         if (supabaseConfig.getAnonKey() == null || supabaseConfig.getAnonKey().isEmpty()) {
             log.error("Chave anon do Supabase não configurada!");
             throw new RuntimeException("Configuração do Supabase inválida: ANON_KEY não definida");
@@ -54,13 +48,11 @@ public class SupabaseAuthService {
         
         log.debug("Tentando autenticar no Supabase. URL: {}, Email: {}", url, email);
         
-        // Preparar headers
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
         headers.set("apikey", supabaseConfig.getAnonKey());
         headers.set("Authorization", "Bearer " + supabaseConfig.getAnonKey());
         
-        // Preparar body
         Map<String, String> requestBody = new HashMap<>();
         requestBody.put("email", email);
         requestBody.put("password", password);
@@ -95,7 +87,6 @@ public class SupabaseAuthService {
             if (e.getStatusCode() == HttpStatus.UNAUTHORIZED || 
                 e.getStatusCode() == HttpStatus.BAD_REQUEST) {
                 try {
-                    // Tentar extrair mensagem de erro do Supabase
                     String errorBody = e.getResponseBodyAsString();
                     log.debug("Corpo do erro do Supabase: {}", errorBody);
                     if (errorBody != null && errorBody.contains("message")) {
@@ -119,7 +110,6 @@ public class SupabaseAuthService {
             throw new UnauthorizedException("Erro ao autenticar usuário: " + e.getMessage());
         } catch (org.springframework.web.client.RestClientException e) {
             log.error("Erro de conexão ao autenticar usuário no Supabase. URL: {}, Erro: {}", url, e.getMessage(), e);
-            // Verificar se é erro de deserialização
             Throwable cause = e.getCause();
             if (cause != null && (cause instanceof com.fasterxml.jackson.databind.exc.MismatchedInputException ||
                                   cause instanceof com.fasterxml.jackson.databind.exc.InvalidFormatException)) {
@@ -134,13 +124,6 @@ public class SupabaseAuthService {
         }
     }
 
-    /**
-     * Verifica e valida um token JWT do Supabase
-     * 
-     * @param token Token JWT para validar
-     * @return Informações do usuário associado ao token
-     * @throws UnauthorizedException se o token for inválido ou expirado
-     */
     public SupabaseAuthResponse.User verifyToken(String token) {
         String url = supabaseConfig.getUrl() + "/auth/v1/user";
         
@@ -187,25 +170,10 @@ public class SupabaseAuthService {
         }
     }
 
-    /**
-     * Obtém informações do usuário usando o token
-     * 
-     * @param token Token JWT do usuário
-     * @return Informações do usuário
-     */
     public SupabaseAuthResponse.User getUser(String token) {
         return verifyToken(token);
     }
 
-    /**
-     * Cria um novo usuário no Supabase Auth usando service_role key (admin).
-     * Este método permite criar usuários sem necessidade de confirmação de email.
-     *
-     * @param email Email do usuário
-     * @param password Senha do usuário
-     * @return Informações do usuário criado
-     * @throws RuntimeException se houver erro na criação
-     */
     public SupabaseAuthResponse.User signUp(String email, String password) {
         String baseUrl = supabaseConfig.getUrl();
         if (baseUrl == null || baseUrl.isEmpty()) {
@@ -213,7 +181,6 @@ public class SupabaseAuthService {
             throw new RuntimeException("Configuração do Supabase inválida: URL não definida");
         }
         
-        // Remover barra final se existir
         if (baseUrl.endsWith("/")) {
             baseUrl = baseUrl.substring(0, baseUrl.length() - 1);
         }
@@ -222,13 +189,11 @@ public class SupabaseAuthService {
         
         log.debug("Criando novo usuário no Supabase Auth. URL: {}, Email: {}", url, email);
         
-        // Preparar headers com service_role key (permissão admin)
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
         headers.set("apikey", supabaseConfig.getServiceRoleKey());
         headers.set("Authorization", "Bearer " + supabaseConfig.getServiceRoleKey());
         
-        // Preparar body
         Map<String, Object> requestBody = new HashMap<>();
         requestBody.put("email", email);
         requestBody.put("password", password);
@@ -272,16 +237,6 @@ public class SupabaseAuthService {
         }
     }
 
-    /**
-     * Atualiza um usuário no Supabase Auth usando service_role key (admin).
-     * Permite atualizar email e senha (ambos opcionais).
-     *
-     * @param userId ID do usuário
-     * @param email Novo email (opcional, pode ser null)
-     * @param password Nova senha (opcional, pode ser null)
-     * @return Informações do usuário atualizado
-     * @throws RuntimeException se houver erro na atualização
-     */
     public SupabaseAuthResponse.User updateUser(java.util.UUID userId, String email, String password) {
         String baseUrl = supabaseConfig.getUrl();
         if (baseUrl == null || baseUrl.isEmpty()) {
@@ -289,7 +244,6 @@ public class SupabaseAuthService {
             throw new RuntimeException("Configuração do Supabase inválida: URL não definida");
         }
         
-        // Remover barra final se existir
         if (baseUrl.endsWith("/")) {
             baseUrl = baseUrl.substring(0, baseUrl.length() - 1);
         }
@@ -299,13 +253,11 @@ public class SupabaseAuthService {
         log.debug("Atualizando usuário no Supabase Auth. URL: {}, UserID: {}, Email: {}, Senha: {}", 
                 url, userId, email, password != null ? "***" : "não fornecida");
         
-        // Preparar headers com service_role key (permissão admin)
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
         headers.set("apikey", supabaseConfig.getServiceRoleKey());
         headers.set("Authorization", "Bearer " + supabaseConfig.getServiceRoleKey());
         
-        // Preparar body - incluir apenas os campos fornecidos
         Map<String, Object> requestBody = new HashMap<>();
         
         if (email != null && !email.trim().isEmpty()) {
@@ -317,7 +269,6 @@ public class SupabaseAuthService {
             log.debug("Nova senha será atualizada para o usuário {}", userId);
         }
         
-        // Se nenhum campo foi fornecido, não faz sentido atualizar
         if (requestBody.isEmpty()) {
             log.warn("Nenhum campo para atualizar foi fornecido para o usuário: {}", userId);
             throw new RuntimeException("Nenhum dado fornecido para atualização");
@@ -361,26 +312,10 @@ public class SupabaseAuthService {
         }
     }
     
-    /**
-     * Atualiza um usuário no Supabase Auth usando service_role key (admin).
-     * Sobrecarga do método para manter compatibilidade com código existente.
-     *
-     * @param userId ID do usuário
-     * @param email Novo email
-     * @return Informações do usuário atualizado
-     * @throws RuntimeException se houver erro na atualização
-     */
     public SupabaseAuthResponse.User updateUser(java.util.UUID userId, String email) {
         return updateUser(userId, email, null);
     }
 
-    /**
-     * Deleta um usuário no Supabase Auth usando service_role key (admin).
-     * Remove o usuário permanentemente do sistema de autenticação.
-     *
-     * @param userId ID do usuário a ser deletado
-     * @throws RuntimeException se houver erro na exclusão
-     */
     public void deleteUser(java.util.UUID userId) {
         String baseUrl = supabaseConfig.getUrl();
         if (baseUrl == null || baseUrl.isEmpty()) {
@@ -388,7 +323,6 @@ public class SupabaseAuthService {
             throw new RuntimeException("Configuração do Supabase inválida: URL não definida");
         }
         
-        // Remover barra final se existir
         if (baseUrl.endsWith("/")) {
             baseUrl = baseUrl.substring(0, baseUrl.length() - 1);
         }
@@ -397,7 +331,6 @@ public class SupabaseAuthService {
         
         log.debug("Deletando usuário no Supabase Auth. URL: {}, UserID: {}", url, userId);
         
-        // Preparar headers com service_role key (permissão admin)
         HttpHeaders headers = new HttpHeaders();
         headers.set("apikey", supabaseConfig.getServiceRoleKey());
         headers.set("Authorization", "Bearer " + supabaseConfig.getServiceRoleKey());
@@ -427,7 +360,7 @@ public class SupabaseAuthService {
             
             if (e.getStatusCode() == HttpStatus.NOT_FOUND) {
                 log.warn("Usuário não encontrado no Supabase Auth: {}", userId);
-                return; // Considera como sucesso se já foi deletado
+                return;
             }
             
             throw new RuntimeException("Erro ao deletar usuário: " + e.getMessage());
@@ -437,13 +370,6 @@ public class SupabaseAuthService {
         }
     }
 
-    /**
-     * Busca um usuário no Supabase Auth pelo ID usando service_role key.
-     * Útil para buscar email quando temos apenas o userId.
-     *
-     * @param userId ID do usuário no Supabase Auth
-     * @return Informações do usuário ou null se não encontrado
-     */
     public SupabaseAuthResponse.User getUserById(java.util.UUID userId) {
         String url = supabaseConfig.getUrl() + "/auth/v1/admin/users/" + userId;
         

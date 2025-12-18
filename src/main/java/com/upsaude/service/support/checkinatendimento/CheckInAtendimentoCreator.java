@@ -1,16 +1,18 @@
 package com.upsaude.service.support.checkinatendimento;
 
-import com.upsaude.api.request.CheckInAtendimentoRequest;
-import com.upsaude.entity.CheckInAtendimento;
-import com.upsaude.entity.Tenant;
-import com.upsaude.mapper.CheckInAtendimentoMapper;
-import com.upsaude.repository.CheckInAtendimentoRepository;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Service;
-
 import java.util.Objects;
 import java.util.UUID;
+
+import org.springframework.stereotype.Service;
+
+import com.upsaude.api.request.clinica.atendimento.CheckInAtendimentoRequest;
+import com.upsaude.entity.clinica.atendimento.CheckInAtendimento;
+import com.upsaude.entity.sistema.Tenant;
+import com.upsaude.mapper.clinica.atendimento.CheckInAtendimentoMapper;
+import com.upsaude.repository.clinica.atendimento.CheckInAtendimentoRepository;
+
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Service

@@ -1,16 +1,18 @@
 package com.upsaude.service.support.historicoclinico;
 
-import com.upsaude.api.request.HistoricoClinicoRequest;
-import com.upsaude.entity.HistoricoClinico;
-import com.upsaude.entity.Tenant;
-import com.upsaude.mapper.HistoricoClinicoMapper;
-import com.upsaude.repository.HistoricoClinicoRepository;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Service;
-
 import java.util.Objects;
 import java.util.UUID;
+
+import org.springframework.stereotype.Service;
+
+import com.upsaude.api.request.clinica.prontuario.HistoricoClinicoRequest;
+import com.upsaude.entity.clinica.prontuario.HistoricoClinico;
+import com.upsaude.entity.sistema.Tenant;
+import com.upsaude.mapper.clinica.prontuario.HistoricoClinicoMapper;
+import com.upsaude.repository.clinica.prontuario.HistoricoClinicoRepository;
+
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Service
@@ -18,24 +20,21 @@ import java.util.UUID;
 public class HistoricoClinicoUpdater {
 
     private final HistoricoClinicoRepository repository;
+    private final HistoricoClinicoMapper mapper;
     private final HistoricoClinicoTenantEnforcer tenantEnforcer;
     private final HistoricoClinicoValidationService validationService;
     private final HistoricoClinicoRelacionamentosHandler relacionamentosHandler;
-    private final HistoricoClinicoDomainService domainService;
-    private final HistoricoClinicoMapper mapper;
 
     public HistoricoClinico atualizar(UUID id, HistoricoClinicoRequest request, UUID tenantId, Tenant tenant) {
-        validationService.validarId(id);
         validationService.validarObrigatorios(request);
 
         HistoricoClinico entity = tenantEnforcer.validarAcesso(id, tenantId);
-        mapper.updateFromRequest(request, entity);
 
-        domainService.aplicarDefaults(entity);
+        mapper.updateFromRequest(request, entity);
         relacionamentosHandler.resolver(entity, request, tenantId, tenant);
 
         HistoricoClinico saved = repository.save(Objects.requireNonNull(entity));
-        log.info("Registro atualizado com sucesso. ID: {}, tenant: {}", saved.getId(), tenantId);
+        log.info("Histórico clínico atualizado com sucesso. ID: {}, tenant: {}", saved.getId(), tenantId);
         return saved;
     }
 }

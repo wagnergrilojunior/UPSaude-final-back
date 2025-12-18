@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns="http://servicos.saude.gov.br/schema/corporativo/v1/competencia" elementFormDefault="qualified" targetNamespace="http://servicos.saude.gov.br/schema/corporativo/v1/competencia">
+    
+    <xs:annotation>
+        <xs:documentation>
+            <![CDATA[
+            Este esquema representa uma Competência, composta de ano e mês, no formato AAAAMM. 
+            ]]>
+        </xs:documentation>
+    </xs:annotation>
+    
+    <xs:element name="competencia" type="CompetenciaType"/>
+    
+    <xs:simpleType name="CompetenciaType">
+            
+        <xs:restriction base="xs:string">
+            <xs:length value="6"/>
+            <xs:pattern value="(19|20)[0-9]{2}(0[1-9]|1[0-2]){1}"/>
+        </xs:restriction>
+        
+    </xs:simpleType>
+    
+</xs:schema>

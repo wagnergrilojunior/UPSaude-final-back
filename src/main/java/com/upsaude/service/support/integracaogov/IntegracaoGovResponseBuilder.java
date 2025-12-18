@@ -1,10 +1,12 @@
 package com.upsaude.service.support.integracaogov;
 
-import com.upsaude.api.response.IntegracaoGovResponse;
-import com.upsaude.entity.IntegracaoGov;
-import com.upsaude.mapper.IntegracaoGovMapper;
-import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+
+import com.upsaude.api.response.sistema.integracao.IntegracaoGovResponse;
+import com.upsaude.entity.sistema.integracao.IntegracaoGov;
+import com.upsaude.mapper.sistema.integracao.IntegracaoGovMapper;
+
+import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor

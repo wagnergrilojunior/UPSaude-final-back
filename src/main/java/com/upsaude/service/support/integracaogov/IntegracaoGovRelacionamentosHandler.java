@@ -1,15 +1,17 @@
 package com.upsaude.service.support.integracaogov;
 
-import com.upsaude.api.request.IntegracaoGovRequest;
-import com.upsaude.entity.IntegracaoGov;
-import com.upsaude.entity.Paciente;
-import com.upsaude.entity.Tenant;
-import com.upsaude.service.support.paciente.PacienteTenantEnforcer;
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
-
 import java.util.Objects;
 import java.util.UUID;
+
+import org.springframework.stereotype.Service;
+
+import com.upsaude.api.request.sistema.integracao.IntegracaoGovRequest;
+import com.upsaude.entity.paciente.Paciente;
+import com.upsaude.entity.sistema.Tenant;
+import com.upsaude.entity.sistema.integracao.IntegracaoGov;
+import com.upsaude.service.support.paciente.PacienteTenantEnforcer;
+
+import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor

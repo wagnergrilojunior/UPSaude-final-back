@@ -1,11 +1,13 @@
 package com.upsaude.service.support.visitasdomiciliares;
 
-import com.upsaude.api.response.VisitasDomiciliaresResponse;
-import com.upsaude.entity.VisitasDomiciliares;
-import com.upsaude.mapper.VisitasDomiciliaresMapper;
-import lombok.RequiredArgsConstructor;
 import org.hibernate.Hibernate;
 import org.springframework.stereotype.Service;
+
+import com.upsaude.api.response.saude_publica.visita.VisitasDomiciliaresResponse;
+import com.upsaude.entity.saude_publica.visita.VisitasDomiciliares;
+import com.upsaude.mapper.saude_publica.visita.VisitasDomiciliaresMapper;
+
+import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor

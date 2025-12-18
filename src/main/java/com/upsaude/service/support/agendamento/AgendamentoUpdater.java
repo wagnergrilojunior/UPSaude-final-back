@@ -1,16 +1,18 @@
 package com.upsaude.service.support.agendamento;
 
-import com.upsaude.api.request.AgendamentoRequest;
-import com.upsaude.entity.Agendamento;
-import com.upsaude.mapper.AgendamentoMapper;
-import com.upsaude.repository.AgendamentoRepository;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Service;
-
 import java.time.OffsetDateTime;
 import java.util.Objects;
 import java.util.UUID;
+
+import org.springframework.stereotype.Service;
+
+import com.upsaude.api.request.agendamento.AgendamentoRequest;
+import com.upsaude.entity.agendamento.Agendamento;
+import com.upsaude.mapper.agendamento.AgendamentoMapper;
+import com.upsaude.repository.agendamento.AgendamentoRepository;
+
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Service

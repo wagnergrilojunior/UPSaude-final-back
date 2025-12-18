@@ -1,16 +1,19 @@
 package com.upsaude.service.support.controleponto;
 
-import com.upsaude.api.request.ControlePontoRequest;
-import com.upsaude.entity.ControlePonto;
-import com.upsaude.entity.Medicos;
-import com.upsaude.entity.ProfissionaisSaude;
-import com.upsaude.entity.Tenant;
-import com.upsaude.service.support.medico.MedicoTenantEnforcer;
+import com.upsaude.api.request.profissional.equipe.ControlePontoRequest;
+import com.upsaude.entity.estabelecimento.Estabelecimentos;
+import com.upsaude.entity.profissional.Medicos;
+import com.upsaude.entity.profissional.ProfissionaisSaude;
+import com.upsaude.entity.profissional.equipe.ControlePonto;
+import com.upsaude.entity.sistema.Tenant;
+import com.upsaude.exception.BadRequestException;
+import com.upsaude.exception.NotFoundException;
+import com.upsaude.repository.profissional.MedicosRepository;
+import com.upsaude.service.support.estabelecimentos.EstabelecimentosTenantEnforcer;
 import com.upsaude.service.support.profissionaissaude.ProfissionaisSaudeTenantEnforcer;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.util.Objects;
 import java.util.UUID;
 
 @Service
@@ -18,28 +21,27 @@ import java.util.UUID;
 public class ControlePontoRelacionamentosHandler {
 
     private final ProfissionaisSaudeTenantEnforcer profissionaisSaudeTenantEnforcer;
-    private final MedicoTenantEnforcer medicoTenantEnforcer;
+    private final EstabelecimentosTenantEnforcer estabelecimentosTenantEnforcer;
+    private final MedicosRepository medicosRepository;
 
     public void resolver(ControlePonto entity, ControlePontoRequest request, UUID tenantId, Tenant tenant) {
         if (request == null) return;
 
-        entity.setTenant(Objects.requireNonNull(tenant, "tenant é obrigatório"));
-
-        ProfissionaisSaude profissional = profissionaisSaudeTenantEnforcer.validarAcesso(
-            Objects.requireNonNull(request.getProfissional(), "profissional é obrigatório"), tenantId);
-        entity.setProfissional(profissional);
-
-        if (request.getMedico() != null) {
-            Medicos medico = medicoTenantEnforcer.validarAcesso(request.getMedico(), tenantId);
-            entity.setMedico(medico);
-        } else {
-            entity.setMedico(null);
+        if (tenantId == null || tenant == null || tenant.getId() == null || !tenantId.equals(tenant.getId())) {
+            throw new BadRequestException("Não foi possível obter tenant do usuário autenticado");
         }
 
-        if (entity.getProfissional() != null && entity.getProfissional().getEstabelecimento() != null) {
-            entity.setEstabelecimento(entity.getProfissional().getEstabelecimento());
-        } else {
-            entity.setEstabelecimento(null);
+        entity.setTenant(tenant);
+
+        if (request.getProfissional() != null) {
+            ProfissionaisSaude profissional = profissionaisSaudeTenantEnforcer.validarAcesso(request.getProfissional(), tenantId);
+            entity.setProfissional(profissional);
+        }
+
+        if (request.getMedico() != null) {
+            Medicos medico = medicosRepository.findByIdAndTenant(request.getMedico(), tenantId)
+                    .orElseThrow(() -> new NotFoundException("Médico não encontrado com ID: " + request.getMedico()));
+            entity.setMedico(medico);
         }
     }
 }

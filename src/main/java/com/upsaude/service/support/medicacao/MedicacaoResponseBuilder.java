@@ -1,10 +1,12 @@
 package com.upsaude.service.support.medicacao;
 
-import com.upsaude.api.response.MedicacaoResponse;
-import com.upsaude.entity.Medicacao;
-import com.upsaude.mapper.MedicacaoMapper;
-import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+
+import com.upsaude.api.response.clinica.medicacao.MedicacaoResponse;
+import com.upsaude.entity.clinica.medicacao.Medicacao;
+import com.upsaude.mapper.clinica.medicacao.MedicacaoMapper;
+
+import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor

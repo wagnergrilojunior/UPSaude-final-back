@@ -1,32 +1,34 @@
 package com.upsaude.service.impl;
 
-import com.upsaude.api.request.AlergiasPacienteRequest;
-import com.upsaude.api.request.AlergiasPacienteSimplificadoRequest;
-import com.upsaude.api.response.AlergiasPacienteResponse;
-import com.upsaude.entity.Alergias;
-import com.upsaude.entity.AlergiasPaciente;
-import com.upsaude.entity.Paciente;
-import com.upsaude.entity.Tenant;
-import com.upsaude.exception.BadRequestException;
-import com.upsaude.exception.NotFoundException;
-import com.upsaude.mapper.AlergiasPacienteMapper;
-import com.upsaude.repository.AlergiasPacienteRepository;
-import com.upsaude.repository.AlergiasRepository;
-import com.upsaude.repository.PacienteRepository;
-import com.upsaude.repository.TenantRepository;
-import com.upsaude.service.AlergiasPacienteService;
-import com.upsaude.service.TenantService;
-import jakarta.transaction.Transactional;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import java.util.UUID;
+
 import org.springframework.beans.BeanUtils;
-import org.springframework.data.domain.Page;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import java.util.UUID;
+import com.upsaude.api.request.alergia.AlergiasPacienteRequest;
+import com.upsaude.api.request.alergia.AlergiasPacienteSimplificadoRequest;
+import com.upsaude.api.response.alergia.AlergiasPacienteResponse;
+import com.upsaude.entity.paciente.Paciente;
+import com.upsaude.entity.paciente.alergia.Alergias;
+import com.upsaude.entity.paciente.alergia.AlergiasPaciente;
+import com.upsaude.entity.sistema.Tenant;
+import com.upsaude.exception.BadRequestException;
+import com.upsaude.exception.NotFoundException;
+import com.upsaude.mapper.paciente.alergia.AlergiasPacienteMapper;
+import com.upsaude.repository.paciente.PacienteRepository;
+import com.upsaude.repository.paciente.alergia.AlergiasPacienteRepository;
+import com.upsaude.repository.paciente.alergia.AlergiasRepository;
+import com.upsaude.repository.sistema.TenantRepository;
+import com.upsaude.service.alergia.AlergiasPacienteService;
+import com.upsaude.service.sistema.TenantService;
+
+import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Service
@@ -195,7 +197,7 @@ public class AlergiasPacienteServiceImpl implements AlergiasPacienteService {
         AlergiasPaciente alergiasPacienteAtualizado = alergiasPacienteMapper.fromRequest(request);
 
         java.util.UUID idOriginal = alergiasPaciente.getId();
-        com.upsaude.entity.Tenant tenantOriginal = alergiasPaciente.getTenant();
+        Tenant tenantOriginal = alergiasPaciente.getTenant();
         Boolean activeOriginal = alergiasPaciente.getActive();
         java.time.OffsetDateTime createdAtOriginal = alergiasPaciente.getCreatedAt();
 

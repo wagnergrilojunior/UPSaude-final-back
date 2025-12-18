@@ -1,16 +1,18 @@
 package com.upsaude.service.support.configuracaoestabelecimento;
 
-import com.upsaude.api.request.ConfiguracaoEstabelecimentoRequest;
-import com.upsaude.entity.ConfiguracaoEstabelecimento;
-import com.upsaude.entity.Tenant;
-import com.upsaude.mapper.ConfiguracaoEstabelecimentoMapper;
-import com.upsaude.repository.ConfiguracaoEstabelecimentoRepository;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Service;
-
 import java.util.Objects;
 import java.util.UUID;
+
+import org.springframework.stereotype.Service;
+
+import com.upsaude.api.request.estabelecimento.ConfiguracaoEstabelecimentoRequest;
+import com.upsaude.entity.estabelecimento.ConfiguracaoEstabelecimento;
+import com.upsaude.entity.sistema.Tenant;
+import com.upsaude.mapper.estabelecimento.ConfiguracaoEstabelecimentoMapper;
+import com.upsaude.repository.estabelecimento.ConfiguracaoEstabelecimentoRepository;
+
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Service

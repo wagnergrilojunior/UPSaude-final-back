@@ -1,9 +1,9 @@
 package com.upsaude.service.support.medico;
 
-import com.upsaude.api.request.MedicosRequest;
-import com.upsaude.entity.Medicos;
+import com.upsaude.api.request.profissional.MedicosRequest;
+import com.upsaude.entity.profissional.Medicos;
 import com.upsaude.exception.BadRequestException;
-import com.upsaude.repository.MedicosRepository;
+import com.upsaude.repository.profissional.MedicosRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 

@@ -1,11 +1,13 @@
 package com.upsaude.service.support.escalatrabalho;
 
-import com.upsaude.api.response.EscalaTrabalhoResponse;
-import com.upsaude.entity.EscalaTrabalho;
-import com.upsaude.mapper.EscalaTrabalhoMapper;
-import lombok.RequiredArgsConstructor;
 import org.hibernate.Hibernate;
 import org.springframework.stereotype.Service;
+
+import com.upsaude.api.response.profissional.equipe.EscalaTrabalhoResponse;
+import com.upsaude.entity.profissional.equipe.EscalaTrabalho;
+import com.upsaude.mapper.profissional.equipe.EscalaTrabalhoMapper;
+
+import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
@@ -15,9 +17,9 @@ public class EscalaTrabalhoResponseBuilder {
 
     public EscalaTrabalhoResponse build(EscalaTrabalho entity) {
         if (entity != null) {
-            Hibernate.initialize(entity.getProfissional());
-            Hibernate.initialize(entity.getMedico());
-            Hibernate.initialize(entity.getEstabelecimento());
+            if (entity.getProfissional() != null) Hibernate.initialize(entity.getProfissional());
+            if (entity.getMedico() != null) Hibernate.initialize(entity.getMedico());
+            if (entity.getEstabelecimento() != null) Hibernate.initialize(entity.getEstabelecimento());
         }
         return mapper.toResponse(entity);
     }

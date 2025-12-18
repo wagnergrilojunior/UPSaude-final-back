@@ -1,6 +1,6 @@
 package com.upsaude.service.support.receitasmedicas;
 
-import com.upsaude.entity.ReceitasMedicas;
+import com.upsaude.entity.clinica.medicacao.ReceitasMedicas;
 import com.upsaude.exception.BadRequestException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;

@@ -1,14 +1,16 @@
 package com.upsaude.service.support.fabricantesvacina;
 
-import com.upsaude.api.response.FabricantesVacinaResponse;
-import com.upsaude.entity.Endereco;
-import com.upsaude.entity.FabricantesVacina;
-import com.upsaude.mapper.FabricantesVacinaMapper;
-import lombok.RequiredArgsConstructor;
+import java.util.UUID;
+
 import org.hibernate.Hibernate;
 import org.springframework.stereotype.Service;
 
-import java.util.UUID;
+import com.upsaude.api.response.saude_publica.vacina.FabricantesVacinaResponse;
+import com.upsaude.entity.paciente.Endereco;
+import com.upsaude.entity.saude_publica.vacina.FabricantesVacina;
+import com.upsaude.mapper.saude_publica.vacina.FabricantesVacinaMapper;
+
+import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor

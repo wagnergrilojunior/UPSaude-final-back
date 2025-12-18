@@ -15,12 +15,6 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.util.UUID;
 
-/**
- * Serviço para interagir com o Supabase Storage.
- * Permite upload e download de arquivos (fotos de usuários).
- *
- * @author UPSaúde
- */
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -35,36 +29,24 @@ public class SupabaseStorageService {
             "image/jpeg", "image/jpg", "image/png", "image/webp", "image/gif"
     };
 
-    /**
-     * Faz upload de uma foto de usuário para o Supabase Storage.
-     *
-     * @param file Arquivo de imagem
-     * @param userId ID do usuário
-     * @return URL pública da imagem no Supabase Storage
-     */
     public String uploadFotoUsuario(MultipartFile file, UUID userId) {
         log.debug("Iniciando upload de foto para usuário: {}", userId);
 
-        // Validar arquivo
         validarArquivo(file);
 
-        // Gerar nome único para o arquivo
         String extension = getFileExtension(file.getOriginalFilename());
         String fileName = userId.toString() + "_" + UUID.randomUUID() + "." + extension;
         String filePath = BUCKET_NAME + "/" + fileName;
 
         try {
-            // Preparar headers
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.parseMediaType(file.getContentType()));
             headers.set("apikey", supabaseConfig.getServiceRoleKey());
             headers.set("Authorization", "Bearer " + supabaseConfig.getServiceRoleKey());
 
-            // Preparar body (bytes do arquivo)
             byte[] fileBytes = file.getBytes();
             HttpEntity<byte[]> request = new HttpEntity<>(fileBytes, headers);
 
-            // URL do Supabase Storage
             String baseUrl = supabaseConfig.getUrl();
             if (baseUrl.endsWith("/")) {
                 baseUrl = baseUrl.substring(0, baseUrl.length() - 1);
@@ -73,7 +55,6 @@ public class SupabaseStorageService {
 
             log.debug("Fazendo upload para: {}", uploadUrl);
 
-            // Fazer upload
             ResponseEntity<String> response = restTemplate.exchange(
                     uploadUrl,
                     HttpMethod.POST,
@@ -82,7 +63,6 @@ public class SupabaseStorageService {
             );
 
             if (response.getStatusCode().is2xxSuccessful()) {
-                // Construir URL pública da imagem
                 String publicUrl = baseUrl + "/storage/v1/object/public/" + filePath;
                 log.info("Foto enviada com sucesso para usuário {}. URL: {}", userId, publicUrl);
                 return publicUrl;
@@ -104,11 +84,6 @@ public class SupabaseStorageService {
         }
     }
 
-    /**
-     * Deleta uma foto de usuário do Supabase Storage.
-     *
-     * @param fotoUrl URL da foto a ser deletada
-     */
     public void deletarFotoUsuario(String fotoUrl) {
         if (!StringUtils.hasText(fotoUrl)) {
             return;
@@ -117,7 +92,6 @@ public class SupabaseStorageService {
         log.debug("Deletando foto: {}", fotoUrl);
 
         try {
-            // Extrair caminho do arquivo da URL
             String filePath = extrairCaminhoArquivo(fotoUrl);
             if (filePath == null) {
                 log.warn("Não foi possível extrair caminho do arquivo da URL: {}", fotoUrl);
@@ -163,9 +137,6 @@ public class SupabaseStorageService {
         }
     }
 
-    /**
-     * Valida o arquivo antes do upload.
-     */
     private void validarArquivo(MultipartFile file) {
         if (file == null || file.isEmpty()) {
             throw new BadRequestException("Arquivo não pode ser vazio");
@@ -181,9 +152,6 @@ public class SupabaseStorageService {
         }
     }
 
-    /**
-     * Verifica se o tipo de conteúdo é permitido.
-     */
     private boolean isAllowedContentType(String contentType) {
         for (String allowed : ALLOWED_CONTENT_TYPES) {
             if (allowed.equalsIgnoreCase(contentType)) {
@@ -193,9 +161,6 @@ public class SupabaseStorageService {
         return false;
     }
 
-    /**
-     * Obtém a extensão do arquivo.
-     */
     private String getFileExtension(String filename) {
         if (filename == null || !filename.contains(".")) {
             return "jpg";
@@ -203,9 +168,6 @@ public class SupabaseStorageService {
         return filename.substring(filename.lastIndexOf(".") + 1).toLowerCase();
     }
 
-    /**
-     * Extrai o caminho do arquivo da URL pública.
-     */
     private String extrairCaminhoArquivo(String fotoUrl) {
         if (!StringUtils.hasText(fotoUrl)) {
             return null;

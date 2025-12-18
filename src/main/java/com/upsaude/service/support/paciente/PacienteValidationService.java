@@ -1,9 +1,9 @@
 package com.upsaude.service.support.paciente;
 
-import com.upsaude.api.request.PacienteRequest;
-import com.upsaude.entity.Paciente;
+import com.upsaude.api.request.paciente.PacienteRequest;
+import com.upsaude.entity.paciente.Paciente;
 import com.upsaude.exception.BadRequestException;
-import com.upsaude.repository.PacienteRepository;
+import com.upsaude.repository.paciente.PacienteRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 

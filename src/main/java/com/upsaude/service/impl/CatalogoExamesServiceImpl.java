@@ -1,25 +1,8 @@
 package com.upsaude.service.impl;
 
 import java.util.Objects;
-import com.upsaude.api.request.CatalogoExamesRequest;
-import com.upsaude.api.response.CatalogoExamesResponse;
-import com.upsaude.cache.CacheKeyUtil;
-import com.upsaude.entity.CatalogoExames;
-import com.upsaude.entity.Tenant;
-import com.upsaude.exception.BadRequestException;
-import com.upsaude.exception.InternalServerErrorException;
-import com.upsaude.exception.NotFoundException;
-import com.upsaude.repository.CatalogoExamesRepository;
-import com.upsaude.service.CatalogoExamesService;
-import com.upsaude.service.TenantService;
-import com.upsaude.service.support.catalogoexames.CatalogoExamesCreator;
-import com.upsaude.service.support.catalogoexames.CatalogoExamesDomainService;
-import com.upsaude.service.support.catalogoexames.CatalogoExamesResponseBuilder;
-import com.upsaude.service.support.catalogoexames.CatalogoExamesTenantEnforcer;
-import com.upsaude.service.support.catalogoexames.CatalogoExamesUpdater;
-import jakarta.transaction.Transactional;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import java.util.UUID;
+
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.CacheEvict;
@@ -30,7 +13,26 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import java.util.UUID;
+import com.upsaude.api.request.clinica.exame.CatalogoExamesRequest;
+import com.upsaude.api.response.clinica.exame.CatalogoExamesResponse;
+import com.upsaude.cache.CacheKeyUtil;
+import com.upsaude.entity.clinica.exame.CatalogoExames;
+import com.upsaude.entity.sistema.Tenant;
+import com.upsaude.exception.BadRequestException;
+import com.upsaude.exception.InternalServerErrorException;
+import com.upsaude.exception.NotFoundException;
+import com.upsaude.repository.clinica.exame.CatalogoExamesRepository;
+import com.upsaude.service.clinica.exame.CatalogoExamesService;
+import com.upsaude.service.sistema.TenantService;
+import com.upsaude.service.support.catalogoexames.CatalogoExamesCreator;
+import com.upsaude.service.support.catalogoexames.CatalogoExamesDomainService;
+import com.upsaude.service.support.catalogoexames.CatalogoExamesResponseBuilder;
+import com.upsaude.service.support.catalogoexames.CatalogoExamesTenantEnforcer;
+import com.upsaude.service.support.catalogoexames.CatalogoExamesUpdater;
+
+import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Service

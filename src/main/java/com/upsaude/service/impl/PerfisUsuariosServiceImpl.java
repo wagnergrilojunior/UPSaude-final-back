@@ -1,16 +1,16 @@
 package com.upsaude.service.impl;
 
-import com.upsaude.api.request.PerfisUsuariosRequest;
-import com.upsaude.api.response.PerfisUsuariosResponse;
+import com.upsaude.api.request.sistema.PerfisUsuariosRequest;
+import com.upsaude.api.response.sistema.PerfisUsuariosResponse;
 import com.upsaude.cache.CacheKeyUtil;
-import com.upsaude.entity.PerfisUsuarios;
-import com.upsaude.entity.Tenant;
+import com.upsaude.entity.sistema.PerfisUsuarios;
+import com.upsaude.entity.sistema.Tenant;
 import com.upsaude.exception.BadRequestException;
 import com.upsaude.exception.InternalServerErrorException;
 import com.upsaude.exception.NotFoundException;
-import com.upsaude.repository.PerfisUsuariosRepository;
-import com.upsaude.service.PerfisUsuariosService;
-import com.upsaude.service.TenantService;
+import com.upsaude.repository.sistema.PerfisUsuariosRepository;
+import com.upsaude.service.sistema.PerfisUsuariosService;
+import com.upsaude.service.sistema.TenantService;
 import com.upsaude.service.support.perfisusuarios.PerfisUsuariosCreator;
 import com.upsaude.service.support.perfisusuarios.PerfisUsuariosDomainService;
 import com.upsaude.service.support.perfisusuarios.PerfisUsuariosResponseBuilder;

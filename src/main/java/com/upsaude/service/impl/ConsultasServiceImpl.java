@@ -1,21 +1,8 @@
 package com.upsaude.service.impl;
 
-import com.upsaude.api.request.ConsultasRequest;
-import com.upsaude.api.response.ConsultasResponse;
-import com.upsaude.cache.CacheKeyUtil;
-import com.upsaude.entity.Consultas;
-import com.upsaude.entity.Tenant;
-import com.upsaude.exception.BadRequestException;
-import com.upsaude.exception.InternalServerErrorException;
-import com.upsaude.repository.ConsultasRepository;
-import com.upsaude.service.ConsultasService;
-import com.upsaude.service.TenantService;
-import com.upsaude.service.support.consultas.ConsultasCreator;
-import com.upsaude.service.support.consultas.ConsultasResponseBuilder;
-import com.upsaude.service.support.consultas.ConsultasTenantEnforcer;
-import com.upsaude.service.support.consultas.ConsultasUpdater;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import java.util.Objects;
+import java.util.UUID;
+
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.CacheEvict;
@@ -26,8 +13,23 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Objects;
-import java.util.UUID;
+import com.upsaude.api.request.clinica.atendimento.ConsultasRequest;
+import com.upsaude.api.response.clinica.atendimento.ConsultasResponse;
+import com.upsaude.cache.CacheKeyUtil;
+import com.upsaude.entity.clinica.atendimento.Consultas;
+import com.upsaude.entity.sistema.Tenant;
+import com.upsaude.exception.BadRequestException;
+import com.upsaude.exception.InternalServerErrorException;
+import com.upsaude.repository.clinica.atendimento.ConsultasRepository;
+import com.upsaude.service.clinica.atendimento.ConsultasService;
+import com.upsaude.service.sistema.TenantService;
+import com.upsaude.service.support.consultas.ConsultasCreator;
+import com.upsaude.service.support.consultas.ConsultasResponseBuilder;
+import com.upsaude.service.support.consultas.ConsultasTenantEnforcer;
+import com.upsaude.service.support.consultas.ConsultasUpdater;
+
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Service

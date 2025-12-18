@@ -1,16 +1,22 @@
 package com.upsaude.service.impl;
 
-import com.upsaude.api.response.EnumInfoResponse;
-import com.upsaude.api.response.EnumItemResponse;
-import com.upsaude.api.response.EnumsResponse;
-import com.upsaude.exception.BadRequestException;
-import com.upsaude.exception.InternalServerErrorException;
-import com.upsaude.service.EnumsService;
-import lombok.extern.slf4j.Slf4j;
+import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
 import org.springframework.stereotype.Service;
 
-import java.lang.reflect.Method;
-import java.util.*;
+import com.upsaude.api.response.sistema.EnumInfoResponse;
+import com.upsaude.api.response.sistema.EnumItemResponse;
+import com.upsaude.api.response.sistema.EnumsResponse;
+import com.upsaude.exception.BadRequestException;
+import com.upsaude.exception.InternalServerErrorException;
+import com.upsaude.service.sistema.EnumsService;
+
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Service
@@ -45,7 +51,6 @@ public class EnumsServiceImpl implements EnumsService {
 
             return EnumsResponse.builder()
                     .enums(enumsInfo)
-                    .totalEnums(enumsInfo.size())
                     .build();
 
         } catch (Exception e) {
@@ -139,11 +144,11 @@ public class EnumsServiceImpl implements EnumsService {
                 "StatusAtendimentoEnum", "StatusAtivoEnum", "StatusCirurgiaEnum", "StatusConsultaEnum",
                 "StatusDiagnosticoEnum", "StatusFuncionamentoEnum", "StatusManutencaoEnum",
                 "StatusPacienteEnum", "StatusPreNatalEnum", "StatusReceitaEnum",
-                "StatusRegistroMedicoEnum", "TipoAcaoPromocaoSaudeEnum", "TipoAlergiaEnum",
+                "StatusRegistroMedicoEnum", "TipoAlergiaEnum",
                 "TipoAtendimentoEnum", "TipoAtendimentoPreferencialEnum", "TipoAtividadeProfissionalEnum",
                 "TipoCnsEnum", "TipoConsultaEnum", "TipoControleMedicamentoEnum", "TipoConvenioEnum",
                 "TipoCuidadoEnfermagemEnum", "TipoDeficienciaEnum", "TipoDoencaEnum",
-                "TipoEducacaoSaudeEnum", "TipoEnderecoEnum", "TipoEquipamentoEnum", "TipoEquipeEnum",
+                "TipoEnderecoEnum", "TipoEquipamentoEnum", "TipoEquipeEnum",
                 "TipoEspecialidadeMedicaEnum", "TipoEstabelecimentoEnum", "TipoExameEnum",
                 "TipoFaltaEnum", "TipoLogradouroEnum", "TipoMetodoContraceptivoEnum",
                 "TipoNotificacaoEnum", "TipoPlantaoEnum", "TipoPontoEnum", "TipoProcedimentoEnum",

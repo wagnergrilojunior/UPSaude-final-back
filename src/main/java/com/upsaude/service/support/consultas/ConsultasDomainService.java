@@ -1,6 +1,6 @@
 package com.upsaude.service.support.consultas;
 
-import com.upsaude.entity.Consultas;
+import com.upsaude.entity.clinica.atendimento.Consultas;
 import org.springframework.stereotype.Service;
 
 @Service

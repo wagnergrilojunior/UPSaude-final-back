@@ -1,17 +1,19 @@
 package com.upsaude.service.support.medico;
 
-import com.upsaude.api.request.MedicosRequest;
-import com.upsaude.entity.Medicos;
-import com.upsaude.entity.Tenant;
-import com.upsaude.mapper.MedicosMapper;
-import com.upsaude.repository.MedicosRepository;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import java.util.Objects;
+import java.util.UUID;
+
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
-import java.util.Objects;
-import java.util.UUID;
+import com.upsaude.api.request.profissional.MedicosRequest;
+import com.upsaude.entity.profissional.Medicos;
+import com.upsaude.entity.sistema.Tenant;
+import com.upsaude.mapper.profissional.MedicosMapper;
+import com.upsaude.repository.profissional.MedicosRepository;
+
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Service

@@ -1,13 +1,15 @@
 package com.upsaude.service.support.doencas;
 
-import com.upsaude.api.request.DoencasRequest;
-import com.upsaude.exception.BadRequestException;
-import com.upsaude.repository.DoencasRepository;
-import lombok.RequiredArgsConstructor;
+import java.util.UUID;
+
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
-import java.util.UUID;
+import com.upsaude.api.request.clinica.doencas.DoencasRequest;
+import com.upsaude.exception.BadRequestException;
+import com.upsaude.repository.clinica.doencas.DoencasRepository;
+
+import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor

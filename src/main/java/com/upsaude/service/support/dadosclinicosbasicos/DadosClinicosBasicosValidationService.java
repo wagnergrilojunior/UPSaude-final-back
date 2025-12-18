@@ -1,9 +1,9 @@
 package com.upsaude.service.support.dadosclinicosbasicos;
 
-import com.upsaude.api.request.DadosClinicosBasicosRequest;
+import com.upsaude.api.request.paciente.DadosClinicosBasicosRequest;
 import com.upsaude.exception.BadRequestException;
 import com.upsaude.exception.ConflictException;
-import com.upsaude.repository.DadosClinicosBasicosRepository;
+import com.upsaude.repository.paciente.DadosClinicosBasicosRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 

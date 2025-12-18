@@ -1,21 +1,8 @@
 package com.upsaude.service.impl;
 
-import com.upsaude.api.request.ControlePontoRequest;
-import com.upsaude.api.response.ControlePontoResponse;
-import com.upsaude.cache.CacheKeyUtil;
-import com.upsaude.entity.ControlePonto;
-import com.upsaude.exception.BadRequestException;
-import com.upsaude.exception.InternalServerErrorException;
-import com.upsaude.repository.ControlePontoRepository;
-import com.upsaude.service.ControlePontoService;
-import com.upsaude.service.TenantService;
-import com.upsaude.entity.Tenant;
-import com.upsaude.service.support.controleponto.ControlePontoCreator;
-import com.upsaude.service.support.controleponto.ControlePontoResponseBuilder;
-import com.upsaude.service.support.controleponto.ControlePontoTenantEnforcer;
-import com.upsaude.service.support.controleponto.ControlePontoUpdater;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import java.util.Objects;
+import java.util.UUID;
+
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.CacheEvict;
@@ -26,9 +13,24 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.upsaude.api.request.profissional.equipe.ControlePontoRequest;
+import com.upsaude.api.response.profissional.equipe.ControlePontoResponse;
+import com.upsaude.cache.CacheKeyUtil;
+import com.upsaude.entity.profissional.equipe.ControlePonto;
+import com.upsaude.entity.sistema.Tenant;
+import com.upsaude.exception.BadRequestException;
+import com.upsaude.exception.InternalServerErrorException;
+import com.upsaude.repository.profissional.equipe.ControlePontoRepository;
+import com.upsaude.service.profissional.equipe.ControlePontoService;
+import com.upsaude.service.sistema.TenantService;
+import com.upsaude.service.support.controleponto.ControlePontoCreator;
+import com.upsaude.service.support.controleponto.ControlePontoResponseBuilder;
+import com.upsaude.service.support.controleponto.ControlePontoTenantEnforcer;
+import com.upsaude.service.support.controleponto.ControlePontoUpdater;
+
 import java.time.LocalDate;
-import java.util.Objects;
-import java.util.UUID;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Service
@@ -47,6 +49,8 @@ public class ControlePontoServiceImpl implements ControlePontoService {
     @Override
     @Transactional
     public ControlePontoResponse criar(ControlePontoRequest request) {
+        log.debug("Criando novo controle de ponto");
+
         try {
             UUID tenantId = tenantService.validarTenantAtual();
             Tenant tenant = tenantService.obterTenantDoUsuarioAutenticado();
@@ -65,7 +69,7 @@ public class ControlePontoServiceImpl implements ControlePontoService {
         } catch (BadRequestException e) {
             throw e;
         } catch (Exception e) {
-            throw new InternalServerErrorException("Erro ao criar registro de ponto", e);
+            throw new InternalServerErrorException("Erro ao criar controle de ponto", e);
         }
     }
 
@@ -73,9 +77,11 @@ public class ControlePontoServiceImpl implements ControlePontoService {
     @Transactional(readOnly = true)
     @Cacheable(cacheNames = CacheKeyUtil.CACHE_CONTROLE_PONTO, keyGenerator = "controlePontoCacheKeyGenerator")
     public ControlePontoResponse obterPorId(UUID id) {
+        log.debug("Buscando controle de ponto por ID: {} (cache miss)", id);
         if (id == null) {
-            throw new BadRequestException("ID do registro de ponto é obrigatório");
+            throw new BadRequestException("ID do controle de ponto é obrigatório");
         }
+
         UUID tenantId = tenantService.validarTenantAtual();
         ControlePonto entity = tenantEnforcer.validarAcessoCompleto(id, tenantId);
         return responseBuilder.build(entity);
@@ -84,6 +90,9 @@ public class ControlePontoServiceImpl implements ControlePontoService {
     @Override
     @Transactional(readOnly = true)
     public Page<ControlePontoResponse> listar(Pageable pageable) {
+        log.debug("Listando controles de ponto paginados. Página: {}, Tamanho: {}",
+                pageable.getPageNumber(), pageable.getPageSize());
+
         UUID tenantId = tenantService.validarTenantAtual();
         Page<ControlePonto> page = repository.findAllByTenant(tenantId, pageable);
         return page.map(responseBuilder::build);
@@ -132,7 +141,7 @@ public class ControlePontoServiceImpl implements ControlePontoService {
             throw new BadRequestException("Data é obrigatória");
         }
         UUID tenantId = tenantService.validarTenantAtual();
-        Page<ControlePonto> page = repository.findByProfissionalIdAndTenantIdAndDataPontoOrderByDataHoraAsc(profissionalId, tenantId, data, pageable);
+        Page<ControlePonto> page = repository.findByProfissionalIdAndDataPontoAndTenantIdOrderByDataHoraDesc(profissionalId, data, tenantId, pageable);
         return page.map(responseBuilder::build);
     }
 
@@ -143,10 +152,10 @@ public class ControlePontoServiceImpl implements ControlePontoService {
             throw new BadRequestException("ID do profissional é obrigatório");
         }
         if (dataInicio == null || dataFim == null) {
-            throw new BadRequestException("Data de início e data fim são obrigatórias");
+            throw new BadRequestException("Data de início e data de fim são obrigatórias");
         }
         UUID tenantId = tenantService.validarTenantAtual();
-        Page<ControlePonto> page = repository.findByProfissionalIdAndTenantIdAndDataPontoBetweenOrderByDataHoraAsc(profissionalId, tenantId, dataInicio, dataFim, pageable);
+        Page<ControlePonto> page = repository.findByProfissionalIdAndDataPontoBetweenAndTenantIdOrderByDataHoraDesc(profissionalId, dataInicio, dataFim, tenantId, pageable);
         return page.map(responseBuilder::build);
     }
 
@@ -154,44 +163,38 @@ public class ControlePontoServiceImpl implements ControlePontoService {
     @Transactional
     @CachePut(cacheNames = CacheKeyUtil.CACHE_CONTROLE_PONTO, keyGenerator = "controlePontoCacheKeyGenerator")
     public ControlePontoResponse atualizar(UUID id, ControlePontoRequest request) {
-        if (id == null) {
-            throw new BadRequestException("ID do registro de ponto é obrigatório");
-        }
-        try {
-            UUID tenantId = tenantService.validarTenantAtual();
-            Tenant tenant = tenantService.obterTenantDoUsuarioAutenticado();
-            validarTenantAutenticadoOrThrow(tenantId, tenant);
+        log.debug("Atualizando controle de ponto. ID: {}", id);
 
-            ControlePonto updated = updater.atualizar(id, request, tenantId, tenant);
-            return responseBuilder.build(updated);
-        } catch (BadRequestException e) {
-            throw e;
-        } catch (Exception e) {
-            throw new InternalServerErrorException("Erro ao atualizar registro de ponto", e);
+        if (id == null) {
+            throw new BadRequestException("ID do controle de ponto é obrigatório");
         }
+
+        UUID tenantId = tenantService.validarTenantAtual();
+        Tenant tenant = tenantService.obterTenantDoUsuarioAutenticado();
+        validarTenantAutenticadoOrThrow(tenantId, tenant);
+
+        ControlePonto updated = updater.atualizar(id, request, tenantId, tenant);
+        return responseBuilder.build(updated);
     }
 
     @Override
     @Transactional
     @CacheEvict(cacheNames = CacheKeyUtil.CACHE_CONTROLE_PONTO, keyGenerator = "controlePontoCacheKeyGenerator", beforeInvocation = false)
     public void excluir(UUID id) {
+        log.debug("Excluindo controle de ponto. ID: {}", id);
         UUID tenantId = tenantService.validarTenantAtual();
         inativarInternal(id, tenantId);
     }
 
     private void inativarInternal(UUID id, UUID tenantId) {
         if (id == null) {
-            throw new BadRequestException("ID do registro de ponto é obrigatório");
+            throw new BadRequestException("ID do controle de ponto é obrigatório");
         }
 
         ControlePonto entity = tenantEnforcer.validarAcesso(id, tenantId);
-        if (Boolean.FALSE.equals(entity.getActive())) {
-            throw new BadRequestException("Registro de ponto já está inativo");
-        }
-
         entity.setActive(false);
         repository.save(Objects.requireNonNull(entity));
-        log.info("Registro de ponto excluído (desativado) com sucesso. ID: {}", id);
+        log.info("Controle de ponto excluído (desativado) com sucesso. ID: {}", id);
     }
 
     private void validarTenantAutenticadoOrThrow(UUID tenantId, Tenant tenant) {

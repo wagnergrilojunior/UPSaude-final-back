@@ -1,21 +1,8 @@
 package com.upsaude.service.impl;
 
-import com.upsaude.api.request.NotificacaoRequest;
-import com.upsaude.api.response.NotificacaoResponse;
-import com.upsaude.cache.CacheKeyUtil;
-import com.upsaude.entity.Notificacao;
-import com.upsaude.entity.Tenant;
-import com.upsaude.exception.BadRequestException;
-import com.upsaude.repository.NotificacaoRepository;
-import com.upsaude.service.NotificacaoService;
-import com.upsaude.service.TenantService;
-import com.upsaude.service.support.notificacao.NotificacaoCreator;
-import com.upsaude.service.support.notificacao.NotificacaoDomainService;
-import com.upsaude.service.support.notificacao.NotificacaoResponseBuilder;
-import com.upsaude.service.support.notificacao.NotificacaoTenantEnforcer;
-import com.upsaude.service.support.notificacao.NotificacaoUpdater;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import java.util.Objects;
+import java.util.UUID;
+
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.CacheEvict;
@@ -26,9 +13,24 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.upsaude.api.request.sistema.notificacao.NotificacaoRequest;
+import com.upsaude.api.response.sistema.notificacao.NotificacaoResponse;
+import com.upsaude.cache.CacheKeyUtil;
+import com.upsaude.entity.sistema.notificacao.Notificacao;
+import com.upsaude.entity.sistema.Tenant;
+import com.upsaude.exception.BadRequestException;
+import com.upsaude.exception.InternalServerErrorException;
+import com.upsaude.repository.sistema.notificacao.NotificacaoRepository;
+import com.upsaude.service.sistema.notificacao.NotificacaoService;
+import com.upsaude.service.sistema.TenantService;
+import com.upsaude.service.support.notificacao.NotificacaoCreator;
+import com.upsaude.service.support.notificacao.NotificacaoResponseBuilder;
+import com.upsaude.service.support.notificacao.NotificacaoTenantEnforcer;
+import com.upsaude.service.support.notificacao.NotificacaoUpdater;
+
 import java.time.OffsetDateTime;
-import java.util.Objects;
-import java.util.UUID;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Service
@@ -42,53 +44,58 @@ public class NotificacaoServiceImpl implements NotificacaoService {
     private final NotificacaoCreator creator;
     private final NotificacaoUpdater updater;
     private final NotificacaoResponseBuilder responseBuilder;
-    private final NotificacaoDomainService domainService;
     private final NotificacaoTenantEnforcer tenantEnforcer;
 
     @Override
     @Transactional
     public NotificacaoResponse criar(NotificacaoRequest request) {
-        UUID tenantId = tenantService.validarTenantAtual();
-        Tenant tenant = tenantService.obterTenantDoUsuarioAutenticado();
-        validarTenantAutenticadoOrThrow(tenantId, tenant);
+        log.debug("Criando nova notificação");
 
-        Notificacao saved = creator.criar(request, tenantId, tenant);
-        NotificacaoResponse response = responseBuilder.build(saved);
+        try {
+            UUID tenantId = tenantService.validarTenantAtual();
+            Tenant tenant = tenantService.obterTenantDoUsuarioAutenticado();
+            validarTenantAutenticadoOrThrow(tenantId, tenant);
 
-        Cache cache = cacheManager.getCache(CacheKeyUtil.CACHE_NOTIFICACOES);
-        if (cache != null) {
-            Object key = Objects.requireNonNull((Object) CacheKeyUtil.notificacao(tenantId, saved.getId()));
-            cache.put(key, response);
+            Notificacao saved = creator.criar(request, tenantId, tenant);
+            NotificacaoResponse response = responseBuilder.build(saved);
+
+            Cache cache = cacheManager.getCache(CacheKeyUtil.CACHE_NOTIFICACOES);
+            if (cache != null) {
+                Object key = Objects.requireNonNull((Object) CacheKeyUtil.notificacao(tenantId, saved.getId()));
+                cache.put(key, response);
+            }
+
+            return response;
+        } catch (BadRequestException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new InternalServerErrorException("Erro ao criar notificação", e);
         }
-
-        return response;
     }
 
     @Override
     @Transactional(readOnly = true)
     @Cacheable(cacheNames = CacheKeyUtil.CACHE_NOTIFICACOES, keyGenerator = "notificacaoCacheKeyGenerator")
     public NotificacaoResponse obterPorId(UUID id) {
+        log.debug("Buscando notificação por ID: {} (cache miss)", id);
         if (id == null) {
             throw new BadRequestException("ID da notificação é obrigatório");
         }
+
         UUID tenantId = tenantService.validarTenantAtual();
-        return responseBuilder.build(tenantEnforcer.validarAcessoCompleto(id, tenantId));
+        Notificacao entity = tenantEnforcer.validarAcessoCompleto(id, tenantId);
+        return responseBuilder.build(entity);
     }
 
     @Override
     @Transactional(readOnly = true)
-    public Page<NotificacaoResponse> listar(Pageable pageable,
-                                           UUID estabelecimentoId,
-                                           UUID pacienteId,
-                                           UUID profissionalId,
-                                           UUID agendamentoId,
-                                           String statusEnvio,
-                                           OffsetDateTime inicio,
-                                           OffsetDateTime fim,
-                                           Boolean usarPrevista) {
-        UUID tenantId = tenantService.validarTenantAtual();
+    public Page<NotificacaoResponse> listar(Pageable pageable, UUID estabelecimentoId, UUID pacienteId, UUID profissionalId, UUID agendamentoId, String statusEnvio, OffsetDateTime inicio, OffsetDateTime fim, Boolean usarPrevista) {
+        log.debug("Listando notificações paginadas. Página: {}, Tamanho: {}",
+                pageable.getPageNumber(), pageable.getPageSize());
 
+        UUID tenantId = tenantService.validarTenantAtual();
         Page<Notificacao> page;
+
         if (estabelecimentoId != null) {
             page = repository.findByEstabelecimentoIdAndTenantIdOrderByDataEnvioDesc(estabelecimentoId, tenantId, pageable);
         } else if (pacienteId != null) {
@@ -99,14 +106,12 @@ public class NotificacaoServiceImpl implements NotificacaoService {
             page = repository.findByAgendamentoIdAndTenantIdOrderByDataEnvioDesc(agendamentoId, tenantId, pageable);
         } else if (statusEnvio != null && !statusEnvio.isBlank()) {
             page = repository.findByStatusEnvioAndTenantIdOrderByDataEnvioDesc(statusEnvio, tenantId, pageable);
-        } else if (inicio != null || fim != null) {
-            if (inicio == null || fim == null) {
-                throw new BadRequestException("Para filtrar por período, informe 'inicio' e 'fim'");
+        } else if (inicio != null && fim != null) {
+            if (Boolean.TRUE.equals(usarPrevista)) {
+                page = repository.findByDataEnvioPrevistaBetweenAndTenantIdOrderByDataEnvioPrevistaDesc(inicio, fim, tenantId, pageable);
+            } else {
+                page = repository.findByDataEnvioBetweenAndTenantIdOrderByDataEnvioDesc(inicio, fim, tenantId, pageable);
             }
-            boolean prevista = Boolean.TRUE.equals(usarPrevista);
-            page = prevista
-                ? repository.findByDataEnvioPrevistaBetweenAndTenantIdOrderByDataEnvioPrevistaDesc(inicio, fim, tenantId, pageable)
-                : repository.findByDataEnvioBetweenAndTenantIdOrderByDataEnvioDesc(inicio, fim, tenantId, pageable);
         } else {
             page = repository.findAllByTenant(tenantId, pageable);
         }
@@ -118,9 +123,12 @@ public class NotificacaoServiceImpl implements NotificacaoService {
     @Transactional
     @CachePut(cacheNames = CacheKeyUtil.CACHE_NOTIFICACOES, keyGenerator = "notificacaoCacheKeyGenerator")
     public NotificacaoResponse atualizar(UUID id, NotificacaoRequest request) {
+        log.debug("Atualizando notificação. ID: {}", id);
+
         if (id == null) {
             throw new BadRequestException("ID da notificação é obrigatório");
         }
+
         UUID tenantId = tenantService.validarTenantAtual();
         Tenant tenant = tenantService.obterTenantDoUsuarioAutenticado();
         validarTenantAutenticadoOrThrow(tenantId, tenant);
@@ -133,6 +141,7 @@ public class NotificacaoServiceImpl implements NotificacaoService {
     @Transactional
     @CacheEvict(cacheNames = CacheKeyUtil.CACHE_NOTIFICACOES, keyGenerator = "notificacaoCacheKeyGenerator", beforeInvocation = false)
     public void excluir(UUID id) {
+        log.debug("Excluindo notificação. ID: {}", id);
         UUID tenantId = tenantService.validarTenantAtual();
         inativarInternal(id, tenantId);
     }
@@ -143,9 +152,9 @@ public class NotificacaoServiceImpl implements NotificacaoService {
         }
 
         Notificacao entity = tenantEnforcer.validarAcesso(id, tenantId);
-        domainService.validarPodeInativar(entity);
         entity.setActive(false);
         repository.save(Objects.requireNonNull(entity));
+        log.info("Notificação excluída (desativada) com sucesso. ID: {}", id);
     }
 
     private void validarTenantAutenticadoOrThrow(UUID tenantId, Tenant tenant) {
@@ -154,4 +163,3 @@ public class NotificacaoServiceImpl implements NotificacaoService {
         }
     }
 }
-

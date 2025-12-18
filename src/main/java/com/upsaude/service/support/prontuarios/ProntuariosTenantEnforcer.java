@@ -1,13 +1,16 @@
 package com.upsaude.service.support.prontuarios;
 
-import com.upsaude.entity.Prontuarios;
-import com.upsaude.exception.NotFoundException;
-import com.upsaude.repository.ProntuariosRepository;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Service;
 
 import java.util.UUID;
+
+import org.springframework.stereotype.Service;
+
+import com.upsaude.entity.clinica.prontuario.Prontuarios;
+import com.upsaude.exception.NotFoundException;
+import com.upsaude.repository.clinica.prontuario.ProntuariosRepository;
+
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Service

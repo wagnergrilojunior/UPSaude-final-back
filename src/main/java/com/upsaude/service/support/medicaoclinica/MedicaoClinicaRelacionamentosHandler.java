@@ -1,14 +1,14 @@
 package com.upsaude.service.support.medicaoclinica;
 
-import com.upsaude.api.request.MedicaoClinicaRequest;
-import com.upsaude.entity.MedicaoClinica;
-import com.upsaude.entity.Paciente;
-import com.upsaude.entity.Tenant;
+import com.upsaude.api.request.profissional.medicao.MedicaoClinicaRequest;
+import com.upsaude.entity.paciente.Paciente;
+import com.upsaude.entity.profissional.medicao.MedicaoClinica;
+import com.upsaude.entity.sistema.Tenant;
+import com.upsaude.exception.BadRequestException;
 import com.upsaude.service.support.paciente.PacienteTenantEnforcer;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.util.Objects;
 import java.util.UUID;
 
 @Service
@@ -20,11 +20,15 @@ public class MedicaoClinicaRelacionamentosHandler {
     public void resolver(MedicaoClinica entity, MedicaoClinicaRequest request, UUID tenantId, Tenant tenant) {
         if (request == null) return;
 
-        entity.setTenant(Objects.requireNonNull(tenant, "tenant é obrigatório"));
+        if (tenantId == null || tenant == null || tenant.getId() == null || !tenantId.equals(tenant.getId())) {
+            throw new BadRequestException("Não foi possível obter tenant do usuário autenticado");
+        }
 
-        Paciente paciente = pacienteTenantEnforcer.validarAcesso(Objects.requireNonNull(request.getPaciente(), "paciente"), tenantId);
-        entity.setPaciente(paciente);
+        entity.setTenant(tenant);
 
-        // estabelecimento: manter comportamento atual (pode ser null)
+        if (request.getPaciente() != null) {
+            Paciente paciente = pacienteTenantEnforcer.validarAcesso(request.getPaciente(), tenantId);
+            entity.setPaciente(paciente);
+        }
     }
 }

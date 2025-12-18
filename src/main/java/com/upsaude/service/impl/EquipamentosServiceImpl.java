@@ -1,22 +1,8 @@
 package com.upsaude.service.impl;
 
-import com.upsaude.api.request.EquipamentosRequest;
-import com.upsaude.api.response.EquipamentosResponse;
-import com.upsaude.cache.CacheKeyUtil;
-import com.upsaude.entity.Equipamentos;
-import com.upsaude.entity.Tenant;
-import com.upsaude.exception.BadRequestException;
-import com.upsaude.exception.InternalServerErrorException;
-import com.upsaude.exception.NotFoundException;
-import com.upsaude.repository.EquipamentosRepository;
-import com.upsaude.service.EquipamentosService;
-import com.upsaude.service.TenantService;
-import com.upsaude.service.support.equipamentos.EquipamentosCreator;
-import com.upsaude.service.support.equipamentos.EquipamentosResponseBuilder;
-import com.upsaude.service.support.equipamentos.EquipamentosTenantEnforcer;
-import com.upsaude.service.support.equipamentos.EquipamentosUpdater;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import java.util.Objects;
+import java.util.UUID;
+
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.CacheEvict;
@@ -27,8 +13,23 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Objects;
-import java.util.UUID;
+import com.upsaude.api.request.estabelecimento.equipamento.EquipamentosRequest;
+import com.upsaude.api.response.estabelecimento.equipamento.EquipamentosResponse;
+import com.upsaude.cache.CacheKeyUtil;
+import com.upsaude.entity.estabelecimento.equipamento.Equipamentos;
+import com.upsaude.entity.sistema.Tenant;
+import com.upsaude.exception.BadRequestException;
+import com.upsaude.exception.InternalServerErrorException;
+import com.upsaude.repository.estabelecimento.equipamento.EquipamentosRepository;
+import com.upsaude.service.estabelecimento.equipamento.EquipamentosService;
+import com.upsaude.service.sistema.TenantService;
+import com.upsaude.service.support.equipamentos.EquipamentosCreator;
+import com.upsaude.service.support.equipamentos.EquipamentosResponseBuilder;
+import com.upsaude.service.support.equipamentos.EquipamentosTenantEnforcer;
+import com.upsaude.service.support.equipamentos.EquipamentosUpdater;
+
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Service
@@ -47,6 +48,8 @@ public class EquipamentosServiceImpl implements EquipamentosService {
     @Override
     @Transactional
     public EquipamentosResponse criar(EquipamentosRequest request) {
+        log.debug("Criando novo equipamento");
+
         try {
             UUID tenantId = tenantService.validarTenantAtual();
             Tenant tenant = tenantService.obterTenantDoUsuarioAutenticado();
@@ -62,7 +65,7 @@ public class EquipamentosServiceImpl implements EquipamentosService {
             }
 
             return response;
-        } catch (BadRequestException | NotFoundException e) {
+        } catch (BadRequestException e) {
             throw e;
         } catch (Exception e) {
             throw new InternalServerErrorException("Erro ao criar equipamento", e);
@@ -73,9 +76,11 @@ public class EquipamentosServiceImpl implements EquipamentosService {
     @Transactional(readOnly = true)
     @Cacheable(cacheNames = CacheKeyUtil.CACHE_EQUIPAMENTOS, keyGenerator = "equipamentosCacheKeyGenerator")
     public EquipamentosResponse obterPorId(UUID id) {
+        log.debug("Buscando equipamento por ID: {} (cache miss)", id);
         if (id == null) {
             throw new BadRequestException("ID do equipamento é obrigatório");
         }
+
         UUID tenantId = tenantService.validarTenantAtual();
         Equipamentos entity = tenantEnforcer.validarAcessoCompleto(id, tenantId);
         return responseBuilder.build(entity);
@@ -84,6 +89,9 @@ public class EquipamentosServiceImpl implements EquipamentosService {
     @Override
     @Transactional(readOnly = true)
     public Page<EquipamentosResponse> listar(Pageable pageable) {
+        log.debug("Listando equipamentos paginados. Página: {}, Tamanho: {}",
+                pageable.getPageNumber(), pageable.getPageSize());
+
         UUID tenantId = tenantService.validarTenantAtual();
         Page<Equipamentos> page = repository.findAllByTenant(tenantId, pageable);
         return page.map(responseBuilder::build);
@@ -93,27 +101,25 @@ public class EquipamentosServiceImpl implements EquipamentosService {
     @Transactional
     @CachePut(cacheNames = CacheKeyUtil.CACHE_EQUIPAMENTOS, keyGenerator = "equipamentosCacheKeyGenerator")
     public EquipamentosResponse atualizar(UUID id, EquipamentosRequest request) {
+        log.debug("Atualizando equipamento. ID: {}", id);
+
         if (id == null) {
             throw new BadRequestException("ID do equipamento é obrigatório");
         }
-        try {
-            UUID tenantId = tenantService.validarTenantAtual();
-            Tenant tenant = tenantService.obterTenantDoUsuarioAutenticado();
-            validarTenantAutenticadoOrThrow(tenantId, tenant);
 
-            Equipamentos updated = updater.atualizar(id, request, tenantId, tenant);
-            return responseBuilder.build(updated);
-        } catch (BadRequestException | NotFoundException e) {
-            throw e;
-        } catch (Exception e) {
-            throw new InternalServerErrorException("Erro ao atualizar equipamento", e);
-        }
+        UUID tenantId = tenantService.validarTenantAtual();
+        Tenant tenant = tenantService.obterTenantDoUsuarioAutenticado();
+        validarTenantAutenticadoOrThrow(tenantId, tenant);
+
+        Equipamentos updated = updater.atualizar(id, request, tenantId, tenant);
+        return responseBuilder.build(updated);
     }
 
     @Override
     @Transactional
     @CacheEvict(cacheNames = CacheKeyUtil.CACHE_EQUIPAMENTOS, keyGenerator = "equipamentosCacheKeyGenerator", beforeInvocation = false)
     public void excluir(UUID id) {
+        log.debug("Excluindo equipamento. ID: {}", id);
         UUID tenantId = tenantService.validarTenantAtual();
         inativarInternal(id, tenantId);
     }
@@ -124,10 +130,6 @@ public class EquipamentosServiceImpl implements EquipamentosService {
         }
 
         Equipamentos entity = tenantEnforcer.validarAcesso(id, tenantId);
-        if (Boolean.FALSE.equals(entity.getActive())) {
-            throw new BadRequestException("Equipamento já está inativo");
-        }
-
         entity.setActive(false);
         repository.save(Objects.requireNonNull(entity));
         log.info("Equipamento excluído (desativado) com sucesso. ID: {}", id);

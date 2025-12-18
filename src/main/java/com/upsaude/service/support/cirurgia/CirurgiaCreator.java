@@ -1,10 +1,10 @@
 package com.upsaude.service.support.cirurgia;
 
-import com.upsaude.api.request.CirurgiaRequest;
-import com.upsaude.entity.Cirurgia;
-import com.upsaude.entity.Tenant;
-import com.upsaude.mapper.CirurgiaMapper;
-import com.upsaude.repository.CirurgiaRepository;
+import com.upsaude.api.request.clinica.cirurgia.CirurgiaRequest;
+import com.upsaude.entity.clinica.cirurgia.Cirurgia;
+import com.upsaude.entity.sistema.Tenant;
+import com.upsaude.mapper.clinica.cirurgia.CirurgiaMapper;
+import com.upsaude.repository.clinica.cirurgia.CirurgiaRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;

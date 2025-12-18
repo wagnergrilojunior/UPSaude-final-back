@@ -1,11 +1,13 @@
 package com.upsaude.service.support.notificacao;
 
-import com.upsaude.api.response.NotificacaoResponse;
-import com.upsaude.entity.Notificacao;
-import com.upsaude.mapper.NotificacaoMapper;
-import lombok.RequiredArgsConstructor;
 import org.hibernate.Hibernate;
 import org.springframework.stereotype.Service;
+
+import com.upsaude.api.response.sistema.notificacao.NotificacaoResponse;
+import com.upsaude.entity.sistema.notificacao.Notificacao;
+import com.upsaude.mapper.sistema.notificacao.NotificacaoMapper;
+
+import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
@@ -15,13 +17,12 @@ public class NotificacaoResponseBuilder {
 
     public NotificacaoResponse build(Notificacao entity) {
         if (entity != null) {
-            Hibernate.initialize(entity.getEstabelecimento());
-            Hibernate.initialize(entity.getPaciente());
-            Hibernate.initialize(entity.getProfissional());
-            Hibernate.initialize(entity.getAgendamento());
-            Hibernate.initialize(entity.getTemplate());
+            if (entity.getPaciente() != null) Hibernate.initialize(entity.getPaciente());
+            if (entity.getProfissional() != null) Hibernate.initialize(entity.getProfissional());
+            if (entity.getAgendamento() != null) Hibernate.initialize(entity.getAgendamento());
+            if (entity.getTemplate() != null) Hibernate.initialize(entity.getTemplate());
+            if (entity.getEstabelecimento() != null) Hibernate.initialize(entity.getEstabelecimento());
         }
         return mapper.toResponse(entity);
     }
 }
-

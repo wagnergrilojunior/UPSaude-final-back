@@ -1,19 +1,19 @@
 package com.upsaude.service.support.puericultura;
 
-import com.upsaude.api.request.PuericulturaRequest;
-import com.upsaude.entity.EquipeSaude;
-import com.upsaude.entity.Estabelecimentos;
-import com.upsaude.entity.Paciente;
-import com.upsaude.entity.ProfissionaisSaude;
-import com.upsaude.entity.Puericultura;
-import com.upsaude.entity.Tenant;
-import com.upsaude.service.support.equipesaude.EquipeSaudeTenantEnforcer;
+import com.upsaude.api.request.saude_publica.puericultura.PuericulturaRequest;
+import com.upsaude.entity.paciente.Paciente;
+import com.upsaude.entity.profissional.ProfissionaisSaude;
+import com.upsaude.entity.profissional.equipe.EquipeSaude;
+import com.upsaude.entity.saude_publica.puericultura.Puericultura;
+import com.upsaude.entity.sistema.Tenant;
+import com.upsaude.exception.BadRequestException;
+import com.upsaude.exception.NotFoundException;
+import com.upsaude.repository.profissional.equipe.EquipeSaudeRepository;
 import com.upsaude.service.support.paciente.PacienteTenantEnforcer;
 import com.upsaude.service.support.profissionaissaude.ProfissionaisSaudeTenantEnforcer;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.util.Objects;
 import java.util.UUID;
 
 @Service
@@ -22,10 +22,16 @@ public class PuericulturaRelacionamentosHandler {
 
     private final PacienteTenantEnforcer pacienteTenantEnforcer;
     private final ProfissionaisSaudeTenantEnforcer profissionaisSaudeTenantEnforcer;
-    private final EquipeSaudeTenantEnforcer equipeSaudeTenantEnforcer;
+    private final EquipeSaudeRepository equipeSaudeRepository;
 
     public void resolver(Puericultura entity, PuericulturaRequest request, UUID tenantId, Tenant tenant) {
         if (request == null) return;
+
+        if (tenantId == null || tenant == null || tenant.getId() == null || !tenantId.equals(tenant.getId())) {
+            throw new BadRequestException("Não foi possível obter tenant do usuário autenticado");
+        }
+
+        entity.setTenant(tenant);
 
         if (request.getPaciente() != null) {
             Paciente paciente = pacienteTenantEnforcer.validarAcesso(request.getPaciente(), tenantId);
@@ -38,23 +44,9 @@ public class PuericulturaRelacionamentosHandler {
         }
 
         if (request.getEquipeSaude() != null) {
-            EquipeSaude equipe = equipeSaudeTenantEnforcer.validarAcesso(request.getEquipeSaude(), tenantId);
+            EquipeSaude equipe = equipeSaudeRepository.findByIdAndTenant(request.getEquipeSaude(), tenantId)
+                    .orElseThrow(() -> new NotFoundException("Equipe de saúde não encontrada com ID: " + request.getEquipeSaude()));
             entity.setEquipeSaude(equipe);
-        }
-
-        entity.setTenant(Objects.requireNonNull(tenant, "tenant é obrigatório"));
-
-        // Regra prática: se houver estabelecimento inferível, propagar para BaseEntity.estabelecimento
-        Estabelecimentos estabelecimento = null;
-        if (entity.getProfissionalResponsavel() != null) {
-            estabelecimento = entity.getProfissionalResponsavel().getEstabelecimento();
-        }
-        if (estabelecimento == null && entity.getEquipeSaude() != null) {
-            estabelecimento = entity.getEquipeSaude().getEstabelecimento();
-        }
-        if (estabelecimento != null) {
-            entity.setEstabelecimento(estabelecimento);
         }
     }
 }
-

@@ -1,9 +1,9 @@
 package com.upsaude.service.support.profissionaissaude;
 
-import com.upsaude.api.request.ProfissionaisSaudeRequest;
-import com.upsaude.entity.ProfissionaisSaude;
+import com.upsaude.api.request.profissional.ProfissionaisSaudeRequest;
+import com.upsaude.entity.profissional.ProfissionaisSaude;
 import com.upsaude.exception.BadRequestException;
-import com.upsaude.repository.ProfissionaisSaudeRepository;
+import com.upsaude.repository.profissional.ProfissionaisSaudeRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 

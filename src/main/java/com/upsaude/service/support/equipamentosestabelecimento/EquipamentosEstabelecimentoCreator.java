@@ -1,16 +1,18 @@
 package com.upsaude.service.support.equipamentosestabelecimento;
 
-import com.upsaude.api.request.EquipamentosEstabelecimentoRequest;
-import com.upsaude.entity.EquipamentosEstabelecimento;
-import com.upsaude.entity.Tenant;
-import com.upsaude.mapper.EquipamentosEstabelecimentoMapper;
-import com.upsaude.repository.EquipamentosEstabelecimentoRepository;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Service;
-
 import java.util.Objects;
 import java.util.UUID;
+
+import org.springframework.stereotype.Service;
+
+import com.upsaude.api.request.estabelecimento.EquipamentosEstabelecimentoRequest;
+import com.upsaude.entity.estabelecimento.EquipamentosEstabelecimento;
+import com.upsaude.entity.sistema.Tenant;
+import com.upsaude.mapper.estabelecimento.EquipamentosEstabelecimentoMapper;
+import com.upsaude.repository.estabelecimento.equipamento.EquipamentosEstabelecimentoRepository;
+
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Service
@@ -21,15 +23,14 @@ public class EquipamentosEstabelecimentoCreator {
     private final EquipamentosEstabelecimentoMapper mapper;
     private final EquipamentosEstabelecimentoValidationService validationService;
     private final EquipamentosEstabelecimentoRelacionamentosHandler relacionamentosHandler;
-    private final EquipamentosEstabelecimentoDomainService domainService;
 
     public EquipamentosEstabelecimento criar(EquipamentosEstabelecimentoRequest request, UUID tenantId, Tenant tenant) {
         validationService.validarObrigatorios(request);
+        validationService.validarUnicidadeParaCriacao(request, tenantId);
 
         EquipamentosEstabelecimento entity = mapper.fromRequest(request);
         entity.setActive(true);
 
-        domainService.aplicarDefaults(entity);
         relacionamentosHandler.resolver(entity, request, tenantId, tenant);
 
         EquipamentosEstabelecimento saved = repository.save(Objects.requireNonNull(entity));

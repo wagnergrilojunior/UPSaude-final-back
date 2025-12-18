@@ -1,16 +1,18 @@
 package com.upsaude.service.support.estados;
 
-import com.upsaude.api.request.EstadosRequest;
-import com.upsaude.entity.Estados;
-import com.upsaude.exception.NotFoundException;
-import com.upsaude.mapper.EstadosMapper;
-import com.upsaude.repository.EstadosRepository;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Service;
-
 import java.util.Objects;
 import java.util.UUID;
+
+import org.springframework.stereotype.Service;
+
+import com.upsaude.api.request.referencia.geografico.EstadosRequest;
+import com.upsaude.entity.referencia.geografico.Estados;
+import com.upsaude.exception.NotFoundException;
+import com.upsaude.mapper.referencia.geografico.EstadosMapper;
+import com.upsaude.repository.referencia.geografico.EstadosRepository;
+
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Service

@@ -1,8 +1,8 @@
 package com.upsaude.service.support.paciente;
 
-import com.upsaude.entity.Paciente;
+import com.upsaude.entity.paciente.Paciente;
 import com.upsaude.exception.NotFoundException;
-import com.upsaude.repository.PacienteRepository;
+import com.upsaude.repository.paciente.PacienteRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;

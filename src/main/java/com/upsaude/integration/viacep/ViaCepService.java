@@ -1,7 +1,7 @@
 package com.upsaude.integration.viacep;
 
 import com.upsaude.enums.TipoLogradouroEnum;
-import com.upsaude.entity.Endereco;
+import com.upsaude.entity.paciente.Endereco;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 

@@ -1,24 +1,26 @@
 package com.upsaude.service.impl;
 
-import com.upsaude.api.request.MedicacoesContinuasRequest;
-import com.upsaude.api.response.MedicacoesContinuasResponse;
-import com.upsaude.entity.MedicacoesContinuas;
-import com.upsaude.exception.BadRequestException;
-import com.upsaude.exception.NotFoundException;
-import com.upsaude.mapper.MedicacoesContinuasMapper;
-import com.upsaude.repository.MedicacoesContinuasRepository;
-import com.upsaude.service.MedicacoesContinuasService;
-import jakarta.transaction.Transactional;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import java.util.UUID;
+
 import org.springframework.beans.BeanUtils;
-import org.springframework.data.domain.Page;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import java.util.UUID;
+import com.upsaude.api.request.clinica.medicacao.MedicacoesContinuasRequest;
+import com.upsaude.api.response.clinica.medicacao.MedicacoesContinuasResponse;
+import com.upsaude.entity.clinica.medicacao.MedicacoesContinuas;
+import com.upsaude.exception.BadRequestException;
+import com.upsaude.exception.NotFoundException;
+import com.upsaude.mapper.clinica.medicacao.MedicacoesContinuasMapper;
+import com.upsaude.repository.clinica.medicacao.MedicacoesContinuasRepository;
+import com.upsaude.service.clinica.medicacao.MedicacoesContinuasService;
+
+import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Service

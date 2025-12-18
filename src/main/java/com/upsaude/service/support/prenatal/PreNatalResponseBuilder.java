@@ -1,11 +1,13 @@
 package com.upsaude.service.support.prenatal;
 
-import com.upsaude.api.response.PreNatalResponse;
-import com.upsaude.entity.PreNatal;
-import com.upsaude.mapper.PreNatalMapper;
-import lombok.RequiredArgsConstructor;
 import org.hibernate.Hibernate;
 import org.springframework.stereotype.Service;
+
+import com.upsaude.api.response.saude_publica.planejamento.PreNatalResponse;
+import com.upsaude.entity.saude_publica.planejamento.PreNatal;
+import com.upsaude.mapper.saude_publica.planejamento.PreNatalMapper;
+
+import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor

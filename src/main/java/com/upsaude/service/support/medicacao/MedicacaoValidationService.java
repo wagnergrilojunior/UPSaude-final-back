@@ -1,6 +1,6 @@
 package com.upsaude.service.support.medicacao;
 
-import com.upsaude.api.request.MedicacaoRequest;
+import com.upsaude.api.request.clinica.medicacao.MedicacaoRequest;
 import com.upsaude.exception.BadRequestException;
 import org.springframework.stereotype.Service;
 

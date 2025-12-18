@@ -1,6 +1,6 @@
 package com.upsaude.service.support.cirurgia;
 
-import com.upsaude.entity.Cirurgia;
+import com.upsaude.entity.clinica.cirurgia.Cirurgia;
 import com.upsaude.exception.BadRequestException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;

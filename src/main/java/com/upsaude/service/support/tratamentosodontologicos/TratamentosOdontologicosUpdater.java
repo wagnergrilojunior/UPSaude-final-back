@@ -1,16 +1,18 @@
 package com.upsaude.service.support.tratamentosodontologicos;
 
-import com.upsaude.api.request.TratamentosOdontologicosRequest;
-import com.upsaude.entity.TratamentosOdontologicos;
-import com.upsaude.entity.Tenant;
-import com.upsaude.mapper.TratamentosOdontologicosMapper;
-import com.upsaude.repository.TratamentosOdontologicosRepository;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Service;
-
 import java.util.Objects;
 import java.util.UUID;
+
+import org.springframework.stereotype.Service;
+
+import com.upsaude.api.request.odontologia.TratamentosOdontologicosRequest;
+import com.upsaude.entity.odontologia.TratamentosOdontologicos;
+import com.upsaude.entity.sistema.Tenant;
+import com.upsaude.mapper.odontologia.TratamentosOdontologicosMapper;
+import com.upsaude.repository.odontologia.TratamentosOdontologicosRepository;
+
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Service
@@ -27,6 +29,7 @@ public class TratamentosOdontologicosUpdater {
         validationService.validarObrigatorios(request);
 
         TratamentosOdontologicos entity = tenantEnforcer.validarAcesso(id, tenantId);
+
         mapper.updateFromRequest(request, entity);
         relacionamentosHandler.resolver(entity, request, tenantId, tenant);
 
@@ -35,4 +38,3 @@ public class TratamentosOdontologicosUpdater {
         return saved;
     }
 }
-

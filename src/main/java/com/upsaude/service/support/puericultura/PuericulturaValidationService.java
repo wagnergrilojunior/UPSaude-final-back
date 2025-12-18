@@ -1,6 +1,6 @@
 package com.upsaude.service.support.puericultura;
 
-import com.upsaude.api.request.PuericulturaRequest;
+import com.upsaude.api.request.saude_publica.puericultura.PuericulturaRequest;
 import com.upsaude.exception.BadRequestException;
 import org.springframework.stereotype.Service;
 
@@ -12,8 +12,10 @@ public class PuericulturaValidationService {
             throw new BadRequestException("Dados da puericultura são obrigatórios");
         }
         if (request.getPaciente() == null) {
-            throw new BadRequestException("Paciente é obrigatório");
+            throw new BadRequestException("Paciente (criança) é obrigatório");
+        }
+        if (request.getDataInicioAcompanhamento() == null) {
+            throw new BadRequestException("Data de início do acompanhamento é obrigatória");
         }
     }
 }
-

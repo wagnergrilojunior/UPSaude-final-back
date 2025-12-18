@@ -1,9 +1,9 @@
 package com.upsaude.service.support.prontuarios;
 
-import com.upsaude.api.request.ProntuariosRequest;
-import com.upsaude.entity.Paciente;
-import com.upsaude.entity.Prontuarios;
-import com.upsaude.entity.Tenant;
+import com.upsaude.api.request.clinica.prontuario.ProntuariosRequest;
+import com.upsaude.entity.paciente.Paciente;
+import com.upsaude.entity.clinica.prontuario.Prontuarios;
+import com.upsaude.entity.sistema.Tenant;
 import com.upsaude.service.support.paciente.PacienteTenantEnforcer;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;

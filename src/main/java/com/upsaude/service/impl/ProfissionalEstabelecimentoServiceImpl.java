@@ -1,29 +1,31 @@
 package com.upsaude.service.impl;
 
-import com.upsaude.api.request.ProfissionalEstabelecimentoRequest;
-import com.upsaude.api.response.ProfissionalEstabelecimentoResponse;
-import com.upsaude.entity.Estabelecimentos;
-import com.upsaude.entity.ProfissionalEstabelecimento;
-import com.upsaude.entity.ProfissionaisSaude;
-import com.upsaude.enums.TipoVinculoProfissionalEnum;
-import com.upsaude.exception.BadRequestException;
-import com.upsaude.exception.NotFoundException;
-import com.upsaude.mapper.ProfissionalEstabelecimentoMapper;
-import com.upsaude.repository.EstabelecimentosRepository;
-import com.upsaude.repository.ProfissionalEstabelecimentoRepository;
-import com.upsaude.repository.ProfissionaisSaudeRepository;
-import com.upsaude.service.ProfissionalEstabelecimentoService;
-import jakarta.transaction.Transactional;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.Page;
+import java.util.Objects;
+import java.util.UUID;
+
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import java.util.Objects;
-import java.util.UUID;
+import com.upsaude.api.request.estabelecimento.ProfissionalEstabelecimentoRequest;
+import com.upsaude.api.response.estabelecimento.ProfissionalEstabelecimentoResponse;
+import com.upsaude.entity.estabelecimento.Estabelecimentos;
+import com.upsaude.entity.estabelecimento.ProfissionalEstabelecimento;
+import com.upsaude.entity.profissional.ProfissionaisSaude;
+import com.upsaude.enums.TipoVinculoProfissionalEnum;
+import com.upsaude.exception.BadRequestException;
+import com.upsaude.exception.NotFoundException;
+import com.upsaude.mapper.estabelecimento.ProfissionalEstabelecimentoMapper;
+import com.upsaude.repository.estabelecimento.EstabelecimentosRepository;
+import com.upsaude.repository.estabelecimento.ProfissionalEstabelecimentoRepository;
+import com.upsaude.repository.profissional.ProfissionaisSaudeRepository;
+import com.upsaude.service.estabelecimento.ProfissionalEstabelecimentoService;
+
+import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Service

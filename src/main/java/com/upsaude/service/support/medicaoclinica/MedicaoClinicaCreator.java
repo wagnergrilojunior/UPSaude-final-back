@@ -1,16 +1,18 @@
 package com.upsaude.service.support.medicaoclinica;
 
-import com.upsaude.api.request.MedicaoClinicaRequest;
-import com.upsaude.entity.MedicaoClinica;
-import com.upsaude.entity.Tenant;
-import com.upsaude.mapper.MedicaoClinicaMapper;
-import com.upsaude.repository.MedicaoClinicaRepository;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Service;
-
 import java.util.Objects;
 import java.util.UUID;
+
+import org.springframework.stereotype.Service;
+
+import com.upsaude.api.request.profissional.medicao.MedicaoClinicaRequest;
+import com.upsaude.entity.profissional.medicao.MedicaoClinica;
+import com.upsaude.entity.sistema.Tenant;
+import com.upsaude.mapper.profissional.medicao.MedicaoClinicaMapper;
+import com.upsaude.repository.profissional.medicao.MedicaoClinicaRepository;
+
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Service
@@ -21,7 +23,6 @@ public class MedicaoClinicaCreator {
     private final MedicaoClinicaMapper mapper;
     private final MedicaoClinicaValidationService validationService;
     private final MedicaoClinicaRelacionamentosHandler relacionamentosHandler;
-    private final MedicaoClinicaDomainService domainService;
 
     public MedicaoClinica criar(MedicaoClinicaRequest request, UUID tenantId, Tenant tenant) {
         validationService.validarObrigatorios(request);
@@ -29,7 +30,6 @@ public class MedicaoClinicaCreator {
         MedicaoClinica entity = mapper.fromRequest(request);
         entity.setActive(true);
 
-        domainService.aplicarDefaults(entity);
         relacionamentosHandler.resolver(entity, request, tenantId, tenant);
 
         MedicaoClinica saved = repository.save(Objects.requireNonNull(entity));

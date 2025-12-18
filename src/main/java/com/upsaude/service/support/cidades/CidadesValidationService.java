@@ -1,6 +1,6 @@
 package com.upsaude.service.support.cidades;
 
-import com.upsaude.api.request.CidadesRequest;
+import com.upsaude.api.request.referencia.geografico.CidadesRequest;
 import com.upsaude.exception.BadRequestException;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;

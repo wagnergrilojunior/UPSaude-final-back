@@ -2,11 +2,13 @@ package com.upsaude.entity.embeddable;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
-import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import com.upsaude.validation.annotation.EmailValido;
+import com.upsaude.validation.annotation.SiteValido;
+import com.upsaude.validation.annotation.TelefoneValido;
 
 @Embeddable
 @Data
@@ -29,32 +31,37 @@ public class ContatoConvenio {
     }
 
     @Size(max = 20, message = "Telefone principal deve ter no máximo 20 caracteres")
+    @TelefoneValido
     @Column(name = "telefone_principal", length = 20)
     private String telefonePrincipal;
 
     @Size(max = 20, message = "Telefone secundário deve ter no máximo 20 caracteres")
+    @TelefoneValido
     @Column(name = "telefone_secundario", length = 20)
     private String telefoneSecundario;
 
     @Size(max = 20, message = "Fax deve ter no máximo 20 caracteres")
+    @TelefoneValido
     @Column(name = "fax", length = 20)
     private String fax;
 
     @Size(max = 20, message = "WhatsApp deve ter no máximo 20 caracteres")
+    @TelefoneValido
     @Column(name = "whatsapp", length = 20)
     private String whatsapp;
 
-    @Email(message = "Email principal inválido")
+    @EmailValido
     @Size(max = 255, message = "Email principal deve ter no máximo 255 caracteres")
     @Column(name = "email_principal", length = 255)
     private String emailPrincipal;
 
-    @Email(message = "Email secundário inválido")
+    @EmailValido
     @Size(max = 255, message = "Email secundário deve ter no máximo 255 caracteres")
     @Column(name = "email_secundario", length = 255)
     private String emailSecundario;
 
     @Size(max = 255, message = "Site deve ter no máximo 255 caracteres")
+    @SiteValido
     @Column(name = "site", length = 255)
     private String site;
 
@@ -67,10 +74,11 @@ public class ContatoConvenio {
     private String cargoContato;
 
     @Size(max = 20, message = "Telefone do contato deve ter no máximo 20 caracteres")
+    @TelefoneValido
     @Column(name = "telefone_contato", length = 20)
     private String telefoneContato;
 
-    @Email(message = "Email do contato inválido")
+    @EmailValido
     @Size(max = 255, message = "Email do contato deve ter no máximo 255 caracteres")
     @Column(name = "email_contato", length = 255)
     private String emailContato;

@@ -4,10 +4,10 @@ import com.upsaude.enums.EstadoCivilEnum;
 import com.upsaude.enums.SexoEnum;
 import com.upsaude.util.converter.EstadoCivilEnumConverter;
 import com.upsaude.util.converter.SexoEnumConverter;
+import com.upsaude.validation.annotation.CPFValido;
 import jakarta.persistence.Column;
 import jakarta.persistence.Convert;
 import jakarta.persistence.Embeddable;
-import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -35,7 +35,7 @@ public class DadosPessoaisMedico {
     @Column(name = "nome_social", length = 255)
     private String nomeSocial;
 
-    @Pattern(regexp = "^\\d{11}$", message = "CPF deve ter 11 dígitos")
+    @CPFValido
     @Column(name = "cpf", length = 11)
     private String cpf;
 

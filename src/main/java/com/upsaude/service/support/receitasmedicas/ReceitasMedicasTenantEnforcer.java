@@ -1,8 +1,8 @@
 package com.upsaude.service.support.receitasmedicas;
 
-import com.upsaude.entity.ReceitasMedicas;
+import com.upsaude.entity.clinica.medicacao.ReceitasMedicas;
 import com.upsaude.exception.NotFoundException;
-import com.upsaude.repository.ReceitasMedicasRepository;
+import com.upsaude.repository.clinica.medicacao.ReceitasMedicasRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;

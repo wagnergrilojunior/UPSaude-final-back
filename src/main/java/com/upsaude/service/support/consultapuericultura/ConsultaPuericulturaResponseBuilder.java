@@ -1,11 +1,13 @@
 package com.upsaude.service.support.consultapuericultura;
 
-import com.upsaude.api.response.ConsultaPuericulturaResponse;
-import com.upsaude.entity.ConsultaPuericultura;
-import com.upsaude.mapper.ConsultaPuericulturaMapper;
-import lombok.RequiredArgsConstructor;
 import org.hibernate.Hibernate;
 import org.springframework.stereotype.Service;
+
+import com.upsaude.api.response.clinica.atendimento.ConsultaPuericulturaResponse;
+import com.upsaude.entity.clinica.atendimento.ConsultaPuericultura;
+import com.upsaude.mapper.clinica.atendimento.ConsultaPuericulturaMapper;
+
+import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
@@ -15,11 +17,10 @@ public class ConsultaPuericulturaResponseBuilder {
 
     public ConsultaPuericulturaResponse build(ConsultaPuericultura entity) {
         if (entity != null) {
-            Hibernate.initialize(entity.getPuericultura());
-            Hibernate.initialize(entity.getProfissional());
-            Hibernate.initialize(entity.getEstabelecimento());
+            if (entity.getPuericultura() != null) Hibernate.initialize(entity.getPuericultura());
+            if (entity.getProfissional() != null) Hibernate.initialize(entity.getProfissional());
+            if (entity.getEstabelecimento() != null) Hibernate.initialize(entity.getEstabelecimento());
         }
         return mapper.toResponse(entity);
     }
 }
-

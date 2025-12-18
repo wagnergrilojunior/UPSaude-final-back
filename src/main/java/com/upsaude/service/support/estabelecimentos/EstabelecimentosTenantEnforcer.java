@@ -1,8 +1,8 @@
 package com.upsaude.service.support.estabelecimentos;
 
-import com.upsaude.entity.Estabelecimentos;
+import com.upsaude.entity.estabelecimento.Estabelecimentos;
 import com.upsaude.exception.NotFoundException;
-import com.upsaude.repository.EstabelecimentosRepository;
+import com.upsaude.repository.estabelecimento.EstabelecimentosRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;

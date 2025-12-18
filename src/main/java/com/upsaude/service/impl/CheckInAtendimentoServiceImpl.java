@@ -1,21 +1,8 @@
 package com.upsaude.service.impl;
 
-import com.upsaude.cache.CacheKeyUtil;
-import com.upsaude.api.request.CheckInAtendimentoRequest;
-import com.upsaude.api.response.CheckInAtendimentoResponse;
-import com.upsaude.entity.CheckInAtendimento;
-import com.upsaude.entity.Tenant;
-import com.upsaude.exception.BadRequestException;
-import com.upsaude.repository.CheckInAtendimentoRepository;
-import com.upsaude.service.CheckInAtendimentoService;
-import com.upsaude.service.TenantService;
-import com.upsaude.service.support.checkinatendimento.CheckInAtendimentoCreator;
-import com.upsaude.service.support.checkinatendimento.CheckInAtendimentoResponseBuilder;
-import com.upsaude.service.support.checkinatendimento.CheckInAtendimentoTenantEnforcer;
-import com.upsaude.service.support.checkinatendimento.CheckInAtendimentoUpdater;
-import com.upsaude.service.support.checkinatendimento.CheckInAtendimentoValidationService;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import java.util.Objects;
+import java.util.UUID;
+
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.CacheEvict;
@@ -26,8 +13,23 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Objects;
-import java.util.UUID;
+import com.upsaude.api.request.clinica.atendimento.CheckInAtendimentoRequest;
+import com.upsaude.api.response.clinica.atendimento.CheckInAtendimentoResponse;
+import com.upsaude.cache.CacheKeyUtil;
+import com.upsaude.entity.clinica.atendimento.CheckInAtendimento;
+import com.upsaude.entity.sistema.Tenant;
+import com.upsaude.exception.BadRequestException;
+import com.upsaude.repository.clinica.atendimento.CheckInAtendimentoRepository;
+import com.upsaude.service.clinica.atendimento.CheckInAtendimentoService;
+import com.upsaude.service.sistema.TenantService;
+import com.upsaude.service.support.checkinatendimento.CheckInAtendimentoCreator;
+import com.upsaude.service.support.checkinatendimento.CheckInAtendimentoResponseBuilder;
+import com.upsaude.service.support.checkinatendimento.CheckInAtendimentoTenantEnforcer;
+import com.upsaude.service.support.checkinatendimento.CheckInAtendimentoUpdater;
+import com.upsaude.service.support.checkinatendimento.CheckInAtendimentoValidationService;
+
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Service

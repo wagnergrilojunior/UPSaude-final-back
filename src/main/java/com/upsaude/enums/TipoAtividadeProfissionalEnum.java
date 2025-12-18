@@ -1,5 +1,9 @@
 package com.upsaude.enums;
 
+import com.upsaude.entity.clinica.atendimento.Atendimento;
+
+import com.upsaude.entity.paciente.Paciente;
+
 import java.util.Arrays;
 import java.util.Locale;
 

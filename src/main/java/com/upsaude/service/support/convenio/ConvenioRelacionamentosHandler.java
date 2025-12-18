@@ -1,13 +1,16 @@
 package com.upsaude.service.support.convenio;
 
-import com.upsaude.api.request.ConvenioRequest;
-import com.upsaude.entity.Convenio;
-import com.upsaude.entity.Endereco;
+import com.upsaude.api.request.convenio.ConvenioRequest;
+import com.upsaude.entity.convenio.Convenio;
+import com.upsaude.entity.paciente.Endereco;
+import com.upsaude.entity.sistema.Tenant;
+import com.upsaude.exception.BadRequestException;
 import com.upsaude.exception.NotFoundException;
-import com.upsaude.repository.EnderecoRepository;
+import com.upsaude.repository.paciente.EnderecoRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.Objects;
 import java.util.UUID;
 
 @Service
@@ -16,20 +19,27 @@ public class ConvenioRelacionamentosHandler {
 
     private final EnderecoRepository enderecoRepository;
 
-    public Convenio processarRelacionamentos(Convenio convenio, ConvenioRequest request, UUID tenantId) {
+    public void processarEndereco(ConvenioRequest request, Convenio convenio, UUID tenantId, Tenant tenant) {
         if (request.getEndereco() != null) {
-            Endereco endereco = enderecoRepository.findById(request.getEndereco())
-                .orElseThrow(() -> new NotFoundException("Endereço não encontrado com ID: " + request.getEndereco()));
+            UUID enderecoId = request.getEndereco();
+            Endereco endereco = enderecoRepository.findById(enderecoId)
+                .orElseThrow(() -> new NotFoundException("Endereço não encontrado com ID: " + enderecoId));
 
-            if (endereco.getTenant() == null || endereco.getTenant().getId() == null || !endereco.getTenant().getId().equals(tenantId)) {
-                throw new NotFoundException("Endereço não encontrado com ID: " + request.getEndereco());
+            if (endereco.getTenant() != null && endereco.getTenant().getId() != null
+                && !endereco.getTenant().getId().equals(tenantId)) {
+                throw new NotFoundException("Endereço não encontrado com ID: " + enderecoId);
             }
 
             convenio.setEndereco(endereco);
         } else {
             convenio.setEndereco(null);
         }
-        return convenio;
+    }
+
+    public void resolver(Convenio entity, ConvenioRequest request, UUID tenantId, Tenant tenant) {
+        if (request == null) return;
+
+        entity.setTenant(Objects.requireNonNull(tenant, "tenant é obrigatório"));
+        processarEndereco(request, entity, tenantId, tenant);
     }
 }
-

@@ -1,6 +1,6 @@
 package com.upsaude.service.support.servicosestabelecimento;
 
-import com.upsaude.entity.ServicosEstabelecimento;
+import com.upsaude.entity.estabelecimento.ServicosEstabelecimento;
 import com.upsaude.exception.BadRequestException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;

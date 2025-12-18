@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns="http://servicos.saude.gov.br/schema/sigtap/procedimento/renases/v1/renases" elementFormDefault="qualified" targetNamespace="http://servicos.saude.gov.br/schema/sigtap/procedimento/renases/v1/renases">
+    
+    <xs:annotation>
+        <xs:documentation>
+            <![CDATA[
+            Este esquema representa um Procedimento RENASES. 
+            ]]>
+        </xs:documentation>
+    </xs:annotation>
+    
+    <xs:simpleType name="CodigoRENASESType">
+        <xs:restriction base="xs:string">
+            <xs:length value="3"/>
+            <xs:pattern value="[0-9]{3}"/>
+        </xs:restriction>
+    </xs:simpleType>
+    
+    <xs:complexType name="RENASESType">
+        <xs:sequence>
+            
+            <xs:element name="codigo" minOccurs="1" maxOccurs="1" nillable="true" type="CodigoRENASESType">
+                <xs:annotation>
+                    <xs:documentation>
+                        <![CDATA[ Código identificador do RENASES. ]]>
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            
+            <xs:element name="nome" minOccurs="0" maxOccurs="1">
+                <xs:annotation>
+                    <xs:documentation>
+                        <![CDATA[ Nome do RENASES. ]]>
+                    </xs:documentation>
+                </xs:annotation>
+                <xs:simpleType>
+                    <xs:restriction base="xs:string">
+                        <xs:minLength value="1"/>
+                        <xs:maxLength value="150"/>
+                    </xs:restriction>
+                </xs:simpleType>
+            </xs:element>
+            
+        </xs:sequence>
+    </xs:complexType>
+    
+</xs:schema>

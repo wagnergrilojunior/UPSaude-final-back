@@ -1,8 +1,8 @@
 package com.upsaude.service.support.estabelecimentos;
 
-import com.upsaude.api.response.EstabelecimentosResponse;
-import com.upsaude.entity.Estabelecimentos;
-import com.upsaude.mapper.EstabelecimentosMapper;
+import com.upsaude.api.response.estabelecimento.EstabelecimentosResponse;
+import com.upsaude.entity.estabelecimento.Estabelecimentos;
+import com.upsaude.mapper.estabelecimento.EstabelecimentosMapper;
 import lombok.RequiredArgsConstructor;
 import org.hibernate.Hibernate;
 import org.springframework.stereotype.Service;

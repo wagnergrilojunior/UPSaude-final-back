@@ -1,11 +1,11 @@
 package com.upsaude.service.support.movimentacoesestoque;
 
-import com.upsaude.api.request.MovimentacoesEstoqueRequest;
-import com.upsaude.entity.EstoquesVacina;
-import com.upsaude.entity.MovimentacoesEstoque;
-import com.upsaude.entity.Tenant;
+import com.upsaude.api.request.estabelecimento.estoque.MovimentacoesEstoqueRequest;
+import com.upsaude.entity.estabelecimento.estoque.MovimentacoesEstoque;
+import com.upsaude.entity.saude_publica.vacina.EstoquesVacina;
+import com.upsaude.entity.sistema.Tenant;
 import com.upsaude.exception.NotFoundException;
-import com.upsaude.repository.EstoquesVacinaRepository;
+import com.upsaude.repository.saude_publica.vacina.EstoquesVacinaRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -23,15 +23,10 @@ public class MovimentacoesEstoqueRelacionamentosHandler {
 
         entity.setTenant(Objects.requireNonNull(tenant, "tenant é obrigatório"));
 
-        UUID estoqueVacinaId = Objects.requireNonNull(request.getEstoqueVacina(), "estoqueVacina");
-        EstoquesVacina estoqueVacina = estoquesVacinaRepository.findByIdAndTenant(estoqueVacinaId, tenantId)
-            .orElseThrow(() -> new NotFoundException("Estoque de vacina não encontrado com ID: " + estoqueVacinaId));
-        entity.setEstoqueVacina(estoqueVacina);
-
-        if (estoqueVacina.getEstabelecimento() != null) {
-            entity.setEstabelecimento(estoqueVacina.getEstabelecimento());
-        } else {
-            entity.setEstabelecimento(null);
+        if (request.getEstoqueVacina() != null) {
+            EstoquesVacina estoqueVacina = estoquesVacinaRepository.findById(request.getEstoqueVacina())
+                    .orElseThrow(() -> new NotFoundException("Estoque de vacina não encontrado com ID: " + request.getEstoqueVacina()));
+            entity.setEstoqueVacina(estoqueVacina);
         }
     }
 }

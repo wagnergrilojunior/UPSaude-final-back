@@ -1,6 +1,6 @@
 package com.upsaude.service.support.equipamentos;
 
-import com.upsaude.api.request.EquipamentosRequest;
+import com.upsaude.api.request.estabelecimento.equipamento.EquipamentosRequest;
 import com.upsaude.exception.BadRequestException;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
@@ -17,9 +17,6 @@ public class EquipamentosValidationService {
         }
         if (request.getTipo() == null) {
             throw new BadRequestException("Tipo de equipamento é obrigatório");
-        }
-        if (request.getStatus() == null) {
-            throw new BadRequestException("Status do equipamento é obrigatório");
         }
     }
 }

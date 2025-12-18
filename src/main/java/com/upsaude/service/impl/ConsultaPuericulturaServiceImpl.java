@@ -1,34 +1,37 @@
 package com.upsaude.service.impl;
 
-import com.upsaude.api.request.ConsultaPuericulturaRequest;
-import com.upsaude.api.response.ConsultaPuericulturaResponse;
-import com.upsaude.cache.CacheKeyUtil;
-import com.upsaude.entity.ConsultaPuericultura;
-import com.upsaude.entity.Tenant;
-import com.upsaude.exception.BadRequestException;
-import com.upsaude.exception.InternalServerErrorException;
-import com.upsaude.exception.NotFoundException;
-import com.upsaude.repository.ConsultaPuericulturaRepository;
-import com.upsaude.service.ConsultaPuericulturaService;
-import com.upsaude.service.TenantService;
-import com.upsaude.service.support.consultapuericultura.ConsultaPuericulturaCreator;
-import com.upsaude.service.support.consultapuericultura.ConsultaPuericulturaResponseBuilder;
-import com.upsaude.service.support.consultapuericultura.ConsultaPuericulturaTenantEnforcer;
-import com.upsaude.service.support.consultapuericultura.ConsultaPuericulturaUpdater;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import java.util.List;
+import java.util.Objects;
+import java.util.UUID;
+
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Objects;
-import java.util.UUID;
+import com.upsaude.api.request.clinica.atendimento.ConsultaPuericulturaRequest;
+import com.upsaude.api.response.clinica.atendimento.ConsultaPuericulturaResponse;
+import com.upsaude.cache.CacheKeyUtil;
+import com.upsaude.entity.clinica.atendimento.ConsultaPuericultura;
+import com.upsaude.entity.sistema.Tenant;
+import com.upsaude.exception.BadRequestException;
+import com.upsaude.exception.InternalServerErrorException;
+import com.upsaude.repository.clinica.atendimento.ConsultaPuericulturaRepository;
+import com.upsaude.service.clinica.atendimento.ConsultaPuericulturaService;
+import com.upsaude.service.sistema.TenantService;
+import com.upsaude.service.support.consultapuericultura.ConsultaPuericulturaCreator;
+import com.upsaude.service.support.consultapuericultura.ConsultaPuericulturaResponseBuilder;
+import com.upsaude.service.support.consultapuericultura.ConsultaPuericulturaTenantEnforcer;
+import com.upsaude.service.support.consultapuericultura.ConsultaPuericulturaUpdater;
+
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Service
@@ -62,7 +65,7 @@ public class ConsultaPuericulturaServiceImpl implements ConsultaPuericulturaServ
             }
 
             return response;
-        } catch (BadRequestException | NotFoundException e) {
+        } catch (BadRequestException e) {
             throw e;
         } catch (Exception e) {
             throw new InternalServerErrorException("Erro ao criar consulta de puericultura", e);
@@ -71,14 +74,13 @@ public class ConsultaPuericulturaServiceImpl implements ConsultaPuericulturaServ
 
     @Override
     @Transactional(readOnly = true)
-    @Cacheable(cacheNames = CacheKeyUtil.CACHE_CONSULTAS_PUERICULTURA, keyGenerator = "consultaPuericulturaCacheKeyGenerator")
+    @Cacheable(cacheNames = "consultasPuericultura", keyGenerator = "consultaPuericulturaCacheKeyGenerator")
     public ConsultaPuericulturaResponse obterPorId(UUID id) {
         if (id == null) {
             throw new BadRequestException("ID da consulta de puericultura é obrigatório");
         }
         UUID tenantId = tenantService.validarTenantAtual();
-        ConsultaPuericultura entity = tenantEnforcer.validarAcessoCompleto(id, tenantId);
-        return responseBuilder.build(entity);
+        return responseBuilder.build(tenantEnforcer.validarAcessoCompleto(id, tenantId));
     }
 
     @Override
@@ -86,10 +88,14 @@ public class ConsultaPuericulturaServiceImpl implements ConsultaPuericulturaServ
     public Page<ConsultaPuericulturaResponse> listar(Pageable pageable, UUID puericulturaId, UUID estabelecimentoId) {
         UUID tenantId = tenantService.validarTenantAtual();
 
-        Page<ConsultaPuericultura> page;
         if (puericulturaId != null) {
-            page = repository.findByPuericulturaIdAndTenantIdOrderByDataConsultaAsc(puericulturaId, tenantId, pageable);
-        } else if (estabelecimentoId != null) {
+            List<ConsultaPuericultura> list = repository.findByPuericulturaIdAndTenantIdOrderByDataConsultaAsc(puericulturaId, tenantId, pageable).getContent();
+            Pageable safePageable = (pageable == null) ? Pageable.unpaged() : pageable;
+            return new PageImpl<>(list, safePageable, list.size()).map(responseBuilder::build);
+        }
+
+        Page<ConsultaPuericultura> page;
+        if (estabelecimentoId != null) {
             page = repository.findByEstabelecimentoIdAndTenantIdOrderByDataConsultaDesc(estabelecimentoId, tenantId, pageable);
         } else {
             page = repository.findAllByTenant(tenantId, pageable);
@@ -100,7 +106,7 @@ public class ConsultaPuericulturaServiceImpl implements ConsultaPuericulturaServ
 
     @Override
     @Transactional
-    @CachePut(cacheNames = CacheKeyUtil.CACHE_CONSULTAS_PUERICULTURA, keyGenerator = "consultaPuericulturaCacheKeyGenerator")
+    @CachePut(cacheNames = "consultasPuericultura", keyGenerator = "consultaPuericulturaCacheKeyGenerator")
     public ConsultaPuericulturaResponse atualizar(UUID id, ConsultaPuericulturaRequest request) {
         if (id == null) {
             throw new BadRequestException("ID da consulta de puericultura é obrigatório");
@@ -115,7 +121,7 @@ public class ConsultaPuericulturaServiceImpl implements ConsultaPuericulturaServ
 
     @Override
     @Transactional
-    @CacheEvict(cacheNames = CacheKeyUtil.CACHE_CONSULTAS_PUERICULTURA, keyGenerator = "consultaPuericulturaCacheKeyGenerator", beforeInvocation = false)
+    @CacheEvict(cacheNames = "consultasPuericultura", keyGenerator = "consultaPuericulturaCacheKeyGenerator", beforeInvocation = false)
     public void excluir(UUID id) {
         UUID tenantId = tenantService.validarTenantAtual();
         inativarInternal(id, tenantId);
@@ -127,13 +133,8 @@ public class ConsultaPuericulturaServiceImpl implements ConsultaPuericulturaServ
         }
 
         ConsultaPuericultura entity = tenantEnforcer.validarAcesso(id, tenantId);
-        if (Boolean.FALSE.equals(entity.getActive())) {
-            throw new BadRequestException("Consulta de puericultura já está inativa");
-        }
-
         entity.setActive(false);
         repository.save(Objects.requireNonNull(entity));
-        log.info("Consulta de puericultura excluída (desativada) com sucesso. ID: {}", id);
     }
 
     private void validarTenantAutenticadoOrThrow(UUID tenantId, Tenant tenant) {
@@ -142,4 +143,3 @@ public class ConsultaPuericulturaServiceImpl implements ConsultaPuericulturaServ
         }
     }
 }
-

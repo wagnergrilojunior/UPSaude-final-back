@@ -1,22 +1,8 @@
 package com.upsaude.service.impl;
 
-import com.upsaude.api.request.EscalaTrabalhoRequest;
-import com.upsaude.api.response.EscalaTrabalhoResponse;
-import com.upsaude.cache.CacheKeyUtil;
-import com.upsaude.entity.EscalaTrabalho;
-import com.upsaude.entity.Tenant;
-import com.upsaude.exception.BadRequestException;
-import com.upsaude.exception.InternalServerErrorException;
-import com.upsaude.exception.NotFoundException;
-import com.upsaude.repository.EscalaTrabalhoRepository;
-import com.upsaude.service.EscalaTrabalhoService;
-import com.upsaude.service.TenantService;
-import com.upsaude.service.support.escalatrabalho.EscalaTrabalhoCreator;
-import com.upsaude.service.support.escalatrabalho.EscalaTrabalhoResponseBuilder;
-import com.upsaude.service.support.escalatrabalho.EscalaTrabalhoTenantEnforcer;
-import com.upsaude.service.support.escalatrabalho.EscalaTrabalhoUpdater;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import java.util.Objects;
+import java.util.UUID;
+
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.CacheEvict;
@@ -27,10 +13,25 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.upsaude.api.request.profissional.equipe.EscalaTrabalhoRequest;
+import com.upsaude.api.response.profissional.equipe.EscalaTrabalhoResponse;
+import com.upsaude.cache.CacheKeyUtil;
+import com.upsaude.entity.profissional.equipe.EscalaTrabalho;
+import com.upsaude.entity.sistema.Tenant;
+import com.upsaude.exception.BadRequestException;
+import com.upsaude.exception.InternalServerErrorException;
+import com.upsaude.repository.profissional.equipe.EscalaTrabalhoRepository;
+import com.upsaude.service.profissional.equipe.EscalaTrabalhoService;
+import com.upsaude.service.sistema.TenantService;
+import com.upsaude.service.support.escalatrabalho.EscalaTrabalhoCreator;
+import com.upsaude.service.support.escalatrabalho.EscalaTrabalhoResponseBuilder;
+import com.upsaude.service.support.escalatrabalho.EscalaTrabalhoTenantEnforcer;
+import com.upsaude.service.support.escalatrabalho.EscalaTrabalhoUpdater;
+
 import java.time.DayOfWeek;
 import java.time.LocalDate;
-import java.util.Objects;
-import java.util.UUID;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Service
@@ -49,6 +50,8 @@ public class EscalaTrabalhoServiceImpl implements EscalaTrabalhoService {
     @Override
     @Transactional
     public EscalaTrabalhoResponse criar(EscalaTrabalhoRequest request) {
+        log.debug("Criando nova escala de trabalho");
+
         try {
             UUID tenantId = tenantService.validarTenantAtual();
             Tenant tenant = tenantService.obterTenantDoUsuarioAutenticado();
@@ -64,7 +67,7 @@ public class EscalaTrabalhoServiceImpl implements EscalaTrabalhoService {
             }
 
             return response;
-        } catch (BadRequestException | NotFoundException e) {
+        } catch (BadRequestException e) {
             throw e;
         } catch (Exception e) {
             throw new InternalServerErrorException("Erro ao criar escala de trabalho", e);
@@ -75,9 +78,11 @@ public class EscalaTrabalhoServiceImpl implements EscalaTrabalhoService {
     @Transactional(readOnly = true)
     @Cacheable(cacheNames = CacheKeyUtil.CACHE_ESCALA_TRABALHO, keyGenerator = "escalaTrabalhoCacheKeyGenerator")
     public EscalaTrabalhoResponse obterPorId(UUID id) {
+        log.debug("Buscando escala de trabalho por ID: {} (cache miss)", id);
         if (id == null) {
             throw new BadRequestException("ID da escala de trabalho é obrigatório");
         }
+
         UUID tenantId = tenantService.validarTenantAtual();
         EscalaTrabalho entity = tenantEnforcer.validarAcessoCompleto(id, tenantId);
         return responseBuilder.build(entity);
@@ -85,26 +90,29 @@ public class EscalaTrabalhoServiceImpl implements EscalaTrabalhoService {
 
     @Override
     @Transactional(readOnly = true)
-    public Page<EscalaTrabalhoResponse> listar(
-        Pageable pageable,
-        UUID profissionalId,
-        UUID medicoId,
-        UUID estabelecimentoId,
-        DayOfWeek diaSemana,
-        LocalDate vigentesEm,
-        Boolean apenasAtivos
-    ) {
+    public Page<EscalaTrabalhoResponse> listar(Pageable pageable, UUID profissionalId, UUID medicoId, UUID estabelecimentoId, DayOfWeek diaSemana, LocalDate vigentesEm, Boolean apenasAtivos) {
+        log.debug("Listando escalas de trabalho paginadas. Página: {}, Tamanho: {}",
+                pageable.getPageNumber(), pageable.getPageSize());
+
         UUID tenantId = tenantService.validarTenantAtual();
-        Page<EscalaTrabalho> page = repository.filtrar(
-            tenantId,
-            profissionalId,
-            medicoId,
-            estabelecimentoId,
-            diaSemana,
-            vigentesEm,
-            apenasAtivos,
-            pageable
-        );
+        Page<EscalaTrabalho> page;
+
+        if (profissionalId != null) {
+            page = repository.findByProfissionalIdAndTenantIdOrderByDiaSemanaAscHoraInicioAsc(profissionalId, tenantId, pageable);
+        } else if (medicoId != null) {
+            page = repository.findByMedicoIdAndTenantIdOrderByDiaSemanaAscHoraInicioAsc(medicoId, tenantId, pageable);
+        } else if (estabelecimentoId != null) {
+            page = repository.findByEstabelecimentoIdAndTenantIdOrderByDiaSemanaAscHoraInicioAsc(estabelecimentoId, tenantId, pageable);
+        } else if (diaSemana != null) {
+            page = repository.findByDiaSemanaAndTenantIdOrderByHoraInicioAsc(diaSemana, tenantId, pageable);
+        } else if (vigentesEm != null) {
+            page = repository.findVigentesEmAndTenantIdOrderByDiaSemanaAscHoraInicioAsc(vigentesEm, tenantId, pageable);
+        } else if (Boolean.TRUE.equals(apenasAtivos)) {
+            page = repository.findByActiveTrueAndTenantIdOrderByDiaSemanaAscHoraInicioAsc(tenantId, pageable);
+        } else {
+            page = repository.findAllByTenant(tenantId, pageable);
+        }
+
         return page.map(responseBuilder::build);
     }
 
@@ -112,27 +120,25 @@ public class EscalaTrabalhoServiceImpl implements EscalaTrabalhoService {
     @Transactional
     @CachePut(cacheNames = CacheKeyUtil.CACHE_ESCALA_TRABALHO, keyGenerator = "escalaTrabalhoCacheKeyGenerator")
     public EscalaTrabalhoResponse atualizar(UUID id, EscalaTrabalhoRequest request) {
+        log.debug("Atualizando escala de trabalho. ID: {}", id);
+
         if (id == null) {
             throw new BadRequestException("ID da escala de trabalho é obrigatório");
         }
-        try {
-            UUID tenantId = tenantService.validarTenantAtual();
-            Tenant tenant = tenantService.obterTenantDoUsuarioAutenticado();
-            validarTenantAutenticadoOrThrow(tenantId, tenant);
 
-            EscalaTrabalho updated = updater.atualizar(id, request, tenantId, tenant);
-            return responseBuilder.build(updated);
-        } catch (BadRequestException | NotFoundException e) {
-            throw e;
-        } catch (Exception e) {
-            throw new InternalServerErrorException("Erro ao atualizar escala de trabalho", e);
-        }
+        UUID tenantId = tenantService.validarTenantAtual();
+        Tenant tenant = tenantService.obterTenantDoUsuarioAutenticado();
+        validarTenantAutenticadoOrThrow(tenantId, tenant);
+
+        EscalaTrabalho updated = updater.atualizar(id, request, tenantId, tenant);
+        return responseBuilder.build(updated);
     }
 
     @Override
     @Transactional
     @CacheEvict(cacheNames = CacheKeyUtil.CACHE_ESCALA_TRABALHO, keyGenerator = "escalaTrabalhoCacheKeyGenerator", beforeInvocation = false)
     public void excluir(UUID id) {
+        log.debug("Excluindo escala de trabalho. ID: {}", id);
         UUID tenantId = tenantService.validarTenantAtual();
         inativarInternal(id, tenantId);
     }
@@ -143,10 +149,6 @@ public class EscalaTrabalhoServiceImpl implements EscalaTrabalhoService {
         }
 
         EscalaTrabalho entity = tenantEnforcer.validarAcesso(id, tenantId);
-        if (Boolean.FALSE.equals(entity.getActive())) {
-            throw new BadRequestException("Escala de trabalho já está inativa");
-        }
-
         entity.setActive(false);
         repository.save(Objects.requireNonNull(entity));
         log.info("Escala de trabalho excluída (desativada) com sucesso. ID: {}", id);

@@ -1,16 +1,18 @@
 package com.upsaude.service.support.templatenotificacao;
 
-import com.upsaude.api.request.TemplateNotificacaoRequest;
-import com.upsaude.entity.TemplateNotificacao;
-import com.upsaude.entity.Tenant;
-import com.upsaude.mapper.TemplateNotificacaoMapper;
-import com.upsaude.repository.TemplateNotificacaoRepository;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Service;
-
 import java.util.Objects;
 import java.util.UUID;
+
+import org.springframework.stereotype.Service;
+
+import com.upsaude.api.request.sistema.notificacao.TemplateNotificacaoRequest;
+import com.upsaude.entity.sistema.notificacao.TemplateNotificacao;
+import com.upsaude.entity.sistema.Tenant;
+import com.upsaude.mapper.sistema.notificacao.TemplateNotificacaoMapper;
+import com.upsaude.repository.sistema.notificacao.TemplateNotificacaoRepository;
+
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Service
@@ -27,12 +29,12 @@ public class TemplateNotificacaoUpdater {
         validationService.validarObrigatorios(request);
 
         TemplateNotificacao entity = tenantEnforcer.validarAcesso(id, tenantId);
+
         mapper.updateFromRequest(request, entity);
         relacionamentosHandler.resolver(entity, request, tenantId, tenant);
 
         TemplateNotificacao saved = repository.save(Objects.requireNonNull(entity));
-        log.info("TemplateNotificacao atualizado com sucesso. ID: {}, tenant: {}", saved.getId(), tenantId);
+        log.info("Template de notificação atualizado com sucesso. ID: {}, tenant: {}", saved.getId(), tenantId);
         return saved;
     }
 }
-

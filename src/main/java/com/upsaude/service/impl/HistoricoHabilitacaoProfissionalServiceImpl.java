@@ -1,21 +1,8 @@
 package com.upsaude.service.impl;
 
-import com.upsaude.cache.CacheKeyUtil;
-import com.upsaude.api.request.HistoricoHabilitacaoProfissionalRequest;
-import com.upsaude.api.response.HistoricoHabilitacaoProfissionalResponse;
-import com.upsaude.entity.HistoricoHabilitacaoProfissional;
-import com.upsaude.entity.Tenant;
-import com.upsaude.exception.BadRequestException;
-import com.upsaude.repository.HistoricoHabilitacaoProfissionalRepository;
-import com.upsaude.service.HistoricoHabilitacaoProfissionalService;
-import com.upsaude.service.TenantService;
-import com.upsaude.service.support.historicohabilitacaoprofissional.HistoricoHabilitacaoProfissionalCreator;
-import com.upsaude.service.support.historicohabilitacaoprofissional.HistoricoHabilitacaoProfissionalResponseBuilder;
-import com.upsaude.service.support.historicohabilitacaoprofissional.HistoricoHabilitacaoProfissionalTenantEnforcer;
-import com.upsaude.service.support.historicohabilitacaoprofissional.HistoricoHabilitacaoProfissionalUpdater;
-import com.upsaude.service.support.historicohabilitacaoprofissional.HistoricoHabilitacaoProfissionalValidationService;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import java.util.Objects;
+import java.util.UUID;
+
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.CacheEvict;
@@ -26,8 +13,23 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Objects;
-import java.util.UUID;
+import com.upsaude.api.request.profissional.HistoricoHabilitacaoProfissionalRequest;
+import com.upsaude.api.response.profissional.HistoricoHabilitacaoProfissionalResponse;
+import com.upsaude.cache.CacheKeyUtil;
+import com.upsaude.entity.profissional.HistoricoHabilitacaoProfissional;
+import com.upsaude.entity.sistema.Tenant;
+import com.upsaude.exception.BadRequestException;
+import com.upsaude.exception.InternalServerErrorException;
+import com.upsaude.repository.profissional.HistoricoHabilitacaoProfissionalRepository;
+import com.upsaude.service.profissional.HistoricoHabilitacaoProfissionalService;
+import com.upsaude.service.sistema.TenantService;
+import com.upsaude.service.support.historicohabilitacaoprofissional.HistoricoHabilitacaoProfissionalCreator;
+import com.upsaude.service.support.historicohabilitacaoprofissional.HistoricoHabilitacaoProfissionalResponseBuilder;
+import com.upsaude.service.support.historicohabilitacaoprofissional.HistoricoHabilitacaoProfissionalTenantEnforcer;
+import com.upsaude.service.support.historicohabilitacaoprofissional.HistoricoHabilitacaoProfissionalUpdater;
+
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Service
@@ -35,59 +37,79 @@ import java.util.UUID;
 public class HistoricoHabilitacaoProfissionalServiceImpl implements HistoricoHabilitacaoProfissionalService {
 
     private final HistoricoHabilitacaoProfissionalRepository repository;
-    private final TenantService tenantService;
     private final CacheManager cacheManager;
+    private final TenantService tenantService;
 
-    private final HistoricoHabilitacaoProfissionalValidationService validationService;
-    private final HistoricoHabilitacaoProfissionalTenantEnforcer tenantEnforcer;
     private final HistoricoHabilitacaoProfissionalCreator creator;
     private final HistoricoHabilitacaoProfissionalUpdater updater;
     private final HistoricoHabilitacaoProfissionalResponseBuilder responseBuilder;
+    private final HistoricoHabilitacaoProfissionalTenantEnforcer tenantEnforcer;
 
     @Override
     @Transactional
     public HistoricoHabilitacaoProfissionalResponse criar(HistoricoHabilitacaoProfissionalRequest request) {
-        validationService.validarObrigatorios(request);
+        log.debug("Criando novo histórico de habilitação profissional");
 
-        UUID tenantId = tenantService.validarTenantAtual();
-        Tenant tenant = tenantService.obterTenantDoUsuarioAutenticado();
+        try {
+            UUID tenantId = tenantService.validarTenantAtual();
+            Tenant tenant = tenantService.obterTenantDoUsuarioAutenticado();
+            validarTenantAutenticadoOrThrow(tenantId, tenant);
 
-        HistoricoHabilitacaoProfissional saved = creator.criar(request, tenantId, tenant);
-        HistoricoHabilitacaoProfissionalResponse response = responseBuilder.build(saved);
+            HistoricoHabilitacaoProfissional saved = creator.criar(request, tenantId, tenant);
+            HistoricoHabilitacaoProfissionalResponse response = responseBuilder.build(saved);
 
-        Cache cache = cacheManager.getCache(CacheKeyUtil.CACHE_HISTORICO_HABILITACAO_PROFISSIONAL);
-        if (cache != null && response != null && response.getId() != null) {
-            cache.put(Objects.requireNonNull((Object) CacheKeyUtil.historicoHabilitacaoProfissional(tenantId, response.getId())), response);
+            Cache cache = cacheManager.getCache(CacheKeyUtil.CACHE_HISTORICO_HABILITACAO_PROFISSIONAL);
+            if (cache != null) {
+                Object key = Objects.requireNonNull((Object) CacheKeyUtil.historicoHabilitacaoProfissional(tenantId, saved.getId()));
+                cache.put(key, response);
+            }
+
+            return response;
+        } catch (BadRequestException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new InternalServerErrorException("Erro ao criar histórico de habilitação profissional", e);
         }
-
-        return response;
     }
 
     @Override
     @Transactional(readOnly = true)
     @Cacheable(cacheNames = CacheKeyUtil.CACHE_HISTORICO_HABILITACAO_PROFISSIONAL, keyGenerator = "historicoHabilitacaoProfissionalCacheKeyGenerator")
     public HistoricoHabilitacaoProfissionalResponse obterPorId(UUID id) {
-        validationService.validarId(id);
+        log.debug("Buscando histórico de habilitação profissional por ID: {} (cache miss)", id);
+        if (id == null) {
+            throw new BadRequestException("ID do histórico de habilitação profissional é obrigatório");
+        }
+
         UUID tenantId = tenantService.validarTenantAtual();
-        return responseBuilder.build(tenantEnforcer.validarAcessoCompleto(id, tenantId));
+        HistoricoHabilitacaoProfissional entity = tenantEnforcer.validarAcessoCompleto(id, tenantId);
+        return responseBuilder.build(entity);
     }
 
     @Override
     @Transactional(readOnly = true)
     public Page<HistoricoHabilitacaoProfissionalResponse> listar(Pageable pageable) {
+        log.debug("Listando históricos de habilitação profissional paginados. Página: {}, Tamanho: {}",
+                pageable.getPageNumber(), pageable.getPageSize());
+
         UUID tenantId = tenantService.validarTenantAtual();
-        return repository.findAllByTenant(tenantId, pageable).map(responseBuilder::build);
+        Page<HistoricoHabilitacaoProfissional> page = repository.findAllByTenant(tenantId, pageable);
+        return page.map(responseBuilder::build);
     }
 
     @Override
     @Transactional
     @CachePut(cacheNames = CacheKeyUtil.CACHE_HISTORICO_HABILITACAO_PROFISSIONAL, keyGenerator = "historicoHabilitacaoProfissionalCacheKeyGenerator")
     public HistoricoHabilitacaoProfissionalResponse atualizar(UUID id, HistoricoHabilitacaoProfissionalRequest request) {
-        validationService.validarId(id);
-        validationService.validarObrigatorios(request);
+        log.debug("Atualizando histórico de habilitação profissional. ID: {}", id);
+
+        if (id == null) {
+            throw new BadRequestException("ID do histórico de habilitação profissional é obrigatório");
+        }
 
         UUID tenantId = tenantService.validarTenantAtual();
         Tenant tenant = tenantService.obterTenantDoUsuarioAutenticado();
+        validarTenantAutenticadoOrThrow(tenantId, tenant);
 
         HistoricoHabilitacaoProfissional updated = updater.atualizar(id, request, tenantId, tenant);
         return responseBuilder.build(updated);
@@ -97,20 +119,25 @@ public class HistoricoHabilitacaoProfissionalServiceImpl implements HistoricoHab
     @Transactional
     @CacheEvict(cacheNames = CacheKeyUtil.CACHE_HISTORICO_HABILITACAO_PROFISSIONAL, keyGenerator = "historicoHabilitacaoProfissionalCacheKeyGenerator", beforeInvocation = false)
     public void excluir(UUID id) {
-        validationService.validarId(id);
+        log.debug("Excluindo histórico de habilitação profissional. ID: {}", id);
         UUID tenantId = tenantService.validarTenantAtual();
         inativarInternal(id, tenantId);
     }
 
     private void inativarInternal(UUID id, UUID tenantId) {
-        HistoricoHabilitacaoProfissional entity = tenantEnforcer.validarAcesso(id, tenantId);
-
-        if (Boolean.FALSE.equals(entity.getActive())) {
-            throw new BadRequestException("Registro já está inativo");
+        if (id == null) {
+            throw new BadRequestException("ID do histórico de habilitação profissional é obrigatório");
         }
 
+        HistoricoHabilitacaoProfissional entity = tenantEnforcer.validarAcesso(id, tenantId);
         entity.setActive(false);
-        repository.save(entity);
-        log.info("Registro excluído (desativado) com sucesso. ID: {}, tenant: {}", id, tenantId);
+        repository.save(Objects.requireNonNull(entity));
+        log.info("Histórico de habilitação profissional excluído (desativado) com sucesso. ID: {}", id);
+    }
+
+    private void validarTenantAutenticadoOrThrow(UUID tenantId, Tenant tenant) {
+        if (tenantId == null || tenant == null || tenant.getId() == null || !tenantId.equals(tenant.getId())) {
+            throw new BadRequestException("Não foi possível obter tenant do usuário autenticado");
+        }
     }
 }

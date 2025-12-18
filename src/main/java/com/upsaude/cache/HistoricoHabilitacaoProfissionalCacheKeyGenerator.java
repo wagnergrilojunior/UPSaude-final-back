@@ -1,6 +1,6 @@
 package com.upsaude.cache;
 
-import com.upsaude.service.TenantService;
+import com.upsaude.service.sistema.TenantService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.interceptor.KeyGenerator;
 import org.springframework.lang.NonNull;

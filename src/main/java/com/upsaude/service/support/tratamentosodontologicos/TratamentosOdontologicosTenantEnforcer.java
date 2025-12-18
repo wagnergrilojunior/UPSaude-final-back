@@ -1,13 +1,15 @@
 package com.upsaude.service.support.tratamentosodontologicos;
 
-import com.upsaude.entity.TratamentosOdontologicos;
-import com.upsaude.exception.NotFoundException;
-import com.upsaude.repository.TratamentosOdontologicosRepository;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import java.util.UUID;
+
 import org.springframework.stereotype.Service;
 
-import java.util.UUID;
+import com.upsaude.entity.odontologia.TratamentosOdontologicos;
+import com.upsaude.exception.NotFoundException;
+import com.upsaude.repository.odontologia.TratamentosOdontologicosRepository;
+
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Service
@@ -29,4 +31,3 @@ public class TratamentosOdontologicosTenantEnforcer {
         return validarAcesso(id, tenantId);
     }
 }
-

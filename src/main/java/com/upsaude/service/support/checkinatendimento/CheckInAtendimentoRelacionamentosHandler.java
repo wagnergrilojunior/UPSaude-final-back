@@ -1,11 +1,11 @@
 package com.upsaude.service.support.checkinatendimento;
 
-import com.upsaude.api.request.CheckInAtendimentoRequest;
-import com.upsaude.entity.Agendamento;
-import com.upsaude.entity.Atendimento;
-import com.upsaude.entity.CheckInAtendimento;
-import com.upsaude.entity.Paciente;
-import com.upsaude.entity.Tenant;
+import com.upsaude.api.request.clinica.atendimento.CheckInAtendimentoRequest;
+import com.upsaude.entity.agendamento.Agendamento;
+import com.upsaude.entity.clinica.atendimento.Atendimento;
+import com.upsaude.entity.clinica.atendimento.CheckInAtendimento;
+import com.upsaude.entity.paciente.Paciente;
+import com.upsaude.entity.sistema.Tenant;
 import com.upsaude.service.support.agendamento.AgendamentoTenantEnforcer;
 import com.upsaude.service.support.atendimento.AtendimentoTenantEnforcer;
 import com.upsaude.service.support.paciente.PacienteTenantEnforcer;

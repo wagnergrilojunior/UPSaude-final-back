@@ -1,13 +1,16 @@
 package com.upsaude.service.support.atendimento;
 
-import com.upsaude.entity.Atendimento;
-import com.upsaude.exception.NotFoundException;
-import com.upsaude.repository.AtendimentoRepository;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Service;
 
 import java.util.UUID;
+
+import org.springframework.stereotype.Service;
+
+import com.upsaude.entity.clinica.atendimento.Atendimento;
+import com.upsaude.exception.NotFoundException;
+import com.upsaude.repository.clinica.atendimento.AtendimentoRepository;
+
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Service

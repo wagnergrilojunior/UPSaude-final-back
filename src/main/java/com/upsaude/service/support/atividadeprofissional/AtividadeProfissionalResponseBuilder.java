@@ -1,11 +1,13 @@
 package com.upsaude.service.support.atividadeprofissional;
 
-import com.upsaude.api.response.AtividadeProfissionalResponse;
-import com.upsaude.entity.AtividadeProfissional;
-import com.upsaude.mapper.AtividadeProfissionalMapper;
-import lombok.RequiredArgsConstructor;
 import org.hibernate.Hibernate;
 import org.springframework.stereotype.Service;
+
+import com.upsaude.api.response.profissional.AtividadeProfissionalResponse;
+import com.upsaude.entity.profissional.AtividadeProfissional;
+import com.upsaude.mapper.profissional.AtividadeProfissionalMapper;
+
+import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor

@@ -1,10 +1,12 @@
 package com.upsaude.service.support.profissionaissaude;
 
-import com.upsaude.api.response.ProfissionaisSaudeResponse;
-import com.upsaude.entity.ProfissionaisSaude;
-import com.upsaude.mapper.ProfissionaisSaudeMapper;
-import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+
+import com.upsaude.api.response.profissional.ProfissionaisSaudeResponse;
+import com.upsaude.entity.profissional.ProfissionaisSaude;
+import com.upsaude.mapper.profissional.ProfissionaisSaudeMapper;
+
+import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor

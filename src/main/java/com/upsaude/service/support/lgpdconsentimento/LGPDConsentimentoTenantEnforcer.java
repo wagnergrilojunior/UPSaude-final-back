@@ -1,8 +1,8 @@
 package com.upsaude.service.support.lgpdconsentimento;
 
-import com.upsaude.entity.LGPDConsentimento;
+import com.upsaude.entity.sistema.LGPDConsentimento;
 import com.upsaude.exception.NotFoundException;
-import com.upsaude.repository.LGPDConsentimentoRepository;
+import com.upsaude.repository.sistema.LGPDConsentimentoRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;

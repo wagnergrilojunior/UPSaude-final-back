@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns="http://servicos.saude.gov.br/schema/sigtap/procedimento/habilitacao/v1/incremento" xmlns:ha="http://servicos.saude.gov.br/schema/sigtap/procedimento/habilitacao/v1/habilitacao" elementFormDefault="qualified" targetNamespace="http://servicos.saude.gov.br/schema/sigtap/procedimento/habilitacao/v1/incremento">
+    
+    <xs:import id="ha" namespace="http://servicos.saude.gov.br/schema/sigtap/procedimento/habilitacao/v1/habilitacao" schemaLocation="habilitacao.v1.xsd"/>
+    
+    <xs:annotation>
+        <xs:documentation>
+            <![CDATA[
+            Este esquema representa um Incremento.
+            É um percentual que é acrescido ao valor do Procedimento e está vinculado diretamente a uma habilitação do estabelecimento.
+            ]]>
+        </xs:documentation>
+    </xs:annotation>
+    
+    <xs:complexType name="IncrementoType">
+        <xs:sequence>
+            
+            <xs:element name="Habilitacao" minOccurs="1" maxOccurs="1" nillable="true" type="ha:HabilitacaoType">
+                <xs:annotation>
+                    <xs:documentation>
+                        <![CDATA[ Habilitação ao qual esse Incremento está vinculado. ]]>
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            
+            <xs:element name="valorPercentualSH" minOccurs="0" maxOccurs="1">
+                <xs:annotation>
+                    <xs:documentation>
+                        <![CDATA[ Percentual de Incremento para o Serviço Hospitalar. ]]>
+                    </xs:documentation>
+                </xs:annotation>
+                <xs:simpleType>
+                    <xs:restriction base="xs:decimal">
+                        <xs:minInclusive value="0"/>
+                        <xs:maxInclusive value="99999.99"/>
+                        <xs:fractionDigits value="2"/>
+                    </xs:restriction>
+                </xs:simpleType>
+            </xs:element>
+            
+            <xs:element name="valorPercentualSA" minOccurs="0" maxOccurs="1">
+                <xs:annotation>
+                    <xs:documentation>
+                        <![CDATA[ Percentual de Incremento para o Serviço Ambulatorial. ]]>
+                    </xs:documentation>
+                </xs:annotation>
+                <xs:simpleType>
+                    <xs:restriction base="xs:decimal">
+                        <xs:minInclusive value="0"/>
+                        <xs:maxInclusive value="99999.99"/>
+                        <xs:fractionDigits value="2"/>
+                    </xs:restriction>
+                </xs:simpleType>
+            </xs:element>
+            
+            <xs:element name="valorPercentualSP" minOccurs="0" maxOccurs="1">
+                <xs:annotation>
+                    <xs:documentation>
+                        <![CDATA[ Percentual de Incremento para o Serviço Profissional. ]]>
+                    </xs:documentation>
+                </xs:annotation>
+                <xs:simpleType>
+                    <xs:restriction base="xs:decimal">
+                        <xs:minInclusive value="0"/>
+                        <xs:maxInclusive value="99999.99"/>
+                        <xs:fractionDigits value="2"/>
+                    </xs:restriction>
+                </xs:simpleType>
+            </xs:element>
+            
+        </xs:sequence>
+    </xs:complexType>
+    
+</xs:schema>

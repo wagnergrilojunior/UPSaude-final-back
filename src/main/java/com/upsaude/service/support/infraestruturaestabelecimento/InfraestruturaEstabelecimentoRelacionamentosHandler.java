@@ -1,9 +1,9 @@
 package com.upsaude.service.support.infraestruturaestabelecimento;
 
-import com.upsaude.api.request.InfraestruturaEstabelecimentoRequest;
-import com.upsaude.entity.Estabelecimentos;
-import com.upsaude.entity.InfraestruturaEstabelecimento;
-import com.upsaude.entity.Tenant;
+import com.upsaude.api.request.estabelecimento.InfraestruturaEstabelecimentoRequest;
+import com.upsaude.entity.estabelecimento.Estabelecimentos;
+import com.upsaude.entity.estabelecimento.InfraestruturaEstabelecimento;
+import com.upsaude.entity.sistema.Tenant;
 import com.upsaude.service.support.estabelecimentos.EstabelecimentosTenantEnforcer;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -22,7 +22,9 @@ public class InfraestruturaEstabelecimentoRelacionamentosHandler {
 
         entity.setTenant(Objects.requireNonNull(tenant, "tenant é obrigatório"));
 
-        Estabelecimentos estabelecimento = estabelecimentosTenantEnforcer.validarAcesso(Objects.requireNonNull(request.getEstabelecimento(), "estabelecimento"), tenantId);
-        entity.setEstabelecimento(estabelecimento);
+        if (request.getEstabelecimento() != null) {
+            Estabelecimentos estabelecimento = estabelecimentosTenantEnforcer.validarAcesso(request.getEstabelecimento(), tenantId);
+            entity.setEstabelecimento(estabelecimento);
+        }
     }
 }

@@ -1,11 +1,13 @@
 package com.upsaude.service.support.vacinacoes;
 
-import com.upsaude.api.response.VacinacoesResponse;
-import com.upsaude.entity.Vacinacoes;
-import com.upsaude.mapper.VacinacoesMapper;
-import lombok.RequiredArgsConstructor;
 import org.hibernate.Hibernate;
 import org.springframework.stereotype.Service;
+
+import com.upsaude.api.response.saude_publica.vacina.VacinacoesResponse;
+import com.upsaude.entity.saude_publica.vacina.Vacinacoes;
+import com.upsaude.mapper.saude_publica.vacina.VacinacoesMapper;
+
+import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor

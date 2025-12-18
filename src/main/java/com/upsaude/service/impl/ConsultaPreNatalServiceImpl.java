@@ -1,22 +1,10 @@
 package com.upsaude.service.impl;
 
-import com.upsaude.api.request.ConsultaPreNatalRequest;
-import com.upsaude.api.response.ConsultaPreNatalResponse;
-import com.upsaude.cache.CacheKeyUtil;
-import com.upsaude.entity.ConsultaPreNatal;
-import com.upsaude.entity.Tenant;
-import com.upsaude.exception.BadRequestException;
-import com.upsaude.exception.InternalServerErrorException;
-import com.upsaude.repository.ConsultaPreNatalRepository;
-import com.upsaude.service.ConsultaPreNatalService;
-import com.upsaude.service.TenantService;
-import com.upsaude.service.support.consultaprenatal.ConsultaPreNatalCreator;
-import com.upsaude.service.support.consultaprenatal.ConsultaPreNatalDomainService;
-import com.upsaude.service.support.consultaprenatal.ConsultaPreNatalResponseBuilder;
-import com.upsaude.service.support.consultaprenatal.ConsultaPreNatalTenantEnforcer;
-import com.upsaude.service.support.consultaprenatal.ConsultaPreNatalUpdater;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import java.time.OffsetDateTime;
+import java.util.List;
+import java.util.Objects;
+import java.util.UUID;
+
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.CacheEvict;
@@ -27,10 +15,24 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.OffsetDateTime;
-import java.util.List;
-import java.util.Objects;
-import java.util.UUID;
+import com.upsaude.api.request.clinica.atendimento.ConsultaPreNatalRequest;
+import com.upsaude.api.response.clinica.atendimento.ConsultaPreNatalResponse;
+import com.upsaude.cache.CacheKeyUtil;
+import com.upsaude.entity.clinica.atendimento.ConsultaPreNatal;
+import com.upsaude.entity.sistema.Tenant;
+import com.upsaude.exception.BadRequestException;
+import com.upsaude.exception.InternalServerErrorException;
+import com.upsaude.repository.clinica.atendimento.ConsultaPreNatalRepository;
+import com.upsaude.service.clinica.atendimento.ConsultaPreNatalService;
+import com.upsaude.service.sistema.TenantService;
+import com.upsaude.service.support.consultaprenatal.ConsultaPreNatalCreator;
+import com.upsaude.service.support.consultaprenatal.ConsultaPreNatalDomainService;
+import com.upsaude.service.support.consultaprenatal.ConsultaPreNatalResponseBuilder;
+import com.upsaude.service.support.consultaprenatal.ConsultaPreNatalTenantEnforcer;
+import com.upsaude.service.support.consultaprenatal.ConsultaPreNatalUpdater;
+
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Service

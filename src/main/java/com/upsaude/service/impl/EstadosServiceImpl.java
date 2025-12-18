@@ -1,14 +1,14 @@
 package com.upsaude.service.impl;
 
-import com.upsaude.api.request.EstadosRequest;
-import com.upsaude.api.response.EstadosResponse;
+import com.upsaude.api.request.referencia.geografico.EstadosRequest;
+import com.upsaude.api.response.referencia.geografico.EstadosResponse;
 import com.upsaude.cache.CacheKeyUtil;
-import com.upsaude.entity.Estados;
+import com.upsaude.entity.referencia.geografico.Estados;
 import com.upsaude.exception.BadRequestException;
 import com.upsaude.exception.InternalServerErrorException;
 import com.upsaude.exception.NotFoundException;
-import com.upsaude.repository.EstadosRepository;
-import com.upsaude.service.EstadosService;
+import com.upsaude.repository.referencia.geografico.EstadosRepository;
+import com.upsaude.service.referencia.geografico.EstadosService;
 import com.upsaude.service.support.estados.EstadosCreator;
 import com.upsaude.service.support.estados.EstadosDomainService;
 import com.upsaude.service.support.estados.EstadosResponseBuilder;

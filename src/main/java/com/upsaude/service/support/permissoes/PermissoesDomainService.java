@@ -1,6 +1,6 @@
 package com.upsaude.service.support.permissoes;
 
-import com.upsaude.entity.Permissoes;
+import com.upsaude.entity.sistema.Permissoes;
 import com.upsaude.exception.BadRequestException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;

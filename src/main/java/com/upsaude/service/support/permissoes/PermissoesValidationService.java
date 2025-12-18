@@ -1,6 +1,6 @@
 package com.upsaude.service.support.permissoes;
 
-import com.upsaude.api.request.PermissoesRequest;
+import com.upsaude.api.request.sistema.PermissoesRequest;
 import com.upsaude.exception.BadRequestException;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;

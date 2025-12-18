@@ -1,6 +1,6 @@
 package com.upsaude.service.support.checkinatendimento;
 
-import com.upsaude.entity.CheckInAtendimento;
+import com.upsaude.entity.clinica.atendimento.CheckInAtendimento;
 import org.springframework.stereotype.Service;
 
 @Service

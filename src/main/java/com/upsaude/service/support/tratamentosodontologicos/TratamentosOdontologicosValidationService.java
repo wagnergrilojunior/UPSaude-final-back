@@ -1,6 +1,6 @@
 package com.upsaude.service.support.tratamentosodontologicos;
 
-import com.upsaude.api.request.TratamentosOdontologicosRequest;
+import com.upsaude.api.request.odontologia.TratamentosOdontologicosRequest;
 import com.upsaude.exception.BadRequestException;
 import org.springframework.stereotype.Service;
 
@@ -17,9 +17,5 @@ public class TratamentosOdontologicosValidationService {
         if (request.getProfissional() == null) {
             throw new BadRequestException("Profissional é obrigatório");
         }
-        if (request.getTitulo() == null || request.getTitulo().isBlank()) {
-            throw new BadRequestException("Título é obrigatório");
-        }
     }
 }
-

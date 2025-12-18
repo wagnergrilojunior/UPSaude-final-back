@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns="http://servicos.saude.gov.br/schema/sigtap/procedimento/habilitacao/v1/habilitacao" xmlns:ah="http://servicos.saude.gov.br/schema/sigtap/procedimento/habilitacao/v1/areahabilitacao" elementFormDefault="qualified" targetNamespace="http://servicos.saude.gov.br/schema/sigtap/procedimento/habilitacao/v1/habilitacao">
+    
+    <xs:import id="ah" namespace="http://servicos.saude.gov.br/schema/sigtap/procedimento/habilitacao/v1/areahabilitacao" schemaLocation="areahabilitacao.v1.xsd"/>
+    
+    <xs:annotation>
+        <xs:documentation>
+            <![CDATA[
+            Este esquema representa uma Habilitação. Habilitações significam que o estabelecimento de saúde reúne condições técnicas operacionais para a prestação de determinado tipo de assistência. 
+            As habilitações são concedidas aos estabelecimentos de saúde através de portarias do MS ou em alguns casos, de forma descentralizada, através de portarias dos próprios gestores estaduais ou municipais responsáveis por sua gestão. 
+            ]]>
+        </xs:documentation>
+    </xs:annotation>
+    
+    <xs:simpleType name="CodigoHabilitacaoType">
+        <xs:restriction base="xs:string">
+            <xs:length value="2"/>
+            <xs:pattern value="[0-9]{2}"/>
+        </xs:restriction>
+    </xs:simpleType>
+    
+    <xs:complexType name="HabilitacaoType">
+        <xs:sequence>
+            
+            <xs:element name="codigo" minOccurs="1" maxOccurs="1" nillable="true" type="CodigoHabilitacaoType">
+                <xs:annotation>
+                    <xs:documentation>
+                        <![CDATA[ Código identificador da Habilitação. ]]>
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            
+            <xs:element name="nome" minOccurs="0" maxOccurs="1">
+                <xs:annotation>
+                    <xs:documentation>
+                        <![CDATA[ Nome descritivo da Habilitação. ]]>
+                    </xs:documentation>
+                </xs:annotation>
+                <xs:simpleType>
+                    <xs:restriction base="xs:string">
+                        <xs:minLength value="1"/>
+                        <xs:maxLength value="150"/>
+                    </xs:restriction>
+                </xs:simpleType>
+            </xs:element>
+            
+            <xs:element name="AreaHabilitacao" minOccurs="0" maxOccurs="1" type="ah:AreaHabilitacaoType">
+                <xs:annotation>
+                    <xs:documentation>
+                        <![CDATA[ Área de Habilitações ao qual essa Habilitação está associada. ]]>
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            
+        </xs:sequence>
+    </xs:complexType>
+    
+</xs:schema>

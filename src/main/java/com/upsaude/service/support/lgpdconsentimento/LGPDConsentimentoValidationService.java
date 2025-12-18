@@ -1,6 +1,6 @@
 package com.upsaude.service.support.lgpdconsentimento;
 
-import com.upsaude.api.request.LGPDConsentimentoRequest;
+import com.upsaude.api.request.sistema.LGPDConsentimentoRequest;
 import com.upsaude.exception.BadRequestException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;

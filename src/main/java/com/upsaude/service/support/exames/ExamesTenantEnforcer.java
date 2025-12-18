@@ -1,13 +1,15 @@
 package com.upsaude.service.support.exames;
 
-import com.upsaude.entity.Exames;
-import com.upsaude.exception.NotFoundException;
-import com.upsaude.repository.ExamesRepository;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import java.util.UUID;
+
 import org.springframework.stereotype.Service;
 
-import java.util.UUID;
+import com.upsaude.entity.clinica.exame.Exames;
+import com.upsaude.exception.NotFoundException;
+import com.upsaude.repository.clinica.exame.ExamesRepository;
+
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Service

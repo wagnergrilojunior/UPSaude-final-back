@@ -1,14 +1,14 @@
 package com.upsaude.service.impl;
 
-import com.upsaude.api.request.EspecialidadesMedicasRequest;
-import com.upsaude.api.response.EspecialidadesMedicasResponse;
+import com.upsaude.api.request.profissional.EspecialidadesMedicasRequest;
+import com.upsaude.api.response.profissional.EspecialidadesMedicasResponse;
 import com.upsaude.cache.CacheKeyUtil;
-import com.upsaude.entity.EspecialidadesMedicas;
+import com.upsaude.entity.profissional.EspecialidadesMedicas;
 import com.upsaude.exception.BadRequestException;
 import com.upsaude.exception.InternalServerErrorException;
 import com.upsaude.exception.NotFoundException;
-import com.upsaude.repository.EspecialidadesMedicasRepository;
-import com.upsaude.service.EspecialidadesMedicasService;
+import com.upsaude.repository.profissional.EspecialidadesMedicasRepository;
+import com.upsaude.service.profissional.EspecialidadesMedicasService;
 import com.upsaude.service.support.especialidadesmedicas.EspecialidadesMedicasCreator;
 import com.upsaude.service.support.especialidadesmedicas.EspecialidadesMedicasDomainService;
 import com.upsaude.service.support.especialidadesmedicas.EspecialidadesMedicasResponseBuilder;

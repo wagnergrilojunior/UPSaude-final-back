@@ -1,13 +1,16 @@
 package com.upsaude.service.support.consultaprenatal;
 
-import com.upsaude.entity.ConsultaPreNatal;
-import com.upsaude.exception.NotFoundException;
-import com.upsaude.repository.ConsultaPreNatalRepository;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Service;
 
 import java.util.UUID;
+
+import org.springframework.stereotype.Service;
+
+import com.upsaude.entity.clinica.atendimento.ConsultaPreNatal;
+import com.upsaude.exception.NotFoundException;
+import com.upsaude.repository.clinica.atendimento.ConsultaPreNatalRepository;
+
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Service

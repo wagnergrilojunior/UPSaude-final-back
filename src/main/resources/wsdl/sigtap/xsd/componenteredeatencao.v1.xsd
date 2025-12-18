@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns="http://servicos.saude.gov.br/schema/sigtap/procedimento/redeatencao/v1/componenteredeatencao" xmlns:ra="http://servicos.saude.gov.br/schema/sigtap/procedimento/redeatencao/v1/redeatencao" elementFormDefault="qualified" targetNamespace="http://servicos.saude.gov.br/schema/sigtap/procedimento/redeatencao/v1/componenteredeatencao">
+    
+    <xs:import id="ra" namespace="http://servicos.saude.gov.br/schema/sigtap/procedimento/redeatencao/v1/redeatencao" schemaLocation="redeatencao.v1.xsd"/>
+    
+    <xs:annotation>
+        <xs:documentation>
+            <![CDATA[
+            Este esquema representa um Componente de Rede de Atenção. 
+            ]]>
+        </xs:documentation>
+    </xs:annotation>
+    
+    <xs:simpleType name="CodigoComponenteRedeAtencaoType">
+        <xs:restriction base="xs:string">
+            <xs:length value="5"/>
+            <xs:pattern value="[0-9]{2}\.[0-9]{2}"/>
+        </xs:restriction>
+    </xs:simpleType>
+    
+    <xs:complexType name="ComponenteRedeAtencaoType">
+        <xs:sequence>
+            
+            <xs:element name="codigo" minOccurs="1" maxOccurs="1" nillable="true" type="CodigoComponenteRedeAtencaoType">
+                <xs:annotation>
+                    <xs:documentation>
+                        <![CDATA[ Código identificador do Componente de Rede de Atenção. ]]>
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            
+            <xs:element name="nome" minOccurs="0" maxOccurs="1">
+                <xs:annotation>
+                    <xs:documentation>
+                        <![CDATA[ Nome descritivo do Componente de Rede de Atenção. ]]>
+                    </xs:documentation>
+                </xs:annotation>
+                <xs:simpleType>
+                    <xs:restriction base="xs:string">
+                        <xs:minLength value="1"/>
+                        <xs:maxLength value="150"/>
+                    </xs:restriction>
+                </xs:simpleType>
+            </xs:element>
+            
+            <xs:element name="RedeAtencao" minOccurs="0" maxOccurs="1" type="ra:RedeAtencaoType">
+                <xs:annotation>
+                    <xs:documentation>
+                        <![CDATA[ Rede de Atenção ao qual esse Componente de Rede de Atenção está associado. ]]>
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            
+        </xs:sequence>
+    </xs:complexType>
+    
+</xs:schema>

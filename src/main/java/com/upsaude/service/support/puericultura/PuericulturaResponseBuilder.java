@@ -1,11 +1,13 @@
 package com.upsaude.service.support.puericultura;
 
-import com.upsaude.api.response.PuericulturaResponse;
-import com.upsaude.entity.Puericultura;
-import com.upsaude.mapper.PuericulturaMapper;
-import lombok.RequiredArgsConstructor;
 import org.hibernate.Hibernate;
 import org.springframework.stereotype.Service;
+
+import com.upsaude.api.response.saude_publica.puericultura.PuericulturaResponse;
+import com.upsaude.entity.saude_publica.puericultura.Puericultura;
+import com.upsaude.mapper.saude_publica.puericultura.PuericulturaMapper;
+
+import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
@@ -15,12 +17,11 @@ public class PuericulturaResponseBuilder {
 
     public PuericulturaResponse build(Puericultura entity) {
         if (entity != null) {
-            Hibernate.initialize(entity.getPaciente());
-            Hibernate.initialize(entity.getProfissionalResponsavel());
-            Hibernate.initialize(entity.getEquipeSaude());
-            Hibernate.initialize(entity.getEstabelecimento());
+            if (entity.getPaciente() != null) Hibernate.initialize(entity.getPaciente());
+            if (entity.getProfissionalResponsavel() != null) Hibernate.initialize(entity.getProfissionalResponsavel());
+            if (entity.getEquipeSaude() != null) Hibernate.initialize(entity.getEquipeSaude());
+            if (entity.getEstabelecimento() != null) Hibernate.initialize(entity.getEstabelecimento());
         }
         return mapper.toResponse(entity);
     }
 }
-

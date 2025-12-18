@@ -1,11 +1,13 @@
 package com.upsaude.service.support.plantao;
 
-import com.upsaude.api.request.PlantaoRequest;
-import com.upsaude.entity.Plantao;
-import com.upsaude.entity.Tenant;
+import com.upsaude.api.request.profissional.equipe.PlantaoRequest;
+import com.upsaude.entity.profissional.Medicos;
+import com.upsaude.entity.profissional.ProfissionaisSaude;
+import com.upsaude.entity.profissional.equipe.Plantao;
+import com.upsaude.entity.sistema.Tenant;
 import com.upsaude.exception.BadRequestException;
-import com.upsaude.service.support.estabelecimentos.EstabelecimentosTenantEnforcer;
-import com.upsaude.service.support.medico.MedicoTenantEnforcer;
+import com.upsaude.exception.NotFoundException;
+import com.upsaude.repository.profissional.MedicosRepository;
 import com.upsaude.service.support.profissionaissaude.ProfissionaisSaudeTenantEnforcer;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -17,27 +19,26 @@ import java.util.UUID;
 public class PlantaoRelacionamentosHandler {
 
     private final ProfissionaisSaudeTenantEnforcer profissionaisSaudeTenantEnforcer;
-    private final MedicoTenantEnforcer medicoTenantEnforcer;
-    private final EstabelecimentosTenantEnforcer estabelecimentosTenantEnforcer;
+    private final MedicosRepository medicosRepository;
 
-    public Plantao processarRelacionamentos(PlantaoRequest request, Plantao entity, UUID tenantId, Tenant tenant) {
+    public void resolver(Plantao entity, PlantaoRequest request, UUID tenantId, Tenant tenant) {
+        if (request == null) return;
+
         if (tenantId == null || tenant == null || tenant.getId() == null || !tenantId.equals(tenant.getId())) {
             throw new BadRequestException("Não foi possível obter tenant do usuário autenticado");
         }
 
         entity.setTenant(tenant);
 
-        entity.setProfissional(profissionaisSaudeTenantEnforcer.validarAcesso(request.getProfissional(), tenantId));
-
-        if (request.getMedico() != null) {
-            entity.setMedico(medicoTenantEnforcer.validarAcesso(request.getMedico(), tenantId));
-        } else {
-            entity.setMedico(null);
+        if (request.getProfissional() != null) {
+            ProfissionaisSaude profissional = profissionaisSaudeTenantEnforcer.validarAcesso(request.getProfissional(), tenantId);
+            entity.setProfissional(profissional);
         }
 
-        entity.setEstabelecimento(estabelecimentosTenantEnforcer.validarAcesso(request.getEstabelecimento(), tenantId));
-
-        return entity;
+        if (request.getMedico() != null) {
+            Medicos medico = medicosRepository.findByIdAndTenant(request.getMedico(), tenantId)
+                    .orElseThrow(() -> new NotFoundException("Médico não encontrado com ID: " + request.getMedico()));
+            entity.setMedico(medico);
+        }
     }
 }
-

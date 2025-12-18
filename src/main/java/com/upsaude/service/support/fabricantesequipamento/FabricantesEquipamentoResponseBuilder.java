@@ -1,10 +1,12 @@
 package com.upsaude.service.support.fabricantesequipamento;
 
-import com.upsaude.api.response.FabricantesEquipamentoResponse;
-import com.upsaude.entity.FabricantesEquipamento;
-import com.upsaude.mapper.FabricantesEquipamentoMapper;
-import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+
+import com.upsaude.api.response.estabelecimento.equipamento.FabricantesEquipamentoResponse;
+import com.upsaude.entity.estabelecimento.equipamento.FabricantesEquipamento;
+import com.upsaude.mapper.estabelecimento.equipamento.FabricantesEquipamentoMapper;
+
+import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
@@ -16,4 +18,3 @@ public class FabricantesEquipamentoResponseBuilder {
         return mapper.toResponse(entity);
     }
 }
-

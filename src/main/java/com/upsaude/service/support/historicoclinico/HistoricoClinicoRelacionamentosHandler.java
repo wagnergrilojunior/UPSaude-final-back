@@ -1,22 +1,23 @@
 package com.upsaude.service.support.historicoclinico;
 
-import com.upsaude.api.request.HistoricoClinicoRequest;
-import com.upsaude.entity.Agendamento;
-import com.upsaude.entity.Atendimento;
-import com.upsaude.entity.Cirurgia;
-import com.upsaude.entity.Exames;
-import com.upsaude.entity.HistoricoClinico;
-import com.upsaude.entity.Paciente;
-import com.upsaude.entity.ProfissionaisSaude;
-import com.upsaude.entity.ReceitasMedicas;
-import com.upsaude.entity.Tenant;
-import com.upsaude.service.support.agendamento.AgendamentoTenantEnforcer;
-import com.upsaude.service.support.atendimento.AtendimentoTenantEnforcer;
-import com.upsaude.service.support.cirurgia.CirurgiaTenantEnforcer;
-import com.upsaude.service.support.exames.ExamesTenantEnforcer;
+import com.upsaude.api.request.clinica.prontuario.HistoricoClinicoRequest;
+import com.upsaude.entity.agendamento.Agendamento;
+import com.upsaude.entity.clinica.atendimento.Atendimento;
+import com.upsaude.entity.clinica.cirurgia.Cirurgia;
+import com.upsaude.entity.clinica.exame.Exames;
+import com.upsaude.entity.clinica.medicacao.ReceitasMedicas;
+import com.upsaude.entity.clinica.prontuario.HistoricoClinico;
+import com.upsaude.entity.paciente.Paciente;
+import com.upsaude.entity.profissional.ProfissionaisSaude;
+import com.upsaude.entity.sistema.Tenant;
+import com.upsaude.exception.NotFoundException;
+import com.upsaude.repository.agendamento.AgendamentoRepository;
+import com.upsaude.repository.clinica.atendimento.AtendimentoRepository;
+import com.upsaude.repository.clinica.cirurgia.CirurgiaRepository;
+import com.upsaude.repository.clinica.exame.ExamesRepository;
+import com.upsaude.repository.clinica.medicacao.ReceitasMedicasRepository;
 import com.upsaude.service.support.paciente.PacienteTenantEnforcer;
 import com.upsaude.service.support.profissionaissaude.ProfissionaisSaudeTenantEnforcer;
-import com.upsaude.service.support.receitasmedicas.ReceitasMedicasTenantEnforcer;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -29,70 +30,55 @@ public class HistoricoClinicoRelacionamentosHandler {
 
     private final PacienteTenantEnforcer pacienteTenantEnforcer;
     private final ProfissionaisSaudeTenantEnforcer profissionaisSaudeTenantEnforcer;
-    private final AtendimentoTenantEnforcer atendimentoTenantEnforcer;
-    private final AgendamentoTenantEnforcer agendamentoTenantEnforcer;
-    private final ExamesTenantEnforcer examesTenantEnforcer;
-    private final ReceitasMedicasTenantEnforcer receitasMedicasTenantEnforcer;
-    private final CirurgiaTenantEnforcer cirurgiaTenantEnforcer;
+    private final AtendimentoRepository atendimentoRepository;
+    private final AgendamentoRepository agendamentoRepository;
+    private final ExamesRepository examesRepository;
+    private final ReceitasMedicasRepository receitasMedicasRepository;
+    private final CirurgiaRepository cirurgiaRepository;
 
     public void resolver(HistoricoClinico entity, HistoricoClinicoRequest request, UUID tenantId, Tenant tenant) {
         if (request == null) return;
 
         entity.setTenant(Objects.requireNonNull(tenant, "tenant é obrigatório"));
 
-        Paciente paciente = pacienteTenantEnforcer.validarAcesso(Objects.requireNonNull(request.getPaciente(), "paciente"), tenantId);
-        entity.setPaciente(paciente);
+        if (request.getPaciente() != null) {
+            Paciente paciente = pacienteTenantEnforcer.validarAcesso(request.getPaciente(), tenantId);
+            entity.setPaciente(paciente);
+        }
 
         if (request.getProfissional() != null) {
             ProfissionaisSaude profissional = profissionaisSaudeTenantEnforcer.validarAcesso(request.getProfissional(), tenantId);
             entity.setProfissional(profissional);
-        } else {
-            entity.setProfissional(null);
         }
 
         if (request.getAtendimento() != null) {
-            Atendimento atendimento = atendimentoTenantEnforcer.validarAcesso(request.getAtendimento(), tenantId);
+            Atendimento atendimento = atendimentoRepository.findByIdAndTenant(request.getAtendimento(), tenantId)
+                    .orElseThrow(() -> new NotFoundException("Atendimento não encontrado com ID: " + request.getAtendimento()));
             entity.setAtendimento(atendimento);
-        } else {
-            entity.setAtendimento(null);
         }
 
         if (request.getAgendamento() != null) {
-            Agendamento agendamento = agendamentoTenantEnforcer.validarAcesso(request.getAgendamento(), tenantId);
+            Agendamento agendamento = agendamentoRepository.findByIdAndTenant(request.getAgendamento(), tenantId)
+                    .orElseThrow(() -> new NotFoundException("Agendamento não encontrado com ID: " + request.getAgendamento()));
             entity.setAgendamento(agendamento);
-        } else {
-            entity.setAgendamento(null);
         }
 
         if (request.getExame() != null) {
-            Exames exame = examesTenantEnforcer.validarAcesso(request.getExame(), tenantId);
+            Exames exame = examesRepository.findByIdAndTenant(request.getExame(), tenantId)
+                    .orElseThrow(() -> new NotFoundException("Exame não encontrado com ID: " + request.getExame()));
             entity.setExame(exame);
-        } else {
-            entity.setExame(null);
         }
 
         if (request.getReceita() != null) {
-            ReceitasMedicas receita = receitasMedicasTenantEnforcer.validarAcesso(request.getReceita(), tenantId);
+            ReceitasMedicas receita = receitasMedicasRepository.findByIdAndTenant(request.getReceita(), tenantId)
+                    .orElseThrow(() -> new NotFoundException("Receita médica não encontrada com ID: " + request.getReceita()));
             entity.setReceita(receita);
-        } else {
-            entity.setReceita(null);
         }
 
         if (request.getCirurgia() != null) {
-            Cirurgia cirurgia = cirurgiaTenantEnforcer.validarAcesso(request.getCirurgia(), tenantId);
+            Cirurgia cirurgia = cirurgiaRepository.findByIdAndTenant(request.getCirurgia(), tenantId)
+                    .orElseThrow(() -> new NotFoundException("Cirurgia não encontrada com ID: " + request.getCirurgia()));
             entity.setCirurgia(cirurgia);
-        } else {
-            entity.setCirurgia(null);
-        }
-
-        if (entity.getAtendimento() != null && entity.getAtendimento().getEstabelecimento() != null) {
-            entity.setEstabelecimento(entity.getAtendimento().getEstabelecimento());
-        } else if (entity.getAgendamento() != null && entity.getAgendamento().getEstabelecimento() != null) {
-            entity.setEstabelecimento(entity.getAgendamento().getEstabelecimento());
-        } else if (entity.getProfissional() != null && entity.getProfissional().getEstabelecimento() != null) {
-            entity.setEstabelecimento(entity.getProfissional().getEstabelecimento());
-        } else {
-            entity.setEstabelecimento(null);
         }
     }
 }

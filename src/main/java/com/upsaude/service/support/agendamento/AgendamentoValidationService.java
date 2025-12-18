@@ -1,9 +1,11 @@
 package com.upsaude.service.support.agendamento;
 
-import com.upsaude.api.request.AgendamentoRequest;
+import com.upsaude.entity.paciente.Paciente;
+
+import com.upsaude.api.request.agendamento.AgendamentoRequest;
 import com.upsaude.enums.StatusAgendamentoEnum;
 import com.upsaude.exception.BadRequestException;
-import com.upsaude.repository.AgendamentoRepository;
+import com.upsaude.repository.agendamento.AgendamentoRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 

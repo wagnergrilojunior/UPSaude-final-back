@@ -1,10 +1,12 @@
 package com.upsaude.service.support.estados;
 
-import com.upsaude.api.response.EstadosResponse;
-import com.upsaude.entity.Estados;
-import com.upsaude.mapper.EstadosMapper;
-import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+
+import com.upsaude.api.response.referencia.geografico.EstadosResponse;
+import com.upsaude.entity.referencia.geografico.Estados;
+import com.upsaude.mapper.referencia.geografico.EstadosMapper;
+
+import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor

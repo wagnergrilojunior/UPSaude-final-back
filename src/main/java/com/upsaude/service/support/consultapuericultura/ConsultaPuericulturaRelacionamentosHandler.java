@@ -1,17 +1,15 @@
 package com.upsaude.service.support.consultapuericultura;
 
-import com.upsaude.api.request.ConsultaPuericulturaRequest;
-import com.upsaude.entity.ConsultaPuericultura;
-import com.upsaude.entity.Estabelecimentos;
-import com.upsaude.entity.ProfissionaisSaude;
-import com.upsaude.entity.Puericultura;
-import com.upsaude.entity.Tenant;
+import com.upsaude.api.request.clinica.atendimento.ConsultaPuericulturaRequest;
+import com.upsaude.entity.clinica.atendimento.ConsultaPuericultura;
+import com.upsaude.entity.saude_publica.puericultura.Puericultura;
+import com.upsaude.entity.sistema.Tenant;
+import com.upsaude.exception.BadRequestException;
 import com.upsaude.service.support.profissionaissaude.ProfissionaisSaudeTenantEnforcer;
 import com.upsaude.service.support.puericultura.PuericulturaTenantEnforcer;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.util.Objects;
 import java.util.UUID;
 
 @Service
@@ -21,28 +19,25 @@ public class ConsultaPuericulturaRelacionamentosHandler {
     private final PuericulturaTenantEnforcer puericulturaTenantEnforcer;
     private final ProfissionaisSaudeTenantEnforcer profissionaisSaudeTenantEnforcer;
 
-    public void resolver(ConsultaPuericultura entity, ConsultaPuericulturaRequest request, UUID tenantId, Tenant tenant) {
-        if (request == null) return;
-
-        if (request.getPuericultura() != null) {
-            Puericultura puericultura = puericulturaTenantEnforcer.validarAcessoCompleto(request.getPuericultura(), tenantId);
-            entity.setPuericultura(puericultura);
+    public ConsultaPuericultura processarRelacionamentos(ConsultaPuericulturaRequest request,
+                                                         ConsultaPuericultura entity,
+                                                         UUID tenantId,
+                                                         Tenant tenant) {
+        if (tenantId == null || tenant == null || tenant.getId() == null || !tenantId.equals(tenant.getId())) {
+            throw new BadRequestException("Não foi possível obter tenant do usuário autenticado");
         }
 
-        if (request.getProfissional() != null) {
-            ProfissionaisSaude profissional = profissionaisSaudeTenantEnforcer.validarAcesso(request.getProfissional(), tenantId);
-            entity.setProfissional(profissional);
+        entity.setTenant(tenant);
+
+        Puericultura puericultura = puericulturaTenantEnforcer.validarAcesso(request.getPuericultura(), tenantId);
+        entity.setPuericultura(puericultura);
+
+        entity.setProfissional(profissionaisSaudeTenantEnforcer.validarAcesso(request.getProfissional(), tenantId));
+
+        if (puericultura.getEstabelecimento() != null) {
+            entity.setEstabelecimento(puericultura.getEstabelecimento());
         }
 
-        entity.setTenant(Objects.requireNonNull(tenant, "tenant é obrigatório"));
-
-        Estabelecimentos estabelecimento = null;
-        if (entity.getPuericultura() != null) {
-            estabelecimento = entity.getPuericultura().getEstabelecimento();
-        }
-        if (estabelecimento != null) {
-            entity.setEstabelecimento(estabelecimento);
-        }
+        return entity;
     }
 }
-

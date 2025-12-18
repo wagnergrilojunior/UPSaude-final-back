@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns="http://servicos.saude.gov.br/schema/sigtap/v1/idadelimite" elementFormDefault="qualified" targetNamespace="http://servicos.saude.gov.br/schema/sigtap/v1/idadelimite">
+    
+    <xs:annotation>
+        <xs:documentation>
+            <![CDATA[
+            Este esquema representa uma Idade Limite. 
+            ]]>
+        </xs:documentation>
+    </xs:annotation>
+    
+    <xs:complexType name="IdadeLimiteType">
+        <xs:sequence>
+            
+            <xs:element name="quantidadeLimite" minOccurs="1" maxOccurs="1" nillable="false">
+                <xs:annotation>
+                    <xs:documentation>
+                        <![CDATA[ O valor numérico do limite de idade. ]]>
+                    </xs:documentation>
+                </xs:annotation>
+                <xs:simpleType>
+                    <xs:restriction base="xs:integer">
+                        <xs:minInclusive value="0"/>
+                        <xs:maxInclusive value="999"/>
+                    </xs:restriction>
+                </xs:simpleType>
+            </xs:element>
+            
+            <xs:element name="unidadeLimite" minOccurs="1" maxOccurs="1" nillable="false" type="UnidadeLimiteType">
+                <xs:annotation>
+                    <xs:documentation>
+                        <![CDATA[ Unidade do valor do limite de idade: Meses ou Anos ]]>
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            
+        </xs:sequence>
+    </xs:complexType>
+    
+    <xs:simpleType name="UnidadeLimiteType">
+        <xs:restriction base="xs:string">
+            <xs:enumeration value="MESES"/>
+            <xs:enumeration value="ANOS"/>
+        </xs:restriction>
+    </xs:simpleType>
+    
+</xs:schema>

@@ -1,16 +1,14 @@
 package com.upsaude.service.support.receitasmedicas;
 
-import com.upsaude.api.request.ReceitasMedicasRequest;
-import com.upsaude.entity.CidDoencas;
-import com.upsaude.entity.Estabelecimentos;
-import com.upsaude.entity.Medicacao;
-import com.upsaude.entity.Medicos;
-import com.upsaude.entity.Paciente;
-import com.upsaude.entity.ReceitasMedicas;
-import com.upsaude.entity.Tenant;
+import com.upsaude.api.request.clinica.medicacao.ReceitasMedicasRequest;
+import com.upsaude.entity.estabelecimento.Estabelecimentos;
+import com.upsaude.entity.clinica.medicacao.Medicacao;
+import com.upsaude.entity.profissional.Medicos;
+import com.upsaude.entity.paciente.Paciente;
+import com.upsaude.entity.clinica.medicacao.ReceitasMedicas;
+import com.upsaude.entity.sistema.Tenant;
 import com.upsaude.exception.NotFoundException;
-import com.upsaude.repository.CidDoencasRepository;
-import com.upsaude.repository.MedicacaoRepository;
+import com.upsaude.repository.clinica.medicacao.MedicacaoRepository;
 import com.upsaude.service.support.estabelecimentos.EstabelecimentosTenantEnforcer;
 import com.upsaude.service.support.medico.MedicoTenantEnforcer;
 import com.upsaude.service.support.paciente.PacienteTenantEnforcer;
@@ -29,7 +27,6 @@ public class ReceitasMedicasRelacionamentosHandler {
     private final EstabelecimentosTenantEnforcer estabelecimentosTenantEnforcer;
     private final MedicoTenantEnforcer medicoTenantEnforcer;
     private final PacienteTenantEnforcer pacienteTenantEnforcer;
-    private final CidDoencasRepository cidDoencasRepository;
     private final MedicacaoRepository medicacaoRepository;
 
     public void resolver(ReceitasMedicas entity, ReceitasMedicasRequest request, UUID tenantId, Tenant tenant) {
@@ -44,13 +41,7 @@ public class ReceitasMedicasRelacionamentosHandler {
         Paciente paciente = pacienteTenantEnforcer.validarAcesso(request.getPaciente(), tenantId);
         entity.setPaciente(paciente);
 
-        if (request.getCidPrincipal() != null) {
-            CidDoencas cidPrincipal = cidDoencasRepository.findById(request.getCidPrincipal())
-                .orElseThrow(() -> new NotFoundException("CID não encontrado com ID: " + request.getCidPrincipal()));
-            entity.setCidPrincipal(cidPrincipal);
-        } else {
-            entity.setCidPrincipal(null);
-        }
+        // CidPrincipal removido - CidDoencas foi deletado
 
         List<UUID> medicacoesIds = request.getMedicacoes() != null ? request.getMedicacoes() : List.of();
         if (!medicacoesIds.isEmpty()) {

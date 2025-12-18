@@ -1,6 +1,6 @@
 package com.upsaude.service.support.estados;
 
-import com.upsaude.entity.Estados;
+import com.upsaude.entity.referencia.geografico.Estados;
 import com.upsaude.exception.BadRequestException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;

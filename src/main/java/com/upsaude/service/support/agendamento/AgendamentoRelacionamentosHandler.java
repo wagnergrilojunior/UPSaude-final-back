@@ -1,19 +1,19 @@
 package com.upsaude.service.support.agendamento;
 
-import com.upsaude.api.request.AgendamentoRequest;
-import com.upsaude.entity.Agendamento;
-import com.upsaude.entity.Convenio;
-import com.upsaude.entity.EspecialidadesMedicas;
-import com.upsaude.entity.Medicos;
-import com.upsaude.entity.Paciente;
-import com.upsaude.entity.ProfissionaisSaude;
+import com.upsaude.api.request.agendamento.AgendamentoRequest;
+import com.upsaude.entity.agendamento.Agendamento;
+import com.upsaude.entity.convenio.Convenio;
+import com.upsaude.entity.profissional.EspecialidadesMedicas;
+import com.upsaude.entity.profissional.Medicos;
+import com.upsaude.entity.paciente.Paciente;
+import com.upsaude.entity.profissional.ProfissionaisSaude;
 import com.upsaude.exception.NotFoundException;
-import com.upsaude.repository.AgendamentoRepository;
-import com.upsaude.repository.ConvenioRepository;
-import com.upsaude.repository.EspecialidadesMedicasRepository;
-import com.upsaude.repository.MedicosRepository;
-import com.upsaude.repository.PacienteRepository;
-import com.upsaude.repository.ProfissionaisSaudeRepository;
+import com.upsaude.repository.agendamento.AgendamentoRepository;
+import com.upsaude.repository.convenio.ConvenioRepository;
+import com.upsaude.repository.profissional.EspecialidadesMedicasRepository;
+import com.upsaude.repository.profissional.MedicosRepository;
+import com.upsaude.repository.paciente.PacienteRepository;
+import com.upsaude.repository.profissional.ProfissionaisSaudeRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 

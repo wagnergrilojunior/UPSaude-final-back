@@ -1,15 +1,15 @@
 package com.upsaude.service.impl;
 
 import com.upsaude.cache.CacheKeyUtil;
-import com.upsaude.api.request.LGPDConsentimentoRequest;
-import com.upsaude.api.response.LGPDConsentimentoResponse;
-import com.upsaude.entity.LGPDConsentimento;
-import com.upsaude.entity.Tenant;
+import com.upsaude.api.request.sistema.LGPDConsentimentoRequest;
+import com.upsaude.api.response.sistema.LGPDConsentimentoResponse;
+import com.upsaude.entity.sistema.LGPDConsentimento;
+import com.upsaude.entity.sistema.Tenant;
 import com.upsaude.exception.BadRequestException;
 import com.upsaude.exception.NotFoundException;
-import com.upsaude.repository.LGPDConsentimentoRepository;
-import com.upsaude.service.LGPDConsentimentoService;
-import com.upsaude.service.TenantService;
+import com.upsaude.repository.sistema.LGPDConsentimentoRepository;
+import com.upsaude.service.sistema.LGPDConsentimentoService;
+import com.upsaude.service.sistema.TenantService;
 import com.upsaude.service.support.lgpdconsentimento.LGPDConsentimentoCreator;
 import com.upsaude.service.support.lgpdconsentimento.LGPDConsentimentoResponseBuilder;
 import com.upsaude.service.support.lgpdconsentimento.LGPDConsentimentoTenantEnforcer;

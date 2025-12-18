@@ -1,13 +1,15 @@
 package com.upsaude.service.support.medicaoclinica;
 
-import com.upsaude.entity.MedicaoClinica;
-import com.upsaude.exception.NotFoundException;
-import com.upsaude.repository.MedicaoClinicaRepository;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import java.util.UUID;
+
 import org.springframework.stereotype.Service;
 
-import java.util.UUID;
+import com.upsaude.entity.profissional.medicao.MedicaoClinica;
+import com.upsaude.exception.NotFoundException;
+import com.upsaude.repository.profissional.medicao.MedicaoClinicaRepository;
+
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Service

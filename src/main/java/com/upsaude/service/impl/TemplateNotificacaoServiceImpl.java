@@ -1,23 +1,8 @@
 package com.upsaude.service.impl;
 
-import com.upsaude.api.request.TemplateNotificacaoRequest;
-import com.upsaude.api.response.TemplateNotificacaoResponse;
-import com.upsaude.cache.CacheKeyUtil;
-import com.upsaude.entity.TemplateNotificacao;
-import com.upsaude.entity.Tenant;
-import com.upsaude.enums.CanalNotificacaoEnum;
-import com.upsaude.enums.TipoNotificacaoEnum;
-import com.upsaude.exception.BadRequestException;
-import com.upsaude.repository.TemplateNotificacaoRepository;
-import com.upsaude.service.TemplateNotificacaoService;
-import com.upsaude.service.TenantService;
-import com.upsaude.service.support.templatenotificacao.TemplateNotificacaoCreator;
-import com.upsaude.service.support.templatenotificacao.TemplateNotificacaoDomainService;
-import com.upsaude.service.support.templatenotificacao.TemplateNotificacaoResponseBuilder;
-import com.upsaude.service.support.templatenotificacao.TemplateNotificacaoTenantEnforcer;
-import com.upsaude.service.support.templatenotificacao.TemplateNotificacaoUpdater;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import java.util.Objects;
+import java.util.UUID;
+
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.CacheEvict;
@@ -28,8 +13,25 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Objects;
-import java.util.UUID;
+import com.upsaude.api.request.sistema.notificacao.TemplateNotificacaoRequest;
+import com.upsaude.api.response.sistema.notificacao.TemplateNotificacaoResponse;
+import com.upsaude.cache.CacheKeyUtil;
+import com.upsaude.entity.sistema.notificacao.TemplateNotificacao;
+import com.upsaude.entity.sistema.Tenant;
+import com.upsaude.enums.CanalNotificacaoEnum;
+import com.upsaude.enums.TipoNotificacaoEnum;
+import com.upsaude.exception.BadRequestException;
+import com.upsaude.exception.InternalServerErrorException;
+import com.upsaude.repository.sistema.notificacao.TemplateNotificacaoRepository;
+import com.upsaude.service.sistema.notificacao.TemplateNotificacaoService;
+import com.upsaude.service.sistema.TenantService;
+import com.upsaude.service.support.templatenotificacao.TemplateNotificacaoCreator;
+import com.upsaude.service.support.templatenotificacao.TemplateNotificacaoResponseBuilder;
+import com.upsaude.service.support.templatenotificacao.TemplateNotificacaoTenantEnforcer;
+import com.upsaude.service.support.templatenotificacao.TemplateNotificacaoUpdater;
+
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Service
@@ -43,45 +45,58 @@ public class TemplateNotificacaoServiceImpl implements TemplateNotificacaoServic
     private final TemplateNotificacaoCreator creator;
     private final TemplateNotificacaoUpdater updater;
     private final TemplateNotificacaoResponseBuilder responseBuilder;
-    private final TemplateNotificacaoDomainService domainService;
     private final TemplateNotificacaoTenantEnforcer tenantEnforcer;
 
     @Override
     @Transactional
     public TemplateNotificacaoResponse criar(TemplateNotificacaoRequest request) {
-        UUID tenantId = tenantService.validarTenantAtual();
-        Tenant tenant = tenantService.obterTenantDoUsuarioAutenticado();
-        validarTenantAutenticadoOrThrow(tenantId, tenant);
+        log.debug("Criando novo template de notificação");
 
-        TemplateNotificacao saved = creator.criar(request, tenantId, tenant);
-        TemplateNotificacaoResponse response = responseBuilder.build(saved);
+        try {
+            UUID tenantId = tenantService.validarTenantAtual();
+            Tenant tenant = tenantService.obterTenantDoUsuarioAutenticado();
+            validarTenantAutenticadoOrThrow(tenantId, tenant);
 
-        Cache cache = cacheManager.getCache(CacheKeyUtil.CACHE_TEMPLATES_NOTIFICACAO);
-        if (cache != null) {
-            Object key = Objects.requireNonNull((Object) CacheKeyUtil.templateNotificacao(tenantId, saved.getId()));
-            cache.put(key, response);
+            TemplateNotificacao saved = creator.criar(request, tenantId, tenant);
+            TemplateNotificacaoResponse response = responseBuilder.build(saved);
+
+            Cache cache = cacheManager.getCache(CacheKeyUtil.CACHE_TEMPLATES_NOTIFICACAO);
+            if (cache != null) {
+                Object key = Objects.requireNonNull((Object) CacheKeyUtil.templateNotificacao(tenantId, saved.getId()));
+                cache.put(key, response);
+            }
+
+            return response;
+        } catch (BadRequestException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new InternalServerErrorException("Erro ao criar template de notificação", e);
         }
-
-        return response;
     }
 
     @Override
     @Transactional(readOnly = true)
     @Cacheable(cacheNames = CacheKeyUtil.CACHE_TEMPLATES_NOTIFICACAO, keyGenerator = "templateNotificacaoCacheKeyGenerator")
     public TemplateNotificacaoResponse obterPorId(UUID id) {
+        log.debug("Buscando template de notificação por ID: {} (cache miss)", id);
         if (id == null) {
             throw new BadRequestException("ID do template de notificação é obrigatório");
         }
+
         UUID tenantId = tenantService.validarTenantAtual();
-        return responseBuilder.build(tenantEnforcer.validarAcessoCompleto(id, tenantId));
+        TemplateNotificacao entity = tenantEnforcer.validarAcessoCompleto(id, tenantId);
+        return responseBuilder.build(entity);
     }
 
     @Override
     @Transactional(readOnly = true)
     public Page<TemplateNotificacaoResponse> listar(Pageable pageable, UUID estabelecimentoId, TipoNotificacaoEnum tipoNotificacao, CanalNotificacaoEnum canal, String nome) {
-        UUID tenantId = tenantService.validarTenantAtual();
+        log.debug("Listando templates de notificação paginados. Página: {}, Tamanho: {}",
+                pageable.getPageNumber(), pageable.getPageSize());
 
+        UUID tenantId = tenantService.validarTenantAtual();
         Page<TemplateNotificacao> page;
+
         if (estabelecimentoId != null) {
             page = repository.findByEstabelecimentoIdAndTenantIdOrderByNomeAsc(estabelecimentoId, tenantId, pageable);
         } else if (tipoNotificacao != null) {
@@ -101,9 +116,12 @@ public class TemplateNotificacaoServiceImpl implements TemplateNotificacaoServic
     @Transactional
     @CachePut(cacheNames = CacheKeyUtil.CACHE_TEMPLATES_NOTIFICACAO, keyGenerator = "templateNotificacaoCacheKeyGenerator")
     public TemplateNotificacaoResponse atualizar(UUID id, TemplateNotificacaoRequest request) {
+        log.debug("Atualizando template de notificação. ID: {}", id);
+
         if (id == null) {
             throw new BadRequestException("ID do template de notificação é obrigatório");
         }
+
         UUID tenantId = tenantService.validarTenantAtual();
         Tenant tenant = tenantService.obterTenantDoUsuarioAutenticado();
         validarTenantAutenticadoOrThrow(tenantId, tenant);
@@ -116,6 +134,7 @@ public class TemplateNotificacaoServiceImpl implements TemplateNotificacaoServic
     @Transactional
     @CacheEvict(cacheNames = CacheKeyUtil.CACHE_TEMPLATES_NOTIFICACAO, keyGenerator = "templateNotificacaoCacheKeyGenerator", beforeInvocation = false)
     public void excluir(UUID id) {
+        log.debug("Excluindo template de notificação. ID: {}", id);
         UUID tenantId = tenantService.validarTenantAtual();
         inativarInternal(id, tenantId);
     }
@@ -126,9 +145,9 @@ public class TemplateNotificacaoServiceImpl implements TemplateNotificacaoServic
         }
 
         TemplateNotificacao entity = tenantEnforcer.validarAcesso(id, tenantId);
-        domainService.validarPodeInativar(entity);
         entity.setActive(false);
         repository.save(Objects.requireNonNull(entity));
+        log.info("Template de notificação excluído (desativado) com sucesso. ID: {}", id);
     }
 
     private void validarTenantAutenticadoOrThrow(UUID tenantId, Tenant tenant) {
@@ -137,4 +156,3 @@ public class TemplateNotificacaoServiceImpl implements TemplateNotificacaoServic
         }
     }
 }
-

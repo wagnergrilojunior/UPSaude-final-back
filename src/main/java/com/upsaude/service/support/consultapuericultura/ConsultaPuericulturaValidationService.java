@@ -1,6 +1,6 @@
 package com.upsaude.service.support.consultapuericultura;
 
-import com.upsaude.api.request.ConsultaPuericulturaRequest;
+import com.upsaude.api.request.clinica.atendimento.ConsultaPuericulturaRequest;
 import com.upsaude.exception.BadRequestException;
 import org.springframework.stereotype.Service;
 
@@ -22,4 +22,3 @@ public class ConsultaPuericulturaValidationService {
         }
     }
 }
-

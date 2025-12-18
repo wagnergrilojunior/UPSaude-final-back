@@ -1,13 +1,13 @@
 package com.upsaude.service.support.filaespera;
 
-import com.upsaude.api.request.FilaEsperaRequest;
-import com.upsaude.entity.EspecialidadesMedicas;
-import com.upsaude.entity.Estabelecimentos;
-import com.upsaude.entity.FilaEspera;
-import com.upsaude.entity.Tenant;
+import com.upsaude.api.request.agendamento.FilaEsperaRequest;
+import com.upsaude.entity.profissional.EspecialidadesMedicas;
+import com.upsaude.entity.estabelecimento.Estabelecimentos;
+import com.upsaude.entity.agendamento.FilaEspera;
+import com.upsaude.entity.sistema.Tenant;
 import com.upsaude.exception.BadRequestException;
 import com.upsaude.exception.NotFoundException;
-import com.upsaude.repository.EspecialidadesMedicasRepository;
+import com.upsaude.repository.profissional.EspecialidadesMedicasRepository;
 import com.upsaude.service.support.agendamento.AgendamentoTenantEnforcer;
 import com.upsaude.service.support.estabelecimentos.EstabelecimentosTenantEnforcer;
 import com.upsaude.service.support.medico.MedicoTenantEnforcer;

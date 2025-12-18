@@ -1,6 +1,6 @@
 package com.upsaude.service.support.logsauditoria;
 
-import com.upsaude.entity.LogsAuditoria;
+import com.upsaude.entity.sistema.LogsAuditoria;
 import org.springframework.stereotype.Service;
 
 @Service

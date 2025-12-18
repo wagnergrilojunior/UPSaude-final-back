@@ -1,6 +1,6 @@
 package com.upsaude.service.support.filaespera;
 
-import com.upsaude.entity.FilaEspera;
+import com.upsaude.entity.agendamento.FilaEspera;
 import com.upsaude.exception.BadRequestException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;

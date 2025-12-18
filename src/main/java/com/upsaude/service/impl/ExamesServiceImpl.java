@@ -14,19 +14,19 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.upsaude.api.request.ExamesRequest;
-import com.upsaude.api.response.ExamesResponse;
-import com.upsaude.entity.Exames;
-import com.upsaude.entity.Tenant;
+import com.upsaude.api.request.clinica.exame.ExamesRequest;
+import com.upsaude.api.response.clinica.exame.ExamesResponse;
 import com.upsaude.cache.CacheKeyUtil;
+import com.upsaude.entity.clinica.exame.Exames;
+import com.upsaude.entity.sistema.Tenant;
 import com.upsaude.exception.BadRequestException;
 import com.upsaude.exception.InternalServerErrorException;
 import com.upsaude.exception.NotFoundException;
-import com.upsaude.repository.AtendimentoRepository;
-import com.upsaude.repository.ConsultasRepository;
-import com.upsaude.repository.ExamesRepository;
-import com.upsaude.service.ExamesService;
-import com.upsaude.service.TenantService;
+import com.upsaude.repository.clinica.atendimento.AtendimentoRepository;
+import com.upsaude.repository.clinica.atendimento.ConsultasRepository;
+import com.upsaude.repository.clinica.exame.ExamesRepository;
+import com.upsaude.service.clinica.exame.ExamesService;
+import com.upsaude.service.sistema.TenantService;
 import com.upsaude.service.support.exames.ExamesCreator;
 import com.upsaude.service.support.exames.ExamesDomainService;
 import com.upsaude.service.support.exames.ExamesResponseBuilder;
@@ -45,7 +45,6 @@ public class ExamesServiceImpl implements ExamesService {
     private final CacheManager cacheManager;
     private final TenantService tenantService;
 
-    // Mantidos para handler/validações (injeção indireta em support, mas alguns projetos usam direto)
     @SuppressWarnings("unused")
     private final AtendimentoRepository atendimentoRepository;
     @SuppressWarnings("unused")

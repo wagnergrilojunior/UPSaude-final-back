@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns="http://servicos.saude.gov.br/schema/sigtap/publicacao/v1/documento" xmlns:td="http://servicos.saude.gov.br/schema/sigtap/publicacao/v1/tipodocumento" xmlns:oo="http://servicos.saude.gov.br/schema/sigtap/publicacao/v1/orgaoorigem" elementFormDefault="qualified" targetNamespace="http://servicos.saude.gov.br/schema/sigtap/publicacao/v1/documento">
+    
+    <xs:import id="td" namespace="http://servicos.saude.gov.br/schema/sigtap/publicacao/v1/tipodocumento" schemaLocation="tipodocumento.v1.xsd"/>
+    <xs:import id="oo" namespace="http://servicos.saude.gov.br/schema/sigtap/publicacao/v1/orgaoorigem" schemaLocation="orgaoorigem.v1.xsd"/>
+    
+    <xs:annotation>
+        <xs:documentation>
+            <![CDATA[
+            Este esquema representa um Documento de Publicação. 
+            É em um Documento onde são definidos novos Procedimentos, ou alterados Procedimentos existentes.
+            ]]>
+        </xs:documentation>
+    </xs:annotation>
+    
+    <xs:simpleType name="NumeroDocumentoType">
+        <xs:restriction base="xs:string">
+            <xs:minLength value="1"/>
+            <xs:maxLength value="10"/>
+        </xs:restriction>
+    </xs:simpleType>
+    
+    <xs:complexType name="DocumentoType">
+        <xs:sequence>
+            
+            <xs:element name="numeroDocumento" minOccurs="1" maxOccurs="1" nillable="true" type="NumeroDocumentoType">
+                <xs:annotation>
+                    <xs:documentation>
+                        <![CDATA[ Número do Documento. ]]>
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            
+            <xs:element name="TipoDocumento" minOccurs="1" maxOccurs="1" nillable="true" type="td:TipoDocumentoType">
+                <xs:annotation>
+                    <xs:documentation>
+                        <![CDATA[ Tipo de Documento que caracteriza o Documento. ]]>
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            
+            <xs:element name="OrgaoOrigem" minOccurs="1" maxOccurs="1" nillable="true" type="oo:OrgaoOrigemType">
+                <xs:annotation>
+                    <xs:documentation>
+                        <![CDATA[ Órgão que emitiu o Documento. ]]>
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            
+            <xs:element name="dataPublicacao" minOccurs="0" maxOccurs="1" type="xs:date">
+                <xs:annotation>
+                    <xs:documentation>
+                        <![CDATA[ Data da publicação do Documento. ]]>
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            
+        </xs:sequence>
+    </xs:complexType>
+    
+</xs:schema>

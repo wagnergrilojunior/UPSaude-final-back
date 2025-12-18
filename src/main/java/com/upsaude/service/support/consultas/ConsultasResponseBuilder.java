@@ -1,11 +1,13 @@
 package com.upsaude.service.support.consultas;
 
-import com.upsaude.api.response.ConsultasResponse;
-import com.upsaude.entity.Consultas;
-import com.upsaude.mapper.ConsultasMapper;
-import lombok.RequiredArgsConstructor;
 import org.hibernate.Hibernate;
 import org.springframework.stereotype.Service;
+
+import com.upsaude.api.response.clinica.atendimento.ConsultasResponse;
+import com.upsaude.entity.clinica.atendimento.Consultas;
+import com.upsaude.mapper.clinica.atendimento.ConsultasMapper;
+
+import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
@@ -20,7 +22,6 @@ public class ConsultasResponseBuilder {
             Hibernate.initialize(entity.getProfissionalSaude());
             Hibernate.initialize(entity.getEspecialidade());
             Hibernate.initialize(entity.getConvenio());
-            Hibernate.initialize(entity.getCidPrincipal());
             Hibernate.initialize(entity.getEstabelecimento());
         }
         return mapper.toResponse(entity);

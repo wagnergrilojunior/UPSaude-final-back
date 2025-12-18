@@ -1,36 +1,36 @@
 package com.upsaude.service.impl;
 
-import com.upsaude.api.request.DoencasPacienteRequest;
-import com.upsaude.api.request.DoencasPacienteSimplificadoRequest;
-import com.upsaude.api.response.DoencasPacienteResponse;
-import com.upsaude.entity.CidDoencas;
-import com.upsaude.entity.Doencas;
-import com.upsaude.entity.DoencasPaciente;
-import com.upsaude.entity.Paciente;
-import com.upsaude.entity.Tenant;
-import com.upsaude.exception.BadRequestException;
-import com.upsaude.exception.NotFoundException;
-import com.upsaude.mapper.DoencasPacienteMapper;
-import com.upsaude.mapper.embeddable.DiagnosticoDoencaPacienteMapper;
-import com.upsaude.mapper.embeddable.AcompanhamentoDoencaPacienteMapper;
-import com.upsaude.mapper.embeddable.TratamentoAtualDoencaPacienteMapper;
-import com.upsaude.repository.CidDoencasRepository;
-import com.upsaude.repository.DoencasPacienteRepository;
-import com.upsaude.repository.DoencasRepository;
-import com.upsaude.repository.PacienteRepository;
-import com.upsaude.repository.TenantRepository;
-import com.upsaude.service.DoencasPacienteService;
-import com.upsaude.service.TenantService;
-import jakarta.transaction.Transactional;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.Page;
+import java.util.UUID;
+
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import java.util.UUID;
+import com.upsaude.api.request.clinica.doencas.DoencasPacienteRequest;
+import com.upsaude.api.request.clinica.doencas.DoencasPacienteSimplificadoRequest;
+import com.upsaude.api.response.clinica.doencas.DoencasPacienteResponse;
+import com.upsaude.entity.clinica.doencas.Doencas;
+import com.upsaude.entity.clinica.doencas.DoencasPaciente;
+import com.upsaude.entity.paciente.Paciente;
+import com.upsaude.entity.sistema.Tenant;
+import com.upsaude.exception.BadRequestException;
+import com.upsaude.exception.NotFoundException;
+import com.upsaude.mapper.clinica.doencas.DoencasPacienteMapper;
+import com.upsaude.mapper.embeddable.AcompanhamentoDoencaPacienteMapper;
+import com.upsaude.mapper.embeddable.DiagnosticoDoencaPacienteMapper;
+import com.upsaude.mapper.embeddable.TratamentoAtualDoencaPacienteMapper;
+import com.upsaude.repository.clinica.doencas.DoencasPacienteRepository;
+import com.upsaude.repository.clinica.doencas.DoencasRepository;
+import com.upsaude.repository.paciente.PacienteRepository;
+import com.upsaude.repository.sistema.TenantRepository;
+import com.upsaude.service.clinica.doencas.DoencasPacienteService;
+import com.upsaude.service.sistema.TenantService;
+
+import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Service
@@ -44,7 +44,6 @@ public class DoencasPacienteServiceImpl implements DoencasPacienteService {
     private final TratamentoAtualDoencaPacienteMapper tratamentoAtualDoencaPacienteMapper;
     private final PacienteRepository pacienteRepository;
     private final DoencasRepository doencasRepository;
-    private final CidDoencasRepository cidDoencasRepository;
     private final TenantRepository tenantRepository;
     private final TenantService tenantService;
 
@@ -68,11 +67,7 @@ public class DoencasPacienteServiceImpl implements DoencasPacienteService {
             doencasPaciente.setDoenca(doenca);
         }
 
-        if (request.getCidPrincipal() != null) {
-            CidDoencas cidPrincipal = cidDoencasRepository.findById(request.getCidPrincipal())
-                    .orElseThrow(() -> new NotFoundException("CID não encontrado com ID: " + request.getCidPrincipal()));
-            doencasPaciente.setCidPrincipal(cidPrincipal);
-        }
+        // CidPrincipal removido - CidDoencas foi deletado
 
         Tenant tenant = tenantService.obterTenantDoUsuarioAutenticado();
         if (tenant == null) {
@@ -255,11 +250,7 @@ public class DoencasPacienteServiceImpl implements DoencasPacienteService {
             doencasPaciente.setObservacoes(request.getObservacoes());
         }
 
-        if (request.getCidPrincipal() != null) {
-            CidDoencas cidPrincipal = cidDoencasRepository.findById(request.getCidPrincipal())
-                    .orElseThrow(() -> new NotFoundException("CID não encontrado com ID: " + request.getCidPrincipal()));
-            doencasPaciente.setCidPrincipal(cidPrincipal);
-        }
+        // CidPrincipal removido - CidDoencas foi deletado
     }
 
 }

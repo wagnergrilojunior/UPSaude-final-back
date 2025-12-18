@@ -1,13 +1,15 @@
 package com.upsaude.service.support.escalatrabalho;
 
-import com.upsaude.entity.EscalaTrabalho;
-import com.upsaude.exception.NotFoundException;
-import com.upsaude.repository.EscalaTrabalhoRepository;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import java.util.UUID;
+
 import org.springframework.stereotype.Service;
 
-import java.util.UUID;
+import com.upsaude.entity.profissional.equipe.EscalaTrabalho;
+import com.upsaude.exception.NotFoundException;
+import com.upsaude.repository.profissional.equipe.EscalaTrabalhoRepository;
+
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Service

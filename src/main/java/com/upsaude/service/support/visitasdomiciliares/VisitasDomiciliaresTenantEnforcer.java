@@ -1,13 +1,15 @@
 package com.upsaude.service.support.visitasdomiciliares;
 
-import com.upsaude.entity.VisitasDomiciliares;
-import com.upsaude.exception.NotFoundException;
-import com.upsaude.repository.VisitasDomiciliaresRepository;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import java.util.UUID;
+
 import org.springframework.stereotype.Service;
 
-import java.util.UUID;
+import com.upsaude.entity.saude_publica.visita.VisitasDomiciliares;
+import com.upsaude.exception.NotFoundException;
+import com.upsaude.repository.saude_publica.visita.VisitasDomiciliaresRepository;
+
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Service

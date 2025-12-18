@@ -1,10 +1,10 @@
 package com.upsaude.service.support.filaespera;
 
-import com.upsaude.api.request.FilaEsperaRequest;
-import com.upsaude.entity.FilaEspera;
-import com.upsaude.entity.Tenant;
-import com.upsaude.mapper.FilaEsperaMapper;
-import com.upsaude.repository.FilaEsperaRepository;
+import com.upsaude.api.request.agendamento.FilaEsperaRequest;
+import com.upsaude.entity.agendamento.FilaEspera;
+import com.upsaude.entity.sistema.Tenant;
+import com.upsaude.mapper.agendamento.FilaEsperaMapper;
+import com.upsaude.repository.agendamento.FilaEsperaRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;

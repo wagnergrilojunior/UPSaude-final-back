@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns="http://servicos.saude.gov.br/schema/sigtap/procedimento/v1/sexopermitido" xmlns:corp="http://servicos.saude.gov.br/schema/corporativo/pessoafisica/v2/sexo" elementFormDefault="qualified" targetNamespace="http://servicos.saude.gov.br/schema/sigtap/procedimento/v1/sexopermitido">
+    
+    <xs:import id="corp" namespace="http://servicos.saude.gov.br/schema/corporativo/pessoafisica/v2/sexo" schemaLocation="sexo.v2.xsd"/>
+    
+    <xs:annotation>
+        <xs:documentation>
+            <![CDATA[
+            Este esquema limita os valores possíveis para Sexo, ou gênero, permitido para a realização de um procedimento: Masculino, Feminino ou Ambos. 
+            ]]>
+        </xs:documentation>
+    </xs:annotation>
+    
+    <xs:simpleType name="SexoPermitidoType">
+        <xs:union memberTypes="corp:SexoType _AmbosSexoPermitidoType"/>
+    </xs:simpleType>
+    
+    <xs:simpleType name="_AmbosSexoPermitidoType">
+        
+        <xs:restriction base="xs:string">
+            <xs:enumeration value="AMBOS"/>
+            <xs:enumeration value="NAO_SE_APLICA"/>
+        </xs:restriction>
+        
+    </xs:simpleType>
+    
+</xs:schema>

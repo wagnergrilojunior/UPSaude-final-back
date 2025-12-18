@@ -1,16 +1,18 @@
 package com.upsaude.service.support.notificacao;
 
-import com.upsaude.api.request.NotificacaoRequest;
-import com.upsaude.entity.Notificacao;
-import com.upsaude.entity.Tenant;
-import com.upsaude.mapper.NotificacaoMapper;
-import com.upsaude.repository.NotificacaoRepository;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Service;
-
 import java.util.Objects;
 import java.util.UUID;
+
+import org.springframework.stereotype.Service;
+
+import com.upsaude.api.request.sistema.notificacao.NotificacaoRequest;
+import com.upsaude.entity.sistema.notificacao.Notificacao;
+import com.upsaude.entity.sistema.Tenant;
+import com.upsaude.mapper.sistema.notificacao.NotificacaoMapper;
+import com.upsaude.repository.sistema.notificacao.NotificacaoRepository;
+
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Service
@@ -27,6 +29,7 @@ public class NotificacaoUpdater {
         validationService.validarObrigatorios(request);
 
         Notificacao entity = tenantEnforcer.validarAcesso(id, tenantId);
+
         mapper.updateFromRequest(request, entity);
         relacionamentosHandler.resolver(entity, request, tenantId, tenant);
 
@@ -35,4 +38,3 @@ public class NotificacaoUpdater {
         return saved;
     }
 }
-

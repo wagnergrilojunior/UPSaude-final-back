@@ -1,13 +1,15 @@
 package com.upsaude.service.support.departamentos;
 
-import com.upsaude.api.request.DepartamentosRequest;
-import com.upsaude.entity.Departamentos;
-import com.upsaude.entity.Estabelecimentos;
-import com.upsaude.service.support.estabelecimentos.EstabelecimentosTenantEnforcer;
-import lombok.RequiredArgsConstructor;
+import java.util.UUID;
+
 import org.springframework.stereotype.Service;
 
-import java.util.UUID;
+import com.upsaude.api.request.estabelecimento.departamento.DepartamentosRequest;
+import com.upsaude.entity.estabelecimento.Estabelecimentos;
+import com.upsaude.entity.estabelecimento.departamento.Departamentos;
+import com.upsaude.service.support.estabelecimentos.EstabelecimentosTenantEnforcer;
+
+import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor

@@ -1,9 +1,9 @@
 package com.upsaude.service.support.consultaprenatal;
 
-import com.upsaude.api.request.ConsultaPreNatalRequest;
-import com.upsaude.entity.ConsultaPreNatal;
-import com.upsaude.entity.PreNatal;
-import com.upsaude.entity.Tenant;
+import com.upsaude.api.request.clinica.atendimento.ConsultaPreNatalRequest;
+import com.upsaude.entity.clinica.atendimento.ConsultaPreNatal;
+import com.upsaude.entity.saude_publica.planejamento.PreNatal;
+import com.upsaude.entity.sistema.Tenant;
 import com.upsaude.exception.BadRequestException;
 import com.upsaude.service.support.prenatal.PreNatalTenantEnforcer;
 import com.upsaude.service.support.profissionaissaude.ProfissionaisSaudeTenantEnforcer;

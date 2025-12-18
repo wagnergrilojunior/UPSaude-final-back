@@ -1,6 +1,6 @@
 package com.upsaude.service.support.escalatrabalho;
 
-import com.upsaude.api.request.EscalaTrabalhoRequest;
+import com.upsaude.api.request.profissional.equipe.EscalaTrabalhoRequest;
 import com.upsaude.exception.BadRequestException;
 import org.springframework.stereotype.Service;
 
@@ -11,8 +11,8 @@ public class EscalaTrabalhoValidationService {
         if (request == null) {
             throw new BadRequestException("Dados da escala de trabalho são obrigatórios");
         }
-        if (request.getProfissional() == null) {
-            throw new BadRequestException("Profissional é obrigatório");
+        if (request.getProfissional() == null && request.getMedico() == null) {
+            throw new BadRequestException("Profissional ou médico é obrigatório");
         }
         if (request.getDiaSemana() == null) {
             throw new BadRequestException("Dia da semana é obrigatório");
@@ -22,9 +22,6 @@ public class EscalaTrabalhoValidationService {
         }
         if (request.getHoraSaida() == null) {
             throw new BadRequestException("Hora de saída é obrigatória");
-        }
-        if (request.getHoraEntrada() != null && request.getHoraSaida() != null && !request.getHoraSaida().isAfter(request.getHoraEntrada())) {
-            throw new BadRequestException("Hora de saída deve ser após a hora de entrada");
         }
     }
 }

@@ -1,6 +1,6 @@
 package com.upsaude.service.support.lgpdconsentimento;
 
-import com.upsaude.entity.LGPDConsentimento;
+import com.upsaude.entity.sistema.LGPDConsentimento;
 import org.springframework.stereotype.Service;
 
 @Service

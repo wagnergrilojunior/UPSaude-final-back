@@ -1,13 +1,15 @@
 package com.upsaude.service.support.historicoclinico;
 
-import com.upsaude.entity.HistoricoClinico;
-import com.upsaude.exception.NotFoundException;
-import com.upsaude.repository.HistoricoClinicoRepository;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import java.util.UUID;
+
 import org.springframework.stereotype.Service;
 
-import java.util.UUID;
+import com.upsaude.entity.clinica.prontuario.HistoricoClinico;
+import com.upsaude.exception.NotFoundException;
+import com.upsaude.repository.clinica.prontuario.HistoricoClinicoRepository;
+
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Service
@@ -20,8 +22,8 @@ public class HistoricoClinicoTenantEnforcer {
         log.debug("Validando acesso ao histórico clínico. ID: {}, tenant: {}", id, tenantId);
         return repository.findByIdAndTenant(id, tenantId)
             .orElseThrow(() -> {
-                log.warn("Registro não encontrado. ID: {}, tenant: {}", id, tenantId);
-                return new NotFoundException("Registro do histórico clínico não encontrado com ID: " + id);
+                log.warn("Histórico clínico não encontrado. ID: {}, tenant: {}", id, tenantId);
+                return new NotFoundException("Histórico clínico não encontrado com ID: " + id);
             });
     }
 

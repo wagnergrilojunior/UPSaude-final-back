@@ -1,6 +1,6 @@
 package com.upsaude.service.support.prenatal;
 
-import com.upsaude.entity.PreNatal;
+import com.upsaude.entity.saude_publica.planejamento.PreNatal;
 import com.upsaude.enums.StatusPreNatalEnum;
 import com.upsaude.exception.BadRequestException;
 import lombok.extern.slf4j.Slf4j;

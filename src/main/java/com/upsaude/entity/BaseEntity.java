@@ -1,4 +1,7 @@
 package com.upsaude.entity;
+import com.upsaude.entity.sistema.Tenant;
+
+import com.upsaude.entity.estabelecimento.Estabelecimentos;
 
 import java.time.OffsetDateTime;
 import java.util.UUID;

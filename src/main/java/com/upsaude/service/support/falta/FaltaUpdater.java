@@ -1,16 +1,18 @@
 package com.upsaude.service.support.falta;
 
-import com.upsaude.api.request.FaltaRequest;
-import com.upsaude.entity.Falta;
-import com.upsaude.entity.Tenant;
-import com.upsaude.mapper.FaltaMapper;
-import com.upsaude.repository.FaltaRepository;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Service;
-
 import java.util.Objects;
 import java.util.UUID;
+
+import org.springframework.stereotype.Service;
+
+import com.upsaude.api.request.profissional.equipe.FaltaRequest;
+import com.upsaude.entity.profissional.equipe.Falta;
+import com.upsaude.entity.sistema.Tenant;
+import com.upsaude.mapper.profissional.equipe.FaltaMapper;
+import com.upsaude.repository.profissional.equipe.FaltaRepository;
+
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Service
@@ -25,16 +27,14 @@ public class FaltaUpdater {
 
     public Falta atualizar(UUID id, FaltaRequest request, UUID tenantId, Tenant tenant) {
         validationService.validarObrigatorios(request);
-        validationService.validarConsistenciaDatas(request);
 
         Falta entity = tenantEnforcer.validarAcesso(id, tenantId);
 
         mapper.updateFromRequest(request, entity);
-        relacionamentosHandler.processarRelacionamentos(request, entity, tenantId, tenant);
+        relacionamentosHandler.resolver(entity, request, tenantId, tenant);
 
         Falta saved = repository.save(Objects.requireNonNull(entity));
         log.info("Falta atualizada com sucesso. ID: {}, tenant: {}", saved.getId(), tenantId);
         return saved;
     }
 }
-

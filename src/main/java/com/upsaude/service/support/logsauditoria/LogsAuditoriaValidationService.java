@@ -1,6 +1,6 @@
 package com.upsaude.service.support.logsauditoria;
 
-import com.upsaude.api.request.LogsAuditoriaRequest;
+import com.upsaude.api.request.sistema.LogsAuditoriaRequest;
 import com.upsaude.exception.BadRequestException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;

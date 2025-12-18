@@ -1,8 +1,8 @@
 package com.upsaude.service.support.filaespera;
 
-import com.upsaude.entity.FilaEspera;
+import com.upsaude.entity.agendamento.FilaEspera;
 import com.upsaude.exception.NotFoundException;
-import com.upsaude.repository.FilaEsperaRepository;
+import com.upsaude.repository.agendamento.FilaEsperaRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;

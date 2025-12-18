@@ -1,12 +1,13 @@
 package com.upsaude.service.support.medicacao;
 
-import com.upsaude.entity.Medicacao;
+import org.springframework.stereotype.Service;
+
+import com.upsaude.entity.clinica.medicacao.Medicacao;
 import com.upsaude.entity.embeddable.ConservacaoArmazenamentoMedicamento;
 import com.upsaude.entity.embeddable.ContraindicacoesPrecaucoesMedicamento;
 import com.upsaude.entity.embeddable.DosagemAdministracaoMedicamento;
 import com.upsaude.entity.embeddable.IdentificacaoMedicamento;
 import com.upsaude.entity.embeddable.RegistroControleMedicamento;
-import org.springframework.stereotype.Service;
 
 @Service
 public class MedicacaoSanitizer {

@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns="http://servicos.saude.gov.br/schema/sigtap/procedimento/v1/complexidade" elementFormDefault="qualified" targetNamespace="http://servicos.saude.gov.br/schema/sigtap/procedimento/v1/complexidade">
+    
+    <xs:annotation>
+        <xs:documentation>
+            <![CDATA[
+            Este esquema determina os valores possíveis para Complexidade: Atenção Básica, Média Complexidade, Alta Complexidade/Custo e Não se aplica.
+            ]]>
+        </xs:documentation>
+    </xs:annotation>
+    
+    <xs:simpleType name="ComplexidadeType">
+        
+        <xs:restriction base="xs:string">
+            <xs:enumeration value="ATENCAO_BASICA"/>
+            <xs:enumeration value="MEDIA_COMPLEXIDADE"/>
+            <xs:enumeration value="ALTA_COMPLEXIDADE_OU_CUSTO"/>
+            <xs:enumeration value="NAO_SE_APLICA"/>
+        </xs:restriction>
+        
+    </xs:simpleType>
+    
+</xs:schema>

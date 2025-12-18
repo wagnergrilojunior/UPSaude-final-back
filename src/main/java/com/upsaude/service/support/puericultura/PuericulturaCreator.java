@@ -1,16 +1,18 @@
 package com.upsaude.service.support.puericultura;
 
-import com.upsaude.api.request.PuericulturaRequest;
-import com.upsaude.entity.Puericultura;
-import com.upsaude.entity.Tenant;
-import com.upsaude.mapper.PuericulturaMapper;
-import com.upsaude.repository.PuericulturaRepository;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Service;
-
 import java.util.Objects;
 import java.util.UUID;
+
+import org.springframework.stereotype.Service;
+
+import com.upsaude.api.request.saude_publica.puericultura.PuericulturaRequest;
+import com.upsaude.entity.saude_publica.puericultura.Puericultura;
+import com.upsaude.entity.sistema.Tenant;
+import com.upsaude.mapper.saude_publica.puericultura.PuericulturaMapper;
+import com.upsaude.repository.saude_publica.puericultura.PuericulturaRepository;
+
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Service
@@ -20,7 +22,6 @@ public class PuericulturaCreator {
     private final PuericulturaRepository repository;
     private final PuericulturaMapper mapper;
     private final PuericulturaValidationService validationService;
-    private final PuericulturaDomainService domainService;
     private final PuericulturaRelacionamentosHandler relacionamentosHandler;
 
     public Puericultura criar(PuericulturaRequest request, UUID tenantId, Tenant tenant) {
@@ -28,7 +29,6 @@ public class PuericulturaCreator {
 
         Puericultura entity = mapper.fromRequest(request);
         entity.setActive(true);
-        domainService.aplicarDefaults(entity);
 
         relacionamentosHandler.resolver(entity, request, tenantId, tenant);
 
@@ -37,4 +37,3 @@ public class PuericulturaCreator {
         return saved;
     }
 }
-

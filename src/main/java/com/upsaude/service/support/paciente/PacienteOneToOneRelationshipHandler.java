@@ -1,13 +1,21 @@
 package com.upsaude.service.support.paciente;
 
-import com.upsaude.api.request.PacienteRequest;
-import com.upsaude.entity.*;
-import com.upsaude.exception.NotFoundException;
-import com.upsaude.repository.*;
-import org.springframework.stereotype.Service;
 
 import java.util.UUID;
 import java.util.function.Consumer;
+
+import org.springframework.stereotype.Service;
+
+import com.upsaude.api.request.paciente.PacienteRequest;
+import com.upsaude.entity.convenio.Convenio;
+import com.upsaude.entity.paciente.Paciente;
+import com.upsaude.exception.NotFoundException;
+import com.upsaude.repository.convenio.ConvenioRepository;
+import com.upsaude.repository.paciente.DadosClinicosBasicosRepository;
+import com.upsaude.repository.paciente.DadosSociodemograficosRepository;
+import com.upsaude.repository.paciente.ResponsavelLegalRepository;
+import com.upsaude.repository.sistema.LGPDConsentimentoRepository;
+import com.upsaude.repository.sistema.integracao.IntegracaoGovRepository;
 
 @Service
 public class PacienteOneToOneRelationshipHandler {

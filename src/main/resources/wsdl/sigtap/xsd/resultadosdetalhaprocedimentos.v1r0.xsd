@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns="http://servicos.saude.gov.br/wsdl/mensageria/v1r0/resultadosdetalhaprocedimentos" xmlns:detalheadicional="http://servicos.saude.gov.br/wsdl/mensageria/sigtap/v1/detalheadicional" xmlns:procedimento="http://servicos.saude.gov.br/schema/sigtap/procedimento/v1/procedimento" elementFormDefault="qualified" targetNamespace="http://servicos.saude.gov.br/wsdl/mensageria/v1r0/resultadosdetalhaprocedimentos">
+
+	<xs:import id="procedimento" namespace="http://servicos.saude.gov.br/schema/sigtap/procedimento/v1/procedimento" schemaLocation="procedimento.v1.xsd"/>
+
+	<xs:import id="detalheadicional" namespace="http://servicos.saude.gov.br/wsdl/mensageria/sigtap/v1/detalheadicional" schemaLocation="detalheadicional.v1.xsd"/>
+
+	<xs:annotation>
+		<xs:documentation>
+			Representa uma lista de resultado de
+			compativilidade.
+		</xs:documentation>
+	</xs:annotation>
+
+	<xs:element name="ResultadosDetalhaProcedimentos" type="ResultadosDetalhaProcedimentosType"/>
+
+	<xs:complexType name="ResultadosDetalhaProcedimentosType">
+		<xs:sequence>
+			<xs:element minOccurs="1" maxOccurs="1" ref="procedimento:Procedimento">
+				<xs:annotation>
+					<xs:documentation>Resposta da procedimento
+					</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element minOccurs="0" maxOccurs="unbounded" ref="detalheadicional:DetalheAdicional">
+				<xs:annotation>
+					<xs:documentation>Lista de detalheadicional</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+</xs:schema>

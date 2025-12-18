@@ -1,8 +1,8 @@
 package com.upsaude.service.support.perfisusuarios;
 
-import com.upsaude.entity.PerfisUsuarios;
+import com.upsaude.entity.sistema.PerfisUsuarios;
 import com.upsaude.exception.NotFoundException;
-import com.upsaude.repository.PerfisUsuariosRepository;
+import com.upsaude.repository.sistema.PerfisUsuariosRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;

@@ -1,14 +1,16 @@
 package com.upsaude.service.support.fabricantesequipamento;
 
-import com.upsaude.api.request.FabricantesEquipamentoRequest;
-import com.upsaude.entity.FabricantesEquipamento;
-import com.upsaude.mapper.FabricantesEquipamentoMapper;
-import com.upsaude.repository.FabricantesEquipamentoRepository;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import java.util.Objects;
+
 import org.springframework.stereotype.Service;
 
-import java.util.Objects;
+import com.upsaude.api.request.estabelecimento.equipamento.FabricantesEquipamentoRequest;
+import com.upsaude.entity.estabelecimento.equipamento.FabricantesEquipamento;
+import com.upsaude.mapper.estabelecimento.equipamento.FabricantesEquipamentoMapper;
+import com.upsaude.repository.estabelecimento.equipamento.FabricantesEquipamentoRepository;
+
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Service
@@ -21,7 +23,6 @@ public class FabricantesEquipamentoCreator {
 
     public FabricantesEquipamento criar(FabricantesEquipamentoRequest request) {
         validationService.validarObrigatorios(request);
-        validationService.validarUnicidadeParaCriacao(request);
 
         FabricantesEquipamento entity = mapper.fromRequest(request);
         entity.setActive(true);
@@ -31,4 +32,3 @@ public class FabricantesEquipamentoCreator {
         return saved;
     }
 }
-

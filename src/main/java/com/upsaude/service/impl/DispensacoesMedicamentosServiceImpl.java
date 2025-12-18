@@ -1,16 +1,16 @@
 package com.upsaude.service.impl;
 
-import com.upsaude.api.request.DispensacoesMedicamentosRequest;
-import com.upsaude.api.response.DispensacoesMedicamentosResponse;
+import com.upsaude.api.request.clinica.medicacao.DispensacoesMedicamentosRequest;
+import com.upsaude.api.response.clinica.medicacao.DispensacoesMedicamentosResponse;
 import com.upsaude.cache.CacheKeyUtil;
-import com.upsaude.entity.DispensacoesMedicamentos;
+import com.upsaude.entity.clinica.medicacao.DispensacoesMedicamentos;
 import com.upsaude.exception.BadRequestException;
 import com.upsaude.exception.InternalServerErrorException;
 import com.upsaude.exception.NotFoundException;
-import com.upsaude.repository.DispensacoesMedicamentosRepository;
-import com.upsaude.service.DispensacoesMedicamentosService;
-import com.upsaude.service.TenantService;
-import com.upsaude.entity.Tenant;
+import com.upsaude.repository.clinica.medicacao.DispensacoesMedicamentosRepository;
+import com.upsaude.service.clinica.medicacao.DispensacoesMedicamentosService;
+import com.upsaude.service.sistema.TenantService;
+import com.upsaude.entity.sistema.Tenant;
 import com.upsaude.service.support.dispensacoesmedicamentos.DispensacoesMedicamentosCreator;
 import com.upsaude.service.support.dispensacoesmedicamentos.DispensacoesMedicamentosResponseBuilder;
 import com.upsaude.service.support.dispensacoesmedicamentos.DispensacoesMedicamentosTenantEnforcer;

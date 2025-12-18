@@ -1,11 +1,13 @@
 package com.upsaude.service.support.plantao;
 
-import com.upsaude.api.response.PlantaoResponse;
-import com.upsaude.entity.Plantao;
-import com.upsaude.mapper.PlantaoMapper;
-import lombok.RequiredArgsConstructor;
 import org.hibernate.Hibernate;
 import org.springframework.stereotype.Service;
+
+import com.upsaude.api.response.profissional.equipe.PlantaoResponse;
+import com.upsaude.entity.profissional.equipe.Plantao;
+import com.upsaude.mapper.profissional.equipe.PlantaoMapper;
+
+import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
@@ -15,11 +17,10 @@ public class PlantaoResponseBuilder {
 
     public PlantaoResponse build(Plantao entity) {
         if (entity != null) {
-            if (entity.getEstabelecimento() != null) Hibernate.initialize(entity.getEstabelecimento());
             if (entity.getProfissional() != null) Hibernate.initialize(entity.getProfissional());
             if (entity.getMedico() != null) Hibernate.initialize(entity.getMedico());
+            if (entity.getEstabelecimento() != null) Hibernate.initialize(entity.getEstabelecimento());
         }
         return mapper.toResponse(entity);
     }
 }
-

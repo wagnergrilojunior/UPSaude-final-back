@@ -1,11 +1,13 @@
 package com.upsaude.service.support.exames;
 
-import com.upsaude.api.response.ExamesResponse;
-import com.upsaude.entity.Exames;
-import com.upsaude.mapper.ExamesMapper;
-import lombok.RequiredArgsConstructor;
 import org.hibernate.Hibernate;
 import org.springframework.stereotype.Service;
+
+import com.upsaude.api.response.clinica.exame.ExamesResponse;
+import com.upsaude.entity.clinica.exame.Exames;
+import com.upsaude.mapper.clinica.exame.ExamesMapper;
+
+import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor

@@ -1,16 +1,18 @@
 package com.upsaude.service.support.controleponto;
 
-import com.upsaude.api.request.ControlePontoRequest;
-import com.upsaude.entity.ControlePonto;
-import com.upsaude.entity.Tenant;
-import com.upsaude.mapper.ControlePontoMapper;
-import com.upsaude.repository.ControlePontoRepository;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Service;
-
 import java.util.Objects;
 import java.util.UUID;
+
+import org.springframework.stereotype.Service;
+
+import com.upsaude.api.request.profissional.equipe.ControlePontoRequest;
+import com.upsaude.entity.profissional.equipe.ControlePonto;
+import com.upsaude.entity.sistema.Tenant;
+import com.upsaude.mapper.profissional.equipe.ControlePontoMapper;
+import com.upsaude.repository.profissional.equipe.ControlePontoRepository;
+
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Service
@@ -22,7 +24,6 @@ public class ControlePontoUpdater {
     private final ControlePontoTenantEnforcer tenantEnforcer;
     private final ControlePontoValidationService validationService;
     private final ControlePontoRelacionamentosHandler relacionamentosHandler;
-    private final ControlePontoDomainService domainService;
 
     public ControlePonto atualizar(UUID id, ControlePontoRequest request, UUID tenantId, Tenant tenant) {
         validationService.validarObrigatorios(request);
@@ -30,11 +31,10 @@ public class ControlePontoUpdater {
         ControlePonto entity = tenantEnforcer.validarAcesso(id, tenantId);
 
         mapper.updateFromRequest(request, entity);
-        domainService.aplicarDefaults(entity);
         relacionamentosHandler.resolver(entity, request, tenantId, tenant);
 
         ControlePonto saved = repository.save(Objects.requireNonNull(entity));
-        log.info("Registro de ponto atualizado com sucesso. ID: {}, tenant: {}", saved.getId(), tenantId);
+        log.info("Controle de ponto atualizado com sucesso. ID: {}, tenant: {}", saved.getId(), tenantId);
         return saved;
     }
 }

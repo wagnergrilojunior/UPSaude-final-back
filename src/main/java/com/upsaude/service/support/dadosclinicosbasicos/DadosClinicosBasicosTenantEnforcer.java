@@ -1,8 +1,8 @@
 package com.upsaude.service.support.dadosclinicosbasicos;
 
-import com.upsaude.entity.DadosClinicosBasicos;
+import com.upsaude.entity.paciente.DadosClinicosBasicos;
 import com.upsaude.exception.NotFoundException;
-import com.upsaude.repository.DadosClinicosBasicosRepository;
+import com.upsaude.repository.paciente.DadosClinicosBasicosRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;

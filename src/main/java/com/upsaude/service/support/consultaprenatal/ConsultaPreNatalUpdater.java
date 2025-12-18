@@ -1,17 +1,19 @@
 package com.upsaude.service.support.consultaprenatal;
 
-import com.upsaude.api.request.ConsultaPreNatalRequest;
-import com.upsaude.entity.ConsultaPreNatal;
-import com.upsaude.entity.PreNatal;
-import com.upsaude.entity.Tenant;
-import com.upsaude.mapper.ConsultaPreNatalMapper;
-import com.upsaude.repository.ConsultaPreNatalRepository;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Service;
-
 import java.util.Objects;
 import java.util.UUID;
+
+import org.springframework.stereotype.Service;
+
+import com.upsaude.api.request.clinica.atendimento.ConsultaPreNatalRequest;
+import com.upsaude.entity.clinica.atendimento.ConsultaPreNatal;
+import com.upsaude.entity.saude_publica.planejamento.PreNatal;
+import com.upsaude.entity.sistema.Tenant;
+import com.upsaude.mapper.clinica.atendimento.ConsultaPreNatalMapper;
+import com.upsaude.repository.clinica.atendimento.ConsultaPreNatalRepository;
+
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Service

@@ -1,13 +1,15 @@
 package com.upsaude.service.support.historicohabilitacaoprofissional;
 
-import com.upsaude.entity.HistoricoHabilitacaoProfissional;
-import com.upsaude.exception.NotFoundException;
-import com.upsaude.repository.HistoricoHabilitacaoProfissionalRepository;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import java.util.UUID;
+
 import org.springframework.stereotype.Service;
 
-import java.util.UUID;
+import com.upsaude.entity.profissional.HistoricoHabilitacaoProfissional;
+import com.upsaude.exception.NotFoundException;
+import com.upsaude.repository.profissional.HistoricoHabilitacaoProfissionalRepository;
+
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Service
@@ -17,11 +19,11 @@ public class HistoricoHabilitacaoProfissionalTenantEnforcer {
     private final HistoricoHabilitacaoProfissionalRepository repository;
 
     public HistoricoHabilitacaoProfissional validarAcesso(UUID id, UUID tenantId) {
-        log.debug("Validando acesso ao histórico de habilitação. ID: {}, tenant: {}", id, tenantId);
+        log.debug("Validando acesso ao histórico de habilitação profissional. ID: {}, tenant: {}", id, tenantId);
         return repository.findByIdAndTenant(id, tenantId)
             .orElseThrow(() -> {
-                log.warn("Registro não encontrado. ID: {}, tenant: {}", id, tenantId);
-                return new NotFoundException("Histórico de habilitação não encontrado com ID: " + id);
+                log.warn("Histórico de habilitação profissional não encontrado. ID: {}, tenant: {}", id, tenantId);
+                return new NotFoundException("Histórico de habilitação profissional não encontrado com ID: " + id);
             });
     }
 

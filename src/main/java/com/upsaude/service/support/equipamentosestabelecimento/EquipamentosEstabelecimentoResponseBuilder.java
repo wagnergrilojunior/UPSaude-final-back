@@ -1,11 +1,13 @@
 package com.upsaude.service.support.equipamentosestabelecimento;
 
-import com.upsaude.api.response.EquipamentosEstabelecimentoResponse;
-import com.upsaude.entity.EquipamentosEstabelecimento;
-import com.upsaude.mapper.EquipamentosEstabelecimentoMapper;
-import lombok.RequiredArgsConstructor;
 import org.hibernate.Hibernate;
 import org.springframework.stereotype.Service;
+
+import com.upsaude.api.response.estabelecimento.EquipamentosEstabelecimentoResponse;
+import com.upsaude.entity.estabelecimento.EquipamentosEstabelecimento;
+import com.upsaude.mapper.estabelecimento.EquipamentosEstabelecimentoMapper;
+
+import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
@@ -15,11 +17,8 @@ public class EquipamentosEstabelecimentoResponseBuilder {
 
     public EquipamentosEstabelecimentoResponse build(EquipamentosEstabelecimento entity) {
         if (entity != null) {
-            Hibernate.initialize(entity.getEstabelecimento());
-            Hibernate.initialize(entity.getEquipamento());
-            if (entity.getEquipamento() != null) {
-                Hibernate.initialize(entity.getEquipamento().getFabricante());
-            }
+            if (entity.getEstabelecimento() != null) Hibernate.initialize(entity.getEstabelecimento());
+            if (entity.getEquipamento() != null) Hibernate.initialize(entity.getEquipamento());
         }
         return mapper.toResponse(entity);
     }

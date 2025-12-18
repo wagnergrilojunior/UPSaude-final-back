@@ -1,11 +1,11 @@
 package com.upsaude.service.support.equipesaude;
 
-import com.upsaude.api.request.EquipeSaudeRequest;
-import com.upsaude.entity.Estabelecimentos;
-import com.upsaude.entity.EquipeSaude;
-import com.upsaude.entity.Tenant;
+import com.upsaude.api.request.profissional.equipe.EquipeSaudeRequest;
+import com.upsaude.entity.estabelecimento.Estabelecimentos;
+import com.upsaude.entity.profissional.equipe.EquipeSaude;
+import com.upsaude.entity.sistema.Tenant;
 import com.upsaude.exception.NotFoundException;
-import com.upsaude.repository.EstabelecimentosRepository;
+import com.upsaude.repository.estabelecimento.EstabelecimentosRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 

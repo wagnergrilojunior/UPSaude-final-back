@@ -1,11 +1,13 @@
 package com.upsaude.service.support.receitasmedicas;
 
-import com.upsaude.api.response.ReceitasMedicasResponse;
-import com.upsaude.entity.ReceitasMedicas;
-import com.upsaude.mapper.ReceitasMedicasMapper;
-import lombok.RequiredArgsConstructor;
 import org.hibernate.Hibernate;
 import org.springframework.stereotype.Service;
+
+import com.upsaude.api.response.clinica.medicacao.ReceitasMedicasResponse;
+import com.upsaude.entity.clinica.medicacao.ReceitasMedicas;
+import com.upsaude.mapper.clinica.medicacao.ReceitasMedicasMapper;
+
+import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
@@ -18,7 +20,6 @@ public class ReceitasMedicasResponseBuilder {
             Hibernate.initialize(entity.getEstabelecimento());
             Hibernate.initialize(entity.getMedico());
             Hibernate.initialize(entity.getPaciente());
-            Hibernate.initialize(entity.getCidPrincipal());
             Hibernate.initialize(entity.getMedicacoes());
         }
         return mapper.toResponse(entity);

@@ -1,21 +1,8 @@
 package com.upsaude.service.impl;
 
-import com.upsaude.cache.CacheKeyUtil;
-import com.upsaude.api.request.InfraestruturaEstabelecimentoRequest;
-import com.upsaude.api.response.InfraestruturaEstabelecimentoResponse;
-import com.upsaude.entity.InfraestruturaEstabelecimento;
-import com.upsaude.entity.Tenant;
-import com.upsaude.exception.BadRequestException;
-import com.upsaude.repository.InfraestruturaEstabelecimentoRepository;
-import com.upsaude.service.InfraestruturaEstabelecimentoService;
-import com.upsaude.service.TenantService;
-import com.upsaude.service.support.infraestruturaestabelecimento.InfraestruturaEstabelecimentoCreator;
-import com.upsaude.service.support.infraestruturaestabelecimento.InfraestruturaEstabelecimentoResponseBuilder;
-import com.upsaude.service.support.infraestruturaestabelecimento.InfraestruturaEstabelecimentoTenantEnforcer;
-import com.upsaude.service.support.infraestruturaestabelecimento.InfraestruturaEstabelecimentoUpdater;
-import com.upsaude.service.support.infraestruturaestabelecimento.InfraestruturaEstabelecimentoValidationService;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import java.util.Objects;
+import java.util.UUID;
+
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.CacheEvict;
@@ -26,8 +13,23 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Objects;
-import java.util.UUID;
+import com.upsaude.api.request.estabelecimento.InfraestruturaEstabelecimentoRequest;
+import com.upsaude.api.response.estabelecimento.InfraestruturaEstabelecimentoResponse;
+import com.upsaude.cache.CacheKeyUtil;
+import com.upsaude.entity.estabelecimento.InfraestruturaEstabelecimento;
+import com.upsaude.entity.sistema.Tenant;
+import com.upsaude.exception.BadRequestException;
+import com.upsaude.exception.InternalServerErrorException;
+import com.upsaude.repository.estabelecimento.InfraestruturaEstabelecimentoRepository;
+import com.upsaude.service.estabelecimento.InfraestruturaEstabelecimentoService;
+import com.upsaude.service.sistema.TenantService;
+import com.upsaude.service.support.infraestruturaestabelecimento.InfraestruturaEstabelecimentoCreator;
+import com.upsaude.service.support.infraestruturaestabelecimento.InfraestruturaEstabelecimentoResponseBuilder;
+import com.upsaude.service.support.infraestruturaestabelecimento.InfraestruturaEstabelecimentoTenantEnforcer;
+import com.upsaude.service.support.infraestruturaestabelecimento.InfraestruturaEstabelecimentoUpdater;
+
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Service
@@ -35,59 +37,79 @@ import java.util.UUID;
 public class InfraestruturaEstabelecimentoServiceImpl implements InfraestruturaEstabelecimentoService {
 
     private final InfraestruturaEstabelecimentoRepository repository;
-    private final TenantService tenantService;
     private final CacheManager cacheManager;
+    private final TenantService tenantService;
 
-    private final InfraestruturaEstabelecimentoValidationService validationService;
-    private final InfraestruturaEstabelecimentoTenantEnforcer tenantEnforcer;
     private final InfraestruturaEstabelecimentoCreator creator;
     private final InfraestruturaEstabelecimentoUpdater updater;
     private final InfraestruturaEstabelecimentoResponseBuilder responseBuilder;
+    private final InfraestruturaEstabelecimentoTenantEnforcer tenantEnforcer;
 
     @Override
     @Transactional
     public InfraestruturaEstabelecimentoResponse criar(InfraestruturaEstabelecimentoRequest request) {
-        validationService.validarObrigatorios(request);
+        log.debug("Criando nova infraestrutura do estabelecimento");
 
-        UUID tenantId = tenantService.validarTenantAtual();
-        Tenant tenant = tenantService.obterTenantDoUsuarioAutenticado();
+        try {
+            UUID tenantId = tenantService.validarTenantAtual();
+            Tenant tenant = tenantService.obterTenantDoUsuarioAutenticado();
+            validarTenantAutenticadoOrThrow(tenantId, tenant);
 
-        InfraestruturaEstabelecimento saved = creator.criar(request, tenantId, tenant);
-        InfraestruturaEstabelecimentoResponse response = responseBuilder.build(saved);
+            InfraestruturaEstabelecimento saved = creator.criar(request, tenantId, tenant);
+            InfraestruturaEstabelecimentoResponse response = responseBuilder.build(saved);
 
-        Cache cache = cacheManager.getCache(CacheKeyUtil.CACHE_INFRAESTRUTURA_ESTABELECIMENTO);
-        if (cache != null && response != null && response.getId() != null) {
-            cache.put(Objects.requireNonNull((Object) CacheKeyUtil.infraestruturaEstabelecimento(tenantId, response.getId())), response);
+            Cache cache = cacheManager.getCache(CacheKeyUtil.CACHE_INFRAESTRUTURA_ESTABELECIMENTO);
+            if (cache != null) {
+                Object key = Objects.requireNonNull((Object) CacheKeyUtil.infraestruturaEstabelecimento(tenantId, saved.getId()));
+                cache.put(key, response);
+            }
+
+            return response;
+        } catch (BadRequestException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new InternalServerErrorException("Erro ao criar infraestrutura do estabelecimento", e);
         }
-
-        return response;
     }
 
     @Override
     @Transactional(readOnly = true)
     @Cacheable(cacheNames = CacheKeyUtil.CACHE_INFRAESTRUTURA_ESTABELECIMENTO, keyGenerator = "infraestruturaEstabelecimentoCacheKeyGenerator")
     public InfraestruturaEstabelecimentoResponse obterPorId(UUID id) {
-        validationService.validarId(id);
+        log.debug("Buscando infraestrutura do estabelecimento por ID: {} (cache miss)", id);
+        if (id == null) {
+            throw new BadRequestException("ID da infraestrutura do estabelecimento é obrigatório");
+        }
+
         UUID tenantId = tenantService.validarTenantAtual();
-        return responseBuilder.build(tenantEnforcer.validarAcessoCompleto(id, tenantId));
+        InfraestruturaEstabelecimento entity = tenantEnforcer.validarAcessoCompleto(id, tenantId);
+        return responseBuilder.build(entity);
     }
 
     @Override
     @Transactional(readOnly = true)
     public Page<InfraestruturaEstabelecimentoResponse> listar(Pageable pageable) {
+        log.debug("Listando infraestruturas do estabelecimento paginadas. Página: {}, Tamanho: {}",
+                pageable.getPageNumber(), pageable.getPageSize());
+
         UUID tenantId = tenantService.validarTenantAtual();
-        return repository.findAllByTenant(tenantId, pageable).map(responseBuilder::build);
+        Page<InfraestruturaEstabelecimento> page = repository.findAllByTenant(tenantId, pageable);
+        return page.map(responseBuilder::build);
     }
 
     @Override
     @Transactional
     @CachePut(cacheNames = CacheKeyUtil.CACHE_INFRAESTRUTURA_ESTABELECIMENTO, keyGenerator = "infraestruturaEstabelecimentoCacheKeyGenerator")
     public InfraestruturaEstabelecimentoResponse atualizar(UUID id, InfraestruturaEstabelecimentoRequest request) {
-        validationService.validarId(id);
-        validationService.validarObrigatorios(request);
+        log.debug("Atualizando infraestrutura do estabelecimento. ID: {}", id);
+
+        if (id == null) {
+            throw new BadRequestException("ID da infraestrutura do estabelecimento é obrigatório");
+        }
 
         UUID tenantId = tenantService.validarTenantAtual();
         Tenant tenant = tenantService.obterTenantDoUsuarioAutenticado();
+        validarTenantAutenticadoOrThrow(tenantId, tenant);
 
         InfraestruturaEstabelecimento updated = updater.atualizar(id, request, tenantId, tenant);
         return responseBuilder.build(updated);
@@ -97,20 +119,25 @@ public class InfraestruturaEstabelecimentoServiceImpl implements InfraestruturaE
     @Transactional
     @CacheEvict(cacheNames = CacheKeyUtil.CACHE_INFRAESTRUTURA_ESTABELECIMENTO, keyGenerator = "infraestruturaEstabelecimentoCacheKeyGenerator", beforeInvocation = false)
     public void excluir(UUID id) {
-        validationService.validarId(id);
+        log.debug("Excluindo infraestrutura do estabelecimento. ID: {}", id);
         UUID tenantId = tenantService.validarTenantAtual();
         inativarInternal(id, tenantId);
     }
 
     private void inativarInternal(UUID id, UUID tenantId) {
-        InfraestruturaEstabelecimento entity = tenantEnforcer.validarAcesso(id, tenantId);
-
-        if (Boolean.FALSE.equals(entity.getActive())) {
-            throw new BadRequestException("Registro já está inativo");
+        if (id == null) {
+            throw new BadRequestException("ID da infraestrutura do estabelecimento é obrigatório");
         }
 
+        InfraestruturaEstabelecimento entity = tenantEnforcer.validarAcesso(id, tenantId);
         entity.setActive(false);
-        repository.save(entity);
-        log.info("Registro excluído (desativado) com sucesso. ID: {}, tenant: {}", id, tenantId);
+        repository.save(Objects.requireNonNull(entity));
+        log.info("Infraestrutura do estabelecimento excluída (desativada) com sucesso. ID: {}", id);
+    }
+
+    private void validarTenantAutenticadoOrThrow(UUID tenantId, Tenant tenant) {
+        if (tenantId == null || tenant == null || tenant.getId() == null || !tenantId.equals(tenant.getId())) {
+            throw new BadRequestException("Não foi possível obter tenant do usuário autenticado");
+        }
     }
 }

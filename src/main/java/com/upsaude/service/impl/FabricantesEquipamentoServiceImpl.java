@@ -1,19 +1,8 @@
 package com.upsaude.service.impl;
 
-import com.upsaude.api.request.FabricantesEquipamentoRequest;
-import com.upsaude.api.response.FabricantesEquipamentoResponse;
-import com.upsaude.cache.CacheKeyUtil;
-import com.upsaude.entity.FabricantesEquipamento;
-import com.upsaude.exception.BadRequestException;
-import com.upsaude.exception.NotFoundException;
-import com.upsaude.repository.FabricantesEquipamentoRepository;
-import com.upsaude.service.FabricantesEquipamentoService;
-import com.upsaude.service.support.fabricantesequipamento.FabricantesEquipamentoCreator;
-import com.upsaude.service.support.fabricantesequipamento.FabricantesEquipamentoDomainService;
-import com.upsaude.service.support.fabricantesequipamento.FabricantesEquipamentoResponseBuilder;
-import com.upsaude.service.support.fabricantesequipamento.FabricantesEquipamentoUpdater;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import java.util.Objects;
+import java.util.UUID;
+
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.CacheEvict;
@@ -24,40 +13,59 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Objects;
-import java.util.UUID;
+import com.upsaude.api.request.estabelecimento.equipamento.FabricantesEquipamentoRequest;
+import com.upsaude.api.response.estabelecimento.equipamento.FabricantesEquipamentoResponse;
+import com.upsaude.cache.CacheKeyUtil;
+import com.upsaude.entity.estabelecimento.equipamento.FabricantesEquipamento;
+import com.upsaude.exception.BadRequestException;
+import com.upsaude.exception.InternalServerErrorException;
+import com.upsaude.exception.NotFoundException;
+import com.upsaude.repository.estabelecimento.equipamento.FabricantesEquipamentoRepository;
+import com.upsaude.service.estabelecimento.equipamento.FabricantesEquipamentoService;
+import com.upsaude.service.support.fabricantesequipamento.FabricantesEquipamentoCreator;
+import com.upsaude.service.support.fabricantesequipamento.FabricantesEquipamentoResponseBuilder;
+import com.upsaude.service.support.fabricantesequipamento.FabricantesEquipamentoUpdater;
+
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class FabricantesEquipamentoServiceImpl implements FabricantesEquipamentoService {
 
-    private final FabricantesEquipamentoRepository fabricantesEquipamentoRepository;
+    private final FabricantesEquipamentoRepository repository;
     private final CacheManager cacheManager;
 
     private final FabricantesEquipamentoCreator creator;
     private final FabricantesEquipamentoUpdater updater;
     private final FabricantesEquipamentoResponseBuilder responseBuilder;
-    private final FabricantesEquipamentoDomainService domainService;
 
     @Override
     @Transactional
     public FabricantesEquipamentoResponse criar(FabricantesEquipamentoRequest request) {
         log.debug("Criando novo fabricante de equipamento");
-        FabricantesEquipamento saved = creator.criar(request);
-        FabricantesEquipamentoResponse response = responseBuilder.build(saved);
 
-        Cache cache = cacheManager.getCache(CacheKeyUtil.CACHE_FABRICANTES_EQUIPAMENTO);
-        if (cache != null) {
-            Object key = Objects.requireNonNull((Object) CacheKeyUtil.fabricanteEquipamento(saved.getId()));
-            cache.put(key, response);
+        try {
+            FabricantesEquipamento saved = creator.criar(request);
+            FabricantesEquipamentoResponse response = responseBuilder.build(saved);
+
+            Cache cache = cacheManager.getCache(CacheKeyUtil.CACHE_FABRICANTES_EQUIPAMENTO);
+            if (cache != null) {
+                Object key = Objects.requireNonNull((Object) CacheKeyUtil.fabricanteEquipamento(saved.getId()));
+                cache.put(key, response);
+            }
+
+            return response;
+        } catch (BadRequestException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new InternalServerErrorException("Erro ao criar fabricante de equipamento", e);
         }
-
-        return response;
     }
 
     @Override
-    @Transactional
+    @Transactional(readOnly = true)
     @Cacheable(cacheNames = CacheKeyUtil.CACHE_FABRICANTES_EQUIPAMENTO, keyGenerator = "fabricantesEquipamentoCacheKeyGenerator")
     public FabricantesEquipamentoResponse obterPorId(UUID id) {
         log.debug("Buscando fabricante de equipamento por ID: {} (cache miss)", id);
@@ -65,19 +73,19 @@ public class FabricantesEquipamentoServiceImpl implements FabricantesEquipamento
             throw new BadRequestException("ID do fabricante de equipamento é obrigatório");
         }
 
-        FabricantesEquipamento fabricantesEquipamento = fabricantesEquipamentoRepository.findById(id)
+        FabricantesEquipamento entity = repository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Fabricante de equipamento não encontrado com ID: " + id));
-
-        return responseBuilder.build(fabricantesEquipamento);
+        return responseBuilder.build(entity);
     }
 
     @Override
+    @Transactional(readOnly = true)
     public Page<FabricantesEquipamentoResponse> listar(Pageable pageable) {
-        log.debug("Listando FabricantesEquipamento paginados. Página: {}, Tamanho: {}",
+        log.debug("Listando fabricantes de equipamento paginados. Página: {}, Tamanho: {}",
                 pageable.getPageNumber(), pageable.getPageSize());
 
-        Page<FabricantesEquipamento> fabricantesEquipamentos = fabricantesEquipamentoRepository.findAll(pageable);
-        return fabricantesEquipamentos.map(responseBuilder::build);
+        Page<FabricantesEquipamento> page = repository.findAll(pageable);
+        return page.map(responseBuilder::build);
     }
 
     @Override
@@ -107,12 +115,10 @@ public class FabricantesEquipamentoServiceImpl implements FabricantesEquipamento
             throw new BadRequestException("ID do fabricante de equipamento é obrigatório");
         }
 
-        FabricantesEquipamento entity = fabricantesEquipamentoRepository.findById(id)
-            .orElseThrow(() -> new NotFoundException("Fabricante de equipamento não encontrado com ID: " + id));
-
-        domainService.validarPodeInativar(entity);
+        FabricantesEquipamento entity = repository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Fabricante de equipamento não encontrado com ID: " + id));
         entity.setActive(false);
-        fabricantesEquipamentoRepository.save(Objects.requireNonNull(entity));
+        repository.save(Objects.requireNonNull(entity));
         log.info("Fabricante de equipamento excluído (desativado) com sucesso. ID: {}", id);
     }
 }

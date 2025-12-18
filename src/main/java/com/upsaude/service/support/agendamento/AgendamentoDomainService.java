@@ -1,6 +1,6 @@
 package com.upsaude.service.support.agendamento;
 
-import com.upsaude.entity.Agendamento;
+import com.upsaude.entity.agendamento.Agendamento;
 import com.upsaude.enums.StatusAgendamentoEnum;
 import com.upsaude.exception.BadRequestException;
 import lombok.extern.slf4j.Slf4j;

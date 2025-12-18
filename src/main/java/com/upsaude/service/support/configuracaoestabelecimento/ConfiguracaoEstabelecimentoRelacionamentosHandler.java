@@ -1,9 +1,9 @@
 package com.upsaude.service.support.configuracaoestabelecimento;
 
-import com.upsaude.api.request.ConfiguracaoEstabelecimentoRequest;
-import com.upsaude.entity.ConfiguracaoEstabelecimento;
-import com.upsaude.entity.Estabelecimentos;
-import com.upsaude.entity.Tenant;
+import com.upsaude.api.request.estabelecimento.ConfiguracaoEstabelecimentoRequest;
+import com.upsaude.entity.estabelecimento.ConfiguracaoEstabelecimento;
+import com.upsaude.entity.estabelecimento.Estabelecimentos;
+import com.upsaude.entity.sistema.Tenant;
 import com.upsaude.service.support.estabelecimentos.EstabelecimentosTenantEnforcer;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;

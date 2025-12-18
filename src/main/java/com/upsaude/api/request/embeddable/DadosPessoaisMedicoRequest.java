@@ -5,6 +5,7 @@ import com.upsaude.enums.EstadoCivilEnum;
 import com.upsaude.enums.SexoEnum;
 import com.upsaude.util.converter.EstadoCivilEnumDeserializer;
 import com.upsaude.util.converter.SexoEnumDeserializer;
+import com.upsaude.validation.annotation.CPFValido;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
@@ -26,7 +27,7 @@ public class DadosPessoaisMedicoRequest {
     @Size(max = 255, message = "Nome social deve ter no máximo 255 caracteres")
     private String nomeSocial;
 
-    @Pattern(regexp = "^$|^\\d{11}$", message = "CPF deve ter 11 dígitos")
+    @CPFValido
     private String cpf;
 
     @JsonDeserialize(using = SexoEnumDeserializer.class)

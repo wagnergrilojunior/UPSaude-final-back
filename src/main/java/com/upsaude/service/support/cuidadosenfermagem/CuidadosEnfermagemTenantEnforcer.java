@@ -1,13 +1,15 @@
 package com.upsaude.service.support.cuidadosenfermagem;
 
-import com.upsaude.entity.CuidadosEnfermagem;
-import com.upsaude.exception.NotFoundException;
-import com.upsaude.repository.CuidadosEnfermagemRepository;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import java.util.UUID;
+
 import org.springframework.stereotype.Service;
 
-import java.util.UUID;
+import com.upsaude.entity.enfermagem.CuidadosEnfermagem;
+import com.upsaude.exception.NotFoundException;
+import com.upsaude.repository.enfermagem.CuidadosEnfermagemRepository;
+
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Service
@@ -17,11 +19,11 @@ public class CuidadosEnfermagemTenantEnforcer {
     private final CuidadosEnfermagemRepository repository;
 
     public CuidadosEnfermagem validarAcesso(UUID id, UUID tenantId) {
-        log.debug("Validando acesso ao cuidado de enfermagem. ID: {}, tenant: {}", id, tenantId);
+        log.debug("Validando acesso aos cuidados de enfermagem. ID: {}, tenant: {}", id, tenantId);
         return repository.findByIdAndTenant(id, tenantId)
             .orElseThrow(() -> {
-                log.warn("Cuidado de enfermagem não encontrado. ID: {}, tenant: {}", id, tenantId);
-                return new NotFoundException("Cuidado de enfermagem não encontrado com ID: " + id);
+                log.warn("Cuidados de enfermagem não encontrados. ID: {}, tenant: {}", id, tenantId);
+                return new NotFoundException("Cuidados de enfermagem não encontrados com ID: " + id);
             });
     }
 

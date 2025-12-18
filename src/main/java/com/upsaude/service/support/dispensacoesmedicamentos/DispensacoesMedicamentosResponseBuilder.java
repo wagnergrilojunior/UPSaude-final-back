@@ -1,8 +1,8 @@
 package com.upsaude.service.support.dispensacoesmedicamentos;
 
-import com.upsaude.api.response.DispensacoesMedicamentosResponse;
-import com.upsaude.entity.DispensacoesMedicamentos;
-import com.upsaude.mapper.DispensacoesMedicamentosMapper;
+import com.upsaude.api.response.clinica.medicacao.DispensacoesMedicamentosResponse;
+import com.upsaude.entity.clinica.medicacao.DispensacoesMedicamentos;
+import com.upsaude.mapper.clinica.medicacao.DispensacoesMedicamentosMapper;
 import lombok.RequiredArgsConstructor;
 import org.hibernate.Hibernate;
 import org.springframework.stereotype.Service;

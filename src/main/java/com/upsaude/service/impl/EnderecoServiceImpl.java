@@ -1,20 +1,9 @@
 package com.upsaude.service.impl;
 
-import com.upsaude.api.request.EnderecoRequest;
-import com.upsaude.api.response.EnderecoResponse;
-import com.upsaude.entity.Endereco;
-import com.upsaude.entity.Cidades;
-import com.upsaude.entity.Estados;
-import com.upsaude.exception.BadRequestException;
-import com.upsaude.exception.InternalServerErrorException;
-import com.upsaude.exception.NotFoundException;
-import com.upsaude.mapper.EnderecoMapper;
-import com.upsaude.repository.EnderecoRepository;
-import com.upsaude.repository.CidadesRepository;
-import com.upsaude.repository.EstadosRepository;
-import com.upsaude.service.EnderecoService;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+
+import java.util.List;
+import java.util.UUID;
+
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.dao.DataAccessException;
@@ -24,9 +13,22 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import com.upsaude.api.request.geral.EnderecoRequest;
+import com.upsaude.api.response.geral.EnderecoResponse;
+import com.upsaude.entity.paciente.Endereco;
+import com.upsaude.entity.referencia.geografico.Cidades;
+import com.upsaude.entity.referencia.geografico.Estados;
+import com.upsaude.exception.BadRequestException;
+import com.upsaude.exception.InternalServerErrorException;
+import com.upsaude.exception.NotFoundException;
+import com.upsaude.mapper.geral.EnderecoMapper;
+import com.upsaude.repository.paciente.EnderecoRepository;
+import com.upsaude.repository.referencia.geografico.CidadesRepository;
+import com.upsaude.repository.referencia.geografico.EstadosRepository;
+import com.upsaude.service.geral.EnderecoService;
+
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Service

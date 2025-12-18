@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="utf-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns="http://servicos.saude.gov.br/schema/sigtap/compatibilidade/v1r1/compatibilidade" xmlns:cp="http://servicos.saude.gov.br/schema/sigtap/compatibilidade/v1r1/compatibilidadepossivel" xmlns:pc="http://servicos.saude.gov.br/schema/sigtap/procedimento/v1/procedimento" xmlns:co="http://servicos.saude.gov.br/schema/corporativo/v1/competencia" xmlns:do="http://servicos.saude.gov.br/schema/sigtap/publicacao/v1/documento" elementFormDefault="qualified" targetNamespace="http://servicos.saude.gov.br/schema/sigtap/compatibilidade/v1r1/compatibilidade">
+    
+    <xs:import id="cp" namespace="http://servicos.saude.gov.br/schema/sigtap/compatibilidade/v1r1/compatibilidadepossivel" schemaLocation="compatibilidadepossivel.v1r1.xsd"/>
+    <xs:import id="pc" namespace="http://servicos.saude.gov.br/schema/sigtap/procedimento/v1/procedimento" schemaLocation="procedimento.v1.xsd"/>
+    <xs:import id="co" namespace="http://servicos.saude.gov.br/schema/corporativo/v1/competencia" schemaLocation="competencia.v1.xsd"/>
+    <xs:import id="do" namespace="http://servicos.saude.gov.br/schema/sigtap/publicacao/v1/documento" schemaLocation="documento.v1.xsd"/>
+    
+    <xs:annotation>
+        <xs:documentation>
+            <![CDATA[
+            Este esquema representa uma Compatibilidade entre dois Procedimentos. 
+            ]]>
+        </xs:documentation>
+    </xs:annotation>
+    
+    <xs:element name="Compatibilidade" type="CompatibilidadeType"/>
+    
+    <xs:complexType name="CompatibilidadeType">
+        <xs:sequence>
+            
+            <xs:element name="CompatibilidadePossivel" minOccurs="1" maxOccurs="1" nillable="true" type="cp:CompatibilidadePossivelType">
+                <xs:annotation>
+                    <xs:documentation>
+                        <![CDATA[ Compatibilidade Possível. ]]>
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            
+            <xs:element name="ProcedimentoPrincipal" minOccurs="1" maxOccurs="1" nillable="true" type="pc:BaseProcedimentoType">
+                <xs:annotation>
+                    <xs:documentation>
+                        <![CDATA[ Procedimento Principal da Compatibilidade. ]]>
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            
+            <xs:element name="ProcedimentoSecundario" minOccurs="1" maxOccurs="1" nillable="true" type="pc:BaseProcedimentoType">
+                <xs:annotation>
+                    <xs:documentation>
+                        <![CDATA[ Procedimento Secundário da Compatibilidade. ]]>
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            
+            <xs:element name="competenciaInicial" minOccurs="1" maxOccurs="1" nillable="true" type="co:CompetenciaType">
+                <xs:annotation>
+                    <xs:documentation>
+                        <![CDATA[ Competência inicial da Compatibilidade. ]]>
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            
+            <xs:element name="competenciaFinal" minOccurs="0" maxOccurs="1" type="co:CompetenciaType">
+                <xs:annotation>
+                    <xs:documentation>
+                        <![CDATA[ Competência final da Compatibilidade. ]]>
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            
+            <xs:element name="quantidadePermitida" minOccurs="0" maxOccurs="1">
+                <xs:annotation>
+                    <xs:documentation>
+                        <![CDATA[ Quantidade de vezes que é autorizada a realização do procedimento secundário numa relação com o principal. ]]>
+                    </xs:documentation>
+                </xs:annotation>
+                <xs:simpleType>
+                    <xs:restriction base="xs:integer">
+                        <xs:minInclusive value="0"/>
+                        <xs:maxInclusive value="9999"/>
+                    </xs:restriction>
+                </xs:simpleType>
+            </xs:element>
+            
+            <xs:element name="DocumentoPublicacao" minOccurs="0" maxOccurs="1" type="do:DocumentoType">
+                <xs:annotation>
+                    <xs:documentation>
+                        <![CDATA[ Documento de publicação da Compatibilidade. ]]>
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            
+            <xs:element name="DocumentoRevogacao" minOccurs="0" maxOccurs="1" type="do:DocumentoType">
+                <xs:annotation>
+                    <xs:documentation>
+                        <![CDATA[ Documento de revogação da Compatibilidade. ]]>
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            
+        </xs:sequence>
+    </xs:complexType>
+    
+</xs:schema>

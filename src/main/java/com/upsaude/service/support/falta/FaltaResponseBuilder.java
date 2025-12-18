@@ -1,11 +1,13 @@
 package com.upsaude.service.support.falta;
 
-import com.upsaude.api.response.FaltaResponse;
-import com.upsaude.entity.Falta;
-import com.upsaude.mapper.FaltaMapper;
-import lombok.RequiredArgsConstructor;
 import org.hibernate.Hibernate;
 import org.springframework.stereotype.Service;
+
+import com.upsaude.api.response.profissional.equipe.FaltaResponse;
+import com.upsaude.entity.profissional.equipe.Falta;
+import com.upsaude.mapper.profissional.equipe.FaltaMapper;
+
+import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
@@ -15,11 +17,10 @@ public class FaltaResponseBuilder {
 
     public FaltaResponse build(Falta entity) {
         if (entity != null) {
-            if (entity.getEstabelecimento() != null) Hibernate.initialize(entity.getEstabelecimento());
             if (entity.getProfissional() != null) Hibernate.initialize(entity.getProfissional());
             if (entity.getMedico() != null) Hibernate.initialize(entity.getMedico());
+            if (entity.getEstabelecimento() != null) Hibernate.initialize(entity.getEstabelecimento());
         }
         return mapper.toResponse(entity);
     }
 }
-
