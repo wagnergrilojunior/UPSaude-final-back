@@ -1,7 +1,7 @@
 package com.upsaude.service.support.historicoclinico;
 
-import com.upsaude.api.response.HistoricoClinicoResponse;
-import com.upsaude.entity.HistoricoClinico;
+import com.upsaude.api.response.prontuario.HistoricoClinicoResponse;
+import com.upsaude.entity.prontuario.HistoricoClinico;
 import com.upsaude.mapper.HistoricoClinicoMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;

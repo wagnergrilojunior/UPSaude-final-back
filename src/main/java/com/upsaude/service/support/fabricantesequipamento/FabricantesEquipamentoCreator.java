@@ -1,9 +1,9 @@
 package com.upsaude.service.support.fabricantesequipamento;
 
-import com.upsaude.api.request.FabricantesEquipamentoRequest;
-import com.upsaude.entity.FabricantesEquipamento;
+import com.upsaude.api.request.equipamento.FabricantesEquipamentoRequest;
+import com.upsaude.entity.equipamento.FabricantesEquipamento;
 import com.upsaude.mapper.FabricantesEquipamentoMapper;
-import com.upsaude.repository.FabricantesEquipamentoRepository;
+import com.upsaude.repository.estabelecimento.equipamento.FabricantesEquipamentoRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;

@@ -1,9 +1,9 @@
 package com.upsaude.service.support.templatenotificacao;
 
-import com.upsaude.api.request.TemplateNotificacaoRequest;
-import com.upsaude.entity.Estabelecimentos;
-import com.upsaude.entity.TemplateNotificacao;
-import com.upsaude.entity.Tenant;
+import com.upsaude.api.request.notificacao.TemplateNotificacaoRequest;
+import com.upsaude.entity.estabelecimento.Estabelecimentos;
+import com.upsaude.entity.notificacao.TemplateNotificacao;
+import com.upsaude.entity.sistema.Tenant;
 import com.upsaude.service.support.estabelecimentos.EstabelecimentosTenantEnforcer;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;

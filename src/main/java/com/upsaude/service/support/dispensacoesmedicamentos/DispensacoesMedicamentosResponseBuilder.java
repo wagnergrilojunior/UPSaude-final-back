@@ -1,7 +1,7 @@
 package com.upsaude.service.support.dispensacoesmedicamentos;
 
-import com.upsaude.api.response.DispensacoesMedicamentosResponse;
-import com.upsaude.entity.DispensacoesMedicamentos;
+import com.upsaude.api.response.medicacao.DispensacoesMedicamentosResponse;
+import com.upsaude.entity.medicacao.DispensacoesMedicamentos;
 import com.upsaude.mapper.DispensacoesMedicamentosMapper;
 import lombok.RequiredArgsConstructor;
 import org.hibernate.Hibernate;

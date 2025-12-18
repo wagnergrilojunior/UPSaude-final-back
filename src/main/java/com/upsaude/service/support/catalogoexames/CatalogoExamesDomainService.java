@@ -1,6 +1,6 @@
 package com.upsaude.service.support.catalogoexames;
 
-import com.upsaude.entity.CatalogoExames;
+import com.upsaude.entity.exame.CatalogoExames;
 import com.upsaude.exception.BadRequestException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;

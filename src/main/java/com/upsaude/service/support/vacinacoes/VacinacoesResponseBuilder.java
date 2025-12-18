@@ -1,7 +1,7 @@
 package com.upsaude.service.support.vacinacoes;
 
-import com.upsaude.api.response.VacinacoesResponse;
-import com.upsaude.entity.Vacinacoes;
+import com.upsaude.api.response.vacina.VacinacoesResponse;
+import com.upsaude.entity.vacina.Vacinacoes;
 import com.upsaude.mapper.VacinacoesMapper;
 import lombok.RequiredArgsConstructor;
 import org.hibernate.Hibernate;

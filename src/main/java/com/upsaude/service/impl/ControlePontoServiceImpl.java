@@ -1,15 +1,15 @@
 package com.upsaude.service.impl;
 
-import com.upsaude.api.request.ControlePontoRequest;
-import com.upsaude.api.response.ControlePontoResponse;
+import com.upsaude.api.request.equipe.ControlePontoRequest;
+import com.upsaude.api.response.equipe.ControlePontoResponse;
 import com.upsaude.cache.CacheKeyUtil;
-import com.upsaude.entity.ControlePonto;
+import com.upsaude.entity.equipe.ControlePonto;
 import com.upsaude.exception.BadRequestException;
 import com.upsaude.exception.InternalServerErrorException;
-import com.upsaude.repository.ControlePontoRepository;
-import com.upsaude.service.ControlePontoService;
-import com.upsaude.service.TenantService;
-import com.upsaude.entity.Tenant;
+import com.upsaude.repository.profissional.equipe.ControlePontoRepository;
+import com.upsaude.service.equipe.ControlePontoService;
+import com.upsaude.service.sistema.TenantService;
+import com.upsaude.entity.sistema.Tenant;
 import com.upsaude.service.support.controleponto.ControlePontoCreator;
 import com.upsaude.service.support.controleponto.ControlePontoResponseBuilder;
 import com.upsaude.service.support.controleponto.ControlePontoTenantEnforcer;

@@ -1,26 +1,24 @@
 package com.upsaude.service.impl;
 
-import com.upsaude.api.request.DoencasPacienteRequest;
+import com.upsaude.api.request.doencas.DoencasPacienteRequest;
 import com.upsaude.api.request.DoencasPacienteSimplificadoRequest;
-import com.upsaude.api.response.DoencasPacienteResponse;
-import com.upsaude.entity.CidDoencas;
-import com.upsaude.entity.Doencas;
-import com.upsaude.entity.DoencasPaciente;
-import com.upsaude.entity.Paciente;
-import com.upsaude.entity.Tenant;
+import com.upsaude.api.response.doencas.DoencasPacienteResponse;
+import com.upsaude.entity.doencas.Doencas;
+import com.upsaude.entity.doencas.DoencasPaciente;
+import com.upsaude.entity.paciente.Paciente;
+import com.upsaude.entity.sistema.Tenant;
 import com.upsaude.exception.BadRequestException;
 import com.upsaude.exception.NotFoundException;
 import com.upsaude.mapper.DoencasPacienteMapper;
 import com.upsaude.mapper.embeddable.DiagnosticoDoencaPacienteMapper;
 import com.upsaude.mapper.embeddable.AcompanhamentoDoencaPacienteMapper;
 import com.upsaude.mapper.embeddable.TratamentoAtualDoencaPacienteMapper;
-import com.upsaude.repository.CidDoencasRepository;
-import com.upsaude.repository.DoencasPacienteRepository;
-import com.upsaude.repository.DoencasRepository;
-import com.upsaude.repository.PacienteRepository;
-import com.upsaude.repository.TenantRepository;
-import com.upsaude.service.DoencasPacienteService;
-import com.upsaude.service.TenantService;
+import com.upsaude.repository.doencas.DoencasPacienteRepository;
+import com.upsaude.repository.doencas.DoencasRepository;
+import com.upsaude.repository.paciente.PacienteRepository;
+import com.upsaude.repository.sistema.TenantRepository;
+import com.upsaude.service.doencas.DoencasPacienteService;
+import com.upsaude.service.sistema.TenantService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -44,7 +42,6 @@ public class DoencasPacienteServiceImpl implements DoencasPacienteService {
     private final TratamentoAtualDoencaPacienteMapper tratamentoAtualDoencaPacienteMapper;
     private final PacienteRepository pacienteRepository;
     private final DoencasRepository doencasRepository;
-    private final CidDoencasRepository cidDoencasRepository;
     private final TenantRepository tenantRepository;
     private final TenantService tenantService;
 
@@ -68,11 +65,7 @@ public class DoencasPacienteServiceImpl implements DoencasPacienteService {
             doencasPaciente.setDoenca(doenca);
         }
 
-        if (request.getCidPrincipal() != null) {
-            CidDoencas cidPrincipal = cidDoencasRepository.findById(request.getCidPrincipal())
-                    .orElseThrow(() -> new NotFoundException("CID não encontrado com ID: " + request.getCidPrincipal()));
-            doencasPaciente.setCidPrincipal(cidPrincipal);
-        }
+        // CidPrincipal removido - CidDoencas foi deletado
 
         Tenant tenant = tenantService.obterTenantDoUsuarioAutenticado();
         if (tenant == null) {
@@ -255,11 +248,7 @@ public class DoencasPacienteServiceImpl implements DoencasPacienteService {
             doencasPaciente.setObservacoes(request.getObservacoes());
         }
 
-        if (request.getCidPrincipal() != null) {
-            CidDoencas cidPrincipal = cidDoencasRepository.findById(request.getCidPrincipal())
-                    .orElseThrow(() -> new NotFoundException("CID não encontrado com ID: " + request.getCidPrincipal()));
-            doencasPaciente.setCidPrincipal(cidPrincipal);
-        }
+        // CidPrincipal removido - CidDoencas foi deletado
     }
 
 }

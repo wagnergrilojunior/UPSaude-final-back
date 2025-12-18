@@ -1,7 +1,7 @@
 package com.upsaude.service.support.medicacao;
 
-import com.upsaude.api.response.MedicacaoResponse;
-import com.upsaude.entity.Medicacao;
+import com.upsaude.api.response.medicacao.MedicacaoResponse;
+import com.upsaude.entity.medicacao.Medicacao;
 import com.upsaude.mapper.MedicacaoMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;

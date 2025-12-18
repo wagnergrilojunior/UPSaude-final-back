@@ -1,9 +1,9 @@
 package com.upsaude.service.support.configuracaoestabelecimento;
 
-import com.upsaude.api.request.ConfiguracaoEstabelecimentoRequest;
+import com.upsaude.api.request.estabelecimento.ConfiguracaoEstabelecimentoRequest;
 import com.upsaude.exception.BadRequestException;
 import com.upsaude.exception.ConflictException;
-import com.upsaude.repository.ConfiguracaoEstabelecimentoRepository;
+import com.upsaude.repository.estabelecimento.ConfiguracaoEstabelecimentoRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 

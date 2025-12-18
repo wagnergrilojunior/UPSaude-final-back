@@ -1,14 +1,14 @@
 package com.upsaude.service.impl;
 
 import com.upsaude.cache.CacheKeyUtil;
-import com.upsaude.api.request.CheckInAtendimentoRequest;
-import com.upsaude.api.response.CheckInAtendimentoResponse;
-import com.upsaude.entity.CheckInAtendimento;
-import com.upsaude.entity.Tenant;
+import com.upsaude.api.request.atendimento.CheckInAtendimentoRequest;
+import com.upsaude.api.response.atendimento.CheckInAtendimentoResponse;
+import com.upsaude.entity.atendimento.CheckInAtendimento;
+import com.upsaude.entity.sistema.Tenant;
 import com.upsaude.exception.BadRequestException;
-import com.upsaude.repository.CheckInAtendimentoRepository;
-import com.upsaude.service.CheckInAtendimentoService;
-import com.upsaude.service.TenantService;
+import com.upsaude.repository.atendimento.CheckInAtendimentoRepository;
+import com.upsaude.service.atendimento.CheckInAtendimentoService;
+import com.upsaude.service.sistema.TenantService;
 import com.upsaude.service.support.checkinatendimento.CheckInAtendimentoCreator;
 import com.upsaude.service.support.checkinatendimento.CheckInAtendimentoResponseBuilder;
 import com.upsaude.service.support.checkinatendimento.CheckInAtendimentoTenantEnforcer;

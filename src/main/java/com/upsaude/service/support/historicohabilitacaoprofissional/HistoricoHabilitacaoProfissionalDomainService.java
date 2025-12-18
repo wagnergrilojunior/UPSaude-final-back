@@ -1,6 +1,6 @@
 package com.upsaude.service.support.historicohabilitacaoprofissional;
 
-import com.upsaude.entity.HistoricoHabilitacaoProfissional;
+import com.upsaude.entity.profissional.HistoricoHabilitacaoProfissional;
 import org.springframework.stereotype.Service;
 
 @Service

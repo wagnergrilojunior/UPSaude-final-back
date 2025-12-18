@@ -1,7 +1,7 @@
 package com.upsaude.service.support.historicohabilitacaoprofissional;
 
-import com.upsaude.api.response.HistoricoHabilitacaoProfissionalResponse;
-import com.upsaude.entity.HistoricoHabilitacaoProfissional;
+import com.upsaude.api.response.profissional.HistoricoHabilitacaoProfissionalResponse;
+import com.upsaude.entity.profissional.HistoricoHabilitacaoProfissional;
 import com.upsaude.mapper.HistoricoHabilitacaoProfissionalMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;

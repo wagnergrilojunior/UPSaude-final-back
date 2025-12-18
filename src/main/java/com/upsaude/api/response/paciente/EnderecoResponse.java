@@ -1,0 +1,54 @@
+package com.upsaude.api.response.paciente;
+import com.upsaude.api.response.geografico.CidadesResponse;
+import com.upsaude.api.response.geografico.EstadosResponse;
+
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.upsaude.enums.TipoEnderecoEnum;
+import com.upsaude.enums.TipoLogradouroEnum;
+import com.upsaude.enums.ZonaDomicilioEnum;
+import com.upsaude.util.converter.TipoLogradouroEnumSerializer;
+import java.time.OffsetDateTime;
+import java.util.UUID;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+@Getter
+@Setter
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+public class EnderecoResponse {
+    private UUID id;
+    private OffsetDateTime createdAt;
+    private OffsetDateTime updatedAt;
+    private Boolean active;
+
+    @JsonSerialize(using = TipoLogradouroEnumSerializer.class)
+    private TipoLogradouroEnum tipoLogradouro;
+    private String logradouro;
+    private String numero;
+    private String complemento;
+    private String bairro;
+    private String cep;
+    private String pais;
+    private String distrito;
+    private String pontoReferencia;
+    private Double latitude;
+    private Double longitude;
+    private TipoEnderecoEnum tipoEndereco;
+    private ZonaDomicilioEnum zona;
+    private String codigoIbgeMunicipio;
+    private String microarea;
+    private String ineEquipe;
+    private String quadra;
+    private String lote;
+    private String zonaRuralDescricao;
+    private String andar;
+    private String bloco;
+    private Boolean semNumero;
+    private EstadosResponse estado;
+    private CidadesResponse cidade;
+}

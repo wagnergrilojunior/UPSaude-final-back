@@ -1,7 +1,7 @@
 package com.upsaude.service.support.plantao;
 
-import com.upsaude.api.response.PlantaoResponse;
-import com.upsaude.entity.Plantao;
+import com.upsaude.api.response.equipe.PlantaoResponse;
+import com.upsaude.entity.equipe.Plantao;
 import com.upsaude.mapper.PlantaoMapper;
 import lombok.RequiredArgsConstructor;
 import org.hibernate.Hibernate;

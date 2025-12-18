@@ -1,6 +1,6 @@
 package com.upsaude.service.support.escalatrabalho;
 
-import com.upsaude.entity.EscalaTrabalho;
+import com.upsaude.entity.equipe.EscalaTrabalho;
 import org.springframework.stereotype.Service;
 
 @Service

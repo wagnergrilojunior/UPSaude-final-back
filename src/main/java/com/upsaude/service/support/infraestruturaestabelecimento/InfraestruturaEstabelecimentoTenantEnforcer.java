@@ -1,8 +1,8 @@
 package com.upsaude.service.support.infraestruturaestabelecimento;
 
-import com.upsaude.entity.InfraestruturaEstabelecimento;
+import com.upsaude.entity.estabelecimento.InfraestruturaEstabelecimento;
 import com.upsaude.exception.NotFoundException;
-import com.upsaude.repository.InfraestruturaEstabelecimentoRepository;
+import com.upsaude.repository.estabelecimento.InfraestruturaEstabelecimentoRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;

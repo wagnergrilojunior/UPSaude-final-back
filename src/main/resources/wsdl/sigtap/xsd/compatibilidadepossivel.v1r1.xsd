@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns="http://servicos.saude.gov.br/schema/sigtap/compatibilidade/v1r1/compatibilidadepossivel" xmlns:ir="http://servicos.saude.gov.br/schema/sigtap/procedimento/v1/instrumentoregistro" elementFormDefault="qualified" targetNamespace="http://servicos.saude.gov.br/schema/sigtap/compatibilidade/v1r1/compatibilidadepossivel">
+    
+    <xs:import id="ir" namespace="http://servicos.saude.gov.br/schema/sigtap/procedimento/v1/instrumentoregistro" schemaLocation="instrumentoregistro.v1.xsd"/>
+    
+    <xs:annotation>
+        <xs:documentation>
+            <![CDATA[
+            Este esquema representa uma Compatibilidade Possível. 
+            Uma Compatibilidade Possível indica uma possibilidade de compatibilidade ou exclusão entre dois procedimentos, de acordo com os Instrumentos de Registro dos Procedimentos primário e secundário. 
+            ]]>
+        </xs:documentation>
+    </xs:annotation>
+    
+   
+    <xs:element name="CompatibilidadePossivel" type="CompatibilidadePossivelType"/>
+    <xs:element name="codigoCompatibilidadePossivel" type="CodigoCompatibilidadePossivelType"/>
+    
+    <xs:simpleType name="CodigoCompatibilidadePossivelType">
+        <xs:restriction base="xs:string">
+            <xs:minLength value="1"/>
+            <xs:maxLength value="3"/>
+            <xs:pattern value="[0-9]*"/>
+        </xs:restriction>
+    </xs:simpleType>
+    
+    <xs:complexType name="CompatibilidadePossivelType">
+        <xs:sequence>
+            
+            <xs:element name="codigo" minOccurs="1" maxOccurs="1" nillable="true" type="CodigoCompatibilidadePossivelType">
+                <xs:annotation>
+                    <xs:documentation>
+                        <![CDATA[ Código identificador da Compatibilidade Possível. ]]>
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            
+            <xs:element name="InstrumentoRegistroPrincipal" minOccurs="0" maxOccurs="1" type="ir:InstrumentoRegistroType">
+                <xs:annotation>
+                    <xs:documentation>
+                        <![CDATA[ Instrumento de Registro do Procedimento Principal da Compatibilidade Possível. ]]>
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            
+            <xs:element name="InstrumentoRegistroSecundario" minOccurs="0" maxOccurs="1" type="ir:InstrumentoRegistroType">
+                <xs:annotation>
+                    <xs:documentation>
+                        <![CDATA[ Instrumento de Registro do Procedimento Secundário da Compatibilidade Possível. ]]>
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            
+            <xs:element name="tipoCompatibilidade" minOccurs="0" maxOccurs="1" type="TipoCompatibilidadeType">
+                <xs:annotation>
+                    <xs:documentation>
+                        <![CDATA[ O Tipo de Compatibiliade entre os Procedimentos primário e secundário. ]]>
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            
+        </xs:sequence>
+    </xs:complexType>
+    
+    <xs:simpleType name="TipoCompatibilidadeType">
+        <xs:restriction base="xs:string">
+            <xs:enumeration value="COMPATIVEL"/>
+            <xs:enumeration value="INCOMPATIVEL_EXCLUDENTE"/>
+            <xs:enumeration value="CONCOMITANTE"/>
+            <xs:enumeration value="COMPATIVEL_SEQUENCIAL"/>
+            <xs:enumeration value="OBRIGATORIA"/>
+        </xs:restriction>
+    </xs:simpleType>
+    
+</xs:schema>

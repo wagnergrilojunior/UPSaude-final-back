@@ -1,7 +1,7 @@
 package com.upsaude.service.support.departamentos;
 
-import com.upsaude.api.response.DepartamentosResponse;
-import com.upsaude.entity.Departamentos;
+import com.upsaude.api.response.departamento.DepartamentosResponse;
+import com.upsaude.entity.departamento.Departamentos;
 import com.upsaude.mapper.DepartamentosMapper;
 import lombok.RequiredArgsConstructor;
 import org.hibernate.Hibernate;

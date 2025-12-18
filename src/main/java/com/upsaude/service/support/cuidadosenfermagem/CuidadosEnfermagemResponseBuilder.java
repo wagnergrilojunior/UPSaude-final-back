@@ -1,7 +1,7 @@
 package com.upsaude.service.support.cuidadosenfermagem;
 
-import com.upsaude.api.response.CuidadosEnfermagemResponse;
-import com.upsaude.entity.CuidadosEnfermagem;
+import com.upsaude.api.response.enfermagem.CuidadosEnfermagemResponse;
+import com.upsaude.entity.enfermagem.CuidadosEnfermagem;
 import com.upsaude.mapper.CuidadosEnfermagemMapper;
 import lombok.RequiredArgsConstructor;
 import org.hibernate.Hibernate;

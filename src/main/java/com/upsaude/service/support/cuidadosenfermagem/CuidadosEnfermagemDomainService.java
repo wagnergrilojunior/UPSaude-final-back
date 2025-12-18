@@ -1,6 +1,6 @@
 package com.upsaude.service.support.cuidadosenfermagem;
 
-import com.upsaude.entity.CuidadosEnfermagem;
+import com.upsaude.entity.enfermagem.CuidadosEnfermagem;
 import org.springframework.stereotype.Service;
 
 @Service

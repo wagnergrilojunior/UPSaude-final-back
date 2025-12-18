@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns="http://servicos.saude.gov.br/schema/cbo/v1/cbo" elementFormDefault="qualified" targetNamespace="http://servicos.saude.gov.br/schema/cbo/v1/cbo">
+    
+    <xs:annotation>
+        <xs:documentation>
+            <![CDATA[
+            Este esquema representa um CBO.
+            ]]>
+        </xs:documentation>
+    </xs:annotation>
+    
+    <xs:element name="CBO" type="CBOType"/>
+    <xs:element name="codigoCBO" type="CodigoCBOType"/>
+    
+    <xs:simpleType name="CodigoCBOType">
+        <xs:annotation>
+            <xs:documentation>
+                <![CDATA[ Tipo que representa o código de um CBO. ]]>
+            </xs:documentation>
+        </xs:annotation>
+        <xs:restriction base="xs:string">
+            <xs:length value="6"/>
+        </xs:restriction>
+    </xs:simpleType>
+    
+    <xs:complexType name="CBOType">
+        <xs:sequence>
+            
+            <xs:element name="codigo" minOccurs="1" maxOccurs="1" nillable="true" type="CodigoCBOType">
+                <xs:annotation>
+                    <xs:documentation>
+                        <![CDATA[ Código identificador do CBO. ]]>
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            
+            <xs:element name="nome" minOccurs="0" maxOccurs="1">
+                <xs:annotation>
+                    <xs:documentation>
+                        <![CDATA[ Nome descritivo do CBO. ]]>
+                    </xs:documentation>
+                </xs:annotation>
+                <xs:simpleType>
+                    <xs:restriction base="xs:string">
+                        <xs:minLength value="1"/>
+                        <xs:maxLength value="150"/>
+                    </xs:restriction>
+                </xs:simpleType>
+            </xs:element>
+            
+        </xs:sequence>
+    </xs:complexType>
+    
+    
+</xs:schema>

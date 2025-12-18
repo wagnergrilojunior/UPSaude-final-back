@@ -6,7 +6,7 @@ import java.util.function.Function;
 
 import org.springframework.util.StringUtils;
 
-import com.upsaude.entity.Tenant;
+import com.upsaude.entity.sistema.Tenant;
 import com.upsaude.exception.BadRequestException;
 
 public class ValidadorHelper {

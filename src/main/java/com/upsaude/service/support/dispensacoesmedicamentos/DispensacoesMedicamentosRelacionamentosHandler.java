@@ -1,11 +1,13 @@
 package com.upsaude.service.support.dispensacoesmedicamentos;
 
-import com.upsaude.api.request.DispensacoesMedicamentosRequest;
-import com.upsaude.entity.DispensacoesMedicamentos;
-import com.upsaude.entity.Medicacao;
-import com.upsaude.entity.Tenant;
+import com.upsaude.entity.paciente.Paciente;
+
+import com.upsaude.api.request.medicacao.DispensacoesMedicamentosRequest;
+import com.upsaude.entity.medicacao.DispensacoesMedicamentos;
+import com.upsaude.entity.medicacao.Medicacao;
+import com.upsaude.entity.sistema.Tenant;
 import com.upsaude.exception.NotFoundException;
-import com.upsaude.repository.MedicacaoRepository;
+import com.upsaude.repository.medicacao.MedicacaoRepository;
 import com.upsaude.service.support.paciente.PacienteTenantEnforcer;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;

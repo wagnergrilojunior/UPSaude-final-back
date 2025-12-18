@@ -1,14 +1,14 @@
 package com.upsaude.service.impl;
 
-import com.upsaude.api.request.ConselhosProfissionaisRequest;
-import com.upsaude.api.response.ConselhosProfissionaisResponse;
+import com.upsaude.api.request.profissional.ConselhosProfissionaisRequest;
+import com.upsaude.api.response.profissional.ConselhosProfissionaisResponse;
 import com.upsaude.cache.CacheKeyUtil;
-import com.upsaude.entity.ConselhosProfissionais;
+import com.upsaude.entity.profissional.ConselhosProfissionais;
 import com.upsaude.exception.BadRequestException;
 import com.upsaude.exception.NotFoundException;
 import com.upsaude.mapper.ConselhosProfissionaisMapper;
-import com.upsaude.repository.ConselhosProfissionaisRepository;
-import com.upsaude.service.ConselhosProfissionaisService;
+import com.upsaude.repository.profissional.ConselhosProfissionaisRepository;
+import com.upsaude.service.profissional.ConselhosProfissionaisService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

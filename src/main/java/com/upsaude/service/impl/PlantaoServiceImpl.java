@@ -1,16 +1,16 @@
 package com.upsaude.service.impl;
 
-import com.upsaude.api.request.PlantaoRequest;
-import com.upsaude.api.response.PlantaoResponse;
+import com.upsaude.api.request.equipe.PlantaoRequest;
+import com.upsaude.api.response.equipe.PlantaoResponse;
 import com.upsaude.cache.CacheKeyUtil;
-import com.upsaude.entity.Plantao;
-import com.upsaude.entity.Tenant;
+import com.upsaude.entity.equipe.Plantao;
+import com.upsaude.entity.sistema.Tenant;
 import com.upsaude.enums.TipoPlantaoEnum;
 import com.upsaude.exception.BadRequestException;
 import com.upsaude.exception.InternalServerErrorException;
-import com.upsaude.repository.PlantaoRepository;
-import com.upsaude.service.PlantaoService;
-import com.upsaude.service.TenantService;
+import com.upsaude.repository.profissional.equipe.PlantaoRepository;
+import com.upsaude.service.equipe.PlantaoService;
+import com.upsaude.service.sistema.TenantService;
 import com.upsaude.service.support.plantao.PlantaoCreator;
 import com.upsaude.service.support.plantao.PlantaoDomainService;
 import com.upsaude.service.support.plantao.PlantaoResponseBuilder;

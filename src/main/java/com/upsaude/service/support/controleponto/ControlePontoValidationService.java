@@ -1,6 +1,6 @@
 package com.upsaude.service.support.controleponto;
 
-import com.upsaude.api.request.ControlePontoRequest;
+import com.upsaude.api.request.equipe.ControlePontoRequest;
 import com.upsaude.exception.BadRequestException;
 import org.springframework.stereotype.Service;
 

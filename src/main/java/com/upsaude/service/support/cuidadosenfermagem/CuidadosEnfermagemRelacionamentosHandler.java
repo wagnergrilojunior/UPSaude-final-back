@@ -1,12 +1,12 @@
 package com.upsaude.service.support.cuidadosenfermagem;
 
-import com.upsaude.api.request.CuidadosEnfermagemRequest;
-import com.upsaude.entity.Atendimento;
-import com.upsaude.entity.CuidadosEnfermagem;
-import com.upsaude.entity.ProfissionaisSaude;
-import com.upsaude.entity.Tenant;
+import com.upsaude.api.request.enfermagem.CuidadosEnfermagemRequest;
+import com.upsaude.entity.atendimento.Atendimento;
+import com.upsaude.entity.enfermagem.CuidadosEnfermagem;
+import com.upsaude.entity.profissional.ProfissionaisSaude;
+import com.upsaude.entity.sistema.Tenant;
 import com.upsaude.exception.NotFoundException;
-import com.upsaude.repository.AtendimentoRepository;
+import com.upsaude.repository.atendimento.AtendimentoRepository;
 import com.upsaude.service.support.paciente.PacienteTenantEnforcer;
 import com.upsaude.service.support.profissionaissaude.ProfissionaisSaudeTenantEnforcer;
 import lombok.RequiredArgsConstructor;

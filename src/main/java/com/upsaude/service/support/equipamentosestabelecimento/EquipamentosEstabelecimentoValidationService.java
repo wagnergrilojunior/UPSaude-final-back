@@ -1,6 +1,6 @@
 package com.upsaude.service.support.equipamentosestabelecimento;
 
-import com.upsaude.api.request.EquipamentosEstabelecimentoRequest;
+import com.upsaude.api.request.estabelecimento.EquipamentosEstabelecimentoRequest;
 import com.upsaude.exception.BadRequestException;
 import org.springframework.stereotype.Service;
 

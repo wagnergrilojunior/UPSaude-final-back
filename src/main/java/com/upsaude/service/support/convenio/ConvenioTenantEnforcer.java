@@ -1,8 +1,8 @@
 package com.upsaude.service.support.convenio;
 
-import com.upsaude.entity.Convenio;
+import com.upsaude.entity.convenio.Convenio;
 import com.upsaude.exception.NotFoundException;
-import com.upsaude.repository.ConvenioRepository;
+import com.upsaude.repository.convenio.ConvenioRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;

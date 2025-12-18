@@ -1,10 +1,10 @@
 package com.upsaude.service.support.equipamentosestabelecimento;
 
-import com.upsaude.api.request.EquipamentosEstabelecimentoRequest;
-import com.upsaude.entity.Equipamentos;
-import com.upsaude.entity.EquipamentosEstabelecimento;
-import com.upsaude.entity.Estabelecimentos;
-import com.upsaude.entity.Tenant;
+import com.upsaude.api.request.estabelecimento.EquipamentosEstabelecimentoRequest;
+import com.upsaude.entity.equipamento.Equipamentos;
+import com.upsaude.entity.estabelecimento.EquipamentosEstabelecimento;
+import com.upsaude.entity.estabelecimento.Estabelecimentos;
+import com.upsaude.entity.sistema.Tenant;
 import com.upsaude.service.support.equipamentos.EquipamentosTenantEnforcer;
 import com.upsaude.service.support.estabelecimentos.EstabelecimentosTenantEnforcer;
 import lombok.RequiredArgsConstructor;

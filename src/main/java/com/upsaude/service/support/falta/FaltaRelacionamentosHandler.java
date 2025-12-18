@@ -1,9 +1,9 @@
 package com.upsaude.service.support.falta;
 
-import com.upsaude.api.request.FaltaRequest;
-import com.upsaude.entity.Estabelecimentos;
-import com.upsaude.entity.Falta;
-import com.upsaude.entity.Tenant;
+import com.upsaude.api.request.equipe.FaltaRequest;
+import com.upsaude.entity.estabelecimento.Estabelecimentos;
+import com.upsaude.entity.equipe.Falta;
+import com.upsaude.entity.sistema.Tenant;
 import com.upsaude.exception.BadRequestException;
 import com.upsaude.service.support.estabelecimentos.EstabelecimentosTenantEnforcer;
 import com.upsaude.service.support.medico.MedicoTenantEnforcer;

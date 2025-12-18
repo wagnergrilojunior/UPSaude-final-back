@@ -1,18 +1,18 @@
 package com.upsaude.service.impl;
 
-import com.upsaude.api.request.EnderecoRequest;
-import com.upsaude.api.response.EnderecoResponse;
-import com.upsaude.entity.Endereco;
-import com.upsaude.entity.Cidades;
-import com.upsaude.entity.Estados;
+import com.upsaude.api.request.paciente.EnderecoRequest;
+import com.upsaude.api.response.paciente.EnderecoResponse;
+import com.upsaude.entity.paciente.Endereco;
+import com.upsaude.entity.geografico.Cidades;
+import com.upsaude.entity.geografico.Estados;
 import com.upsaude.exception.BadRequestException;
 import com.upsaude.exception.InternalServerErrorException;
 import com.upsaude.exception.NotFoundException;
 import com.upsaude.mapper.EnderecoMapper;
-import com.upsaude.repository.EnderecoRepository;
-import com.upsaude.repository.CidadesRepository;
-import com.upsaude.repository.EstadosRepository;
-import com.upsaude.service.EnderecoService;
+import com.upsaude.repository.paciente.EnderecoRepository;
+import com.upsaude.repository.referencia.geografico.CidadesRepository;
+import com.upsaude.repository.referencia.geografico.EstadosRepository;
+import com.upsaude.service.paciente.EnderecoService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.CacheEvict;

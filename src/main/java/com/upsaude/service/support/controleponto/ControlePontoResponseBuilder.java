@@ -1,7 +1,7 @@
 package com.upsaude.service.support.controleponto;
 
-import com.upsaude.api.response.ControlePontoResponse;
-import com.upsaude.entity.ControlePonto;
+import com.upsaude.api.response.equipe.ControlePontoResponse;
+import com.upsaude.entity.equipe.ControlePonto;
 import com.upsaude.mapper.ControlePontoMapper;
 import lombok.RequiredArgsConstructor;
 import org.hibernate.Hibernate;

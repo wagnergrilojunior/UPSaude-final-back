@@ -1,6 +1,6 @@
 package com.upsaude.service.support.planejamentofamiliar;
 
-import com.upsaude.entity.PlanejamentoFamiliar;
+import com.upsaude.entity.planejamento.PlanejamentoFamiliar;
 import com.upsaude.exception.BadRequestException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;

@@ -1,6 +1,6 @@
 package com.upsaude.service.support.acaopromocaoprevencao;
 
-import com.upsaude.entity.AcaoPromocaoPrevencao;
+import com.upsaude.entity.educacao.AcaoPromocaoPrevencao;
 import com.upsaude.exception.BadRequestException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;

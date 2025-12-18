@@ -1,6 +1,6 @@
 package com.upsaude.service.support.deficiencias;
 
-import com.upsaude.entity.Deficiencias;
+import com.upsaude.entity.deficiencia.Deficiencias;
 import com.upsaude.exception.BadRequestException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;

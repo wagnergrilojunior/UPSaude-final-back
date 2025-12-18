@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns="http://servicos.saude.gov.br/wsdl/mensageria/v1r1/resultadospesquisacompatibilidades" xmlns:compatibilidade="http://servicos.saude.gov.br/schema/sigtap/compatibilidade/v1r1/compatibilidade" xmlns:paginacao="http://servicos.saude.gov.br/wsdl/mensageria/v1/paginacao" elementFormDefault="qualified" targetNamespace="http://servicos.saude.gov.br/wsdl/mensageria/v1r1/resultadospesquisacompatibilidades">
+
+	<xs:import id="paginacao" namespace="http://servicos.saude.gov.br/wsdl/mensageria/v1/paginacao" schemaLocation="paginacao.v1.xsd"/>
+
+	<xs:import id="compatibilidade" namespace="http://servicos.saude.gov.br/schema/sigtap/compatibilidade/v1r1/compatibilidade" schemaLocation="compatibilidade.v1r1.xsd"/>
+
+	<xs:annotation>
+		<xs:documentation>
+			Representa uma lista de resultado de
+			compativilidade.
+		</xs:documentation>
+	</xs:annotation>
+
+	<xs:element name="ResultadosPesquisaCompatibilidades" type="ResultadosPesquisaCompatibilidadesType"/>
+
+	<xs:complexType name="ResultadosPesquisaCompatibilidadesType">
+		<xs:sequence>
+			<xs:element minOccurs="0" maxOccurs="unbounded" ref="compatibilidade:Compatibilidade">
+				<xs:annotation>
+					<xs:documentation><![CDATA[Lista de Compatibilidade]]></xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element minOccurs="0" maxOccurs="1" ref="paginacao:Paginacao">
+				<xs:annotation>
+					<xs:documentation><![CDATA[Resposta da paginação]]>
+					</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+
+		</xs:sequence>
+	</xs:complexType>
+</xs:schema>

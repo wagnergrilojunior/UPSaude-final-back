@@ -1,14 +1,14 @@
 package com.upsaude.service.impl;
 
-import com.upsaude.api.request.MedicacaoRequest;
-import com.upsaude.api.response.MedicacaoResponse;
+import com.upsaude.api.request.medicacao.MedicacaoRequest;
+import com.upsaude.api.response.medicacao.MedicacaoResponse;
 import com.upsaude.cache.CacheKeyUtil;
-import com.upsaude.entity.Medicacao;
+import com.upsaude.entity.medicacao.Medicacao;
 import com.upsaude.exception.BadRequestException;
 import com.upsaude.exception.InternalServerErrorException;
 import com.upsaude.exception.NotFoundException;
-import com.upsaude.repository.MedicacaoRepository;
-import com.upsaude.service.MedicacaoService;
+import com.upsaude.repository.medicacao.MedicacaoRepository;
+import com.upsaude.service.medicacao.MedicacaoService;
 import com.upsaude.service.support.medicacao.MedicacaoCreator;
 import com.upsaude.service.support.medicacao.MedicacaoDomainService;
 import com.upsaude.service.support.medicacao.MedicacaoResponseBuilder;

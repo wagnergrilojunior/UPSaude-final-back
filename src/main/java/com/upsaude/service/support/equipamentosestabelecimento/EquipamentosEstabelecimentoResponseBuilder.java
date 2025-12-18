@@ -1,7 +1,7 @@
 package com.upsaude.service.support.equipamentosestabelecimento;
 
-import com.upsaude.api.response.EquipamentosEstabelecimentoResponse;
-import com.upsaude.entity.EquipamentosEstabelecimento;
+import com.upsaude.api.response.estabelecimento.EquipamentosEstabelecimentoResponse;
+import com.upsaude.entity.estabelecimento.EquipamentosEstabelecimento;
 import com.upsaude.mapper.EquipamentosEstabelecimentoMapper;
 import lombok.RequiredArgsConstructor;
 import org.hibernate.Hibernate;

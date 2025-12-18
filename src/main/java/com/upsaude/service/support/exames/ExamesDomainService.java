@@ -1,6 +1,6 @@
 package com.upsaude.service.support.exames;
 
-import com.upsaude.entity.Exames;
+import com.upsaude.entity.exame.Exames;
 import com.upsaude.exception.BadRequestException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;

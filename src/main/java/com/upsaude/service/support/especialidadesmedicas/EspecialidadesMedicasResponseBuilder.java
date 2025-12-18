@@ -1,7 +1,7 @@
 package com.upsaude.service.support.especialidadesmedicas;
 
-import com.upsaude.api.response.EspecialidadesMedicasResponse;
-import com.upsaude.entity.EspecialidadesMedicas;
+import com.upsaude.api.response.profissional.EspecialidadesMedicasResponse;
+import com.upsaude.entity.profissional.EspecialidadesMedicas;
 import com.upsaude.mapper.EspecialidadesMedicasMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;

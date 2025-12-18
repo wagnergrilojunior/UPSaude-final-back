@@ -1,13 +1,15 @@
 package com.upsaude.service.support.atividadeprofissional;
 
-import com.upsaude.api.request.AtividadeProfissionalRequest;
-import com.upsaude.entity.Atendimento;
-import com.upsaude.entity.AtividadeProfissional;
-import com.upsaude.entity.Estabelecimentos;
-import com.upsaude.entity.Tenant;
+import com.upsaude.entity.paciente.Paciente;
+
+import com.upsaude.api.request.profissional.AtividadeProfissionalRequest;
+import com.upsaude.entity.atendimento.Atendimento;
+import com.upsaude.entity.profissional.AtividadeProfissional;
+import com.upsaude.entity.estabelecimento.Estabelecimentos;
+import com.upsaude.entity.sistema.Tenant;
 import com.upsaude.exception.BadRequestException;
 import com.upsaude.exception.NotFoundException;
-import com.upsaude.repository.AtendimentoRepository;
+import com.upsaude.repository.atendimento.AtendimentoRepository;
 import com.upsaude.service.support.cirurgia.CirurgiaTenantEnforcer;
 import com.upsaude.service.support.estabelecimentos.EstabelecimentosTenantEnforcer;
 import com.upsaude.service.support.medico.MedicoTenantEnforcer;

@@ -1,8 +1,8 @@
 package com.upsaude.service.support.controleponto;
 
-import com.upsaude.entity.ControlePonto;
+import com.upsaude.entity.equipe.ControlePonto;
 import com.upsaude.exception.NotFoundException;
-import com.upsaude.repository.ControlePontoRepository;
+import com.upsaude.repository.profissional.equipe.ControlePontoRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;

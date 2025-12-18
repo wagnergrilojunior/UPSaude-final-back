@@ -1,4 +1,5 @@
 package com.upsaude.integration.supabase;
+import com.upsaude.entity.sistema.User;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.upsaude.config.SupabaseConfig;

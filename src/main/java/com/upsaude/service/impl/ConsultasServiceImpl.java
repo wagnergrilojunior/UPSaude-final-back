@@ -1,15 +1,15 @@
 package com.upsaude.service.impl;
 
-import com.upsaude.api.request.ConsultasRequest;
-import com.upsaude.api.response.ConsultasResponse;
+import com.upsaude.api.request.atendimento.ConsultasRequest;
+import com.upsaude.api.response.atendimento.ConsultasResponse;
 import com.upsaude.cache.CacheKeyUtil;
-import com.upsaude.entity.Consultas;
-import com.upsaude.entity.Tenant;
+import com.upsaude.entity.atendimento.Consultas;
+import com.upsaude.entity.sistema.Tenant;
 import com.upsaude.exception.BadRequestException;
 import com.upsaude.exception.InternalServerErrorException;
-import com.upsaude.repository.ConsultasRepository;
-import com.upsaude.service.ConsultasService;
-import com.upsaude.service.TenantService;
+import com.upsaude.repository.atendimento.ConsultasRepository;
+import com.upsaude.service.atendimento.ConsultasService;
+import com.upsaude.service.sistema.TenantService;
 import com.upsaude.service.support.consultas.ConsultasCreator;
 import com.upsaude.service.support.consultas.ConsultasResponseBuilder;
 import com.upsaude.service.support.consultas.ConsultasTenantEnforcer;

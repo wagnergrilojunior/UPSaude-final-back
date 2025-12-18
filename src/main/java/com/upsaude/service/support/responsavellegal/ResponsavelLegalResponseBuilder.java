@@ -1,7 +1,7 @@
 package com.upsaude.service.support.responsavellegal;
 
-import com.upsaude.api.response.ResponsavelLegalResponse;
-import com.upsaude.entity.ResponsavelLegal;
+import com.upsaude.api.response.paciente.ResponsavelLegalResponse;
+import com.upsaude.entity.paciente.ResponsavelLegal;
 import com.upsaude.mapper.ResponsavelLegalMapper;
 import lombok.RequiredArgsConstructor;
 import org.hibernate.Hibernate;

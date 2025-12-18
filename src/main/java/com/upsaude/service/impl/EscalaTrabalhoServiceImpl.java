@@ -1,16 +1,16 @@
 package com.upsaude.service.impl;
 
-import com.upsaude.api.request.EscalaTrabalhoRequest;
-import com.upsaude.api.response.EscalaTrabalhoResponse;
+import com.upsaude.api.request.equipe.EscalaTrabalhoRequest;
+import com.upsaude.api.response.equipe.EscalaTrabalhoResponse;
 import com.upsaude.cache.CacheKeyUtil;
-import com.upsaude.entity.EscalaTrabalho;
-import com.upsaude.entity.Tenant;
+import com.upsaude.entity.equipe.EscalaTrabalho;
+import com.upsaude.entity.sistema.Tenant;
 import com.upsaude.exception.BadRequestException;
 import com.upsaude.exception.InternalServerErrorException;
 import com.upsaude.exception.NotFoundException;
-import com.upsaude.repository.EscalaTrabalhoRepository;
-import com.upsaude.service.EscalaTrabalhoService;
-import com.upsaude.service.TenantService;
+import com.upsaude.repository.profissional.equipe.EscalaTrabalhoRepository;
+import com.upsaude.service.equipe.EscalaTrabalhoService;
+import com.upsaude.service.sistema.TenantService;
 import com.upsaude.service.support.escalatrabalho.EscalaTrabalhoCreator;
 import com.upsaude.service.support.escalatrabalho.EscalaTrabalhoResponseBuilder;
 import com.upsaude.service.support.escalatrabalho.EscalaTrabalhoTenantEnforcer;

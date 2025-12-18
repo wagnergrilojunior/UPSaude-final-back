@@ -1,7 +1,7 @@
 package com.upsaude.service.support.falta;
 
-import com.upsaude.api.response.FaltaResponse;
-import com.upsaude.entity.Falta;
+import com.upsaude.api.response.equipe.FaltaResponse;
+import com.upsaude.entity.equipe.Falta;
 import com.upsaude.mapper.FaltaMapper;
 import lombok.RequiredArgsConstructor;
 import org.hibernate.Hibernate;

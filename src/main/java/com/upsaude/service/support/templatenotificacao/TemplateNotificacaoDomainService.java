@@ -1,6 +1,6 @@
 package com.upsaude.service.support.templatenotificacao;
 
-import com.upsaude.entity.TemplateNotificacao;
+import com.upsaude.entity.notificacao.TemplateNotificacao;
 import com.upsaude.exception.BadRequestException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;

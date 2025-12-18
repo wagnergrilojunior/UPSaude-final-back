@@ -1,6 +1,6 @@
 package com.upsaude.service.support.departamentos;
 
-import com.upsaude.api.request.DepartamentosRequest;
+import com.upsaude.api.request.departamento.DepartamentosRequest;
 import com.upsaude.exception.BadRequestException;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;

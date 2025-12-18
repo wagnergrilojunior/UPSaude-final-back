@@ -1,14 +1,14 @@
 package com.upsaude.service.impl;
 
-import com.upsaude.api.request.DoencasRequest;
-import com.upsaude.api.response.DoencasResponse;
+import com.upsaude.api.request.doencas.DoencasRequest;
+import com.upsaude.api.response.doencas.DoencasResponse;
 import com.upsaude.cache.CacheKeyUtil;
-import com.upsaude.entity.Doencas;
+import com.upsaude.entity.doencas.Doencas;
 import com.upsaude.exception.BadRequestException;
 import com.upsaude.exception.InternalServerErrorException;
 import com.upsaude.exception.NotFoundException;
-import com.upsaude.repository.DoencasRepository;
-import com.upsaude.service.DoencasService;
+import com.upsaude.repository.doencas.DoencasRepository;
+import com.upsaude.service.doencas.DoencasService;
 import com.upsaude.service.support.doencas.DoencasCreator;
 import com.upsaude.service.support.doencas.DoencasDomainService;
 import com.upsaude.service.support.doencas.DoencasResponseBuilder;

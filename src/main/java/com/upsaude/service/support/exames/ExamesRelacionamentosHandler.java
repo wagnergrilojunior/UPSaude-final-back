@@ -1,15 +1,16 @@
 package com.upsaude.service.support.exames;
+import com.upsaude.entity.BaseEntity;
 
-import com.upsaude.api.request.ExamesRequest;
-import com.upsaude.entity.Atendimento;
-import com.upsaude.entity.Consultas;
-import com.upsaude.entity.Estabelecimentos;
-import com.upsaude.entity.Exames;
-import com.upsaude.entity.Tenant;
+import com.upsaude.api.request.exame.ExamesRequest;
+import com.upsaude.entity.atendimento.Atendimento;
+import com.upsaude.entity.atendimento.Consultas;
+import com.upsaude.entity.estabelecimento.Estabelecimentos;
+import com.upsaude.entity.exame.Exames;
+import com.upsaude.entity.sistema.Tenant;
 import com.upsaude.exception.BadRequestException;
 import com.upsaude.exception.NotFoundException;
-import com.upsaude.repository.AtendimentoRepository;
-import com.upsaude.repository.ConsultasRepository;
+import com.upsaude.repository.atendimento.AtendimentoRepository;
+import com.upsaude.repository.atendimento.ConsultasRepository;
 import com.upsaude.service.support.catalogoexames.CatalogoExamesTenantEnforcer;
 import com.upsaude.service.support.estabelecimentos.EstabelecimentosTenantEnforcer;
 import com.upsaude.service.support.medico.MedicoTenantEnforcer;

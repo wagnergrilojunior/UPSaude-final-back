@@ -1,6 +1,6 @@
 package com.upsaude.service.support.notificacao;
 
-import com.upsaude.api.request.NotificacaoRequest;
+import com.upsaude.api.request.notificacao.NotificacaoRequest;
 import com.upsaude.exception.BadRequestException;
 import org.springframework.stereotype.Service;
 

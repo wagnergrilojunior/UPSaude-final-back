@@ -1,13 +1,13 @@
 package com.upsaude.service.support.notificacao;
 
-import com.upsaude.api.request.NotificacaoRequest;
-import com.upsaude.entity.Agendamento;
-import com.upsaude.entity.Estabelecimentos;
-import com.upsaude.entity.Notificacao;
-import com.upsaude.entity.Paciente;
-import com.upsaude.entity.ProfissionaisSaude;
-import com.upsaude.entity.TemplateNotificacao;
-import com.upsaude.entity.Tenant;
+import com.upsaude.api.request.notificacao.NotificacaoRequest;
+import com.upsaude.entity.agendamento.Agendamento;
+import com.upsaude.entity.estabelecimento.Estabelecimentos;
+import com.upsaude.entity.notificacao.Notificacao;
+import com.upsaude.entity.paciente.Paciente;
+import com.upsaude.entity.profissional.ProfissionaisSaude;
+import com.upsaude.entity.notificacao.TemplateNotificacao;
+import com.upsaude.entity.sistema.Tenant;
 import com.upsaude.service.support.agendamento.AgendamentoTenantEnforcer;
 import com.upsaude.service.support.estabelecimentos.EstabelecimentosTenantEnforcer;
 import com.upsaude.service.support.paciente.PacienteTenantEnforcer;

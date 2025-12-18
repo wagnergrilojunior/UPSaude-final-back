@@ -1,7 +1,7 @@
 package com.upsaude.service.support.puericultura;
 
-import com.upsaude.api.response.PuericulturaResponse;
-import com.upsaude.entity.Puericultura;
+import com.upsaude.api.response.puericultura.PuericulturaResponse;
+import com.upsaude.entity.puericultura.Puericultura;
 import com.upsaude.mapper.PuericulturaMapper;
 import lombok.RequiredArgsConstructor;
 import org.hibernate.Hibernate;

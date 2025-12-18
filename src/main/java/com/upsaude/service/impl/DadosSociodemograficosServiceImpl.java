@@ -1,17 +1,18 @@
 package com.upsaude.service.impl;
+import com.upsaude.entity.paciente.Paciente;
 
-import com.upsaude.api.request.DadosSociodemograficosRequest;
-import com.upsaude.api.response.DadosSociodemograficosResponse;
+import com.upsaude.api.request.paciente.DadosSociodemograficosRequest;
+import com.upsaude.api.response.paciente.DadosSociodemograficosResponse;
 import com.upsaude.cache.CacheKeyUtil;
-import com.upsaude.entity.DadosSociodemograficos;
-import com.upsaude.entity.Tenant;
+import com.upsaude.entity.paciente.DadosSociodemograficos;
+import com.upsaude.entity.sistema.Tenant;
 import com.upsaude.exception.BadRequestException;
 import com.upsaude.exception.ConflictException;
 import com.upsaude.exception.InternalServerErrorException;
 import com.upsaude.exception.NotFoundException;
-import com.upsaude.repository.DadosSociodemograficosRepository;
-import com.upsaude.service.DadosSociodemograficosService;
-import com.upsaude.service.TenantService;
+import com.upsaude.repository.paciente.DadosSociodemograficosRepository;
+import com.upsaude.service.paciente.DadosSociodemograficosService;
+import com.upsaude.service.sistema.TenantService;
 import com.upsaude.service.support.dadossociodemograficos.DadosSociodemograficosCreator;
 import com.upsaude.service.support.dadossociodemograficos.DadosSociodemograficosDomainService;
 import com.upsaude.service.support.dadossociodemograficos.DadosSociodemograficosResponseBuilder;

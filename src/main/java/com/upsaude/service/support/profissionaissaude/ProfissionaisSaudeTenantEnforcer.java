@@ -1,8 +1,8 @@
 package com.upsaude.service.support.profissionaissaude;
 
-import com.upsaude.entity.ProfissionaisSaude;
+import com.upsaude.entity.profissional.ProfissionaisSaude;
 import com.upsaude.exception.NotFoundException;
-import com.upsaude.repository.ProfissionaisSaudeRepository;
+import com.upsaude.repository.profissional.ProfissionaisSaudeRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;

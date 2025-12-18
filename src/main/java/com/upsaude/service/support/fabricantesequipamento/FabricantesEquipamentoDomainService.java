@@ -1,6 +1,6 @@
 package com.upsaude.service.support.fabricantesequipamento;
 
-import com.upsaude.entity.FabricantesEquipamento;
+import com.upsaude.entity.equipamento.FabricantesEquipamento;
 import com.upsaude.exception.BadRequestException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;

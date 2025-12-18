@@ -1,8 +1,8 @@
 package com.upsaude.service.support.historicoclinico;
 
-import com.upsaude.entity.HistoricoClinico;
+import com.upsaude.entity.prontuario.HistoricoClinico;
 import com.upsaude.exception.NotFoundException;
-import com.upsaude.repository.HistoricoClinicoRepository;
+import com.upsaude.repository.prontuario.HistoricoClinicoRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;

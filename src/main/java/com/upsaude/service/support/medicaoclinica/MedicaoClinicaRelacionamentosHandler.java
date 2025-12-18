@@ -1,9 +1,9 @@
 package com.upsaude.service.support.medicaoclinica;
 
-import com.upsaude.api.request.MedicaoClinicaRequest;
-import com.upsaude.entity.MedicaoClinica;
-import com.upsaude.entity.Paciente;
-import com.upsaude.entity.Tenant;
+import com.upsaude.api.request.medicao.MedicaoClinicaRequest;
+import com.upsaude.entity.medicao.MedicaoClinica;
+import com.upsaude.entity.paciente.Paciente;
+import com.upsaude.entity.sistema.Tenant;
 import com.upsaude.service.support.paciente.PacienteTenantEnforcer;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;

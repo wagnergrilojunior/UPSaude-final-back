@@ -1,14 +1,15 @@
 package com.upsaude.service.impl;
+import com.upsaude.entity.sistema.User;
 
-import com.upsaude.api.request.TenantRequest;
-import com.upsaude.api.response.TenantResponse;
-import com.upsaude.entity.Tenant;
+import com.upsaude.api.request.sistema.TenantRequest;
+import com.upsaude.api.response.sistema.TenantResponse;
+import com.upsaude.entity.sistema.Tenant;
 import com.upsaude.exception.BadRequestException;
 import com.upsaude.exception.NotFoundException;
 import com.upsaude.mapper.TenantMapper;
-import com.upsaude.repository.TenantRepository;
-import com.upsaude.repository.UsuariosSistemaRepository;
-import com.upsaude.service.TenantService;
+import com.upsaude.repository.sistema.TenantRepository;
+import com.upsaude.repository.sistema.UsuariosSistemaRepository;
+import com.upsaude.service.sistema.TenantService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.hibernate.Hibernate;

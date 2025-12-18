@@ -1,10 +1,10 @@
 package com.upsaude.service.support.educacaosaude;
 
-import com.upsaude.api.request.EducacaoSaudeRequest;
-import com.upsaude.entity.EducacaoSaude;
-import com.upsaude.entity.Paciente;
-import com.upsaude.entity.ProfissionaisSaude;
-import com.upsaude.entity.Tenant;
+import com.upsaude.api.request.educacao.EducacaoSaudeRequest;
+import com.upsaude.entity.educacao.EducacaoSaude;
+import com.upsaude.entity.paciente.Paciente;
+import com.upsaude.entity.profissional.ProfissionaisSaude;
+import com.upsaude.entity.sistema.Tenant;
 import com.upsaude.service.support.equipesaude.EquipeSaudeTenantEnforcer;
 import com.upsaude.service.support.paciente.PacienteTenantEnforcer;
 import com.upsaude.service.support.profissionaissaude.ProfissionaisSaudeTenantEnforcer;

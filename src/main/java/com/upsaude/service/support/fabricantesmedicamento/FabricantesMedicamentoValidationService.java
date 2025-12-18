@@ -1,8 +1,8 @@
 package com.upsaude.service.support.fabricantesmedicamento;
 
-import com.upsaude.api.request.FabricantesMedicamentoRequest;
+import com.upsaude.api.request.fabricante.FabricantesMedicamentoRequest;
 import com.upsaude.exception.BadRequestException;
-import com.upsaude.repository.FabricantesMedicamentoRepository;
+import com.upsaude.repository.referencia.fabricante.FabricantesMedicamentoRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;

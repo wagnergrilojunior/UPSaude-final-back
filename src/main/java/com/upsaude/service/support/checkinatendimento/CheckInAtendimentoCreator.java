@@ -1,10 +1,10 @@
 package com.upsaude.service.support.checkinatendimento;
 
-import com.upsaude.api.request.CheckInAtendimentoRequest;
-import com.upsaude.entity.CheckInAtendimento;
-import com.upsaude.entity.Tenant;
+import com.upsaude.api.request.atendimento.CheckInAtendimentoRequest;
+import com.upsaude.entity.atendimento.CheckInAtendimento;
+import com.upsaude.entity.sistema.Tenant;
 import com.upsaude.mapper.CheckInAtendimentoMapper;
-import com.upsaude.repository.CheckInAtendimentoRepository;
+import com.upsaude.repository.atendimento.CheckInAtendimentoRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;

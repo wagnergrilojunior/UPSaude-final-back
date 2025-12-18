@@ -1,7 +1,7 @@
 package com.upsaude.service.support.planejamentofamiliar;
 
-import com.upsaude.api.response.PlanejamentoFamiliarResponse;
-import com.upsaude.entity.PlanejamentoFamiliar;
+import com.upsaude.api.response.planejamento.PlanejamentoFamiliarResponse;
+import com.upsaude.entity.planejamento.PlanejamentoFamiliar;
 import com.upsaude.mapper.PlanejamentoFamiliarMapper;
 import lombok.RequiredArgsConstructor;
 import org.hibernate.Hibernate;

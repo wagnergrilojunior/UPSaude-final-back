@@ -1,10 +1,10 @@
 package com.upsaude.service.support.atendimento;
 
-import com.upsaude.api.request.AtendimentoRequest;
-import com.upsaude.entity.Atendimento;
-import com.upsaude.entity.Tenant;
+import com.upsaude.api.request.atendimento.AtendimentoRequest;
+import com.upsaude.entity.atendimento.Atendimento;
+import com.upsaude.entity.sistema.Tenant;
 import com.upsaude.mapper.AtendimentoMapper;
-import com.upsaude.repository.AtendimentoRepository;
+import com.upsaude.repository.atendimento.AtendimentoRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;

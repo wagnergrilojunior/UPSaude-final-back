@@ -1,16 +1,16 @@
 package com.upsaude.service.impl;
 
-import com.upsaude.api.request.ConvenioRequest;
-import com.upsaude.api.response.ConvenioResponse;
+import com.upsaude.api.request.convenio.ConvenioRequest;
+import com.upsaude.api.response.convenio.ConvenioResponse;
 import com.upsaude.cache.CacheKeyUtil;
-import com.upsaude.entity.Convenio;
-import com.upsaude.entity.Tenant;
+import com.upsaude.entity.convenio.Convenio;
+import com.upsaude.entity.sistema.Tenant;
 import com.upsaude.exception.BadRequestException;
 import com.upsaude.exception.InternalServerErrorException;
 import com.upsaude.exception.NotFoundException;
-import com.upsaude.repository.ConvenioRepository;
-import com.upsaude.service.ConvenioService;
-import com.upsaude.service.TenantService;
+import com.upsaude.repository.convenio.ConvenioRepository;
+import com.upsaude.service.convenio.ConvenioService;
+import com.upsaude.service.sistema.TenantService;
 import com.upsaude.service.support.convenio.ConvenioCreator;
 import com.upsaude.service.support.convenio.ConvenioDomainService;
 import com.upsaude.service.support.convenio.ConvenioResponseBuilder;

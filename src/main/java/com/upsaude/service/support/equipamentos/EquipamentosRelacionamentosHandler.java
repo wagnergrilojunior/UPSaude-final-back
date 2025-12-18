@@ -1,11 +1,11 @@
 package com.upsaude.service.support.equipamentos;
 
-import com.upsaude.api.request.EquipamentosRequest;
-import com.upsaude.entity.Equipamentos;
-import com.upsaude.entity.FabricantesEquipamento;
-import com.upsaude.entity.Tenant;
+import com.upsaude.api.request.equipamento.EquipamentosRequest;
+import com.upsaude.entity.equipamento.Equipamentos;
+import com.upsaude.entity.equipamento.FabricantesEquipamento;
+import com.upsaude.entity.sistema.Tenant;
 import com.upsaude.exception.NotFoundException;
-import com.upsaude.repository.FabricantesEquipamentoRepository;
+import com.upsaude.repository.estabelecimento.equipamento.FabricantesEquipamentoRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 

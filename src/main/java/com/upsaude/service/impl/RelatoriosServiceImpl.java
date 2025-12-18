@@ -1,10 +1,12 @@
 package com.upsaude.service.impl;
 
+import com.upsaude.entity.agendamento.Agendamento;
+
 import com.upsaude.api.request.RelatorioEstatisticasRequest;
 import com.upsaude.api.response.RelatorioEstatisticasResponse;
 import com.upsaude.entity.*;
 import com.upsaude.repository.*;
-import com.upsaude.service.RelatoriosService;
+import com.upsaude.service.sistema.RelatoriosService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;

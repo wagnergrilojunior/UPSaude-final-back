@@ -1,9 +1,9 @@
 package com.upsaude.service.support.dadossociodemograficos;
 
-import com.upsaude.api.request.DadosSociodemograficosRequest;
+import com.upsaude.api.request.paciente.DadosSociodemograficosRequest;
 import com.upsaude.exception.BadRequestException;
 import com.upsaude.exception.ConflictException;
-import com.upsaude.repository.DadosSociodemograficosRepository;
+import com.upsaude.repository.paciente.DadosSociodemograficosRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 

@@ -1,9 +1,10 @@
 package com.upsaude.service.support.paciente;
+import com.upsaude.entity.sistema.Tenant;
 
-import com.upsaude.api.request.PacienteRequest;
-import com.upsaude.entity.Paciente;
+import com.upsaude.api.request.paciente.PacienteRequest;
+import com.upsaude.entity.paciente.Paciente;
 import com.upsaude.mapper.PacienteMapper;
-import com.upsaude.repository.PacienteRepository;
+import com.upsaude.repository.paciente.PacienteRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;

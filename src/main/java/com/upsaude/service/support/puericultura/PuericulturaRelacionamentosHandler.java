@@ -1,12 +1,13 @@
 package com.upsaude.service.support.puericultura;
+import com.upsaude.entity.BaseEntity;
 
-import com.upsaude.api.request.PuericulturaRequest;
-import com.upsaude.entity.EquipeSaude;
-import com.upsaude.entity.Estabelecimentos;
-import com.upsaude.entity.Paciente;
-import com.upsaude.entity.ProfissionaisSaude;
-import com.upsaude.entity.Puericultura;
-import com.upsaude.entity.Tenant;
+import com.upsaude.api.request.puericultura.PuericulturaRequest;
+import com.upsaude.entity.equipe.EquipeSaude;
+import com.upsaude.entity.estabelecimento.Estabelecimentos;
+import com.upsaude.entity.paciente.Paciente;
+import com.upsaude.entity.profissional.ProfissionaisSaude;
+import com.upsaude.entity.puericultura.Puericultura;
+import com.upsaude.entity.sistema.Tenant;
 import com.upsaude.service.support.equipesaude.EquipeSaudeTenantEnforcer;
 import com.upsaude.service.support.paciente.PacienteTenantEnforcer;
 import com.upsaude.service.support.profissionaissaude.ProfissionaisSaudeTenantEnforcer;

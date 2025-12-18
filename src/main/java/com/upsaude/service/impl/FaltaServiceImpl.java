@@ -1,17 +1,17 @@
 package com.upsaude.service.impl;
 
-import com.upsaude.api.request.FaltaRequest;
-import com.upsaude.api.response.FaltaResponse;
+import com.upsaude.api.request.equipe.FaltaRequest;
+import com.upsaude.api.response.equipe.FaltaResponse;
 import com.upsaude.cache.CacheKeyUtil;
-import com.upsaude.entity.Falta;
-import com.upsaude.entity.Tenant;
+import com.upsaude.entity.equipe.Falta;
+import com.upsaude.entity.sistema.Tenant;
 import com.upsaude.enums.TipoFaltaEnum;
 import com.upsaude.exception.BadRequestException;
 import com.upsaude.exception.InternalServerErrorException;
 import com.upsaude.exception.NotFoundException;
-import com.upsaude.repository.FaltaRepository;
-import com.upsaude.service.FaltaService;
-import com.upsaude.service.TenantService;
+import com.upsaude.repository.profissional.equipe.FaltaRepository;
+import com.upsaude.service.equipe.FaltaService;
+import com.upsaude.service.sistema.TenantService;
 import com.upsaude.service.support.falta.FaltaCreator;
 import com.upsaude.service.support.falta.FaltaDomainService;
 import com.upsaude.service.support.falta.FaltaResponseBuilder;

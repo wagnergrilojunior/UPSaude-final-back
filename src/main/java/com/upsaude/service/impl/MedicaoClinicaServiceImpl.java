@@ -1,14 +1,14 @@
 package com.upsaude.service.impl;
 
 import com.upsaude.cache.CacheKeyUtil;
-import com.upsaude.api.request.MedicaoClinicaRequest;
-import com.upsaude.api.response.MedicaoClinicaResponse;
-import com.upsaude.entity.MedicaoClinica;
-import com.upsaude.entity.Tenant;
+import com.upsaude.api.request.medicao.MedicaoClinicaRequest;
+import com.upsaude.api.response.medicao.MedicaoClinicaResponse;
+import com.upsaude.entity.medicao.MedicaoClinica;
+import com.upsaude.entity.sistema.Tenant;
 import com.upsaude.exception.BadRequestException;
-import com.upsaude.repository.MedicaoClinicaRepository;
-import com.upsaude.service.MedicaoClinicaService;
-import com.upsaude.service.TenantService;
+import com.upsaude.repository.profissional.medicao.MedicaoClinicaRepository;
+import com.upsaude.service.medicao.MedicaoClinicaService;
+import com.upsaude.service.sistema.TenantService;
 import com.upsaude.service.support.medicaoclinica.MedicaoClinicaCreator;
 import com.upsaude.service.support.medicaoclinica.MedicaoClinicaResponseBuilder;
 import com.upsaude.service.support.medicaoclinica.MedicaoClinicaTenantEnforcer;

@@ -1,13 +1,13 @@
 package com.upsaude.service.impl;
 
-import com.upsaude.api.request.DeficienciasRequest;
-import com.upsaude.api.response.DeficienciasResponse;
+import com.upsaude.api.request.deficiencia.DeficienciasRequest;
+import com.upsaude.api.response.deficiencia.DeficienciasResponse;
 import com.upsaude.cache.CacheKeyUtil;
-import com.upsaude.entity.Deficiencias;
+import com.upsaude.entity.deficiencia.Deficiencias;
 import com.upsaude.exception.BadRequestException;
 import com.upsaude.exception.NotFoundException;
-import com.upsaude.repository.DeficienciasRepository;
-import com.upsaude.service.DeficienciasService;
+import com.upsaude.repository.deficiencia.DeficienciasRepository;
+import com.upsaude.service.deficiencia.DeficienciasService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.Cache;

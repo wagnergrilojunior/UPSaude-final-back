@@ -1,6 +1,6 @@
 package com.upsaude.service.support.atividadeprofissional;
 
-import com.upsaude.entity.AtividadeProfissional;
+import com.upsaude.entity.profissional.AtividadeProfissional;
 import com.upsaude.exception.BadRequestException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;

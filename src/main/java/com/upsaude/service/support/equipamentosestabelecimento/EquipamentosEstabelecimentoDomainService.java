@@ -1,6 +1,6 @@
 package com.upsaude.service.support.equipamentosestabelecimento;
 
-import com.upsaude.entity.EquipamentosEstabelecimento;
+import com.upsaude.entity.estabelecimento.EquipamentosEstabelecimento;
 import org.springframework.stereotype.Service;
 
 @Service

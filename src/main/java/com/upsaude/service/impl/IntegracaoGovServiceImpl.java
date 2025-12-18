@@ -1,15 +1,15 @@
 package com.upsaude.service.impl;
 
 import com.upsaude.cache.CacheKeyUtil;
-import com.upsaude.api.request.IntegracaoGovRequest;
-import com.upsaude.api.response.IntegracaoGovResponse;
-import com.upsaude.entity.IntegracaoGov;
-import com.upsaude.entity.Tenant;
+import com.upsaude.api.request.integracao.IntegracaoGovRequest;
+import com.upsaude.api.response.integracao.IntegracaoGovResponse;
+import com.upsaude.entity.integracao.IntegracaoGov;
+import com.upsaude.entity.sistema.Tenant;
 import com.upsaude.exception.BadRequestException;
 import com.upsaude.exception.NotFoundException;
-import com.upsaude.repository.IntegracaoGovRepository;
-import com.upsaude.service.IntegracaoGovService;
-import com.upsaude.service.TenantService;
+import com.upsaude.repository.sistema.integracao.IntegracaoGovRepository;
+import com.upsaude.service.integracao.IntegracaoGovService;
+import com.upsaude.service.sistema.TenantService;
 import com.upsaude.service.support.integracaogov.IntegracaoGovCreator;
 import com.upsaude.service.support.integracaogov.IntegracaoGovResponseBuilder;
 import com.upsaude.service.support.integracaogov.IntegracaoGovTenantEnforcer;

@@ -1,15 +1,15 @@
 package com.upsaude.service.impl;
 
-import com.upsaude.api.request.PuericulturaRequest;
-import com.upsaude.api.response.PuericulturaResponse;
+import com.upsaude.api.request.puericultura.PuericulturaRequest;
+import com.upsaude.api.response.puericultura.PuericulturaResponse;
 import com.upsaude.cache.CacheKeyUtil;
-import com.upsaude.entity.Puericultura;
-import com.upsaude.entity.Tenant;
+import com.upsaude.entity.puericultura.Puericultura;
+import com.upsaude.entity.sistema.Tenant;
 import com.upsaude.exception.BadRequestException;
 import com.upsaude.exception.InternalServerErrorException;
 import com.upsaude.exception.NotFoundException;
-import com.upsaude.repository.PuericulturaRepository;
-import com.upsaude.service.PuericulturaService;
+import com.upsaude.repository.saude_publica.puericultura.PuericulturaRepository;
+import com.upsaude.service.puericultura.PuericulturaService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.Cache;
@@ -22,7 +22,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.upsaude.service.TenantService;
+import com.upsaude.service.sistema.TenantService;
 import com.upsaude.service.support.puericultura.PuericulturaCreator;
 import com.upsaude.service.support.puericultura.PuericulturaDomainService;
 import com.upsaude.service.support.puericultura.PuericulturaResponseBuilder;

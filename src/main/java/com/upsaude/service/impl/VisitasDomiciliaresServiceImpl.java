@@ -1,15 +1,15 @@
 package com.upsaude.service.impl;
 
-import com.upsaude.api.request.VisitasDomiciliaresRequest;
-import com.upsaude.api.response.VisitasDomiciliaresResponse;
+import com.upsaude.api.request.visita.VisitasDomiciliaresRequest;
+import com.upsaude.api.response.visita.VisitasDomiciliaresResponse;
 import com.upsaude.cache.CacheKeyUtil;
-import com.upsaude.entity.Tenant;
-import com.upsaude.entity.VisitasDomiciliares;
+import com.upsaude.entity.sistema.Tenant;
+import com.upsaude.entity.visita.VisitasDomiciliares;
 import com.upsaude.enums.TipoVisitaDomiciliarEnum;
 import com.upsaude.exception.BadRequestException;
-import com.upsaude.repository.VisitasDomiciliaresRepository;
-import com.upsaude.service.TenantService;
-import com.upsaude.service.VisitasDomiciliaresService;
+import com.upsaude.repository.saude_publica.visita.VisitasDomiciliaresRepository;
+import com.upsaude.service.sistema.TenantService;
+import com.upsaude.service.visita.VisitasDomiciliaresService;
 import com.upsaude.service.support.visitasdomiciliares.VisitasDomiciliaresCreator;
 import com.upsaude.service.support.visitasdomiciliares.VisitasDomiciliaresDomainService;
 import com.upsaude.service.support.visitasdomiciliares.VisitasDomiciliaresResponseBuilder;

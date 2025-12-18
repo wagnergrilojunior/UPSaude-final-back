@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="utf-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns="http://servicos.saude.gov.br/schema/sigtap/procedimento/cid/v1/cid" xmlns:se="http://servicos.saude.gov.br/schema/sigtap/procedimento/v1/sexopermitido" elementFormDefault="qualified" targetNamespace="http://servicos.saude.gov.br/schema/sigtap/procedimento/cid/v1/cid">
+    
+    <xs:import id="se" namespace="http://servicos.saude.gov.br/schema/sigtap/procedimento/v1/sexopermitido" schemaLocation="sexopermitido.v1.xsd"/>
+    
+    <xs:annotation>
+        <xs:documentation>
+            <![CDATA[
+            Este esquema representa um CID, Classificação Internacional De Doenças, que identifica a patologia/lesão que motivou especificamente o atendimento ambulatorial ou internação do paciente.
+            Esta representação é específica para uso do SIGTAP.
+            ]]>
+        </xs:documentation>
+    </xs:annotation>
+    
+    <xs:simpleType name="CodigoCIDType">
+        <xs:restriction base="xs:string">
+            <xs:minLength value="2"/>
+            <xs:maxLength value="4"/>
+            <xs:pattern value="[A-Z][0-9]{1,3}"/>
+        </xs:restriction>
+    </xs:simpleType>
+    
+    <xs:complexType name="CIDType">
+        <xs:sequence>
+            
+            <xs:element name="codigo" minOccurs="1" maxOccurs="1" nillable="true" type="CodigoCIDType">
+                <xs:annotation>
+                    <xs:documentation>
+                        <![CDATA[ Código identificador do CID. ]]>
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            
+            <xs:element name="nome" minOccurs="0" maxOccurs="1">
+                <xs:annotation>
+                    <xs:documentation>
+                        <![CDATA[ Nome descritivo do CID. ]]>
+                    </xs:documentation>
+                </xs:annotation>
+                <xs:simpleType>
+                    <xs:restriction base="xs:string">
+                        <xs:minLength value="1"/>
+                        <xs:maxLength value="300"/>
+                    </xs:restriction>
+                </xs:simpleType>
+            </xs:element>
+            
+            <xs:element name="agravo" minOccurs="0" maxOccurs="1" type="AgravoType">
+                <xs:annotation>
+                    <xs:documentation>
+                        <![CDATA[ Agravo do CID. ]]>
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            
+            <xs:element name="sexoAplicavel" minOccurs="0" maxOccurs="1" type="se:SexoPermitidoType">
+                <xs:annotation>
+                    <xs:documentation>
+                        <![CDATA[ Sexo aplicável ao CID. ]]>
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            
+            <xs:element name="estadio" minOccurs="0" maxOccurs="1" type="xs:boolean">
+                <xs:annotation>
+                    <xs:documentation>
+                        <![CDATA[ Indica se o CID é estadio ou não. ]]>
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            
+            <xs:element name="quantidadeCamposIrradiados" minOccurs="0" maxOccurs="1">
+                <xs:annotation>
+                    <xs:documentation>
+                        <![CDATA[ A quantidade de campos irradiados pelo CID.. ]]>
+                    </xs:documentation>
+                </xs:annotation>
+                <xs:simpleType>
+                    <xs:restriction base="xs:integer">
+                        <xs:minInclusive value="0"/>
+                        <xs:maxInclusive value="9999"/>
+                    </xs:restriction>
+                </xs:simpleType>
+            </xs:element>
+            
+        </xs:sequence>
+    </xs:complexType>
+    
+    <xs:simpleType name="AgravoType">
+        <xs:restriction base="xs:string">
+            <xs:enumeration value="SEM_AGRAVO"/>
+            <xs:enumeration value="AGRAVO_NOTIFICACAO"/>
+            <xs:enumeration value="AGRAVO_BLOQUEIO"/>
+        </xs:restriction>
+    </xs:simpleType>
+    
+</xs:schema>

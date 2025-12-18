@@ -1,11 +1,11 @@
 package com.upsaude.service.support.movimentacoesestoque;
 
-import com.upsaude.api.request.MovimentacoesEstoqueRequest;
-import com.upsaude.entity.EstoquesVacina;
-import com.upsaude.entity.MovimentacoesEstoque;
-import com.upsaude.entity.Tenant;
+import com.upsaude.api.request.estoque.MovimentacoesEstoqueRequest;
+import com.upsaude.entity.vacina.EstoquesVacina;
+import com.upsaude.entity.estoque.MovimentacoesEstoque;
+import com.upsaude.entity.sistema.Tenant;
 import com.upsaude.exception.NotFoundException;
-import com.upsaude.repository.EstoquesVacinaRepository;
+import com.upsaude.repository.saude_publica.vacina.EstoquesVacinaRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 

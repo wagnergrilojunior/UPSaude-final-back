@@ -1,6 +1,6 @@
 package com.upsaude.service.support.movimentacoesestoque;
 
-import com.upsaude.entity.MovimentacoesEstoque;
+import com.upsaude.entity.estoque.MovimentacoesEstoque;
 import org.springframework.stereotype.Service;
 
 @Service

@@ -1,8 +1,8 @@
 package com.upsaude.service.support.falta;
 
-import com.upsaude.entity.Falta;
+import com.upsaude.entity.equipe.Falta;
 import com.upsaude.exception.NotFoundException;
-import com.upsaude.repository.FaltaRepository;
+import com.upsaude.repository.profissional.equipe.FaltaRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;

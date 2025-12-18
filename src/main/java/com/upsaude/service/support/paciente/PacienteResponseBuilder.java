@@ -1,8 +1,8 @@
 package com.upsaude.service.support.paciente;
 
-import com.upsaude.api.response.PacienteResponse;
+import com.upsaude.api.response.paciente.PacienteResponse;
 import com.upsaude.api.response.PacienteSimplificadoResponse;
-import com.upsaude.entity.Paciente;
+import com.upsaude.entity.paciente.Paciente;
 import com.upsaude.mapper.PacienteMapper;
 import com.upsaude.repository.projection.PacienteSimplificadoProjection;
 import lombok.RequiredArgsConstructor;

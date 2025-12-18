@@ -1,6 +1,6 @@
 package com.upsaude.service.support.tratamentosodontologicos;
 
-import com.upsaude.entity.TratamentosOdontologicos;
+import com.upsaude.entity.odontologia.TratamentosOdontologicos;
 import com.upsaude.exception.BadRequestException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;

@@ -1,9 +1,9 @@
 package com.upsaude.service.support.integracaogov;
 
-import com.upsaude.api.request.IntegracaoGovRequest;
-import com.upsaude.entity.IntegracaoGov;
-import com.upsaude.entity.Paciente;
-import com.upsaude.entity.Tenant;
+import com.upsaude.api.request.integracao.IntegracaoGovRequest;
+import com.upsaude.entity.integracao.IntegracaoGov;
+import com.upsaude.entity.paciente.Paciente;
+import com.upsaude.entity.sistema.Tenant;
 import com.upsaude.service.support.paciente.PacienteTenantEnforcer;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;

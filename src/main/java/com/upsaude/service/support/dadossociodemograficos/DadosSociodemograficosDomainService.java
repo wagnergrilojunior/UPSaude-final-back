@@ -1,6 +1,6 @@
 package com.upsaude.service.support.dadossociodemograficos;
 
-import com.upsaude.entity.DadosSociodemograficos;
+import com.upsaude.entity.paciente.DadosSociodemograficos;
 import com.upsaude.exception.BadRequestException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;

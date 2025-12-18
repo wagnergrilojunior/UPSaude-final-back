@@ -1,6 +1,6 @@
 package com.upsaude.service.support.acaopromocaoprevencao;
 
-import com.upsaude.api.request.AcaoPromocaoPrevencaoRequest;
+import com.upsaude.api.request.educacao.AcaoPromocaoPrevencaoRequest;
 import com.upsaude.exception.BadRequestException;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;

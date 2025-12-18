@@ -1,10 +1,10 @@
 package com.upsaude.service.support.consultapuericultura;
 
-import com.upsaude.api.request.ConsultaPuericulturaRequest;
-import com.upsaude.entity.ConsultaPuericultura;
-import com.upsaude.entity.Tenant;
+import com.upsaude.api.request.atendimento.ConsultaPuericulturaRequest;
+import com.upsaude.entity.atendimento.ConsultaPuericultura;
+import com.upsaude.entity.sistema.Tenant;
 import com.upsaude.mapper.ConsultaPuericulturaMapper;
-import com.upsaude.repository.ConsultaPuericulturaRepository;
+import com.upsaude.repository.atendimento.ConsultaPuericulturaRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;

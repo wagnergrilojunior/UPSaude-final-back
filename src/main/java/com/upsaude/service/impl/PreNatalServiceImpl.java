@@ -1,16 +1,16 @@
 package com.upsaude.service.impl;
 
-import com.upsaude.api.request.PreNatalRequest;
-import com.upsaude.api.response.PreNatalResponse;
+import com.upsaude.api.request.planejamento.PreNatalRequest;
+import com.upsaude.api.response.planejamento.PreNatalResponse;
 import com.upsaude.cache.CacheKeyUtil;
-import com.upsaude.entity.PreNatal;
-import com.upsaude.entity.Tenant;
+import com.upsaude.entity.planejamento.PreNatal;
+import com.upsaude.entity.sistema.Tenant;
 import com.upsaude.enums.StatusPreNatalEnum;
 import com.upsaude.exception.BadRequestException;
 import com.upsaude.exception.InternalServerErrorException;
 import com.upsaude.exception.NotFoundException;
-import com.upsaude.repository.PreNatalRepository;
-import com.upsaude.service.PreNatalService;
+import com.upsaude.repository.saude_publica.planejamento.PreNatalRepository;
+import com.upsaude.service.planejamento.PreNatalService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.Cache;
@@ -23,7 +23,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.upsaude.service.TenantService;
+import com.upsaude.service.sistema.TenantService;
 import com.upsaude.service.support.prenatal.PreNatalCreator;
 import com.upsaude.service.support.prenatal.PreNatalDomainService;
 import com.upsaude.service.support.prenatal.PreNatalResponseBuilder;

@@ -1,8 +1,8 @@
 package com.upsaude.service.support.consultaprenatal;
 
-import com.upsaude.entity.PreNatal;
-import com.upsaude.repository.ConsultaPreNatalRepository;
-import com.upsaude.repository.PreNatalRepository;
+import com.upsaude.entity.planejamento.PreNatal;
+import com.upsaude.repository.atendimento.ConsultaPreNatalRepository;
+import com.upsaude.repository.saude_publica.planejamento.PreNatalRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;

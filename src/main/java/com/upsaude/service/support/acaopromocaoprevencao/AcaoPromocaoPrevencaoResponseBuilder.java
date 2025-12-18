@@ -1,7 +1,7 @@
 package com.upsaude.service.support.acaopromocaoprevencao;
 
-import com.upsaude.api.response.AcaoPromocaoPrevencaoResponse;
-import com.upsaude.entity.AcaoPromocaoPrevencao;
+import com.upsaude.api.response.educacao.AcaoPromocaoPrevencaoResponse;
+import com.upsaude.entity.educacao.AcaoPromocaoPrevencao;
 import com.upsaude.mapper.AcaoPromocaoPrevencaoMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;

@@ -1,14 +1,14 @@
 package com.upsaude.service.impl;
 
 import com.upsaude.cache.CacheKeyUtil;
-import com.upsaude.api.request.MovimentacoesEstoqueRequest;
-import com.upsaude.api.response.MovimentacoesEstoqueResponse;
-import com.upsaude.entity.MovimentacoesEstoque;
-import com.upsaude.entity.Tenant;
+import com.upsaude.api.request.estoque.MovimentacoesEstoqueRequest;
+import com.upsaude.api.response.estoque.MovimentacoesEstoqueResponse;
+import com.upsaude.entity.estoque.MovimentacoesEstoque;
+import com.upsaude.entity.sistema.Tenant;
 import com.upsaude.exception.BadRequestException;
-import com.upsaude.repository.MovimentacoesEstoqueRepository;
-import com.upsaude.service.MovimentacoesEstoqueService;
-import com.upsaude.service.TenantService;
+import com.upsaude.repository.estabelecimento.estoque.MovimentacoesEstoqueRepository;
+import com.upsaude.service.estoque.MovimentacoesEstoqueService;
+import com.upsaude.service.sistema.TenantService;
 import com.upsaude.service.support.movimentacoesestoque.MovimentacoesEstoqueCreator;
 import com.upsaude.service.support.movimentacoesestoque.MovimentacoesEstoqueResponseBuilder;
 import com.upsaude.service.support.movimentacoesestoque.MovimentacoesEstoqueTenantEnforcer;

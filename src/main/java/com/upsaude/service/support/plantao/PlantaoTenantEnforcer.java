@@ -1,8 +1,8 @@
 package com.upsaude.service.support.plantao;
 
-import com.upsaude.entity.Plantao;
+import com.upsaude.entity.equipe.Plantao;
 import com.upsaude.exception.NotFoundException;
-import com.upsaude.repository.PlantaoRepository;
+import com.upsaude.repository.profissional.equipe.PlantaoRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;

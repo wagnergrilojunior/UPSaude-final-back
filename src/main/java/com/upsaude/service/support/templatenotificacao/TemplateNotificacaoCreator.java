@@ -1,10 +1,10 @@
 package com.upsaude.service.support.templatenotificacao;
 
-import com.upsaude.api.request.TemplateNotificacaoRequest;
-import com.upsaude.entity.TemplateNotificacao;
-import com.upsaude.entity.Tenant;
+import com.upsaude.api.request.notificacao.TemplateNotificacaoRequest;
+import com.upsaude.entity.notificacao.TemplateNotificacao;
+import com.upsaude.entity.sistema.Tenant;
 import com.upsaude.mapper.TemplateNotificacaoMapper;
-import com.upsaude.repository.TemplateNotificacaoRepository;
+import com.upsaude.repository.sistema.notificacao.TemplateNotificacaoRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;

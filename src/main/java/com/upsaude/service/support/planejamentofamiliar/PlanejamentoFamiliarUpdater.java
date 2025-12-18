@@ -1,10 +1,10 @@
 package com.upsaude.service.support.planejamentofamiliar;
 
-import com.upsaude.api.request.PlanejamentoFamiliarRequest;
-import com.upsaude.entity.PlanejamentoFamiliar;
-import com.upsaude.entity.Tenant;
+import com.upsaude.api.request.planejamento.PlanejamentoFamiliarRequest;
+import com.upsaude.entity.planejamento.PlanejamentoFamiliar;
+import com.upsaude.entity.sistema.Tenant;
 import com.upsaude.mapper.PlanejamentoFamiliarMapper;
-import com.upsaude.repository.PlanejamentoFamiliarRepository;
+import com.upsaude.repository.saude_publica.planejamento.PlanejamentoFamiliarRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;

@@ -1,6 +1,6 @@
 package com.upsaude.service.support.perfisusuarios;
 
-import com.upsaude.entity.PerfisUsuarios;
+import com.upsaude.entity.sistema.PerfisUsuarios;
 import com.upsaude.exception.BadRequestException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;

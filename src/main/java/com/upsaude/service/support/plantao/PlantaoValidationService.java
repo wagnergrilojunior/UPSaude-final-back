@@ -1,6 +1,6 @@
 package com.upsaude.service.support.plantao;
 
-import com.upsaude.api.request.PlantaoRequest;
+import com.upsaude.api.request.equipe.PlantaoRequest;
 import com.upsaude.exception.BadRequestException;
 import org.springframework.stereotype.Service;
 

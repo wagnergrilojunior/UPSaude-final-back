@@ -1,6 +1,6 @@
 package com.upsaude.service.support.escalatrabalho;
 
-import com.upsaude.api.request.EscalaTrabalhoRequest;
+import com.upsaude.api.request.equipe.EscalaTrabalhoRequest;
 import com.upsaude.exception.BadRequestException;
 import org.springframework.stereotype.Service;
 

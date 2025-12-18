@@ -1,7 +1,7 @@
 package com.upsaude.service.support.visitasdomiciliares;
 
-import com.upsaude.api.response.VisitasDomiciliaresResponse;
-import com.upsaude.entity.VisitasDomiciliares;
+import com.upsaude.api.response.visita.VisitasDomiciliaresResponse;
+import com.upsaude.entity.visita.VisitasDomiciliares;
 import com.upsaude.mapper.VisitasDomiciliaresMapper;
 import lombok.RequiredArgsConstructor;
 import org.hibernate.Hibernate;

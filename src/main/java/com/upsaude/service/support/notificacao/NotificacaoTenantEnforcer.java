@@ -1,8 +1,8 @@
 package com.upsaude.service.support.notificacao;
 
-import com.upsaude.entity.Notificacao;
+import com.upsaude.entity.notificacao.Notificacao;
 import com.upsaude.exception.NotFoundException;
-import com.upsaude.repository.NotificacaoRepository;
+import com.upsaude.repository.sistema.notificacao.NotificacaoRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;

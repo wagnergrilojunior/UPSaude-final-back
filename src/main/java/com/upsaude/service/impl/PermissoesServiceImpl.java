@@ -1,16 +1,16 @@
 package com.upsaude.service.impl;
 
-import com.upsaude.api.request.PermissoesRequest;
-import com.upsaude.api.response.PermissoesResponse;
+import com.upsaude.api.request.sistema.PermissoesRequest;
+import com.upsaude.api.response.sistema.PermissoesResponse;
 import com.upsaude.cache.CacheKeyUtil;
-import com.upsaude.entity.Permissoes;
-import com.upsaude.entity.Tenant;
+import com.upsaude.entity.sistema.Permissoes;
+import com.upsaude.entity.sistema.Tenant;
 import com.upsaude.exception.BadRequestException;
 import com.upsaude.exception.InternalServerErrorException;
 import com.upsaude.exception.NotFoundException;
-import com.upsaude.repository.PermissoesRepository;
-import com.upsaude.service.PermissoesService;
-import com.upsaude.service.TenantService;
+import com.upsaude.repository.sistema.PermissoesRepository;
+import com.upsaude.service.sistema.PermissoesService;
+import com.upsaude.service.sistema.TenantService;
 import com.upsaude.service.support.permissoes.PermissoesCreator;
 import com.upsaude.service.support.permissoes.PermissoesDomainService;
 import com.upsaude.service.support.permissoes.PermissoesResponseBuilder;

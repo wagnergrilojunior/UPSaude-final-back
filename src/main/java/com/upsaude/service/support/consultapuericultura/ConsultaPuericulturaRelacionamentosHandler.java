@@ -1,11 +1,11 @@
 package com.upsaude.service.support.consultapuericultura;
 
-import com.upsaude.api.request.ConsultaPuericulturaRequest;
-import com.upsaude.entity.ConsultaPuericultura;
-import com.upsaude.entity.Estabelecimentos;
-import com.upsaude.entity.ProfissionaisSaude;
-import com.upsaude.entity.Puericultura;
-import com.upsaude.entity.Tenant;
+import com.upsaude.api.request.atendimento.ConsultaPuericulturaRequest;
+import com.upsaude.entity.atendimento.ConsultaPuericultura;
+import com.upsaude.entity.estabelecimento.Estabelecimentos;
+import com.upsaude.entity.profissional.ProfissionaisSaude;
+import com.upsaude.entity.puericultura.Puericultura;
+import com.upsaude.entity.sistema.Tenant;
 import com.upsaude.service.support.profissionaissaude.ProfissionaisSaudeTenantEnforcer;
 import com.upsaude.service.support.puericultura.PuericulturaTenantEnforcer;
 import lombok.RequiredArgsConstructor;

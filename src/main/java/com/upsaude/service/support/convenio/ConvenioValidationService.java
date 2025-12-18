@@ -1,8 +1,8 @@
 package com.upsaude.service.support.convenio;
 
-import com.upsaude.api.request.ConvenioRequest;
+import com.upsaude.api.request.convenio.ConvenioRequest;
 import com.upsaude.exception.BadRequestException;
-import com.upsaude.repository.ConvenioRepository;
+import com.upsaude.repository.convenio.ConvenioRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 

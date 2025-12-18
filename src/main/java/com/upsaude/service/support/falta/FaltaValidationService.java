@@ -1,6 +1,6 @@
 package com.upsaude.service.support.falta;
 
-import com.upsaude.api.request.FaltaRequest;
+import com.upsaude.api.request.equipe.FaltaRequest;
 import com.upsaude.exception.BadRequestException;
 import org.springframework.stereotype.Service;
 

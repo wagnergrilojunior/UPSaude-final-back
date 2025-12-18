@@ -1,6 +1,6 @@
 package com.upsaude.service.support.visitasdomiciliares;
 
-import com.upsaude.entity.VisitasDomiciliares;
+import com.upsaude.entity.visita.VisitasDomiciliares;
 import com.upsaude.exception.BadRequestException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;

@@ -1,23 +1,21 @@
 package com.upsaude.service.impl;
 
-import com.upsaude.api.request.MedicacaoPacienteRequest;
+import com.upsaude.api.request.medicacao.MedicacaoPacienteRequest;
 import com.upsaude.api.request.MedicacaoPacienteSimplificadoRequest;
-import com.upsaude.api.response.MedicacaoPacienteResponse;
-import com.upsaude.entity.MedicacaoPaciente;
-import com.upsaude.entity.Paciente;
-import com.upsaude.entity.Medicacao;
-import com.upsaude.entity.CidDoencas;
-import com.upsaude.entity.Tenant;
+import com.upsaude.api.response.medicacao.MedicacaoPacienteResponse;
+import com.upsaude.entity.medicacao.MedicacaoPaciente;
+import com.upsaude.entity.paciente.Paciente;
+import com.upsaude.entity.medicacao.Medicacao;
+import com.upsaude.entity.sistema.Tenant;
 import com.upsaude.exception.BadRequestException;
 import com.upsaude.exception.NotFoundException;
 import com.upsaude.mapper.MedicacaoPacienteMapper;
-import com.upsaude.repository.MedicacaoPacienteRepository;
-import com.upsaude.repository.PacienteRepository;
-import com.upsaude.repository.MedicacaoRepository;
-import com.upsaude.repository.CidDoencasRepository;
-import com.upsaude.repository.TenantRepository;
-import com.upsaude.service.MedicacaoPacienteService;
-import com.upsaude.service.TenantService;
+import com.upsaude.repository.medicacao.MedicacaoPacienteRepository;
+import com.upsaude.repository.paciente.PacienteRepository;
+import com.upsaude.repository.medicacao.MedicacaoRepository;
+import com.upsaude.repository.sistema.TenantRepository;
+import com.upsaude.service.medicacao.MedicacaoPacienteService;
+import com.upsaude.service.sistema.TenantService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -38,7 +36,6 @@ public class MedicacaoPacienteServiceImpl implements MedicacaoPacienteService {
     private final MedicacaoPacienteMapper medicacaoPacienteMapper;
     private final PacienteRepository pacienteRepository;
     private final MedicacaoRepository medicacaoRepository;
-    private final CidDoencasRepository cidDoencasRepository;
     private final TenantRepository tenantRepository;
     private final TenantService tenantService;
 
@@ -58,11 +55,7 @@ public class MedicacaoPacienteServiceImpl implements MedicacaoPacienteService {
                 .orElseThrow(() -> new NotFoundException("Medicação não encontrada com ID: " + request.getMedicacao()));
         medicacaoPaciente.setMedicacao(medicacao);
 
-        if (request.getCidRelacionado() != null) {
-            CidDoencas cidRelacionado = cidDoencasRepository.findById(request.getCidRelacionado())
-                    .orElseThrow(() -> new NotFoundException("CID não encontrado com ID: " + request.getCidRelacionado()));
-            medicacaoPaciente.setCidRelacionado(cidRelacionado);
-        }
+        // CidRelacionado removido - CidDoencas foi deletado
 
         medicacaoPaciente.setMedicacaoAtiva(true);
 
@@ -227,14 +220,7 @@ public class MedicacaoPacienteServiceImpl implements MedicacaoPacienteService {
             medicacaoPaciente.setMedicacao(medicacao);
         }
 
-        if (request.getCidRelacionado() != null) {
-            CidDoencas cidRelacionado = cidDoencasRepository.findById(request.getCidRelacionado())
-                    .orElseThrow(() -> new NotFoundException("CID não encontrado com ID: " + request.getCidRelacionado()));
-            medicacaoPaciente.setCidRelacionado(cidRelacionado);
-        } else {
-
-            medicacaoPaciente.setCidRelacionado(null);
-        }
+        // CidRelacionado removido - CidDoencas foi deletado
     }
 
 }

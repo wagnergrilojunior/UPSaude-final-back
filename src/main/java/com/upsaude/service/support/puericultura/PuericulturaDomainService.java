@@ -1,6 +1,6 @@
 package com.upsaude.service.support.puericultura;
 
-import com.upsaude.entity.Puericultura;
+import com.upsaude.entity.puericultura.Puericultura;
 import com.upsaude.exception.BadRequestException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;

@@ -1,8 +1,8 @@
 package com.upsaude.service.support.doencas;
 
-import com.upsaude.api.request.DoencasRequest;
+import com.upsaude.api.request.doencas.DoencasRequest;
 import com.upsaude.exception.BadRequestException;
-import com.upsaude.repository.DoencasRepository;
+import com.upsaude.repository.doencas.DoencasRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;

@@ -1,6 +1,10 @@
 package com.upsaude.service.support.checkinatendimento;
 
-import com.upsaude.api.request.CheckInAtendimentoRequest;
+import com.upsaude.entity.agendamento.Agendamento;
+
+import com.upsaude.entity.paciente.Paciente;
+
+import com.upsaude.api.request.atendimento.CheckInAtendimentoRequest;
 import com.upsaude.exception.BadRequestException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;

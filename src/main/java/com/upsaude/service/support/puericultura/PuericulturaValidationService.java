@@ -1,6 +1,8 @@
 package com.upsaude.service.support.puericultura;
 
-import com.upsaude.api.request.PuericulturaRequest;
+import com.upsaude.entity.paciente.Paciente;
+
+import com.upsaude.api.request.puericultura.PuericulturaRequest;
 import com.upsaude.exception.BadRequestException;
 import org.springframework.stereotype.Service;
 

@@ -1,8 +1,8 @@
 package com.upsaude.service.support.puericultura;
 
-import com.upsaude.entity.Puericultura;
+import com.upsaude.entity.puericultura.Puericultura;
 import com.upsaude.exception.NotFoundException;
-import com.upsaude.repository.PuericulturaRepository;
+import com.upsaude.repository.saude_publica.puericultura.PuericulturaRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;

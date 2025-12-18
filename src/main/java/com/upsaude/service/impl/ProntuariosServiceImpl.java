@@ -1,15 +1,15 @@
 package com.upsaude.service.impl;
 
-import com.upsaude.api.request.ProntuariosRequest;
-import com.upsaude.api.response.ProntuariosResponse;
+import com.upsaude.api.request.prontuario.ProntuariosRequest;
+import com.upsaude.api.response.prontuario.ProntuariosResponse;
 import com.upsaude.cache.CacheKeyUtil;
-import com.upsaude.entity.Prontuarios;
-import com.upsaude.entity.Tenant;
+import com.upsaude.entity.prontuario.Prontuarios;
+import com.upsaude.entity.sistema.Tenant;
 import com.upsaude.exception.BadRequestException;
 import com.upsaude.exception.InternalServerErrorException;
 import com.upsaude.exception.NotFoundException;
-import com.upsaude.repository.ProntuariosRepository;
-import com.upsaude.service.ProntuariosService;
+import com.upsaude.repository.prontuario.ProntuariosRepository;
+import com.upsaude.service.prontuario.ProntuariosService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.Cache;
@@ -22,7 +22,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.upsaude.service.TenantService;
+import com.upsaude.service.sistema.TenantService;
 import com.upsaude.service.support.prontuarios.ProntuariosCreator;
 import com.upsaude.service.support.prontuarios.ProntuariosDomainService;
 import com.upsaude.service.support.prontuarios.ProntuariosResponseBuilder;

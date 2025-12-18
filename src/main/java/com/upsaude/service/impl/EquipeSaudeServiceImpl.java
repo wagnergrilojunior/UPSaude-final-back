@@ -1,17 +1,17 @@
 package com.upsaude.service.impl;
 
-import com.upsaude.api.request.EquipeSaudeRequest;
-import com.upsaude.api.response.EquipeSaudeResponse;
+import com.upsaude.api.request.equipe.EquipeSaudeRequest;
+import com.upsaude.api.response.equipe.EquipeSaudeResponse;
 import com.upsaude.cache.CacheKeyUtil;
-import com.upsaude.entity.EquipeSaude;
-import com.upsaude.entity.Tenant;
+import com.upsaude.entity.equipe.EquipeSaude;
+import com.upsaude.entity.sistema.Tenant;
 import com.upsaude.enums.StatusAtivoEnum;
 import com.upsaude.exception.BadRequestException;
 import com.upsaude.exception.InternalServerErrorException;
 import com.upsaude.exception.NotFoundException;
-import com.upsaude.repository.EquipeSaudeRepository;
-import com.upsaude.service.EquipeSaudeService;
-import com.upsaude.service.TenantService;
+import com.upsaude.repository.profissional.equipe.EquipeSaudeRepository;
+import com.upsaude.service.equipe.EquipeSaudeService;
+import com.upsaude.service.sistema.TenantService;
 import com.upsaude.service.support.equipesaude.EquipeSaudeCreator;
 import com.upsaude.service.support.equipesaude.EquipeSaudeDomainService;
 import com.upsaude.service.support.equipesaude.EquipeSaudeResponseBuilder;

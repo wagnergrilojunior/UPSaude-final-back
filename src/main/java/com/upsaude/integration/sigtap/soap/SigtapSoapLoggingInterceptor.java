@@ -1,0 +1,76 @@
+package com.upsaude.integration.sigtap.soap;
+
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.ws.client.WebServiceClientException;
+import org.springframework.ws.client.support.interceptor.ClientInterceptor;
+import org.springframework.ws.context.MessageContext;
+import org.springframework.ws.soap.SoapMessage;
+
+import javax.xml.transform.Source;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.stream.StreamResult;
+import java.io.StringWriter;
+
+/**
+ * Interceptor de logging para chamadas SOAP.
+ *
+ * <p>Importante: loga apenas o <b>payload</b> (Body) para n?o vazar credenciais do WS-Security
+ * inseridas no Header (UsernameToken).
+ */
+@Slf4j
+public class SigtapSoapLoggingInterceptor implements ClientInterceptor {
+
+    @Override
+    public boolean handleRequest(MessageContext messageContext) throws WebServiceClientException {
+        if (log.isDebugEnabled()) {
+            log.debug("SIGTAP SOAP request payload={}", payloadToString(messageContext.getRequest()));
+        } else {
+            log.info("SIGTAP SOAP request enviado");
+        }
+        return true;
+    }
+
+    @Override
+    public boolean handleResponse(MessageContext messageContext) throws WebServiceClientException {
+        if (log.isDebugEnabled()) {
+            log.debug("SIGTAP SOAP response payload={}", payloadToString(messageContext.getResponse()));
+        } else {
+            log.info("SIGTAP SOAP response recebido");
+        }
+        return true;
+    }
+
+    @Override
+    public boolean handleFault(MessageContext messageContext) throws WebServiceClientException {
+        log.warn("SIGTAP SOAP fault payload={}", payloadToString(messageContext.getResponse()));
+        return true;
+    }
+
+    @Override
+    public void afterCompletion(MessageContext messageContext, Exception ex) throws WebServiceClientException {
+        if (ex != null) {
+            log.error("SIGTAP SOAP erro de transporte/processamento", ex);
+        }
+    }
+
+    private String payloadToString(org.springframework.ws.WebServiceMessage message) {
+        try {
+            Source source = message.getPayloadSource();
+            if (source == null) {
+                if (message instanceof SoapMessage soapMessage) {
+                    source = soapMessage.getEnvelope().getSource();
+                } else {
+                    return "<payload-vazio/>";
+                }
+            }
+            Transformer transformer = TransformerFactory.newInstance().newTransformer();
+            StringWriter writer = new StringWriter();
+            transformer.transform(source, new StreamResult(writer));
+            return writer.toString();
+        } catch (Exception e) {
+            return "<erro-serializando-payload/>";
+        }
+    }
+}
+

@@ -1,6 +1,8 @@
 package com.upsaude.service.support.planejamentofamiliar;
 
-import com.upsaude.api.request.PlanejamentoFamiliarRequest;
+import com.upsaude.entity.paciente.Paciente;
+
+import com.upsaude.api.request.planejamento.PlanejamentoFamiliarRequest;
 import com.upsaude.exception.BadRequestException;
 import org.springframework.stereotype.Service;
 

@@ -1,9 +1,9 @@
 package com.upsaude.service.support.lgpdconsentimento;
 
-import com.upsaude.api.request.LGPDConsentimentoRequest;
-import com.upsaude.entity.LGPDConsentimento;
-import com.upsaude.entity.Paciente;
-import com.upsaude.entity.Tenant;
+import com.upsaude.api.request.sistema.LGPDConsentimentoRequest;
+import com.upsaude.entity.sistema.LGPDConsentimento;
+import com.upsaude.entity.paciente.Paciente;
+import com.upsaude.entity.sistema.Tenant;
 import com.upsaude.service.support.paciente.PacienteTenantEnforcer;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;

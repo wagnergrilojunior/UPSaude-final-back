@@ -1,8 +1,8 @@
 package com.upsaude.service.support.integracaogov;
 
-import com.upsaude.entity.IntegracaoGov;
+import com.upsaude.entity.integracao.IntegracaoGov;
 import com.upsaude.exception.NotFoundException;
-import com.upsaude.repository.IntegracaoGovRepository;
+import com.upsaude.repository.sistema.integracao.IntegracaoGovRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;

@@ -1,0 +1,73 @@
+100Serviço de Atenção a Saúde no Sistema Penitenciário                                                                     202512
+101Estratégia de Saúde da Família                                                                                          202512
+102Estratégias de Agentes Comunitário de Saúde                                                                             202512
+103Serviço de Atendimento Móvel de Urgências                                                                               202512
+104Regulação Assistêncial dos Serviços de Saúde                                                                            202512
+105Serviço de Atenção em Neurologia/ Neurocirurgia                                                                         202512
+106Serviço de Atenção a DST/HIV/AIDS                                                                                       202512
+107Atenção à Saúde Auditiva                                                                                                202512
+108Atenção a Saúde do Trabalhador                                                                                          202512
+109Serviço de Atenção a Saúde dos Adolecentes em Conflito com a Lei, em Regime de Internação e Internação Provisória       202512
+110Serviço de Atenção a Saúde Reprodutiva                                                                                  202512
+111Serviço de Atenção ao Paciente com Tuberculose                                                                          202512
+112Serviço de Atenção ao Pré-Natal e Nascimento                                                                            202512
+113Serviço de Atenção Domiciliar                                                                                           202512
+114Serviço de Atenção em Saúde Bucal                                                                                       202512
+115Serviço de Atenção Psicossocial                                                                                         202512
+116Serviço de Atenção Cardiovascular/Cardiologia                                                                           202512
+117Serviço de Cirurgia Reparadora                                                                                          202512
+118Serviço de Cirurgia Torácica                                                                                            202512
+119Serviço de Controle de Tabagismo                                                                                        202512
+120Serviço de Diagnóstico por Anatomia Patológica e/ou Citopatologia                                                       202512
+121Diagnóstico por Imagem                                                                                                  202512
+122Serviço de Diagnóstico por Métodos Gráficos/Dinâmicos                                                                   202512
+123Serviço de Dispensação de Órteses, Próteses e Materiais Especiais                                                       202512
+124Serviço de Endocrinologia                                                                                               202512
+125Serviço de Farmácia                                                                                                     202512
+126Serviço de Fisioterapia                                                                                                 202512
+127Serviço de Atenção à Obesidade                                                                                          202512
+128Serviço de Hemoterapia                                                                                                  202512
+129Servico de Laboratório de Histocompatibilidade                                                                          202512
+130Atenção à Doença Renal Crônica                                                                                          202512
+131Serviço de Oftalmologia                                                                                                 202512
+132Serviço de Oncologia                                                                                                    202512
+133Serviço de Pneumologia                                                                                                  202512
+134Serviço de Práticas Integrativas e Complementares                                                                       202512
+135Serviço de Reabilitação                                                                                                 202512
+136Serviço de Suporte Nutricional                                                                                          202512
+137Serviço de Telemedicina                                                                                                 202512
+138Serviço de Traumato-Ortopedia                                                                                           202512
+139Serviço de Triagem Neonatal                                                                                             202512
+140Serviço de Urgência e Emergência                                                                                        202512
+141Serviço de Vigilância em Saúde                                                                                          202512
+142Serviço de Endoscopia                                                                                                   202512
+143Serviço Móvel de Urgência (exceto SAMU)                                                                                 202512
+144Serviço Posto de Coleta de Materiais Biológicos                                                                         202512
+145Serviço de Diagnóstico por Laboratório Clínico                                                                          202512
+146Serviço de Videolaparoscopia                                                                                            202512
+147Serviço de Apoio a Saúde da Família                                                                                     202512
+148Hospital-Dia                                                                                                            202512
+149Transplante                                                                                                             202512
+150Cirurgia Vascular                                                                                                       202512
+151Medicina Nuclear                                                                                                        202512
+152Atenção à Saúde da População Indígena                                                                                   202512
+153Atenção Especializada no Processo Transexualizador                                                                      202512
+154Serviço de Banco de Tecidos                                                                                             202512
+155Serviço de Traumatologia  Ortopedia                                                                                     202512
+157Serviço de Laboratorio de Protese Dentaria                                                                              202512
+158Serviço de Atenção Integral em Hanseniase                                                                               202512
+159Atenção Primária                                                                                                        202512
+160Teleconsultoria                                                                                                         202512
+161Consultório na Rua                                                                                                      202512
+162Serviço de Terapia Intensiva                                                                                            202512
+163Serviço de Cuidados Intermediários                                                                                      202512
+164Serviço de Órteses,Próteses e Materiais Especiais em Reabilitação                                                       202512
+165Atenção às Pessoas em Situação de Violência Sexual                                                                      202512
+166Serviço de  Análise Laboratorial  de Produtos Sujeitos á  Vigilância Sanitária                                          202512
+167Atendimento Itinerante de Asistência e Ensino em Saúde                                                                  202512
+168Atenção Às Pessoas com Doenças Raras                                                                                    202512
+169Serviço de Atenção em Urologia                                                                                          202512
+170Comissões e Comitês                                                                                                     202512
+171Cuidados Paliativos                                                                                                     202512
+173Logística de Imunobiológicos                                                                                            202512
+174Imunização                                                                                                              202512

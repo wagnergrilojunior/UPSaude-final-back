@@ -1,13 +1,14 @@
 package com.upsaude.service.impl;
+import com.upsaude.entity.sistema.Tenant;
 
-import com.upsaude.api.request.MedicacoesContinuasPacienteRequest;
-import com.upsaude.api.response.MedicacoesContinuasPacienteResponse;
-import com.upsaude.entity.MedicacoesContinuasPaciente;
+import com.upsaude.api.request.medicacao.MedicacoesContinuasPacienteRequest;
+import com.upsaude.api.response.medicacao.MedicacoesContinuasPacienteResponse;
+import com.upsaude.entity.medicacao.MedicacoesContinuasPaciente;
 import com.upsaude.exception.BadRequestException;
 import com.upsaude.exception.NotFoundException;
 import com.upsaude.mapper.MedicacoesContinuasPacienteMapper;
-import com.upsaude.repository.MedicacoesContinuasPacienteRepository;
-import com.upsaude.service.MedicacoesContinuasPacienteService;
+import com.upsaude.repository.medicacao.MedicacoesContinuasPacienteRepository;
+import com.upsaude.service.medicacao.MedicacoesContinuasPacienteService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

@@ -1,8 +1,8 @@
 package com.upsaude.service.support.consultas;
 
-import com.upsaude.entity.Consultas;
+import com.upsaude.entity.atendimento.Consultas;
 import com.upsaude.exception.NotFoundException;
-import com.upsaude.repository.ConsultasRepository;
+import com.upsaude.repository.atendimento.ConsultasRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;

@@ -1,6 +1,6 @@
 package com.upsaude.service.support.medicaoclinica;
 
-import com.upsaude.entity.MedicaoClinica;
+import com.upsaude.entity.medicao.MedicaoClinica;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;

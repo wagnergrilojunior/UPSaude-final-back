@@ -1,7 +1,7 @@
 package com.upsaude.service.support.consultas;
 
-import com.upsaude.api.response.ConsultasResponse;
-import com.upsaude.entity.Consultas;
+import com.upsaude.api.response.atendimento.ConsultasResponse;
+import com.upsaude.entity.atendimento.Consultas;
 import com.upsaude.mapper.ConsultasMapper;
 import lombok.RequiredArgsConstructor;
 import org.hibernate.Hibernate;
@@ -20,7 +20,6 @@ public class ConsultasResponseBuilder {
             Hibernate.initialize(entity.getProfissionalSaude());
             Hibernate.initialize(entity.getEspecialidade());
             Hibernate.initialize(entity.getConvenio());
-            Hibernate.initialize(entity.getCidPrincipal());
             Hibernate.initialize(entity.getEstabelecimento());
         }
         return mapper.toResponse(entity);

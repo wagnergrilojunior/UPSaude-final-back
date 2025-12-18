@@ -1,7 +1,7 @@
 package com.upsaude.service.support.educacaosaude;
 
-import com.upsaude.api.response.EducacaoSaudeResponse;
-import com.upsaude.entity.EducacaoSaude;
+import com.upsaude.api.response.educacao.EducacaoSaudeResponse;
+import com.upsaude.entity.educacao.EducacaoSaude;
 import com.upsaude.mapper.EducacaoSaudeMapper;
 import lombok.RequiredArgsConstructor;
 import org.hibernate.Hibernate;

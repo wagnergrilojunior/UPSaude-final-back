@@ -1,15 +1,15 @@
 package com.upsaude.service.support.historicoclinico;
 
-import com.upsaude.api.request.HistoricoClinicoRequest;
-import com.upsaude.entity.Agendamento;
-import com.upsaude.entity.Atendimento;
-import com.upsaude.entity.Cirurgia;
-import com.upsaude.entity.Exames;
-import com.upsaude.entity.HistoricoClinico;
-import com.upsaude.entity.Paciente;
-import com.upsaude.entity.ProfissionaisSaude;
-import com.upsaude.entity.ReceitasMedicas;
-import com.upsaude.entity.Tenant;
+import com.upsaude.api.request.prontuario.HistoricoClinicoRequest;
+import com.upsaude.entity.agendamento.Agendamento;
+import com.upsaude.entity.atendimento.Atendimento;
+import com.upsaude.entity.cirurgia.Cirurgia;
+import com.upsaude.entity.exame.Exames;
+import com.upsaude.entity.prontuario.HistoricoClinico;
+import com.upsaude.entity.paciente.Paciente;
+import com.upsaude.entity.profissional.ProfissionaisSaude;
+import com.upsaude.entity.medicacao.ReceitasMedicas;
+import com.upsaude.entity.sistema.Tenant;
 import com.upsaude.service.support.agendamento.AgendamentoTenantEnforcer;
 import com.upsaude.service.support.atendimento.AtendimentoTenantEnforcer;
 import com.upsaude.service.support.cirurgia.CirurgiaTenantEnforcer;

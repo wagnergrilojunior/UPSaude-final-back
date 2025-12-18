@@ -1,0 +1,10 @@
+package com.upsaude.dto.sigtap;
+
+import lombok.Data;
+
+@Data
+public class SigtapProcedimentoDetalhadoResponse {
+    private SigtapProcedimentoResponse procedimento;
+    private SigtapProcedimentoDetalheResponse detalhe;
+}
+

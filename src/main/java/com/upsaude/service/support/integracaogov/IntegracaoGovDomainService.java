@@ -1,6 +1,6 @@
 package com.upsaude.service.support.integracaogov;
 
-import com.upsaude.entity.IntegracaoGov;
+import com.upsaude.entity.integracao.IntegracaoGov;
 import org.springframework.stereotype.Service;
 
 @Service

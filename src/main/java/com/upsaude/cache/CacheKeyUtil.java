@@ -1,5 +1,7 @@
 package com.upsaude.cache;
 
+import com.upsaude.entity.atendimento.Atendimento;
+
 import java.util.UUID;
 
 public final class CacheKeyUtil {

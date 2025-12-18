@@ -1,15 +1,15 @@
 package com.upsaude.service.impl;
 
-import com.upsaude.api.request.TratamentosOdontologicosRequest;
-import com.upsaude.api.response.TratamentosOdontologicosResponse;
+import com.upsaude.api.request.odontologia.TratamentosOdontologicosRequest;
+import com.upsaude.api.response.odontologia.TratamentosOdontologicosResponse;
 import com.upsaude.cache.CacheKeyUtil;
-import com.upsaude.entity.TratamentosOdontologicos;
+import com.upsaude.entity.odontologia.TratamentosOdontologicos;
 import com.upsaude.entity.TratamentosOdontologicos.StatusTratamento;
-import com.upsaude.entity.Tenant;
+import com.upsaude.entity.sistema.Tenant;
 import com.upsaude.exception.BadRequestException;
-import com.upsaude.repository.TratamentosOdontologicosRepository;
-import com.upsaude.service.TenantService;
-import com.upsaude.service.TratamentosOdontologicosService;
+import com.upsaude.repository.odontologia.TratamentosOdontologicosRepository;
+import com.upsaude.service.sistema.TenantService;
+import com.upsaude.service.odontologia.TratamentosOdontologicosService;
 import com.upsaude.service.support.tratamentosodontologicos.TratamentosOdontologicosCreator;
 import com.upsaude.service.support.tratamentosodontologicos.TratamentosOdontologicosDomainService;
 import com.upsaude.service.support.tratamentosodontologicos.TratamentosOdontologicosResponseBuilder;

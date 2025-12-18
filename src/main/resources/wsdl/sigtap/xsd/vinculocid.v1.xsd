@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns="http://servicos.saude.gov.br/schema/sigtap/procedimento/cid/v1/vinculocid" elementFormDefault="qualified" targetNamespace="http://servicos.saude.gov.br/schema/sigtap/procedimento/cid/v1/vinculocid">
+    
+    <xs:annotation>
+        <xs:documentation>
+            <![CDATA[
+            Este esquema limita os valores possíveis para o vínculo de um CID à um Procedimento: Primário e Secundário.
+            ]]>
+        </xs:documentation>
+    </xs:annotation>
+    
+    <xs:simpleType name="VinculoCIDType">
+        
+        <xs:restriction base="xs:string">
+            <xs:enumeration value="PRIMARIO"/>
+            <xs:enumeration value="SECUNDARIO"/>
+        </xs:restriction>
+        
+    </xs:simpleType>
+    
+</xs:schema>

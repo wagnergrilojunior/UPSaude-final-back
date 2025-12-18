@@ -1,8 +1,8 @@
 package com.upsaude.service.support.vacinacoes;
 
-import com.upsaude.entity.Vacinacoes;
+import com.upsaude.entity.vacina.Vacinacoes;
 import com.upsaude.exception.NotFoundException;
-import com.upsaude.repository.VacinacoesRepository;
+import com.upsaude.repository.saude_publica.vacina.VacinacoesRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;

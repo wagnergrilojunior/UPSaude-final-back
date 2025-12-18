@@ -1,10 +1,10 @@
 package com.upsaude.service.support.profissionaissaude;
 
-import com.upsaude.api.request.ProfissionaisSaudeRequest;
-import com.upsaude.entity.ProfissionaisSaude;
-import com.upsaude.entity.Tenant;
+import com.upsaude.api.request.profissional.ProfissionaisSaudeRequest;
+import com.upsaude.entity.profissional.ProfissionaisSaude;
+import com.upsaude.entity.sistema.Tenant;
 import com.upsaude.mapper.ProfissionaisSaudeMapper;
-import com.upsaude.repository.ProfissionaisSaudeRepository;
+import com.upsaude.repository.profissional.ProfissionaisSaudeRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;

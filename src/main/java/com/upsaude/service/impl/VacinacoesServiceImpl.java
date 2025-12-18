@@ -1,14 +1,14 @@
 package com.upsaude.service.impl;
 
-import com.upsaude.api.request.VacinacoesRequest;
-import com.upsaude.api.response.VacinacoesResponse;
+import com.upsaude.api.request.vacina.VacinacoesRequest;
+import com.upsaude.api.response.vacina.VacinacoesResponse;
 import com.upsaude.cache.CacheKeyUtil;
-import com.upsaude.entity.Tenant;
-import com.upsaude.entity.Vacinacoes;
+import com.upsaude.entity.sistema.Tenant;
+import com.upsaude.entity.vacina.Vacinacoes;
 import com.upsaude.exception.BadRequestException;
-import com.upsaude.repository.VacinacoesRepository;
-import com.upsaude.service.TenantService;
-import com.upsaude.service.VacinacoesService;
+import com.upsaude.repository.saude_publica.vacina.VacinacoesRepository;
+import com.upsaude.service.sistema.TenantService;
+import com.upsaude.service.vacina.VacinacoesService;
 import com.upsaude.service.support.vacinacoes.VacinacoesCreator;
 import com.upsaude.service.support.vacinacoes.VacinacoesDomainService;
 import com.upsaude.service.support.vacinacoes.VacinacoesResponseBuilder;

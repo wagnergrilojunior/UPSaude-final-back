@@ -1,10 +1,10 @@
 package com.upsaude.service.support.consultas;
 
-import com.upsaude.api.request.ConsultasRequest;
-import com.upsaude.entity.Consultas;
-import com.upsaude.entity.Tenant;
+import com.upsaude.api.request.atendimento.ConsultasRequest;
+import com.upsaude.entity.atendimento.Consultas;
+import com.upsaude.entity.sistema.Tenant;
 import com.upsaude.mapper.ConsultasMapper;
-import com.upsaude.repository.ConsultasRepository;
+import com.upsaude.repository.atendimento.ConsultasRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;

@@ -1,10 +1,10 @@
 package com.upsaude.service.support.escalatrabalho;
 
-import com.upsaude.api.request.EscalaTrabalhoRequest;
-import com.upsaude.entity.EscalaTrabalho;
-import com.upsaude.entity.Tenant;
+import com.upsaude.api.request.equipe.EscalaTrabalhoRequest;
+import com.upsaude.entity.equipe.EscalaTrabalho;
+import com.upsaude.entity.sistema.Tenant;
 import com.upsaude.mapper.EscalaTrabalhoMapper;
-import com.upsaude.repository.EscalaTrabalhoRepository;
+import com.upsaude.repository.profissional.equipe.EscalaTrabalhoRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;

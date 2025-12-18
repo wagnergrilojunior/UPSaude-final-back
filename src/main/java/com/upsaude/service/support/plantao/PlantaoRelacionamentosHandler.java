@@ -1,8 +1,8 @@
 package com.upsaude.service.support.plantao;
 
-import com.upsaude.api.request.PlantaoRequest;
-import com.upsaude.entity.Plantao;
-import com.upsaude.entity.Tenant;
+import com.upsaude.api.request.equipe.PlantaoRequest;
+import com.upsaude.entity.equipe.Plantao;
+import com.upsaude.entity.sistema.Tenant;
 import com.upsaude.exception.BadRequestException;
 import com.upsaude.service.support.estabelecimentos.EstabelecimentosTenantEnforcer;
 import com.upsaude.service.support.medico.MedicoTenantEnforcer;

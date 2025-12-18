@@ -1,8 +1,8 @@
 package com.upsaude.service.support.planejamentofamiliar;
 
-import com.upsaude.entity.PlanejamentoFamiliar;
+import com.upsaude.entity.planejamento.PlanejamentoFamiliar;
 import com.upsaude.exception.NotFoundException;
-import com.upsaude.repository.PlanejamentoFamiliarRepository;
+import com.upsaude.repository.saude_publica.planejamento.PlanejamentoFamiliarRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;

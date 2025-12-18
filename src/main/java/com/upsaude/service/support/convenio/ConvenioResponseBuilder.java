@@ -1,7 +1,7 @@
 package com.upsaude.service.support.convenio;
 
-import com.upsaude.api.response.ConvenioResponse;
-import com.upsaude.entity.Convenio;
+import com.upsaude.api.response.convenio.ConvenioResponse;
+import com.upsaude.entity.convenio.Convenio;
 import com.upsaude.mapper.ConvenioMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;

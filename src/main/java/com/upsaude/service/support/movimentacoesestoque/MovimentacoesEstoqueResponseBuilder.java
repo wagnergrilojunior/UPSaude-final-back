@@ -1,7 +1,7 @@
 package com.upsaude.service.support.movimentacoesestoque;
 
-import com.upsaude.api.response.MovimentacoesEstoqueResponse;
-import com.upsaude.entity.MovimentacoesEstoque;
+import com.upsaude.api.response.estoque.MovimentacoesEstoqueResponse;
+import com.upsaude.entity.estoque.MovimentacoesEstoque;
 import com.upsaude.mapper.MovimentacoesEstoqueMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;

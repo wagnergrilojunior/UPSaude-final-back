@@ -1,10 +1,10 @@
 package com.upsaude.service.support.receitasmedicas;
 
-import com.upsaude.api.request.ReceitasMedicasRequest;
-import com.upsaude.entity.ReceitasMedicas;
-import com.upsaude.entity.Tenant;
+import com.upsaude.api.request.medicacao.ReceitasMedicasRequest;
+import com.upsaude.entity.medicacao.ReceitasMedicas;
+import com.upsaude.entity.sistema.Tenant;
 import com.upsaude.mapper.ReceitasMedicasMapper;
-import com.upsaude.repository.ReceitasMedicasRepository;
+import com.upsaude.repository.medicacao.ReceitasMedicasRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;

@@ -1,7 +1,7 @@
 package com.upsaude.service.support.doencas;
 
-import com.upsaude.api.response.DoencasResponse;
-import com.upsaude.entity.Doencas;
+import com.upsaude.api.response.doencas.DoencasResponse;
+import com.upsaude.entity.doencas.Doencas;
 import com.upsaude.mapper.DoencasMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;

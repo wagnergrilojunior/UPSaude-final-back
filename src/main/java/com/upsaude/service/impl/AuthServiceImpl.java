@@ -1,14 +1,15 @@
 package com.upsaude.service.impl;
+import com.upsaude.entity.sistema.User;
 
 import com.upsaude.api.request.LoginRequest;
 import com.upsaude.api.response.LoginResponse;
 import com.upsaude.api.response.UsuarioSistemaInfoResponse;
-import com.upsaude.entity.UsuarioEstabelecimento;
-import com.upsaude.entity.UsuariosSistema;
+import com.upsaude.entity.estabelecimento.UsuarioEstabelecimento;
+import com.upsaude.entity.sistema.UsuariosSistema;
 import com.upsaude.integration.supabase.SupabaseAuthResponse;
 import com.upsaude.integration.supabase.SupabaseAuthService;
-import com.upsaude.repository.UsuarioEstabelecimentoRepository;
-import com.upsaude.repository.UsuariosSistemaRepository;
+import com.upsaude.repository.estabelecimento.UsuarioEstabelecimentoRepository;
+import com.upsaude.repository.sistema.UsuariosSistemaRepository;
 import com.upsaude.service.AuthService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

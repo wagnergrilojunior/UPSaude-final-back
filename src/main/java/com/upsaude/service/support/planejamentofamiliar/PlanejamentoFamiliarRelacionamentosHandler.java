@@ -1,8 +1,8 @@
 package com.upsaude.service.support.planejamentofamiliar;
 
-import com.upsaude.api.request.PlanejamentoFamiliarRequest;
-import com.upsaude.entity.PlanejamentoFamiliar;
-import com.upsaude.entity.Tenant;
+import com.upsaude.api.request.planejamento.PlanejamentoFamiliarRequest;
+import com.upsaude.entity.planejamento.PlanejamentoFamiliar;
+import com.upsaude.entity.sistema.Tenant;
 import com.upsaude.exception.BadRequestException;
 import com.upsaude.service.support.equipesaude.EquipeSaudeTenantEnforcer;
 import com.upsaude.service.support.paciente.PacienteTenantEnforcer;

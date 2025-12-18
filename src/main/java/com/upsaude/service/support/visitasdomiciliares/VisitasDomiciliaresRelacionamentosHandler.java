@@ -1,12 +1,12 @@
 package com.upsaude.service.support.visitasdomiciliares;
 
-import com.upsaude.api.request.VisitasDomiciliaresRequest;
-import com.upsaude.entity.EquipeSaude;
-import com.upsaude.entity.Estabelecimentos;
-import com.upsaude.entity.Paciente;
-import com.upsaude.entity.ProfissionaisSaude;
-import com.upsaude.entity.Tenant;
-import com.upsaude.entity.VisitasDomiciliares;
+import com.upsaude.api.request.visita.VisitasDomiciliaresRequest;
+import com.upsaude.entity.equipe.EquipeSaude;
+import com.upsaude.entity.estabelecimento.Estabelecimentos;
+import com.upsaude.entity.paciente.Paciente;
+import com.upsaude.entity.profissional.ProfissionaisSaude;
+import com.upsaude.entity.sistema.Tenant;
+import com.upsaude.entity.visita.VisitasDomiciliares;
 import com.upsaude.service.support.equipesaude.EquipeSaudeTenantEnforcer;
 import com.upsaude.service.support.estabelecimentos.EstabelecimentosTenantEnforcer;
 import com.upsaude.service.support.paciente.PacienteTenantEnforcer;

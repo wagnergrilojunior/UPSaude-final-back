@@ -1,9 +1,10 @@
 package com.upsaude.service.support.acaopromocaoprevencao;
+import com.upsaude.entity.sistema.Tenant;
 
-import com.upsaude.api.request.AcaoPromocaoPrevencaoRequest;
-import com.upsaude.entity.AcaoPromocaoPrevencao;
+import com.upsaude.api.request.educacao.AcaoPromocaoPrevencaoRequest;
+import com.upsaude.entity.educacao.AcaoPromocaoPrevencao;
 import com.upsaude.mapper.AcaoPromocaoPrevencaoMapper;
-import com.upsaude.repository.AcaoPromocaoPrevencaoRepository;
+import com.upsaude.repository.saude_publica.educacao.AcaoPromocaoPrevencaoRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;

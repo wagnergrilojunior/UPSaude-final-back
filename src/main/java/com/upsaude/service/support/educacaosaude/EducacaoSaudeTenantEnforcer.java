@@ -1,8 +1,8 @@
 package com.upsaude.service.support.educacaosaude;
 
-import com.upsaude.entity.EducacaoSaude;
+import com.upsaude.entity.educacao.EducacaoSaude;
 import com.upsaude.exception.NotFoundException;
-import com.upsaude.repository.EducacaoSaudeRepository;
+import com.upsaude.repository.saude_publica.educacao.EducacaoSaudeRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;

@@ -1,16 +1,16 @@
 package com.upsaude.service.impl;
 
-import com.upsaude.api.request.ConsultaPuericulturaRequest;
-import com.upsaude.api.response.ConsultaPuericulturaResponse;
+import com.upsaude.api.request.atendimento.ConsultaPuericulturaRequest;
+import com.upsaude.api.response.atendimento.ConsultaPuericulturaResponse;
 import com.upsaude.cache.CacheKeyUtil;
-import com.upsaude.entity.ConsultaPuericultura;
-import com.upsaude.entity.Tenant;
+import com.upsaude.entity.atendimento.ConsultaPuericultura;
+import com.upsaude.entity.sistema.Tenant;
 import com.upsaude.exception.BadRequestException;
 import com.upsaude.exception.InternalServerErrorException;
 import com.upsaude.exception.NotFoundException;
-import com.upsaude.repository.ConsultaPuericulturaRepository;
-import com.upsaude.service.ConsultaPuericulturaService;
-import com.upsaude.service.TenantService;
+import com.upsaude.repository.atendimento.ConsultaPuericulturaRepository;
+import com.upsaude.service.atendimento.ConsultaPuericulturaService;
+import com.upsaude.service.sistema.TenantService;
 import com.upsaude.service.support.consultapuericultura.ConsultaPuericulturaCreator;
 import com.upsaude.service.support.consultapuericultura.ConsultaPuericulturaResponseBuilder;
 import com.upsaude.service.support.consultapuericultura.ConsultaPuericulturaTenantEnforcer;

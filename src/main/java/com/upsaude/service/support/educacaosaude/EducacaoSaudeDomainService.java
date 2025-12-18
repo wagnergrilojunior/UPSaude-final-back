@@ -1,6 +1,6 @@
 package com.upsaude.service.support.educacaosaude;
 
-import com.upsaude.entity.EducacaoSaude;
+import com.upsaude.entity.educacao.EducacaoSaude;
 import org.springframework.stereotype.Service;
 
 @Service

@@ -1,14 +1,14 @@
 package com.upsaude.service.impl;
 
 import com.upsaude.cache.CacheKeyUtil;
-import com.upsaude.api.request.HistoricoClinicoRequest;
-import com.upsaude.api.response.HistoricoClinicoResponse;
-import com.upsaude.entity.HistoricoClinico;
-import com.upsaude.entity.Tenant;
+import com.upsaude.api.request.prontuario.HistoricoClinicoRequest;
+import com.upsaude.api.response.prontuario.HistoricoClinicoResponse;
+import com.upsaude.entity.prontuario.HistoricoClinico;
+import com.upsaude.entity.sistema.Tenant;
 import com.upsaude.exception.BadRequestException;
-import com.upsaude.repository.HistoricoClinicoRepository;
-import com.upsaude.service.HistoricoClinicoService;
-import com.upsaude.service.TenantService;
+import com.upsaude.repository.prontuario.HistoricoClinicoRepository;
+import com.upsaude.service.prontuario.HistoricoClinicoService;
+import com.upsaude.service.sistema.TenantService;
 import com.upsaude.service.support.historicoclinico.HistoricoClinicoCreator;
 import com.upsaude.service.support.historicoclinico.HistoricoClinicoResponseBuilder;
 import com.upsaude.service.support.historicoclinico.HistoricoClinicoTenantEnforcer;

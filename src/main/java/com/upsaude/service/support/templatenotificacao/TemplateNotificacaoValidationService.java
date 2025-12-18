@@ -1,6 +1,6 @@
 package com.upsaude.service.support.templatenotificacao;
 
-import com.upsaude.api.request.TemplateNotificacaoRequest;
+import com.upsaude.api.request.notificacao.TemplateNotificacaoRequest;
 import com.upsaude.exception.BadRequestException;
 import org.springframework.stereotype.Service;
 

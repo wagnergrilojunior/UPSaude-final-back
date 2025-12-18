@@ -1,6 +1,6 @@
 package com.upsaude.service.support.fabricantesvacina;
 
-import com.upsaude.entity.FabricantesVacina;
+import com.upsaude.entity.vacina.FabricantesVacina;
 import com.upsaude.exception.BadRequestException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;

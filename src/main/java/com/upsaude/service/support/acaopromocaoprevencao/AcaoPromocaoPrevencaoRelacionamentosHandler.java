@@ -1,12 +1,12 @@
 package com.upsaude.service.support.acaopromocaoprevencao;
 
-import com.upsaude.api.request.AcaoPromocaoPrevencaoRequest;
-import com.upsaude.entity.AcaoPromocaoPrevencao;
-import com.upsaude.entity.EquipeSaude;
-import com.upsaude.entity.ProfissionaisSaude;
+import com.upsaude.api.request.educacao.AcaoPromocaoPrevencaoRequest;
+import com.upsaude.entity.educacao.AcaoPromocaoPrevencao;
+import com.upsaude.entity.equipe.EquipeSaude;
+import com.upsaude.entity.profissional.ProfissionaisSaude;
 import com.upsaude.exception.NotFoundException;
-import com.upsaude.repository.EquipeSaudeRepository;
-import com.upsaude.repository.ProfissionaisSaudeRepository;
+import com.upsaude.repository.profissional.equipe.EquipeSaudeRepository;
+import com.upsaude.repository.profissional.ProfissionaisSaudeRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;

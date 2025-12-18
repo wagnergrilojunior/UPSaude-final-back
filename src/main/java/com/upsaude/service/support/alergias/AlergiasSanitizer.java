@@ -1,6 +1,6 @@
 package com.upsaude.service.support.alergias;
 
-import com.upsaude.api.request.AlergiasRequest;
+import com.upsaude.api.request.alergia.AlergiasRequest;
 import org.springframework.stereotype.Service;
 
 @Service

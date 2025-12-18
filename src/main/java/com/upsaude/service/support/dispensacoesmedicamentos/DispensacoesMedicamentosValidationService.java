@@ -1,6 +1,8 @@
 package com.upsaude.service.support.dispensacoesmedicamentos;
 
-import com.upsaude.api.request.DispensacoesMedicamentosRequest;
+import com.upsaude.entity.paciente.Paciente;
+
+import com.upsaude.api.request.medicacao.DispensacoesMedicamentosRequest;
 import com.upsaude.exception.BadRequestException;
 import org.springframework.stereotype.Service;
 

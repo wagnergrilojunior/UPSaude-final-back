@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns="http://servicos.saude.gov.br/schema/sigtap/publicacao/v1/orgaoorigem" elementFormDefault="qualified" targetNamespace="http://servicos.saude.gov.br/schema/sigtap/publicacao/v1/orgaoorigem">
+    
+    <xs:annotation>
+        <xs:documentation>
+            <![CDATA[
+            Este esquema representa um Órgão de Origem, característica de um Documento de Publicação, indica qual órgão emitiu o Documento. 
+            ]]>
+        </xs:documentation>
+    </xs:annotation>
+    
+    <xs:simpleType name="CodigoOrgaoOrigemType">
+        <xs:restriction base="xs:string">
+            <xs:minLength value="1"/>
+            <xs:maxLength value="6"/>
+            <xs:pattern value="[0-9]{1,6}"/>
+        </xs:restriction>
+    </xs:simpleType>
+
+    <xs:complexType name="OrgaoOrigemType">
+        <xs:sequence>
+
+            <xs:element name="codigo" minOccurs="1" maxOccurs="1" nillable="true" type="CodigoOrgaoOrigemType">
+                <xs:annotation>
+                    <xs:documentation>
+                        <![CDATA[ Código identificador do Órgão de Origem. ]]>
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:element>
+
+            <xs:element name="nome" minOccurs="0" maxOccurs="1">
+                <xs:annotation>
+                    <xs:documentation>
+                        <![CDATA[ Nome descritivo do Órgão de Origem. ]]>
+                    </xs:documentation>
+                </xs:annotation>
+                <xs:simpleType>
+                    <xs:restriction base="xs:string">
+                        <xs:minLength value="1"/>
+                        <xs:maxLength value="50"/>
+                    </xs:restriction>
+                </xs:simpleType>
+            </xs:element>
+
+        </xs:sequence>
+    </xs:complexType>
+
+</xs:schema>

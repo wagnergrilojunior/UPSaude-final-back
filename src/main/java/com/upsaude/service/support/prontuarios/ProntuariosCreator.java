@@ -1,10 +1,10 @@
 package com.upsaude.service.support.prontuarios;
 
-import com.upsaude.api.request.ProntuariosRequest;
-import com.upsaude.entity.Prontuarios;
-import com.upsaude.entity.Tenant;
+import com.upsaude.api.request.prontuario.ProntuariosRequest;
+import com.upsaude.entity.prontuario.Prontuarios;
+import com.upsaude.entity.sistema.Tenant;
 import com.upsaude.mapper.ProntuariosMapper;
-import com.upsaude.repository.ProntuariosRepository;
+import com.upsaude.repository.prontuario.ProntuariosRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;

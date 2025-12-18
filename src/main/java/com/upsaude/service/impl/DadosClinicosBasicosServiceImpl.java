@@ -1,17 +1,18 @@
 package com.upsaude.service.impl;
+import com.upsaude.entity.paciente.Paciente;
 
-import com.upsaude.api.request.DadosClinicosBasicosRequest;
-import com.upsaude.api.response.DadosClinicosBasicosResponse;
+import com.upsaude.api.request.paciente.DadosClinicosBasicosRequest;
+import com.upsaude.api.response.paciente.DadosClinicosBasicosResponse;
 import com.upsaude.cache.CacheKeyUtil;
-import com.upsaude.entity.DadosClinicosBasicos;
-import com.upsaude.entity.Tenant;
+import com.upsaude.entity.paciente.DadosClinicosBasicos;
+import com.upsaude.entity.sistema.Tenant;
 import com.upsaude.exception.BadRequestException;
 import com.upsaude.exception.ConflictException;
 import com.upsaude.exception.InternalServerErrorException;
 import com.upsaude.exception.NotFoundException;
-import com.upsaude.repository.DadosClinicosBasicosRepository;
-import com.upsaude.service.DadosClinicosBasicosService;
-import com.upsaude.service.TenantService;
+import com.upsaude.repository.paciente.DadosClinicosBasicosRepository;
+import com.upsaude.service.paciente.DadosClinicosBasicosService;
+import com.upsaude.service.sistema.TenantService;
 import com.upsaude.service.support.dadosclinicosbasicos.DadosClinicosBasicosCreator;
 import com.upsaude.service.support.dadosclinicosbasicos.DadosClinicosBasicosDomainService;
 import com.upsaude.service.support.dadosclinicosbasicos.DadosClinicosBasicosResponseBuilder;

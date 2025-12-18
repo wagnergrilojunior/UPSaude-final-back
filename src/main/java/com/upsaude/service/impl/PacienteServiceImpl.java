@@ -1,4 +1,5 @@
 package com.upsaude.service.impl;
+import com.upsaude.entity.BaseEntityWithoutTenant;
 
 import java.util.Objects;
 import java.util.UUID;
@@ -15,16 +16,16 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.upsaude.cache.CacheKeyUtil;
-import com.upsaude.api.request.PacienteRequest;
-import com.upsaude.api.response.PacienteResponse;
+import com.upsaude.api.request.paciente.PacienteRequest;
+import com.upsaude.api.response.paciente.PacienteResponse;
 import com.upsaude.api.response.PacienteSimplificadoResponse;
-import com.upsaude.entity.Paciente;
+import com.upsaude.entity.paciente.Paciente;
 import com.upsaude.exception.BadRequestException;
 import com.upsaude.exception.InternalServerErrorException;
 import com.upsaude.exception.NotFoundException;
-import com.upsaude.repository.PacienteRepository;
-import com.upsaude.service.PacienteService;
-import com.upsaude.service.TenantService;
+import com.upsaude.repository.paciente.PacienteRepository;
+import com.upsaude.service.paciente.PacienteService;
+import com.upsaude.service.sistema.TenantService;
 import com.upsaude.service.support.paciente.PacienteAssociacoesManager;
 import com.upsaude.service.support.paciente.PacienteCreator;
 import com.upsaude.service.support.paciente.PacienteDomainService;

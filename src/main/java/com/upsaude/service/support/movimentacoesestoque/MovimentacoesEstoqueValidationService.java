@@ -1,6 +1,6 @@
 package com.upsaude.service.support.movimentacoesestoque;
 
-import com.upsaude.api.request.MovimentacoesEstoqueRequest;
+import com.upsaude.api.request.estoque.MovimentacoesEstoqueRequest;
 import com.upsaude.exception.BadRequestException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;

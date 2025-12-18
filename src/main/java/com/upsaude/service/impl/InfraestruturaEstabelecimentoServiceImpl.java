@@ -1,14 +1,14 @@
 package com.upsaude.service.impl;
 
 import com.upsaude.cache.CacheKeyUtil;
-import com.upsaude.api.request.InfraestruturaEstabelecimentoRequest;
-import com.upsaude.api.response.InfraestruturaEstabelecimentoResponse;
-import com.upsaude.entity.InfraestruturaEstabelecimento;
-import com.upsaude.entity.Tenant;
+import com.upsaude.api.request.estabelecimento.InfraestruturaEstabelecimentoRequest;
+import com.upsaude.api.response.estabelecimento.InfraestruturaEstabelecimentoResponse;
+import com.upsaude.entity.estabelecimento.InfraestruturaEstabelecimento;
+import com.upsaude.entity.sistema.Tenant;
 import com.upsaude.exception.BadRequestException;
-import com.upsaude.repository.InfraestruturaEstabelecimentoRepository;
-import com.upsaude.service.InfraestruturaEstabelecimentoService;
-import com.upsaude.service.TenantService;
+import com.upsaude.repository.estabelecimento.InfraestruturaEstabelecimentoRepository;
+import com.upsaude.service.estabelecimento.InfraestruturaEstabelecimentoService;
+import com.upsaude.service.sistema.TenantService;
 import com.upsaude.service.support.infraestruturaestabelecimento.InfraestruturaEstabelecimentoCreator;
 import com.upsaude.service.support.infraestruturaestabelecimento.InfraestruturaEstabelecimentoResponseBuilder;
 import com.upsaude.service.support.infraestruturaestabelecimento.InfraestruturaEstabelecimentoTenantEnforcer;

@@ -1,10 +1,10 @@
 package com.upsaude.service.support.controleponto;
 
-import com.upsaude.api.request.ControlePontoRequest;
-import com.upsaude.entity.ControlePonto;
-import com.upsaude.entity.Medicos;
-import com.upsaude.entity.ProfissionaisSaude;
-import com.upsaude.entity.Tenant;
+import com.upsaude.api.request.equipe.ControlePontoRequest;
+import com.upsaude.entity.equipe.ControlePonto;
+import com.upsaude.entity.profissional.Medicos;
+import com.upsaude.entity.profissional.ProfissionaisSaude;
+import com.upsaude.entity.sistema.Tenant;
 import com.upsaude.service.support.medico.MedicoTenantEnforcer;
 import com.upsaude.service.support.profissionaissaude.ProfissionaisSaudeTenantEnforcer;
 import lombok.RequiredArgsConstructor;

@@ -1,16 +1,16 @@
 package com.upsaude.service.impl;
 
-import com.upsaude.api.request.EquipamentosRequest;
-import com.upsaude.api.response.EquipamentosResponse;
+import com.upsaude.api.request.equipamento.EquipamentosRequest;
+import com.upsaude.api.response.equipamento.EquipamentosResponse;
 import com.upsaude.cache.CacheKeyUtil;
-import com.upsaude.entity.Equipamentos;
-import com.upsaude.entity.Tenant;
+import com.upsaude.entity.equipamento.Equipamentos;
+import com.upsaude.entity.sistema.Tenant;
 import com.upsaude.exception.BadRequestException;
 import com.upsaude.exception.InternalServerErrorException;
 import com.upsaude.exception.NotFoundException;
-import com.upsaude.repository.EquipamentosRepository;
-import com.upsaude.service.EquipamentosService;
-import com.upsaude.service.TenantService;
+import com.upsaude.repository.estabelecimento.equipamento.EquipamentosRepository;
+import com.upsaude.service.equipamento.EquipamentosService;
+import com.upsaude.service.sistema.TenantService;
 import com.upsaude.service.support.equipamentos.EquipamentosCreator;
 import com.upsaude.service.support.equipamentos.EquipamentosResponseBuilder;
 import com.upsaude.service.support.equipamentos.EquipamentosTenantEnforcer;

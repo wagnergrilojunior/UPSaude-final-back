@@ -1,6 +1,6 @@
 package com.upsaude.service.support.historicoclinico;
 
-import com.upsaude.entity.HistoricoClinico;
+import com.upsaude.entity.prontuario.HistoricoClinico;
 import org.springframework.stereotype.Service;
 
 @Service

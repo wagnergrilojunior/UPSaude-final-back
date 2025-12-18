@@ -1,6 +1,8 @@
 package com.upsaude.service.support.paciente;
 
-import com.upsaude.api.request.PacienteRequest;
+import com.upsaude.entity.paciente.Paciente;
+
+import com.upsaude.api.request.paciente.PacienteRequest;
 import com.upsaude.entity.*;
 import com.upsaude.exception.NotFoundException;
 import com.upsaude.repository.*;

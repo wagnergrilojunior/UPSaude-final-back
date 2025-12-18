@@ -1,15 +1,13 @@
 package com.upsaude.service.support.doencas;
 
-import com.upsaude.api.request.DoencasRequest;
-import com.upsaude.entity.CidDoencas;
-import com.upsaude.entity.Doencas;
+import com.upsaude.api.request.doencas.DoencasRequest;
+import com.upsaude.entity.doencas.Doencas;
 import com.upsaude.exception.NotFoundException;
 import com.upsaude.mapper.embeddable.ClassificacaoDoencaMapper;
 import com.upsaude.mapper.embeddable.EpidemiologiaDoencaMapper;
 import com.upsaude.mapper.embeddable.SintomasDoencaMapper;
 import com.upsaude.mapper.embeddable.TratamentoPadraoDoencaMapper;
-import com.upsaude.repository.CidDoencasRepository;
-import com.upsaude.repository.DoencasRepository;
+import com.upsaude.repository.doencas.DoencasRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -24,7 +22,6 @@ public class DoencasUpdater {
 
     private final DoencasRepository repository;
     private final DoencasValidationService validationService;
-    private final CidDoencasRepository cidDoencasRepository;
     private final ClassificacaoDoencaMapper classificacaoDoencaMapper;
     private final SintomasDoencaMapper sintomasDoencaMapper;
     private final TratamentoPadraoDoencaMapper tratamentoPadraoDoencaMapper;
@@ -99,11 +96,7 @@ public class DoencasUpdater {
             doenca.setObservacoes(request.getObservacoes());
         }
 
-        if (request.getCidPrincipal() != null) {
-            CidDoencas cidPrincipal = cidDoencasRepository.findById(request.getCidPrincipal())
-                .orElseThrow(() -> new NotFoundException("CID não encontrado com ID: " + request.getCidPrincipal()));
-            doenca.setCidPrincipal(cidPrincipal);
-        }
+        // CidPrincipal removido - CidDoencas foi deletado
     }
 }
 

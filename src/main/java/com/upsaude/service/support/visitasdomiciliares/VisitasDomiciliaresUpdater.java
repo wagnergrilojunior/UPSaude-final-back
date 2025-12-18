@@ -1,10 +1,10 @@
 package com.upsaude.service.support.visitasdomiciliares;
 
-import com.upsaude.api.request.VisitasDomiciliaresRequest;
-import com.upsaude.entity.Tenant;
-import com.upsaude.entity.VisitasDomiciliares;
+import com.upsaude.api.request.visita.VisitasDomiciliaresRequest;
+import com.upsaude.entity.sistema.Tenant;
+import com.upsaude.entity.visita.VisitasDomiciliares;
 import com.upsaude.mapper.VisitasDomiciliaresMapper;
-import com.upsaude.repository.VisitasDomiciliaresRepository;
+import com.upsaude.repository.saude_publica.visita.VisitasDomiciliaresRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;

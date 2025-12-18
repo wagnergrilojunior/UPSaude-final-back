@@ -1,11 +1,11 @@
 package com.upsaude.service.support.consultaprenatal;
 
-import com.upsaude.api.request.ConsultaPreNatalRequest;
-import com.upsaude.entity.ConsultaPreNatal;
-import com.upsaude.entity.PreNatal;
-import com.upsaude.entity.Tenant;
+import com.upsaude.api.request.atendimento.ConsultaPreNatalRequest;
+import com.upsaude.entity.atendimento.ConsultaPreNatal;
+import com.upsaude.entity.planejamento.PreNatal;
+import com.upsaude.entity.sistema.Tenant;
 import com.upsaude.mapper.ConsultaPreNatalMapper;
-import com.upsaude.repository.ConsultaPreNatalRepository;
+import com.upsaude.repository.atendimento.ConsultaPreNatalRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;

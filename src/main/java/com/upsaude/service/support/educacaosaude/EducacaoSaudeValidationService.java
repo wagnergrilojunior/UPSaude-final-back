@@ -1,6 +1,6 @@
 package com.upsaude.service.support.educacaosaude;
 
-import com.upsaude.api.request.EducacaoSaudeRequest;
+import com.upsaude.api.request.educacao.EducacaoSaudeRequest;
 import com.upsaude.exception.BadRequestException;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;

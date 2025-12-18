@@ -1,8 +1,8 @@
 package com.upsaude.service.support.catalogoexames;
 
-import com.upsaude.api.request.CatalogoExamesRequest;
+import com.upsaude.api.request.exame.CatalogoExamesRequest;
 import com.upsaude.exception.BadRequestException;
-import com.upsaude.repository.CatalogoExamesRepository;
+import com.upsaude.repository.exame.CatalogoExamesRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 

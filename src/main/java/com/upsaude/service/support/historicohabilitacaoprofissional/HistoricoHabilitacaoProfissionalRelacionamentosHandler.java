@@ -1,9 +1,9 @@
 package com.upsaude.service.support.historicohabilitacaoprofissional;
 
-import com.upsaude.api.request.HistoricoHabilitacaoProfissionalRequest;
-import com.upsaude.entity.HistoricoHabilitacaoProfissional;
-import com.upsaude.entity.ProfissionaisSaude;
-import com.upsaude.entity.Tenant;
+import com.upsaude.api.request.profissional.HistoricoHabilitacaoProfissionalRequest;
+import com.upsaude.entity.profissional.HistoricoHabilitacaoProfissional;
+import com.upsaude.entity.profissional.ProfissionaisSaude;
+import com.upsaude.entity.sistema.Tenant;
 import com.upsaude.service.support.profissionaissaude.ProfissionaisSaudeTenantEnforcer;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;

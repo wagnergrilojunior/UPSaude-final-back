@@ -1,6 +1,8 @@
 package com.upsaude.service.support.prenatal;
 
-import com.upsaude.api.request.PreNatalRequest;
+import com.upsaude.entity.paciente.Paciente;
+
+import com.upsaude.api.request.planejamento.PreNatalRequest;
 import com.upsaude.exception.BadRequestException;
 import org.springframework.stereotype.Service;
 

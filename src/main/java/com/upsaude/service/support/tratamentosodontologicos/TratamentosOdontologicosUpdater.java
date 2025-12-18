@@ -1,10 +1,10 @@
 package com.upsaude.service.support.tratamentosodontologicos;
 
-import com.upsaude.api.request.TratamentosOdontologicosRequest;
-import com.upsaude.entity.TratamentosOdontologicos;
-import com.upsaude.entity.Tenant;
+import com.upsaude.api.request.odontologia.TratamentosOdontologicosRequest;
+import com.upsaude.entity.odontologia.TratamentosOdontologicos;
+import com.upsaude.entity.sistema.Tenant;
 import com.upsaude.mapper.TratamentosOdontologicosMapper;
-import com.upsaude.repository.TratamentosOdontologicosRepository;
+import com.upsaude.repository.odontologia.TratamentosOdontologicosRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;

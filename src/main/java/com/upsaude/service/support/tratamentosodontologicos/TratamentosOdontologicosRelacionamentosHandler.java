@@ -1,11 +1,11 @@
 package com.upsaude.service.support.tratamentosodontologicos;
 
-import com.upsaude.api.request.TratamentosOdontologicosRequest;
-import com.upsaude.entity.Estabelecimentos;
-import com.upsaude.entity.Paciente;
-import com.upsaude.entity.ProfissionaisSaude;
-import com.upsaude.entity.TratamentosOdontologicos;
-import com.upsaude.entity.Tenant;
+import com.upsaude.api.request.odontologia.TratamentosOdontologicosRequest;
+import com.upsaude.entity.estabelecimento.Estabelecimentos;
+import com.upsaude.entity.paciente.Paciente;
+import com.upsaude.entity.profissional.ProfissionaisSaude;
+import com.upsaude.entity.odontologia.TratamentosOdontologicos;
+import com.upsaude.entity.sistema.Tenant;
 import com.upsaude.service.support.estabelecimentos.EstabelecimentosTenantEnforcer;
 import com.upsaude.service.support.paciente.PacienteTenantEnforcer;
 import com.upsaude.service.support.profissionaissaude.ProfissionaisSaudeTenantEnforcer;

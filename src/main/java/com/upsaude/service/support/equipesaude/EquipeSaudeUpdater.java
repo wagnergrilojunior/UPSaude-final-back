@@ -1,10 +1,10 @@
 package com.upsaude.service.support.equipesaude;
 
-import com.upsaude.api.request.EquipeSaudeRequest;
-import com.upsaude.entity.EquipeSaude;
-import com.upsaude.entity.Tenant;
+import com.upsaude.api.request.equipe.EquipeSaudeRequest;
+import com.upsaude.entity.equipe.EquipeSaude;
+import com.upsaude.entity.sistema.Tenant;
 import com.upsaude.mapper.EquipeSaudeMapper;
-import com.upsaude.repository.EquipeSaudeRepository;
+import com.upsaude.repository.profissional.equipe.EquipeSaudeRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;

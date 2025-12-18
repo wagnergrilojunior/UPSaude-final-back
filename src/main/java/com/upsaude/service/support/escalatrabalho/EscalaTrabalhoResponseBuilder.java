@@ -1,7 +1,7 @@
 package com.upsaude.service.support.escalatrabalho;
 
-import com.upsaude.api.response.EscalaTrabalhoResponse;
-import com.upsaude.entity.EscalaTrabalho;
+import com.upsaude.api.response.equipe.EscalaTrabalhoResponse;
+import com.upsaude.entity.equipe.EscalaTrabalho;
 import com.upsaude.mapper.EscalaTrabalhoMapper;
 import lombok.RequiredArgsConstructor;
 import org.hibernate.Hibernate;

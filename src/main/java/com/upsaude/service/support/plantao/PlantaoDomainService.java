@@ -1,6 +1,6 @@
 package com.upsaude.service.support.plantao;
 
-import com.upsaude.entity.Plantao;
+import com.upsaude.entity.equipe.Plantao;
 import com.upsaude.exception.BadRequestException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;

@@ -1,16 +1,16 @@
 package com.upsaude.service.impl;
 
-import com.upsaude.api.request.UserRequest;
-import com.upsaude.api.response.UserResponse;
+import com.upsaude.api.request.sistema.UserRequest;
+import com.upsaude.api.response.sistema.UserResponse;
 import com.upsaude.dto.UserDTO;
-import com.upsaude.entity.User;
+import com.upsaude.entity.sistema.User;
 import com.upsaude.exception.BadRequestException;
 import com.upsaude.exception.NotFoundException;
 import com.upsaude.integration.supabase.SupabaseAuthResponse;
 import com.upsaude.integration.supabase.SupabaseAuthService;
 import com.upsaude.mapper.UserMapper;
-import com.upsaude.repository.UserRepository;
-import com.upsaude.service.UserService;
+import com.upsaude.repository.sistema.UserRepository;
+import com.upsaude.service.sistema.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.CacheEvict;

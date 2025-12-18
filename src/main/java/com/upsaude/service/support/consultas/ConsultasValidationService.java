@@ -1,6 +1,8 @@
 package com.upsaude.service.support.consultas;
 
-import com.upsaude.api.request.ConsultasRequest;
+import com.upsaude.entity.paciente.Paciente;
+
+import com.upsaude.api.request.atendimento.ConsultasRequest;
 import com.upsaude.exception.BadRequestException;
 import org.springframework.stereotype.Service;
 

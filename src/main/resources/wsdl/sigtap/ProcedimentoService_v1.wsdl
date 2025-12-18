@@ -1,0 +1,202 @@
+<?xml version="1.0" encoding="utf-8"?>
+<wsdl:definitions xmlns:tns="http://servicos.saude.gov.br/sigtap/v1/procedimentoservice" xmlns:soap11="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:soap12="http://schemas.xmlsoap.org/wsdl/soap12/" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:msfalha="http://servicos.saude.gov.br/wsdl/mensageria/falha/v5r0/msfalha" name="ProcedimentoService" targetNamespace="http://servicos.saude.gov.br/sigtap/v1/procedimentoservice">
+
+	<wsdl:types>
+		<xs:schema xmlns:comp="http://servicos.saude.gov.br/schema/corporativo/v1/competencia" xmlns:grupo="http://servicos.saude.gov.br/schema/sigtap/procedimento/nivelagregacao/v1/grupo" xmlns:subgrupo="http://servicos.saude.gov.br/schema/sigtap/procedimento/nivelagregacao/v1/subgrupo" xmlns:proced="http://servicos.saude.gov.br/schema/sigtap/procedimento/v1/procedimento" xmlns:pag="http://servicos.saude.gov.br/wsdl/mensageria/v1/paginacao" xmlns:det="http://servicos.saude.gov.br/wsdl/mensageria/sigtap/v1/detalheadicional" xmlns:respp="http://servicos.saude.gov.br/wsdl/mensageria/v1r0/resultadospesquisaprocedimentos" xmlns:resdp="http://servicos.saude.gov.br/wsdl/mensageria/v1r0/resultadosdetalhaprocedimentos" elementFormDefault="qualified" targetNamespace="http://servicos.saude.gov.br/sigtap/v1/procedimentoservice">
+
+			<xs:import id="comp" namespace="http://servicos.saude.gov.br/schema/corporativo/v1/competencia" schemaLocation="xsd/competencia.v1.xsd"/>
+
+			<xs:import id="grupo" namespace="http://servicos.saude.gov.br/schema/sigtap/procedimento/nivelagregacao/v1/grupo" schemaLocation="xsd/grupo.v1.xsd"/>
+
+			<xs:import id="subgrupo" namespace="http://servicos.saude.gov.br/schema/sigtap/procedimento/nivelagregacao/v1/subgrupo" schemaLocation="xsd/subgrupo.v1.xsd"/>
+
+			<xs:import id="proced" namespace="http://servicos.saude.gov.br/schema/sigtap/procedimento/v1/procedimento" schemaLocation="xsd/procedimento.v1.xsd"/>
+
+			<xs:import id="pag" namespace="http://servicos.saude.gov.br/wsdl/mensageria/v1/paginacao" schemaLocation="xsd/paginacao.v1.xsd"/>
+
+			<xs:import id="det" namespace="http://servicos.saude.gov.br/wsdl/mensageria/sigtap/v1/detalheadicional" schemaLocation="xsd/detalheadicional.v1.xsd"/>
+
+			<xs:import id="msfalha" namespace="http://servicos.saude.gov.br/wsdl/mensageria/falha/v5r0/msfalha" schemaLocation="xsd/msfalha.v5r0.xsd"/>
+
+			<xs:import id="respp" namespace="http://servicos.saude.gov.br/wsdl/mensageria/v1r0/resultadospesquisaprocedimentos" schemaLocation="xsd/resultadospesquisaprocedimentos.v1r0.xsd"/>
+
+			<xs:import id="resdp" namespace="http://servicos.saude.gov.br/wsdl/mensageria/v1r0/resultadosdetalhaprocedimentos" schemaLocation="xsd/resultadosdetalhaprocedimentos.v1r0.xsd"/>
+
+			<xs:element name="requestPesquisarProcedimentos">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element minOccurs="1" maxOccurs="1" ref="grupo:codigoGrupo"/>
+						<xs:element minOccurs="0" maxOccurs="1" ref="subgrupo:codigoSubgrupo"/>
+						<xs:element minOccurs="0" maxOccurs="1" ref="comp:competencia"/>
+						<xs:element minOccurs="1" maxOccurs="1" ref="pag:Paginacao"/>
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+
+
+			<xs:element name="responsePesquisarProcedimentos">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element minOccurs="1" maxOccurs="1" ref="respp:ResultadosPesquisaProcedimentos">
+							<xs:annotation>
+								<xs:documentation>Resultado pesquisa do procedimentos.</xs:documentation>
+							</xs:annotation>
+						</xs:element>
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+
+			<xs:element name="requestDetalharProcedimento">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element minOccurs="1" maxOccurs="1" ref="proced:codigoProcedimento"/>
+						<xs:element minOccurs="0" maxOccurs="1" ref="comp:competencia"/>
+						<xs:element name="DetalhesAdicionais" minOccurs="1" maxOccurs="1">
+							<xs:complexType>
+								<xs:sequence>
+									<xs:element minOccurs="0" maxOccurs="unbounded" ref="det:DetalheAdicional"/>
+								</xs:sequence>
+							</xs:complexType>
+						</xs:element>
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="responseDetalharProcedimento">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element minOccurs="1" maxOccurs="1" ref="resdp:ResultadosDetalhaProcedimentos">
+							<xs:annotation>
+								<xs:documentation>Resultado pesquisa de detalha do procedimentos.</xs:documentation>
+							</xs:annotation>
+						</xs:element>
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+
+		</xs:schema>
+	</wsdl:types>
+
+	<wsdl:message name="requestPesquisarProcedimentos">
+		<wsdl:part element="tns:requestPesquisarProcedimentos" name="requestPesquisarProcedimentos"/>
+	</wsdl:message>
+	<wsdl:message name="responsePesquisarProcedimentos">
+		<wsdl:part element="tns:responsePesquisarProcedimentos" name="responsePesquisarProcedimentos"/>
+	</wsdl:message>
+
+	<wsdl:message name="requestDetalharProcedimento">
+		<wsdl:part element="tns:requestDetalharProcedimento" name="requestDetalharProcedimento"/>
+	</wsdl:message>
+	<wsdl:message name="responseDetalharProcedimento">
+		<wsdl:part element="tns:responseDetalharProcedimento" name="responseDetalharProcedimento"/>
+	</wsdl:message>
+
+	<wsdl:message name="SIGTAPFault">
+		<wsdl:part name="fault" element="msfalha:MSFalha"/>
+	</wsdl:message>
+
+	<wsdl:portType name="ProcedimentoServicePortType">
+
+		<wsdl:operation name="pesquisarProcedimentos">
+			<wsdl:documentation>
+				 Listar os Procedimentos existentes na base do SIGTAP de acordo com os filtros informados. 
+			</wsdl:documentation>
+			<wsdl:input name="requestPesquisarProcedimentos" message="tns:requestPesquisarProcedimentos"/>
+			<wsdl:output name="responsePesquisarProcedimentos" message="tns:responsePesquisarProcedimentos"/>
+			<wsdl:fault name="SIGTAPFault" message="tns:SIGTAPFault"/>
+		</wsdl:operation>
+
+		<wsdl:operation name="detalharProcedimento">
+			<wsdl:documentation>
+				 Detalhar um Procedimento existente na base do SIGTAP de acordo com os filtros informados. 
+			</wsdl:documentation>
+			<wsdl:input name="requestDetalharProcedimento" message="tns:requestDetalharProcedimento"/>
+			<wsdl:output name="responseDetalharProcedimento" message="tns:responseDetalharProcedimento"/>
+			<wsdl:fault name="SIGTAPFault" message="tns:SIGTAPFault"/>
+		</wsdl:operation>
+
+	</wsdl:portType>
+
+	<wsdl:binding name="ProcedimentoServiceSOAP12Binding" type="tns:ProcedimentoServicePortType">
+		<soap12:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
+
+		<wsdl:operation name="pesquisarProcedimentos">
+			<wsdl:documentation>
+				 Listar os Procedimentos existentes na base do SIGTAP de acordo com os filtros informados. 
+			</wsdl:documentation>
+			<soap12:operation soapAction=""/>
+			<wsdl:input>
+				<soap12:body use="literal"/>
+			</wsdl:input>
+			<wsdl:output>
+				<soap12:body use="literal"/>
+			</wsdl:output>
+			<wsdl:fault name="SIGTAPFault">
+				<soap12:fault name="SIGTAPFault" use="literal"/>
+			</wsdl:fault>
+		</wsdl:operation>
+
+		<wsdl:operation name="detalharProcedimento">
+			<wsdl:documentation>
+				 Detalhar um Procedimento existente na base do SIGTAP de acordo com os filtros informados. 
+			</wsdl:documentation>
+			<soap12:operation soapAction=""/>
+			<wsdl:input>
+				<soap12:body use="literal"/>
+			</wsdl:input>
+			<wsdl:output>
+				<soap12:body use="literal"/>
+			</wsdl:output>
+			<wsdl:fault name="SIGTAPFault">
+				<soap12:fault name="SIGTAPFault" use="literal"/>
+			</wsdl:fault>
+		</wsdl:operation>
+
+	</wsdl:binding>
+
+	<wsdl:binding name="ProcedimentoServiceSOAP11Binding" type="tns:ProcedimentoServicePortType">
+		<soap11:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
+
+		<wsdl:operation name="pesquisarProcedimentos">
+			<wsdl:documentation>
+				 Listar os Procedimentos existentes na base do SIGTAP de acordo com os filtros informados. 
+			</wsdl:documentation>
+			<soap11:operation soapAction=""/>
+			<wsdl:input>
+				<soap11:body use="literal"/>
+			</wsdl:input>
+			<wsdl:output>
+				<soap11:body use="literal"/>
+			</wsdl:output>
+			<wsdl:fault name="SIGTAPFault">
+				<soap11:fault name="SIGTAPFault" use="literal"/>
+			</wsdl:fault>
+		</wsdl:operation>
+
+		<wsdl:operation name="detalharProcedimento">
+			<wsdl:documentation>
+				 Detalhar um Procedimento existente na base do SIGTAP de acordo com os filtros informados. 
+			</wsdl:documentation>
+			<soap11:operation soapAction=""/>
+			<wsdl:input>
+				<soap11:body use="literal"/>
+			</wsdl:input>
+			<wsdl:output>
+				<soap11:body use="literal"/>
+			</wsdl:output>
+			<wsdl:fault name="SIGTAPFault">
+				<soap11:fault name="SIGTAPFault" use="literal"/>
+			</wsdl:fault>
+		</wsdl:operation>
+
+	</wsdl:binding>
+
+	<wsdl:service name="ProcedimentoService">
+		<wsdl:port binding="tns:ProcedimentoServiceSOAP12Binding" name="ProcedimentoServicePort">
+			<soap12:address location="https://servicos.saude.gov.br/sigtap/ProcedimentoService/v1"/>
+		</wsdl:port>
+		<wsdl:port binding="tns:ProcedimentoServiceSOAP11Binding" name="ProcedimentoServiceSOAP11Port">
+			<soap11:address location="https://servicos.saude.gov.br/sigtap/ProcedimentoService/v1"/>
+		</wsdl:port>
+	</wsdl:service>
+
+</wsdl:definitions>

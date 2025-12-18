@@ -1,9 +1,9 @@
 package com.upsaude.service.support.doencas;
 
-import com.upsaude.api.request.DoencasRequest;
-import com.upsaude.entity.Doencas;
+import com.upsaude.api.request.doencas.DoencasRequest;
+import com.upsaude.entity.doencas.Doencas;
 import com.upsaude.mapper.DoencasMapper;
-import com.upsaude.repository.DoencasRepository;
+import com.upsaude.repository.doencas.DoencasRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;

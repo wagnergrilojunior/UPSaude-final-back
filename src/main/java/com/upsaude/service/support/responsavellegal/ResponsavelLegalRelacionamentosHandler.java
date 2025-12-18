@@ -1,10 +1,10 @@
 package com.upsaude.service.support.responsavellegal;
 
-import com.upsaude.api.request.ResponsavelLegalRequest;
-import com.upsaude.entity.Estabelecimentos;
-import com.upsaude.entity.Paciente;
-import com.upsaude.entity.ResponsavelLegal;
-import com.upsaude.entity.Tenant;
+import com.upsaude.api.request.paciente.ResponsavelLegalRequest;
+import com.upsaude.entity.estabelecimento.Estabelecimentos;
+import com.upsaude.entity.paciente.Paciente;
+import com.upsaude.entity.paciente.ResponsavelLegal;
+import com.upsaude.entity.sistema.Tenant;
 import com.upsaude.exception.BadRequestException;
 import com.upsaude.service.support.estabelecimentos.EstabelecimentosTenantEnforcer;
 import com.upsaude.service.support.paciente.PacienteTenantEnforcer;

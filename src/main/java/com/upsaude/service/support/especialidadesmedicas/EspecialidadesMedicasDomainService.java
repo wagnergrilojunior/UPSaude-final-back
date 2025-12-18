@@ -1,6 +1,6 @@
 package com.upsaude.service.support.especialidadesmedicas;
 
-import com.upsaude.entity.EspecialidadesMedicas;
+import com.upsaude.entity.profissional.EspecialidadesMedicas;
 import com.upsaude.exception.BadRequestException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;

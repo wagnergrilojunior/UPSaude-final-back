@@ -1,10 +1,10 @@
 package com.upsaude.service.support.convenio;
 
-import com.upsaude.api.request.ConvenioRequest;
-import com.upsaude.entity.Convenio;
-import com.upsaude.entity.Tenant;
+import com.upsaude.api.request.convenio.ConvenioRequest;
+import com.upsaude.entity.convenio.Convenio;
+import com.upsaude.entity.sistema.Tenant;
 import com.upsaude.mapper.ConvenioMapper;
-import com.upsaude.repository.ConvenioRepository;
+import com.upsaude.repository.convenio.ConvenioRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;

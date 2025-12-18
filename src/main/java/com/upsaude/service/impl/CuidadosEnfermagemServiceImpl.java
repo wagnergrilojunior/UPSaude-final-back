@@ -1,16 +1,16 @@
 package com.upsaude.service.impl;
 
-import com.upsaude.api.request.CuidadosEnfermagemRequest;
-import com.upsaude.api.response.CuidadosEnfermagemResponse;
+import com.upsaude.api.request.enfermagem.CuidadosEnfermagemRequest;
+import com.upsaude.api.response.enfermagem.CuidadosEnfermagemResponse;
 import com.upsaude.cache.CacheKeyUtil;
-import com.upsaude.entity.CuidadosEnfermagem;
+import com.upsaude.entity.enfermagem.CuidadosEnfermagem;
 import com.upsaude.exception.BadRequestException;
 import com.upsaude.exception.InternalServerErrorException;
 import com.upsaude.exception.NotFoundException;
-import com.upsaude.repository.CuidadosEnfermagemRepository;
-import com.upsaude.service.CuidadosEnfermagemService;
-import com.upsaude.service.TenantService;
-import com.upsaude.entity.Tenant;
+import com.upsaude.repository.enfermagem.CuidadosEnfermagemRepository;
+import com.upsaude.service.enfermagem.CuidadosEnfermagemService;
+import com.upsaude.service.sistema.TenantService;
+import com.upsaude.entity.sistema.Tenant;
 import com.upsaude.service.support.cuidadosenfermagem.CuidadosEnfermagemCreator;
 import com.upsaude.service.support.cuidadosenfermagem.CuidadosEnfermagemResponseBuilder;
 import com.upsaude.service.support.cuidadosenfermagem.CuidadosEnfermagemTenantEnforcer;

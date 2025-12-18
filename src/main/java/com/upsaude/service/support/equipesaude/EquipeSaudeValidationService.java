@@ -1,8 +1,8 @@
 package com.upsaude.service.support.equipesaude;
 
-import com.upsaude.api.request.EquipeSaudeRequest;
+import com.upsaude.api.request.equipe.EquipeSaudeRequest;
 import com.upsaude.exception.BadRequestException;
-import com.upsaude.repository.EquipeSaudeRepository;
+import com.upsaude.repository.profissional.equipe.EquipeSaudeRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 

@@ -1,10 +1,10 @@
 package com.upsaude.service.support.historicoclinico;
 
-import com.upsaude.api.request.HistoricoClinicoRequest;
-import com.upsaude.entity.HistoricoClinico;
-import com.upsaude.entity.Tenant;
+import com.upsaude.api.request.prontuario.HistoricoClinicoRequest;
+import com.upsaude.entity.prontuario.HistoricoClinico;
+import com.upsaude.entity.sistema.Tenant;
 import com.upsaude.mapper.HistoricoClinicoMapper;
-import com.upsaude.repository.HistoricoClinicoRepository;
+import com.upsaude.repository.prontuario.HistoricoClinicoRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;

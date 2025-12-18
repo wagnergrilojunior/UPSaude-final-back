@@ -1,13 +1,13 @@
 package com.upsaude.service.impl;
 
-import com.upsaude.api.request.FabricantesEquipamentoRequest;
-import com.upsaude.api.response.FabricantesEquipamentoResponse;
+import com.upsaude.api.request.equipamento.FabricantesEquipamentoRequest;
+import com.upsaude.api.response.equipamento.FabricantesEquipamentoResponse;
 import com.upsaude.cache.CacheKeyUtil;
-import com.upsaude.entity.FabricantesEquipamento;
+import com.upsaude.entity.equipamento.FabricantesEquipamento;
 import com.upsaude.exception.BadRequestException;
 import com.upsaude.exception.NotFoundException;
-import com.upsaude.repository.FabricantesEquipamentoRepository;
-import com.upsaude.service.FabricantesEquipamentoService;
+import com.upsaude.repository.estabelecimento.equipamento.FabricantesEquipamentoRepository;
+import com.upsaude.service.equipamento.FabricantesEquipamentoService;
 import com.upsaude.service.support.fabricantesequipamento.FabricantesEquipamentoCreator;
 import com.upsaude.service.support.fabricantesequipamento.FabricantesEquipamentoDomainService;
 import com.upsaude.service.support.fabricantesequipamento.FabricantesEquipamentoResponseBuilder;

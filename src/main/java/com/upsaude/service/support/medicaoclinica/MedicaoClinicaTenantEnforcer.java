@@ -1,8 +1,8 @@
 package com.upsaude.service.support.medicaoclinica;
 
-import com.upsaude.entity.MedicaoClinica;
+import com.upsaude.entity.medicao.MedicaoClinica;
 import com.upsaude.exception.NotFoundException;
-import com.upsaude.repository.MedicaoClinicaRepository;
+import com.upsaude.repository.profissional.medicao.MedicaoClinicaRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;

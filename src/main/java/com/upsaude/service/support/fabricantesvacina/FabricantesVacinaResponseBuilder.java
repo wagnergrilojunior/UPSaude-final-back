@@ -1,8 +1,8 @@
 package com.upsaude.service.support.fabricantesvacina;
 
-import com.upsaude.api.response.FabricantesVacinaResponse;
-import com.upsaude.entity.Endereco;
-import com.upsaude.entity.FabricantesVacina;
+import com.upsaude.api.response.vacina.FabricantesVacinaResponse;
+import com.upsaude.entity.paciente.Endereco;
+import com.upsaude.entity.vacina.FabricantesVacina;
 import com.upsaude.mapper.FabricantesVacinaMapper;
 import lombok.RequiredArgsConstructor;
 import org.hibernate.Hibernate;

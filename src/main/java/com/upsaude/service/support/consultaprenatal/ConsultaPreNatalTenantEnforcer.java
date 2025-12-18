@@ -1,8 +1,8 @@
 package com.upsaude.service.support.consultaprenatal;
 
-import com.upsaude.entity.ConsultaPreNatal;
+import com.upsaude.entity.atendimento.ConsultaPreNatal;
 import com.upsaude.exception.NotFoundException;
-import com.upsaude.repository.ConsultaPreNatalRepository;
+import com.upsaude.repository.atendimento.ConsultaPreNatalRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;

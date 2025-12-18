@@ -1,13 +1,14 @@
 package com.upsaude.service.impl;
+import com.upsaude.entity.sistema.Tenant;
 
-import com.upsaude.api.request.EstoquesVacinaRequest;
-import com.upsaude.api.response.EstoquesVacinaResponse;
-import com.upsaude.entity.EstoquesVacina;
+import com.upsaude.api.request.vacina.EstoquesVacinaRequest;
+import com.upsaude.api.response.vacina.EstoquesVacinaResponse;
+import com.upsaude.entity.vacina.EstoquesVacina;
 import com.upsaude.exception.BadRequestException;
 import com.upsaude.exception.NotFoundException;
 import com.upsaude.mapper.EstoquesVacinaMapper;
-import com.upsaude.repository.EstoquesVacinaRepository;
-import com.upsaude.service.EstoquesVacinaService;
+import com.upsaude.repository.saude_publica.vacina.EstoquesVacinaRepository;
+import com.upsaude.service.vacina.EstoquesVacinaService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

@@ -1,10 +1,10 @@
 package com.upsaude.service.support.logsauditoria;
 
-import com.upsaude.api.request.LogsAuditoriaRequest;
-import com.upsaude.entity.LogsAuditoria;
-import com.upsaude.entity.Tenant;
+import com.upsaude.api.request.sistema.LogsAuditoriaRequest;
+import com.upsaude.entity.sistema.LogsAuditoria;
+import com.upsaude.entity.sistema.Tenant;
 import com.upsaude.mapper.LogsAuditoriaMapper;
-import com.upsaude.repository.LogsAuditoriaRepository;
+import com.upsaude.repository.sistema.LogsAuditoriaRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;

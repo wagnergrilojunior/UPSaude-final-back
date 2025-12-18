@@ -1,7 +1,7 @@
 package com.upsaude.service.support.deficiencias;
 
-import com.upsaude.api.response.DeficienciasResponse;
-import com.upsaude.entity.Deficiencias;
+import com.upsaude.api.response.deficiencia.DeficienciasResponse;
+import com.upsaude.entity.deficiencia.Deficiencias;
 import com.upsaude.mapper.DeficienciasMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;

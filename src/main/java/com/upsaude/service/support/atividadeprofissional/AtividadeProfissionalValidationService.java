@@ -1,6 +1,6 @@
 package com.upsaude.service.support.atividadeprofissional;
 
-import com.upsaude.api.request.AtividadeProfissionalRequest;
+import com.upsaude.api.request.profissional.AtividadeProfissionalRequest;
 import com.upsaude.exception.BadRequestException;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;

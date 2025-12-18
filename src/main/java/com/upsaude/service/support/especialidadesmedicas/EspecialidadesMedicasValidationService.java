@@ -1,6 +1,6 @@
 package com.upsaude.service.support.especialidadesmedicas;
 
-import com.upsaude.api.request.EspecialidadesMedicasRequest;
+import com.upsaude.api.request.profissional.EspecialidadesMedicasRequest;
 import com.upsaude.exception.BadRequestException;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;

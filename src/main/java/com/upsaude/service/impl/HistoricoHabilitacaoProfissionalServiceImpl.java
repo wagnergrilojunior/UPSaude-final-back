@@ -1,14 +1,14 @@
 package com.upsaude.service.impl;
 
 import com.upsaude.cache.CacheKeyUtil;
-import com.upsaude.api.request.HistoricoHabilitacaoProfissionalRequest;
-import com.upsaude.api.response.HistoricoHabilitacaoProfissionalResponse;
-import com.upsaude.entity.HistoricoHabilitacaoProfissional;
-import com.upsaude.entity.Tenant;
+import com.upsaude.api.request.profissional.HistoricoHabilitacaoProfissionalRequest;
+import com.upsaude.api.response.profissional.HistoricoHabilitacaoProfissionalResponse;
+import com.upsaude.entity.profissional.HistoricoHabilitacaoProfissional;
+import com.upsaude.entity.sistema.Tenant;
 import com.upsaude.exception.BadRequestException;
-import com.upsaude.repository.HistoricoHabilitacaoProfissionalRepository;
-import com.upsaude.service.HistoricoHabilitacaoProfissionalService;
-import com.upsaude.service.TenantService;
+import com.upsaude.repository.profissional.HistoricoHabilitacaoProfissionalRepository;
+import com.upsaude.service.profissional.HistoricoHabilitacaoProfissionalService;
+import com.upsaude.service.sistema.TenantService;
 import com.upsaude.service.support.historicohabilitacaoprofissional.HistoricoHabilitacaoProfissionalCreator;
 import com.upsaude.service.support.historicohabilitacaoprofissional.HistoricoHabilitacaoProfissionalResponseBuilder;
 import com.upsaude.service.support.historicohabilitacaoprofissional.HistoricoHabilitacaoProfissionalTenantEnforcer;

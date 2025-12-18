@@ -1,10 +1,10 @@
 package com.upsaude.service.support.cidades;
 
-import com.upsaude.api.request.CidadesRequest;
-import com.upsaude.entity.Cidades;
+import com.upsaude.api.request.geografico.CidadesRequest;
+import com.upsaude.entity.geografico.Cidades;
 import com.upsaude.exception.NotFoundException;
 import com.upsaude.mapper.CidadesMapper;
-import com.upsaude.repository.CidadesRepository;
+import com.upsaude.repository.referencia.geografico.CidadesRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;

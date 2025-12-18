@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns="http://servicos.saude.gov.br/schema/sigtap/procedimento/v1/finalidadepublicacao" elementFormDefault="qualified" targetNamespace="http://servicos.saude.gov.br/schema/sigtap/publicacao/v1/finalidadepublicacao">
+    
+    <xs:annotation>
+        <xs:documentation>
+            <![CDATA[
+            Este esquema limita os valores possíveis para a Finalidade da Publicação: Inclusão, Alteração ou Revogação. 
+            ]]>
+        </xs:documentation>
+    </xs:annotation>
+    
+    <xs:simpleType name="FinalidadePublicacaoType">
+        
+        <xs:restriction base="xs:string">
+            <xs:enumeration value="INCLUSAO"/>
+            <xs:enumeration value="ALTERACAO"/>
+            <xs:enumeration value="REVOGACAO"/>
+        </xs:restriction>
+        
+    </xs:simpleType>
+    
+</xs:schema>

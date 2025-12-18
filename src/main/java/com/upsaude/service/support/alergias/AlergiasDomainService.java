@@ -1,6 +1,6 @@
 package com.upsaude.service.support.alergias;
 
-import com.upsaude.entity.Alergias;
+import com.upsaude.entity.alergia.Alergias;
 import com.upsaude.exception.BadRequestException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;

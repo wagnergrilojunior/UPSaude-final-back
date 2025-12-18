@@ -1,7 +1,7 @@
 package com.upsaude.service.support.integracaogov;
 
-import com.upsaude.api.response.IntegracaoGovResponse;
-import com.upsaude.entity.IntegracaoGov;
+import com.upsaude.api.response.integracao.IntegracaoGovResponse;
+import com.upsaude.entity.integracao.IntegracaoGov;
 import com.upsaude.mapper.IntegracaoGovMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;

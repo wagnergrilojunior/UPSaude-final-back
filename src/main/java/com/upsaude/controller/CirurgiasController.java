@@ -1,11 +1,11 @@
 package com.upsaude.controller;
 
-import com.upsaude.api.request.CirurgiaRequest;
-import com.upsaude.api.response.CirurgiaResponse;
+import com.upsaude.api.request.cirurgia.CirurgiaRequest;
+import com.upsaude.api.response.cirurgia.CirurgiaResponse;
 import com.upsaude.enums.StatusCirurgiaEnum;
 import com.upsaude.exception.BadRequestException;
 import com.upsaude.exception.NotFoundException;
-import com.upsaude.service.CirurgiaService;
+import com.upsaude.service.cirurgia.CirurgiaService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;

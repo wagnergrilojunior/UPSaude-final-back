@@ -1,0 +1,36 @@
+package com.upsaude.mapper.paciente;
+
+import com.upsaude.api.request.paciente.DadosClinicosBasicosRequest;
+import com.upsaude.api.response.paciente.DadosClinicosBasicosResponse;
+import com.upsaude.dto.DadosClinicosBasicosDTO;
+import com.upsaude.entity.paciente.DadosClinicosBasicos;
+import com.upsaude.mapper.config.MappingConfig;
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
+import org.mapstruct.MappingTarget;
+
+@Mapper(config = MappingConfig.class)
+public interface DadosClinicosBasicosMapper extends EntityMapper<DadosClinicosBasicos, DadosClinicosBasicosDTO> {
+
+    @Mapping(target = "active", ignore = true)
+    DadosClinicosBasicos toEntity(DadosClinicosBasicosDTO dto);
+
+    DadosClinicosBasicosDTO toDTO(DadosClinicosBasicos entity);
+
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "createdAt", ignore = true)
+    @Mapping(target = "updatedAt", ignore = true)
+    @Mapping(target = "active", ignore = true)
+    @Mapping(target = "paciente", ignore = true)
+    DadosClinicosBasicos fromRequest(DadosClinicosBasicosRequest request);
+
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "createdAt", ignore = true)
+    @Mapping(target = "updatedAt", ignore = true)
+    @Mapping(target = "active", ignore = true)
+    @Mapping(target = "paciente", ignore = true)
+    void updateFromRequest(DadosClinicosBasicosRequest request, @MappingTarget DadosClinicosBasicos entity);
+
+    @Mapping(target = "paciente", ignore = true)
+    DadosClinicosBasicosResponse toResponse(DadosClinicosBasicos entity);
+}

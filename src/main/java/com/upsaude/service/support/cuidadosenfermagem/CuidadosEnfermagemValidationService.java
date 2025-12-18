@@ -1,6 +1,8 @@
 package com.upsaude.service.support.cuidadosenfermagem;
 
-import com.upsaude.api.request.CuidadosEnfermagemRequest;
+import com.upsaude.entity.paciente.Paciente;
+
+import com.upsaude.api.request.enfermagem.CuidadosEnfermagemRequest;
 import com.upsaude.exception.BadRequestException;
 import org.springframework.stereotype.Service;
 

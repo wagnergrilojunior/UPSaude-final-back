@@ -1,7 +1,7 @@
 package com.upsaude.service.support.notificacao;
 
-import com.upsaude.api.response.NotificacaoResponse;
-import com.upsaude.entity.Notificacao;
+import com.upsaude.api.response.notificacao.NotificacaoResponse;
+import com.upsaude.entity.notificacao.Notificacao;
 import com.upsaude.mapper.NotificacaoMapper;
 import lombok.RequiredArgsConstructor;
 import org.hibernate.Hibernate;

@@ -1,6 +1,6 @@
 package com.upsaude.service.support.historicohabilitacaoprofissional;
 
-import com.upsaude.api.request.HistoricoHabilitacaoProfissionalRequest;
+import com.upsaude.api.request.profissional.HistoricoHabilitacaoProfissionalRequest;
 import com.upsaude.exception.BadRequestException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;

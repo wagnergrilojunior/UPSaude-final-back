@@ -1,10 +1,10 @@
 package com.upsaude.service.support.convenio;
 
-import com.upsaude.api.request.ConvenioRequest;
-import com.upsaude.entity.Convenio;
-import com.upsaude.entity.Endereco;
+import com.upsaude.api.request.convenio.ConvenioRequest;
+import com.upsaude.entity.convenio.Convenio;
+import com.upsaude.entity.paciente.Endereco;
 import com.upsaude.exception.NotFoundException;
-import com.upsaude.repository.EnderecoRepository;
+import com.upsaude.repository.paciente.EnderecoRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 

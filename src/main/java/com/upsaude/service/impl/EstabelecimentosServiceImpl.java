@@ -1,17 +1,17 @@
 package com.upsaude.service.impl;
 
-import com.upsaude.api.request.EstabelecimentosRequest;
-import com.upsaude.api.response.EstabelecimentosResponse;
+import com.upsaude.api.request.estabelecimento.EstabelecimentosRequest;
+import com.upsaude.api.response.estabelecimento.EstabelecimentosResponse;
 import com.upsaude.cache.CacheKeyUtil;
-import com.upsaude.entity.Estabelecimentos;
-import com.upsaude.entity.Tenant;
+import com.upsaude.entity.estabelecimento.Estabelecimentos;
+import com.upsaude.entity.sistema.Tenant;
 import com.upsaude.exception.BadRequestException;
 import com.upsaude.exception.ConflictException;
 import com.upsaude.exception.InternalServerErrorException;
 import com.upsaude.exception.NotFoundException;
-import com.upsaude.repository.EstabelecimentosRepository;
-import com.upsaude.service.EstabelecimentosService;
-import com.upsaude.service.TenantService;
+import com.upsaude.repository.estabelecimento.EstabelecimentosRepository;
+import com.upsaude.service.estabelecimento.EstabelecimentosService;
+import com.upsaude.service.sistema.TenantService;
 import com.upsaude.service.support.estabelecimentos.EstabelecimentosCreator;
 import com.upsaude.service.support.estabelecimentos.EstabelecimentosDomainService;
 import com.upsaude.service.support.estabelecimentos.EstabelecimentosResponseBuilder;

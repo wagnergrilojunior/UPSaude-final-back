@@ -1,14 +1,14 @@
 package com.upsaude.service.impl;
 
 import com.upsaude.cache.CacheKeyUtil;
-import com.upsaude.api.request.LogsAuditoriaRequest;
-import com.upsaude.api.response.LogsAuditoriaResponse;
-import com.upsaude.entity.LogsAuditoria;
-import com.upsaude.entity.Tenant;
+import com.upsaude.api.request.sistema.LogsAuditoriaRequest;
+import com.upsaude.api.response.sistema.LogsAuditoriaResponse;
+import com.upsaude.entity.sistema.LogsAuditoria;
+import com.upsaude.entity.sistema.Tenant;
 import com.upsaude.exception.BadRequestException;
-import com.upsaude.repository.LogsAuditoriaRepository;
-import com.upsaude.service.LogsAuditoriaService;
-import com.upsaude.service.TenantService;
+import com.upsaude.repository.sistema.LogsAuditoriaRepository;
+import com.upsaude.service.sistema.LogsAuditoriaService;
+import com.upsaude.service.sistema.TenantService;
 import com.upsaude.service.support.logsauditoria.LogsAuditoriaCreator;
 import com.upsaude.service.support.logsauditoria.LogsAuditoriaResponseBuilder;
 import com.upsaude.service.support.logsauditoria.LogsAuditoriaTenantEnforcer;

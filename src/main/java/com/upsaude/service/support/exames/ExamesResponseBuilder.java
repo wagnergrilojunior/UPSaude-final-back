@@ -1,7 +1,7 @@
 package com.upsaude.service.support.exames;
 
-import com.upsaude.api.response.ExamesResponse;
-import com.upsaude.entity.Exames;
+import com.upsaude.api.response.exame.ExamesResponse;
+import com.upsaude.entity.exame.Exames;
 import com.upsaude.mapper.ExamesMapper;
 import lombok.RequiredArgsConstructor;
 import org.hibernate.Hibernate;

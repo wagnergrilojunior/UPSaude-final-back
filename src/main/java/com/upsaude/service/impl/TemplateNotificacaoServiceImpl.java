@@ -1,16 +1,16 @@
 package com.upsaude.service.impl;
 
-import com.upsaude.api.request.TemplateNotificacaoRequest;
-import com.upsaude.api.response.TemplateNotificacaoResponse;
+import com.upsaude.api.request.notificacao.TemplateNotificacaoRequest;
+import com.upsaude.api.response.notificacao.TemplateNotificacaoResponse;
 import com.upsaude.cache.CacheKeyUtil;
-import com.upsaude.entity.TemplateNotificacao;
-import com.upsaude.entity.Tenant;
+import com.upsaude.entity.notificacao.TemplateNotificacao;
+import com.upsaude.entity.sistema.Tenant;
 import com.upsaude.enums.CanalNotificacaoEnum;
 import com.upsaude.enums.TipoNotificacaoEnum;
 import com.upsaude.exception.BadRequestException;
-import com.upsaude.repository.TemplateNotificacaoRepository;
-import com.upsaude.service.TemplateNotificacaoService;
-import com.upsaude.service.TenantService;
+import com.upsaude.repository.sistema.notificacao.TemplateNotificacaoRepository;
+import com.upsaude.service.notificacao.TemplateNotificacaoService;
+import com.upsaude.service.sistema.TenantService;
 import com.upsaude.service.support.templatenotificacao.TemplateNotificacaoCreator;
 import com.upsaude.service.support.templatenotificacao.TemplateNotificacaoDomainService;
 import com.upsaude.service.support.templatenotificacao.TemplateNotificacaoResponseBuilder;

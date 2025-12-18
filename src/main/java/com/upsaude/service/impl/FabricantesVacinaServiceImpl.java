@@ -1,14 +1,14 @@
 package com.upsaude.service.impl;
 
-import com.upsaude.api.request.FabricantesVacinaRequest;
-import com.upsaude.api.response.FabricantesVacinaResponse;
+import com.upsaude.api.request.vacina.FabricantesVacinaRequest;
+import com.upsaude.api.response.vacina.FabricantesVacinaResponse;
 import com.upsaude.cache.CacheKeyUtil;
-import com.upsaude.entity.FabricantesVacina;
+import com.upsaude.entity.vacina.FabricantesVacina;
 import com.upsaude.exception.BadRequestException;
 import com.upsaude.exception.NotFoundException;
-import com.upsaude.repository.FabricantesVacinaRepository;
-import com.upsaude.service.FabricantesVacinaService;
-import com.upsaude.service.TenantService;
+import com.upsaude.repository.saude_publica.vacina.FabricantesVacinaRepository;
+import com.upsaude.service.vacina.FabricantesVacinaService;
+import com.upsaude.service.sistema.TenantService;
 import com.upsaude.service.support.fabricantesvacina.FabricantesVacinaCreator;
 import com.upsaude.service.support.fabricantesvacina.FabricantesVacinaDomainService;
 import com.upsaude.service.support.fabricantesvacina.FabricantesVacinaResponseBuilder;

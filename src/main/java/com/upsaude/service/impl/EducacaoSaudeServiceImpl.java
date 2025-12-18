@@ -1,16 +1,16 @@
 package com.upsaude.service.impl;
 
-import com.upsaude.api.request.EducacaoSaudeRequest;
-import com.upsaude.api.response.EducacaoSaudeResponse;
+import com.upsaude.api.request.educacao.EducacaoSaudeRequest;
+import com.upsaude.api.response.educacao.EducacaoSaudeResponse;
 import com.upsaude.cache.CacheKeyUtil;
-import com.upsaude.entity.EducacaoSaude;
-import com.upsaude.entity.Tenant;
+import com.upsaude.entity.educacao.EducacaoSaude;
+import com.upsaude.entity.sistema.Tenant;
 import com.upsaude.exception.BadRequestException;
 import com.upsaude.exception.InternalServerErrorException;
 import com.upsaude.exception.NotFoundException;
-import com.upsaude.repository.EducacaoSaudeRepository;
-import com.upsaude.service.EducacaoSaudeService;
-import com.upsaude.service.TenantService;
+import com.upsaude.repository.saude_publica.educacao.EducacaoSaudeRepository;
+import com.upsaude.service.educacao.EducacaoSaudeService;
+import com.upsaude.service.sistema.TenantService;
 import com.upsaude.service.support.educacaosaude.EducacaoSaudeCreator;
 import com.upsaude.service.support.educacaosaude.EducacaoSaudeResponseBuilder;
 import com.upsaude.service.support.educacaosaude.EducacaoSaudeTenantEnforcer;

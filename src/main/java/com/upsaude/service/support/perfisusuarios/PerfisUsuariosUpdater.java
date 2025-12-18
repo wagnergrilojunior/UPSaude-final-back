@@ -1,10 +1,10 @@
 package com.upsaude.service.support.perfisusuarios;
 
-import com.upsaude.api.request.PerfisUsuariosRequest;
-import com.upsaude.entity.PerfisUsuarios;
-import com.upsaude.entity.Tenant;
+import com.upsaude.api.request.sistema.PerfisUsuariosRequest;
+import com.upsaude.entity.sistema.PerfisUsuarios;
+import com.upsaude.entity.sistema.Tenant;
 import com.upsaude.mapper.PerfisUsuariosMapper;
-import com.upsaude.repository.PerfisUsuariosRepository;
+import com.upsaude.repository.sistema.PerfisUsuariosRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;

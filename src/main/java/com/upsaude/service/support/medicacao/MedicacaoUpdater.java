@@ -1,10 +1,10 @@
 package com.upsaude.service.support.medicacao;
 
-import com.upsaude.api.request.MedicacaoRequest;
-import com.upsaude.entity.Medicacao;
+import com.upsaude.api.request.medicacao.MedicacaoRequest;
+import com.upsaude.entity.medicacao.Medicacao;
 import com.upsaude.exception.NotFoundException;
 import com.upsaude.mapper.MedicacaoMapper;
-import com.upsaude.repository.MedicacaoRepository;
+import com.upsaude.repository.medicacao.MedicacaoRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;

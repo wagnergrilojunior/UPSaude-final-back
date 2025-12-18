@@ -1,10 +1,10 @@
 package com.upsaude.service.support.controleponto;
 
-import com.upsaude.api.request.ControlePontoRequest;
-import com.upsaude.entity.ControlePonto;
-import com.upsaude.entity.Tenant;
+import com.upsaude.api.request.equipe.ControlePontoRequest;
+import com.upsaude.entity.equipe.ControlePonto;
+import com.upsaude.entity.sistema.Tenant;
 import com.upsaude.mapper.ControlePontoMapper;
-import com.upsaude.repository.ControlePontoRepository;
+import com.upsaude.repository.profissional.equipe.ControlePontoRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;

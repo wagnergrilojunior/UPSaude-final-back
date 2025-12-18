@@ -1,8 +1,8 @@
 package com.upsaude.service.support.acaopromocaoprevencao;
 
-import com.upsaude.entity.AcaoPromocaoPrevencao;
+import com.upsaude.entity.educacao.AcaoPromocaoPrevencao;
 import com.upsaude.exception.NotFoundException;
-import com.upsaude.repository.AcaoPromocaoPrevencaoRepository;
+import com.upsaude.repository.saude_publica.educacao.AcaoPromocaoPrevencaoRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;

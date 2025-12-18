@@ -1,15 +1,15 @@
 package com.upsaude.service.impl;
 
-import com.upsaude.api.request.ConsultaPreNatalRequest;
-import com.upsaude.api.response.ConsultaPreNatalResponse;
+import com.upsaude.api.request.atendimento.ConsultaPreNatalRequest;
+import com.upsaude.api.response.atendimento.ConsultaPreNatalResponse;
 import com.upsaude.cache.CacheKeyUtil;
-import com.upsaude.entity.ConsultaPreNatal;
-import com.upsaude.entity.Tenant;
+import com.upsaude.entity.atendimento.ConsultaPreNatal;
+import com.upsaude.entity.sistema.Tenant;
 import com.upsaude.exception.BadRequestException;
 import com.upsaude.exception.InternalServerErrorException;
-import com.upsaude.repository.ConsultaPreNatalRepository;
-import com.upsaude.service.ConsultaPreNatalService;
-import com.upsaude.service.TenantService;
+import com.upsaude.repository.atendimento.ConsultaPreNatalRepository;
+import com.upsaude.service.atendimento.ConsultaPreNatalService;
+import com.upsaude.service.sistema.TenantService;
 import com.upsaude.service.support.consultaprenatal.ConsultaPreNatalCreator;
 import com.upsaude.service.support.consultaprenatal.ConsultaPreNatalDomainService;
 import com.upsaude.service.support.consultaprenatal.ConsultaPreNatalResponseBuilder;

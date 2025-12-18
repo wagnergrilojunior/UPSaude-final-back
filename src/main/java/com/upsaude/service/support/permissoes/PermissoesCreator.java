@@ -1,10 +1,10 @@
 package com.upsaude.service.support.permissoes;
 
-import com.upsaude.api.request.PermissoesRequest;
-import com.upsaude.entity.Permissoes;
-import com.upsaude.entity.Tenant;
+import com.upsaude.api.request.sistema.PermissoesRequest;
+import com.upsaude.entity.sistema.Permissoes;
+import com.upsaude.entity.sistema.Tenant;
 import com.upsaude.mapper.PermissoesMapper;
-import com.upsaude.repository.PermissoesRepository;
+import com.upsaude.repository.sistema.PermissoesRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;

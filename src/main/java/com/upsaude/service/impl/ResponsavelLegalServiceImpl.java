@@ -1,14 +1,14 @@
 package com.upsaude.service.impl;
 
-import com.upsaude.api.request.ResponsavelLegalRequest;
-import com.upsaude.api.response.ResponsavelLegalResponse;
+import com.upsaude.api.request.paciente.ResponsavelLegalRequest;
+import com.upsaude.api.response.paciente.ResponsavelLegalResponse;
 import com.upsaude.cache.CacheKeyUtil;
-import com.upsaude.entity.ResponsavelLegal;
-import com.upsaude.entity.Tenant;
+import com.upsaude.entity.paciente.ResponsavelLegal;
+import com.upsaude.entity.sistema.Tenant;
 import com.upsaude.exception.BadRequestException;
-import com.upsaude.repository.ResponsavelLegalRepository;
-import com.upsaude.service.ResponsavelLegalService;
-import com.upsaude.service.TenantService;
+import com.upsaude.repository.paciente.ResponsavelLegalRepository;
+import com.upsaude.service.paciente.ResponsavelLegalService;
+import com.upsaude.service.sistema.TenantService;
 import com.upsaude.service.support.responsavellegal.ResponsavelLegalCreator;
 import com.upsaude.service.support.responsavellegal.ResponsavelLegalDomainService;
 import com.upsaude.service.support.responsavellegal.ResponsavelLegalResponseBuilder;

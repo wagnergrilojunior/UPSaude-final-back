@@ -1,10 +1,10 @@
 package com.upsaude.service.support.catalogoexames;
 
-import com.upsaude.api.request.CatalogoExamesRequest;
-import com.upsaude.entity.CatalogoExames;
-import com.upsaude.entity.Tenant;
+import com.upsaude.api.request.exame.CatalogoExamesRequest;
+import com.upsaude.entity.exame.CatalogoExames;
+import com.upsaude.entity.sistema.Tenant;
 import com.upsaude.mapper.CatalogoExamesMapper;
-import com.upsaude.repository.CatalogoExamesRepository;
+import com.upsaude.repository.exame.CatalogoExamesRepository;
 import com.upsaude.service.support.catalogoexames.CatalogoExamesValidationService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

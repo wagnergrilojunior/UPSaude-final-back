@@ -1,7 +1,7 @@
 package com.upsaude.service.support.consultaprenatal;
 
-import com.upsaude.api.response.ConsultaPreNatalResponse;
-import com.upsaude.entity.ConsultaPreNatal;
+import com.upsaude.api.response.atendimento.ConsultaPreNatalResponse;
+import com.upsaude.entity.atendimento.ConsultaPreNatal;
 import com.upsaude.mapper.ConsultaPreNatalMapper;
 import lombok.RequiredArgsConstructor;
 import org.hibernate.Hibernate;

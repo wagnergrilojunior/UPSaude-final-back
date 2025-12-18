@@ -1,15 +1,15 @@
 package com.upsaude.service.support.vacinacoes;
 
-import com.upsaude.api.request.VacinacoesRequest;
-import com.upsaude.entity.Estabelecimentos;
-import com.upsaude.entity.FabricantesVacina;
-import com.upsaude.entity.Paciente;
-import com.upsaude.entity.Tenant;
-import com.upsaude.entity.Vacinas;
-import com.upsaude.entity.Vacinacoes;
+import com.upsaude.api.request.vacina.VacinacoesRequest;
+import com.upsaude.entity.estabelecimento.Estabelecimentos;
+import com.upsaude.entity.vacina.FabricantesVacina;
+import com.upsaude.entity.paciente.Paciente;
+import com.upsaude.entity.sistema.Tenant;
+import com.upsaude.entity.vacina.Vacinas;
+import com.upsaude.entity.vacina.Vacinacoes;
 import com.upsaude.exception.NotFoundException;
-import com.upsaude.repository.FabricantesVacinaRepository;
-import com.upsaude.repository.VacinasRepository;
+import com.upsaude.repository.saude_publica.vacina.FabricantesVacinaRepository;
+import com.upsaude.repository.saude_publica.vacina.VacinasRepository;
 import com.upsaude.service.support.estabelecimentos.EstabelecimentosTenantEnforcer;
 import com.upsaude.service.support.paciente.PacienteTenantEnforcer;
 import lombok.RequiredArgsConstructor;

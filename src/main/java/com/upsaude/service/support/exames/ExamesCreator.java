@@ -1,10 +1,10 @@
 package com.upsaude.service.support.exames;
 
-import com.upsaude.api.request.ExamesRequest;
-import com.upsaude.entity.Exames;
-import com.upsaude.entity.Tenant;
+import com.upsaude.api.request.exame.ExamesRequest;
+import com.upsaude.entity.exame.Exames;
+import com.upsaude.entity.sistema.Tenant;
 import com.upsaude.mapper.ExamesMapper;
-import com.upsaude.repository.ExamesRepository;
+import com.upsaude.repository.exame.ExamesRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;

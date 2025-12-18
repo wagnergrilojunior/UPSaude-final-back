@@ -1,7 +1,7 @@
 package com.upsaude.service.support.filaespera;
 
-import com.upsaude.api.response.FilaEsperaResponse;
-import com.upsaude.entity.FilaEspera;
+import com.upsaude.api.response.agendamento.FilaEsperaResponse;
+import com.upsaude.entity.agendamento.FilaEspera;
 import com.upsaude.mapper.FilaEsperaMapper;
 import lombok.RequiredArgsConstructor;
 import org.hibernate.Hibernate;

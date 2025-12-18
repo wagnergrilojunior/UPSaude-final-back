@@ -1,15 +1,16 @@
 package com.upsaude.service.impl;
+import com.upsaude.entity.sistema.Tenant;
 
-import com.upsaude.api.request.AcaoPromocaoPrevencaoRequest;
-import com.upsaude.api.response.AcaoPromocaoPrevencaoResponse;
+import com.upsaude.api.request.educacao.AcaoPromocaoPrevencaoRequest;
+import com.upsaude.api.response.educacao.AcaoPromocaoPrevencaoResponse;
 import com.upsaude.exception.BadRequestException;
 import com.upsaude.exception.InternalServerErrorException;
 import com.upsaude.exception.NotFoundException;
 import com.upsaude.cache.CacheKeyUtil;
-import com.upsaude.entity.AcaoPromocaoPrevencao;
-import com.upsaude.repository.AcaoPromocaoPrevencaoRepository;
-import com.upsaude.service.AcaoPromocaoPrevencaoService;
-import com.upsaude.service.TenantService;
+import com.upsaude.entity.educacao.AcaoPromocaoPrevencao;
+import com.upsaude.repository.saude_publica.educacao.AcaoPromocaoPrevencaoRepository;
+import com.upsaude.service.educacao.AcaoPromocaoPrevencaoService;
+import com.upsaude.service.sistema.TenantService;
 import com.upsaude.service.support.acaopromocaoprevencao.AcaoPromocaoPrevencaoCreator;
 import com.upsaude.service.support.acaopromocaoprevencao.AcaoPromocaoPrevencaoDomainService;
 import com.upsaude.service.support.acaopromocaoprevencao.AcaoPromocaoPrevencaoResponseBuilder;

@@ -1,6 +1,8 @@
 package com.upsaude.service.support.tratamentosodontologicos;
 
-import com.upsaude.api.request.TratamentosOdontologicosRequest;
+import com.upsaude.entity.paciente.Paciente;
+
+import com.upsaude.api.request.odontologia.TratamentosOdontologicosRequest;
 import com.upsaude.exception.BadRequestException;
 import org.springframework.stereotype.Service;
 

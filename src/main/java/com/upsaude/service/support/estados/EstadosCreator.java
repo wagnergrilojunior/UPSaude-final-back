@@ -1,9 +1,9 @@
 package com.upsaude.service.support.estados;
 
-import com.upsaude.api.request.EstadosRequest;
-import com.upsaude.entity.Estados;
+import com.upsaude.api.request.geografico.EstadosRequest;
+import com.upsaude.entity.geografico.Estados;
 import com.upsaude.mapper.EstadosMapper;
-import com.upsaude.repository.EstadosRepository;
+import com.upsaude.repository.referencia.geografico.EstadosRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;

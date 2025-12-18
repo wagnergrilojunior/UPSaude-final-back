@@ -1,10 +1,10 @@
 package com.upsaude.service.support.plantao;
 
-import com.upsaude.api.request.PlantaoRequest;
-import com.upsaude.entity.Plantao;
-import com.upsaude.entity.Tenant;
+import com.upsaude.api.request.equipe.PlantaoRequest;
+import com.upsaude.entity.equipe.Plantao;
+import com.upsaude.entity.sistema.Tenant;
 import com.upsaude.mapper.PlantaoMapper;
-import com.upsaude.repository.PlantaoRepository;
+import com.upsaude.repository.profissional.equipe.PlantaoRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;

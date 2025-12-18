@@ -1,0 +1,42 @@
+040009Atendimento/acompanhamento em reabilitação física, mental, visual, auditiva e múltiplas deficiências202512
+040013Atendimento/acompanhamento de diagnóstico de doenças endocrinas/metabólicas e nutricionais          202512
+040017Nefrologia                                                                                          202512
+040024Cirurgia do aparelho digestivo, orgãos anexos e parede abdominal(inclui pré e pós operatório)       202512
+040028Outras cirurgias plásticas/reparadoras                                                              202512
+040030Sequenciais                                                                                         202512
+040032Transplantes de orgãos, tecidos e células                                                           202512
+040033Medicamentos para transplante                                                                       202512
+040038OPM para transplantes                                                                               202512
+040041Central Nacional de Regulação de Alta Complexidade (CNRAC)                                          202512
+040044Redesignação e Acompanhamento                                                                       202512
+040049Implementar Cirg. CV Pediátrica                                                                     202512
+040055Transplante - Histocompatibilidade                                                                  202512
+040062Doenças Raras                                                                                       202512
+040063Cadeiras de Rodas                                                                                   202512
+040065Medicamentos em Urgência                                                                            202512
+040066Cirurgias Eletivas - Componente Único                                                               202512
+040067Atenção Especializada em Saúde Auditiva                                                             202512
+040068Terapias Especializadas em Angiologia                                                               202512
+040069Tratamento de Doença Macular                                                                        202512
+040070OPME Não Relacionados ao Ato Cirúrgico                                                              202512
+040071Diagnóstico/tratamento em oncologia                                                                 202512
+040072Diagnóstico de trombofilia em gestante                                                              202512
+040073Reabilitação Pós-COVID-19                                                                           202512
+040074Telemedicina em Urgência                                                                            202512
+040075Fisioterapia Cardiovascular                                                                         202512
+040076Hemodinâmica em atendimento de urgência                                                             202512
+040077Exames Sorológicos e Imunológicos                                                                   202512
+040078QualiSUS Cardio                                                                                     202512
+040079Pré-cirúrgico em Cirurgias Prioritárias                                                             202512
+040080Redução das Filas de Procedimentos Eletivos.                                                        202512
+040081Síndrome Respiratória Aguda Grave - SRAG                                                            202512
+040082Alta Complexidade em Cardiologia                                                                    202512
+040083Cirurgia da Face e do Sistema Estomatognático                                                       202512
+040084Neurocirurgias                                                                                      202512
+040085Exames coprológicos                                                                                 202512
+040086Programa Mais Acesso a Especialistas (PMAE)                                                         202512
+040087Saúde Bucal                                                                                         202512
+040088Radioterapia                                                                                        202512
+040089Recursos Vinculados a Parcela Única                                                                 202512
+040090Recursos Vinculados a Emendas Parlamentares                                                         202512
+040091Materno Infântil                                                                                    202512

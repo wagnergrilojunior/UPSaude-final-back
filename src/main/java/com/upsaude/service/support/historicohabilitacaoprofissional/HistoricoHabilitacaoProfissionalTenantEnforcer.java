@@ -1,8 +1,8 @@
 package com.upsaude.service.support.historicohabilitacaoprofissional;
 
-import com.upsaude.entity.HistoricoHabilitacaoProfissional;
+import com.upsaude.entity.profissional.HistoricoHabilitacaoProfissional;
 import com.upsaude.exception.NotFoundException;
-import com.upsaude.repository.HistoricoHabilitacaoProfissionalRepository;
+import com.upsaude.repository.profissional.HistoricoHabilitacaoProfissionalRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;

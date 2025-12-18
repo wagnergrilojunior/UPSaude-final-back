@@ -1,14 +1,14 @@
 package com.upsaude.service.support.cirurgia;
 
-import com.upsaude.api.request.CirurgiaRequest;
-import com.upsaude.entity.Cirurgia;
-import com.upsaude.entity.Convenio;
-import com.upsaude.entity.EspecialidadesMedicas;
-import com.upsaude.entity.Medicos;
-import com.upsaude.entity.Paciente;
-import com.upsaude.entity.ProfissionaisSaude;
+import com.upsaude.api.request.cirurgia.CirurgiaRequest;
+import com.upsaude.entity.cirurgia.Cirurgia;
+import com.upsaude.entity.convenio.Convenio;
+import com.upsaude.entity.profissional.EspecialidadesMedicas;
+import com.upsaude.entity.profissional.Medicos;
+import com.upsaude.entity.paciente.Paciente;
+import com.upsaude.entity.profissional.ProfissionaisSaude;
 import com.upsaude.exception.NotFoundException;
-import com.upsaude.repository.EspecialidadesMedicasRepository;
+import com.upsaude.repository.profissional.EspecialidadesMedicasRepository;
 import com.upsaude.service.support.convenio.ConvenioTenantEnforcer;
 import com.upsaude.service.support.medico.MedicoTenantEnforcer;
 import com.upsaude.service.support.paciente.PacienteTenantEnforcer;

@@ -1,17 +1,17 @@
 package com.upsaude.service.impl;
 
 import java.util.Objects;
-import com.upsaude.api.request.CatalogoExamesRequest;
-import com.upsaude.api.response.CatalogoExamesResponse;
+import com.upsaude.api.request.exame.CatalogoExamesRequest;
+import com.upsaude.api.response.exame.CatalogoExamesResponse;
 import com.upsaude.cache.CacheKeyUtil;
-import com.upsaude.entity.CatalogoExames;
-import com.upsaude.entity.Tenant;
+import com.upsaude.entity.exame.CatalogoExames;
+import com.upsaude.entity.sistema.Tenant;
 import com.upsaude.exception.BadRequestException;
 import com.upsaude.exception.InternalServerErrorException;
 import com.upsaude.exception.NotFoundException;
-import com.upsaude.repository.CatalogoExamesRepository;
-import com.upsaude.service.CatalogoExamesService;
-import com.upsaude.service.TenantService;
+import com.upsaude.repository.exame.CatalogoExamesRepository;
+import com.upsaude.service.exame.CatalogoExamesService;
+import com.upsaude.service.sistema.TenantService;
 import com.upsaude.service.support.catalogoexames.CatalogoExamesCreator;
 import com.upsaude.service.support.catalogoexames.CatalogoExamesDomainService;
 import com.upsaude.service.support.catalogoexames.CatalogoExamesResponseBuilder;

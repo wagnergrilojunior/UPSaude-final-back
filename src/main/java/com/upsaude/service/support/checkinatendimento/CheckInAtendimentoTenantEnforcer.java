@@ -1,8 +1,8 @@
 package com.upsaude.service.support.checkinatendimento;
 
-import com.upsaude.entity.CheckInAtendimento;
+import com.upsaude.entity.atendimento.CheckInAtendimento;
 import com.upsaude.exception.NotFoundException;
-import com.upsaude.repository.CheckInAtendimentoRepository;
+import com.upsaude.repository.atendimento.CheckInAtendimentoRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;

@@ -1,10 +1,10 @@
 package com.upsaude.service.support.infraestruturaestabelecimento;
 
-import com.upsaude.api.request.InfraestruturaEstabelecimentoRequest;
-import com.upsaude.entity.InfraestruturaEstabelecimento;
-import com.upsaude.entity.Tenant;
+import com.upsaude.api.request.estabelecimento.InfraestruturaEstabelecimentoRequest;
+import com.upsaude.entity.estabelecimento.InfraestruturaEstabelecimento;
+import com.upsaude.entity.sistema.Tenant;
 import com.upsaude.mapper.InfraestruturaEstabelecimentoMapper;
-import com.upsaude.repository.InfraestruturaEstabelecimentoRepository;
+import com.upsaude.repository.estabelecimento.InfraestruturaEstabelecimentoRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;

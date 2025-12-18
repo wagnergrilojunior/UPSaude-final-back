@@ -1,13 +1,13 @@
 package com.upsaude.service.impl;
 
-import com.upsaude.api.request.FabricantesMedicamentoRequest;
-import com.upsaude.api.response.FabricantesMedicamentoResponse;
+import com.upsaude.api.request.fabricante.FabricantesMedicamentoRequest;
+import com.upsaude.api.response.fabricante.FabricantesMedicamentoResponse;
 import com.upsaude.cache.CacheKeyUtil;
-import com.upsaude.entity.FabricantesMedicamento;
+import com.upsaude.entity.fabricante.FabricantesMedicamento;
 import com.upsaude.exception.BadRequestException;
 import com.upsaude.exception.NotFoundException;
-import com.upsaude.repository.FabricantesMedicamentoRepository;
-import com.upsaude.service.FabricantesMedicamentoService;
+import com.upsaude.repository.referencia.fabricante.FabricantesMedicamentoRepository;
+import com.upsaude.service.fabricante.FabricantesMedicamentoService;
 import com.upsaude.service.support.fabricantesmedicamento.FabricantesMedicamentoCreator;
 import com.upsaude.service.support.fabricantesmedicamento.FabricantesMedicamentoDomainService;
 import com.upsaude.service.support.fabricantesmedicamento.FabricantesMedicamentoResponseBuilder;

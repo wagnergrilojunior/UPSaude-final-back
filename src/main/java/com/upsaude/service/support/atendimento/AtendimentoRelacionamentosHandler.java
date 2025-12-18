@@ -1,17 +1,15 @@
 package com.upsaude.service.support.atendimento;
 
-import com.upsaude.api.request.AtendimentoRequest;
-import com.upsaude.entity.Atendimento;
-import com.upsaude.entity.CidDoencas;
-import com.upsaude.entity.Convenio;
-import com.upsaude.entity.EspecialidadesMedicas;
-import com.upsaude.entity.EquipeSaude;
-import com.upsaude.entity.Paciente;
-import com.upsaude.entity.ProfissionaisSaude;
-import com.upsaude.entity.Tenant;
+import com.upsaude.api.request.atendimento.AtendimentoRequest;
+import com.upsaude.entity.atendimento.Atendimento;
+import com.upsaude.entity.convenio.Convenio;
+import com.upsaude.entity.profissional.EspecialidadesMedicas;
+import com.upsaude.entity.equipe.EquipeSaude;
+import com.upsaude.entity.paciente.Paciente;
+import com.upsaude.entity.profissional.ProfissionaisSaude;
+import com.upsaude.entity.sistema.Tenant;
 import com.upsaude.exception.NotFoundException;
-import com.upsaude.repository.CidDoencasRepository;
-import com.upsaude.repository.EspecialidadesMedicasRepository;
+import com.upsaude.repository.profissional.EspecialidadesMedicasRepository;
 import com.upsaude.service.support.convenio.ConvenioTenantEnforcer;
 import com.upsaude.service.support.equipesaude.EquipeSaudeTenantEnforcer;
 import com.upsaude.service.support.paciente.PacienteTenantEnforcer;
@@ -31,7 +29,6 @@ public class AtendimentoRelacionamentosHandler {
     private final EquipeSaudeTenantEnforcer equipeSaudeTenantEnforcer;
     private final ConvenioTenantEnforcer convenioTenantEnforcer;
     private final EspecialidadesMedicasRepository especialidadesMedicasRepository;
-    private final CidDoencasRepository cidDoencasRepository;
 
     public void resolver(Atendimento entity, AtendimentoRequest request, UUID tenantId, Tenant tenant) {
         if (request == null) return;
@@ -71,14 +68,7 @@ public class AtendimentoRelacionamentosHandler {
             entity.setConvenio(null);
         }
 
-        if (request.getCidPrincipal() != null) {
-            UUID cidId = Objects.requireNonNull(request.getCidPrincipal(), "cidPrincipal");
-            CidDoencas cid = cidDoencasRepository.findById(cidId)
-                .orElseThrow(() -> new NotFoundException("CID não encontrado com ID: " + cidId));
-            entity.setCidPrincipal(cid);
-        } else {
-            entity.setCidPrincipal(null);
-        }
+        // CidPrincipal removido - CidDoencas foi deletado
 
         if (entity.getProfissional() != null && entity.getProfissional().getEstabelecimento() != null) {
             entity.setEstabelecimento(entity.getProfissional().getEstabelecimento());

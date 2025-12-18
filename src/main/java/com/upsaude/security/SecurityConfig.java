@@ -69,6 +69,9 @@ public class SecurityConfig {
                 .requestMatchers("/swagger-ui/**").permitAll()
                 .requestMatchers("/swagger-ui.html").permitAll()
                 
+                // Endpoint interno de sincronização SIGTAP (sem autenticação para facilitar execução manual)
+                .requestMatchers("/sigtap/sync").permitAll()
+                
                 // Todos os outros endpoints requerem autenticação
                 .anyRequest().authenticated()
             )

@@ -1,6 +1,6 @@
 package com.upsaude.service.support.controleponto;
 
-import com.upsaude.entity.ControlePonto;
+import com.upsaude.entity.equipe.ControlePonto;
 import org.springframework.stereotype.Service;
 
 @Service

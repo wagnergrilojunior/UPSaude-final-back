@@ -1,8 +1,8 @@
 package com.upsaude.service.support.vacinas;
 
-import com.upsaude.api.request.VacinasRequest;
+import com.upsaude.api.request.vacina.VacinasRequest;
 import com.upsaude.exception.BadRequestException;
-import com.upsaude.repository.VacinasRepository;
+import com.upsaude.repository.saude_publica.vacina.VacinasRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;

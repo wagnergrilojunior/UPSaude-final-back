@@ -1,15 +1,13 @@
 package com.upsaude.service.support.consultas;
 
-import com.upsaude.api.request.ConsultasRequest;
-import com.upsaude.entity.CidDoencas;
-import com.upsaude.entity.Consultas;
-import com.upsaude.entity.EspecialidadesMedicas;
-import com.upsaude.entity.Medicos;
-import com.upsaude.entity.ProfissionaisSaude;
-import com.upsaude.entity.Tenant;
+import com.upsaude.api.request.atendimento.ConsultasRequest;
+import com.upsaude.entity.atendimento.Consultas;
+import com.upsaude.entity.profissional.EspecialidadesMedicas;
+import com.upsaude.entity.profissional.Medicos;
+import com.upsaude.entity.profissional.ProfissionaisSaude;
+import com.upsaude.entity.sistema.Tenant;
 import com.upsaude.exception.NotFoundException;
-import com.upsaude.repository.CidDoencasRepository;
-import com.upsaude.repository.EspecialidadesMedicasRepository;
+import com.upsaude.repository.profissional.EspecialidadesMedicasRepository;
 import com.upsaude.service.support.convenio.ConvenioTenantEnforcer;
 import com.upsaude.service.support.medico.MedicoTenantEnforcer;
 import com.upsaude.service.support.paciente.PacienteTenantEnforcer;
@@ -29,7 +27,6 @@ public class ConsultasRelacionamentosHandler {
     private final ProfissionaisSaudeTenantEnforcer profissionaisSaudeTenantEnforcer;
     private final ConvenioTenantEnforcer convenioTenantEnforcer;
     private final EspecialidadesMedicasRepository especialidadesMedicasRepository;
-    private final CidDoencasRepository cidDoencasRepository;
 
     public void resolver(Consultas entity, ConsultasRequest request, UUID tenantId, Tenant tenant) {
         if (request == null) return;
@@ -68,14 +65,7 @@ public class ConsultasRelacionamentosHandler {
             entity.setEspecialidade(null);
         }
 
-        if (request.getCidPrincipal() != null) {
-            UUID cidId = Objects.requireNonNull(request.getCidPrincipal(), "cidPrincipal");
-            CidDoencas cid = cidDoencasRepository.findById(cidId)
-                .orElseThrow(() -> new NotFoundException("CID não encontrado com ID: " + cidId));
-            entity.setCidPrincipal(cid);
-        } else {
-            entity.setCidPrincipal(null);
-        }
+        // CidPrincipal removido - CidDoencas foi deletado
 
         if (entity.getProfissionalSaude() != null && entity.getProfissionalSaude().getEstabelecimento() != null) {
             entity.setEstabelecimento(entity.getProfissionalSaude().getEstabelecimento());

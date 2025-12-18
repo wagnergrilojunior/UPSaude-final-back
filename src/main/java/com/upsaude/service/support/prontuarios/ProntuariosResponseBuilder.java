@@ -1,7 +1,7 @@
 package com.upsaude.service.support.prontuarios;
 
-import com.upsaude.api.response.ProntuariosResponse;
-import com.upsaude.entity.Prontuarios;
+import com.upsaude.api.response.prontuario.ProntuariosResponse;
+import com.upsaude.entity.prontuario.Prontuarios;
 import com.upsaude.mapper.ProntuariosMapper;
 import lombok.RequiredArgsConstructor;
 import org.hibernate.Hibernate;

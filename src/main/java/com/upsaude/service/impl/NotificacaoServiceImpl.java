@@ -1,14 +1,14 @@
 package com.upsaude.service.impl;
 
-import com.upsaude.api.request.NotificacaoRequest;
-import com.upsaude.api.response.NotificacaoResponse;
+import com.upsaude.api.request.notificacao.NotificacaoRequest;
+import com.upsaude.api.response.notificacao.NotificacaoResponse;
 import com.upsaude.cache.CacheKeyUtil;
-import com.upsaude.entity.Notificacao;
-import com.upsaude.entity.Tenant;
+import com.upsaude.entity.notificacao.Notificacao;
+import com.upsaude.entity.sistema.Tenant;
 import com.upsaude.exception.BadRequestException;
-import com.upsaude.repository.NotificacaoRepository;
-import com.upsaude.service.NotificacaoService;
-import com.upsaude.service.TenantService;
+import com.upsaude.repository.sistema.notificacao.NotificacaoRepository;
+import com.upsaude.service.notificacao.NotificacaoService;
+import com.upsaude.service.sistema.TenantService;
 import com.upsaude.service.support.notificacao.NotificacaoCreator;
 import com.upsaude.service.support.notificacao.NotificacaoDomainService;
 import com.upsaude.service.support.notificacao.NotificacaoResponseBuilder;

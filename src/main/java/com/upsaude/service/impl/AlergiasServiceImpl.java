@@ -1,14 +1,14 @@
 package com.upsaude.service.impl;
 
-import com.upsaude.api.request.AlergiasRequest;
-import com.upsaude.api.response.AlergiasResponse;
+import com.upsaude.api.request.alergia.AlergiasRequest;
+import com.upsaude.api.response.alergia.AlergiasResponse;
 import com.upsaude.cache.CacheKeyUtil;
-import com.upsaude.entity.Alergias;
+import com.upsaude.entity.alergia.Alergias;
 import com.upsaude.exception.BadRequestException;
 import com.upsaude.exception.InternalServerErrorException;
 import com.upsaude.exception.NotFoundException;
-import com.upsaude.repository.AlergiasRepository;
-import com.upsaude.service.AlergiasService;
+import com.upsaude.repository.alergia.AlergiasRepository;
+import com.upsaude.service.alergia.AlergiasService;
 import com.upsaude.service.support.alergias.AlergiasCreator;
 import com.upsaude.service.support.alergias.AlergiasDomainService;
 import com.upsaude.service.support.alergias.AlergiasResponseBuilder;

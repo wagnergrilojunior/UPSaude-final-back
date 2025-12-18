@@ -5,7 +5,7 @@ import com.upsaude.api.response.EnumItemResponse;
 import com.upsaude.api.response.EnumsResponse;
 import com.upsaude.exception.BadRequestException;
 import com.upsaude.exception.InternalServerErrorException;
-import com.upsaude.service.EnumsService;
+import com.upsaude.service.sistema.EnumsService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 

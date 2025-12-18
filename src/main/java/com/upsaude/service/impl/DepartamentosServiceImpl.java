@@ -1,16 +1,16 @@
 package com.upsaude.service.impl;
 
-import com.upsaude.api.request.DepartamentosRequest;
-import com.upsaude.api.response.DepartamentosResponse;
+import com.upsaude.api.request.departamento.DepartamentosRequest;
+import com.upsaude.api.response.departamento.DepartamentosResponse;
 import com.upsaude.cache.CacheKeyUtil;
-import com.upsaude.entity.Departamentos;
-import com.upsaude.entity.Tenant;
+import com.upsaude.entity.departamento.Departamentos;
+import com.upsaude.entity.sistema.Tenant;
 import com.upsaude.exception.BadRequestException;
 import com.upsaude.exception.InternalServerErrorException;
 import com.upsaude.exception.NotFoundException;
-import com.upsaude.repository.DepartamentosRepository;
-import com.upsaude.service.DepartamentosService;
-import com.upsaude.service.TenantService;
+import com.upsaude.repository.estabelecimento.departamento.DepartamentosRepository;
+import com.upsaude.service.departamento.DepartamentosService;
+import com.upsaude.service.sistema.TenantService;
 import com.upsaude.service.support.departamentos.DepartamentosCreator;
 import com.upsaude.service.support.departamentos.DepartamentosDomainService;
 import com.upsaude.service.support.departamentos.DepartamentosResponseBuilder;

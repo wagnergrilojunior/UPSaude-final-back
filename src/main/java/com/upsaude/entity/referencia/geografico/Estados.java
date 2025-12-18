@@ -1,0 +1,24 @@
+package com.upsaude.entity.referencia.geografico;
+import com.upsaude.entity.BaseEntityWithoutTenant;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Table;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+
+@Entity
+@Table(name = "estados", schema = "public")
+@Data
+@EqualsAndHashCode(callSuper = true)
+public class Estados extends BaseEntityWithoutTenant {
+
+    @Column(name = "sigla", length = 2, nullable = false)
+    private String sigla;
+
+    @Column(name = "nome", length = 100, nullable = false)
+    private String nome;
+
+    @Column(name = "codigo_ibge", length = 20)
+    private String codigoIbge;
+}
