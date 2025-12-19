@@ -22,5 +22,8 @@ public interface Cid10GruposRepository extends JpaRepository<Cid10Grupos, UUID> 
             "INNER JOIN (SELECT unnest(:catinics::text[]) as catinic, unnest(:catfims::text[]) as catfim) pairs " +
             "ON g.catinic = pairs.catinic AND g.catfim = pairs.catfim", nativeQuery = true)
     List<Cid10Grupos> findByCatinicAndCatfimPairs(@Param("catinics") List<String> catinics, @Param("catfims") List<String> catfims);
+
+    @Query(value = "SELECT g.* FROM cid10_grupos g WHERE g.catinic >= :catinic AND g.catfim <= :catfim AND g.ativo = true ORDER BY g.catinic", nativeQuery = true)
+    List<Cid10Grupos> findByIntervalo(@Param("catinic") String catinic, @Param("catfim") String catfim);
 }
 

@@ -1,7 +1,6 @@
 package com.upsaude.api.response.agendamento;
 
 import com.upsaude.api.response.sistema.notificacao.NotificacaoResponse;
-import com.upsaude.api.response.profissional.EspecialidadesMedicasResponse;
 import com.upsaude.api.response.profissional.MedicosResponse;
 import com.upsaude.api.response.profissional.ProfissionaisSaudeResponse;
 import com.upsaude.api.response.clinica.atendimento.CheckInAtendimentoResponse;
@@ -35,7 +34,6 @@ public class AgendamentoResponse {
     private PacienteResponse paciente;
     private ProfissionaisSaudeResponse profissional;
     private MedicosResponse medico;
-    private EspecialidadesMedicasResponse especialidade;
     private ConvenioResponse convenio;
     private AtendimentoResponse atendimento;
     private AgendamentoResponse agendamentoOriginal;

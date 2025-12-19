@@ -11,11 +11,10 @@ import com.upsaude.mapper.EntityMapper;
 import com.upsaude.mapper.config.MappingConfig;
 import com.upsaude.mapper.convenio.ConvenioMapper;
 import com.upsaude.mapper.paciente.PacienteMapper;
-import com.upsaude.mapper.profissional.EspecialidadesMedicasMapper;
 import com.upsaude.mapper.profissional.MedicosMapper;
 import com.upsaude.mapper.profissional.ProfissionaisSaudeMapper;
 
-@Mapper(config = MappingConfig.class, uses = {ConvenioMapper.class, EspecialidadesMedicasMapper.class, MedicosMapper.class, PacienteMapper.class, ProfissionaisSaudeMapper.class})
+@Mapper(config = MappingConfig.class, uses = {ConvenioMapper.class, MedicosMapper.class, PacienteMapper.class, ProfissionaisSaudeMapper.class})
 public interface CirurgiaMapper extends EntityMapper<Cirurgia, CirurgiaDTO> {
 
     @Mapping(target = "active", ignore = true)
@@ -29,7 +28,6 @@ public interface CirurgiaMapper extends EntityMapper<Cirurgia, CirurgiaDTO> {
     @Mapping(target = "active", ignore = true)
     @Mapping(target = "cirurgiaoPrincipal", ignore = true)
     @Mapping(target = "convenio", ignore = true)
-    @Mapping(target = "especialidade", ignore = true)
     @Mapping(target = "medicoCirurgiao", ignore = true)
     @Mapping(target = "paciente", ignore = true)
     @Mapping(target = "equipe", ignore = true)
@@ -41,7 +39,6 @@ public interface CirurgiaMapper extends EntityMapper<Cirurgia, CirurgiaDTO> {
     @Mapping(target = "active", ignore = true)
     @Mapping(target = "cirurgiaoPrincipal", ignore = true)
     @Mapping(target = "convenio", ignore = true)
-    @Mapping(target = "especialidade", ignore = true)
     @Mapping(target = "medicoCirurgiao", ignore = true)
     @Mapping(target = "paciente", ignore = true)
     @Mapping(target = "equipe", ignore = true)
@@ -51,7 +48,6 @@ public interface CirurgiaMapper extends EntityMapper<Cirurgia, CirurgiaDTO> {
     @Mapping(target = "paciente", ignore = true)
     @Mapping(target = "cirurgiaoPrincipal", ignore = true)
     @Mapping(target = "medicoCirurgiao", ignore = true)
-    @Mapping(target = "especialidade", ignore = true)
     @Mapping(target = "convenio", ignore = true)
     @Mapping(target = "equipe", ignore = true)
     CirurgiaResponse toResponse(Cirurgia entity);

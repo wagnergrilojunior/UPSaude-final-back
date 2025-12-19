@@ -1,5 +1,4 @@
 package com.upsaude.entity.clinica.cirurgia;
-import com.upsaude.entity.profissional.EspecialidadesMedicas;
 import com.upsaude.entity.profissional.Medicos;
 import com.upsaude.entity.BaseEntity;
 
@@ -63,9 +62,6 @@ public class Cirurgia extends BaseEntity {
     @JoinColumn(name = "medico_cirurgiao_id")
     private Medicos medicoCirurgiao;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "especialidade_id")
-    private EspecialidadesMedicas especialidade;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "convenio_id")

@@ -5,8 +5,6 @@ import com.upsaude.api.response.profissional.ProfissionaisSaudeResponse;
 import com.upsaude.api.response.agendamento.AgendamentoResponse;
 import com.upsaude.api.response.clinica.atendimento.AtendimentoResponse;
 import com.upsaude.api.response.paciente.PacienteResponse;
-import com.upsaude.api.response.clinica.exame.ExamesResponse;
-import com.upsaude.api.response.clinica.medicacao.ReceitasMedicasResponse;
 
 
 import java.time.OffsetDateTime;
@@ -26,8 +24,6 @@ public class HistoricoClinicoResponse {
     private ProfissionaisSaudeResponse profissional;
     private AtendimentoResponse atendimento;
     private AgendamentoResponse agendamento;
-    private ExamesResponse exame;
-    private ReceitasMedicasResponse receita;
     private CirurgiaResponse cirurgia;
     private OffsetDateTime dataRegistro;
     private String tipoRegistro;

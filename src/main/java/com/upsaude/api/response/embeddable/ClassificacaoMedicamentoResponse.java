@@ -16,7 +16,5 @@ import lombok.Setter;
 public class ClassificacaoMedicamentoResponse {
     private ClasseTerapeuticaEnum classeTerapeutica;
     private FormaFarmaceuticaEnum formaFarmaceutica;
-    private String categoria;
-    private String subcategoria;
     private String codigoAtc;
 }

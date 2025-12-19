@@ -31,9 +31,6 @@ public interface FilaEsperaRepository extends JpaRepository<FilaEspera, UUID> {
     Page<FilaEspera> findByPrioridadeOrderByDataEntradaAsc(
             PrioridadeAtendimentoEnum prioridade, Pageable pageable);
 
-    Page<FilaEspera> findByEspecialidadeIdOrderByPrioridadeDescDataEntradaAsc(
-            UUID especialidadeId, Pageable pageable);
-
     Page<FilaEspera> findByDataEntradaBetweenOrderByPrioridadeDescDataEntradaAsc(
             OffsetDateTime dataInicio, OffsetDateTime dataFim, Pageable pageable);
 
@@ -52,8 +49,6 @@ public interface FilaEsperaRepository extends JpaRepository<FilaEspera, UUID> {
     Page<FilaEspera> findByEstabelecimentoIdAndTenantIdOrderByPrioridadeDescDataEntradaAsc(UUID estabelecimentoId, UUID tenantId, Pageable pageable);
 
     Page<FilaEspera> findByPrioridadeAndTenantIdOrderByDataEntradaAsc(PrioridadeAtendimentoEnum prioridade, UUID tenantId, Pageable pageable);
-
-    Page<FilaEspera> findByEspecialidadeIdAndTenantIdOrderByPrioridadeDescDataEntradaAsc(UUID especialidadeId, UUID tenantId, Pageable pageable);
 
     Page<FilaEspera> findByDataEntradaBetweenAndTenantIdOrderByPrioridadeDescDataEntradaAsc(OffsetDateTime dataInicio, OffsetDateTime dataFim, UUID tenantId, Pageable pageable);
 

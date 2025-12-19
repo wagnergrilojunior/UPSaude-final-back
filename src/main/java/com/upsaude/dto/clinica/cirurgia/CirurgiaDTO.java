@@ -6,7 +6,6 @@ import java.time.OffsetDateTime;
 import java.util.UUID;
 import lombok.*;
 import com.upsaude.dto.convenio.ConvenioDTO;
-import com.upsaude.dto.profissional.EspecialidadesMedicasDTO;
 import com.upsaude.dto.profissional.MedicosDTO;
 import com.upsaude.dto.paciente.PacienteDTO;
 import com.upsaude.dto.profissional.ProfissionaisSaudeDTO;
@@ -24,7 +23,6 @@ public class CirurgiaDTO {
     private PacienteDTO paciente;
     private ProfissionaisSaudeDTO cirurgiaoPrincipal;
     private MedicosDTO medicoCirurgiao;
-    private EspecialidadesMedicasDTO especialidade;
     private ConvenioDTO convenio;
     private String descricao;
     private String codigoProcedimento;

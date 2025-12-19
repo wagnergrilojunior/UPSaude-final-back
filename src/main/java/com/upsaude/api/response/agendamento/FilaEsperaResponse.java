@@ -1,6 +1,5 @@
 package com.upsaude.api.response.agendamento;
 import com.upsaude.api.response.estabelecimento.EstabelecimentosResponse;
-import com.upsaude.api.response.profissional.EspecialidadesMedicasResponse;
 import com.upsaude.api.response.profissional.MedicosResponse;
 import com.upsaude.api.response.profissional.ProfissionaisSaudeResponse;
 import com.upsaude.api.response.agendamento.AgendamentoResponse;
@@ -25,7 +24,6 @@ public class FilaEsperaResponse {
     private PacienteResponse paciente;
     private ProfissionaisSaudeResponse profissional;
     private MedicosResponse medico;
-    private EspecialidadesMedicasResponse especialidade;
     private AgendamentoResponse agendamento;
     private OffsetDateTime dataEntrada;
     private LocalDate dataFimDesejada;

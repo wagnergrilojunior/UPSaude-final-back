@@ -1,6 +1,5 @@
 package com.upsaude.entity.agendamento;
 import com.upsaude.entity.sistema.notificacao.Notificacao;
-import com.upsaude.entity.profissional.EspecialidadesMedicas;
 import com.upsaude.entity.profissional.Medicos;
 import com.upsaude.entity.clinica.atendimento.CheckInAtendimento;
 import com.upsaude.entity.BaseEntity;
@@ -71,9 +70,6 @@ public class Agendamento extends BaseEntity {
     @JoinColumn(name = "medico_id")
     private Medicos medico;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "especialidade_id")
-    private EspecialidadesMedicas especialidade;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "convenio_id")

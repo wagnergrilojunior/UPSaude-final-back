@@ -17,7 +17,6 @@ public class MedicosDTO {
     private OffsetDateTime createdAt;
     private OffsetDateTime updatedAt;
     private Boolean active;
-    private EspecialidadesMedicasDTO especialidade;
     private String nomeCompleto;
     private DadosPessoaisMedicoDTO dadosPessoais;
     private RegistroProfissionalMedicoDTO registroProfissional;

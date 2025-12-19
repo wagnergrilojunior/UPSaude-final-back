@@ -21,11 +21,9 @@ public interface ProfissionaisSaudeRepository extends JpaRepository<Profissionai
     Optional<ProfissionaisSaude> findByIdAndTenant(@Param("id") UUID id, @Param("tenantId") UUID tenantId);
 
     @EntityGraph(attributePaths = {
-        "conselho",
         "enderecoProfissional",
         "enderecoProfissional.estado",
-        "enderecoProfissional.cidade",
-        "especialidades"
+        "enderecoProfissional.cidade"
     })
     @Query("SELECT p FROM ProfissionaisSaude p WHERE p.id = :id AND p.tenant.id = :tenantId")
     Optional<ProfissionaisSaude> findByIdCompletoAndTenant(@Param("id") UUID id, @Param("tenantId") UUID tenantId);
@@ -40,8 +38,6 @@ public interface ProfissionaisSaudeRepository extends JpaRepository<Profissionai
 
     @Query("SELECT p FROM ProfissionaisSaude p WHERE p.cpf = :cpf AND p.tenant.id = :tenantId")
     Optional<ProfissionaisSaude> findByCpfAndTenantId(@Param("cpf") String cpf, @Param("tenantId") UUID tenantId);
-
-    boolean existsByRegistroProfissionalAndConselhoIdAndUfRegistro(String registroProfissional, UUID conselhoId, String ufRegistro);
 
     Optional<ProfissionaisSaude> findByCpf(String cpf);
 
@@ -76,21 +72,4 @@ public interface ProfissionaisSaudeRepository extends JpaRepository<Profissionai
     boolean existsByCnsAndIdNot(String cns, UUID id);
 
     boolean existsByCpfAndIdNot(String cpf, UUID id);
-
-    @Query("SELECT p FROM ProfissionaisSaude p WHERE p.registroProfissional = :registroProfissional AND p.conselho.id = :conselhoId AND p.ufRegistro = :ufRegistro AND p.tenant = :tenant")
-    Optional<ProfissionaisSaude> findByRegistroProfissionalAndConselhoIdAndUfRegistroAndTenant(
-            @Param("registroProfissional") String registroProfissional,
-            @Param("conselhoId") UUID conselhoId,
-            @Param("ufRegistro") String ufRegistro,
-            @Param("tenant") Tenant tenant);
-
-    @Query("SELECT p FROM ProfissionaisSaude p WHERE p.registroProfissional = :registroProfissional AND p.conselho.id = :conselhoId AND p.ufRegistro = :ufRegistro AND p.tenant.id = :tenantId")
-    Optional<ProfissionaisSaude> findByRegistroProfissionalAndConselhoIdAndUfRegistroAndTenantId(
-            @Param("registroProfissional") String registroProfissional,
-            @Param("conselhoId") UUID conselhoId,
-            @Param("ufRegistro") String ufRegistro,
-            @Param("tenantId") UUID tenantId);
-
-    Optional<ProfissionaisSaude> findByRegistroProfissionalAndConselhoIdAndUfRegistro(
-            String registroProfissional, UUID conselhoId, String ufRegistro);
 }

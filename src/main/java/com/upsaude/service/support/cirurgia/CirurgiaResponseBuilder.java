@@ -18,7 +18,6 @@ public class CirurgiaResponseBuilder {
             if (entity.getPaciente() != null) Hibernate.initialize(entity.getPaciente());
             if (entity.getCirurgiaoPrincipal() != null) Hibernate.initialize(entity.getCirurgiaoPrincipal());
             if (entity.getMedicoCirurgiao() != null) Hibernate.initialize(entity.getMedicoCirurgiao());
-            if (entity.getEspecialidade() != null) Hibernate.initialize(entity.getEspecialidade());
             if (entity.getConvenio() != null) Hibernate.initialize(entity.getConvenio());
             if (entity.getEquipe() != null) Hibernate.initialize(entity.getEquipe());
         }

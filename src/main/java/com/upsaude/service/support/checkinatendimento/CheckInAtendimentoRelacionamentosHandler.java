@@ -6,8 +6,9 @@ import com.upsaude.entity.clinica.atendimento.Atendimento;
 import com.upsaude.entity.clinica.atendimento.CheckInAtendimento;
 import com.upsaude.entity.paciente.Paciente;
 import com.upsaude.entity.sistema.Tenant;
-import com.upsaude.service.support.agendamento.AgendamentoTenantEnforcer;
 import com.upsaude.service.support.atendimento.AtendimentoTenantEnforcer;
+import com.upsaude.repository.agendamento.AgendamentoRepository;
+import com.upsaude.exception.NotFoundException;
 import com.upsaude.service.support.paciente.PacienteTenantEnforcer;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -19,7 +20,7 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class CheckInAtendimentoRelacionamentosHandler {
 
-    private final AgendamentoTenantEnforcer agendamentoTenantEnforcer;
+    private final AgendamentoRepository agendamentoRepository;
     private final PacienteTenantEnforcer pacienteTenantEnforcer;
     private final AtendimentoTenantEnforcer atendimentoTenantEnforcer;
 
@@ -28,8 +29,14 @@ public class CheckInAtendimentoRelacionamentosHandler {
 
         entity.setTenant(Objects.requireNonNull(tenant, "tenant é obrigatório"));
 
-        Agendamento agendamento = agendamentoTenantEnforcer.validarAcesso(request.getAgendamento(), tenantId);
-        entity.setAgendamento(agendamento);
+        Agendamento agendamento = null;
+        if (request.getAgendamento() != null) {
+            agendamento = agendamentoRepository.findByIdAndTenant(request.getAgendamento(), tenantId)
+                    .orElseThrow(() -> new NotFoundException("Agendamento não encontrado com ID: " + request.getAgendamento()));
+            entity.setAgendamento(agendamento);
+        } else {
+            entity.setAgendamento(null);
+        }
 
         Paciente paciente = pacienteTenantEnforcer.validarAcesso(request.getPaciente(), tenantId);
         entity.setPaciente(paciente);
@@ -41,7 +48,7 @@ public class CheckInAtendimentoRelacionamentosHandler {
             entity.setAtendimento(null);
         }
 
-        if (agendamento.getEstabelecimento() != null) {
+        if (agendamento != null && agendamento.getEstabelecimento() != null) {
             entity.setEstabelecimento(agendamento.getEstabelecimento());
         } else if (entity.getAtendimento() != null && entity.getAtendimento().getEstabelecimento() != null) {
             entity.setEstabelecimento(entity.getAtendimento().getEstabelecimento());

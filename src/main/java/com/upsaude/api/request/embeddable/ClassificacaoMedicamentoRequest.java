@@ -26,12 +26,6 @@ public class ClassificacaoMedicamentoRequest {
     @JsonDeserialize(using = FormaFarmaceuticaEnumDeserializer.class)
     private FormaFarmaceuticaEnum formaFarmaceutica;
 
-    @Size(max = 100, message = "Categoria deve ter no máximo 100 caracteres")
-    private String categoria;
-
-    @Size(max = 100, message = "Subcategoria deve ter no máximo 100 caracteres")
-    private String subcategoria;
-
     @Size(max = 50, message = "Código ATC deve ter no máximo 50 caracteres")
     private String codigoAtc;
 }

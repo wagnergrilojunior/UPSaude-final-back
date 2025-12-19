@@ -20,7 +20,6 @@ public class ConsultasResponseBuilder {
             Hibernate.initialize(entity.getPaciente());
             Hibernate.initialize(entity.getMedico());
             Hibernate.initialize(entity.getProfissionalSaude());
-            Hibernate.initialize(entity.getEspecialidade());
             Hibernate.initialize(entity.getConvenio());
             Hibernate.initialize(entity.getEstabelecimento());
         }

@@ -15,8 +15,6 @@ public class HistoricoClinicoRequest {
     private UUID profissional;
     private UUID atendimento;
     private UUID agendamento;
-    private UUID exame;
-    private UUID receita;
     private UUID cirurgia;
     private OffsetDateTime dataRegistro;
     private String tipoRegistro;

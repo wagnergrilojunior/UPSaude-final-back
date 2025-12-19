@@ -20,9 +20,6 @@ public class ProfissionaisSaudeValidationService {
         if (!StringUtils.hasText(request.getRegistroProfissional())) {
             throw new BadRequestException("Registro profissional é obrigatório");
         }
-        if (request.getConselho() == null) {
-            throw new BadRequestException("Conselho profissional é obrigatório");
-        }
     }
 
     public void validarUnicidadeParaCriacao(ProfissionaisSaudeRequest request, ProfissionaisSaudeRepository repository, UUID tenantId) {
@@ -30,7 +27,7 @@ public class ProfissionaisSaudeValidationService {
         validarEmailUnico(null, request.getEmail(), repository, tenantId);
         validarRgUnico(null, request.getRg(), repository, tenantId);
         validarCnsUnico(null, request.getCns(), repository, tenantId);
-        validarRegistroProfissionalUnico(null, request.getRegistroProfissional(), request.getConselho(), request.getUfRegistro(), repository, tenantId);
+        // Conselho removido - ConselhosProfissionais foi deletado
     }
 
     public void validarUnicidadeParaAtualizacao(UUID id, ProfissionaisSaudeRequest request, ProfissionaisSaudeRepository repository, UUID tenantId) {
@@ -38,7 +35,7 @@ public class ProfissionaisSaudeValidationService {
         validarEmailUnico(id, request.getEmail(), repository, tenantId);
         validarRgUnico(id, request.getRg(), repository, tenantId);
         validarCnsUnico(id, request.getCns(), repository, tenantId);
-        validarRegistroProfissionalUnico(id, request.getRegistroProfissional(), request.getConselho(), request.getUfRegistro(), repository, tenantId);
+        // Conselho removido - ConselhosProfissionais foi deletado
     }
 
     public void sanitizarFlags(ProfissionaisSaudeRequest request) {
@@ -125,27 +122,5 @@ public class ProfissionaisSaudeValidationService {
         }
     }
 
-    private void validarRegistroProfissionalUnico(UUID profissionalId, String registroProfissional, UUID conselhoId, String ufRegistro, ProfissionaisSaudeRepository repository, UUID tenantId) {
-        if (!StringUtils.hasText(registroProfissional) || conselhoId == null || !StringUtils.hasText(ufRegistro)) {
-            return;
-        }
-
-        Optional<ProfissionaisSaude> profissionalExistente = repository.findByRegistroProfissionalAndConselhoIdAndUfRegistroAndTenantId(registroProfissional, conselhoId, ufRegistro, tenantId);
-
-        if (profissionalExistente.isPresent()) {
-            ProfissionaisSaude profissionalEncontrado = profissionalExistente.get();
-
-            if (profissionalId != null && !profissionalEncontrado.getId().equals(profissionalId)) {
-                throw new BadRequestException(
-                        String.format("Já existe um profissional cadastrado com o registro profissional '%s', conselho e UF '%s' informados",
-                                registroProfissional, ufRegistro));
-            }
-
-            if (profissionalId == null) {
-                throw new BadRequestException(
-                        String.format("Já existe um profissional cadastrado com o registro profissional '%s', conselho e UF '%s' informados",
-                                registroProfissional, ufRegistro));
-            }
-        }
-    }
+    // Método validarRegistroProfissionalUnico removido - ConselhosProfissionais foi deletado
 }

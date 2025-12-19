@@ -10,11 +10,10 @@ import com.upsaude.entity.agendamento.FilaEspera;
 import com.upsaude.mapper.config.MappingConfig;
 import com.upsaude.mapper.estabelecimento.EstabelecimentosMapper;
 import com.upsaude.mapper.paciente.PacienteMapper;
-import com.upsaude.mapper.profissional.EspecialidadesMedicasMapper;
 import com.upsaude.mapper.profissional.MedicosMapper;
 import com.upsaude.mapper.profissional.ProfissionaisSaudeMapper;
 
-@Mapper(config = MappingConfig.class, uses = {AgendamentoMapper.class, EspecialidadesMedicasMapper.class, MedicosMapper.class, PacienteMapper.class, ProfissionaisSaudeMapper.class, EstabelecimentosMapper.class})
+@Mapper(config = MappingConfig.class, uses = {AgendamentoMapper.class, MedicosMapper.class, PacienteMapper.class, ProfissionaisSaudeMapper.class, EstabelecimentosMapper.class})
 public interface FilaEsperaMapper {
 
     @Mapping(target = "active", ignore = true)
@@ -26,7 +25,6 @@ public interface FilaEsperaMapper {
     @Mapping(target = "active", ignore = true)
     @Mapping(target = "estabelecimento", ignore = true)
     @Mapping(target = "agendamento", ignore = true)
-    @Mapping(target = "especialidade", ignore = true)
     @Mapping(target = "medico", ignore = true)
     @Mapping(target = "paciente", ignore = true)
     @Mapping(target = "profissional", ignore = true)
@@ -38,7 +36,6 @@ public interface FilaEsperaMapper {
     @Mapping(target = "active", ignore = true)
     @Mapping(target = "estabelecimento", ignore = true)
     @Mapping(target = "agendamento", ignore = true)
-    @Mapping(target = "especialidade", ignore = true)
     @Mapping(target = "medico", ignore = true)
     @Mapping(target = "paciente", ignore = true)
     @Mapping(target = "profissional", ignore = true)

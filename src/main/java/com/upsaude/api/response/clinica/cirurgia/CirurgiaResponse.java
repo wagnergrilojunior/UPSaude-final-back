@@ -1,7 +1,6 @@
 package com.upsaude.api.response.clinica.cirurgia;
 
 import com.upsaude.api.response.clinica.cirurgia.EquipeCirurgicaResponse;
-import com.upsaude.api.response.profissional.EspecialidadesMedicasResponse;
 import com.upsaude.api.response.profissional.MedicosResponse;
 import com.upsaude.api.response.profissional.ProfissionaisSaudeResponse;
 import com.upsaude.api.response.paciente.PacienteResponse;
@@ -33,7 +32,6 @@ public class CirurgiaResponse {
     private PacienteResponse paciente;
     private ProfissionaisSaudeResponse cirurgiaoPrincipal;
     private MedicosResponse medicoCirurgiao;
-    private EspecialidadesMedicasResponse especialidade;
     private ConvenioResponse convenio;
     private String descricao;
     private String codigoProcedimento;

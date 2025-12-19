@@ -143,7 +143,7 @@ public class EnumsServiceImpl implements EnumsService {
                 "SeveridadeAlergiaEnum", "SexoEnum", "SituacaoFamiliarEnum", "StatusAgendamentoEnum",
                 "StatusAtendimentoEnum", "StatusAtivoEnum", "StatusCirurgiaEnum", "StatusConsultaEnum",
                 "StatusDiagnosticoEnum", "StatusFuncionamentoEnum", "StatusManutencaoEnum",
-                "StatusPacienteEnum", "StatusPreNatalEnum", "StatusReceitaEnum",
+                "StatusPacienteEnum", "StatusReceitaEnum",
                 "StatusRegistroMedicoEnum", "TipoAlergiaEnum",
                 "TipoAtendimentoEnum", "TipoAtendimentoPreferencialEnum", "TipoAtividadeProfissionalEnum",
                 "TipoCnsEnum", "TipoConsultaEnum", "TipoControleMedicamentoEnum", "TipoConvenioEnum",

@@ -1,5 +1,4 @@
 package com.upsaude.entity.profissional;
-import com.upsaude.entity.profissional.EspecialidadesMedicas;
 import com.upsaude.entity.BaseEntityWithoutEstabelecimento;
 
 import com.upsaude.entity.profissional.Medicos;
@@ -19,9 +18,6 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinTable;
-import jakarta.persistence.ManyToMany;
-import jakarta.persistence.NamedAttributeNode;
-import jakarta.persistence.NamedEntityGraph;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
@@ -45,13 +41,6 @@ import java.util.List;
            @Index(name = "idx_medicos_crm_uf", columnList = "crm_uf"),
            @Index(name = "idx_medicos_nome", columnList = "nome_completo")
        })
-@NamedEntityGraph(
-    name = "Medicos.listagemCompleta",
-    attributeNodes = {
-        @NamedAttributeNode("especialidades")
-
-    }
-)
 @Data
 @EqualsAndHashCode(callSuper = true)
 public class Medicos extends BaseEntityWithoutEstabelecimento {
@@ -63,21 +52,7 @@ public class Medicos extends BaseEntityWithoutEstabelecimento {
         this.contato = new ContatoMedico();
         this.enderecos = new ArrayList<>();
         this.medicosEstabelecimentos = new ArrayList<>();
-        this.especialidades = new ArrayList<>();
     }
-
-    @ManyToMany(fetch = FetchType.LAZY)
-    @JoinTable(
-        name = "medicos_especialidades",
-        schema = "public",
-        joinColumns = @JoinColumn(name = "medico_id"),
-        inverseJoinColumns = @JoinColumn(name = "especialidade_id"),
-        indexes = {
-            @Index(name = "idx_medicos_especialidades_medico", columnList = "medico_id"),
-            @Index(name = "idx_medicos_especialidades_especialidade", columnList = "especialidade_id")
-        }
-    )
-    private List<EspecialidadesMedicas> especialidades = new ArrayList<>();
 
     @NotBlank(message = "Nome completo é obrigatório")
     @Size(max = 255, message = "Nome completo deve ter no máximo 255 caracteres")
@@ -134,28 +109,6 @@ public class Medicos extends BaseEntityWithoutEstabelecimento {
         if (medicosEstabelecimentos == null) {
             medicosEstabelecimentos = new ArrayList<>();
         }
-        if (especialidades == null) {
-            especialidades = new ArrayList<>();
-        }
-    }
-
-    public void addEspecialidade(EspecialidadesMedicas especialidade) {
-        if (especialidade == null) {
-            return;
-        }
-        if (especialidades == null) {
-            especialidades = new ArrayList<>();
-        }
-        if (!especialidades.contains(especialidade)) {
-            especialidades.add(especialidade);
-        }
-    }
-
-    public void removeEspecialidade(EspecialidadesMedicas especialidade) {
-        if (especialidade == null || especialidades == null) {
-            return;
-        }
-        especialidades.remove(especialidade);
     }
 
     public void addMedicoEstabelecimento(MedicoEstabelecimento medicoEstabelecimento) {

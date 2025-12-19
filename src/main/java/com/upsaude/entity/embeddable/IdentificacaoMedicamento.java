@@ -22,7 +22,6 @@ public class IdentificacaoMedicamento {
         this.catmatCodigo = "";
         this.codigoAnvisa = "";
         this.codigoTuss = "";
-        this.codigoSigtap = "";
     }
 
     @NotBlank(message = "Princípio ativo é obrigatório")
@@ -54,8 +53,4 @@ public class IdentificacaoMedicamento {
     @Size(max = 50, message = "Código TUSS deve ter no máximo 50 caracteres")
     @Column(name = "codigo_tuss", length = 50)
     private String codigoTuss;
-
-    @Size(max = 50, message = "Código SIGTAP deve ter no máximo 50 caracteres")
-    @Column(name = "codigo_sigtap", length = 50)
-    private String codigoSigtap;
 }

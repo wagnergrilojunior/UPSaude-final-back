@@ -19,7 +19,6 @@ import com.upsaude.enums.CondicaoMoradiaEnum;
 import com.upsaude.enums.EscolaridadeEnum;
 import com.upsaude.enums.EstadoCivilEnum;
 import com.upsaude.enums.FormaFarmaceuticaEnum;
-import com.upsaude.enums.FrequenciaMedicacaoEnum;
 import com.upsaude.enums.GravidadeDoencaEnum;
 import com.upsaude.enums.IdentidadeGeneroEnum;
 import com.upsaude.enums.ModalidadeConvenioEnum;
@@ -40,7 +39,6 @@ import com.upsaude.enums.StatusDiagnosticoEnum;
 import com.upsaude.enums.StatusFuncionamentoEnum;
 import com.upsaude.enums.StatusManutencaoEnum;
 import com.upsaude.enums.StatusPacienteEnum;
-import com.upsaude.enums.StatusPreNatalEnum;
 import com.upsaude.enums.StatusReceitaEnum;
 import com.upsaude.enums.StatusRegistroMedicoEnum;
 import com.upsaude.enums.TipoAlergiaEnum;
@@ -275,21 +273,7 @@ public class EnumsController {
         }
     }
 
-    @GetMapping("/frequencia-medicacao")
-    @Operation(summary = "Listar valores de FrequenciaMedicacaoEnum")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Valores do enum retornados com sucesso",
-                    content = @Content(schema = @Schema(implementation = EnumInfoResponse.class)))
-    })
-    public ResponseEntity<EnumInfoResponse> listarFrequenciaMedicacao() {
-        log.debug("REQUEST GET /v1/enums/frequencia-medicacao");
-        try {
-            return ResponseEntity.ok(converterEnum(FrequenciaMedicacaoEnum.class, FrequenciaMedicacaoEnum.values()));
-        } catch (Exception ex) {
-            log.error("Erro inesperado ao listar FrequenciaMedicacaoEnum", ex);
-            throw ex;
-        }
-    }
+    // FrequenciaMedicacaoEnum removido - Medicacao foi deletada
 
     @GetMapping("/gravidade-doenca")
     @Operation(summary = "Listar valores de GravidadeDoencaEnum")
@@ -611,21 +595,6 @@ public class EnumsController {
         }
     }
 
-    @GetMapping("/status-pre-natal")
-    @Operation(summary = "Listar valores de StatusPreNatalEnum")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Valores do enum retornados com sucesso",
-                    content = @Content(schema = @Schema(implementation = EnumInfoResponse.class)))
-    })
-    public ResponseEntity<EnumInfoResponse> listarStatusPreNatal() {
-        log.debug("REQUEST GET /v1/enums/status-pre-natal");
-        try {
-            return ResponseEntity.ok(converterEnum(StatusPreNatalEnum.class, StatusPreNatalEnum.values()));
-        } catch (Exception ex) {
-            log.error("Erro inesperado ao listar StatusPreNatalEnum", ex);
-            throw ex;
-        }
-    }
 
     @GetMapping("/status-receita")
     @Operation(summary = "Listar valores de StatusReceitaEnum")
