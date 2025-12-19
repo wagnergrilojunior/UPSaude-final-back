@@ -111,5 +111,19 @@ public class Cid10SubcategoriasServiceImpl implements Cid10SubcategoriasService 
             throw new InternalServerErrorException("Erro ao excluir subcategoria CID-10", e);
         }
     }
+
+    @Override
+    @Transactional(readOnly = true)
+    public java.util.List<Cid10Subcategorias> listarPorCategoria(String categoriaCat) {
+        if (categoriaCat == null || categoriaCat.trim().isEmpty()) {
+            throw new BadRequestException("Código da categoria é obrigatório");
+        }
+        try {
+            return repository.findByCategoriaCatAndActiveTrue(categoriaCat);
+        } catch (DataAccessException e) {
+            log.error("Erro ao listar subcategorias CID-10 por categoria. categoriaCat: {}", categoriaCat, e);
+            throw new InternalServerErrorException("Erro ao listar subcategorias CID-10 por categoria", e);
+        }
+    }
 }
 

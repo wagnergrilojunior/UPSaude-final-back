@@ -19,5 +19,4 @@ public class IdentificacaoMedicamentoResponse {
     private String catmatCodigo;
     private String codigoAnvisa;
     private String codigoTuss;
-    private String codigoSigtap;
 }

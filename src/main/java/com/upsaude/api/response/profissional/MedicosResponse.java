@@ -29,8 +29,6 @@ public class MedicosResponse {
     private OffsetDateTime updatedAt;
     private Boolean active;
 
-    @Builder.Default
-    private List<EspecialidadesMedicasResponse> especialidades = new ArrayList<>();
 
     private String nomeCompleto;
     private DadosPessoaisMedicoResponse dadosPessoais;

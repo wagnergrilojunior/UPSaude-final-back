@@ -19,9 +19,8 @@ public interface FilaEsperaService {
     Page<FilaEsperaResponse> listar(Pageable pageable,
                                    UUID pacienteId,
                                    UUID profissionalId,
-                                   UUID estabelecimentoId,
-                                   UUID especialidadeId,
-                                   PrioridadeAtendimentoEnum prioridade,
+                                  UUID estabelecimentoId,
+                                  PrioridadeAtendimentoEnum prioridade,
                                    OffsetDateTime dataInicio,
                                    OffsetDateTime dataFim);
 

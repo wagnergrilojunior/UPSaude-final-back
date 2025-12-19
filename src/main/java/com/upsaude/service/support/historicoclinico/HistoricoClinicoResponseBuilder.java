@@ -21,8 +21,6 @@ public class HistoricoClinicoResponseBuilder {
             if (entity.getProfissional() != null) Hibernate.initialize(entity.getProfissional());
             if (entity.getAtendimento() != null) Hibernate.initialize(entity.getAtendimento());
             if (entity.getAgendamento() != null) Hibernate.initialize(entity.getAgendamento());
-            if (entity.getExame() != null) Hibernate.initialize(entity.getExame());
-            if (entity.getReceita() != null) Hibernate.initialize(entity.getReceita());
             if (entity.getCirurgia() != null) Hibernate.initialize(entity.getCirurgia());
         }
         return mapper.toResponse(entity);

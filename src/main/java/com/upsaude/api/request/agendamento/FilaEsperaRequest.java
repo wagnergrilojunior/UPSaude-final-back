@@ -19,7 +19,6 @@ public class FilaEsperaRequest {
     private UUID paciente;
     private UUID profissional;
     private UUID medico;
-    private UUID especialidade;
     private UUID agendamento;
     private OffsetDateTime dataEntrada;
     private LocalDate dataFimDesejada;

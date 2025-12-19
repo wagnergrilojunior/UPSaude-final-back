@@ -17,5 +17,7 @@ public interface Cid10SubcategoriasService {
     Cid10Subcategorias atualizar(UUID id, Cid10Subcategorias entity);
 
     void excluir(UUID id);
+
+    java.util.List<Cid10Subcategorias> listarPorCategoria(String categoriaCat);
 }
 

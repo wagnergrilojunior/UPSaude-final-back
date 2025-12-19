@@ -1,14 +1,12 @@
 package com.upsaude.service.support.medico;
 
 import com.upsaude.api.request.profissional.MedicosRequest;
-import com.upsaude.entity.profissional.EspecialidadesMedicas;
 import com.upsaude.entity.estabelecimento.Estabelecimentos;
 import com.upsaude.entity.estabelecimento.MedicoEstabelecimento;
 import com.upsaude.entity.profissional.Medicos;
 import com.upsaude.entity.sistema.Tenant;
 import com.upsaude.enums.TipoVinculoProfissionalEnum;
 import com.upsaude.exception.NotFoundException;
-import com.upsaude.repository.profissional.EspecialidadesMedicasRepository;
 import com.upsaude.repository.estabelecimento.EstabelecimentosRepository;
 import com.upsaude.repository.estabelecimento.MedicoEstabelecimentoRepository;
 import lombok.RequiredArgsConstructor;
@@ -16,9 +14,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.time.OffsetDateTime;
-import java.util.ArrayList;
 import java.util.LinkedHashSet;
-import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
@@ -29,51 +25,16 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class MedicoRelacionamentosHandler {
 
-    private final EspecialidadesMedicasRepository especialidadesMedicasRepository;
     private final EstabelecimentosRepository estabelecimentosRepository;
     private final MedicoEstabelecimentoRepository medicoEstabelecimentoRepository;
 
     public Medicos processarRelacionamentos(Medicos medico, MedicosRequest request, Tenant tenant) {
         log.debug("Processando relacionamentos do médico");
 
-        processarEspecialidades(medico, request);
         processarEstabelecimentos(medico, request, tenant);
 
         log.debug("Relacionamentos processados. JPA gerenciará persistência automaticamente.");
         return medico;
-    }
-
-    private void processarEspecialidades(Medicos medico, MedicosRequest request) {
-        if (request.getEspecialidades() != null && !request.getEspecialidades().isEmpty()) {
-            log.debug("Processando {} especialidade(s) para o médico", request.getEspecialidades().size());
-            List<EspecialidadesMedicas> especialidades = new ArrayList<>();
-
-            Set<UUID> especialidadesIdsUnicos = new LinkedHashSet<>(request.getEspecialidades());
-
-            if (especialidadesIdsUnicos.size() != request.getEspecialidades().size()) {
-                log.warn("Lista de especialidades contém IDs duplicados. Removendo duplicatas.");
-            }
-
-            for (UUID especialidadeId : especialidadesIdsUnicos) {
-                if (especialidadeId == null) {
-                    log.warn("ID de especialidade nulo encontrado na lista. Ignorando.");
-                    continue;
-                }
-
-                EspecialidadesMedicas especialidade = especialidadesMedicasRepository
-                        .findById(especialidadeId)
-                        .orElseThrow(() -> new NotFoundException(
-                                "Especialidade médica não encontrada com ID: " + especialidadeId));
-                especialidades.add(especialidade);
-                log.debug("Especialidade {} associada ao médico", especialidadeId);
-            }
-
-            medico.setEspecialidades(especialidades);
-            log.debug("{} especialidade(s) associada(s) ao médico com sucesso", especialidades.size());
-        } else {
-            medico.setEspecialidades(new ArrayList<>());
-            log.debug("Nenhuma especialidade fornecida. Lista de especialidades será limpa.");
-        }
     }
 
     private void processarEstabelecimentos(Medicos medico, MedicosRequest request, Tenant tenant) {

@@ -23,7 +23,6 @@ import com.upsaude.importacao.sigtap.file.SigtapFileParser;
 import com.upsaude.importacao.sigtap.file.SigtapLayoutDefinition;
 import com.upsaude.importacao.sigtap.file.SigtapLayoutReader;
 import com.upsaude.mapper.sigtap.SigtapEntityMapper;
-import com.upsaude.repository.referencia.sigtap.SigtapCidRepository;
 import com.upsaude.repository.referencia.sigtap.SigtapCompatibilidadeRepository;
 import com.upsaude.repository.referencia.sigtap.SigtapComponenteRedeRepository;
 import com.upsaude.repository.referencia.sigtap.SigtapDescricaoDetalheRepository;
@@ -95,7 +94,6 @@ public class SigtapFileImportServiceImpl {
     private final SigtapTipoLeitoRepository tipoLeitoRepository;
     private final SigtapServicoRepository servicoRepository;
     private final SigtapServicoClassificacaoRepository servicoClassificacaoRepository;
-    private final SigtapCidRepository cidRepository;
     private final SigtapOcupacaoRepository ocupacaoRepository;
     private final SigtapHabilitacaoRepository habilitacaoRepository;
     private final SigtapGrupoHabilitacaoRepository grupoHabilitacaoRepository;
@@ -143,7 +141,6 @@ public class SigtapFileImportServiceImpl {
             SigtapTipoLeitoRepository tipoLeitoRepository,
             SigtapServicoRepository servicoRepository,
             SigtapServicoClassificacaoRepository servicoClassificacaoRepository,
-            SigtapCidRepository cidRepository,
             SigtapOcupacaoRepository ocupacaoRepository,
             SigtapHabilitacaoRepository habilitacaoRepository,
             SigtapGrupoHabilitacaoRepository grupoHabilitacaoRepository,
@@ -187,7 +184,6 @@ public class SigtapFileImportServiceImpl {
         this.tipoLeitoRepository = tipoLeitoRepository;
         this.servicoRepository = servicoRepository;
         this.servicoClassificacaoRepository = servicoClassificacaoRepository;
-        this.cidRepository = cidRepository;
         this.ocupacaoRepository = ocupacaoRepository;
         this.habilitacaoRepository = habilitacaoRepository;
         this.grupoHabilitacaoRepository = grupoHabilitacaoRepository;
@@ -238,7 +234,6 @@ public class SigtapFileImportServiceImpl {
             importarArquivo(competenciaPath, "tb_tipo_leito.txt", competencia, result, this::importarTiposLeito);
             importarArquivo(competenciaPath, "tb_servico.txt", competencia, result, this::importarServicos);
             importarArquivo(competenciaPath, "tb_servico_classificacao.txt", competencia, result, this::importarServicosClassificacao);
-            importarArquivo(competenciaPath, "tb_cid.txt", competencia, result, this::importarCids);
             importarArquivo(competenciaPath, "tb_ocupacao.txt", competencia, result, this::importarOcupacoes);
             importarArquivo(competenciaPath, "tb_habilitacao.txt", competencia, result, this::importarHabilitacoes);
             importarArquivo(competenciaPath, "tb_grupo_habilitacao.txt", competencia, result, this::importarGruposHabilitacao);
@@ -405,11 +400,6 @@ public class SigtapFileImportServiceImpl {
                 servicoClassificacaoRepository::saveAll);
     }
 
-    @Transactional
-    private int importarCids(ImportContext context) {
-        return importarComBatch(context, fields -> entityMapper.mapToCid(fields),
-                cidRepository::saveAll);
-    }
 
     @Transactional
     private int importarOcupacoes(ImportContext context) {

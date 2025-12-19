@@ -41,7 +41,6 @@ public class ProfissionaisSaudeDTO {
     private NacionalidadeEnum nacionalidade;
     private String naturalidade;
     private String registroProfissional;
-    private ConselhosProfissionaisDTO conselho;
     private String ufRegistro;
     private OffsetDateTime dataEmissaoRegistro;
     private OffsetDateTime dataValidadeRegistro;

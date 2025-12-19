@@ -8,8 +8,6 @@ import java.util.UUID;
 
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.upsaude.api.response.alergia.AlergiasPacienteResponse;
-import com.upsaude.api.response.clinica.doencas.DoencasPacienteResponse;
-import com.upsaude.api.response.clinica.medicacao.MedicacaoPacienteResponse;
 import com.upsaude.api.response.convenio.ConvenioResponse;
 import com.upsaude.api.response.deficiencia.DeficienciasPacienteResponse;
 import com.upsaude.api.response.geral.EnderecoResponse;
@@ -127,8 +125,7 @@ public class PacienteResponse {
     private LGPDConsentimentoResponse lgpdConsentimento;
     private IntegracaoGovResponse integracaoGov;
 
-    @Builder.Default
-    private List<DoencasPacienteResponse> doencas = new ArrayList<>();
+    // DoencasPacienteResponse removido - Doencas foi deletada
 
     @Builder.Default
     private List<AlergiasPacienteResponse> alergias = new ArrayList<>();
@@ -136,6 +133,5 @@ public class PacienteResponse {
     @Builder.Default
     private List<DeficienciasPacienteResponse> deficiencias = new ArrayList<>();
 
-    @Builder.Default
-    private List<MedicacaoPacienteResponse> medicacoes = new ArrayList<>();
+    // MedicacaoPacienteResponse removido - Medicacao foi deletada
 }

@@ -17,5 +17,7 @@ public interface Cid10GruposService {
     Cid10Grupos atualizar(UUID id, Cid10Grupos entity);
 
     void excluir(UUID id);
+
+    java.util.List<Cid10Grupos> listarPorIntervalo(String catinic, String catfim);
 }
 

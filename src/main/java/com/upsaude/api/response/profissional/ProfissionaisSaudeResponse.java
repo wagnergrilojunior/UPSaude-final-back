@@ -1,10 +1,6 @@
 package com.upsaude.api.response.profissional;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
 import java.util.UUID;
 
 import com.upsaude.api.response.geral.EnderecoResponse;
@@ -50,7 +46,6 @@ public class ProfissionaisSaudeResponse {
     private NacionalidadeEnum nacionalidade;
     private String naturalidade;
     private String registroProfissional;
-    private ConselhosProfissionaisResponse conselho;
     private String ufRegistro;
     private OffsetDateTime dataEmissaoRegistro;
     private OffsetDateTime dataValidadeRegistro;
@@ -66,11 +61,6 @@ public class ProfissionaisSaudeResponse {
     private String emailInstitucional;
     private EnderecoResponse enderecoProfissional;
 
-    @Builder.Default
-    private List<EspecialidadesMedicasResponse> especialidades = new ArrayList<>();
-
-    @Builder.Default
-    private Set<HistoricoHabilitacaoProfissionalResponse> historicoHabilitacao = new HashSet<>();
 
     private String observacoes;
 }

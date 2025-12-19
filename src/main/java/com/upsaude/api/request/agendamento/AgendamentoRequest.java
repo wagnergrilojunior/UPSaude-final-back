@@ -1,21 +1,21 @@
 package com.upsaude.api.request.agendamento;
 
-import com.upsaude.entity.paciente.Paciente;
+import java.time.OffsetDateTime;
+import java.util.UUID;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.upsaude.enums.PrioridadeAtendimentoEnum;
 import com.upsaude.enums.StatusAgendamentoEnum;
 import com.upsaude.util.converter.PrioridadeAtendimentoEnumDeserializer;
 import com.upsaude.util.converter.StatusAgendamentoEnumDeserializer;
+
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotNull;
-import java.time.OffsetDateTime;
-import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import io.swagger.v3.oas.annotations.media.Schema;
 
 @Getter
 @Setter

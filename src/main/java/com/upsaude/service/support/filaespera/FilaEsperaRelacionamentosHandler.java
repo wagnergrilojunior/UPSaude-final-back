@@ -1,15 +1,14 @@
 package com.upsaude.service.support.filaespera;
 
 import com.upsaude.api.request.agendamento.FilaEsperaRequest;
-import com.upsaude.entity.profissional.EspecialidadesMedicas;
 import com.upsaude.entity.estabelecimento.Estabelecimentos;
+import com.upsaude.entity.agendamento.Agendamento;
 import com.upsaude.entity.agendamento.FilaEspera;
 import com.upsaude.entity.sistema.Tenant;
 import com.upsaude.exception.BadRequestException;
 import com.upsaude.exception.NotFoundException;
-import com.upsaude.repository.profissional.EspecialidadesMedicasRepository;
-import com.upsaude.service.support.agendamento.AgendamentoTenantEnforcer;
 import com.upsaude.service.support.estabelecimentos.EstabelecimentosTenantEnforcer;
+import com.upsaude.repository.agendamento.AgendamentoRepository;
 import com.upsaude.service.support.medico.MedicoTenantEnforcer;
 import com.upsaude.service.support.paciente.PacienteTenantEnforcer;
 import com.upsaude.service.support.profissionaissaude.ProfissionaisSaudeTenantEnforcer;
@@ -26,8 +25,7 @@ public class FilaEsperaRelacionamentosHandler {
     private final PacienteTenantEnforcer pacienteTenantEnforcer;
     private final ProfissionaisSaudeTenantEnforcer profissionaisSaudeTenantEnforcer;
     private final MedicoTenantEnforcer medicoTenantEnforcer;
-    private final AgendamentoTenantEnforcer agendamentoTenantEnforcer;
-    private final EspecialidadesMedicasRepository especialidadesMedicasRepository;
+    private final AgendamentoRepository agendamentoRepository;
 
     public FilaEspera processarRelacionamentos(FilaEsperaRequest request, FilaEspera entity, UUID tenantId, Tenant tenant) {
         if (tenantId == null || tenant == null || tenant.getId() == null || !tenantId.equals(tenant.getId())) {
@@ -54,18 +52,13 @@ public class FilaEsperaRelacionamentosHandler {
         }
 
         if (request.getAgendamento() != null) {
-            entity.setAgendamento(agendamentoTenantEnforcer.validarAcesso(request.getAgendamento(), tenantId));
+            Agendamento agendamento = agendamentoRepository.findByIdAndTenant(request.getAgendamento(), tenantId)
+                    .orElseThrow(() -> new NotFoundException("Agendamento não encontrado com ID: " + request.getAgendamento()));
+            entity.setAgendamento(agendamento);
         } else {
             entity.setAgendamento(null);
         }
 
-        if (request.getEspecialidade() != null) {
-            EspecialidadesMedicas especialidade = especialidadesMedicasRepository.findById(request.getEspecialidade())
-                .orElseThrow(() -> new NotFoundException("Especialidade médica não encontrada com ID: " + request.getEspecialidade()));
-            entity.setEspecialidade(especialidade);
-        } else {
-            entity.setEspecialidade(null);
-        }
 
         return entity;
     }

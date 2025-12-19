@@ -28,10 +28,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
-import jakarta.persistence.JoinTable;
-import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToMany;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
@@ -46,10 +43,6 @@ import lombok.EqualsAndHashCode;
 
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
 
 @Entity
 @Table(name = "profissionais_saude", schema = "public",
@@ -69,8 +62,6 @@ import java.util.Set;
 public class ProfissionaisSaude extends BaseEntity {
 
     public ProfissionaisSaude() {
-        this.especialidades = new ArrayList<>();
-        this.historicoHabilitacao = new HashSet<>();
     }
 
     @Column(name = "nome_completo", nullable = false, length = 255)
@@ -140,10 +131,6 @@ public class ProfissionaisSaude extends BaseEntity {
     @Size(max = 20, message = "Registro deve ter no máximo 20 caracteres")
     private String registroProfissional;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "conselho_id", nullable = false)
-    @NotNull(message = "Conselho profissional é obrigatório")
-    private ConselhosProfissionais conselho;
 
     @Column(name = "uf_registro", length = 2)
     @Pattern(regexp = "^[A-Z]{2}$", message = "UF do registro deve ter 2 letras maiúsculas")
@@ -163,14 +150,6 @@ public class ProfissionaisSaude extends BaseEntity {
     @Column(name = "tipo_profissional")
     private TipoProfissionalEnum tipoProfissional;
 
-    @ManyToMany(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
-    @JoinTable(
-        name = "profissionais_saude_especialidades",
-        schema = "public",
-        joinColumns = @JoinColumn(name = "profissional_saude_id"),
-        inverseJoinColumns = @JoinColumn(name = "especialidade_id")
-    )
-    private List<EspecialidadesMedicas> especialidades = new ArrayList<>();
 
     @Column(name = "cns", length = 15)
     @Size(max = 15, message = "CNS deve ter no máximo 15 caracteres")
@@ -210,42 +189,8 @@ public class ProfissionaisSaude extends BaseEntity {
     @JoinColumn(name = "endereco_profissional_id")
     private Endereco enderecoProfissional;
 
-    @OneToMany(mappedBy = "profissional", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<HistoricoHabilitacaoProfissional> historicoHabilitacao = new HashSet<>();
 
     @Column(name = "observacoes", columnDefinition = "TEXT")
     private String observacoes;
 
-    @PrePersist
-    @PreUpdate
-    public void validateCollections() {
-        if (especialidades == null) {
-            especialidades = new ArrayList<>();
-        }
-        if (historicoHabilitacao == null) {
-            historicoHabilitacao = new HashSet<>();
-        }
-    }
-
-    public void addHistoricoHabilitacao(HistoricoHabilitacaoProfissional historico) {
-        if (historico == null) {
-            return;
-        }
-        if (historicoHabilitacao == null) {
-            historicoHabilitacao = new HashSet<>();
-        }
-        if (!historicoHabilitacao.contains(historico)) {
-            historicoHabilitacao.add(historico);
-            historico.setProfissional(this);
-        }
-    }
-
-    public void removeHistoricoHabilitacao(HistoricoHabilitacaoProfissional historico) {
-        if (historico == null || historicoHabilitacao == null) {
-            return;
-        }
-        if (historicoHabilitacao.remove(historico)) {
-            historico.setProfissional(null);
-        }
-    }
 }

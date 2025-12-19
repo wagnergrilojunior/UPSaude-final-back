@@ -5,24 +5,16 @@ import org.mapstruct.MappingTarget;
 
 import com.upsaude.api.request.agendamento.AgendamentoRequest;
 import com.upsaude.api.response.agendamento.AgendamentoResponse;
-import com.upsaude.dto.agendamento.AgendamentoDTO;
 import com.upsaude.entity.agendamento.Agendamento;
-import com.upsaude.mapper.EntityMapper;
 import com.upsaude.mapper.clinica.atendimento.AtendimentoMapper;
 import com.upsaude.mapper.config.MappingConfig;
 import com.upsaude.mapper.convenio.ConvenioMapper;
 import com.upsaude.mapper.paciente.PacienteMapper;
-import com.upsaude.mapper.profissional.EspecialidadesMedicasMapper;
 import com.upsaude.mapper.profissional.MedicosMapper;
 import com.upsaude.mapper.profissional.ProfissionaisSaudeMapper;
 
-@Mapper(config = MappingConfig.class, uses = {AtendimentoMapper.class, ConvenioMapper.class, EspecialidadesMedicasMapper.class, MedicosMapper.class, PacienteMapper.class, ProfissionaisSaudeMapper.class})
-public interface AgendamentoMapper extends EntityMapper<Agendamento, AgendamentoDTO> {
-
-    @Mapping(target = "active", ignore = true)
-    Agendamento toEntity(AgendamentoDTO dto);
-
-    AgendamentoDTO toDTO(Agendamento entity);
+@Mapper(config = MappingConfig.class, uses = {AtendimentoMapper.class, ConvenioMapper.class, MedicosMapper.class, PacienteMapper.class, ProfissionaisSaudeMapper.class})
+public interface AgendamentoMapper {
 
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
@@ -31,7 +23,6 @@ public interface AgendamentoMapper extends EntityMapper<Agendamento, Agendamento
     @Mapping(target = "agendamentoOriginal", ignore = true)
     @Mapping(target = "atendimento", ignore = true)
     @Mapping(target = "convenio", ignore = true)
-    @Mapping(target = "especialidade", ignore = true)
     @Mapping(target = "medico", ignore = true)
     @Mapping(target = "paciente", ignore = true)
     @Mapping(target = "profissional", ignore = true)
@@ -47,7 +38,6 @@ public interface AgendamentoMapper extends EntityMapper<Agendamento, Agendamento
     @Mapping(target = "agendamentoOriginal", ignore = true)
     @Mapping(target = "atendimento", ignore = true)
     @Mapping(target = "convenio", ignore = true)
-    @Mapping(target = "especialidade", ignore = true)
     @Mapping(target = "medico", ignore = true)
     @Mapping(target = "paciente", ignore = true)
     @Mapping(target = "profissional", ignore = true)
@@ -63,7 +53,6 @@ public interface AgendamentoMapper extends EntityMapper<Agendamento, Agendamento
     @Mapping(target = "paciente", ignore = true)
     @Mapping(target = "profissional", ignore = true)
     @Mapping(target = "medico", ignore = true)
-    @Mapping(target = "especialidade", ignore = true)
     @Mapping(target = "convenio", ignore = true)
     @Mapping(target = "atendimento", ignore = true)
     AgendamentoResponse toResponse(Agendamento entity);

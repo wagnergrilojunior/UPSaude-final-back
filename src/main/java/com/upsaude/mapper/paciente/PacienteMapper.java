@@ -10,8 +10,6 @@ import com.upsaude.api.response.paciente.PacienteSimplificadoResponse;
 import com.upsaude.dto.paciente.PacienteDTO;
 import com.upsaude.entity.paciente.Paciente;
 import com.upsaude.mapper.EntityMapper;
-import com.upsaude.mapper.clinica.doencas.DoencasPacienteMapper;
-import com.upsaude.mapper.clinica.medicacao.MedicacaoPacienteMapper;
 import com.upsaude.mapper.config.MappingConfig;
 import com.upsaude.mapper.convenio.ConvenioMapper;
 import com.upsaude.mapper.paciente.alergia.AlergiasPacienteMapper;
@@ -20,7 +18,7 @@ import com.upsaude.mapper.sistema.LGPDConsentimentoMapper;
 import com.upsaude.mapper.sistema.integracao.IntegracaoGovMapper;
 import com.upsaude.repository.projection.PacienteSimplificadoProjection;
 
-@Mapper(config = MappingConfig.class, uses = {ConvenioMapper.class, DadosClinicosBasicosMapper.class, DadosSociodemograficosMapper.class, IntegracaoGovMapper.class, LGPDConsentimentoMapper.class, ResponsavelLegalMapper.class, DoencasPacienteMapper.class, AlergiasPacienteMapper.class, DeficienciasPacienteMapper.class, MedicacaoPacienteMapper.class})
+@Mapper(config = MappingConfig.class, uses = {ConvenioMapper.class, DadosClinicosBasicosMapper.class, DadosSociodemograficosMapper.class, IntegracaoGovMapper.class, LGPDConsentimentoMapper.class, ResponsavelLegalMapper.class, AlergiasPacienteMapper.class, DeficienciasPacienteMapper.class})
 public interface PacienteMapper extends EntityMapper<Paciente, PacienteDTO> {
 
     @Mapping(target = "active", ignore = true)
@@ -39,10 +37,8 @@ public interface PacienteMapper extends EntityMapper<Paciente, PacienteDTO> {
     @Mapping(target = "lgpdConsentimento", ignore = true)
     @Mapping(target = "responsavelLegal", ignore = true)
     @Mapping(target = "enderecos", ignore = true)
-    @Mapping(target = "doencas", ignore = true)
     @Mapping(target = "alergias", ignore = true)
     @Mapping(target = "deficiencias", ignore = true)
-    @Mapping(target = "medicacoes", ignore = true)
     Paciente fromRequest(PacienteRequest request);
 
     @Mapping(target = "id", ignore = true)
@@ -56,10 +52,8 @@ public interface PacienteMapper extends EntityMapper<Paciente, PacienteDTO> {
     @Mapping(target = "lgpdConsentimento", ignore = true)
     @Mapping(target = "responsavelLegal", ignore = true)
     @Mapping(target = "enderecos", ignore = true)
-    @Mapping(target = "doencas", ignore = true)
     @Mapping(target = "alergias", ignore = true)
     @Mapping(target = "deficiencias", ignore = true)
-    @Mapping(target = "medicacoes", ignore = true)
     void updateFromRequest(PacienteRequest request, @MappingTarget Paciente entity);
 
     PacienteResponse toResponse(Paciente entity);

@@ -19,7 +19,6 @@ public class FilaEsperaResponseBuilder {
             if (entity.getPaciente() != null) Hibernate.initialize(entity.getPaciente());
             if (entity.getProfissional() != null) Hibernate.initialize(entity.getProfissional());
             if (entity.getMedico() != null) Hibernate.initialize(entity.getMedico());
-            if (entity.getEspecialidade() != null) Hibernate.initialize(entity.getEspecialidade());
             if (entity.getAgendamento() != null) Hibernate.initialize(entity.getAgendamento());
         }
         return mapper.toResponse(entity);

@@ -10,6 +10,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.RestTemplate;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -80,6 +81,18 @@ public class SupabaseAuthService {
                     response.getStatusCode(), response.getBody());
             throw new UnauthorizedException("Falha na autenticação");
             
+        } catch (HttpServerErrorException e) {
+            log.error("Erro do servidor Supabase ao autenticar usuário - Status: {}, Body: {}, URL: {}", 
+                    e.getStatusCode(), e.getResponseBodyAsString(), url);
+            
+            String errorMessage = "Serviço de autenticação temporariamente indisponível";
+            if (e.getStatusCode() == HttpStatus.BAD_GATEWAY || 
+                e.getStatusCode() == HttpStatus.SERVICE_UNAVAILABLE ||
+                e.getStatusCode() == HttpStatus.GATEWAY_TIMEOUT) {
+                errorMessage = "Serviço de autenticação temporariamente indisponível. Tente novamente em alguns instantes.";
+            }
+            
+            throw new RuntimeException(errorMessage + " (Status: " + e.getStatusCode() + ")", e);
         } catch (HttpClientErrorException e) {
             log.error("Erro HTTP ao autenticar usuário - Status: {}, Body: {}, URL: {}", 
                     e.getStatusCode(), e.getResponseBodyAsString(), url);

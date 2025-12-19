@@ -4,7 +4,7 @@ import java.util.Map;
 
 import org.springframework.stereotype.Component;
 
-import com.upsaude.entity.referencia.sigtap.SigtapCid;
+import com.upsaude.entity.referencia.cid.Cid10Subcategorias;
 import com.upsaude.entity.referencia.sigtap.SigtapComponenteRede;
 import com.upsaude.entity.referencia.sigtap.SigtapDescricao;
 import com.upsaude.entity.referencia.sigtap.SigtapDescricaoDetalhe;
@@ -45,7 +45,7 @@ import com.upsaude.entity.referencia.sigtap.SigtapSubgrupo;
 import com.upsaude.entity.referencia.sigtap.SigtapTipoLeito;
 import com.upsaude.entity.referencia.sigtap.SigtapTuss;
 import com.upsaude.importacao.sigtap.file.SigtapFileParser;
-import com.upsaude.repository.referencia.sigtap.SigtapCidRepository;
+import com.upsaude.repository.referencia.cid.Cid10SubcategoriasRepository;
 import com.upsaude.repository.referencia.sigtap.SigtapComponenteRedeRepository;
 import com.upsaude.repository.referencia.sigtap.SigtapDetalheRepository;
 import com.upsaude.repository.referencia.sigtap.SigtapFinanciamentoRepository;
@@ -79,7 +79,7 @@ public class SigtapEntityMapper {
     private final SigtapFormaOrganizacaoRepository formaOrganizacaoRepository;
     private final SigtapProcedimentoRepository procedimentoRepository;
     private final SigtapFinanciamentoRepository financiamentoRepository;
-    private final SigtapCidRepository cidRepository;
+    private final Cid10SubcategoriasRepository cid10SubcategoriasRepository;
     private final SigtapOcupacaoRepository ocupacaoRepository;
     private final SigtapHabilitacaoRepository habilitacaoRepository;
     private final SigtapGrupoHabilitacaoRepository grupoHabilitacaoRepository;
@@ -102,7 +102,7 @@ public class SigtapEntityMapper {
             SigtapFormaOrganizacaoRepository formaOrganizacaoRepository,
             SigtapProcedimentoRepository procedimentoRepository,
             SigtapFinanciamentoRepository financiamentoRepository,
-            SigtapCidRepository cidRepository,
+            Cid10SubcategoriasRepository cid10SubcategoriasRepository,
             SigtapOcupacaoRepository ocupacaoRepository,
             SigtapHabilitacaoRepository habilitacaoRepository,
             SigtapGrupoHabilitacaoRepository grupoHabilitacaoRepository,
@@ -123,7 +123,7 @@ public class SigtapEntityMapper {
         this.formaOrganizacaoRepository = formaOrganizacaoRepository;
         this.procedimentoRepository = procedimentoRepository;
         this.financiamentoRepository = financiamentoRepository;
-        this.cidRepository = cidRepository;
+        this.cid10SubcategoriasRepository = cid10SubcategoriasRepository;
         this.ocupacaoRepository = ocupacaoRepository;
         this.habilitacaoRepository = habilitacaoRepository;
         this.grupoHabilitacaoRepository = grupoHabilitacaoRepository;
@@ -232,16 +232,6 @@ public class SigtapEntityMapper {
 
     // ========== MAPEAMENTOS DE TABELAS DE REFER?NCIA ==========
 
-    public SigtapCid mapToCid(Map<String, String> fields) {
-        SigtapCid cid = new SigtapCid();
-        cid.setCodigoOficial(fields.get("CO_CID"));
-        cid.setNome(limparString(fields.get("NO_CID")));
-        cid.setTipoAgravo(fields.get("TP_AGRAVO"));
-        cid.setTipoSexo(fields.get("TP_SEXO"));
-        cid.setTipoEstadio(fields.get("TP_ESTADIO"));
-        cid.setValorCamposIrradiados(parser.parseInteger(fields.get("VL_CAMPOS_IRRADIADOS")));
-        return cid;
-    }
 
     public SigtapOcupacao mapToOcupacao(Map<String, String> fields) {
         SigtapOcupacao ocupacao = new SigtapOcupacao();
@@ -432,13 +422,13 @@ public class SigtapEntityMapper {
         String codigoProcedimento = fields.get("CO_PROCEDIMENTO");
         String codigoCid = fields.get("CO_CID");
         SigtapProcedimento procedimento = procedimentoRepository.findByCodigoOficial(codigoProcedimento)
-                .orElseThrow(() -> new IllegalArgumentException("Procedimento n?o encontrado: " + codigoProcedimento));
-        SigtapCid cid = cidRepository.findByCodigoOficial(codigoCid)
-                .orElseThrow(() -> new IllegalArgumentException("CID n?o encontrado: " + codigoCid));
+                .orElseThrow(() -> new IllegalArgumentException("Procedimento não encontrado: " + codigoProcedimento));
+        Cid10Subcategorias cid10Subcategoria = cid10SubcategoriasRepository.findBySubcat(codigoCid)
+                .orElseThrow(() -> new IllegalArgumentException("CID-10 Subcategoria não encontrada: " + codigoCid));
 
         SigtapProcedimentoCid procCid = new SigtapProcedimentoCid();
         procCid.setProcedimento(procedimento);
-        procCid.setCid(cid);
+        procCid.setCid10Subcategoria(cid10Subcategoria);
         procCid.setPrincipal(parser.parseBoolean(fields.get("ST_PRINCIPAL")));
         procCid.setCompetenciaInicial(fields.getOrDefault("DT_COMPETENCIA", competencia));
         return procCid;

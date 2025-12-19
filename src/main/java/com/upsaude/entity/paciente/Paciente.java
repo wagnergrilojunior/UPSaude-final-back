@@ -4,9 +4,6 @@ import com.upsaude.entity.paciente.DadosClinicosBasicos;
 import com.upsaude.entity.paciente.ResponsavelLegal;
 import com.upsaude.entity.BaseEntityWithoutTenant;
 
-import com.upsaude.entity.clinica.doencas.DoencasPaciente;
-import com.upsaude.entity.clinica.medicacao.Medicacao;
-import com.upsaude.entity.clinica.medicacao.MedicacaoPaciente;
 import com.upsaude.entity.paciente.alergia.AlergiasPaciente;
 import com.upsaude.entity.paciente.deficiencia.DeficienciasPaciente;
 import com.upsaude.entity.convenio.Convenio;
@@ -110,40 +107,12 @@ import java.util.List;
         }
     ),
     @NamedEntityGraph(
-        name = "Paciente.comDoencas",
-        attributeNodes = {
-            @NamedAttributeNode(value = "doencas", subgraph = "doencasSubgraph")
-        },
-        subgraphs = {
-            @NamedSubgraph(name = "doencasSubgraph", type = DoencasPaciente.class, attributeNodes = {
-                @NamedAttributeNode("doenca")
-            })
-        }
-    ),
-    @NamedEntityGraph(
-        name = "Paciente.comMedicacoes",
-        attributeNodes = {
-            @NamedAttributeNode(value = "medicacoes", subgraph = "medicacoesSubgraph")
-        },
-        subgraphs = {
-            @NamedSubgraph(name = "medicacoesSubgraph", type = MedicacaoPaciente.class, attributeNodes = {
-                @NamedAttributeNode(value = "medicacao", subgraph = "medicacaoDetalhes")
-            }),
-            @NamedSubgraph(name = "medicacaoDetalhes", type = Medicacao.class, attributeNodes = {
-                @NamedAttributeNode("identificacao"),
-                @NamedAttributeNode("fabricanteEntity")
-            })
-        }
-    ),
-    @NamedEntityGraph(
         name = "Paciente.completo",
         attributeNodes = {
             @NamedAttributeNode("convenio"),
             @NamedAttributeNode("enderecos"),
-            @NamedAttributeNode(value = "doencas", subgraph = "doencasSubgraph"),
             @NamedAttributeNode(value = "alergias", subgraph = "alergiasSubgraph"),
             @NamedAttributeNode("deficiencias"),
-            @NamedAttributeNode(value = "medicacoes", subgraph = "medicacoesSubgraph"),
             @NamedAttributeNode("dadosSociodemograficos"),
             @NamedAttributeNode("dadosClinicosBasicos"),
             @NamedAttributeNode("responsavelLegal"),
@@ -153,16 +122,6 @@ import java.util.List;
         subgraphs = {
             @NamedSubgraph(name = "alergiasSubgraph", type = AlergiasPaciente.class, attributeNodes = {
                 @NamedAttributeNode("alergia")
-            }),
-            @NamedSubgraph(name = "doencasSubgraph", type = DoencasPaciente.class, attributeNodes = {
-                @NamedAttributeNode("doenca")
-            }),
-            @NamedSubgraph(name = "medicacoesSubgraph", type = MedicacaoPaciente.class, attributeNodes = {
-                @NamedAttributeNode(value = "medicacao", subgraph = "medicacaoDetalhes")
-            }),
-            @NamedSubgraph(name = "medicacaoDetalhes", type = Medicacao.class, attributeNodes = {
-                @NamedAttributeNode("identificacao"),
-                @NamedAttributeNode("fabricanteEntity")
             })
         }
     ),
@@ -171,10 +130,8 @@ import java.util.List;
         attributeNodes = {
             @NamedAttributeNode("convenio"),
             @NamedAttributeNode("enderecos"),
-            @NamedAttributeNode("doencas"),
             @NamedAttributeNode("alergias"),
-            @NamedAttributeNode("deficiencias"),
-            @NamedAttributeNode("medicacoes")
+            @NamedAttributeNode("deficiencias")
         }
     )
 })
@@ -184,10 +141,8 @@ public class Paciente extends BaseEntityWithoutTenant {
 
     public Paciente() {
         this.enderecos = new ArrayList<>();
-        this.doencas = new ArrayList<>();
         this.alergias = new ArrayList<>();
         this.deficiencias = new ArrayList<>();
-        this.medicacoes = new ArrayList<>();
     }
 
     @Column(name = "nome_completo", nullable = false, length = 255)
@@ -350,10 +305,7 @@ public class Paciente extends BaseEntityWithoutTenant {
     @OneToOne(mappedBy = "paciente", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
     private IntegracaoGov integracaoGov;
 
-    @OneToMany(mappedBy = "paciente", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
-    @org.hibernate.annotations.BatchSize(size = 50)
-    @org.hibernate.annotations.Fetch(org.hibernate.annotations.FetchMode.SUBSELECT)
-    private List<DoencasPaciente> doencas = new ArrayList<>();
+    // DoencasPaciente removido - Doencas foi deletada
 
     @OneToMany(mappedBy = "paciente", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
     @org.hibernate.annotations.BatchSize(size = 50)
@@ -365,10 +317,7 @@ public class Paciente extends BaseEntityWithoutTenant {
     @org.hibernate.annotations.Fetch(org.hibernate.annotations.FetchMode.SUBSELECT)
     private List<DeficienciasPaciente> deficiencias = new ArrayList<>();
 
-    @OneToMany(mappedBy = "paciente", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
-    @org.hibernate.annotations.BatchSize(size = 50)
-    @org.hibernate.annotations.Fetch(org.hibernate.annotations.FetchMode.SUBSELECT)
-    private List<MedicacaoPaciente> medicacoes = new ArrayList<>();
+    // MedicacaoPaciente removido - Medicacao foi deletada
 
     @PrePersist
     @PreUpdate
@@ -376,39 +325,11 @@ public class Paciente extends BaseEntityWithoutTenant {
         if (enderecos == null) {
             enderecos = new ArrayList<>();
         }
-        if (doencas == null) {
-            doencas = new ArrayList<>();
-        }
         if (alergias == null) {
             alergias = new ArrayList<>();
         }
         if (deficiencias == null) {
             deficiencias = new ArrayList<>();
-        }
-        if (medicacoes == null) {
-            medicacoes = new ArrayList<>();
-        }
-    }
-
-    public void addDoenca(DoencasPaciente doenca) {
-        if (doenca == null) {
-            return;
-        }
-        if (doencas == null) {
-            doencas = new ArrayList<>();
-        }
-        if (!doencas.contains(doenca)) {
-            doencas.add(doenca);
-            doenca.setPaciente(this);
-        }
-    }
-
-    public void removeDoenca(DoencasPaciente doenca) {
-        if (doenca == null || doencas == null) {
-            return;
-        }
-        if (doencas.remove(doenca)) {
-            doenca.setPaciente(null);
         }
     }
 
@@ -453,28 +374,6 @@ public class Paciente extends BaseEntityWithoutTenant {
         }
         if (deficiencias.remove(deficiencia)) {
             deficiencia.setPaciente(null);
-        }
-    }
-
-    public void addMedicacao(MedicacaoPaciente medicacao) {
-        if (medicacao == null) {
-            return;
-        }
-        if (medicacoes == null) {
-            medicacoes = new ArrayList<>();
-        }
-        if (!medicacoes.contains(medicacao)) {
-            medicacoes.add(medicacao);
-            medicacao.setPaciente(this);
-        }
-    }
-
-    public void removeMedicacao(MedicacaoPaciente medicacao) {
-        if (medicacao == null || medicacoes == null) {
-            return;
-        }
-        if (medicacoes.remove(medicacao)) {
-            medicacao.setPaciente(null);
         }
     }
 }

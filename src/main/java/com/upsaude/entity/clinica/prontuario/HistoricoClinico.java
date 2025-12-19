@@ -5,8 +5,6 @@ import com.upsaude.entity.BaseEntity;
 import com.upsaude.entity.agendamento.Agendamento;
 import com.upsaude.entity.clinica.atendimento.Atendimento;
 import com.upsaude.entity.clinica.cirurgia.Cirurgia;
-import com.upsaude.entity.clinica.exame.Exames;
-import com.upsaude.entity.clinica.medicacao.ReceitasMedicas;
 import com.upsaude.entity.paciente.Paciente;
 import com.upsaude.entity.profissional.ProfissionaisSaude;
 
@@ -50,14 +48,6 @@ public class HistoricoClinico extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "agendamento_id")
     private Agendamento agendamento;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "exame_id")
-    private Exames exame;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "receita_id")
-    private ReceitasMedicas receita;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "cirurgia_id")

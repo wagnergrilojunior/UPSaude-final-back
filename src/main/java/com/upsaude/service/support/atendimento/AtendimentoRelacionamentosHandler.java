@@ -9,13 +9,11 @@ import com.upsaude.api.request.clinica.atendimento.AtendimentoRequest;
 import com.upsaude.entity.clinica.atendimento.Atendimento;
 import com.upsaude.entity.convenio.Convenio;
 import com.upsaude.entity.paciente.Paciente;
-import com.upsaude.entity.profissional.EspecialidadesMedicas;
 import com.upsaude.entity.profissional.ProfissionaisSaude;
 import com.upsaude.entity.profissional.equipe.EquipeSaude;
 import com.upsaude.entity.sistema.Tenant;
 import com.upsaude.exception.NotFoundException;
 import com.upsaude.repository.convenio.ConvenioRepository;
-import com.upsaude.repository.profissional.EspecialidadesMedicasRepository;
 import com.upsaude.service.support.equipesaude.EquipeSaudeTenantEnforcer;
 import com.upsaude.service.support.paciente.PacienteTenantEnforcer;
 import com.upsaude.service.support.profissionaissaude.ProfissionaisSaudeTenantEnforcer;
@@ -30,7 +28,6 @@ public class AtendimentoRelacionamentosHandler {
     private final ProfissionaisSaudeTenantEnforcer profissionaisSaudeTenantEnforcer;
     private final EquipeSaudeTenantEnforcer equipeSaudeTenantEnforcer;
     private final ConvenioRepository convenioRepository;
-    private final EspecialidadesMedicasRepository especialidadesMedicasRepository;
 
     public void resolver(Atendimento entity, AtendimentoRequest request, UUID tenantId, Tenant tenant) {
         if (request == null) return;
@@ -47,14 +44,6 @@ public class AtendimentoRelacionamentosHandler {
             entity.setProfissional(profissional);
         }
 
-        if (request.getEspecialidade() != null) {
-            UUID especialidadeId = Objects.requireNonNull(request.getEspecialidade(), "especialidade");
-            EspecialidadesMedicas especialidade = especialidadesMedicasRepository.findById(especialidadeId)
-                .orElseThrow(() -> new NotFoundException("Especialidade não encontrada com ID: " + especialidadeId));
-            entity.setEspecialidade(especialidade);
-        } else {
-            entity.setEspecialidade(null);
-        }
 
         if (request.getEquipeSaude() != null) {
             EquipeSaude equipeSaude = equipeSaudeTenantEnforcer.validarAcesso(request.getEquipeSaude(), tenantId);

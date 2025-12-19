@@ -108,5 +108,19 @@ public class Cid10CategoriasServiceImpl implements Cid10CategoriasService {
             throw new InternalServerErrorException("Erro ao excluir categoria CID-10", e);
         }
     }
+
+    @Override
+    @Transactional(readOnly = true)
+    public java.util.List<Cid10Categorias> listarPorIntervalo(String catinic, String catfim) {
+        if (catinic == null || catfim == null) {
+            throw new BadRequestException("Intervalo (catinic e catfim) são obrigatórios");
+        }
+        try {
+            return repository.findByIntervalo(catinic, catfim);
+        } catch (DataAccessException e) {
+            log.error("Erro ao listar categorias CID-10 por intervalo. catinic: {}, catfim: {}", catinic, catfim, e);
+            throw new InternalServerErrorException("Erro ao listar categorias CID-10 por intervalo", e);
+        }
+    }
 }
 

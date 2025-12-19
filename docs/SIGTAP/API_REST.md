@@ -19,7 +19,7 @@ Authorization: Bearer <token>
 
 Importa todos os arquivos de uma competência específica.
 
-**Endpoint**: `POST /api/sigtap/import/{competencia}`
+**Endpoint**: `POST /v1/sigtap/import/{competencia}`
 
 **Parâmetros**:
 - `competencia` (path): Competência no formato AAAAMM (ex: `202512`)
@@ -58,20 +58,20 @@ Importa todos os arquivos de uma competência específica.
 }
 ```
 
-**Exemplo de Requisiçãoo**:
+**Exemplo de Requisição**:
 ```bash
-curl -X POST "http://localhost:8080/api/sigtap/import/202512" \
+curl -X POST "http://localhost:8080/v1/sigtap/import/202512" \
   -H "Authorization: Bearer <token>"
 ```
 
-### Listar Arquivos Disponéveis
+### Listar Arquivos Disponíveis
 
 Lista os arquivos disponíveis para importação de uma competência.
 
-**Endpoint**: `GET /api/sigtap/import/{competencia}/arquivos`
+**Endpoint**: `GET /v1/sigtap/import/arquivos/{competencia}`
 
-**Parémetros**:
-- `competencia` (path): Competéncia no formato AAAAMM
+**Parâmetros**:
+- `competencia` (path): Competência no formato AAAAMM
 
 **Resposta** (200):
 ```json
@@ -95,143 +95,558 @@ Lista os arquivos disponíveis para importação de uma competência.
 }
 ```
 
-**Exemplo de Requisiçãoo**:
+**Exemplo de Requisição**:
 ```bash
-curl -X GET "http://localhost:8080/api/sigtap/import/202512/arquivos" \
+curl -X GET "http://localhost:8080/v1/sigtap/import/arquivos/202512" \
   -H "Authorization: Bearer <token>"
 ```
 
-## 📋 Consultas (Futuro)
+## 📋 Consultas
 
-> **Nota**: Endpoints de consulta ainda não foram implementados. Esta seção descreve a estrutura planejada.
+### 1. Procedimentos (Medicamentos e Procedimentos)
 
-### Buscar Procedimento
+#### Pesquisar Procedimentos
 
-**Endpoint**: `GET /api/sigtap/procedimentos/{codigo}`
+Busca procedimentos com paginação e filtros opcionais.
 
-**Parémetros**:
-- `codigo` (path): Cdigo do procedimento (ex: `03.01.01.001-0`)
+**Endpoint**: `GET /v1/sigtap/procedimentos`
 
-**Resposta Esperada**:
-```json
-{
-  "id": "uuid",
-  "codigoOficial": "03.01.01.001-0",
-  "nome": "CONSULTA MÉDICA EM ATENÇÃO BÁSICA",
-  "competenciaInicial": "202512",
-  "competenciaFinal": null,
-  "sexoPermitido": "I",
-  "idadeMinima": null,
-  "idadeMaxima": null,
-  "valorServicoHospitalar": 0.00,
-  "valorServicoAmbulatorial": 45.00,
-  "valorServicoProfissional": 30.00,
-  "formaOrganizacao": {
-    "codigoOficial": "03.01.01",
-    "nome": "Consulta Mdica"
-  }
-}
+**Parâmetros de Query**:
+- `q` (opcional): Termo de busca em código ou nome
+- `grupoCodigo` (opcional): Código do grupo para filtrar (ex: "06" para medicamentos)
+- `subgrupoCodigo` (opcional): Código do subgrupo para filtrar (deve ser usado junto com grupoCodigo)
+- `competencia` (opcional): Competência no formato AAAAMM (ex: 202512)
+- `page` (opcional): Número da página (padrão: 0)
+- `size` (opcional): Tamanho da página (padrão: 20)
+- `sort` (opcional): Ordenação (ex: `codigoOficial,asc`)
+
+**Exemplo de Requisição - Buscar todos os procedimentos**:
+```bash
+curl -X GET "http://localhost:8080/v1/sigtap/procedimentos?q=0301010010&competencia=202512&page=0&size=20" \
+  -H "Authorization: Bearer <token>"
 ```
 
-### Listar Procedimentos
+**Exemplo de Requisição - Buscar todos os medicamentos (grupo 06)**:
+```bash
+curl -X GET "http://localhost:8080/v1/sigtap/procedimentos?grupoCodigo=06&page=0&size=20" \
+  -H "Authorization: Bearer <token>"
+```
 
-**Endpoint**: `GET /api/sigtap/procedimentos`
+**Exemplo de Requisição - Buscar medicamentos de um subgrupo específico**:
+```bash
+curl -X GET "http://localhost:8080/v1/sigtap/procedimentos?grupoCodigo=06&subgrupoCodigo=01&page=0&size=20" \
+  -H "Authorization: Bearer <token>"
+```
 
-**Parémetros de Query**:
-- `page` (opcional): Nmero da pégina (padréo: 0)
-- `size` (opcional): Tamanho da pégina (padréo: 20)
-- `nome` (opcional): Filtrar por nome (busca parcial)
-- `competencia` (opcional): Filtrar por competência
-
-**Resposta Esperada**:
+**Exemplo de Resposta** (200):
 ```json
 {
   "content": [
     {
-      "id": "uuid",
-      "codigoOficial": "03.01.01.001-0",
-      "nome": "CONSULTA MÉDICA EM ATENÇÃO BÁSICA"
+      "id": "550e8400-e29b-41d4-a716-446655440000",
+      "codigoOficial": "0301010010",
+      "nome": "CONSULTA MÉDICA EM ATENDIMENTO AMBULATORIAL",
+      "competenciaInicial": "202501",
+      "competenciaFinal": null,
+      "grupoCodigo": "03",
+      "grupoNome": "PROCEDIMENTOS CLINICOS",
+      "subgrupoCodigo": "0301",
+      "subgrupoNome": "CONSULTA MEDICA",
+      "formaOrganizacaoCodigo": "01",
+      "formaOrganizacaoNome": "AMBULATORIAL",
+      "sexoPermitido": "AMBOS",
+      "idadeMinima": null,
+      "idadeMaxima": null,
+      "valorServicoAmbulatorial": 23.50,
+      "valorServicoHospitalar": null,
+      "valorServicoProfissional": null
     }
   ],
-  "page": {
-    "number": 0,
-    "size": 20,
-    "totalElements": 4957,
-    "totalPages": 248
+  "pageable": {
+    "pageNumber": 0,
+    "pageSize": 20
+  },
+  "totalElements": 4957,
+  "totalPages": 248
+}
+```
+
+#### Obter Procedimento Detalhado
+
+Retorna um procedimento específico com seus detalhes completos.
+
+**Endpoint**: `GET /v1/sigtap/procedimentos/{codigo}`
+
+**Parâmetros**:
+- `codigo` (path): Código do procedimento
+- `competencia` (query, opcional): Competência no formato AAAAMM
+
+**Exemplo de Requisição**:
+```bash
+curl -X GET "http://localhost:8080/v1/sigtap/procedimentos/0301010010?competencia=202512" \
+  -H "Authorization: Bearer <token>"
+```
+
+**Exemplo de Resposta** (200):
+```json
+{
+  "procedimento": {
+    "id": "550e8400-e29b-41d4-a716-446655440000",
+    "codigoOficial": "0301010010",
+    "nome": "CONSULTA MÉDICA EM ATENDIMENTO AMBULATORIAL",
+    "competenciaInicial": "202501",
+    "competenciaFinal": null,
+    "grupoCodigo": "03",
+    "grupoNome": "PROCEDIMENTOS CLINICOS",
+    "subgrupoCodigo": "0301",
+    "subgrupoNome": "CONSULTA MEDICA",
+    "formaOrganizacaoCodigo": "01",
+    "formaOrganizacaoNome": "AMBULATORIAL",
+    "sexoPermitido": "AMBOS",
+    "idadeMinima": null,
+    "idadeMaxima": null,
+    "mediaDiasInternacao": null,
+    "quantidadeMaximaDias": null,
+    "limiteMaximo": null,
+    "valorServicoHospitalar": null,
+    "valorServicoAmbulatorial": 23.50,
+    "valorServicoProfissional": null
+  },
+  "detalhe": {
+    "id": "660e8400-e29b-41d4-a716-446655440001",
+    "procedimentoId": "550e8400-e29b-41d4-a716-446655440000",
+    "competenciaInicial": "202501",
+    "competenciaFinal": null
   }
 }
 ```
 
-### Buscar CID de um Procedimento
+### 2. Serviços/Exames
 
-**Endpoint**: `GET /api/sigtap/procedimentos/{codigo}/cids`
+#### Pesquisar Serviços/Exames
 
-**Resposta Esperada**:
+Busca serviços/exames com paginação.
+
+**Endpoint**: `GET /v1/sigtap/servicos`
+
+**Parâmetros de Query**:
+- `q` (opcional): Termo de busca em código ou nome
+- `page` (opcional): Número da página
+- `size` (opcional): Tamanho da página
+
+**Exemplo de Requisição**:
+```bash
+curl -X GET "http://localhost:8080/v1/sigtap/servicos?q=hemograma&page=0&size=20" \
+  -H "Authorization: Bearer <token>"
+```
+
+**Exemplo de Resposta** (200):
 ```json
 {
-  "procedimento": {
-    "codigoOficial": "03.01.01.001-0",
-    "nome": "CONSULTA MÉDICA EM ATENÇÃO BÁSICA"
-  },
-  "cids": [
+  "content": [
     {
-      "codigoOficial": "A00",
-      "nome": "Cólera",
-      "principal": true
+      "id": "770e8400-e29b-41d4-a716-446655440002",
+      "codigoOficial": "01",
+      "nome": "SERVIÇO HOSPITALAR"
+    },
+    {
+      "id": "880e8400-e29b-41d4-a716-446655440003",
+      "codigoOficial": "02",
+      "nome": "SERVIÇO AMBULATORIAL"
     }
-  ]
+  ],
+  "pageable": {
+    "pageNumber": 0,
+    "pageSize": 20
+  },
+  "totalElements": 2,
+  "totalPages": 1
 }
 ```
 
-### Buscar Ocupações de um Procedimento
+#### Obter Serviço por Código
 
-**Endpoint**: `GET /api/sigtap/procedimentos/{codigo}/ocupacoes`
+**Endpoint**: `GET /v1/sigtap/servicos/{codigo}`
 
-**Resposta Esperada**:
+**Exemplo de Requisição**:
+```bash
+curl -X GET "http://localhost:8080/v1/sigtap/servicos/01" \
+  -H "Authorization: Bearer <token>"
+```
+
+**Exemplo de Resposta** (200):
 ```json
 {
-  "procedimento": {
-    "codigoOficial": "03.01.01.001-0",
-    "nome": "CONSULTA MÉDICA EM ATENÇÃO BÁSICA"
-  },
-  "ocupacoes": [
+  "id": "770e8400-e29b-41d4-a716-446655440002",
+  "codigoOficial": "01",
+  "nome": "SERVIÇO HOSPITALAR"
+}
+```
+
+### 3. RENASES (Rede Nacional de Atenção Especializada em Saúde)
+
+#### Pesquisar RENASES
+
+**Endpoint**: `GET /v1/sigtap/renases`
+
+**Parâmetros de Query**:
+- `q` (opcional): Termo de busca em código ou nome
+- `page` (opcional): Número da página
+- `size` (opcional): Tamanho da página
+
+**Exemplo de Requisição**:
+```bash
+curl -X GET "http://localhost:8080/v1/sigtap/renases?q=cardiologia&page=0&size=20" \
+  -H "Authorization: Bearer <token>"
+```
+
+**Exemplo de Resposta** (200):
+```json
+{
+  "content": [
     {
+      "id": "990e8400-e29b-41d4-a716-446655440004",
+      "codigoOficial": "01",
+      "nome": "CENTRO DE CARDIOLOGIA"
+    }
+  ],
+  "totalElements": 1
+}
+```
+
+#### Obter RENASES por Código
+
+**Endpoint**: `GET /v1/sigtap/renases/{codigo}`
+
+### 4. Grupos
+
+#### Listar Grupos
+
+Retorna lista de todos os grupos SIGTAP.
+
+**Endpoint**: `GET /v1/sigtap/grupos`
+
+**Exemplo de Requisição**:
+```bash
+curl -X GET "http://localhost:8080/v1/sigtap/grupos" \
+  -H "Authorization: Bearer <token>"
+```
+
+**Exemplo de Resposta** (200):
+```json
+[
+  {
+    "id": "aa0e8400-e29b-41d4-a716-446655440005",
+    "codigoOficial": "03",
+    "nome": "PROCEDIMENTOS CLINICOS",
+    "competenciaInicial": "202501",
+    "competenciaFinal": null
+  },
+  {
+    "id": "bb0e8400-e29b-41d4-a716-446655440006",
+    "codigoOficial": "04",
+    "nome": "PROCEDIMENTOS CIRURGICOS",
+    "competenciaInicial": "202501",
+    "competenciaFinal": null
+  }
+]
+```
+
+### 5. Subgrupos
+
+#### Pesquisar Subgrupos
+
+**Endpoint**: `GET /v1/sigtap/subgrupos`
+
+**Parâmetros de Query**:
+- `q` (opcional): Termo de busca em código ou nome
+- `grupoCodigo` (opcional): Código do grupo para filtrar
+- `subgrupoCodigo` (opcional): Código do subgrupo para filtrar (deve ser usado junto com grupoCodigo)
+- `competencia` (opcional): Competência no formato AAAAMM
+- `page` (opcional): Número da página
+- `size` (opcional): Tamanho da página
+
+**Exemplo de Requisição - Buscar todos os subgrupos de um grupo**:
+```bash
+curl -X GET "http://localhost:8080/v1/sigtap/subgrupos?grupoCodigo=06&competencia=202512" \
+  -H "Authorization: Bearer <token>"
+```
+
+**Exemplo de Requisição - Buscar um subgrupo específico**:
+```bash
+curl -X GET "http://localhost:8080/v1/sigtap/subgrupos?grupoCodigo=06&subgrupoCodigo=01&competencia=202512" \
+  -H "Authorization: Bearer <token>"
+```
+
+**Exemplo de Requisição - Buscar subgrupos com termo de busca**:
+```bash
+curl -X GET "http://localhost:8080/v1/sigtap/subgrupos?grupoCodigo=03&q=consulta&competencia=202512" \
+  -H "Authorization: Bearer <token>"
+```
+
+**Exemplo de Resposta** (200):
+```json
+{
+  "content": [
+    {
+      "id": "cc0e8400-e29b-41d4-a716-446655440007",
+      "codigoOficial": "0301",
+      "nome": "CONSULTA MEDICA",
+      "competenciaInicial": "202501",
+      "competenciaFinal": null,
+      "grupoCodigo": "03",
+      "grupoNome": "PROCEDIMENTOS CLINICOS"
+    }
+  ],
+  "totalElements": 1
+}
+```
+
+#### Obter Subgrupo por Código
+
+**Endpoint**: `GET /v1/sigtap/subgrupos/{codigo}`
+
+**Parâmetros**:
+- `codigo` (path): Código do subgrupo
+- `grupoCodigo` (query, opcional): Código do grupo para busca mais precisa
+
+### 6. Formas de Organização
+
+#### Pesquisar Formas de Organização
+
+**Endpoint**: `GET /v1/sigtap/formas-organizacao`
+
+**Parâmetros de Query**:
+- `q` (opcional): Termo de busca
+- `subgrupoCodigo` (opcional): Código do subgrupo para filtrar
+- `competencia` (opcional): Competência no formato AAAAMM
+- `page` (opcional): Número da página
+- `size` (opcional): Tamanho da página
+
+**Exemplo de Requisição**:
+```bash
+curl -X GET "http://localhost:8080/v1/sigtap/formas-organizacao?subgrupoCodigo=0301&q=ambulatorial" \
+  -H "Authorization: Bearer <token>"
+```
+
+#### Obter Forma de Organização por Código
+
+**Endpoint**: `GET /v1/sigtap/formas-organizacao/{codigo}`
+
+**Parâmetros**:
+- `codigo` (path): Código da forma de organização
+- `subgrupoCodigo` (query, opcional): Código do subgrupo para busca mais precisa
+
+### 7. Habilitações
+
+#### Pesquisar Habilitações
+
+**Endpoint**: `GET /v1/sigtap/habilitacoes`
+
+**Parâmetros de Query**:
+- `q` (opcional): Termo de busca
+- `competencia` (opcional): Competência no formato AAAAMM
+- `page` (opcional): Número da página
+- `size` (opcional): Tamanho da página
+
+**Exemplo de Requisição**:
+```bash
+curl -X GET "http://localhost:8080/v1/sigtap/habilitacoes?q=hospital&competencia=202512" \
+  -H "Authorization: Bearer <token>"
+```
+
+#### Obter Habilitação por Código
+
+**Endpoint**: `GET /v1/sigtap/habilitacoes/{codigo}`
+
+**Parâmetros**:
+- `codigo` (path): Código da habilitação
+- `competencia` (query, opcional): Competência no formato AAAAMM
+
+### 8. TUSS (Terminologia Unificada da Saúde Suplementar)
+
+#### Pesquisar TUSS
+
+**Endpoint**: `GET /v1/sigtap/tuss`
+
+**Parâmetros de Query**:
+- `q` (opcional): Termo de busca em código ou nome
+- `page` (opcional): Número da página
+- `size` (opcional): Tamanho da página
+
+**Exemplo de Requisição**:
+```bash
+curl -X GET "http://localhost:8080/v1/sigtap/tuss?q=10101010&page=0&size=20" \
+  -H "Authorization: Bearer <token>"
+```
+
+#### Obter TUSS por Código
+
+**Endpoint**: `GET /v1/sigtap/tuss/{codigo}`
+
+### 9. Ocupações (CBO)
+
+#### Pesquisar Ocupações
+
+**Endpoint**: `GET /v1/sigtap/ocupacoes`
+
+**Parâmetros de Query**:
+- `q` (opcional): Termo de busca em código ou nome
+- `page` (opcional): Número da página
+- `size` (opcional): Tamanho da página
+
+**Exemplo de Requisição**:
+```bash
+curl -X GET "http://localhost:8080/v1/sigtap/ocupacoes?q=médico&page=0&size=20" \
+  -H "Authorization: Bearer <token>"
+```
+
+**Exemplo de Resposta** (200):
+```json
+{
+  "content": [
+    {
+      "id": "ee0e8400-e29b-41d4-a716-446655440009",
       "codigoOficial": "225110",
-      "nome": "Mdico cardiologista"
+      "nome": "MÉDICO CLINICO GERAL"
     }
-  ]
+  ],
+  "totalElements": 1
 }
 ```
 
-## 📋 Cdigos de Status HTTP
+#### Obter Ocupação por Código
+
+**Endpoint**: `GET /v1/sigtap/ocupacoes/{codigo}`
+
+### 10. Modalidades
+
+#### Pesquisar Modalidades
+
+**Endpoint**: `GET /v1/sigtap/modalidades`
+
+**Parâmetros de Query**:
+- `q` (opcional): Termo de busca
+- `competencia` (opcional): Competência no formato AAAAMM
+- `page` (opcional): Número da página
+- `size` (opcional): Tamanho da página
+
+**Exemplo de Requisição**:
+```bash
+curl -X GET "http://localhost:8080/v1/sigtap/modalidades?q=01&competencia=202512" \
+  -H "Authorization: Bearer <token>"
+```
+
+#### Obter Modalidade por Código
+
+**Endpoint**: `GET /v1/sigtap/modalidades/{codigo}`
+
+**Parâmetros**:
+- `codigo` (path): Código da modalidade
+- `competencia` (query, opcional): Competência no formato AAAAMM
+
+### 11. Compatibilidades
+
+#### Pesquisar Compatibilidades
+
+Busca compatibilidades entre procedimentos.
+
+**Endpoint**: `GET /v1/sigtap/compatibilidades`
+
+**Parâmetros de Query**:
+- `codigoProcedimentoPrincipal` (opcional): Código do procedimento principal para filtrar
+- `competencia` (opcional): Competência no formato AAAAMM
+- `page` (opcional): Número da página
+- `size` (opcional): Tamanho da página
+
+**Exemplo de Requisição**:
+```bash
+curl -X GET "http://localhost:8080/v1/sigtap/compatibilidades?codigoProcedimentoPrincipal=0301010010&competencia=202512" \
+  -H "Authorization: Bearer <token>"
+```
+
+**Exemplo de Resposta** (200):
+```json
+{
+  "content": [
+    {
+      "id": "ff0e8400-e29b-41d4-a716-446655440010",
+      "codigoCompatibilidadePossivel": "01",
+      "tipoCompatibilidade": "PERMITIDA",
+      "codigoProcedimentoPrincipal": "0301010010",
+      "nomeProcedimentoPrincipal": "CONSULTA MÉDICA",
+      "codigoProcedimentoSecundario": "0201010010",
+      "nomeProcedimentoSecundario": "EXAME COMPLEMENTAR",
+      "competenciaInicial": "202501",
+      "competenciaFinal": null,
+      "quantidadePermitida": 1
+    }
+  ],
+  "totalElements": 1
+}
+```
+
+## 📋 Exemplos de Uso Comuns
+
+### Buscar um Medicamento/Procedimento por Código
+```bash
+curl -X GET "http://localhost:8080/v1/sigtap/procedimentos/0301010010?competencia=202512" \
+  -H "Authorization: Bearer <token>"
+```
+
+### Buscar Exames por Nome
+```bash
+curl -X GET "http://localhost:8080/v1/sigtap/servicos?q=hemograma&page=0&size=20" \
+  -H "Authorization: Bearer <token>"
+```
+
+### Listar Todos os Grupos de Procedimentos
+```bash
+curl -X GET "http://localhost:8080/v1/sigtap/grupos" \
+  -H "Authorization: Bearer <token>"
+```
+
+### Buscar Procedimentos de uma Competência Específica
+```bash
+curl -X GET "http://localhost:8080/v1/sigtap/procedimentos?competencia=202512&page=0&size=50" \
+  -H "Authorization: Bearer <token>"
+```
+
+### Buscar Subgrupos de um Grupo Específico
+```bash
+curl -X GET "http://localhost:8080/v1/sigtap/subgrupos?grupoCodigo=03&page=0&size=20" \
+  -H "Authorization: Bearer <token>"
+```
+
+## 📋 Códigos de Status HTTP
 
 - **200 OK**: Requisição bem-sucedida
 - **400 Bad Request**: Parâmetros inválidos
 - **401 Unauthorized**: Token ausente ou inválido
-- **404 Not Found**: Recursão não encontrado
+- **404 Not Found**: Recurso não encontrado
 - **500 Internal Server Error**: Erro interno do servidor
 
-## 📋 Seguranéa
+## 📋 Segurança
 
-### Autenticaçãoo
+### Autenticação
 
 Todos os endpoints requerem autenticação JWT. O token deve ser obtido através do endpoint de login:
 
 ```
-POST /api/v1/auth/login
+POST /v1/auth/login
 {
   "email": "usuario@example.com",
   "password": "senha"
 }
 ```
 
-### Autorizaçãoo
+### Autorização
 
-Atualmente, todos os endpoints SIGTAP requerem apenas autenticação. Futuras implementações podem incluir controle de acessão baseado em roles.
+Atualmente, todos os endpoints SIGTAP requerem apenas autenticação. Futuras implementações podem incluir controle de acesso baseado em roles.
 
-## 📋 Exemplos de Usão
+## 📋 Exemplos de Uso
 
-### Importar Competéncia Completa
+### Importar Competência Completa
 
 ```bash
 # 1. Obter token
@@ -241,7 +656,7 @@ TOKEN=$(curl -X POST "http://localhost:8080/api/v1/auth/login" \
   | jq -r '.accessToken')
 
 # 2. Importar competência
-curl -X POST "http://localhost:8080/api/sigtap/import/202512" \
+curl -X POST "http://localhost:8080/v1/sigtap/import/202512" \
   -H "Authorization: Bearer $TOKEN" \
   | jq
 ```
@@ -249,7 +664,7 @@ curl -X POST "http://localhost:8080/api/sigtap/import/202512" \
 ### Verificar Arquivos Disponéveis
 
 ```bash
-curl -X GET "http://localhost:8080/api/sigtap/import/202512/arquivos" \
+curl -X GET "http://localhost:8080/v1/sigtap/import/arquivos/202512" \
   -H "Authorization: Bearer $TOKEN" \
   | jq
 ```
@@ -267,18 +682,18 @@ curl -X GET "http://localhost:8080/api/sigtap/import/202512/arquivos" \
 }
 ```
 
-### Erro de Validaçãoo
+### Erro de Validação
 
 ```json
 {
   "timestamp": "2025-12-17T10:00:00",
   "status": 400,
   "error": "Bad Request",
-  "message": "Competéncia invélida. Formato esperado: AAAAMM"
+  "message": "Competência inválida. Formato esperado: AAAAMM"
 }
 ```
 
-### Erro de Recursão No Encontrado
+### Erro de Recurso Não Encontrado
 
 ```json
 {
@@ -289,15 +704,64 @@ curl -X GET "http://localhost:8080/api/sigtap/import/202512/arquivos" \
 }
 ```
 
+## 📋 Observações Importantes
+
+### Competência
+- Formato: **AAAAMM** (ex: 202512 para dezembro de 2025)
+- A competência é usada para filtrar dados válidos em uma determinada data
+
+### Paginação
+- Padrão: página 0 com 20 itens por página
+- Use `page` e `size` para controlar a paginação
+- Use `sort` para ordenar (ex: `sort=codigoOficial,asc` ou `sort=nome,desc`)
+
+### Busca
+- O parâmetro `q` busca tanto no código quanto no nome
+- A busca é case-insensitive (não diferencia maiúsculas/minúsculas)
+- A busca é parcial (LIKE) - não precisa do termo completo
+
+### Filtros
+- Múltiplos filtros podem ser combinados para refinar a busca
+- Filtros de relacionamento (grupo, subgrupo) ajudam a restringir resultados
+
+### Estrutura de Resposta Paginada
+
+Todas as listas paginadas seguem o formato padrão do Spring Data:
+
+```json
+{
+  "content": [
+    // Array de itens
+  ],
+  "pageable": {
+    "pageNumber": 0,
+    "pageSize": 20,
+    "sort": {
+      "sorted": false
+    }
+  },
+  "totalElements": 100,
+  "totalPages": 5,
+  "last": false,
+  "first": true,
+  "numberOfElements": 20,
+  "size": 20,
+  "number": 0,
+  "empty": false
+}
+```
+
 ## 📋 Swagger/OpenAPI
 
 A documentação completa da API está disponível via Swagger UI:
 
 ```
-http://localhost:8080/api/swagger-ui.html
+http://localhost:8080/swagger-ui.html
 ```
 
-Navegue até a seção **"SIGTAP Importação"** para ver todos os endpoints disponíveis.
+Navegue até as seções:
+- **"SIGTAP Importação"** - Endpoints para importação de dados
+- **"SIGTAP Consulta"** - Endpoints para consulta de dados (procedimentos, serviços, etc.)
 
 ---
 

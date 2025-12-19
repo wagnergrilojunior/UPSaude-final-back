@@ -18,9 +18,7 @@ import com.upsaude.entity.agendamento.Agendamento;
 import com.upsaude.repository.agendamento.AgendamentoRepository;
 import com.upsaude.repository.clinica.atendimento.AtendimentoRepository;
 import com.upsaude.repository.clinica.atendimento.ConsultasRepository;
-import com.upsaude.repository.clinica.exame.ExamesRepository;
 import com.upsaude.repository.paciente.PacienteRepository;
-import com.upsaude.repository.saude_publica.visita.VisitasDomiciliaresRepository;
 import com.upsaude.service.sistema.RelatoriosService;
 
 import lombok.RequiredArgsConstructor;
@@ -33,10 +31,8 @@ public class RelatoriosServiceImpl implements RelatoriosService {
 
     private final AtendimentoRepository atendimentoRepository;
     private final ConsultasRepository consultasRepository;
-    private final ExamesRepository examesRepository;
     private final AgendamentoRepository agendamentoRepository;
     private final PacienteRepository pacienteRepository;
-    private final VisitasDomiciliaresRepository visitasDomiciliaresRepository;
 
     @Override
     public RelatorioEstatisticasResponse gerarEstatisticas(RelatorioEstatisticasRequest request) {
@@ -51,9 +47,7 @@ public class RelatoriosServiceImpl implements RelatoriosService {
 
         long totalAtendimentos = contarAtendimentos(request, inicio, fim);
         long totalConsultas = contarConsultas(request, inicio, fim);
-        long totalExames = contarExames(request, inicio, fim);
         long totalAgendamentos = contarAgendamentos(request, inicio, fim);
-        long totalVisitasDomiciliares = contarVisitas(request, inicio, fim);
 
         long totalPacientes = pacienteRepository.count();
 
@@ -70,11 +64,11 @@ public class RelatoriosServiceImpl implements RelatoriosService {
                 .dataFim(dataFim)
                 .totalAtendimentos(totalAtendimentos)
                 .totalConsultas(totalConsultas)
-                .totalExames(totalExames)
+                .totalExames(0L)
                 .totalProcedimentos(0L)
                 .totalAgendamentos(totalAgendamentos)
                 .totalPacientes(totalPacientes)
-                .totalVisitasDomiciliares(totalVisitasDomiciliares)
+                .totalVisitasDomiciliares(0L)
                 .atendimentosPorTipo(atendimentosPorTipo)
                 .atendimentosPorEspecialidade(atendimentosPorEspecialidade)
                 .examesPorTipo(examesPorTipo)
@@ -110,28 +104,12 @@ public class RelatoriosServiceImpl implements RelatoriosService {
                 .count();
     }
 
-    private long contarExames(RelatorioEstatisticasRequest request, OffsetDateTime inicio, OffsetDateTime fim) {
-
-        return examesRepository.findAll().stream()
-                .filter(e -> e.getDataExame() != null &&
-                           !e.getDataExame().isBefore(inicio) &&
-                           !e.getDataExame().isAfter(fim))
-                .count();
-    }
 
     private long contarAgendamentos(RelatorioEstatisticasRequest request, OffsetDateTime inicio, OffsetDateTime fim) {
 
         List<Agendamento> agendamentos = agendamentoRepository.findByDataHoraBetweenOrderByDataHoraAsc(
                 inicio, fim, PageRequest.of(0, Integer.MAX_VALUE)).getContent();
         return agendamentos.size();
-    }
-
-    private long contarVisitas(RelatorioEstatisticasRequest request, OffsetDateTime inicio, OffsetDateTime fim) {
-        return visitasDomiciliaresRepository.findAll().stream()
-                .filter(v -> v.getDataVisita() != null &&
-                           !v.getDataVisita().isBefore(inicio) &&
-                           !v.getDataVisita().isAfter(fim))
-                .count();
     }
 
     private Map<String, BigDecimal> calcularIndicadoresSaude(long totalAgendamentos,

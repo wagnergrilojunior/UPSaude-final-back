@@ -1,6 +1,5 @@
 package com.upsaude.api.response.clinica.atendimento;
 
-import com.upsaude.api.response.profissional.EspecialidadesMedicasResponse;
 import com.upsaude.api.response.profissional.ProfissionaisSaudeResponse;
 import com.upsaude.api.response.paciente.PacienteResponse;
 import com.upsaude.api.response.embeddable.AnamneseAtendimentoResponse;
@@ -37,7 +36,6 @@ public class AtendimentoResponse {
     private Boolean active;
     private PacienteResponse paciente;
     private ProfissionaisSaudeResponse profissional;
-    private EspecialidadesMedicasResponse especialidade;
     private EquipeSaudeResponse equipeSaude;
     private ConvenioResponse convenio;
     private InformacoesAtendimentoResponse informacoes;

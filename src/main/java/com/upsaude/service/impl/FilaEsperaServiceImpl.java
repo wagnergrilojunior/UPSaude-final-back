@@ -99,12 +99,11 @@ public class FilaEsperaServiceImpl implements FilaEsperaService {
                                           UUID pacienteId,
                                           UUID profissionalId,
                                           UUID estabelecimentoId,
-                                          UUID especialidadeId,
                                           PrioridadeAtendimentoEnum prioridade,
                                           OffsetDateTime dataInicio,
                                           OffsetDateTime dataFim) {
-        log.debug("Listando fila de espera. pageable: {}, pacienteId: {}, profissionalId: {}, estabelecimentoId: {}, especialidadeId: {}, prioridade: {}, dataInicio: {}, dataFim: {}",
-            pageable, pacienteId, profissionalId, estabelecimentoId, especialidadeId, prioridade, dataInicio, dataFim);
+        log.debug("Listando fila de espera. pageable: {}, pacienteId: {}, profissionalId: {}, estabelecimentoId: {}, prioridade: {}, dataInicio: {}, dataFim: {}",
+            pageable, pacienteId, profissionalId, estabelecimentoId, prioridade, dataInicio, dataFim);
 
         try {
             UUID tenantId = tenantService.validarTenantAtual();
@@ -116,8 +115,6 @@ public class FilaEsperaServiceImpl implements FilaEsperaService {
                 page = repository.findByProfissionalIdAndTenantIdOrderByPrioridadeDescDataEntradaAsc(profissionalId, tenantId, pageable);
             } else if (estabelecimentoId != null) {
                 page = repository.findByEstabelecimentoIdAndTenantIdOrderByPrioridadeDescDataEntradaAsc(estabelecimentoId, tenantId, pageable);
-            } else if (especialidadeId != null) {
-                page = repository.findByEspecialidadeIdAndTenantIdOrderByPrioridadeDescDataEntradaAsc(especialidadeId, tenantId, pageable);
             } else if (prioridade != null) {
                 page = repository.findByPrioridadeAndTenantIdOrderByDataEntradaAsc(prioridade, tenantId, pageable);
             } else if (dataInicio != null && dataFim != null) {

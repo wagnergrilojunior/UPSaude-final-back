@@ -9,7 +9,6 @@ import com.upsaude.entity.embeddable.ExamesSolicitadosConsulta;
 import com.upsaude.entity.embeddable.InformacoesConsulta;
 import com.upsaude.entity.embeddable.PrescricaoConsulta;
 import com.upsaude.entity.paciente.Paciente;
-import com.upsaude.entity.profissional.EspecialidadesMedicas;
 import com.upsaude.entity.profissional.Medicos;
 import com.upsaude.entity.profissional.ProfissionaisSaude;
 
@@ -63,9 +62,6 @@ public class Consultas extends BaseEntity {
     @JoinColumn(name = "profissional_saude_id")
     private ProfissionaisSaude profissionalSaude;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "especialidade_id")
-    private EspecialidadesMedicas especialidade;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "convenio_id")

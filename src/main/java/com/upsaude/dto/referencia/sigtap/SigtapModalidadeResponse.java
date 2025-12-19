@@ -1,0 +1,14 @@
+package com.upsaude.dto.referencia.sigtap;
+
+import lombok.Data;
+
+import java.util.UUID;
+
+@Data
+public class SigtapModalidadeResponse {
+    private UUID id;
+    private String codigoOficial;
+    private String nome;
+    private String competenciaInicial;
+    private String competenciaFinal;
+}

@@ -1,5 +1,4 @@
 package com.upsaude.entity.clinica.atendimento;
-import com.upsaude.entity.profissional.EspecialidadesMedicas;
 import com.upsaude.entity.BaseEntity;
 
 import com.upsaude.entity.profissional.ProfissionaisSaude;
@@ -59,9 +58,6 @@ public class Atendimento extends BaseEntity {
     @NotNull(message = "Profissional de saúde é obrigatório")
     private ProfissionaisSaude profissional;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "especialidade_id")
-    private EspecialidadesMedicas especialidade;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "equipe_saude_id")

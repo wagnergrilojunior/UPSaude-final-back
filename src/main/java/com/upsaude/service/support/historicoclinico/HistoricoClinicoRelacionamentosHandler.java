@@ -4,8 +4,6 @@ import com.upsaude.api.request.clinica.prontuario.HistoricoClinicoRequest;
 import com.upsaude.entity.agendamento.Agendamento;
 import com.upsaude.entity.clinica.atendimento.Atendimento;
 import com.upsaude.entity.clinica.cirurgia.Cirurgia;
-import com.upsaude.entity.clinica.exame.Exames;
-import com.upsaude.entity.clinica.medicacao.ReceitasMedicas;
 import com.upsaude.entity.clinica.prontuario.HistoricoClinico;
 import com.upsaude.entity.paciente.Paciente;
 import com.upsaude.entity.profissional.ProfissionaisSaude;
@@ -14,8 +12,6 @@ import com.upsaude.exception.NotFoundException;
 import com.upsaude.repository.agendamento.AgendamentoRepository;
 import com.upsaude.repository.clinica.atendimento.AtendimentoRepository;
 import com.upsaude.repository.clinica.cirurgia.CirurgiaRepository;
-import com.upsaude.repository.clinica.exame.ExamesRepository;
-import com.upsaude.repository.clinica.medicacao.ReceitasMedicasRepository;
 import com.upsaude.service.support.paciente.PacienteTenantEnforcer;
 import com.upsaude.service.support.profissionaissaude.ProfissionaisSaudeTenantEnforcer;
 import lombok.RequiredArgsConstructor;
@@ -32,8 +28,6 @@ public class HistoricoClinicoRelacionamentosHandler {
     private final ProfissionaisSaudeTenantEnforcer profissionaisSaudeTenantEnforcer;
     private final AtendimentoRepository atendimentoRepository;
     private final AgendamentoRepository agendamentoRepository;
-    private final ExamesRepository examesRepository;
-    private final ReceitasMedicasRepository receitasMedicasRepository;
     private final CirurgiaRepository cirurgiaRepository;
 
     public void resolver(HistoricoClinico entity, HistoricoClinicoRequest request, UUID tenantId, Tenant tenant) {
@@ -63,17 +57,6 @@ public class HistoricoClinicoRelacionamentosHandler {
             entity.setAgendamento(agendamento);
         }
 
-        if (request.getExame() != null) {
-            Exames exame = examesRepository.findByIdAndTenant(request.getExame(), tenantId)
-                    .orElseThrow(() -> new NotFoundException("Exame não encontrado com ID: " + request.getExame()));
-            entity.setExame(exame);
-        }
-
-        if (request.getReceita() != null) {
-            ReceitasMedicas receita = receitasMedicasRepository.findByIdAndTenant(request.getReceita(), tenantId)
-                    .orElseThrow(() -> new NotFoundException("Receita médica não encontrada com ID: " + request.getReceita()));
-            entity.setReceita(receita);
-        }
 
         if (request.getCirurgia() != null) {
             Cirurgia cirurgia = cirurgiaRepository.findByIdAndTenant(request.getCirurgia(), tenantId)
