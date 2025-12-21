@@ -67,27 +67,34 @@ public class SigtapConsultaServiceImpl implements SigtapConsultaService {
         }
         Specification<SigtapProcedimento> spec = Specification.where(null);
 
-        // Filtrar por grupo ou subgrupo através do relacionamento formaOrganizacao -> subgrupo -> grupo
+        // Filtrar por ativo (todos os procedimentos devem estar ativos)
+        spec = spec.and((root, query, cb) -> cb.equal(root.get("active"), true));
+
+        // Filtrar por grupo através do código oficial (primeiros 2 dígitos)
+        // Exemplo: grupo 06 = procedimentos que começam com "06"
         if (grupoCodigo != null && !grupoCodigo.isBlank()) {
+            String grupoCod = grupoCodigo.trim();
+            // Garantir que o código do grupo tenha 2 dígitos
+            if (grupoCod.length() == 1) {
+                grupoCod = "0" + grupoCod;
+            }
+            
             if (subgrupoCodigo != null && !subgrupoCodigo.isBlank()) {
-                // Filtrar por grupo + subgrupo
-                spec = spec.and((root, query, cb) -> {
-                    var formaOrganizacao = root.join("formaOrganizacao");
-                    var subgrupo = formaOrganizacao.join("subgrupo");
-                    var grupo = subgrupo.join("grupo");
-                    return cb.and(
-                            cb.equal(grupo.get("codigoOficial"), grupoCodigo.trim()),
-                            cb.equal(subgrupo.get("codigoOficial"), subgrupoCodigo.trim())
-                    );
-                });
+                // Filtrar por grupo + subgrupo (primeiros 4 dígitos: 2 do grupo + 2 do subgrupo)
+                String subgrupoCod = subgrupoCodigo.trim();
+                if (subgrupoCod.length() == 1) {
+                    subgrupoCod = "0" + subgrupoCod;
+                }
+                final String prefixo = grupoCod + subgrupoCod;
+                spec = spec.and((root, query, cb) -> 
+                    cb.like(root.get("codigoOficial"), prefixo + "%")
+                );
             } else {
-                // Filtrar apenas por grupo
-                spec = spec.and((root, query, cb) -> {
-                    var formaOrganizacao = root.join("formaOrganizacao");
-                    var subgrupo = formaOrganizacao.join("subgrupo");
-                    var grupo = subgrupo.join("grupo");
-                    return cb.equal(grupo.get("codigoOficial"), grupoCodigo.trim());
-                });
+                // Filtrar apenas por grupo (primeiros 2 dígitos)
+                final String prefixo = grupoCod;
+                spec = spec.and((root, query, cb) -> 
+                    cb.like(root.get("codigoOficial"), prefixo + "%")
+                );
             }
         }
 
