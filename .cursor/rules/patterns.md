@@ -114,31 +114,6 @@ patterns:
       }
 
   # ==========================================================
-  # DTO
-  # ==========================================================
-  dto:
-    template: |
-      package {{package}}.dto;
-
-      import lombok.*;
-      import java.time.OffsetDateTime;
-      import java.util.UUID;
-      {{imports}}
-
-      @Data
-      @Builder
-      @NoArgsConstructor
-      @AllArgsConstructor
-      public class {{EntityName}}DTO {
-          private UUID id;
-          private OffsetDateTime createdAt;
-          private OffsetDateTime updatedAt;
-          private Boolean active;
-
-          {{fields}}
-      }
-
-  # ==========================================================
   # MAPPER
   # ==========================================================
   mapper:
@@ -148,18 +123,12 @@ patterns:
       import org.mapstruct.*;
       import {{package}}.mapper.config.MappingConfig;
       import {{package}}.entity.{{EntityName}};
-      import {{package}}.dto.{{EntityName}}DTO;
       import {{package}}.api.request.{{EntityName}}Request;
       import {{package}}.api.response.{{EntityName}}Response;
       {{imports}}
 
       @Mapper(config = MappingConfig.class, uses = { {{embeddable_mappers}} })
-      public interface {{EntityName}}Mapper extends EntityMapper<{{EntityName}}, {{EntityName}}DTO> {
-
-          @Mapping(target = "active", ignore = true)
-          {{EntityName}} toEntity({{EntityName}}DTO dto);
-
-          {{EntityName}}DTO toDTO({{EntityName}} entity);
+      public interface {{EntityName}}Mapper {
 
           @Mapping(target = "id", ignore = true)
           @Mapping(target = "createdAt", ignore = true)

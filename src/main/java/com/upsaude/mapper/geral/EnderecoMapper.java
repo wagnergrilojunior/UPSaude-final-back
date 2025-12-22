@@ -6,20 +6,13 @@ import org.mapstruct.MappingTarget;
 
 import com.upsaude.api.request.geral.EnderecoRequest;
 import com.upsaude.api.response.geral.EnderecoResponse;
-import com.upsaude.dto.paciente.EnderecoDTO;
 import com.upsaude.entity.paciente.Endereco;
-import com.upsaude.mapper.EntityMapper;
 import com.upsaude.mapper.config.MappingConfig;
 import com.upsaude.mapper.referencia.geografico.CidadesMapper;
 import com.upsaude.mapper.referencia.geografico.EstadosMapper;
 
 @Mapper(config = MappingConfig.class, uses = {CidadesMapper.class, EstadosMapper.class})
-public interface EnderecoMapper extends EntityMapper<Endereco, EnderecoDTO> {
-
-    @Mapping(target = "active", ignore = true)
-    Endereco toEntity(EnderecoDTO dto);
-
-    EnderecoDTO toDTO(Endereco entity);
+public interface EnderecoMapper  {
 
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "createdAt", ignore = true)

@@ -1,0 +1,12 @@
+package com.upsaude.api.response.referencia.sigtap;
+
+import lombok.Data;
+
+import java.util.UUID;
+
+@Data
+public class SigtapRenasesResponse {
+    private UUID id;
+    private String codigoOficial;
+    private String nome;
+}

@@ -3,7 +3,7 @@ package com.upsaude.mapper.sigtap;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
-import com.upsaude.dto.referencia.sigtap.SigtapCompatibilidadeResponse;
+import com.upsaude.api.response.referencia.sigtap.SigtapCompatibilidadeResponse;
 import com.upsaude.entity.referencia.sigtap.SigtapCompatibilidade;
 
 @Mapper(componentModel = "spring")

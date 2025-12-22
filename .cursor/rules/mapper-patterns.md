@@ -24,8 +24,6 @@ mapper_rules:
       - "{{package}}.mapper.shared.*"
 
     required_methods:
-      - toEntity
-      - toDTO
       - toResponse
       - fromRequest
       - updateFromRequest
@@ -39,32 +37,20 @@ mapper_rules:
     import org.mapstruct.*;
     import {{mapping_config}};
     import {{package}}.entity.{{EntityName}};
-    import {{package}}.dto.{{EntityName}}DTO;
     import {{package}}.api.request.{{EntityName}}Request;
     import {{package}}.api.response.{{EntityName}}Response;
     {{imports}}
 
     /**
      * Mapper para conversão de {{EntityName}}:
-     * Entity ↔ DTO ↔ Request ↔ Response
+     * Entity ↔ Request ↔ Response
      *
      * Geração automática seguindo padrões UPSaude.
      */
     @Mapper(config = MappingConfig.class, uses = { {{uses}} })
-    public interface {{EntityName}}Mapper extends EntityMapper<{{EntityName}}, {{EntityName}}DTO> {
+    public interface {{EntityName}}Mapper {
 
         {{generated}}
-
-        // ============================
-        // DTO → ENTITY
-        // ============================
-        @Mapping(target = "active", ignore = true)
-        {{EntityName}} toEntity({{EntityName}}DTO dto);
-
-        // ============================
-        // ENTITY → DTO
-        // ============================
-        {{EntityName}}DTO toDTO({{EntityName}} entity);
 
         // ============================
         // REQUEST → ENTITY (NOVA INSTÂNCIA)

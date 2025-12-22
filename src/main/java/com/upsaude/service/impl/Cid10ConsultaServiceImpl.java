@@ -10,7 +10,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
-import com.upsaude.dto.referencia.cid.*;
+import com.upsaude.api.response.referencia.cid.*;
 import com.upsaude.entity.referencia.cid.*;
 import com.upsaude.exception.NotFoundException;
 import com.upsaude.mapper.referencia.cid.*;

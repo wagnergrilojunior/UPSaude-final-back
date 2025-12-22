@@ -5,9 +5,7 @@ import org.mapstruct.MappingTarget;
 
 import com.upsaude.api.request.clinica.cirurgia.CirurgiaRequest;
 import com.upsaude.api.response.clinica.cirurgia.CirurgiaResponse;
-import com.upsaude.dto.clinica.cirurgia.CirurgiaDTO;
 import com.upsaude.entity.clinica.cirurgia.Cirurgia;
-import com.upsaude.mapper.EntityMapper;
 import com.upsaude.mapper.config.MappingConfig;
 import com.upsaude.mapper.convenio.ConvenioMapper;
 import com.upsaude.mapper.paciente.PacienteMapper;
@@ -15,12 +13,7 @@ import com.upsaude.mapper.profissional.MedicosMapper;
 import com.upsaude.mapper.profissional.ProfissionaisSaudeMapper;
 
 @Mapper(config = MappingConfig.class, uses = {ConvenioMapper.class, MedicosMapper.class, PacienteMapper.class, ProfissionaisSaudeMapper.class})
-public interface CirurgiaMapper extends EntityMapper<Cirurgia, CirurgiaDTO> {
-
-    @Mapping(target = "active", ignore = true)
-    Cirurgia toEntity(CirurgiaDTO dto);
-
-    CirurgiaDTO toDTO(Cirurgia entity);
+public interface CirurgiaMapper  {
 
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "createdAt", ignore = true)

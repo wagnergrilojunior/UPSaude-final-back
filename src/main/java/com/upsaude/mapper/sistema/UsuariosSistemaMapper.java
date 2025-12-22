@@ -6,18 +6,11 @@ import org.mapstruct.MappingTarget;
 
 import com.upsaude.api.request.sistema.UsuariosSistemaRequest;
 import com.upsaude.api.response.sistema.UsuariosSistemaResponse;
-import com.upsaude.dto.sistema.UsuariosSistemaDTO;
 import com.upsaude.entity.sistema.UsuariosSistema;
-import com.upsaude.mapper.EntityMapper;
 import com.upsaude.mapper.config.MappingConfig;
 
 @Mapper(config = MappingConfig.class)
-public interface UsuariosSistemaMapper extends EntityMapper<UsuariosSistema, UsuariosSistemaDTO> {
-
-    @Mapping(target = "active", ignore = true)
-    UsuariosSistema toEntity(UsuariosSistemaDTO dto);
-
-    UsuariosSistemaDTO toDTO(UsuariosSistema entity);
+public interface UsuariosSistemaMapper  {
 
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "createdAt", ignore = true)

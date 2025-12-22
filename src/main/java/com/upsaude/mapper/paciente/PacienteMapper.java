@@ -7,9 +7,7 @@ import org.mapstruct.MappingTarget;
 import com.upsaude.api.request.paciente.PacienteRequest;
 import com.upsaude.api.response.paciente.PacienteResponse;
 import com.upsaude.api.response.paciente.PacienteSimplificadoResponse;
-import com.upsaude.dto.paciente.PacienteDTO;
 import com.upsaude.entity.paciente.Paciente;
-import com.upsaude.mapper.EntityMapper;
 import com.upsaude.mapper.config.MappingConfig;
 import com.upsaude.mapper.convenio.ConvenioMapper;
 import com.upsaude.mapper.paciente.alergia.AlergiasPacienteMapper;
@@ -19,12 +17,7 @@ import com.upsaude.mapper.sistema.integracao.IntegracaoGovMapper;
 import com.upsaude.repository.projection.PacienteSimplificadoProjection;
 
 @Mapper(config = MappingConfig.class, uses = {ConvenioMapper.class, DadosClinicosBasicosMapper.class, DadosSociodemograficosMapper.class, IntegracaoGovMapper.class, LGPDConsentimentoMapper.class, ResponsavelLegalMapper.class, AlergiasPacienteMapper.class, DeficienciasPacienteMapper.class})
-public interface PacienteMapper extends EntityMapper<Paciente, PacienteDTO> {
-
-    @Mapping(target = "active", ignore = true)
-    Paciente toEntity(PacienteDTO dto);
-
-    PacienteDTO toDTO(Paciente entity);
+public interface PacienteMapper {
 
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "createdAt", ignore = true)

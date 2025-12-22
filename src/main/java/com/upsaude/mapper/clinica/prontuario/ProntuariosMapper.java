@@ -6,19 +6,12 @@ import org.mapstruct.MappingTarget;
 
 import com.upsaude.api.request.clinica.prontuario.ProntuariosRequest;
 import com.upsaude.api.response.clinica.prontuario.ProntuariosResponse;
-import com.upsaude.dto.clinica.prontuario.ProntuariosDTO;
 import com.upsaude.entity.clinica.prontuario.Prontuarios;
-import com.upsaude.mapper.EntityMapper;
 import com.upsaude.mapper.config.MappingConfig;
 import com.upsaude.mapper.paciente.PacienteMapper;
 
 @Mapper(config = MappingConfig.class, uses = {PacienteMapper.class})
-public interface ProntuariosMapper extends EntityMapper<Prontuarios, ProntuariosDTO> {
-
-    @Mapping(target = "active", ignore = true)
-    Prontuarios toEntity(ProntuariosDTO dto);
-
-    ProntuariosDTO toDTO(Prontuarios entity);
+public interface ProntuariosMapper  {
 
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "createdAt", ignore = true)

@@ -1,6 +1,6 @@
 package com.upsaude.controller.referencia.cid;
 
-import com.upsaude.dto.referencia.cid.*;
+import com.upsaude.api.response.referencia.cid.*;
 import com.upsaude.exception.NotFoundException;
 import com.upsaude.service.referencia.cid.Cid10ConsultaService;
 import io.swagger.v3.oas.annotations.Operation;

@@ -3,7 +3,6 @@ package com.upsaude.mapper.embeddable;
 import com.upsaude.api.request.embeddable.TratamentoAtualDoencaPacienteRequest;
 import com.upsaude.api.response.embeddable.TratamentoAtualDoencaPacienteResponse;
 import com.upsaude.entity.embeddable.TratamentoAtualDoencaPaciente;
-import com.upsaude.dto.embeddable.TratamentoAtualDoencaPacienteDTO;
 import com.upsaude.mapper.config.MappingConfig;
 import org.mapstruct.Mapper;
 import org.mapstruct.MappingTarget;
@@ -14,7 +13,4 @@ public interface TratamentoAtualDoencaPacienteMapper {
     TratamentoAtualDoencaPacienteResponse toResponse(TratamentoAtualDoencaPaciente entity);
     void updateFromRequest(TratamentoAtualDoencaPacienteRequest request, @MappingTarget TratamentoAtualDoencaPaciente entity);
 
-    TratamentoAtualDoencaPaciente toEntity(com.upsaude.dto.embeddable.TratamentoAtualDoencaPacienteDTO dto);
-    com.upsaude.dto.embeddable.TratamentoAtualDoencaPacienteDTO toDTO(TratamentoAtualDoencaPaciente entity);
-    void updateFromDTO(com.upsaude.dto.embeddable.TratamentoAtualDoencaPacienteDTO dto, @MappingTarget TratamentoAtualDoencaPaciente entity);
 }

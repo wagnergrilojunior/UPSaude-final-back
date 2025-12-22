@@ -2,21 +2,14 @@ package com.upsaude.mapper.referencia.geografico;
 
 import com.upsaude.api.request.referencia.geografico.EstadosRequest;
 import com.upsaude.api.response.referencia.geografico.EstadosResponse;
-import com.upsaude.dto.referencia.geografico.EstadosDTO;
 import com.upsaude.entity.referencia.geografico.Estados;
-import com.upsaude.mapper.EntityMapper;
 import com.upsaude.mapper.config.MappingConfig;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 
 @Mapper(config = MappingConfig.class)
-public interface EstadosMapper extends EntityMapper<Estados, EstadosDTO> {
-
-    @Mapping(target = "active", ignore = true)
-    Estados toEntity(EstadosDTO dto);
-
-    EstadosDTO toDTO(Estados entity);
+public interface EstadosMapper {
 
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "createdAt", ignore = true)

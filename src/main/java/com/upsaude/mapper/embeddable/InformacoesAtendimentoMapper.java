@@ -3,7 +3,6 @@ package com.upsaude.mapper.embeddable;
 import com.upsaude.api.request.embeddable.InformacoesAtendimentoRequest;
 import com.upsaude.api.response.embeddable.InformacoesAtendimentoResponse;
 import com.upsaude.entity.embeddable.InformacoesAtendimento;
-import com.upsaude.dto.embeddable.InformacoesAtendimentoDTO;
 import com.upsaude.mapper.config.MappingConfig;
 import org.mapstruct.Mapper;
 import org.mapstruct.MappingTarget;
@@ -14,7 +13,4 @@ public interface InformacoesAtendimentoMapper {
     InformacoesAtendimentoResponse toResponse(InformacoesAtendimento entity);
     void updateFromRequest(InformacoesAtendimentoRequest request, @MappingTarget InformacoesAtendimento entity);
 
-    InformacoesAtendimento toEntity(com.upsaude.dto.embeddable.InformacoesAtendimentoDTO dto);
-    com.upsaude.dto.embeddable.InformacoesAtendimentoDTO toDTO(InformacoesAtendimento entity);
-    void updateFromDTO(com.upsaude.dto.embeddable.InformacoesAtendimentoDTO dto, @MappingTarget InformacoesAtendimento entity);
 }

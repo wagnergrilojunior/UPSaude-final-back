@@ -11,7 +11,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
-import com.upsaude.dto.referencia.sigtap.*;
+import com.upsaude.api.response.referencia.sigtap.*;
 import com.upsaude.entity.referencia.sigtap.*;
 import com.upsaude.exception.NotFoundException;
 import com.upsaude.mapper.sigtap.*;

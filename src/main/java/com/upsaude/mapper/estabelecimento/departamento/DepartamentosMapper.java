@@ -2,10 +2,8 @@ package com.upsaude.mapper.estabelecimento.departamento;
 
 import com.upsaude.api.request.estabelecimento.departamento.DepartamentosRequest;
 import com.upsaude.api.response.estabelecimento.departamento.DepartamentosResponse;
-import com.upsaude.dto.estabelecimento.departamento.DepartamentosDTO;
 import com.upsaude.entity.estabelecimento.departamento.Departamentos;
 import com.upsaude.entity.estabelecimento.Estabelecimentos;
-import com.upsaude.mapper.EntityMapper;
 import com.upsaude.mapper.config.MappingConfig;
 import com.upsaude.mapper.estabelecimento.EstabelecimentosMapper;
 import org.mapstruct.Mapper;
@@ -13,12 +11,7 @@ import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 
 @Mapper(config = MappingConfig.class, uses = {EstabelecimentosMapper.class})
-public interface DepartamentosMapper extends EntityMapper<Departamentos, DepartamentosDTO> {
-
-    @Mapping(target = "active", ignore = true)
-    Departamentos toEntity(DepartamentosDTO dto);
-
-    DepartamentosDTO toDTO(Departamentos entity);
+public interface DepartamentosMapper  {
 
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
