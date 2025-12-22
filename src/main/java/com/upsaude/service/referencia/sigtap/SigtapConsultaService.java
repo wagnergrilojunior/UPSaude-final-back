@@ -1,6 +1,6 @@
 package com.upsaude.service.referencia.sigtap;
 
-import com.upsaude.dto.referencia.sigtap.*;
+import com.upsaude.api.response.referencia.sigtap.*;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 

@@ -6,19 +6,12 @@ import org.mapstruct.MappingTarget;
 
 import com.upsaude.api.request.profissional.equipe.VinculoProfissionalEquipeRequest;
 import com.upsaude.api.response.profissional.equipe.VinculoProfissionalEquipeResponse;
-import com.upsaude.dto.profissional.equipe.VinculoProfissionalEquipeDTO;
 import com.upsaude.entity.profissional.equipe.VinculoProfissionalEquipe;
-import com.upsaude.mapper.EntityMapper;
 import com.upsaude.mapper.config.MappingConfig;
 import com.upsaude.mapper.profissional.ProfissionaisSaudeMapper;
 
 @Mapper(config = MappingConfig.class, uses = {EquipeSaudeMapper.class, ProfissionaisSaudeMapper.class})
-public interface VinculoProfissionalEquipeMapper extends EntityMapper<VinculoProfissionalEquipe, VinculoProfissionalEquipeDTO> {
-
-    @Mapping(target = "active", ignore = true)
-    VinculoProfissionalEquipe toEntity(VinculoProfissionalEquipeDTO dto);
-
-    VinculoProfissionalEquipeDTO toDTO(VinculoProfissionalEquipe entity);
+public interface VinculoProfissionalEquipeMapper  {
 
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "createdAt", ignore = true)

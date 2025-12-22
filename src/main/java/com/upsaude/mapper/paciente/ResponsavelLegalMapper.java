@@ -6,19 +6,12 @@ import org.mapstruct.MappingTarget;
 
 import com.upsaude.api.request.paciente.ResponsavelLegalRequest;
 import com.upsaude.api.response.paciente.ResponsavelLegalResponse;
-import com.upsaude.dto.paciente.ResponsavelLegalDTO;
 import com.upsaude.entity.paciente.ResponsavelLegal;
-import com.upsaude.mapper.EntityMapper;
 import com.upsaude.mapper.config.MappingConfig;
 import com.upsaude.mapper.estabelecimento.EstabelecimentosMapper;
 
 @Mapper(config = MappingConfig.class, uses = {PacienteMapper.class, EstabelecimentosMapper.class})
-public interface ResponsavelLegalMapper extends EntityMapper<ResponsavelLegal, ResponsavelLegalDTO> {
-
-    @Mapping(target = "active", ignore = true)
-    ResponsavelLegal toEntity(ResponsavelLegalDTO dto);
-
-    ResponsavelLegalDTO toDTO(ResponsavelLegal entity);
+public interface ResponsavelLegalMapper  {
 
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "createdAt", ignore = true)

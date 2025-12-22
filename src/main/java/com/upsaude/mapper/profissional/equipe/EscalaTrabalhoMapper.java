@@ -6,20 +6,13 @@ import org.mapstruct.MappingTarget;
 
 import com.upsaude.api.request.profissional.equipe.EscalaTrabalhoRequest;
 import com.upsaude.api.response.profissional.equipe.EscalaTrabalhoResponse;
-import com.upsaude.dto.profissional.equipe.EscalaTrabalhoDTO;
 import com.upsaude.entity.profissional.equipe.EscalaTrabalho;
-import com.upsaude.mapper.EntityMapper;
 import com.upsaude.mapper.config.MappingConfig;
 import com.upsaude.mapper.profissional.MedicosMapper;
 import com.upsaude.mapper.profissional.ProfissionaisSaudeMapper;
 
 @Mapper(config = MappingConfig.class, uses = {MedicosMapper.class, ProfissionaisSaudeMapper.class})
-public interface EscalaTrabalhoMapper extends EntityMapper<EscalaTrabalho, EscalaTrabalhoDTO> {
-
-    @Mapping(target = "active", ignore = true)
-    EscalaTrabalho toEntity(EscalaTrabalhoDTO dto);
-
-    EscalaTrabalhoDTO toDTO(EscalaTrabalho entity);
+public interface EscalaTrabalhoMapper  {
 
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "createdAt", ignore = true)

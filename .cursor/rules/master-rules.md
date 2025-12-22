@@ -41,7 +41,7 @@ global_rules:
   - Todas as TABELAS devem ser PLURAL snake_case (alergias, pacientes)
   - Nunca expor ENTIDADES em controllers
   - Controllers recebem Request e retornam Response
-  - Mapeamentos ENTIDADE ↔ DTO ↔ REQUEST/RESPONSE deve ser feito por MapStruct
+  - Mapeamentos ENTIDADE ↔ REQUEST/RESPONSE deve ser feito por MapStruct
   - Toda lógica de negócio deve estar no service_impl
   - Toda regra pesada deve ir para domain-rules.yaml
   - Toda classe deve ser documentada
@@ -93,26 +93,13 @@ response:
     - Estrutura equilibrada, sem dados desnecessários.
 
 # ==========================================================
-#   DTO
-# ==========================================================
-dto:
-  rules:
-    - Nome: NomeEntidadeDTO.
-    - Representa modelo interno usado pelo service.
-    - Deve conter id, timestamps e active.
-    - Nunca conter validações.
-    - Embeddables devem ter DTO próprio.
-
-# ==========================================================
 #   MAPPER
 # ==========================================================
 mapper:
   rules:
     - Deve usar @Mapper(config = MappingConfig.class)
-    - Deve extender EntityMapper<Entity, DTO>.
+    - NÃO deve extender EntityMapper (DTOs foram removidos).
     - Métodos obrigatórios:
-        - toEntity(dto)
-        - toDTO(entity)
         - fromRequest(request)
         - updateFromRequest(request, @MappingTarget entity)
         - toResponse(entity)
@@ -185,7 +172,7 @@ controller:
         - @RestController
         - @RequestMapping("/api/v1/{entidade}")
     - Retornos sempre ResponseEntity
-    - Nunca retornar Entity ou DTO → APENAS Response
+    - Nunca retornar Entity → APENAS Response
     - Paginação deve usar Pageable
     - Tratamento de erros centralizado no ApiExceptionHandler
     - Controllers NÃO devem conter lógica de negócio
@@ -200,7 +187,6 @@ naming_conventions:
   package_case: lower_case
   request_suffix: Request
   response_suffix: Response
-  dto_suffix: DTO
   mapper_suffix: Mapper
   service_suffix: Service
   service_impl_suffix: ServiceImpl

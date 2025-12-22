@@ -23,8 +23,8 @@ controller_rules:
 
   forbidden:
     - "Nunca retornar Entity"
-    - "Nunca retornar DTO"
-    - "Nunca receber Entity ou DTO no payload"
+    - "Nunca retornar Entity"
+    - "Nunca receber Entity no payload"
     - "Nunca colocar regra de negócio no controller"
     - "Nunca acessar Repository diretamente"
 

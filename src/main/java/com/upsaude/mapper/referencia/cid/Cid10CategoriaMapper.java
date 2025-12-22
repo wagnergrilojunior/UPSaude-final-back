@@ -2,7 +2,7 @@ package com.upsaude.mapper.referencia.cid;
 
 import org.mapstruct.Mapper;
 
-import com.upsaude.dto.referencia.cid.Cid10CategoriaResponse;
+import com.upsaude.api.response.referencia.cid.Cid10CategoriaResponse;
 import com.upsaude.entity.referencia.cid.Cid10Categorias;
 
 @Mapper(componentModel = "spring")

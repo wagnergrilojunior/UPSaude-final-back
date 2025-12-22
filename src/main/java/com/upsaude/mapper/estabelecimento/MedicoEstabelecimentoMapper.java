@@ -6,18 +6,11 @@ import org.mapstruct.MappingTarget;
 
 import com.upsaude.api.request.estabelecimento.MedicoEstabelecimentoRequest;
 import com.upsaude.api.response.estabelecimento.MedicoEstabelecimentoResponse;
-import com.upsaude.dto.estabelecimento.MedicoEstabelecimentoDTO;
 import com.upsaude.entity.estabelecimento.MedicoEstabelecimento;
-import com.upsaude.mapper.EntityMapper;
 import com.upsaude.mapper.config.MappingConfig;
 
 @Mapper(config = MappingConfig.class, uses = {EstabelecimentosMapper.class})
-public interface MedicoEstabelecimentoMapper extends EntityMapper<MedicoEstabelecimento, MedicoEstabelecimentoDTO> {
-
-    @Mapping(target = "active", ignore = true)
-    MedicoEstabelecimento toEntity(MedicoEstabelecimentoDTO dto);
-
-    MedicoEstabelecimentoDTO toDTO(MedicoEstabelecimento entity);
+public interface MedicoEstabelecimentoMapper  {
 
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "createdAt", ignore = true)

@@ -2,10 +2,8 @@ package com.upsaude.mapper.sistema.notificacao;
 
 import com.upsaude.api.request.sistema.notificacao.TemplateNotificacaoRequest;
 import com.upsaude.api.response.sistema.notificacao.TemplateNotificacaoResponse;
-import com.upsaude.dto.sistema.notificacao.TemplateNotificacaoDTO;
 import com.upsaude.entity.sistema.notificacao.TemplateNotificacao;
 import com.upsaude.entity.estabelecimento.Estabelecimentos;
-import com.upsaude.mapper.EntityMapper;
 import com.upsaude.mapper.config.MappingConfig;
 import com.upsaude.mapper.estabelecimento.EstabelecimentosMapper;
 import org.mapstruct.Mapper;
@@ -13,12 +11,7 @@ import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 
 @Mapper(config = MappingConfig.class, uses = {EstabelecimentosMapper.class})
-public interface TemplateNotificacaoMapper extends EntityMapper<TemplateNotificacao, TemplateNotificacaoDTO> {
-
-    @Mapping(target = "active", ignore = true)
-    TemplateNotificacao toEntity(TemplateNotificacaoDTO dto);
-
-    TemplateNotificacaoDTO toDTO(TemplateNotificacao entity);
+public interface TemplateNotificacaoMapper  {
 
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "createdAt", ignore = true)

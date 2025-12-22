@@ -2,21 +2,14 @@ package com.upsaude.mapper.estabelecimento.equipamento;
 
 import com.upsaude.api.request.estabelecimento.equipamento.FabricantesEquipamentoRequest;
 import com.upsaude.api.response.estabelecimento.equipamento.FabricantesEquipamentoResponse;
-import com.upsaude.dto.estabelecimento.equipamento.FabricantesEquipamentoDTO;
 import com.upsaude.entity.estabelecimento.equipamento.FabricantesEquipamento;
-import com.upsaude.mapper.EntityMapper;
 import com.upsaude.mapper.config.MappingConfig;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 
 @Mapper(config = MappingConfig.class)
-public interface FabricantesEquipamentoMapper extends EntityMapper<FabricantesEquipamento, FabricantesEquipamentoDTO> {
-
-    @Mapping(target = "active", ignore = true)
-    FabricantesEquipamento toEntity(FabricantesEquipamentoDTO dto);
-
-    FabricantesEquipamentoDTO toDTO(FabricantesEquipamento entity);
+public interface FabricantesEquipamentoMapper {
 
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "createdAt", ignore = true)

@@ -1,6 +1,6 @@
 package com.upsaude.service.referencia.cid;
 
-import com.upsaude.dto.referencia.cid.*;
+import com.upsaude.api.response.referencia.cid.*;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 

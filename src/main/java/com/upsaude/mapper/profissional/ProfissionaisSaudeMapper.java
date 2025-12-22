@@ -6,19 +6,12 @@ import org.mapstruct.MappingTarget;
 
 import com.upsaude.api.request.profissional.ProfissionaisSaudeRequest;
 import com.upsaude.api.response.profissional.ProfissionaisSaudeResponse;
-import com.upsaude.dto.profissional.ProfissionaisSaudeDTO;
 import com.upsaude.entity.profissional.ProfissionaisSaude;
-import com.upsaude.mapper.EntityMapper;
 import com.upsaude.mapper.config.MappingConfig;
 import com.upsaude.mapper.geral.EnderecoMapper;
 
 @Mapper(config = MappingConfig.class, uses = {EnderecoMapper.class})
-public interface ProfissionaisSaudeMapper extends EntityMapper<ProfissionaisSaude, ProfissionaisSaudeDTO> {
-
-    @Mapping(target = "active", ignore = true)
-    ProfissionaisSaude toEntity(ProfissionaisSaudeDTO dto);
-
-    ProfissionaisSaudeDTO toDTO(ProfissionaisSaude entity);
+public interface ProfissionaisSaudeMapper  {
 
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "createdAt", ignore = true)

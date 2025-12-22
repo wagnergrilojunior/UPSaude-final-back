@@ -6,18 +6,11 @@ import org.mapstruct.MappingTarget;
 
 import com.upsaude.api.request.deficiencia.DeficienciasRequest;
 import com.upsaude.api.response.deficiencia.DeficienciasResponse;
-import com.upsaude.dto.deficiencia.DeficienciasDTO;
 import com.upsaude.entity.paciente.deficiencia.Deficiencias;
-import com.upsaude.mapper.EntityMapper;
 import com.upsaude.mapper.config.MappingConfig;
 
 @Mapper(config = MappingConfig.class)
-public interface DeficienciasMapper extends EntityMapper<Deficiencias, DeficienciasDTO> {
-
-    @Mapping(target = "active", ignore = true)
-    Deficiencias toEntity(DeficienciasDTO dto);
-
-    DeficienciasDTO toDTO(Deficiencias entity);
+public interface DeficienciasMapper  {
 
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "createdAt", ignore = true)

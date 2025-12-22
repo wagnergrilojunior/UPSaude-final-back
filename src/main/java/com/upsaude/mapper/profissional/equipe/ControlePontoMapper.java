@@ -6,20 +6,13 @@ import org.mapstruct.MappingTarget;
 
 import com.upsaude.api.request.profissional.equipe.ControlePontoRequest;
 import com.upsaude.api.response.profissional.equipe.ControlePontoResponse;
-import com.upsaude.dto.profissional.equipe.ControlePontoDTO;
 import com.upsaude.entity.profissional.equipe.ControlePonto;
-import com.upsaude.mapper.EntityMapper;
 import com.upsaude.mapper.config.MappingConfig;
 import com.upsaude.mapper.profissional.MedicosMapper;
 import com.upsaude.mapper.profissional.ProfissionaisSaudeMapper;
 
 @Mapper(config = MappingConfig.class, uses = {MedicosMapper.class, ProfissionaisSaudeMapper.class})
-public interface ControlePontoMapper extends EntityMapper<ControlePonto, ControlePontoDTO> {
-
-    @Mapping(target = "active", ignore = true)
-    ControlePonto toEntity(ControlePontoDTO dto);
-
-    ControlePontoDTO toDTO(ControlePonto entity);
+public interface ControlePontoMapper  {
 
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "createdAt", ignore = true)

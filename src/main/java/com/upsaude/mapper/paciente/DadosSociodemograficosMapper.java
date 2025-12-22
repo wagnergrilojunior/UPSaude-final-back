@@ -6,18 +6,11 @@ import org.mapstruct.MappingTarget;
 
 import com.upsaude.api.request.paciente.DadosSociodemograficosRequest;
 import com.upsaude.api.response.paciente.DadosSociodemograficosResponse;
-import com.upsaude.dto.paciente.DadosSociodemograficosDTO;
 import com.upsaude.entity.paciente.DadosSociodemograficos;
-import com.upsaude.mapper.EntityMapper;
 import com.upsaude.mapper.config.MappingConfig;
 
 @Mapper(config = MappingConfig.class)
-public interface DadosSociodemograficosMapper extends EntityMapper<DadosSociodemograficos, DadosSociodemograficosDTO> {
-
-    @Mapping(target = "active", ignore = true)
-    DadosSociodemograficos toEntity(DadosSociodemograficosDTO dto);
-
-    DadosSociodemograficosDTO toDTO(DadosSociodemograficos entity);
+public interface DadosSociodemograficosMapper  {
 
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "createdAt", ignore = true)

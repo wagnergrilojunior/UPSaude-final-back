@@ -6,21 +6,14 @@ import org.mapstruct.MappingTarget;
 
 import com.upsaude.api.request.profissional.equipe.PlantaoRequest;
 import com.upsaude.api.response.profissional.equipe.PlantaoResponse;
-import com.upsaude.dto.profissional.equipe.PlantaoDTO;
 import com.upsaude.entity.profissional.equipe.Plantao;
-import com.upsaude.mapper.EntityMapper;
 import com.upsaude.mapper.config.MappingConfig;
 import com.upsaude.mapper.estabelecimento.EstabelecimentosMapper;
 import com.upsaude.mapper.profissional.MedicosMapper;
 import com.upsaude.mapper.profissional.ProfissionaisSaudeMapper;
 
 @Mapper(config = MappingConfig.class, uses = {MedicosMapper.class, ProfissionaisSaudeMapper.class, EstabelecimentosMapper.class})
-public interface PlantaoMapper extends EntityMapper<Plantao, PlantaoDTO> {
-
-    @Mapping(target = "active", ignore = true)
-    Plantao toEntity(PlantaoDTO dto);
-
-    PlantaoDTO toDTO(Plantao entity);
+public interface PlantaoMapper  {
 
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "createdAt", ignore = true)

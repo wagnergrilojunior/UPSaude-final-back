@@ -1,6 +1,6 @@
 package com.upsaude.controller.referencia.sigtap;
 
-import com.upsaude.dto.referencia.sigtap.*;
+import com.upsaude.api.response.referencia.sigtap.*;
 import com.upsaude.exception.NotFoundException;
 import com.upsaude.service.referencia.sigtap.SigtapConsultaService;
 import io.swagger.v3.oas.annotations.Operation;

@@ -6,18 +6,11 @@ import org.mapstruct.MappingTarget;
 
 import com.upsaude.api.request.sistema.TenantRequest;
 import com.upsaude.api.response.sistema.TenantResponse;
-import com.upsaude.dto.sistema.TenantDTO;
 import com.upsaude.entity.sistema.Tenant;
-import com.upsaude.mapper.EntityMapper;
 import com.upsaude.mapper.config.MappingConfig;
 
 @Mapper(config = MappingConfig.class)
-public interface TenantMapper extends EntityMapper<Tenant, TenantDTO> {
-
-    @Mapping(target = "active", ignore = true)
-    Tenant toEntity(TenantDTO dto);
-
-    TenantDTO toDTO(Tenant entity);
+public interface TenantMapper  {
 
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "createdAt", ignore = true)

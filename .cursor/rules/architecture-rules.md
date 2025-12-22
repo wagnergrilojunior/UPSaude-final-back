@@ -30,7 +30,7 @@ architecture:
     - Nenhuma camada pode atravessar a outra diretamente (ex: controller não usa repository).
     - Todas as regras pesadas devem viver no domínio (domain-rules.yaml).
     - Toda lógica REST deve existir apenas no controller.
-    - Serviços nunca retornam entidades, apenas DTO/Response.
+    - Serviços nunca retornam entidades, apenas Response.
     - Services não recebem entidades, apenas Request.
     - MapStruct deve ser a única forma de conversão entre camadas.
     - Toda entidade deve ser persistida via repository, nunca via entityManager direto.
@@ -115,23 +115,13 @@ response:
     - Nunca retornar entidades.
     - Embeddables devem ter suas versões próprias.
 
-# ========== DTO ==========
-dto:
-  rules:
-    - Nome: NomeEntidadeDTO.
-    - Usado internamente no service.
-    - Deve conter id, timestamps e active.
-    - Nunca conter validações.
-
 # ========== MAPPER ==========
 mapper:
   rules:
     - Deve usar @Mapper(config = MappingConfig.class)
     - Usar mappers de embeddable em "uses".
-    - Deve extender EntityMapper<Entity, DTO>.
+    - NÃO deve extender EntityMapper (DTOs foram removidos).
     - Deve conter:
-        - toDTO(entity)
-        - toEntity(dto)
         - toResponse(entity)
         - fromRequest(request)
         - updateFromRequest(request, entity)
@@ -241,7 +231,6 @@ naming_conventions:
   package_case: lower_case
   request_suffix: Request
   response_suffix: Response
-  dto_suffix: DTO
   mapper_suffix: Mapper
   service_suffix: Service
   service_impl_suffix: ServiceImpl

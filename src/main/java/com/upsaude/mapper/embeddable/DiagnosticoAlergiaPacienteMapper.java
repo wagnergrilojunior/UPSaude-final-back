@@ -3,7 +3,6 @@ package com.upsaude.mapper.embeddable;
 import com.upsaude.api.request.embeddable.DiagnosticoAlergiaPacienteRequest;
 import com.upsaude.api.response.embeddable.DiagnosticoAlergiaPacienteResponse;
 import com.upsaude.entity.embeddable.DiagnosticoAlergiaPaciente;
-import com.upsaude.dto.embeddable.DiagnosticoAlergiaPacienteDTO;
 import com.upsaude.mapper.config.MappingConfig;
 import org.mapstruct.Mapper;
 import org.mapstruct.MappingTarget;
@@ -14,7 +13,4 @@ public interface DiagnosticoAlergiaPacienteMapper {
     DiagnosticoAlergiaPacienteResponse toResponse(DiagnosticoAlergiaPaciente entity);
     void updateFromRequest(DiagnosticoAlergiaPacienteRequest request, @MappingTarget DiagnosticoAlergiaPaciente entity);
 
-    DiagnosticoAlergiaPaciente toEntity(com.upsaude.dto.embeddable.DiagnosticoAlergiaPacienteDTO dto);
-    com.upsaude.dto.embeddable.DiagnosticoAlergiaPacienteDTO toDTO(DiagnosticoAlergiaPaciente entity);
-    void updateFromDTO(com.upsaude.dto.embeddable.DiagnosticoAlergiaPacienteDTO dto, @MappingTarget DiagnosticoAlergiaPaciente entity);
 }
