@@ -61,7 +61,7 @@ public class SigtapConsultaServiceImpl implements SigtapConsultaService {
     }
 
     @Override
-    public Page<SigtapProcedimentoResponse> pesquisarProcedimentos(String q, String grupoCodigo, String subgrupoCodigo, String competencia, Pageable pageable) {
+    public Page<SigtapProcedimentoResponse> pesquisarProcedimentos(String q, String grupoCodigo, String subgrupoCodigo, String formaOrganizacaoCodigo, String competencia, Pageable pageable) {
         if (pageable == null) {
             pageable = PageRequest.of(0, 20);
         }
@@ -70,8 +70,12 @@ public class SigtapConsultaServiceImpl implements SigtapConsultaService {
         // Filtrar por ativo (todos os procedimentos devem estar ativos)
         spec = spec.and((root, query, cb) -> cb.equal(root.get("active"), true));
 
-        // Filtrar por grupo através do código oficial (primeiros 2 dígitos)
-        // Exemplo: grupo 06 = procedimentos que começam com "06"
+        // Filtrar por hierarquia: grupo -> subgrupo -> forma de organização
+        // O código oficial do procedimento SIGTAP tem a estrutura:
+        // - Primeiros 2 dígitos: código do grupo
+        // - Próximos 2 dígitos: código do subgrupo
+        // - Próximos 2 dígitos: código da forma de organização
+        // - Resto: código específico do procedimento
         if (grupoCodigo != null && !grupoCodigo.isBlank()) {
             String grupoCod = grupoCodigo.trim();
             // Garantir que o código do grupo tenha 2 dígitos
@@ -80,15 +84,29 @@ public class SigtapConsultaServiceImpl implements SigtapConsultaService {
             }
             
             if (subgrupoCodigo != null && !subgrupoCodigo.isBlank()) {
-                // Filtrar por grupo + subgrupo (primeiros 4 dígitos: 2 do grupo + 2 do subgrupo)
+                // Filtrar por grupo + subgrupo
                 String subgrupoCod = subgrupoCodigo.trim();
                 if (subgrupoCod.length() == 1) {
                     subgrupoCod = "0" + subgrupoCod;
                 }
-                final String prefixo = grupoCod + subgrupoCod;
-                spec = spec.and((root, query, cb) -> 
-                    cb.like(root.get("codigoOficial"), prefixo + "%")
-                );
+                
+                if (formaOrganizacaoCodigo != null && !formaOrganizacaoCodigo.isBlank()) {
+                    // Filtrar por grupo + subgrupo + forma de organização (primeiros 6 dígitos)
+                    String formaOrgCod = formaOrganizacaoCodigo.trim();
+                    if (formaOrgCod.length() == 1) {
+                        formaOrgCod = "0" + formaOrgCod;
+                    }
+                    final String prefixo = grupoCod + subgrupoCod + formaOrgCod;
+                    spec = spec.and((root, query, cb) -> 
+                        cb.like(root.get("codigoOficial"), prefixo + "%")
+                    );
+                } else {
+                    // Filtrar por grupo + subgrupo (primeiros 4 dígitos)
+                    final String prefixo = grupoCod + subgrupoCod;
+                    spec = spec.and((root, query, cb) -> 
+                        cb.like(root.get("codigoOficial"), prefixo + "%")
+                    );
+                }
             } else {
                 // Filtrar apenas por grupo (primeiros 2 dígitos)
                 final String prefixo = grupoCod;
@@ -120,7 +138,14 @@ public class SigtapConsultaServiceImpl implements SigtapConsultaService {
         }
 
         Page<SigtapProcedimento> page = procedimentoRepository.findAll(spec, pageable);
-        return page.map(procedimentoMapper::toResponse);
+        Page<SigtapProcedimentoResponse> responsePage = page.map(procedimentoMapper::toResponse);
+        
+        // Enriquecer responses com dados faltantes a partir do código oficial
+        responsePage.getContent().forEach(response -> {
+            enrichResponseFromCodigoOficial(response);
+        });
+        
+        return responsePage;
     }
 
     @Override
@@ -356,11 +381,123 @@ public class SigtapConsultaServiceImpl implements SigtapConsultaService {
     }
 
     @Override
-    public Page<SigtapFormaOrganizacaoResponse> pesquisarFormasOrganizacao(String q, String subgrupoCodigo, String competencia, Pageable pageable) {
+    public Page<SigtapFormaOrganizacaoResponse> pesquisarFormasOrganizacao(String q, String grupoCodigo, String subgrupoCodigo, String competencia, Pageable pageable) {
         if (pageable == null) {
             pageable = PageRequest.of(0, 20);
         }
+        
+        // Usar métodos com JOIN FETCH quando temos filtros de grupo/subgrupo para evitar LazyInitializationException
+        if (grupoCodigo != null && !grupoCodigo.isBlank() && 
+            subgrupoCodigo != null && !subgrupoCodigo.isBlank()) {
+            // Filtrar por grupo + subgrupo
+            List<SigtapFormaOrganizacao> all = formaOrganizacaoRepository.findByGrupoCodigoAndSubgrupoCodigoWithRelationships(
+                    grupoCodigo.trim(), subgrupoCodigo.trim());
+            
+            // Aplicar filtro de busca (q) se necessário
+            if (q != null && !q.isBlank()) {
+                String searchTerm = q.trim().toLowerCase(Locale.ROOT);
+                all = all.stream()
+                        .filter(fo -> (fo.getCodigoOficial() != null && fo.getCodigoOficial().toLowerCase(Locale.ROOT).contains(searchTerm)) ||
+                                     (fo.getNome() != null && fo.getNome().toLowerCase(Locale.ROOT).contains(searchTerm)))
+                        .toList();
+            }
+            
+            // Aplicar filtro de competência se necessário
+            if (competencia != null && !competencia.isBlank()) {
+                String comp = competencia.replaceAll("[^0-9]", "");
+                if (comp.matches("\\d{6}")) {
+                    all = all.stream()
+                            .filter(fo -> {
+                                if (fo.getCompetenciaInicial() == null) return false;
+                                boolean inicioOk = fo.getCompetenciaInicial().compareTo(comp) <= 0;
+                                boolean fimOk = fo.getCompetenciaFinal() == null || fo.getCompetenciaFinal().compareTo(comp) >= 0;
+                                return inicioOk && fimOk;
+                            })
+                            .toList();
+                }
+            }
+            
+            // Aplicar paginação manualmente
+            int start = (int) pageable.getOffset();
+            int end = Math.min((start + pageable.getPageSize()), all.size());
+            List<SigtapFormaOrganizacao> pageContent = start < all.size() ? all.subList(start, end) : List.of();
+            Page<SigtapFormaOrganizacao> page = new PageImpl<>(pageContent, pageable, all.size());
+            return page.map(formaOrganizacaoMapper::toResponse);
+        } else if (subgrupoCodigo != null && !subgrupoCodigo.isBlank()) {
+            // Filtrar apenas por subgrupo
+            List<SigtapFormaOrganizacao> all = formaOrganizacaoRepository.findBySubgrupoCodigoWithRelationships(subgrupoCodigo.trim());
+            
+            // Aplicar filtro de busca (q) se necessário
+            if (q != null && !q.isBlank()) {
+                String searchTerm = q.trim().toLowerCase(Locale.ROOT);
+                all = all.stream()
+                        .filter(fo -> (fo.getCodigoOficial() != null && fo.getCodigoOficial().toLowerCase(Locale.ROOT).contains(searchTerm)) ||
+                                     (fo.getNome() != null && fo.getNome().toLowerCase(Locale.ROOT).contains(searchTerm)))
+                        .toList();
+            }
+            
+            // Aplicar filtro de competência se necessário
+            if (competencia != null && !competencia.isBlank()) {
+                String comp = competencia.replaceAll("[^0-9]", "");
+                if (comp.matches("\\d{6}")) {
+                    all = all.stream()
+                            .filter(fo -> {
+                                if (fo.getCompetenciaInicial() == null) return false;
+                                boolean inicioOk = fo.getCompetenciaInicial().compareTo(comp) <= 0;
+                                boolean fimOk = fo.getCompetenciaFinal() == null || fo.getCompetenciaFinal().compareTo(comp) >= 0;
+                                return inicioOk && fimOk;
+                            })
+                            .toList();
+                }
+            }
+            
+            // Aplicar paginação manualmente
+            int start = (int) pageable.getOffset();
+            int end = Math.min((start + pageable.getPageSize()), all.size());
+            List<SigtapFormaOrganizacao> pageContent = start < all.size() ? all.subList(start, end) : List.of();
+            Page<SigtapFormaOrganizacao> page = new PageImpl<>(pageContent, pageable, all.size());
+            return page.map(formaOrganizacaoMapper::toResponse);
+        } else if (grupoCodigo != null && !grupoCodigo.isBlank()) {
+            // Filtrar apenas por grupo
+            List<SigtapFormaOrganizacao> all = formaOrganizacaoRepository.findByGrupoCodigoWithRelationships(grupoCodigo.trim());
+            
+            // Aplicar filtro de busca (q) se necessário
+            if (q != null && !q.isBlank()) {
+                String searchTerm = q.trim().toLowerCase(Locale.ROOT);
+                all = all.stream()
+                        .filter(fo -> (fo.getCodigoOficial() != null && fo.getCodigoOficial().toLowerCase(Locale.ROOT).contains(searchTerm)) ||
+                                     (fo.getNome() != null && fo.getNome().toLowerCase(Locale.ROOT).contains(searchTerm)))
+                        .toList();
+            }
+            
+            // Aplicar filtro de competência se necessário
+            if (competencia != null && !competencia.isBlank()) {
+                String comp = competencia.replaceAll("[^0-9]", "");
+                if (comp.matches("\\d{6}")) {
+                    all = all.stream()
+                            .filter(fo -> {
+                                if (fo.getCompetenciaInicial() == null) return false;
+                                boolean inicioOk = fo.getCompetenciaInicial().compareTo(comp) <= 0;
+                                boolean fimOk = fo.getCompetenciaFinal() == null || fo.getCompetenciaFinal().compareTo(comp) >= 0;
+                                return inicioOk && fimOk;
+                            })
+                            .toList();
+                }
+            }
+            
+            // Aplicar paginação manualmente
+            int start = (int) pageable.getOffset();
+            int end = Math.min((start + pageable.getPageSize()), all.size());
+            List<SigtapFormaOrganizacao> pageContent = start < all.size() ? all.subList(start, end) : List.of();
+            Page<SigtapFormaOrganizacao> page = new PageImpl<>(pageContent, pageable, all.size());
+            return page.map(formaOrganizacaoMapper::toResponse);
+        }
+        
+        // Para outros casos, usar Specification normal (sem filtros de grupo/subgrupo)
         Specification<SigtapFormaOrganizacao> spec = Specification.where(null);
+
+        // Filtrar por ativo
+        spec = spec.and((root, query, cb) -> cb.equal(root.get("active"), true));
 
         if (q != null && !q.isBlank()) {
             String like = "%" + q.trim().toLowerCase(Locale.ROOT) + "%";
@@ -368,13 +505,6 @@ public class SigtapConsultaServiceImpl implements SigtapConsultaService {
                     cb.like(cb.lower(root.get("codigoOficial")), like),
                     cb.like(cb.lower(root.get("nome")), like)
             ));
-        }
-
-        if (subgrupoCodigo != null && !subgrupoCodigo.isBlank()) {
-            String cod = subgrupoCodigo.trim();
-            spec = spec.and((root, query, cb) ->
-                    cb.equal(root.join("subgrupo").get("codigoOficial"), cod)
-            );
         }
 
         if (competencia != null && !competencia.isBlank()) {
@@ -391,6 +521,8 @@ public class SigtapConsultaServiceImpl implements SigtapConsultaService {
         }
 
         Page<SigtapFormaOrganizacao> page = formaOrganizacaoRepository.findAll(spec, pageable);
+        // Para casos sem filtros de relacionamento, precisamos carregar os relacionamentos manualmente
+        // ou usar EntityGraph. Por enquanto, vamos tentar mapear e ver se funciona.
         return page.map(formaOrganizacaoMapper::toResponse);
     }
 
@@ -586,6 +718,88 @@ public class SigtapConsultaServiceImpl implements SigtapConsultaService {
                     .orElseThrow(() -> new NotFoundException("Modalidade SIGTAP não encontrada: " + codigoOficial));
         }
         return modalidadeMapper.toResponse(modalidade);
+    }
+
+    /**
+     * Enriquece o response com dados faltantes extraídos do código oficial.
+     * O código oficial do procedimento SIGTAP tem a estrutura:
+     * - Primeiros 2 dígitos: código do grupo
+     * - Próximos 2 dígitos: código do subgrupo
+     * - Próximos 2 dígitos: código da forma de organização
+     * - Resto: código específico do procedimento
+     */
+    private void enrichResponseFromCodigoOficial(SigtapProcedimentoResponse response) {
+        if (response == null || response.getCodigoOficial() == null || response.getCodigoOficial().length() < 4) {
+            return;
+        }
+
+        String codigoOficial = response.getCodigoOficial();
+        
+        // Se já tem os dados, não precisa buscar
+        if (response.getGrupoCodigo() != null && response.getSubgrupoCodigo() != null) {
+            return;
+        }
+
+        // Extrair códigos do código oficial
+        String grupoCodigo = codigoOficial.length() >= 2 ? codigoOficial.substring(0, 2) : null;
+        String subgrupoCodigo = codigoOficial.length() >= 4 ? codigoOficial.substring(2, 4) : null;
+        String formaOrganizacaoCodigo = codigoOficial.length() >= 6 ? codigoOficial.substring(4, 6) : null;
+
+        // Buscar e preencher grupo se faltar
+        if (grupoCodigo != null && (response.getGrupoCodigo() == null || response.getGrupoNome() == null)) {
+            grupoRepository.findByCodigoOficial(grupoCodigo)
+                    .ifPresent(grupo -> {
+                        response.setGrupoCodigo(grupo.getCodigoOficial());
+                        response.setGrupoNome(grupo.getNome());
+                    });
+        }
+
+        // Buscar e preencher subgrupo se faltar (usando método com JOIN FETCH)
+        if (grupoCodigo != null && subgrupoCodigo != null && 
+            (response.getSubgrupoCodigo() == null || response.getSubgrupoNome() == null)) {
+            List<SigtapSubgrupo> subgrupos = subgrupoRepository.findByGrupoCodigoOficialAndSubgrupoCodigoWithGrupo(grupoCodigo, subgrupoCodigo);
+            if (!subgrupos.isEmpty()) {
+                SigtapSubgrupo subgrupo = subgrupos.get(0);
+                response.setSubgrupoCodigo(subgrupo.getCodigoOficial());
+                response.setSubgrupoNome(subgrupo.getNome());
+                // Garantir que grupo também está preenchido
+                if (subgrupo.getGrupo() != null) {
+                    response.setGrupoCodigo(subgrupo.getGrupo().getCodigoOficial());
+                    response.setGrupoNome(subgrupo.getGrupo().getNome());
+                }
+            }
+        }
+
+        // Buscar e preencher forma de organização se faltar
+        if (grupoCodigo != null && subgrupoCodigo != null && formaOrganizacaoCodigo != null &&
+            (response.getFormaOrganizacaoCodigo() == null || response.getFormaOrganizacaoNome() == null)) {
+            // Usar lista porque pode haver múltiplas competências, pegar a mais recente
+            List<SigtapFormaOrganizacao> formasOrg = formaOrganizacaoRepository.findBySubgrupoCodigoOficialAndCodigoOficialIn(subgrupoCodigo, List.of(formaOrganizacaoCodigo));
+            if (!formasOrg.isEmpty()) {
+                // Ordenar por competência inicial (mais recente primeiro) e pegar a primeira
+                SigtapFormaOrganizacao formaOrg = formasOrg.stream()
+                        .sorted((a, b) -> {
+                            String compA = a.getCompetenciaInicial() != null ? a.getCompetenciaInicial() : "";
+                            String compB = b.getCompetenciaInicial() != null ? b.getCompetenciaInicial() : "";
+                            return compB.compareTo(compA); // Ordem decrescente (mais recente primeiro)
+                        })
+                        .findFirst()
+                        .orElse(formasOrg.get(0));
+                
+                response.setFormaOrganizacaoCodigo(formaOrg.getCodigoOficial());
+                response.setFormaOrganizacaoNome(formaOrg.getNome());
+                // Se subgrupo ainda não foi preenchido, buscar agora
+                if (response.getSubgrupoCodigo() == null && formaOrg.getSubgrupo() != null) {
+                    response.setSubgrupoCodigo(formaOrg.getSubgrupo().getCodigoOficial());
+                    response.setSubgrupoNome(formaOrg.getSubgrupo().getNome());
+                    // Se grupo ainda não foi preenchido, buscar agora
+                    if (response.getGrupoCodigo() == null && formaOrg.getSubgrupo().getGrupo() != null) {
+                        response.setGrupoCodigo(formaOrg.getSubgrupo().getGrupo().getCodigoOficial());
+                        response.setGrupoNome(formaOrg.getSubgrupo().getGrupo().getNome());
+                    }
+                }
+            }
+        }
     }
 }
 

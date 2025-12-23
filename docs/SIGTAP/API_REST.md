@@ -112,13 +112,14 @@ Busca procedimentos com paginação e filtros opcionais.
 **Endpoint**: `GET /v1/sigtap/procedimentos`
 
 **Parâmetros de Query**:
-- `q` (opcional): Termo de busca em código ou nome
-- `grupoCodigo` (opcional): Código do grupo para filtrar (ex: "06" para medicamentos)
-- `subgrupoCodigo` (opcional): Código do subgrupo para filtrar (deve ser usado junto com grupoCodigo)
+- `q` (opcional): Termo de busca livre em código ou nome do procedimento. Busca parcial e case-insensitive
+- `grupoCodigo` (opcional): Código do grupo para filtrar (2 dígitos). Exemplos: "03" (Procedimentos clínicos), "04" (Procedimentos cirúrgicos), "06" (Medicamentos)
+- `subgrupoCodigo` (opcional): Código do subgrupo para filtrar (2 dígitos). Deve ser usado junto com `grupoCodigo`
+- `formaOrganizacaoCodigo` (opcional): Código da forma de organização para filtrar (2 dígitos). Deve ser usado junto com `grupoCodigo` e `subgrupoCodigo`
 - `competencia` (opcional): Competência no formato AAAAMM (ex: 202512)
 - `page` (opcional): Número da página (padrão: 0)
 - `size` (opcional): Tamanho da página (padrão: 20)
-- `sort` (opcional): Ordenação (ex: `codigoOficial,asc`)
+- `sort` (opcional): Ordenação (ex: `codigoOficial,asc` ou `nome,desc`)
 
 **Exemplo de Requisição - Buscar todos os procedimentos**:
 ```bash
@@ -352,16 +353,21 @@ curl -X GET "http://localhost:8080/v1/sigtap/grupos" \
 ]
 ```
 
-### 5. Subgrupos
+### 5. Subgrupos e Formas de Organização
 
-#### Pesquisar Subgrupos
+#### Pesquisar Subgrupos ou Formas de Organização
 
 **Endpoint**: `GET /v1/sigtap/subgrupos`
 
+Este endpoint tem **comportamento dinâmico** baseado nos parâmetros informados:
+
+- **Apenas `grupoCodigo`**: Retorna **subgrupos** do grupo especificado
+- **`grupoCodigo` + `subgrupoCodigo`**: Retorna **formas de organização** do subgrupo especificado
+
 **Parâmetros de Query**:
 - `q` (opcional): Termo de busca em código ou nome
-- `grupoCodigo` (opcional): Código do grupo para filtrar
-- `subgrupoCodigo` (opcional): Código do subgrupo para filtrar (deve ser usado junto com grupoCodigo)
+- `grupoCodigo` (opcional): Código do grupo para filtrar (2 dígitos)
+- `subgrupoCodigo` (opcional): Código do subgrupo para filtrar (2 dígitos). Quando usado junto com `grupoCodigo`, retorna formas de organização
 - `competencia` (opcional): Competência no formato AAAAMM
 - `page` (opcional): Número da página
 - `size` (opcional): Tamanho da página
@@ -372,7 +378,7 @@ curl -X GET "http://localhost:8080/v1/sigtap/subgrupos?grupoCodigo=06&competenci
   -H "Authorization: Bearer <token>"
 ```
 
-**Exemplo de Requisição - Buscar um subgrupo específico**:
+**Exemplo de Requisição - Buscar formas de organização de um subgrupo específico**:
 ```bash
 curl -X GET "http://localhost:8080/v1/sigtap/subgrupos?grupoCodigo=06&subgrupoCodigo=01&competencia=202512" \
   -H "Authorization: Bearer <token>"
@@ -384,7 +390,7 @@ curl -X GET "http://localhost:8080/v1/sigtap/subgrupos?grupoCodigo=03&q=consulta
   -H "Authorization: Bearer <token>"
 ```
 
-**Exemplo de Resposta** (200):
+**Exemplo de Resposta - Subgrupos** (200):
 ```json
 {
   "content": [
@@ -396,6 +402,26 @@ curl -X GET "http://localhost:8080/v1/sigtap/subgrupos?grupoCodigo=03&q=consulta
       "competenciaFinal": null,
       "grupoCodigo": "03",
       "grupoNome": "PROCEDIMENTOS CLINICOS"
+    }
+  ],
+  "totalElements": 1
+}
+```
+
+**Exemplo de Resposta - Formas de Organização** (200):
+```json
+{
+  "content": [
+    {
+      "id": "dd0e8400-e29b-41d4-a716-446655440008",
+      "codigoOficial": "01",
+      "nome": "Pequenas cirurgias",
+      "competenciaInicial": "202501",
+      "competenciaFinal": null,
+      "subgrupoCodigo": "01",
+      "subgrupoNome": "Pequenas cirurgias e cirurgias de pele",
+      "grupoCodigo": "04",
+      "grupoNome": "Procedimentos cirúrgicos"
     }
   ],
   "totalElements": 1
@@ -417,15 +443,28 @@ curl -X GET "http://localhost:8080/v1/sigtap/subgrupos?grupoCodigo=03&q=consulta
 **Endpoint**: `GET /v1/sigtap/formas-organizacao`
 
 **Parâmetros de Query**:
-- `q` (opcional): Termo de busca
-- `subgrupoCodigo` (opcional): Código do subgrupo para filtrar
+- `q` (opcional): Termo de busca em código ou nome
+- `grupoCodigo` (opcional): Código do grupo para filtrar (2 dígitos). Pode ser usado sozinho ou combinado com `subgrupoCodigo`
+- `subgrupoCodigo` (opcional): Código do subgrupo para filtrar (2 dígitos). Pode ser usado sozinho ou combinado com `grupoCodigo`
 - `competencia` (opcional): Competência no formato AAAAMM
 - `page` (opcional): Número da página
 - `size` (opcional): Tamanho da página
 
-**Exemplo de Requisição**:
+**Exemplo de Requisição - Filtrar por grupo**:
 ```bash
-curl -X GET "http://localhost:8080/v1/sigtap/formas-organizacao?subgrupoCodigo=0301&q=ambulatorial" \
+curl -X GET "http://localhost:8080/v1/sigtap/formas-organizacao?grupoCodigo=04" \
+  -H "Authorization: Bearer <token>"
+```
+
+**Exemplo de Requisição - Filtrar por subgrupo**:
+```bash
+curl -X GET "http://localhost:8080/v1/sigtap/formas-organizacao?subgrupoCodigo=01&q=ambulatorial" \
+  -H "Authorization: Bearer <token>"
+```
+
+**Exemplo de Requisição - Filtrar por grupo e subgrupo**:
+```bash
+curl -X GET "http://localhost:8080/v1/sigtap/formas-organizacao?grupoCodigo=04&subgrupoCodigo=01" \
   -H "Authorization: Bearer <token>"
 ```
 
@@ -618,6 +657,12 @@ curl -X GET "http://localhost:8080/v1/sigtap/subgrupos?grupoCodigo=03&page=0&siz
   -H "Authorization: Bearer <token>"
 ```
 
+### Buscar Formas de Organização de um Subgrupo
+```bash
+curl -X GET "http://localhost:8080/v1/sigtap/subgrupos?grupoCodigo=06&subgrupoCodigo=01&page=0&size=20" \
+  -H "Authorization: Bearer <token>"
+```
+
 ## 📋 Códigos de Status HTTP
 
 - **200 OK**: Requisição bem-sucedida
@@ -720,9 +765,18 @@ curl -X GET "http://localhost:8080/v1/sigtap/import/arquivos/202512" \
 - A busca é case-insensitive (não diferencia maiúsculas/minúsculas)
 - A busca é parcial (LIKE) - não precisa do termo completo
 
-### Filtros
-- Múltiplos filtros podem ser combinados para refinar a busca
-- Filtros de relacionamento (grupo, subgrupo) ajudam a restringir resultados
+### Filtros Hierárquicos
+- **Filtro por Grupo**: Use apenas `grupoCodigo` para filtrar todos os procedimentos de um grupo
+  - Exemplo: `grupoCodigo=04` retorna todos os procedimentos cirúrgicos
+- **Filtro por Grupo + Subgrupo**: Use `grupoCodigo` e `subgrupoCodigo` para filtrar procedimentos de um subgrupo específico
+  - Exemplo: `grupoCodigo=04&subgrupoCodigo=01` retorna procedimentos que começam com "0401"
+- **Filtro por Grupo + Subgrupo + Forma de Organização**: Use os três parâmetros para filtrar procedimentos de uma forma de organização específica
+  - Exemplo: `grupoCodigo=04&subgrupoCodigo=01&formaOrganizacaoCodigo=01` retorna procedimentos que começam com "040101"
+- Múltiplos filtros podem ser combinados com busca por termo (`q`) para refinar ainda mais os resultados
+- Filtros hierárquicos são baseados nos primeiros dígitos do código oficial do procedimento:
+  - Primeiros 2 dígitos: grupo
+  - Próximos 2 dígitos: subgrupo
+  - Próximos 2 dígitos: forma de organização
 
 ### Estrutura de Resposta Paginada
 

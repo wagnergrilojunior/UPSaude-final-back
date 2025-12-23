@@ -24,24 +24,52 @@ Este grupo contém todos os medicamentos disponíveis no SUS, organizados por ti
 
 ### Via API REST
 
+#### Filtros Hierárquicos
+
+**1. Filtrar apenas por grupo (todos os medicamentos)**:
 ```bash
-# Buscar TODOS os medicamentos do grupo 06
 GET /v1/sigtap/procedimentos?grupoCodigo=06&page=0&size=20
+```
 
-# Buscar medicamentos de um subgrupo específico (ex: dispensação excepcional)
+**2. Filtrar por grupo e subgrupo (ex: dispensação excepcional)**:
+```bash
 GET /v1/sigtap/procedimentos?grupoCodigo=06&subgrupoCodigo=01&page=0&size=20
+```
 
+**3. Filtrar por grupo, subgrupo e forma de organização**:
+```bash
+GET /v1/sigtap/procedimentos?grupoCodigo=06&subgrupoCodigo=01&formaOrganizacaoCodigo=01&page=0&size=20
+```
+
+#### Busca por Termo
+
+```bash
 # Buscar medicamentos por nome dentro do grupo 06
 GET /v1/sigtap/procedimentos?grupoCodigo=06&q=dipirona&page=0&size=20
 
 # Buscar medicamento específico por código
 GET /v1/sigtap/procedimentos/0601010101
+```
 
-# Buscar subgrupos do grupo 06
+#### Consultar Subgrupos
+
+```bash
+# Buscar todos os subgrupos do grupo 06
 GET /v1/sigtap/subgrupos?grupoCodigo=06&page=0&size=20
 
 # Buscar um subgrupo específico do grupo 06
 GET /v1/sigtap/subgrupos?grupoCodigo=06&subgrupoCodigo=01
+```
+
+#### Consultar Formas de Organização
+
+```bash
+# Buscar formas de organização de um subgrupo específico
+# Quando informar grupoCodigo + subgrupoCodigo, o endpoint retorna formas de organização
+GET /v1/sigtap/subgrupos?grupoCodigo=06&subgrupoCodigo=01&page=0&size=20
+
+# Ou usar o endpoint específico de formas de organização
+GET /v1/sigtap/formas-organizacao?grupoCodigo=06&subgrupoCodigo=01&page=0&size=20
 ```
 
 ### Via SQL
@@ -77,6 +105,13 @@ GET /v1/sigtap/procedimentos?grupoCodigo=06&subgrupoCodigo=01&page=0&size=20
 
 # Medicamentos estratégicos (subgrupo 02)
 GET /v1/sigtap/procedimentos?grupoCodigo=06&subgrupoCodigo=02&page=0&size=20
+
+# Medicamentos de âmbito hospitalar e urgência (subgrupo 03)
+GET /v1/sigtap/procedimentos?grupoCodigo=06&subgrupoCodigo=03&page=0&size=20
+
+# Componente especializado da assistência farmacêutica (subgrupo 04)
+GET /v1/sigtap/procedimentos?grupoCodigo=06&subgrupoCodigo=04&page=0&size=20
+```
 
 # Medicamentos de âmbito hospitalar e urgência (subgrupo 03)
 GET /v1/sigtap/procedimentos?grupoCodigo=06&subgrupoCodigo=03&page=0&size=20

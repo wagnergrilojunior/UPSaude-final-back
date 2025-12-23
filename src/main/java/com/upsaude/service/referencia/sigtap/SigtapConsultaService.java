@@ -14,6 +14,7 @@ public interface SigtapConsultaService {
             String q,
             String grupoCodigo,
             String subgrupoCodigo,
+            String formaOrganizacaoCodigo,
             String competencia,
             Pageable pageable
     );
@@ -39,7 +40,7 @@ public interface SigtapConsultaService {
     SigtapSubgrupoResponse obterSubgrupoPorCodigo(String codigoOficial, String grupoCodigo);
 
     // Formas de Organização
-    Page<SigtapFormaOrganizacaoResponse> pesquisarFormasOrganizacao(String q, String subgrupoCodigo, String competencia, Pageable pageable);
+    Page<SigtapFormaOrganizacaoResponse> pesquisarFormasOrganizacao(String q, String grupoCodigo, String subgrupoCodigo, String competencia, Pageable pageable);
     SigtapFormaOrganizacaoResponse obterFormaOrganizacaoPorCodigo(String codigoOficial, String subgrupoCodigo);
 
     // Habilitações
