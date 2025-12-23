@@ -38,15 +38,52 @@ Este grupo contém todos os procedimentos cirúrgicos realizados em diversas esp
 
 ### Via API REST
 
+#### Filtros Hierárquicos
+
+**1. Filtrar apenas por grupo (todos os procedimentos cirúrgicos)**:
 ```bash
-# Buscar procedimentos cirúrgicos
-GET /v1/sigtap/procedimentos?q=cirurgia&page=0&size=50
+GET /v1/sigtap/procedimentos?grupoCodigo=04&page=0&size=20
+```
+
+**2. Filtrar por grupo e subgrupo (ex: pequenas cirurgias)**:
+```bash
+GET /v1/sigtap/procedimentos?grupoCodigo=04&subgrupoCodigo=01&page=0&size=20
+```
+
+**3. Filtrar por grupo, subgrupo e forma de organização**:
+```bash
+GET /v1/sigtap/procedimentos?grupoCodigo=04&subgrupoCodigo=01&formaOrganizacaoCodigo=01&page=0&size=20
+```
+
+#### Busca por Termo
+
+```bash
+# Buscar procedimentos cirúrgicos por nome
+GET /v1/sigtap/procedimentos?grupoCodigo=04&q=cirurgia&page=0&size=50
 
 # Buscar cirurgias específicas
-GET /v1/sigtap/procedimentos?q=cirurgia%20cardíaca&page=0&size=20
+GET /v1/sigtap/procedimentos?grupoCodigo=04&q=cirurgia%20cardíaca&page=0&size=20
+```
 
-# Buscar subgrupos do grupo 04
+#### Consultar Subgrupos
+
+```bash
+# Buscar todos os subgrupos do grupo 04
 GET /v1/sigtap/subgrupos?grupoCodigo=04&page=0&size=20
+
+# Buscar um subgrupo específico
+GET /v1/sigtap/subgrupos?grupoCodigo=04&subgrupoCodigo=01&page=0&size=20
+```
+
+#### Consultar Formas de Organização
+
+```bash
+# Buscar formas de organização de um subgrupo específico
+# Quando informar grupoCodigo + subgrupoCodigo, o endpoint retorna formas de organização
+GET /v1/sigtap/subgrupos?grupoCodigo=04&subgrupoCodigo=01&page=0&size=20
+
+# Ou usar o endpoint específico de formas de organização
+GET /v1/sigtap/formas-organizacao?grupoCodigo=04&subgrupoCodigo=01&page=0&size=20
 ```
 
 ### Via SQL
