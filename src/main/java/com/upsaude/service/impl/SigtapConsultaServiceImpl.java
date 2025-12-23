@@ -2,6 +2,7 @@ package com.upsaude.service.impl;
 
 import java.util.List;
 import java.util.Locale;
+import java.util.UUID;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -14,6 +15,7 @@ import org.springframework.stereotype.Service;
 import com.upsaude.api.response.referencia.sigtap.*;
 import com.upsaude.entity.referencia.sigtap.*;
 import com.upsaude.exception.NotFoundException;
+import java.util.ArrayList;
 import com.upsaude.mapper.sigtap.*;
 import com.upsaude.repository.referencia.sigtap.*;
 import com.upsaude.service.referencia.sigtap.SigtapConsultaService;
@@ -38,6 +40,19 @@ public class SigtapConsultaServiceImpl implements SigtapConsultaService {
     private final SigtapTussRepository tussRepository;
     private final SigtapOcupacaoRepository ocupacaoRepository;
     private final SigtapModalidadeRepository modalidadeRepository;
+    
+    // Repositórios de relacionamento
+    private final SigtapProcedimentoCidRepository procedimentoCidRepository;
+    private final SigtapProcedimentoOcupacaoRepository procedimentoOcupacaoRepository;
+    private final SigtapProcedimentoLeitoRepository procedimentoLeitoRepository;
+    private final SigtapProcedimentoServicoRepository procedimentoServicoRepository;
+    private final SigtapProcedimentoHabilitacaoRepository procedimentoHabilitacaoRepository;
+    private final SigtapProcedimentoComponenteRedeRepository procedimentoComponenteRedeRepository;
+    private final SigtapProcedimentoOrigemRepository procedimentoOrigemRepository;
+    private final SigtapProcedimentoRegraCondicionadaRepository procedimentoRegraCondicionadaRepository;
+    private final SigtapProcedimentoRenasesRepository procedimentoRenasesRepository;
+    private final SigtapProcedimentoTussRepository procedimentoTussRepository;
+    private final SigtapProcedimentoSiaSihRepository procedimentoSiaSihRepository;
 
     private final SigtapGrupoMapper grupoMapper;
     private final SigtapProcedimentoMapper procedimentoMapper;
@@ -51,6 +66,19 @@ public class SigtapConsultaServiceImpl implements SigtapConsultaService {
     private final SigtapTussMapper tussMapper;
     private final SigtapOcupacaoMapper ocupacaoMapper;
     private final SigtapModalidadeMapper modalidadeMapper;
+    
+    // Mappers de detalhe
+    private final SigtapProcedimentoDetalheCidMapper procedimentoDetalheCidMapper;
+    private final SigtapProcedimentoDetalheCboMapper procedimentoDetalheCboMapper;
+    private final SigtapProcedimentoDetalheLeitoMapper procedimentoDetalheLeitoMapper;
+    private final SigtapProcedimentoDetalheServicoMapper procedimentoDetalheServicoMapper;
+    private final SigtapProcedimentoDetalheHabilitacaoMapper procedimentoDetalheHabilitacaoMapper;
+    private final SigtapProcedimentoDetalheRedeMapper procedimentoDetalheRedeMapper;
+    private final SigtapProcedimentoDetalheOrigemMapper procedimentoDetalheOrigemMapper;
+    private final SigtapProcedimentoDetalheRegraCondicionadaMapper procedimentoDetalheRegraCondicionadaMapper;
+    private final SigtapProcedimentoDetalheRenasesMapper procedimentoDetalheRenasesMapper;
+    private final SigtapProcedimentoDetalheTussMapper procedimentoDetalheTussMapper;
+    private final SigtapProcedimentoDetalheSiaSihMapper procedimentoDetalheSiaSihMapper;
 
     @Override
     public List<SigtapGrupoResponse> listarGrupos() {
@@ -151,7 +179,7 @@ public class SigtapConsultaServiceImpl implements SigtapConsultaService {
     @Override
     public SigtapProcedimentoDetalhadoResponse obterProcedimentoDetalhado(String codigoProcedimento, String competencia) {
         if (codigoProcedimento == null || codigoProcedimento.isBlank()) {
-            throw new NotFoundException("Procedimento SIGTAP n?o encontrado");
+            throw new NotFoundException("Procedimento SIGTAP não encontrado");
         }
 
         Specification<SigtapProcedimento> spec = Specification.where((root, query, cb) ->
@@ -176,12 +204,228 @@ public class SigtapConsultaServiceImpl implements SigtapConsultaService {
                 PageRequest.of(0, 1, Sort.by(Sort.Direction.DESC, "competenciaInicial"))
         );
         SigtapProcedimento procedimento = page.getContent().stream().findFirst()
-                .orElseThrow(() -> new NotFoundException("Procedimento SIGTAP n?o encontrado: " + codigoProcedimento));
+                .orElseThrow(() -> new NotFoundException("Procedimento SIGTAP não encontrado: " + codigoProcedimento));
 
+        // Criar resposta
         SigtapProcedimentoDetalhadoResponse resp = new SigtapProcedimentoDetalhadoResponse();
-        resp.setProcedimento(procedimentoMapper.toResponse(procedimento));
-        procedimentoDetalheRepository.findByProcedimentoId(procedimento.getId())
-                .ifPresent(det -> resp.setDetalhe(procedimentoDetalheMapper.toResponse(det)));
+        
+        // Popular procedimento e campos de hierarquia
+        SigtapProcedimentoResponse procedimentoResponse = procedimentoMapper.toResponse(procedimento);
+        enrichResponseFromCodigoOficial(procedimentoResponse);
+        resp.setProcedimento(procedimentoResponse);
+        
+        // Buscar detalhes da tabela JSONB
+        SigtapProcedimentoDetalhe detalheEntity = procedimentoDetalheRepository.findByProcedimentoId(procedimento.getId())
+                .orElse(null);
+        
+        SigtapProcedimentoDetalheResponse detalheResponse = null;
+        if (detalheEntity != null) {
+            detalheResponse = procedimentoDetalheMapper.toResponse(detalheEntity);
+        } else {
+            detalheResponse = new SigtapProcedimentoDetalheResponse();
+            detalheResponse.setProcedimentoId(procedimento.getId());
+        }
+        
+        // Filtrar por competência se informada
+        final String compFiltro;
+        if (competencia != null && !competencia.isBlank()) {
+            String comp = competencia.replaceAll("[^0-9]", "");
+            if (comp.matches("\\d{6}")) {
+                compFiltro = comp;
+            } else {
+                compFiltro = null;
+            }
+        } else {
+            compFiltro = null;
+        }
+        
+        // Buscar dados das tabelas de relacionamento
+        UUID procedimentoId = procedimento.getId();
+        
+        // CIDs
+        List<SigtapProcedimentoCid> procedimentosCid = procedimentoCidRepository.findByProcedimentoId(procedimentoId);
+        if (compFiltro != null) {
+            final String comp = compFiltro;
+            procedimentosCid = procedimentosCid.stream()
+                    .filter(pc -> {
+                        if (pc.getCompetenciaInicial() == null) return false;
+                        boolean inicioOk = pc.getCompetenciaInicial().compareTo(comp) <= 0;
+                        boolean fimOk = pc.getCompetenciaFinal() == null || pc.getCompetenciaFinal().compareTo(comp) >= 0;
+                        return inicioOk && fimOk;
+                    })
+                    .toList();
+        }
+        detalheResponse.setListaCids(procedimentosCid.stream()
+                .map(procedimentoDetalheCidMapper::toResponse)
+                .toList());
+        
+        // CBOs
+        List<SigtapProcedimentoOcupacao> procedimentosOcupacao = procedimentoOcupacaoRepository.findByProcedimentoId(procedimentoId);
+        if (compFiltro != null) {
+            final String comp = compFiltro;
+            procedimentosOcupacao = procedimentosOcupacao.stream()
+                    .filter(po -> {
+                        if (po.getCompetenciaInicial() == null) return false;
+                        boolean inicioOk = po.getCompetenciaInicial().compareTo(comp) <= 0;
+                        boolean fimOk = po.getCompetenciaFinal() == null || po.getCompetenciaFinal().compareTo(comp) >= 0;
+                        return inicioOk && fimOk;
+                    })
+                    .toList();
+        }
+        detalheResponse.setListaCbos(procedimentosOcupacao.stream()
+                .map(procedimentoDetalheCboMapper::toResponse)
+                .toList());
+        
+        // Leitos
+        List<SigtapProcedimentoLeito> procedimentosLeito = procedimentoLeitoRepository.findByProcedimentoId(procedimentoId);
+        if (compFiltro != null) {
+            final String comp = compFiltro;
+            procedimentosLeito = procedimentosLeito.stream()
+                    .filter(pl -> {
+                        if (pl.getCompetenciaInicial() == null) return false;
+                        boolean inicioOk = pl.getCompetenciaInicial().compareTo(comp) <= 0;
+                        boolean fimOk = pl.getCompetenciaFinal() == null || pl.getCompetenciaFinal().compareTo(comp) >= 0;
+                        return inicioOk && fimOk;
+                    })
+                    .toList();
+        }
+        detalheResponse.setListaLeitos(procedimentosLeito.stream()
+                .map(procedimentoDetalheLeitoMapper::toResponse)
+                .toList());
+        
+        // Serviços/Classificações
+        List<SigtapProcedimentoServico> procedimentosServico = procedimentoServicoRepository.findByProcedimentoId(procedimentoId);
+        if (compFiltro != null) {
+            final String comp = compFiltro;
+            procedimentosServico = procedimentosServico.stream()
+                    .filter(ps -> {
+                        if (ps.getCompetenciaInicial() == null) return false;
+                        boolean inicioOk = ps.getCompetenciaInicial().compareTo(comp) <= 0;
+                        boolean fimOk = ps.getCompetenciaFinal() == null || ps.getCompetenciaFinal().compareTo(comp) >= 0;
+                        return inicioOk && fimOk;
+                    })
+                    .toList();
+        }
+        detalheResponse.setListaServicosClassificacoes(procedimentosServico.stream()
+                .map(procedimentoDetalheServicoMapper::toResponse)
+                .toList());
+        
+        // Habilitações
+        List<SigtapProcedimentoHabilitacao> procedimentosHabilitacao = procedimentoHabilitacaoRepository.findByProcedimentoId(procedimentoId);
+        if (compFiltro != null) {
+            final String comp = compFiltro;
+            procedimentosHabilitacao = procedimentosHabilitacao.stream()
+                    .filter(ph -> {
+                        if (ph.getCompetenciaInicial() == null) return false;
+                        boolean inicioOk = ph.getCompetenciaInicial().compareTo(comp) <= 0;
+                        boolean fimOk = ph.getCompetenciaFinal() == null || ph.getCompetenciaFinal().compareTo(comp) >= 0;
+                        return inicioOk && fimOk;
+                    })
+                    .toList();
+        }
+        detalheResponse.setListaHabilitacoes(procedimentosHabilitacao.stream()
+                .map(procedimentoDetalheHabilitacaoMapper::toResponse)
+                .toList());
+        
+        // Componentes de Rede
+        List<SigtapProcedimentoComponenteRede> procedimentosComponenteRede = procedimentoComponenteRedeRepository.findByProcedimentoId(procedimentoId);
+        detalheResponse.setListaRedes(procedimentosComponenteRede.stream()
+                .map(procedimentoDetalheRedeMapper::toResponse)
+                .toList());
+        
+        // Origens SIGTAP
+        List<SigtapProcedimentoOrigem> procedimentosOrigem = procedimentoOrigemRepository.findByProcedimentoId(procedimentoId);
+        log.debug("Origens SIGTAP encontradas antes dos filtros: {}", procedimentosOrigem.size());
+        if (compFiltro != null) {
+            final String comp = compFiltro;
+            procedimentosOrigem = procedimentosOrigem.stream()
+                    .filter(po -> {
+                        // Considerar ativo se for null ou true
+                        Boolean ativo = po.getActive();
+                        if (ativo != null && !ativo) return false;
+                        if (po.getCompetenciaInicial() == null) return false;
+                        boolean inicioOk = po.getCompetenciaInicial().compareTo(comp) <= 0;
+                        boolean fimOk = po.getCompetenciaFinal() == null || po.getCompetenciaFinal().compareTo(comp) >= 0;
+                        return inicioOk && fimOk;
+                    })
+                    .toList();
+        } else {
+            // Sem filtro de competência, apenas filtrar por ativo
+            procedimentosOrigem = procedimentosOrigem.stream()
+                    .filter(po -> {
+                        Boolean ativo = po.getActive();
+                        return ativo == null || ativo;
+                    })
+                    .toList();
+        }
+        log.debug("Origens SIGTAP após filtros: {}", procedimentosOrigem.size());
+        List<SigtapProcedimentoDetalheOrigemResponse> origensSigtap = procedimentosOrigem.stream()
+                .map(procedimentoDetalheOrigemMapper::toResponse)
+                .toList();
+        
+        // Origens SIA/SIH
+        List<SigtapProcedimentoSiaSih> procedimentosSiaSih = procedimentoSiaSihRepository.findByProcedimentoId(procedimentoId);
+        log.debug("Origens SIA/SIH encontradas antes dos filtros: {}", procedimentosSiaSih.size());
+        if (compFiltro != null) {
+            final String comp = compFiltro;
+            procedimentosSiaSih = procedimentosSiaSih.stream()
+                    .filter(ps -> {
+                        // Considerar ativo se for null ou true
+                        Boolean ativo = ps.getActive();
+                        if (ativo != null && !ativo) return false;
+                        if (ps.getCompetenciaInicial() == null) return false;
+                        boolean inicioOk = ps.getCompetenciaInicial().compareTo(comp) <= 0;
+                        boolean fimOk = ps.getCompetenciaFinal() == null || ps.getCompetenciaFinal().compareTo(comp) >= 0;
+                        return inicioOk && fimOk;
+                    })
+                    .toList();
+        } else {
+            // Sem filtro de competência, apenas filtrar por ativo
+            procedimentosSiaSih = procedimentosSiaSih.stream()
+                    .filter(ps -> {
+                        Boolean ativo = ps.getActive();
+                        return ativo == null || ativo;
+                    })
+                    .toList();
+        }
+        log.debug("Origens SIA/SIH após filtros: {}", procedimentosSiaSih.size());
+        List<SigtapProcedimentoDetalheOrigemResponse> origensSiaSih = procedimentosSiaSih.stream()
+                .map(procedimentoDetalheSiaSihMapper::toResponse)
+                .toList();
+        
+        // Combinar origens SIGTAP e SIA/SIH
+        List<SigtapProcedimentoDetalheOrigemResponse> todasOrigens = new ArrayList<>();
+        todasOrigens.addAll(origensSigtap);
+        todasOrigens.addAll(origensSiaSih);
+        detalheResponse.setListaOrigens(todasOrigens);
+        
+        // Regras Condicionadas
+        List<SigtapProcedimentoRegraCondicionada> procedimentosRegraCondicionada = procedimentoRegraCondicionadaRepository.findByProcedimentoId(procedimentoId);
+        detalheResponse.setListaRegrasCondicionadas(procedimentosRegraCondicionada.stream()
+                .map(procedimentoDetalheRegraCondicionadaMapper::toResponse)
+                .toList());
+        
+        // RENASES
+        List<SigtapProcedimentoRenases> procedimentosRenases = procedimentoRenasesRepository.findByProcedimentoId(procedimentoId);
+        log.debug("RENASES encontrados antes dos filtros: {}", procedimentosRenases.size());
+        procedimentosRenases = procedimentosRenases.stream()
+                .filter(pr -> {
+                    Boolean ativo = pr.getActive();
+                    return ativo == null || ativo;
+                })
+                .toList();
+        log.debug("RENASES após filtro de ativo: {}", procedimentosRenases.size());
+        detalheResponse.setListaRenases(procedimentosRenases.stream()
+                .map(procedimentoDetalheRenasesMapper::toResponse)
+                .toList());
+        
+        // TUSS
+        List<SigtapProcedimentoTuss> procedimentosTuss = procedimentoTussRepository.findByProcedimentoId(procedimentoId);
+        detalheResponse.setListaTuss(procedimentosTuss.stream()
+                .map(procedimentoDetalheTussMapper::toResponse)
+                .toList());
+        
+        resp.setDetalhe(detalheResponse);
         return resp;
     }
 

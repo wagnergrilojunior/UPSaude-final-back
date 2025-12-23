@@ -215,17 +215,9 @@ public class SigtapEntityMapper {
         procedimento.setValorServicoAmbulatorial(parser.parseBigDecimal(fields.get("VL_SA"), true));
         procedimento.setValorServicoProfissional(parser.parseBigDecimal(fields.get("VL_SP"), true));
 
-        // Lookup de forma de organiza??o (se houver CO_GRUPO, CO_SUB_GRUPO, CO_FORMA_ORGANIZACAO)
-        String codigoGrupo = fields.get("CO_GRUPO");
-        String codigoSubgrupo = fields.get("CO_SUB_GRUPO");
-        String codigoForma = fields.get("CO_FORMA_ORGANIZACAO");
-        if (codigoGrupo != null && codigoSubgrupo != null && codigoForma != null) {
-            formaOrganizacaoRepository.findBySubgrupoGrupoCodigoOficialAndSubgrupoCodigoOficialAndCodigoOficialIn(
-                    codigoGrupo, codigoSubgrupo, java.util.List.of(codigoForma))
-                    .stream()
-                    .findFirst()
-                    .ifPresent(procedimento::setFormaOrganizacao);
-        }
+        // Nota: O arquivo tb_procedimento.txt não contém CO_GRUPO, CO_SUB_GRUPO, CO_FORMA_ORGANIZACAO
+        // A relação com forma de organização é determinada pela estrutura hierárquica do código do procedimento
+        // A forma de organização é estabelecida através dos relacionamentos nas tabelas de subgrupo e forma_organizacao
 
         return procedimento;
     }
@@ -340,6 +332,8 @@ public class SigtapEntityMapper {
         SigtapComponenteRede componente = new SigtapComponenteRede();
         componente.setCodigoOficial(fields.get("CO_COMPONENTE_REDE"));
         componente.setNome(limparString(fields.get("NO_COMPONENTE_REDE")));
+        // Nota: O campo CO_REDE_ATENCAO existe no arquivo mas não é armazenado diretamente na entidade
+        // O relacionamento entre componente e rede é feito através de outras tabelas relacionais
         return componente;
     }
 
@@ -352,8 +346,8 @@ public class SigtapEntityMapper {
 
     public SigtapSiaSih mapToSiaSih(Map<String, String> fields) {
         SigtapSiaSih siaSih = new SigtapSiaSih();
-        siaSih.setCodigoOficial(fields.get("CO_SIA_SIH"));
-        siaSih.setNome(limparString(fields.get("NO_SIA_SIH")));
+        siaSih.setCodigoOficial(fields.get("CO_PROCEDIMENTO_SIA_SIH"));
+        siaSih.setNome(limparString(fields.get("NO_PROCEDIMENTO_SIA_SIH")));
         return siaSih;
     }
 

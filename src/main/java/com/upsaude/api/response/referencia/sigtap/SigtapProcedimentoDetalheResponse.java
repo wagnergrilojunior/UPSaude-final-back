@@ -3,6 +3,7 @@ package com.upsaude.api.response.referencia.sigtap;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
+import java.util.List;
 import java.util.UUID;
 
 @Data
@@ -23,45 +24,77 @@ public class SigtapProcedimentoDetalheResponse {
     @Schema(description = "Descrição completa do procedimento")
     private String descricaoCompleta;
 
-    @Schema(description = "JSON serializado com CIDs relacionados ao procedimento")
+    // Campos JSONB mantidos para compatibilidade
+    @Schema(description = "JSON serializado com CIDs relacionados ao procedimento (legado)")
     private String cids;
     
-    @Schema(description = "JSON serializado com CBOs (ocupações) relacionadas ao procedimento")
+    @Schema(description = "JSON serializado com CBOs (ocupações) relacionadas ao procedimento (legado)")
     private String cbos;
     
-    @Schema(description = "JSON serializado com categorias CBO")
+    @Schema(description = "JSON serializado com categorias CBO (legado)")
     private String categoriasCbo;
     
-    @Schema(description = "JSON serializado com tipos de leito permitidos")
+    @Schema(description = "JSON serializado com tipos de leito permitidos (legado)")
     private String tiposLeito;
     
-    @Schema(description = "JSON serializado com serviços e classificações")
+    @Schema(description = "JSON serializado com serviços e classificações (legado)")
     private String servicosClassificacoes;
     
-    @Schema(description = "JSON serializado com habilitações necessárias")
+    @Schema(description = "JSON serializado com habilitações necessárias (legado)")
     private String habilitacoes;
     
-    @Schema(description = "JSON serializado com grupos de habilitação")
+    @Schema(description = "JSON serializado com grupos de habilitação (legado)")
     private String gruposHabilitacao;
     
-    @Schema(description = "JSON serializado com incrementos aplicáveis")
+    @Schema(description = "JSON serializado com incrementos aplicáveis (legado)")
     private String incrementos;
     
-    @Schema(description = "JSON serializado com componentes da rede")
+    @Schema(description = "JSON serializado com componentes da rede (legado)")
     private String componentesRede;
     
-    @Schema(description = "JSON serializado com origens SIGTAP")
+    @Schema(description = "JSON serializado com origens SIGTAP (legado)")
     private String origensSigtap;
     
-    @Schema(description = "JSON serializado com origens SIA/SIH")
+    @Schema(description = "JSON serializado com origens SIA/SIH (legado)")
     private String origensSiaSih;
     
-    @Schema(description = "JSON serializado com regras condicionadas")
+    @Schema(description = "JSON serializado com regras condicionadas (legado)")
     private String regrasCondicionadas;
     
-    @Schema(description = "JSON serializado com RENASES relacionados")
+    @Schema(description = "JSON serializado com RENASES relacionados (legado)")
     private String renases;
     
-    @Schema(description = "JSON serializado com códigos TUSS relacionados")
+    @Schema(description = "JSON serializado com códigos TUSS relacionados (legado)")
     private String tuss;
+    
+    // Listas estruturadas (prioridade sobre JSONB)
+    @Schema(description = "Lista de CIDs relacionados ao procedimento")
+    private List<SigtapProcedimentoDetalheCidResponse> listaCids;
+    
+    @Schema(description = "Lista de CBOs (ocupações) relacionadas ao procedimento")
+    private List<SigtapProcedimentoDetalheCboResponse> listaCbos;
+    
+    @Schema(description = "Lista de tipos de leito permitidos")
+    private List<SigtapProcedimentoDetalheLeitoResponse> listaLeitos;
+    
+    @Schema(description = "Lista de serviços e classificações")
+    private List<SigtapProcedimentoDetalheServicoResponse> listaServicosClassificacoes;
+    
+    @Schema(description = "Lista de habilitações necessárias")
+    private List<SigtapProcedimentoDetalheHabilitacaoResponse> listaHabilitacoes;
+    
+    @Schema(description = "Lista de componentes de rede")
+    private List<SigtapProcedimentoDetalheRedeResponse> listaRedes;
+    
+    @Schema(description = "Lista de procedimentos origem")
+    private List<SigtapProcedimentoDetalheOrigemResponse> listaOrigens;
+    
+    @Schema(description = "Lista de regras condicionadas")
+    private List<SigtapProcedimentoDetalheRegraCondicionadaResponse> listaRegrasCondicionadas;
+    
+    @Schema(description = "Lista de RENASES relacionados")
+    private List<SigtapProcedimentoDetalheRenasesResponse> listaRenases;
+    
+    @Schema(description = "Lista de códigos TUSS relacionados")
+    private List<SigtapProcedimentoDetalheTussResponse> listaTuss;
 }
