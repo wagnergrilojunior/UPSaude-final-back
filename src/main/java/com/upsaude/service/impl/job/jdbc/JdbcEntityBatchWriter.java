@@ -16,6 +16,7 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.UUID;
 
 /**
  * Writer genérico para persistência em batch via JDBC, com suporte a INSERT e UPSERT (Postgres).
@@ -39,7 +40,9 @@ import java.util.concurrent.ConcurrentHashMap;
 @Service
 public class JdbcEntityBatchWriter {
 
-    private static final Set<String> BASE_COLUMNS = Set.of("id", "criado_em", "atualizado_em", "ativo");
+    // Colunas que são gerenciadas automaticamente (criado_em, atualizado_em, ativo)
+    // NOTA: "id" NÃO está mais aqui - será incluído quando necessário e gerado se null
+    private static final Set<String> BASE_COLUMNS = Set.of("criado_em", "atualizado_em", "ativo");
 
     // USO EXCLUSIVO JOB - JdbcTemplate criado a partir do jobDataSource
     private final JdbcTemplate jdbcTemplate;
@@ -113,7 +116,27 @@ public class JdbcEntityBatchWriter {
         }
 
         List<ColumnBinding> bindings = new ArrayList<>();
+        Field idField = null;
+        
+        // Primeiro, procura o campo "id" para incluí-lo na lista de colunas
         for (Field f : allFields(clazz)) {
+            if ("id".equals(f.getName()) && UUID.class.isAssignableFrom(f.getType())) {
+                f.setAccessible(true);
+                idField = f;
+                break;
+            }
+        }
+        
+        // Se encontrou campo id, adiciona como primeira coluna
+        if (idField != null) {
+            bindings.add(new ColumnBinding("id", idField, BindingKind.ID_FIELD));
+        }
+        
+        // Depois, processa as outras colunas
+        for (Field f : allFields(clazz)) {
+            // Pula o campo id (já foi processado)
+            if ("id".equals(f.getName())) continue;
+            
             Column col = f.getAnnotation(Column.class);
             if (col != null) {
                 String colName = col.name();
@@ -159,11 +182,13 @@ public class JdbcEntityBatchWriter {
 
         String upsertSql = null;
         if (!conflictCols.isEmpty()) {
-            // Atualiza todas as colunas exceto as de conflito (mantém chave natural intacta)
+            // Atualiza todas as colunas exceto as de conflito e o id (mantém chave natural e primária intactas)
+            // O id não deve ser atualizado porque é uma chave primária e pode estar sendo referenciado por foreign keys
             Set<String> conflictSet = new HashSet<>(conflictCols);
             List<String> updates = new ArrayList<>();
             for (ColumnBinding b : bindings) {
                 if (conflictSet.contains(b.columnName)) continue;
+                if ("id".equals(b.columnName)) continue; // Não atualiza o id em caso de conflito
                 updates.add(b.columnName + " = EXCLUDED." + b.columnName);
             }
             String updateSql = updates.isEmpty() ? "DO NOTHING" : ("DO UPDATE SET " + String.join(", ", updates));
@@ -183,7 +208,7 @@ public class JdbcEntityBatchWriter {
         return out;
     }
 
-    private enum BindingKind { DIRECT_FIELD, JOIN_ENTITY_ID }
+    private enum BindingKind { ID_FIELD, DIRECT_FIELD, JOIN_ENTITY_ID }
 
     private static final class ColumnBinding {
         final String columnName;
@@ -226,21 +251,37 @@ public class JdbcEntityBatchWriter {
                 ColumnBinding b = bindings.get(idx);
                 Object value = null;
                 try {
-                    Object raw = b.field.get(entity);
-                    if (b.kind == BindingKind.DIRECT_FIELD) {
-                        value = raw;
-                    } else if (b.kind == BindingKind.JOIN_ENTITY_ID) {
+                    if (b.kind == BindingKind.ID_FIELD) {
+                        // Para campo id, gera UUID se estiver null
+                        Object raw = b.field.get(entity);
                         if (raw == null) {
-                            value = null;
-                        } else {
-                            // tenta getId() via reflexão
+                            value = UUID.randomUUID();
+                            // Opcional: define o UUID gerado de volta na entidade
                             try {
-                                value = raw.getClass().getMethod("getId").invoke(raw);
-                            } catch (Exception ex) {
-                                // fallback: campo "id"
-                                Field idField = raw.getClass().getDeclaredField("id");
-                                idField.setAccessible(true);
-                                value = idField.get(raw);
+                                b.field.set(entity, value);
+                            } catch (Exception e) {
+                                // Ignora se não conseguir setar (pode ser final)
+                            }
+                        } else {
+                            value = raw;
+                        }
+                    } else {
+                        Object raw = b.field.get(entity);
+                        if (b.kind == BindingKind.DIRECT_FIELD) {
+                            value = raw;
+                        } else if (b.kind == BindingKind.JOIN_ENTITY_ID) {
+                            if (raw == null) {
+                                value = null;
+                            } else {
+                                // tenta getId() via reflexão
+                                try {
+                                    value = raw.getClass().getMethod("getId").invoke(raw);
+                                } catch (Exception ex) {
+                                    // fallback: campo "id"
+                                    Field idField = raw.getClass().getDeclaredField("id");
+                                    idField.setAccessible(true);
+                                    value = idField.get(raw);
+                                }
                             }
                         }
                     }

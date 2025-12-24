@@ -62,15 +62,40 @@ public interface ImportJobJobRepository extends JpaRepository<ImportJob, UUID> {
     /**
      * Faz o claim ATÔMICO de 1 job: seleciona um job ENFILEIRADO pronto (next_run_at <= now),
      * respeita limite global e por tenant, marca como PROCESSANDO e retorna o id.
+     * 
+     * IMPORTANTE: Processa jobs agrupados por tipo. Se houver jobs de um tipo em processamento,
+     * só buscará novos jobs desse mesmo tipo. Caso contrário, buscará jobs do próximo tipo disponível.
      *
      * Usa SKIP LOCKED para evitar concorrência entre schedulers.
      */
     @Query(value = """
-        WITH candidate AS (
+        WITH tipo_em_processamento AS (
+            -- Identifica se há algum tipo em processamento
+            SELECT DISTINCT tipo
+            FROM import_job
+            WHERE status = :processingStatus
+            LIMIT 1
+        ),
+        tipo_alvo AS (
+            -- Define qual tipo deve ser processado:
+            -- Se houver tipo em processamento, usa esse tipo
+            -- Caso contrário, usa o primeiro tipo disponível (ordenado alfabeticamente)
+            SELECT COALESCE(
+                (SELECT tipo FROM tipo_em_processamento),
+                (SELECT tipo FROM import_job 
+                 WHERE status = :queuedStatus 
+                   AND (next_run_at IS NULL OR next_run_at <= :now)
+                 ORDER BY tipo ASC 
+                 LIMIT 1)
+            ) AS tipo
+        ),
+        candidate AS (
             SELECT j.id
             FROM import_job j
+            CROSS JOIN tipo_alvo ta
             WHERE j.status = :queuedStatus
               AND (j.next_run_at IS NULL OR j.next_run_at <= :now)
+              AND j.tipo = ta.tipo
               AND (SELECT COUNT(1) FROM import_job p WHERE p.status = :processingStatus) < :maxGlobal
               AND (
                     j.tenant_id IS NULL
