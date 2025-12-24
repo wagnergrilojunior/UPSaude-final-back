@@ -4,7 +4,7 @@ import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -23,23 +23,21 @@ public class DataSourceConfig {
     @Bean
     @Primary
     @ConfigurationProperties("spring.datasource.api.hikari")
-    public HikariConfig apiHikariConfig(DataSourceProperties dataSourceProperties) {
+    public HikariConfig apiHikariConfig(
+            @Value("${spring.datasource.api.url:${spring.datasource.url:}}") String jdbcUrl,
+            @Value("${spring.datasource.api.username:${spring.datasource.username:}}") String username,
+            @Value("${spring.datasource.api.password:${spring.datasource.password:}}") String password,
+            @Value("${spring.datasource.api.driver-class-name:${spring.datasource.driver-class-name:org.postgresql.Driver}}") String driverClassName) {
         HikariConfig config = new HikariConfig();
 
-        // Usa propriedades específicas da API ou fallback para base
-        String jdbcUrl = dataSourceProperties.getUrl();
-        String username = dataSourceProperties.getUsername();
-        String password = dataSourceProperties.getPassword();
-        String driverClassName = dataSourceProperties.getDriverClassName();
-
         if (jdbcUrl == null || jdbcUrl.isEmpty()) {
-            log.error("ERRO CRÍTICO: spring.datasource.url não está configurado!");
-            throw new IllegalStateException("spring.datasource.url é obrigatório. Verifique as variáveis de ambiente ou application.properties");
+            log.error("ERRO CRÍTICO: spring.datasource.api.url não está configurado!");
+            throw new IllegalStateException("spring.datasource.api.url é obrigatório. Verifique as variáveis de ambiente ou application.properties");
         }
 
         if (username == null || username.isEmpty()) {
-            log.error("ERRO CRÍTICO: spring.datasource.username não está configurado!");
-            throw new IllegalStateException("spring.datasource.username é obrigatório. Verifique as variáveis de ambiente ou application.properties");
+            log.error("ERRO CRÍTICO: spring.datasource.api.username não está configurado!");
+            throw new IllegalStateException("spring.datasource.api.username é obrigatório. Verifique as variáveis de ambiente ou application.properties");
         }
 
         String urlForLog = jdbcUrl.replaceAll("password=[^&;]*", "password=***");
@@ -78,23 +76,21 @@ public class DataSourceConfig {
     @Bean
     @Qualifier("jobHikariConfig")
     @ConfigurationProperties("spring.datasource.job.hikari")
-    public HikariConfig jobHikariConfig(DataSourceProperties dataSourceProperties) {
+    public HikariConfig jobHikariConfig(
+            @Value("${spring.datasource.job.url:${spring.datasource.url:}}") String jdbcUrl,
+            @Value("${spring.datasource.job.username:${spring.datasource.username:}}") String username,
+            @Value("${spring.datasource.job.password:${spring.datasource.password:}}") String password,
+            @Value("${spring.datasource.job.driver-class-name:${spring.datasource.driver-class-name:org.postgresql.Driver}}") String driverClassName) {
         HikariConfig config = new HikariConfig();
 
-        // Usa propriedades específicas do JOB ou fallback para base
-        String jdbcUrl = dataSourceProperties.getUrl();
-        String username = dataSourceProperties.getUsername();
-        String password = dataSourceProperties.getPassword();
-        String driverClassName = dataSourceProperties.getDriverClassName();
-
         if (jdbcUrl == null || jdbcUrl.isEmpty()) {
-            log.error("ERRO CRÍTICO: spring.datasource.url não está configurado!");
-            throw new IllegalStateException("spring.datasource.url é obrigatório. Verifique as variáveis de ambiente ou application.properties");
+            log.error("ERRO CRÍTICO: spring.datasource.job.url não está configurado!");
+            throw new IllegalStateException("spring.datasource.job.url é obrigatório. Verifique as variáveis de ambiente ou application.properties");
         }
 
         if (username == null || username.isEmpty()) {
-            log.error("ERRO CRÍTICO: spring.datasource.username não está configurado!");
-            throw new IllegalStateException("spring.datasource.username é obrigatório. Verifique as variáveis de ambiente ou application.properties");
+            log.error("ERRO CRÍTICO: spring.datasource.job.username não está configurado!");
+            throw new IllegalStateException("spring.datasource.job.username é obrigatório. Verifique as variáveis de ambiente ou application.properties");
         }
 
         String urlForLog = jdbcUrl.replaceAll("password=[^&;]*", "password=***");
