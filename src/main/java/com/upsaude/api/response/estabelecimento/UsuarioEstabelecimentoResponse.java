@@ -1,7 +1,7 @@
 package com.upsaude.api.response.estabelecimento;
 
 import com.upsaude.api.response.estabelecimento.EstabelecimentosResponse;
-import com.upsaude.api.response.sistema.UsuariosSistemaResponse;
+import com.upsaude.api.response.sistema.usuario.UsuariosSistemaResponse;
 
 
 import com.upsaude.enums.TipoUsuarioSistemaEnum;

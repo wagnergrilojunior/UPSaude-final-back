@@ -200,10 +200,10 @@
             <phase>generate-sources</phase>
             <configuration>
               <wsdlFiles>
-                <wsdlFile>${project.basedir}/src/main/resources/wsdl/sigtap/ProcedimentoService_v1.wsdl</wsdlFile>
-                <wsdlFile>${project.basedir}/src/main/resources/wsdl/sigtap/NivelAgregacaoService_v1.wsdl</wsdlFile>
-                <wsdlFile>${project.basedir}/src/main/resources/wsdl/sigtap/CompatibilidadeService_v1.wsdl</wsdlFile>
-                <wsdlFile>${project.basedir}/src/main/resources/wsdl/sigtap/CompatibilidadePossivelService_v1.wsdl</wsdlFile>
+                <wsdlFile>${project.basedir}/src/main/resources/assets/wsdl/sigtap/ProcedimentoService_v1.wsdl</wsdlFile>
+                <wsdlFile>${project.basedir}/src/main/resources/assets/wsdl/sigtap/NivelAgregacaoService_v1.wsdl</wsdlFile>
+                <wsdlFile>${project.basedir}/src/main/resources/assets/wsdl/sigtap/CompatibilidadeService_v1.wsdl</wsdlFile>
+                <wsdlFile>${project.basedir}/src/main/resources/assets/wsdl/sigtap/CompatibilidadePossivelService_v1.wsdl</wsdlFile>
               </wsdlFiles>
               <packageName>com.upsaude.integration.sigtap.wsdl</packageName>
               <sourceDestDir>${project.build.directory}/generated-sources/wsimport</sourceDestDir>

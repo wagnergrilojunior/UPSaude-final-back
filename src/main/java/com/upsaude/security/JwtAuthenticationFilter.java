@@ -1,9 +1,9 @@
 package com.upsaude.security;
-import com.upsaude.entity.sistema.User;
+import com.upsaude.entity.sistema.auth.User;
 
 import com.upsaude.integration.supabase.SupabaseAuthService;
 import com.upsaude.integration.supabase.SupabaseAuthResponse;
-import com.upsaude.repository.sistema.UsuariosSistemaRepository;
+import com.upsaude.repository.sistema.usuario.UsuariosSistemaRepository;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;

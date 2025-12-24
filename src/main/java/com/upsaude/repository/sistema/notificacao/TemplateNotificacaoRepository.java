@@ -1,7 +1,7 @@
 package com.upsaude.repository.sistema.notificacao;
 
 import com.upsaude.entity.sistema.notificacao.TemplateNotificacao;
-import com.upsaude.entity.sistema.Tenant;
+import com.upsaude.entity.sistema.multitenancy.Tenant;
 import com.upsaude.enums.CanalNotificacaoEnum;
 import com.upsaude.enums.TipoNotificacaoEnum;
 import org.springframework.data.domain.Page;

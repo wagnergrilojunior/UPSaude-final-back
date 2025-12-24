@@ -10,7 +10,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import com.upsaude.entity.clinica.prontuario.Prontuarios;
-import com.upsaude.entity.sistema.Tenant;
+import com.upsaude.entity.sistema.multitenancy.Tenant;
 
 public interface ProntuariosRepository extends JpaRepository<Prontuarios, UUID> {
 

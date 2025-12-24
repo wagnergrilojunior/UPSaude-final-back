@@ -10,7 +10,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import com.upsaude.entity.convenio.Convenio;
-import com.upsaude.entity.sistema.Tenant;
+import com.upsaude.entity.sistema.multitenancy.Tenant;
 
 public interface ConvenioRepository extends JpaRepository<Convenio, UUID> {
 

@@ -12,7 +12,7 @@ import com.upsaude.mapper.config.MappingConfig;
 import com.upsaude.mapper.convenio.ConvenioMapper;
 import com.upsaude.mapper.paciente.alergia.AlergiasPacienteMapper;
 import com.upsaude.mapper.paciente.deficiencia.DeficienciasPacienteMapper;
-import com.upsaude.mapper.sistema.LGPDConsentimentoMapper;
+import com.upsaude.mapper.sistema.lgpd.LGPDConsentimentoMapper;
 import com.upsaude.mapper.sistema.integracao.IntegracaoGovMapper;
 import com.upsaude.repository.projection.PacienteSimplificadoProjection;
 

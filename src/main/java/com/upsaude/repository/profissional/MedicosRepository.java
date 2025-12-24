@@ -12,7 +12,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.lang.NonNull;
 
 import com.upsaude.entity.profissional.Medicos;
-import com.upsaude.entity.sistema.Tenant;
+import com.upsaude.entity.sistema.multitenancy.Tenant;
 
 public interface MedicosRepository extends JpaRepository<Medicos, UUID> {
 

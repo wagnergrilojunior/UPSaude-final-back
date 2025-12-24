@@ -10,7 +10,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import com.upsaude.entity.estabelecimento.departamento.Departamentos;
-import com.upsaude.entity.sistema.Tenant;
+import com.upsaude.entity.sistema.multitenancy.Tenant;
 
 public interface DepartamentosRepository extends JpaRepository<Departamentos, UUID> {
 

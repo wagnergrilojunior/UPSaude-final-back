@@ -1,7 +1,10 @@
 package com.upsaude.mapper.sigtap;
 
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.upsaude.entity.referencia.cid.Cid10Subcategorias;
@@ -48,8 +51,6 @@ import com.upsaude.importacao.sigtap.file.SigtapFileParser;
 import com.upsaude.repository.referencia.cid.Cid10SubcategoriasRepository;
 import com.upsaude.repository.referencia.sigtap.SigtapComponenteRedeRepository;
 import com.upsaude.repository.referencia.sigtap.SigtapDetalheRepository;
-import com.upsaude.repository.referencia.sigtap.SigtapFinanciamentoRepository;
-import com.upsaude.repository.referencia.sigtap.SigtapFormaOrganizacaoRepository;
 import com.upsaude.repository.referencia.sigtap.SigtapGrupoHabilitacaoRepository;
 import com.upsaude.repository.referencia.sigtap.SigtapGrupoRepository;
 import com.upsaude.repository.referencia.sigtap.SigtapHabilitacaoRepository;
@@ -76,9 +77,7 @@ public class SigtapEntityMapper {
     private final SigtapFileParser parser;
     private final SigtapGrupoRepository grupoRepository;
     private final SigtapSubgrupoRepository subgrupoRepository;
-    private final SigtapFormaOrganizacaoRepository formaOrganizacaoRepository;
     private final SigtapProcedimentoRepository procedimentoRepository;
-    private final SigtapFinanciamentoRepository financiamentoRepository;
     private final Cid10SubcategoriasRepository cid10SubcategoriasRepository;
     private final SigtapOcupacaoRepository ocupacaoRepository;
     private final SigtapHabilitacaoRepository habilitacaoRepository;
@@ -99,9 +98,7 @@ public class SigtapEntityMapper {
             SigtapFileParser parser,
             SigtapGrupoRepository grupoRepository,
             SigtapSubgrupoRepository subgrupoRepository,
-            SigtapFormaOrganizacaoRepository formaOrganizacaoRepository,
             SigtapProcedimentoRepository procedimentoRepository,
-            SigtapFinanciamentoRepository financiamentoRepository,
             Cid10SubcategoriasRepository cid10SubcategoriasRepository,
             SigtapOcupacaoRepository ocupacaoRepository,
             SigtapHabilitacaoRepository habilitacaoRepository,
@@ -120,9 +117,7 @@ public class SigtapEntityMapper {
         this.parser = parser;
         this.grupoRepository = grupoRepository;
         this.subgrupoRepository = subgrupoRepository;
-        this.formaOrganizacaoRepository = formaOrganizacaoRepository;
         this.procedimentoRepository = procedimentoRepository;
-        this.financiamentoRepository = financiamentoRepository;
         this.cid10SubcategoriasRepository = cid10SubcategoriasRepository;
         this.ocupacaoRepository = ocupacaoRepository;
         this.habilitacaoRepository = habilitacaoRepository;
@@ -150,6 +145,83 @@ public class SigtapEntityMapper {
         return idade;
     }
 
+    // ========== CACHES (reduz lookup por linha) ==========
+    /**
+     * IMPORTANTE: este mapper é singleton. Caches sem limite podem crescer indefinidamente em jobs grandes.
+     * Estratégia mínima: impor limite e limpar quando exceder (evita consumo de heap não controlado).
+     */
+    @Value("${sigtap.import.mapper-cache-max-size:20000}")
+    private int mapperCacheMaxSize;
+
+    private final ConcurrentMap<String, SigtapGrupo> grupoCache = new ConcurrentHashMap<>();
+    private final ConcurrentMap<String, SigtapSubgrupo> subgrupoCache = new ConcurrentHashMap<>();
+    private final ConcurrentMap<String, SigtapProcedimento> procedimentoCache = new ConcurrentHashMap<>();
+    private final ConcurrentMap<String, Cid10Subcategorias> cid10SubcatCache = new ConcurrentHashMap<>();
+    private final ConcurrentMap<String, SigtapOcupacao> ocupacaoCache = new ConcurrentHashMap<>();
+
+    private void enforceCacheLimit() {
+        int limit = mapperCacheMaxSize;
+        if (limit <= 0) return;
+        if (grupoCache.size() > limit) grupoCache.clear();
+        if (subgrupoCache.size() > limit) subgrupoCache.clear();
+        if (procedimentoCache.size() > limit) procedimentoCache.clear();
+        if (cid10SubcatCache.size() > limit) cid10SubcatCache.clear();
+        if (ocupacaoCache.size() > limit) ocupacaoCache.clear();
+    }
+
+    private SigtapGrupo getGrupo(String codigoGrupo) {
+        if (codigoGrupo == null || codigoGrupo.isBlank()) {
+            throw new IllegalArgumentException("CO_GRUPO inválido");
+        }
+        enforceCacheLimit();
+        return grupoCache.computeIfAbsent(codigoGrupo, k ->
+                grupoRepository.findByCodigoOficial(k)
+                        .orElseThrow(() -> new IllegalArgumentException("Grupo não encontrado: " + k))
+        );
+    }
+
+    private SigtapSubgrupo getSubgrupo(String codigoGrupo, String codigoSubgrupo) {
+        String key = (codigoGrupo == null ? "" : codigoGrupo) + "|" + (codigoSubgrupo == null ? "" : codigoSubgrupo);
+        enforceCacheLimit();
+        return subgrupoCache.computeIfAbsent(key, k ->
+                subgrupoRepository.findByGrupoCodigoOficialAndCodigoOficial(codigoGrupo, codigoSubgrupo)
+                        .orElseThrow(() -> new IllegalArgumentException("Subgrupo não encontrado: " + codigoGrupo + "/" + codigoSubgrupo))
+        );
+    }
+
+    private SigtapProcedimento getProcedimento(String codigoProcedimento) {
+        if (codigoProcedimento == null || codigoProcedimento.isBlank()) {
+            throw new IllegalArgumentException("CO_PROCEDIMENTO inválido");
+        }
+        enforceCacheLimit();
+        return procedimentoCache.computeIfAbsent(codigoProcedimento, k ->
+                procedimentoRepository.findByCodigoOficial(k)
+                        .orElseThrow(() -> new IllegalArgumentException("Procedimento não encontrado: " + k))
+        );
+    }
+
+    private Cid10Subcategorias getCid10Subcat(String codigoCid) {
+        if (codigoCid == null || codigoCid.isBlank()) {
+            throw new IllegalArgumentException("CO_CID inválido");
+        }
+        enforceCacheLimit();
+        return cid10SubcatCache.computeIfAbsent(codigoCid, k ->
+                cid10SubcategoriasRepository.findBySubcat(k)
+                        .orElseThrow(() -> new IllegalArgumentException("CID-10 Subcategoria não encontrada: " + k))
+        );
+    }
+
+    private SigtapOcupacao getOcupacao(String codigoOcupacao) {
+        if (codigoOcupacao == null || codigoOcupacao.isBlank()) {
+            throw new IllegalArgumentException("CO_OCUPACAO inválido");
+        }
+        enforceCacheLimit();
+        return ocupacaoCache.computeIfAbsent(codigoOcupacao, k ->
+                ocupacaoRepository.findByCodigoOficial(k)
+                        .orElseThrow(() -> new IllegalArgumentException("Ocupa??o n?o encontrada: " + k))
+        );
+    }
+
     // ========== MAPEAMENTOS DE TABELAS PRINCIPAIS ==========
 
     public SigtapGrupo mapToGrupo(Map<String, String> fields, String competencia) {
@@ -162,8 +234,7 @@ public class SigtapEntityMapper {
 
     public SigtapSubgrupo mapToSubgrupo(Map<String, String> fields, String competencia) {
         String codigoGrupo = fields.get("CO_GRUPO");
-        SigtapGrupo grupo = grupoRepository.findByCodigoOficial(codigoGrupo)
-                .orElseThrow(() -> new IllegalArgumentException("Grupo n?o encontrado: " + codigoGrupo));
+        SigtapGrupo grupo = getGrupo(codigoGrupo);
 
         SigtapSubgrupo subgrupo = new SigtapSubgrupo();
         subgrupo.setGrupo(grupo);
@@ -176,17 +247,7 @@ public class SigtapEntityMapper {
     public SigtapFormaOrganizacao mapToFormaOrganizacao(Map<String, String> fields, String competencia) {
         String codigoGrupo = fields.get("CO_GRUPO");
         String codigoSubgrupo = fields.get("CO_SUB_GRUPO");
-        SigtapSubgrupo subgrupo;
-        try {
-            subgrupo = subgrupoRepository.findByGrupoCodigoOficialAndCodigoOficial(codigoGrupo, codigoSubgrupo)
-                    .orElseThrow(() -> new IllegalArgumentException("Subgrupo não encontrado: " + codigoGrupo + "/" + codigoSubgrupo));
-        } catch (IllegalStateException e) {
-            // Contexto Spring fechado - relançar como IllegalArgumentException para ser capturado pelo tratamento de exceções
-            if (e.getMessage() != null && e.getMessage().contains("closed")) {
-                throw new IllegalArgumentException("Contexto Spring fechado durante busca de subgrupo: " + codigoGrupo + "/" + codigoSubgrupo, e);
-            }
-            throw e;
-        }
+        SigtapSubgrupo subgrupo = getSubgrupo(codigoGrupo, codigoSubgrupo);
 
         SigtapFormaOrganizacao forma = new SigtapFormaOrganizacao();
         forma.setSubgrupo(subgrupo);
@@ -360,41 +421,16 @@ public class SigtapEntityMapper {
     }
 
     public SigtapDescricao mapToDescricao(Map<String, String> fields, String competencia) {
-        // #region agent log
         String codigoProcedimento = fields.get("CO_PROCEDIMENTO");
-        boolean procedimentoEncontrado = false;
-        // #endregion
         SigtapDescricao descricao = new SigtapDescricao();
         if (codigoProcedimento != null) {
             java.util.Optional<SigtapProcedimento> optProcedimento = procedimentoRepository.findByCodigoOficial(codigoProcedimento);
             if (optProcedimento.isPresent()) {
                 descricao.setProcedimento(optProcedimento.get());
-                // #region agent log
-                procedimentoEncontrado = true;
-                // #endregion
-            } else {
-                // #region agent log
-                try {
-                    java.nio.file.Files.write(
-                        java.nio.file.Paths.get("/Users/wagnergrilo/Desktop/WGB/sistemas/UPSaude/code/UPSaude-back/.cursor/debug.log"),
-                        (String.format("{\"sessionId\":\"debug-session\",\"runId\":\"import-start\",\"hypothesisId\":\"F\",\"location\":\"SigtapEntityMapper.java:321\",\"message\":\"Procedimento nao encontrado\",\"data\":{\"codigoProcedimento\":\"%s\",\"competencia\":\"%s\",\"timestamp\":%d},\"timestamp\":%d}%n", 
-                            codigoProcedimento, competencia, System.currentTimeMillis(), System.currentTimeMillis())).getBytes(),
-                        java.nio.file.StandardOpenOption.CREATE, java.nio.file.StandardOpenOption.APPEND);
-                } catch (Exception e) {}
-                // #endregion
             }
         }
         descricao.setDescricaoCompleta(limparString(fields.get("DS_PROCEDIMENTO")));
         descricao.setCompetenciaInicial(fields.getOrDefault("DT_COMPETENCIA", competencia));
-        // #region agent log
-        try {
-            java.nio.file.Files.write(
-                java.nio.file.Paths.get("/Users/wagnergrilo/Desktop/WGB/sistemas/UPSaude/code/UPSaude-back/.cursor/debug.log"),
-                (String.format("{\"sessionId\":\"debug-session\",\"runId\":\"import-start\",\"hypothesisId\":\"F\",\"location\":\"SigtapEntityMapper.java:326\",\"message\":\"Descricao mapeada\",\"data\":{\"codigoProcedimento\":\"%s\",\"procedimentoEncontrado\":%s,\"competencia\":\"%s\",\"timestamp\":%d},\"timestamp\":%d}%n", 
-                    codigoProcedimento != null ? codigoProcedimento : "null", procedimentoEncontrado, competencia, System.currentTimeMillis(), System.currentTimeMillis())).getBytes(),
-                java.nio.file.StandardOpenOption.CREATE, java.nio.file.StandardOpenOption.APPEND);
-        } catch (Exception e) {}
-        // #endregion
         return descricao;
     }
 
@@ -415,10 +451,8 @@ public class SigtapEntityMapper {
     public SigtapProcedimentoCid mapToProcedimentoCid(Map<String, String> fields, String competencia) {
         String codigoProcedimento = fields.get("CO_PROCEDIMENTO");
         String codigoCid = fields.get("CO_CID");
-        SigtapProcedimento procedimento = procedimentoRepository.findByCodigoOficial(codigoProcedimento)
-                .orElseThrow(() -> new IllegalArgumentException("Procedimento não encontrado: " + codigoProcedimento));
-        Cid10Subcategorias cid10Subcategoria = cid10SubcategoriasRepository.findBySubcat(codigoCid)
-                .orElseThrow(() -> new IllegalArgumentException("CID-10 Subcategoria não encontrada: " + codigoCid));
+        SigtapProcedimento procedimento = getProcedimento(codigoProcedimento);
+        Cid10Subcategorias cid10Subcategoria = getCid10Subcat(codigoCid);
 
         SigtapProcedimentoCid procCid = new SigtapProcedimentoCid();
         procCid.setProcedimento(procedimento);
@@ -429,71 +463,15 @@ public class SigtapEntityMapper {
     }
 
     public SigtapProcedimentoOcupacao mapToProcedimentoOcupacao(Map<String, String> fields, String competencia) {
-        // #region agent log
-        try {
-            java.nio.file.Files.write(
-                java.nio.file.Paths.get("/Users/wagnergrilo/Desktop/WGB/sistemas/UPSaude/code/UPSaude-back/.cursor/debug.log"),
-                (String.format("{\"sessionId\":\"debug-session\",\"runId\":\"import-start\",\"hypothesisId\":\"I\",\"location\":\"SigtapEntityMapper.java:386\",\"message\":\"mapToProcedimentoOcupacao inicio\",\"data\":{\"codigoProcedimento\":\"%s\",\"codigoOcupacao\":\"%s\",\"competencia\":\"%s\",\"timestamp\":%d},\"timestamp\":%d}%n", 
-                    fields.get("CO_PROCEDIMENTO"), fields.get("CO_OCUPACAO"), competencia, System.currentTimeMillis(), System.currentTimeMillis())).getBytes(),
-                java.nio.file.StandardOpenOption.CREATE, java.nio.file.StandardOpenOption.APPEND);
-        } catch (Exception e) {}
-        // #endregion
         String codigoProcedimento = fields.get("CO_PROCEDIMENTO");
         String codigoOcupacao = fields.get("CO_OCUPACAO");
-        // #region agent log
-        try {
-            java.nio.file.Files.write(
-                java.nio.file.Paths.get("/Users/wagnergrilo/Desktop/WGB/sistemas/UPSaude/code/UPSaude-back/.cursor/debug.log"),
-                (String.format("{\"sessionId\":\"debug-session\",\"runId\":\"import-start\",\"hypothesisId\":\"I\",\"location\":\"SigtapEntityMapper.java:390\",\"message\":\"Buscando procedimento\",\"data\":{\"codigoProcedimento\":\"%s\",\"timestamp\":%d},\"timestamp\":%d}%n", 
-                    codigoProcedimento, System.currentTimeMillis(), System.currentTimeMillis())).getBytes(),
-                java.nio.file.StandardOpenOption.CREATE, java.nio.file.StandardOpenOption.APPEND);
-        } catch (Exception e) {}
-        // #endregion
-        SigtapProcedimento procedimento;
-        try {
-            procedimento = procedimentoRepository.findByCodigoOficial(codigoProcedimento)
-                    .orElseThrow(() -> new IllegalArgumentException("Procedimento n?o encontrado: " + codigoProcedimento));
-        } catch (IllegalStateException e) {
-            // Contexto Spring fechado - relançar como IllegalArgumentException para ser capturado pelo tratamento de exceções
-            if (e.getMessage() != null && e.getMessage().contains("closed")) {
-                throw new IllegalArgumentException("Contexto Spring fechado durante busca de procedimento: " + codigoProcedimento, e);
-            }
-            throw e;
-        }
-        // #region agent log
-        try {
-            java.nio.file.Files.write(
-                java.nio.file.Paths.get("/Users/wagnergrilo/Desktop/WGB/sistemas/UPSaude/code/UPSaude-back/.cursor/debug.log"),
-                (String.format("{\"sessionId\":\"debug-session\",\"runId\":\"import-start\",\"hypothesisId\":\"I\",\"location\":\"SigtapEntityMapper.java:405\",\"message\":\"Buscando ocupacao\",\"data\":{\"codigoOcupacao\":\"%s\",\"timestamp\":%d},\"timestamp\":%d}%n", 
-                    codigoOcupacao, System.currentTimeMillis(), System.currentTimeMillis())).getBytes(),
-                java.nio.file.StandardOpenOption.CREATE, java.nio.file.StandardOpenOption.APPEND);
-        } catch (Exception e) {}
-        // #endregion
-        SigtapOcupacao ocupacao;
-        try {
-            ocupacao = ocupacaoRepository.findByCodigoOficial(codigoOcupacao)
-                    .orElseThrow(() -> new IllegalArgumentException("Ocupa??o n?o encontrada: " + codigoOcupacao));
-        } catch (IllegalStateException e) {
-            // Contexto Spring fechado - relançar como IllegalArgumentException para ser capturado pelo tratamento de exceções
-            if (e.getMessage() != null && e.getMessage().contains("closed")) {
-                throw new IllegalArgumentException("Contexto Spring fechado durante busca de ocupa??o: " + codigoOcupacao, e);
-            }
-            throw e;
-        }
+        SigtapProcedimento procedimento = getProcedimento(codigoProcedimento);
+        SigtapOcupacao ocupacao = getOcupacao(codigoOcupacao);
 
         SigtapProcedimentoOcupacao procOcup = new SigtapProcedimentoOcupacao();
         procOcup.setProcedimento(procedimento);
         procOcup.setOcupacao(ocupacao);
         procOcup.setCompetenciaInicial(fields.getOrDefault("DT_COMPETENCIA", competencia));
-        // #region agent log
-        try {
-            java.nio.file.Files.write(
-                java.nio.file.Paths.get("/Users/wagnergrilo/Desktop/WGB/sistemas/UPSaude/code/UPSaude-back/.cursor/debug.log"),
-                (String.format("{\"sessionId\":\"debug-session\",\"runId\":\"import-start\",\"hypothesisId\":\"I\",\"location\":\"SigtapEntityMapper.java:398\",\"message\":\"mapToProcedimentoOcupacao sucesso\",\"data\":{\"timestamp\":%d},\"timestamp\":%d}%n", 
-                    System.currentTimeMillis(), System.currentTimeMillis())).getBytes(),
-                java.nio.file.StandardOpenOption.CREATE, java.nio.file.StandardOpenOption.APPEND);
-        } catch (Exception e) {}
-        // #endregion
         return procOcup;
     }
 

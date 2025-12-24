@@ -1,5 +1,5 @@
 package com.upsaude.entity;
-import com.upsaude.entity.sistema.Tenant;
+import com.upsaude.entity.sistema.multitenancy.Tenant;
 
 import com.upsaude.entity.estabelecimento.Estabelecimentos;
 

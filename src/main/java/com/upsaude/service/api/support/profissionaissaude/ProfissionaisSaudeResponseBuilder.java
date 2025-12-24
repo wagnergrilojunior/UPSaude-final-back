@@ -1,0 +1,20 @@
+package com.upsaude.service.api.support.profissionaissaude;
+
+import org.springframework.stereotype.Service;
+
+import com.upsaude.api.response.profissional.ProfissionaisSaudeResponse;
+import com.upsaude.entity.profissional.ProfissionaisSaude;
+import com.upsaude.mapper.profissional.ProfissionaisSaudeMapper;
+
+import lombok.RequiredArgsConstructor;
+
+@Service
+@RequiredArgsConstructor
+public class ProfissionaisSaudeResponseBuilder {
+
+    private final ProfissionaisSaudeMapper profissionaisSaudeMapper;
+
+    public ProfissionaisSaudeResponse build(ProfissionaisSaude profissional) {
+        return profissionaisSaudeMapper.toResponse(profissional);
+    }
+}
