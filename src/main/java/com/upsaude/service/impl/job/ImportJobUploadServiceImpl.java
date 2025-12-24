@@ -9,6 +9,10 @@ import com.upsaude.exception.InternalServerErrorException;
 import com.upsaude.integration.supabase.SupabaseStorageService;
 import com.upsaude.repository.sistema.importacao.ImportJobApiRepository;
 import com.upsaude.service.job.ImportJobUploadService;
+import com.upsaude.service.job.SigtapJobOrchestrator;
+import com.upsaude.service.job.SigtapZipExtractionService;
+import com.upsaude.service.job.Cid10ZipExtractionService;
+import com.upsaude.service.job.Cid10JobOrchestrator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -21,6 +25,7 @@ import java.io.InputStream;
 import java.security.DigestInputStream;
 import java.security.MessageDigest;
 import java.time.OffsetDateTime;
+import java.util.ArrayList;
 import java.util.HexFormat;
 import java.util.List;
 import java.util.UUID;
@@ -39,6 +44,10 @@ public class ImportJobUploadServiceImpl implements ImportJobUploadService {
     // USO EXCLUSIVO API - Upload é operação HTTP, usa pool API
     private final ImportJobApiRepository importJobApiRepository;
     private final SupabaseStorageService supabaseStorageService;
+    private final SigtapZipExtractionService sigtapZipExtractionService;
+    private final SigtapJobOrchestrator sigtapJobOrchestrator;
+    private final Cid10ZipExtractionService cid10ZipExtractionService;
+    private final Cid10JobOrchestrator cid10JobOrchestrator;
 
     @Value("${import.job.storage.bucket:imports}")
     private String importsBucket;
@@ -54,6 +63,18 @@ public class ImportJobUploadServiceImpl implements ImportJobUploadService {
 
     @Value("${import.job.priority.cid10:10}")
     private int priorityCid10;
+
+    @Value("${sigtap.import.zip.max-size-bytes:1073741824}")
+    private long maxZipSizeBytes;
+
+    @Value("${sigtap.import.zip.extracted-path-prefix:extracted}")
+    private String extractedPathPrefix;
+
+    @Value("${cid10.import.zip.max-size-bytes:1073741824}")
+    private long maxCid10ZipSizeBytes;
+
+    @Value("${cid10.import.zip.extracted-path-prefix:extracted}")
+    private String cid10ExtractedPathPrefix;
 
     @Override
     public ImportJob criarJobUpload(MultipartFile file,
@@ -104,47 +125,335 @@ public class ImportJobUploadServiceImpl implements ImportJobUploadService {
     }
 
     @Override
-    public ImportJob criarJobUploadComLayoutSigtap(MultipartFile fileDados,
-                                                  MultipartFile fileLayout,
-                                                  String competenciaAno,
-                                                  String competenciaMes,
-                                                  Tenant tenant,
-                                                  UUID createdByUserId) {
-        validarEntrada(fileDados, ImportJobTipoEnum.SIGTAP, tenant);
-        validarLimiteJobsPendentes(tenant);
-        validarDuplicata(fileDados, ImportJobTipoEnum.SIGTAP, competenciaAno, competenciaMes, null, tenant);
-        if (fileLayout == null || fileLayout.isEmpty() || !StringUtils.hasText(fileLayout.getOriginalFilename())) {
-            throw new BadRequestException("Arquivo de layout do SIGTAP é obrigatório");
+    public ImportJobUploadService.CriarJobsZipResultado criarJobsFromZipSigtap(
+            MultipartFile zipFile,
+            String competenciaAno,
+            String competenciaMes,
+            Tenant tenant,
+            UUID createdByUserId) {
+        
+        // Validações iniciais
+        if (tenant == null || tenant.getId() == null) {
+            throw new BadRequestException("Tenant é obrigatório");
+        }
+        if (zipFile == null || zipFile.isEmpty()) {
+            throw new BadRequestException("Arquivo ZIP é obrigatório e não pode ser vazio");
+        }
+        if (zipFile.getSize() > maxZipSizeBytes) {
+            throw new BadRequestException("Arquivo ZIP excede o tamanho máximo permitido: " + maxZipSizeBytes + " bytes");
+        }
+        if (!StringUtils.hasText(competenciaAno) || !StringUtils.hasText(competenciaMes)) {
+            throw new BadRequestException("Competência (ano e mês) é obrigatória");
         }
 
-        // 1) Cria job placeholder
-        ImportJob job = criarJobPlaceholder(fileDados, ImportJobTipoEnum.SIGTAP, competenciaAno, competenciaMes, null, tenant, createdByUserId);
+        validarLimiteJobsPendentes(tenant);
 
-        String bucket = StringUtils.hasText(importsBucket) ? importsBucket : IMPORTS_BUCKET_DEFAULT;
-        String dataPath = montarObjectPath(job, fileDados.getOriginalFilename());
-        String layoutPath = montarObjectPath(job, fileLayout.getOriginalFilename());
+        List<ImportJob> jobsCriados = new ArrayList<>();
+        List<String> erros = new ArrayList<>();
 
-        try (InputStream raw = fileDados.getInputStream()) {
-            MessageDigest digest = MessageDigest.getInstance("SHA-256");
-            try (DigestInputStream dis = new DigestInputStream(raw, digest)) {
-                supabaseStorageService.uploadStream(bucket, dataPath, dis, fileDados.getSize(), fileDados.getContentType());
-            }
-            String checksum = HexFormat.of().formatHex(digest.digest());
-
-            try (InputStream layoutIs = fileLayout.getInputStream()) {
-                supabaseStorageService.uploadStream(bucket, layoutPath, layoutIs, fileLayout.getSize(), fileLayout.getContentType());
+        try {
+            // 1. Extrai ZIP
+            log.info("Iniciando extração do ZIP SIGTAP para competência {}/{}", competenciaAno, competenciaMes);
+            SigtapZipExtractionService.ExtrairResultado resultadoExtracao;
+            try (InputStream zipInputStream = zipFile.getInputStream()) {
+                resultadoExtracao = sigtapZipExtractionService.extrairZip(zipInputStream);
             }
 
-            String payloadJson = "{\"layoutPath\":\"" + layoutPath.replace("\"", "") + "\"}";
-            finalizarJobEnfileiradoComPayload(job.getId(), bucket, dataPath, fileDados.getSize(), fileDados.getContentType(), checksum, payloadJson);
-            return importJobApiRepository.findById(job.getId()).orElseThrow();
+            if (resultadoExtracao.getArquivos().isEmpty()) {
+                throw new BadRequestException("ZIP não contém arquivos válidos");
+            }
+
+            // 2. Valida estrutura
+            sigtapZipExtractionService.validarEstruturaZip(resultadoExtracao.getArquivos());
+
+            // 3. Identifica pares
+            List<SigtapZipExtractionService.ArquivoPar> pares = sigtapZipExtractionService.identificarPares(resultadoExtracao.getArquivos());
+            if (pares.isEmpty()) {
+                throw new BadRequestException("Nenhum par de arquivos (dados + layout) foi identificado no ZIP");
+            }
+
+            // 4. Ordena por prioridade
+            List<SigtapJobOrchestrator.ArquivoComPrioridade> arquivosOrdenados = sigtapJobOrchestrator.ordenarArquivos(pares);
+
+            // 5. Para cada par, faz upload PRIMEIRO, depois cria job completo
+            String bucket = StringUtils.hasText(importsBucket) ? importsBucket : IMPORTS_BUCKET_DEFAULT;
+            String tenantId = tenant.getId().toString();
+
+            for (SigtapJobOrchestrator.ArquivoComPrioridade acp : arquivosOrdenados) {
+                SigtapZipExtractionService.ArquivoPar par = acp.getPar();
+                String nomeArquivoDados = par.getArquivoDados().getNome();
+                int prioridade = acp.getPrioridade();
+
+                try {
+                    // Monta paths com pasta extracted/
+                    String dataPath = montarObjectPathExtracted(tenantId, competenciaAno, competenciaMes, nomeArquivoDados);
+                    String layoutPath = montarObjectPathExtracted(tenantId, competenciaAno, competenciaMes, par.getArquivoLayout().getNome());
+
+                    // 1. FAZ UPLOAD DOS ARQUIVOS PRIMEIRO
+                    String checksum;
+                    try (InputStream dataIs = par.getArquivoDados().getConteudoAsInputStream()) {
+                        MessageDigest digest = MessageDigest.getInstance("SHA-256");
+                        try (DigestInputStream dis = new DigestInputStream(dataIs, digest)) {
+                            supabaseStorageService.uploadStream(bucket, dataPath, dis, par.getArquivoDados().getTamanho(), "text/plain");
+                        }
+                        checksum = HexFormat.of().formatHex(digest.digest());
+                    }
+
+                    // Upload arquivo de layout
+                    try (InputStream layoutIs = par.getArquivoLayout().getConteudoAsInputStream()) {
+                        supabaseStorageService.uploadStream(bucket, layoutPath, layoutIs, par.getArquivoLayout().getTamanho(), "text/plain");
+                    }
+
+                    // 2. CRIA JOB COMPLETO (com todos os dados, incluindo storage_bucket e storage_path)
+                    String payloadJson = "{\"layoutPath\":\"" + layoutPath.replace("\"", "\\\"") + "\"}";
+                    
+                    ImportJob job = criarJobCompletoZip(
+                            nomeArquivoDados,
+                            par.getArquivoDados().getTamanho(),
+                            ImportJobTipoEnum.SIGTAP,
+                            competenciaAno,
+                            competenciaMes,
+                            tenant,
+                            createdByUserId,
+                            prioridade,
+                            bucket,
+                            dataPath,
+                            checksum,
+                            payloadJson
+                    );
+                    
+                    jobsCriados.add(job);
+                    log.info("Job criado com sucesso: {} - {} (prioridade: {})", job.getId(), nomeArquivoDados, prioridade);
+                } catch (Exception e) {
+                    String erro = String.format("Erro ao processar arquivo %s: %s", nomeArquivoDados, e.getMessage());
+                    log.error(erro, e);
+                    erros.add(erro);
+                }
+            }
+
+            log.info("Processamento do ZIP concluído. Jobs criados: {}, Erros: {}", jobsCriados.size(), erros.size());
+            return new ImportJobUploadService.CriarJobsZipResultado(jobsCriados, arquivosOrdenados.size(), erros);
+
         } catch (BadRequestException e) {
-            marcarErro(job.getId(), "Erro de validação no upload: " + e.getMessage());
+            log.error("Erro de validação no upload ZIP: {}", e.getMessage());
             throw e;
         } catch (Exception e) {
-            marcarErro(job.getId(), "Falha ao fazer upload no Storage: " + e.getMessage());
-            throw new InternalServerErrorException("Erro ao salvar arquivos SIGTAP no Storage: " + e.getMessage(), e);
+            log.error("Erro ao processar ZIP SIGTAP: {}", e.getMessage(), e);
+            throw new InternalServerErrorException("Erro ao processar arquivo ZIP SIGTAP: " + e.getMessage(), e);
         }
+    }
+
+    @Override
+    public ImportJobUploadService.CriarJobsZipResultado criarJobsFromZipCid10(
+            MultipartFile zipFile,
+            String competenciaAno,
+            String competenciaMes,
+            Tenant tenant,
+            UUID createdByUserId) {
+
+        if (zipFile == null || zipFile.isEmpty()) {
+            throw new BadRequestException("Arquivo ZIP é obrigatório e não pode ser vazio");
+        }
+        if (zipFile.getSize() > maxCid10ZipSizeBytes) {
+            throw new BadRequestException("Arquivo ZIP excede o tamanho máximo permitido: " + maxCid10ZipSizeBytes + " bytes");
+        }
+        if (!StringUtils.hasText(competenciaAno) || !StringUtils.hasText(competenciaMes)) {
+            throw new BadRequestException("Competência (ano e mês) é obrigatória");
+        }
+
+        validarLimiteJobsPendentes(tenant);
+
+        List<ImportJob> jobsCriados = new ArrayList<>();
+        List<String> erros = new ArrayList<>();
+
+        try {
+            // 1. Extrai ZIP
+            log.info("Iniciando extração do ZIP CID-10 para competência {}/{}", competenciaAno, competenciaMes);
+            Cid10ZipExtractionService.ExtrairResultado resultadoExtracao;
+            try (InputStream zipInputStream = zipFile.getInputStream()) {
+                resultadoExtracao = cid10ZipExtractionService.extrairZip(zipInputStream);
+            }
+
+            if (resultadoExtracao.getArquivos().isEmpty()) {
+                throw new BadRequestException("ZIP não contém arquivos CSV válidos");
+            }
+
+            // 2. Valida estrutura
+            cid10ZipExtractionService.validarEstruturaZip(resultadoExtracao.getArquivos());
+
+            // 3. Ordena por prioridade
+            List<Cid10JobOrchestrator.ArquivoComPrioridade> arquivosOrdenados = cid10JobOrchestrator.ordenarArquivos(resultadoExtracao.getArquivos());
+
+            if (arquivosOrdenados.isEmpty()) {
+                throw new BadRequestException("Nenhum arquivo válido foi identificado no ZIP");
+            }
+
+            // 4. Para cada arquivo, faz upload PRIMEIRO, depois cria job completo
+            String bucket = StringUtils.hasText(importsBucket) ? importsBucket : IMPORTS_BUCKET_DEFAULT;
+            String tenantId = tenant.getId().toString();
+
+            for (Cid10JobOrchestrator.ArquivoComPrioridade acp : arquivosOrdenados) {
+                Cid10ZipExtractionService.ArquivoExtraido arquivo = acp.getArquivo();
+                String nomeArquivo = arquivo.getNome();
+                int prioridade = acp.getPrioridade();
+
+                try {
+                    // Monta path com pasta extracted/
+                    String storagePath = montarObjectPathExtractedCid10(tenantId, competenciaAno, competenciaMes, nomeArquivo);
+
+                    // 1. FAZ UPLOAD DO ARQUIVO PRIMEIRO
+                    String checksum;
+                    try (InputStream arquivoIs = arquivo.getConteudoAsInputStream()) {
+                        MessageDigest digest = MessageDigest.getInstance("SHA-256");
+                        try (DigestInputStream dis = new DigestInputStream(arquivoIs, digest)) {
+                            supabaseStorageService.uploadStream(bucket, storagePath, dis, arquivo.getTamanho(), "text/csv");
+                        }
+                        checksum = HexFormat.of().formatHex(digest.digest());
+                    }
+
+                    // 2. CRIA JOB COMPLETO (com todos os dados, incluindo storage_bucket e storage_path)
+                    ImportJob job = criarJobCompletoCid10(
+                            nomeArquivo,
+                            arquivo.getTamanho(),
+                            ImportJobTipoEnum.CID10,
+                            competenciaAno,
+                            competenciaMes,
+                            tenant,
+                            createdByUserId,
+                            prioridade,
+                            bucket,
+                            storagePath,
+                            checksum
+                    );
+                    
+                    jobsCriados.add(job);
+                    log.info("Job criado com sucesso: {} - {} (prioridade: {})", job.getId(), nomeArquivo, prioridade);
+                } catch (Exception e) {
+                    String erro = String.format("Erro ao processar arquivo %s: %s", nomeArquivo, e.getMessage());
+                    log.error(erro, e);
+                    erros.add(erro);
+                }
+            }
+
+            log.info("Processamento do ZIP CID-10 concluído. Jobs criados: {}, Erros: {}", jobsCriados.size(), erros.size());
+            return new ImportJobUploadService.CriarJobsZipResultado(jobsCriados, arquivosOrdenados.size(), erros);
+
+        } catch (BadRequestException e) {
+            log.error("Erro de validação no upload ZIP CID-10: {}", e.getMessage());
+            throw e;
+        } catch (Exception e) {
+            log.error("Erro ao processar ZIP CID-10: {}", e.getMessage(), e);
+            throw new InternalServerErrorException("Erro ao processar arquivo ZIP CID-10: " + e.getMessage(), e);
+        }
+    }
+
+    /**
+     * Cria job completo para arquivo extraído do ZIP (com todos os dados, incluindo storage).
+     * IMPORTANTE: Este método deve ser chamado APÓS o upload dos arquivos estar completo.
+     */
+    @Transactional
+    protected ImportJob criarJobCompletoZip(String nomeArquivo,
+                                           Long tamanho,
+                                           ImportJobTipoEnum tipo,
+                                           String competenciaAno,
+                                           String competenciaMes,
+                                           Tenant tenant,
+                                           UUID createdByUserId,
+                                           int prioridade,
+                                           String storageBucket,
+                                           String storagePath,
+                                           String checksum,
+                                           String payloadJson) {
+        ImportJob job = new ImportJob();
+        job.setTenant(tenant);
+        job.setTipo(tipo);
+        job.setCompetenciaAno(competenciaAno);
+        job.setCompetenciaMes(competenciaMes);
+        job.setUf(null); // SIGTAP não tem UF
+        job.setOriginalFilename(nomeArquivo);
+        job.setSizeBytes(tamanho);
+        job.setContentType("text/plain");
+        job.setStatus(ImportJobStatusEnum.ENFILEIRADO);
+        job.setPriority(prioridade);
+        job.setCreatedByUserId(createdByUserId);
+        job.setCreatedAt(OffsetDateTime.now());
+        job.setUpdatedAt(OffsetDateTime.now());
+        
+        // Dados do storage (obrigatórios)
+        job.setStorageBucket(storageBucket);
+        job.setStoragePath(storagePath);
+        job.setChecksum(checksum);
+        job.setPayloadJson(payloadJson);
+
+        return importJobApiRepository.save(job);
+    }
+
+    /**
+     * Cria job completo para arquivo extraído do ZIP CID-10 (com todos os dados, incluindo storage).
+     * IMPORTANTE: Este método deve ser chamado APÓS o upload do arquivo estar completo.
+     */
+    @Transactional
+    protected ImportJob criarJobCompletoCid10(String nomeArquivo,
+                                             Long tamanho,
+                                             ImportJobTipoEnum tipo,
+                                             String competenciaAno,
+                                             String competenciaMes,
+                                             Tenant tenant,
+                                             UUID createdByUserId,
+                                             int prioridade,
+                                             String storageBucket,
+                                             String storagePath,
+                                             String checksum) {
+        ImportJob job = new ImportJob();
+        job.setTenant(tenant);
+        job.setTipo(tipo);
+        job.setCompetenciaAno(competenciaAno);
+        job.setCompetenciaMes(competenciaMes);
+        job.setUf(null); // CID-10 não tem UF
+        job.setOriginalFilename(nomeArquivo);
+        job.setSizeBytes(tamanho);
+        job.setContentType("text/csv");
+        job.setStatus(ImportJobStatusEnum.ENFILEIRADO);
+        job.setPriority(prioridade);
+        job.setCreatedByUserId(createdByUserId);
+        job.setCreatedAt(OffsetDateTime.now());
+        job.setUpdatedAt(OffsetDateTime.now());
+        
+        // Dados do storage (obrigatórios)
+        job.setStorageBucket(storageBucket);
+        job.setStoragePath(storagePath);
+        job.setChecksum(checksum);
+        job.setPayloadJson(null); // CID-10 não precisa de payload JSON
+
+        return importJobApiRepository.save(job);
+    }
+
+    /**
+     * Monta path para arquivo extraído do ZIP (com pasta extracted/).
+     */
+    private String montarObjectPathExtracted(String tenantId, String ano, String mes, String nomeArquivo) {
+        String safeName = sanitizarNomeArquivo(nomeArquivo);
+        String prefix = StringUtils.hasText(extractedPathPrefix) ? extractedPathPrefix : "extracted";
+        
+        return "tenant/" + tenantId +
+                "/tipo/sigtap" +
+                "/competencia/" + ano + "/" + mes +
+                "/" + prefix +
+                "/" + safeName;
+    }
+
+    /**
+     * Monta path para arquivo extraído do ZIP CID-10 (com pasta extracted/).
+     */
+    private String montarObjectPathExtractedCid10(String tenantId, String ano, String mes, String nomeArquivo) {
+        String safeName = sanitizarNomeArquivo(nomeArquivo);
+        String prefix = StringUtils.hasText(cid10ExtractedPathPrefix) ? cid10ExtractedPathPrefix : "extracted";
+        
+        return "tenant/" + tenantId +
+                "/tipo/cid10" +
+                "/competencia/" + ano + "/" + mes +
+                "/" + prefix +
+                "/" + safeName;
     }
 
     private void validarEntrada(MultipartFile file, ImportJobTipoEnum tipo, Tenant tenant) {

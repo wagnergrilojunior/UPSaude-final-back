@@ -40,10 +40,77 @@ public class Cid10FileImportController {
     @Value("${cid10.import.base-path:data_import/cid10}")
     private String basePath;
 
+    @PostMapping("/import/upload-zip")
+    @Operation(
+            summary = "Upload de arquivo ZIP CID-10/CID-O (assíncrono)",
+            description = "Recebe um arquivo ZIP contendo todos os arquivos CSV do CID-10/CID-O de uma competência. " +
+                    "Extrai automaticamente os arquivos, salva no Storage e cria jobs ordenados por prioridade " +
+                    "baseada em dependências. Retorna 202 Accepted imediatamente.",
+            responses = {
+                    @ApiResponse(responseCode = "202", description = "Upload aceito e jobs criados"),
+                    @ApiResponse(responseCode = "400", description = "Dados inválidos"),
+                    @ApiResponse(responseCode = "401", description = "Não autenticado"),
+                    @ApiResponse(responseCode = "500", description = "Erro ao processar ZIP")
+            }
+    )
+    public ResponseEntity<Map<String, Object>> uploadZipCid10(
+            @Parameter(description = "Arquivo ZIP contendo arquivos CSV do CID-10/CID-O", required = true)
+            @RequestParam("zipFile") MultipartFile zipFile,
+            @Parameter(description = "Competência no formato AAAAMM (ex: 202512)", required = true)
+            @RequestParam("competencia") String competencia
+    ) {
+        log.debug("REQUEST POST /v1/cid10/import/upload-zip - competencia={}, filename={}",
+                competencia, zipFile != null ? zipFile.getOriginalFilename() : null);
+
+        Tenant tenant = tenantService.obterTenantDoUsuarioAutenticado();
+        if (tenant == null || tenant.getId() == null) {
+            return ResponseEntity.status(401).build();
+        }
+
+        if (competencia == null || !competencia.matches("\\d{6}")) {
+            Map<String, Object> error = new HashMap<>();
+            error.put("erro", "Competência inválida. Deve estar no formato AAAAMM");
+            return ResponseEntity.badRequest().body(error);
+        }
+
+        String ano = competencia.substring(0, 4);
+        String mes = competencia.substring(4, 6);
+        UUID userId = obterUserIdAutenticado();
+
+        ImportJobUploadService.CriarJobsZipResultado resultado = importJobUploadService.criarJobsFromZipCid10(
+                zipFile,
+                ano,
+                mes,
+                tenant,
+                userId
+        );
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("totalJobsCriados", resultado.getJobsCriados().size());
+        response.put("totalArquivosProcessados", resultado.getTotalArquivosProcessados());
+        response.put("totalErros", resultado.getErros().size());
+        response.put("jobs", resultado.getJobsCriados().stream()
+                .map(job -> {
+                    Map<String, Object> jobInfo = new HashMap<>();
+                    jobInfo.put("id", job.getId());
+                    jobInfo.put("status", job.getStatus() != null ? job.getStatus().name() : null);
+                    jobInfo.put("originalFilename", job.getOriginalFilename());
+                    jobInfo.put("priority", job.getPriority());
+                    jobInfo.put("statusUrl", "/api/v1/import-jobs/" + job.getId() + "/status");
+                    return jobInfo;
+                })
+                .toList());
+        response.put("erros", resultado.getErros());
+        response.put("mensagem", "Upload ZIP concluído. Jobs criados para processamento em background.");
+        return ResponseEntity.accepted().body(response);
+    }
+
     @PostMapping("/import/upload")
     @Operation(
-            summary = "Upload de arquivo CID10 (assíncrono)",
-            description = "Recebe um arquivo CSV do CID10 e cria um job ENFILEIRADO para processamento em background. Retorna 202 Accepted imediatamente.",
+            summary = "[DEPRECATED] Upload de arquivo CID10 individual (assíncrono)",
+            description = "DEPRECATED: Use POST /v1/cid10/import/upload-zip para upload de ZIP completo. " +
+                    "Este endpoint ainda funciona para upload individual de arquivo CSV.",
+            deprecated = true,
             responses = {
                     @ApiResponse(responseCode = "202", description = "Upload aceito e job criado"),
                     @ApiResponse(responseCode = "400", description = "Dados inválidos"),
