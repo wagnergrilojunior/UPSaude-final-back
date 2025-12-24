@@ -1,7 +1,7 @@
 package com.upsaude.repository.agendamento;
 
 import com.upsaude.entity.agendamento.Agendamento;
-import com.upsaude.entity.sistema.Tenant;
+import com.upsaude.entity.sistema.multitenancy.Tenant;
 import com.upsaude.enums.StatusAgendamentoEnum;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;

@@ -69,9 +69,6 @@ public class SecurityConfig {
                 .requestMatchers("/swagger-ui/**").permitAll()
                 .requestMatchers("/swagger-ui.html").permitAll()
                 
-                // Endpoints de importação SIGTAP (sem autenticação para facilitar execução manual)
-                .requestMatchers("/v1/sigtap/**").permitAll()
-                
                 // Todos os outros endpoints requerem autenticação
                 .anyRequest().authenticated()
             )

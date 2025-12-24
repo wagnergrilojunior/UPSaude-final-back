@@ -1,7 +1,7 @@
 package com.upsaude.repository.estabelecimento;
 
 import com.upsaude.entity.estabelecimento.ProfissionalEstabelecimento;
-import com.upsaude.entity.sistema.Tenant;
+import com.upsaude.entity.sistema.multitenancy.Tenant;
 import com.upsaude.enums.TipoVinculoProfissionalEnum;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;

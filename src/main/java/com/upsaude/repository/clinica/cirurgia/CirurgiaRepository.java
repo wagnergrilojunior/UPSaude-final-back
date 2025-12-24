@@ -1,7 +1,7 @@
 package com.upsaude.repository.clinica.cirurgia;
 
 import com.upsaude.entity.clinica.cirurgia.Cirurgia;
-import com.upsaude.entity.sistema.Tenant;
+import com.upsaude.entity.sistema.multitenancy.Tenant;
 import com.upsaude.enums.StatusCirurgiaEnum;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;

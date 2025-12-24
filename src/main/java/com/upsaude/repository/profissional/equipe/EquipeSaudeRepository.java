@@ -1,7 +1,7 @@
 package com.upsaude.repository.profissional.equipe;
 
 import com.upsaude.entity.profissional.equipe.EquipeSaude;
-import com.upsaude.entity.sistema.Tenant;
+import com.upsaude.entity.sistema.multitenancy.Tenant;
 import com.upsaude.enums.StatusAtivoEnum;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;

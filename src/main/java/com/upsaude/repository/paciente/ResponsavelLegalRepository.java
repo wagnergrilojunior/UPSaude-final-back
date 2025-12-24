@@ -1,7 +1,7 @@
 package com.upsaude.repository.paciente;
 
 import com.upsaude.entity.paciente.ResponsavelLegal;
-import com.upsaude.entity.sistema.Tenant;
+import com.upsaude.entity.sistema.multitenancy.Tenant;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;

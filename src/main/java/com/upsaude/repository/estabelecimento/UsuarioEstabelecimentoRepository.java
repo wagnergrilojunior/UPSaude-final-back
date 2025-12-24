@@ -9,7 +9,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-import com.upsaude.entity.sistema.Tenant;
+import com.upsaude.entity.sistema.multitenancy.Tenant;
 import com.upsaude.entity.estabelecimento.UsuarioEstabelecimento;
 
 public interface UsuarioEstabelecimentoRepository extends JpaRepository<UsuarioEstabelecimento, UUID> {

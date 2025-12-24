@@ -11,7 +11,7 @@ import com.upsaude.api.response.alergia.AlergiasPacienteResponse;
 import com.upsaude.api.response.convenio.ConvenioResponse;
 import com.upsaude.api.response.deficiencia.DeficienciasPacienteResponse;
 import com.upsaude.api.response.geral.EnderecoResponse;
-import com.upsaude.api.response.sistema.LGPDConsentimentoResponse;
+import com.upsaude.api.response.sistema.lgpd.LGPDConsentimentoResponse;
 import com.upsaude.api.response.sistema.integracao.IntegracaoGovResponse;
 import com.upsaude.enums.EscolaridadeEnum;
 import com.upsaude.enums.EstadoCivilEnum;

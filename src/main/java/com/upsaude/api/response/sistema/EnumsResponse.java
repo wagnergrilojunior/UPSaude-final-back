@@ -1,5 +1,6 @@
 package com.upsaude.api.response.sistema;
 
+import com.upsaude.api.response.sistema.enums.EnumInfoResponse;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Builder;

@@ -7,7 +7,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import com.upsaude.entity.paciente.alergia.AlergiasPaciente;
-import com.upsaude.entity.sistema.Tenant;
+import com.upsaude.entity.sistema.multitenancy.Tenant;
 
 public interface AlergiasPacienteRepository extends JpaRepository<AlergiasPaciente, UUID> {
 
