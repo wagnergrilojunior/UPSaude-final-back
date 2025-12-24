@@ -42,27 +42,27 @@ public class SigtapFileImportController {
         this.tenantService = tenantService;
     }
 
-    @PostMapping("/import/upload")
+    @PostMapping("/import/upload-zip")
     @Operation(
-            summary = "Upload de arquivo SIGTAP (assíncrono)",
-            description = "Recebe um arquivo TXT do SIGTAP e cria um job ENFILEIRADO para processamento em background. Retorna 202 Accepted imediatamente.",
+            summary = "Upload de arquivo ZIP SIGTAP (assíncrono)",
+            description = "Recebe um arquivo ZIP contendo todos os arquivos TXT do SIGTAP de uma competência. " +
+                    "Extrai automaticamente os arquivos, salva no Storage e cria jobs ordenados por prioridade " +
+                    "baseada em dependências. Retorna 202 Accepted imediatamente.",
             responses = {
-                    @ApiResponse(responseCode = "202", description = "Upload aceito e job criado"),
+                    @ApiResponse(responseCode = "202", description = "Upload aceito e jobs criados"),
                     @ApiResponse(responseCode = "400", description = "Dados inválidos"),
                     @ApiResponse(responseCode = "401", description = "Não autenticado"),
-                    @ApiResponse(responseCode = "500", description = "Erro ao criar job")
+                    @ApiResponse(responseCode = "500", description = "Erro ao processar ZIP")
             }
     )
-    public ResponseEntity<Map<String, Object>> uploadSigtap(
-            @Parameter(description = "Arquivo TXT (SIGTAP)", required = true)
-            @RequestParam("file") MultipartFile file,
-            @Parameter(description = "Arquivo de layout TXT/CSV (SIGTAP *_layout.txt)", required = true)
-            @RequestParam("layoutFile") MultipartFile layoutFile,
+    public ResponseEntity<Map<String, Object>> uploadZipSigtap(
+            @Parameter(description = "Arquivo ZIP contendo arquivos TXT do SIGTAP", required = true)
+            @RequestParam("zipFile") MultipartFile zipFile,
             @Parameter(description = "Competência no formato AAAAMM (ex: 202512)", required = true)
             @RequestParam("competencia") String competencia
     ) {
-        log.debug("REQUEST POST /v1/sigtap/import/upload - competencia={}, filename={}",
-                competencia, file != null ? file.getOriginalFilename() : null);
+        log.debug("REQUEST POST /v1/sigtap/import/upload-zip - competencia={}, filename={}",
+                competencia, zipFile != null ? zipFile.getOriginalFilename() : null);
 
         Tenant tenant = tenantService.obterTenantDoUsuarioAutenticado();
         if (tenant == null || tenant.getId() == null) {
@@ -79,9 +79,8 @@ public class SigtapFileImportController {
         String mes = competencia.substring(4, 6);
         UUID userId = obterUserIdAutenticado();
 
-        var job = importJobUploadService.criarJobUploadComLayoutSigtap(
-                file,
-                layoutFile,
+        ImportJobUploadService.CriarJobsZipResultado resultado = importJobUploadService.criarJobsFromZipSigtap(
+                zipFile,
                 ano,
                 mes,
                 tenant,
@@ -89,20 +88,32 @@ public class SigtapFileImportController {
         );
 
         Map<String, Object> response = new HashMap<>();
-        response.put("jobId", job.getId());
-        response.put("status", job.getStatus() != null ? job.getStatus().name() : null);
-        response.put("mensagem", "Upload concluído. Processamento será executado em background.");
-        response.put("originalFilename", job.getOriginalFilename());
-        response.put("sizeBytes", job.getSizeBytes());
-        response.put("statusUrl", "/api/v1/import-jobs/" + job.getId() + "/status");
-        response.put("errorsUrl", "/api/v1/import-jobs/" + job.getId() + "/errors");
+        response.put("totalJobsCriados", resultado.getJobsCriados().size());
+        response.put("totalArquivosProcessados", resultado.getTotalArquivosProcessados());
+        response.put("totalErros", resultado.getErros().size());
+        response.put("jobs", resultado.getJobsCriados().stream()
+                .map(job -> {
+                    Map<String, Object> jobInfo = new HashMap<>();
+                    jobInfo.put("id", job.getId());
+                    jobInfo.put("status", job.getStatus() != null ? job.getStatus().name() : null);
+                    jobInfo.put("originalFilename", job.getOriginalFilename());
+                    jobInfo.put("priority", job.getPriority());
+                    jobInfo.put("statusUrl", "/api/v1/import-jobs/" + job.getId() + "/status");
+                    return jobInfo;
+                })
+                .toList());
+        if (!resultado.getErros().isEmpty()) {
+            response.put("erros", resultado.getErros());
+        }
+        response.put("mensagem", "Upload do ZIP concluído. " + resultado.getJobsCriados().size() + 
+                " jobs criados e enfileirados para processamento em background.");
         return ResponseEntity.accepted().body(response);
     }
 
     @PostMapping("/import/{competencia}")
     @Operation(
             summary = "[DEPRECATED] Importar arquivos SIGTAP (legado/síncrono)",
-            description = "DEPRECATED: este endpoint não executa mais processamento pesado no ciclo HTTP. Use POST /v1/sigtap/import/upload (envie tb_*.txt + tb_*_layout.txt) e acompanhe o job em /v1/import-jobs/{jobId}/status.",
+            description = "DEPRECATED: este endpoint não executa mais processamento pesado no ciclo HTTP. Use POST /v1/sigtap/import/upload-zip (envie arquivo ZIP completo) e acompanhe os jobs em /v1/import-jobs.",
             deprecated = true,
             responses = {
                     @ApiResponse(responseCode = "410", description = "Endpoint legado desativado"),
@@ -115,9 +126,9 @@ public class SigtapFileImportController {
             @PathVariable String competencia) {
         log.debug("REQUEST POST /v1/sigtap/import/{}", competencia);
         Map<String, Object> response = new HashMap<>();
-        response.put("erro", "Endpoint legado desativado. Use /v1/sigtap/import/upload (file + layoutFile) e acompanhe o job em /v1/import-jobs/{jobId}/status.");
+        response.put("erro", "Endpoint legado desativado. Use /v1/sigtap/import/upload-zip (envie arquivo ZIP completo) e acompanhe os jobs em /v1/import-jobs.");
         response.put("sucesso", false);
-        response.put("novoEndpoint", "/api/v1/sigtap/import/upload");
+        response.put("novoEndpoint", "/api/v1/sigtap/import/upload-zip");
         return ResponseEntity.status(410).body(response);
     }
 
