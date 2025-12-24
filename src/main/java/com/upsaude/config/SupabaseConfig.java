@@ -32,23 +32,29 @@ public class SupabaseConfig {
         cm.setDefaultMaxPerRoute(20);
 
         RequestConfig requestConfig = RequestConfig.custom()
-                .setConnectTimeout(Timeout.ofSeconds(10))
-                // Para arquivos grandes, precisamos de um responseTimeout alto (streaming pode levar vários minutos)
-                .setResponseTimeout(Timeout.ofMinutes(30))
+                .setConnectTimeout(Timeout.ofSeconds(30))
+                // Para arquivos grandes, precisamos de um responseTimeout muito alto (upload streaming pode levar horas para arquivos muito grandes)
+                .setResponseTimeout(Timeout.ofHours(2))
+                // Socket timeout também aumentado para uploads longos
+                .setConnectionRequestTimeout(Timeout.ofSeconds(30))
                 .build();
 
         return HttpClients.custom()
                 .setConnectionManager(cm)
                 .setDefaultRequestConfig(requestConfig)
-                .evictIdleConnections(TimeValue.ofMinutes(1))
+                .evictIdleConnections(TimeValue.ofMinutes(5))
                 .build();
     }
 
     @Bean
     public RestTemplate restTemplate(CloseableHttpClient supabaseHttpClient) {
         HttpComponentsClientHttpRequestFactory factory = new HttpComponentsClientHttpRequestFactory(supabaseHttpClient);
-        factory.setConnectTimeout(10_000);
-        factory.setConnectionRequestTimeout(10_000);
+        // Timeouts aumentados para suportar uploads de arquivos grandes
+        // O cliente HTTP já tem responseTimeout configurado para 2 horas, então aqui só configuramos
+        // os timeouts de conexão que o RestTemplate gerencia diretamente
+        factory.setConnectTimeout(30_000); // 30 segundos
+        factory.setConnectionRequestTimeout(30_000); // 30 segundos
+        // Desabilita buffer para permitir streaming de arquivos grandes
         factory.setBufferRequestBody(false);
         return new RestTemplate(factory);
     }

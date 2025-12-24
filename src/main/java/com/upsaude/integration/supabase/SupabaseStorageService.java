@@ -215,6 +215,15 @@ public class SupabaseStorageService {
                 throw new ImportJobRecoverableException("Erro temporário no Supabase Storage (upload). Status=" + code, e);
             }
             throw new ImportJobFatalException("Erro no Supabase Storage (upload). Status=" + code + " - " + e.getMessage(), e);
+        } catch (org.springframework.web.client.ResourceAccessException e) {
+            // ResourceAccessException geralmente indica problemas de rede/IO (como Broken pipe)
+            // Tratamos como recuperável para permitir retry
+            log.warn("Erro de acesso ao recurso (possível problema de rede) ao fazer upload streaming: {}", e.getMessage());
+            Throwable cause = e.getCause();
+            if (cause instanceof IOException || cause instanceof java.net.SocketException) {
+                throw new ImportJobRecoverableException("Falha de rede ao fazer upload no Supabase Storage (pode ser temporário): " + e.getMessage(), e);
+            }
+            throw new ImportJobRecoverableException("Erro de acesso ao recurso ao fazer upload no Supabase Storage: " + e.getMessage(), e);
         } catch (Exception e) {
             log.error("Erro inesperado ao fazer upload streaming para Supabase Storage", e);
             if (e instanceof ImportJobRecoverableException re) throw re;

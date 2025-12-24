@@ -30,7 +30,7 @@ public class SigtapRegistro extends BaseEntityWithoutTenant {
     @Column(name = "codigo_oficial", nullable = false, length = 2)
     private String codigoOficial;
 
-    @Column(name = "nome", length = 100)
+    @Column(name = "nome", length = 300)
     private String nome;
 
     @Column(name = "competencia_inicial", length = 6)
