@@ -448,6 +448,10 @@ public class SigtapImportJobWorker implements ImportJobWorker {
             case "rl_procedimento_registro.txt" -> simpleMapper(entityMapper::mapToProcedimentoRegistro, competencia);
             case "rl_procedimento_detalhe.txt" -> new ImportStrategy<>(entityMapper::mapToProcedimentoDetalheItem);
             case "rl_excecao_compatibilidade.txt" -> simpleMapper(entityMapper::mapToExcecaoCompatibilidade, competencia);
+            // tb_cid.txt não é processado pelo SIGTAP - os dados de CID-10 são importados separadamente via endpoint CID-10
+            case "tb_cid.txt" -> new ImportStrategy<>(fields -> null);
+            // rl_procedimento_compativel.txt não é mais usado/processado pelo sistema SIGTAP atual
+            case "rl_procedimento_compativel.txt" -> new ImportStrategy<>(fields -> null);
             default -> null;
         };
     }

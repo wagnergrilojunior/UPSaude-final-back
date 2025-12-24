@@ -52,6 +52,9 @@ public class ImportJobScheduler {
     @Value("${import.job.heartbeat-timeout-seconds:300}")
     private int heartbeatTimeoutSeconds;
 
+    @Value("${import.job.enabled:true}")
+    private boolean jobsEnabled;
+
     private final String instanceId = UUID.randomUUID().toString();
     private static final long SCHEDULER_CLAIM_LOCK_KEY = 88123499123L;
 
@@ -60,6 +63,10 @@ public class ImportJobScheduler {
      */
     @Scheduled(fixedDelayString = "#{${import.job.scheduler-interval-seconds:5} * 1000}")
     public void consumirFila() {
+        if (!jobsEnabled) {
+            // Jobs desabilitados - não processa nada
+            return;
+        }
         try {
             // Observação: o limite global no banco é reforçado no claim atômico,
             // mas aqui fazemos um pré-cálculo para reduzir chamadas.
@@ -94,6 +101,10 @@ public class ImportJobScheduler {
      */
     @Scheduled(fixedDelayString = "#{60 * 1000}")
     public void detectarJobsTravados() {
+        if (!jobsEnabled) {
+            // Jobs desabilitados - não detecta jobs travados
+            return;
+        }
         try {
             OffsetDateTime expiredBefore = OffsetDateTime.now().minusSeconds(heartbeatTimeoutSeconds);
             List<ImportJob> stuck = importJobJobRepository.findStuckJobs(ImportJobStatusEnum.PROCESSANDO, expiredBefore);
