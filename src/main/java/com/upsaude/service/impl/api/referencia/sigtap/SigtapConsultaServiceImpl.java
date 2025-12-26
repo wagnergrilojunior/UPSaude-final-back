@@ -58,6 +58,7 @@ public class SigtapConsultaServiceImpl implements SigtapConsultaService {
     private final SigtapProcedimentoSiaSihRepository procedimentoSiaSihRepository;
     private final SigtapDescricaoRepository descricaoRepository;
     private final SigtapProcedimentoModalidadeRepository procedimentoModalidadeRepository;
+    private final SigtapProcedimentoRegistroRepository procedimentoRegistroRepository;
 
     private final SigtapGrupoMapper grupoMapper;
     private final SigtapProcedimentoMapper procedimentoMapper;
@@ -85,6 +86,7 @@ public class SigtapConsultaServiceImpl implements SigtapConsultaService {
     private final SigtapProcedimentoDetalheTussMapper procedimentoDetalheTussMapper;
     private final SigtapProcedimentoDetalheSiaSihMapper procedimentoDetalheSiaSihMapper;
     private final SigtapProcedimentoDetalheModalidadeMapper procedimentoDetalheModalidadeMapper;
+    private final SigtapProcedimentoDetalheRegistroMapper procedimentoDetalheRegistroMapper;
 
     @Override
     public List<SigtapGrupoResponse> listarGrupos() {
@@ -100,9 +102,6 @@ public class SigtapConsultaServiceImpl implements SigtapConsultaService {
             pageable = PageRequest.of(0, 20);
         }
         Specification<SigtapProcedimento> spec = Specification.where(null);
-
-        // Filtrar por ativo (todos os procedimentos devem estar ativos)
-        spec = spec.and((root, query, cb) -> cb.equal(root.get("active"), true));
 
         // Filtrar por hierarquia: grupo -> subgrupo -> forma de organização
         // O código oficial do procedimento SIGTAP tem a estrutura:
@@ -565,6 +564,23 @@ public class SigtapConsultaServiceImpl implements SigtapConsultaService {
                 .map(procedimentoDetalheTussMapper::toResponse)
                 .toList());
         
+        // Instrumentos de Registro
+        List<SigtapProcedimentoRegistro> procedimentosRegistro = procedimentoRegistroRepository.findByProcedimentoId(procedimentoId);
+        if (compFiltro != null) {
+            final String comp = compFiltro;
+            procedimentosRegistro = procedimentosRegistro.stream()
+                    .filter(pr -> {
+                        if (pr.getCompetenciaInicial() == null) return false;
+                        boolean inicioOk = pr.getCompetenciaInicial().compareTo(comp) <= 0;
+                        boolean fimOk = pr.getCompetenciaFinal() == null || pr.getCompetenciaFinal().compareTo(comp) >= 0;
+                        return inicioOk && fimOk;
+                    })
+                    .toList();
+        }
+        detalheResponse.setListaRegistros(procedimentosRegistro.stream()
+                .map(procedimentoDetalheRegistroMapper::toResponse)
+                .toList());
+        
         resp.setDetalhe(detalheResponse);
         return resp;
     }
@@ -879,9 +895,6 @@ public class SigtapConsultaServiceImpl implements SigtapConsultaService {
         
         // Para outros casos, usar Specification normal (sem filtros de grupo/subgrupo)
         Specification<SigtapFormaOrganizacao> spec = Specification.where(null);
-
-        // Filtrar por ativo
-        spec = spec.and((root, query, cb) -> cb.equal(root.get("active"), true));
 
         if (q != null && !q.isBlank()) {
             String like = "%" + q.trim().toLowerCase(Locale.ROOT) + "%";

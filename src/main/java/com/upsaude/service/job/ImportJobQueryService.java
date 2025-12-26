@@ -8,6 +8,7 @@ import com.upsaude.enums.ImportJobTipoEnum;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
+import java.util.List;
 import java.util.UUID;
 
 /**
@@ -59,5 +60,22 @@ public interface ImportJobQueryService {
      * @return Job atualizado com status ENFILEIRADO
      */
     ImportJobResponse reprocessarJob(UUID jobId, UUID tenantId);
+
+    /**
+     * Reprocessa todos os jobs com status ERRO de um tipo e competência específicos.
+     * Os jobs são reprocessados na ordem correta (por prioridade) seguindo as regras de negócio.
+     * 
+     * @param tipo Tipo do job (SIGTAP, CID10, SIA_PA)
+     * @param competenciaAno Ano da competência
+     * @param competenciaMes Mês da competência
+     * @param tenantId ID do tenant (para validação de segurança)
+     * @return Lista de jobs reprocessados, ordenados por prioridade
+     */
+    List<ImportJobResponse> reprocessarJobsPorTipoECompetencia(
+        ImportJobTipoEnum tipo,
+        String competenciaAno,
+        String competenciaMes,
+        UUID tenantId
+    );
 }
 

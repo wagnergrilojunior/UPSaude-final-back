@@ -100,4 +100,7 @@ public class SigtapProcedimentoDetalheResponse {
     
     @Schema(description = "Lista de modalidades de atendimento")
     private List<SigtapProcedimentoDetalheModalidadeResponse> listaModalidades;
+    
+    @Schema(description = "Lista de instrumentos de registro")
+    private List<SigtapProcedimentoDetalheRegistroResponse> listaRegistros;
 }

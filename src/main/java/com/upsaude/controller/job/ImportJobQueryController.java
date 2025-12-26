@@ -22,6 +22,10 @@ import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 /**
  * Controller para consultas de jobs de importação (somente leitura).
  */
@@ -247,6 +251,74 @@ public class ImportJobQueryController {
         }
 
         ImportJobResponse response = importJobQueryService.reprocessarJob(jobId, tenant.getId());
+        return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/reprocessar-por-tipo-competencia")
+    @Operation(
+            summary = "Reprocessar jobs por tipo e competência",
+            description = "Reprocessa todos os jobs com status ERRO de um tipo e competência específicos. " +
+                         "Os jobs são reprocessados na ordem correta (por prioridade) seguindo as regras de negócio. " +
+                         "Apenas jobs com status ERRO são reprocessados.",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "Jobs reprocessados com sucesso"),
+                    @ApiResponse(responseCode = "400", description = "Parâmetros inválidos"),
+                    @ApiResponse(responseCode = "401", description = "Não autenticado")
+            }
+    )
+    public ResponseEntity<Map<String, Object>> reprocessarJobsPorTipoECompetencia(
+            @Parameter(description = "Tipo do job (SIGTAP, CID10, SIA_PA)", required = true)
+            @RequestParam("tipo") String tipo,
+            @Parameter(description = "Ano da competência (4 dígitos)", required = true, example = "2025")
+            @RequestParam("competenciaAno") String competenciaAno,
+            @Parameter(description = "Mês da competência (2 dígitos)", required = true, example = "12")
+            @RequestParam("competenciaMes") String competenciaMes) {
+        log.info("REQUEST POST /v1/import-jobs/reprocessar-por-tipo-competencia?tipo={}&competenciaAno={}&competenciaMes={}",
+                tipo, competenciaAno, competenciaMes);
+
+        Tenant tenant = tenantService.obterTenantDoUsuarioAutenticado();
+        if (tenant == null) {
+            throw new BadRequestException("Tenant não encontrado para o usuário autenticado");
+        }
+
+        ImportJobTipoEnum tipoEnum = ImportJobTipoEnum.fromCodigo(tipo.toUpperCase());
+        if (tipoEnum == null) {
+            throw new BadRequestException("Tipo inválido: " + tipo);
+        }
+
+        // Valida formato da competência
+        if (!competenciaAno.matches("\\d{4}")) {
+            throw new BadRequestException("Ano da competência deve ter 4 dígitos");
+        }
+        if (!competenciaMes.matches("\\d{2}")) {
+            throw new BadRequestException("Mês da competência deve ter 2 dígitos");
+        }
+
+        List<ImportJobResponse> jobsReprocessados = importJobQueryService.reprocessarJobsPorTipoECompetencia(
+                tipoEnum,
+                competenciaAno,
+                competenciaMes,
+                tenant.getId()
+        );
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("totalReprocessados", jobsReprocessados.size());
+        response.put("tipo", tipo);
+        response.put("competenciaAno", competenciaAno);
+        response.put("competenciaMes", competenciaMes);
+        response.put("jobs", jobsReprocessados.stream()
+                .map(job -> {
+                    Map<String, Object> jobInfo = new HashMap<>();
+                    jobInfo.put("id", job.getId());
+                    jobInfo.put("status", job.getStatus() != null ? job.getStatus().name() : null);
+                    jobInfo.put("originalFilename", job.getOriginalFilename());
+                    jobInfo.put("priority", job.getPriority());
+                    return jobInfo;
+                })
+                .toList());
+        response.put("mensagem", String.format("%d jobs reprocessados com sucesso para tipo %s e competência %s/%s",
+                jobsReprocessados.size(), tipo, competenciaAno, competenciaMes));
+
         return ResponseEntity.ok(response);
     }
 }
