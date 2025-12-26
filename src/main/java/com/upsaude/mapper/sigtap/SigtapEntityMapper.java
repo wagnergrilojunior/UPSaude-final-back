@@ -51,6 +51,7 @@ import com.upsaude.importacao.sigtap.file.SigtapFileParser;
 import com.upsaude.repository.referencia.cid.Cid10SubcategoriasRepository;
 import com.upsaude.repository.referencia.sigtap.SigtapComponenteRedeRepository;
 import com.upsaude.repository.referencia.sigtap.SigtapDetalheRepository;
+import com.upsaude.repository.referencia.sigtap.SigtapFinanciamentoRepository;
 import com.upsaude.repository.referencia.sigtap.SigtapGrupoHabilitacaoRepository;
 import com.upsaude.repository.referencia.sigtap.SigtapGrupoRepository;
 import com.upsaude.repository.referencia.sigtap.SigtapHabilitacaoRepository;
@@ -60,6 +61,7 @@ import com.upsaude.repository.referencia.sigtap.SigtapProcedimentoRepository;
 import com.upsaude.repository.referencia.sigtap.SigtapRegistroRepository;
 import com.upsaude.repository.referencia.sigtap.SigtapRegraCondicionadaRepository;
 import com.upsaude.repository.referencia.sigtap.SigtapRenasesRepository;
+import com.upsaude.repository.referencia.sigtap.SigtapRubricaRepository;
 import com.upsaude.repository.referencia.sigtap.SigtapServicoClassificacaoRepository;
 import com.upsaude.repository.referencia.sigtap.SigtapServicoRepository;
 import com.upsaude.repository.referencia.sigtap.SigtapSiaSihRepository;
@@ -93,6 +95,8 @@ public class SigtapEntityMapper {
     private final SigtapModalidadeRepository modalidadeRepository;
     private final SigtapRegistroRepository registroRepository;
     private final SigtapDetalheRepository detalheRepository;
+    private final SigtapFinanciamentoRepository financiamentoRepository;
+    private final SigtapRubricaRepository rubricaRepository;
 
     public SigtapEntityMapper(
             SigtapFileParser parser,
@@ -113,7 +117,9 @@ public class SigtapEntityMapper {
             SigtapSiaSihRepository siaSihRepository,
             SigtapModalidadeRepository modalidadeRepository,
             SigtapRegistroRepository registroRepository,
-            SigtapDetalheRepository detalheRepository) {
+            SigtapDetalheRepository detalheRepository,
+            SigtapFinanciamentoRepository financiamentoRepository,
+            SigtapRubricaRepository rubricaRepository) {
         this.parser = parser;
         this.grupoRepository = grupoRepository;
         this.subgrupoRepository = subgrupoRepository;
@@ -133,6 +139,8 @@ public class SigtapEntityMapper {
         this.modalidadeRepository = modalidadeRepository;
         this.registroRepository = registroRepository;
         this.detalheRepository = detalheRepository;
+        this.financiamentoRepository = financiamentoRepository;
+        this.rubricaRepository = rubricaRepository;
     }
 
     // ========== M?TODOS AUXILIARES ==========
@@ -271,6 +279,23 @@ public class SigtapEntityMapper {
         procedimento.setMediaDiasInternacao(parser.parseInteger(fields.get("QT_DIAS_PERMANENCIA")));
         procedimento.setQuantidadeMaximaDias(parser.parseInteger(fields.get("QT_TEMPO_PERMANENCIA")));
         procedimento.setLimiteMaximo(parser.parseInteger(fields.get("QT_MAXIMA_EXECUCAO")));
+        procedimento.setPontos(parser.parseInteger(fields.get("QT_PONTOS")));
+
+        // Buscar e mapear financiamento
+        String codigoFinanciamento = fields.get("CO_FINANCIAMENTO");
+        if (codigoFinanciamento != null && !codigoFinanciamento.isBlank()) {
+            financiamentoRepository.findByCodigoOficialAndCompetenciaInicial(
+                    codigoFinanciamento.trim(), competencia)
+                    .ifPresent(procedimento::setFinanciamento);
+        }
+
+        // Buscar e mapear rubrica
+        String codigoRubrica = fields.get("CO_RUBRICA");
+        if (codigoRubrica != null && !codigoRubrica.isBlank()) {
+            rubricaRepository.findByCodigoOficialAndCompetenciaInicial(
+                    codigoRubrica.trim(), competencia)
+                    .ifPresent(procedimento::setRubrica);
+        }
 
         // Valores monet?rios (assumindo que est?o em centavos, dividir por 100)
         procedimento.setValorServicoHospitalar(parser.parseBigDecimal(fields.get("VL_SH"), true));

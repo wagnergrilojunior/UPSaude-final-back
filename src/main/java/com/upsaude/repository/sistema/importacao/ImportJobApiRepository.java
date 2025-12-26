@@ -50,6 +50,18 @@ public interface ImportJobApiRepository extends JpaRepository<ImportJob, UUID>, 
         String uf
     );
     
+    /**
+     * Busca jobs por tenant, tipo, competência e status.
+     * Ordena por prioridade DESC (maior primeiro) e depois por createdAt ASC.
+     */
+    List<ImportJob> findByTenant_IdAndTipoAndCompetenciaAnoAndCompetenciaMesAndStatusOrderByPriorityDescCreatedAtAsc(
+        UUID tenantId,
+        ImportJobTipoEnum tipo,
+        String competenciaAno,
+        String competenciaMes,
+        ImportJobStatusEnum status
+    );
+    
     // ========== ESTATÍSTICAS (API) ==========
     
     @Query("""

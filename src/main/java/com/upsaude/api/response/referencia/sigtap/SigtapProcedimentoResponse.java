@@ -63,6 +63,15 @@ public class SigtapProcedimentoResponse {
     @Schema(description = "Limite máximo de execuções do procedimento", example = "1")
     private Integer limiteMaximo;
 
+    @Schema(description = "Quantidade de pontos do procedimento", example = "15")
+    private Integer pontos;
+
+    @Schema(description = "Informações do financiamento do procedimento")
+    private SigtapFinanciamentoResponse financiamento;
+
+    @Schema(description = "Informações da rubrica (sub-tipo de financiamento) do procedimento")
+    private SigtapRubricaResponse rubrica;
+
     @Schema(description = "Valor do serviço hospitalar em reais", example = "664.72")
     private BigDecimal valorServicoHospitalar;
     
@@ -71,4 +80,13 @@ public class SigtapProcedimentoResponse {
     
     @Schema(description = "Valor do serviço profissional em reais", example = "326.65")
     private BigDecimal valorServicoProfissional;
+
+    @Schema(description = "Total ambulatorial (Serviço Ambulatorial + Serviço Profissional) em reais", example = "32.40")
+    private BigDecimal totalAmbulatorial;
+
+    @Schema(description = "Total hospitalar (Serviço Hospitalar + Serviço Profissional) em reais", example = "32.40")
+    private BigDecimal totalHospitalar;
+
+    @Schema(description = "Atributos complementares do procedimento (campos adicionais ou especiais)", example = "{}")
+    private java.util.Map<String, Object> atributosComplementares;
 }

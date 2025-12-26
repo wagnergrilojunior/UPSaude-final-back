@@ -371,6 +371,9 @@ public class SigtapFileImportServiceImpl {
                         existing.setMediaDiasInternacao(procedimento.getMediaDiasInternacao());
                         existing.setQuantidadeMaximaDias(procedimento.getQuantidadeMaximaDias());
                         existing.setLimiteMaximo(procedimento.getLimiteMaximo());
+                        existing.setPontos(procedimento.getPontos());
+                        existing.setFinanciamento(procedimento.getFinanciamento());
+                        existing.setRubrica(procedimento.getRubrica());
                         existing.setValorServicoHospitalar(procedimento.getValorServicoHospitalar());
                         existing.setValorServicoAmbulatorial(procedimento.getValorServicoAmbulatorial());
                         existing.setValorServicoProfissional(procedimento.getValorServicoProfissional());

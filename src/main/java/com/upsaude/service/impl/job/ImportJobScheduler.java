@@ -46,8 +46,11 @@ public class ImportJobScheduler {
     @Value("${import.job.max-concurrent-per-tenant:1}")
     private int maxConcurrentPerTenant;
 
-    @Value("${import.job.scheduler-interval-seconds:5}")
+    @Value("${import.job.scheduler-interval-seconds:3600}")
     private int schedulerIntervalSeconds;
+
+    @Value("${import.job.scheduler-rapido-interval-seconds:120}")
+    private int schedulerRapidoIntervalSeconds;
 
     @Value("${import.job.heartbeat-timeout-seconds:300}")
     private int heartbeatTimeoutSeconds;
@@ -59,9 +62,10 @@ public class ImportJobScheduler {
     private static final long SCHEDULER_CLAIM_LOCK_KEY = 88123499123L;
 
     /**
-     * Consumidor principal da fila.
+     * Consumidor principal da fila (executa a cada 1 hora).
+     * Processa jobs enfileirados de forma geral.
      */
-    @Scheduled(fixedDelayString = "#{${import.job.scheduler-interval-seconds:5} * 1000}")
+    @Scheduled(fixedDelayString = "#{${import.job.scheduler-interval-seconds:3600} * 1000}")
     public void consumirFila() {
         if (!jobsEnabled) {
             // Jobs desabilitados - não processa nada
@@ -93,6 +97,58 @@ public class ImportJobScheduler {
             }
         } catch (Exception e) {
             log.error("Erro no scheduler de import jobs: {}", e.getMessage(), e);
+        }
+    }
+
+    /**
+     * Scheduler rápido para processar jobs recém-enfileirados após upload completo.
+     * Executa a cada 2 minutos (fixedRate) para processar jobs que acabaram de ser criados/enfileirados.
+     * Prioriza jobs que foram enfileirados recentemente (últimos 5 minutos).
+     * 
+     * Usa fixedRate ao invés de fixedDelay para garantir execução a cada 2 minutos,
+     * independente do tempo de execução da iteração anterior.
+     */
+    @Scheduled(fixedRateString = "#{${import.job.scheduler-rapido-interval-seconds:120} * 1000}")
+    public void consumirFilaRapida() {
+        if (!jobsEnabled) {
+            // Jobs desabilitados - não processa nada
+            return;
+        }
+        try {
+            // Busca jobs enfileirados recentemente (últimos 5 minutos)
+            OffsetDateTime limiteTempo = OffsetDateTime.now().minusMinutes(5);
+            
+            // Observação: o limite global no banco é reforçado no claim atômico,
+            // mas aqui fazemos um pré-cálculo para reduzir chamadas.
+            long processando = importJobJobRepository.countByStatus(ImportJobStatusEnum.PROCESSANDO);
+            long slots = (long) maxConcurrentGlobal - processando;
+            if (slots <= 0) {
+                log.debug("Scheduler rápido: sem slots disponíveis (processando: {})", processando);
+                return;
+            }
+
+            log.debug("Scheduler rápido: processando jobs recém-enfileirados (slots disponíveis: {})", slots);
+
+            // Tenta preencher os slots com claims de jobs recém-enfileirados
+            for (int i = 0; i < slots; i++) {
+                UUID jobId = claimNextJobRecemEnfileirado(limiteTempo);
+                if (jobId == null) {
+                    break;
+                }
+
+                try {
+                    // Executa fora da transação e fora do ciclo HTTP (thread pool dedicado)
+                    importJobExecutor.execute(() -> importJobProcessor.processar(jobId));
+                    log.debug("Scheduler rápido: job {} iniciado para processamento", jobId);
+                } catch (RejectedExecutionException rex) {
+                    // Se o executor estiver cheio, não deixa job travado em PROCESSANDO
+                    log.warn("Executor de import jobs cheio no scheduler rápido; re-enfileirando job {}. Motivo: {}", jobId, rex.getMessage());
+                    importJobQueueService.reEnfileirarOuFalhar(jobId, "Executor cheio (RejectedExecutionException)");
+                    break;
+                }
+            }
+        } catch (Exception e) {
+            log.error("Erro no scheduler rápido de import jobs: {}", e.getMessage(), e);
         }
     }
 
@@ -138,6 +194,33 @@ public class ImportJobScheduler {
                     ImportJobStatusEnum.ENFILEIRADO.name(),
                     ImportJobStatusEnum.PROCESSANDO.name(),
                     now,
+                    instanceId,
+                    maxConcurrentGlobal,
+                    maxConcurrentPerTenant
+            );
+        });
+    }
+
+    /**
+     * Transação curta: claim atômico de 1 job ENFILEIRADO recém-enfileirado (após limiteTempo).
+     * Prioriza jobs que foram enfileirados recentemente para processamento rápido após upload.
+     * 
+     * IMPORTANTE: Usa TransactionManager do JOB explicitamente
+     */
+    protected UUID claimNextJobRecemEnfileirado(OffsetDateTime limiteTempo) {
+        TransactionTemplate txTemplate = new TransactionTemplate(jobTransactionManager);
+        return txTemplate.execute(status -> {
+            OffsetDateTime now = OffsetDateTime.now();
+            Boolean gotLock = importJobJobRepository.tryAdvisoryXactLock(SCHEDULER_CLAIM_LOCK_KEY);
+            if (gotLock == null || !gotLock) {
+                return null;
+            }
+
+            return importJobJobRepository.claimNextJobRecemEnfileirado(
+                    ImportJobStatusEnum.ENFILEIRADO.name(),
+                    ImportJobStatusEnum.PROCESSANDO.name(),
+                    now,
+                    limiteTempo,
                     instanceId,
                     maxConcurrentGlobal,
                     maxConcurrentPerTenant

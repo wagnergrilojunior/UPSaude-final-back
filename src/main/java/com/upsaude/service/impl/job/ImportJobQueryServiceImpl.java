@@ -3,6 +3,7 @@ package com.upsaude.service.impl.job;
 import com.upsaude.api.response.sistema.importacao.ImportJobErrorResponse;
 import com.upsaude.api.response.sistema.importacao.ImportJobResponse;
 import com.upsaude.api.response.sistema.importacao.ImportJobStatusResponse;
+import com.upsaude.entity.sistema.importacao.ImportJob;
 import com.upsaude.enums.ImportJobStatusEnum;
 import com.upsaude.enums.ImportJobTipoEnum;
 import com.upsaude.exception.BadRequestException;
@@ -22,7 +23,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 import java.time.OffsetDateTime;
-
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -182,6 +183,91 @@ public class ImportJobQueryServiceImpl implements ImportJobQueryService {
         log.info("Job {} reprocessado com sucesso. Status alterado de ERRO para ENFILEIRADO", jobId);
 
         return importJobMapper.toResponse(savedJob);
+    }
+
+    @Override
+    @Transactional
+    public List<ImportJobResponse> reprocessarJobsPorTipoECompetencia(
+            ImportJobTipoEnum tipo,
+            String competenciaAno,
+            String competenciaMes,
+            UUID tenantId) {
+        log.info("Reprocessando jobs por tipo e competência - tipo: {}, competência: {}/{}, tenant: {}",
+                tipo, competenciaAno, competenciaMes, tenantId);
+
+        // Validações
+        if (tipo == null) {
+            throw new BadRequestException("Tipo do job é obrigatório");
+        }
+        if (!StringUtils.hasText(competenciaAno) || !StringUtils.hasText(competenciaMes)) {
+            throw new BadRequestException("Competência (ano e mês) é obrigatória");
+        }
+
+        // Busca todos os jobs com ERRO do tipo e competência especificados
+        // Ordena por prioridade DESC (maior primeiro) e depois por createdAt ASC
+        List<ImportJob> jobsComErro = importJobApiRepository
+                .findByTenant_IdAndTipoAndCompetenciaAnoAndCompetenciaMesAndStatusOrderByPriorityDescCreatedAtAsc(
+                        tenantId,
+                        tipo,
+                        competenciaAno,
+                        competenciaMes,
+                        ImportJobStatusEnum.ERRO
+                );
+
+        if (jobsComErro.isEmpty()) {
+            log.info("Nenhum job com status ERRO encontrado para tipo: {}, competência: {}/{}, tenant: {}",
+                    tipo, competenciaAno, competenciaMes, tenantId);
+            return List.of();
+        }
+
+        log.info("Encontrados {} jobs com ERRO para reprocessamento. Ordem de processamento:",
+                jobsComErro.size());
+        for (int i = 0; i < jobsComErro.size(); i++) {
+            ImportJob job = jobsComErro.get(i);
+            log.info("  {}. {} - prioridade: {}", i + 1, job.getOriginalFilename(), job.getPriority());
+        }
+
+        // Reprocessa cada job na ordem correta
+        OffsetDateTime now = OffsetDateTime.now();
+        List<ImportJobResponse> jobsReprocessados = new ArrayList<>();
+
+        for (ImportJob job : jobsComErro) {
+            // Valida que o arquivo ainda existe no storage
+            if (!StringUtils.hasText(job.getStorageBucket()) || !StringUtils.hasText(job.getStoragePath())) {
+                log.warn("Job {} não possui informações de storage válidas. Pulando reprocessamento.",
+                        job.getId());
+                continue;
+            }
+
+            // Reseta o job para ENFILEIRADO (mesma lógica do reprocessarJob individual)
+            job.setStatus(ImportJobStatusEnum.ENFILEIRADO);
+            job.setAttempts(0);
+            job.setNextRunAt(now);
+            job.setLockedAt(null);
+            job.setLockedBy(null);
+            job.setHeartbeatAt(null);
+            job.setErrorSummary(null);
+            job.setErrorSampleJson(null);
+            job.setStartedAt(null);
+            job.setFinishedAt(null);
+            job.setDurationMs(null);
+            job.setCheckpointLinha(0L);
+            job.setCheckpointByteOffset(null);
+            job.setLinhasLidas(0L);
+            job.setLinhasProcessadas(0L);
+            job.setLinhasInseridas(0L);
+            job.setLinhasErro(0L);
+            job.setPercentualEstimado(null);
+
+            var savedJob = importJobApiRepository.save(job);
+            jobsReprocessados.add(importJobMapper.toResponse(savedJob));
+            log.info("Job {} reprocessado com sucesso (prioridade: {})", job.getId(), job.getPriority());
+        }
+
+        log.info("Reprocessamento em lote concluído. {} jobs reprocessados de {} encontrados",
+                jobsReprocessados.size(), jobsComErro.size());
+
+        return jobsReprocessados;
     }
 }
 

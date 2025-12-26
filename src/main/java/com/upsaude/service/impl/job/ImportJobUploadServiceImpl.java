@@ -175,7 +175,7 @@ public class ImportJobUploadServiceImpl implements ImportJobUploadService {
             // 4. Ordena por prioridade
             List<SigtapJobOrchestrator.ArquivoComPrioridade> arquivosOrdenados = sigtapJobOrchestrator.ordenarArquivos(pares);
 
-            // 5. Para cada par, faz upload PRIMEIRO, depois cria job completo
+            // 5. Para cada par, faz upload PRIMEIRO, depois cria job completo (com status PAUSADO)
             String bucket = StringUtils.hasText(importsBucket) ? importsBucket : IMPORTS_BUCKET_DEFAULT;
             String tenantId = tenant.getId().toString();
 
@@ -204,10 +204,10 @@ public class ImportJobUploadServiceImpl implements ImportJobUploadService {
                         supabaseStorageService.uploadStream(bucket, layoutPath, layoutIs, par.getArquivoLayout().getTamanho(), "text/plain");
                     }
 
-                    // 2. CRIA JOB COMPLETO (com todos os dados, incluindo storage_bucket e storage_path)
+                    // 2. CRIA JOB COMPLETO COM STATUS PAUSADO (será enfileirado após todos os jobs serem criados)
                     String payloadJson = "{\"layoutPath\":\"" + layoutPath.replace("\"", "\\\"") + "\"}";
                     
-                    ImportJob job = criarJobCompletoZip(
+                    ImportJob job = criarJobCompletoZipPausado(
                             nomeArquivoDados,
                             par.getArquivoDados().getTamanho(),
                             ImportJobTipoEnum.SIGTAP,
@@ -223,12 +223,19 @@ public class ImportJobUploadServiceImpl implements ImportJobUploadService {
                     );
                     
                     jobsCriados.add(job);
-                    log.info("Job criado com sucesso: {} - {} (prioridade: {})", job.getId(), nomeArquivoDados, prioridade);
+                    log.info("Job criado (pausado) com sucesso: {} - {} (prioridade: {})", job.getId(), nomeArquivoDados, prioridade);
                 } catch (Exception e) {
                     String erro = String.format("Erro ao processar arquivo %s: %s", nomeArquivoDados, e.getMessage());
                     log.error(erro, e);
                     erros.add(erro);
                 }
+            }
+
+            // 6. APÓS TODOS OS JOBS SEREM CRIADOS, ENFILEIRA TODOS DE UMA VEZ
+            // Isso garante que o scheduler não vai processar nenhum job enquanto o upload ainda está em andamento
+            if (!jobsCriados.isEmpty()) {
+                log.info("Enfileirando {} jobs após conclusão do upload ZIP", jobsCriados.size());
+                enfileirarJobsEmLote(jobsCriados);
             }
 
             log.info("Processamento do ZIP concluído. Jobs criados: {}, Erros: {}", jobsCriados.size(), erros.size());
@@ -288,7 +295,7 @@ public class ImportJobUploadServiceImpl implements ImportJobUploadService {
                 throw new BadRequestException("Nenhum arquivo válido foi identificado no ZIP");
             }
 
-            // 4. Para cada arquivo, faz upload PRIMEIRO, depois cria job completo
+            // 4. Para cada arquivo, faz upload PRIMEIRO, depois cria job completo (com status PAUSADO)
             String bucket = StringUtils.hasText(importsBucket) ? importsBucket : IMPORTS_BUCKET_DEFAULT;
             String tenantId = tenant.getId().toString();
 
@@ -311,8 +318,8 @@ public class ImportJobUploadServiceImpl implements ImportJobUploadService {
                         checksum = HexFormat.of().formatHex(digest.digest());
                     }
 
-                    // 2. CRIA JOB COMPLETO (com todos os dados, incluindo storage_bucket e storage_path)
-                    ImportJob job = criarJobCompletoCid10(
+                    // 2. CRIA JOB COMPLETO COM STATUS PAUSADO (será enfileirado após todos os jobs serem criados)
+                    ImportJob job = criarJobCompletoCid10Pausado(
                             nomeArquivo,
                             arquivo.getTamanho(),
                             ImportJobTipoEnum.CID10,
@@ -327,12 +334,19 @@ public class ImportJobUploadServiceImpl implements ImportJobUploadService {
                     );
                     
                     jobsCriados.add(job);
-                    log.info("Job criado com sucesso: {} - {} (prioridade: {})", job.getId(), nomeArquivo, prioridade);
+                    log.info("Job criado (pausado) com sucesso: {} - {} (prioridade: {})", job.getId(), nomeArquivo, prioridade);
                 } catch (Exception e) {
                     String erro = String.format("Erro ao processar arquivo %s: %s", nomeArquivo, e.getMessage());
                     log.error(erro, e);
                     erros.add(erro);
                 }
+            }
+
+            // 5. APÓS TODOS OS JOBS SEREM CRIADOS, ENFILEIRA TODOS DE UMA VEZ
+            // Isso garante que o scheduler não vai processar nenhum job enquanto o upload ainda está em andamento
+            if (!jobsCriados.isEmpty()) {
+                log.info("Enfileirando {} jobs após conclusão do upload ZIP CID-10", jobsCriados.size());
+                enfileirarJobsEmLote(jobsCriados);
             }
 
             log.info("Processamento do ZIP CID-10 concluído. Jobs criados: {}, Erros: {}", jobsCriados.size(), erros.size());
@@ -350,20 +364,21 @@ public class ImportJobUploadServiceImpl implements ImportJobUploadService {
     /**
      * Cria job completo para arquivo extraído do ZIP (com todos os dados, incluindo storage).
      * IMPORTANTE: Este método deve ser chamado APÓS o upload dos arquivos estar completo.
+     * O job é criado com status PAUSADO e será enfileirado após todos os jobs do ZIP serem criados.
      */
     @Transactional
-    protected ImportJob criarJobCompletoZip(String nomeArquivo,
-                                           Long tamanho,
-                                           ImportJobTipoEnum tipo,
-                                           String competenciaAno,
-                                           String competenciaMes,
-                                           Tenant tenant,
-                                           UUID createdByUserId,
-                                           int prioridade,
-                                           String storageBucket,
-                                           String storagePath,
-                                           String checksum,
-                                           String payloadJson) {
+    protected ImportJob criarJobCompletoZipPausado(String nomeArquivo,
+                                                  Long tamanho,
+                                                  ImportJobTipoEnum tipo,
+                                                  String competenciaAno,
+                                                  String competenciaMes,
+                                                  Tenant tenant,
+                                                  UUID createdByUserId,
+                                                  int prioridade,
+                                                  String storageBucket,
+                                                  String storagePath,
+                                                  String checksum,
+                                                  String payloadJson) {
         ImportJob job = new ImportJob();
         job.setTenant(tenant);
         job.setTipo(tipo);
@@ -373,7 +388,7 @@ public class ImportJobUploadServiceImpl implements ImportJobUploadService {
         job.setOriginalFilename(nomeArquivo);
         job.setSizeBytes(tamanho);
         job.setContentType("text/plain");
-        job.setStatus(ImportJobStatusEnum.ENFILEIRADO);
+        job.setStatus(ImportJobStatusEnum.PAUSADO); // PAUSADO até todos os jobs serem criados
         job.setPriority(prioridade);
         job.setCreatedByUserId(createdByUserId);
         job.setCreatedAt(OffsetDateTime.now());
@@ -391,19 +406,20 @@ public class ImportJobUploadServiceImpl implements ImportJobUploadService {
     /**
      * Cria job completo para arquivo extraído do ZIP CID-10 (com todos os dados, incluindo storage).
      * IMPORTANTE: Este método deve ser chamado APÓS o upload do arquivo estar completo.
+     * O job é criado com status PAUSADO e será enfileirado após todos os jobs do ZIP serem criados.
      */
     @Transactional
-    protected ImportJob criarJobCompletoCid10(String nomeArquivo,
-                                             Long tamanho,
-                                             ImportJobTipoEnum tipo,
-                                             String competenciaAno,
-                                             String competenciaMes,
-                                             Tenant tenant,
-                                             UUID createdByUserId,
-                                             int prioridade,
-                                             String storageBucket,
-                                             String storagePath,
-                                             String checksum) {
+    protected ImportJob criarJobCompletoCid10Pausado(String nomeArquivo,
+                                                     Long tamanho,
+                                                     ImportJobTipoEnum tipo,
+                                                     String competenciaAno,
+                                                     String competenciaMes,
+                                                     Tenant tenant,
+                                                     UUID createdByUserId,
+                                                     int prioridade,
+                                                     String storageBucket,
+                                                     String storagePath,
+                                                     String checksum) {
         ImportJob job = new ImportJob();
         job.setTenant(tenant);
         job.setTipo(tipo);
@@ -413,7 +429,7 @@ public class ImportJobUploadServiceImpl implements ImportJobUploadService {
         job.setOriginalFilename(nomeArquivo);
         job.setSizeBytes(tamanho);
         job.setContentType("text/csv");
-        job.setStatus(ImportJobStatusEnum.ENFILEIRADO);
+        job.setStatus(ImportJobStatusEnum.PAUSADO); // PAUSADO até todos os jobs serem criados
         job.setPriority(prioridade);
         job.setCreatedByUserId(createdByUserId);
         job.setCreatedAt(OffsetDateTime.now());
@@ -426,6 +442,34 @@ public class ImportJobUploadServiceImpl implements ImportJobUploadService {
         job.setPayloadJson(null); // CID-10 não precisa de payload JSON
 
         return importJobApiRepository.save(job);
+    }
+
+    /**
+     * Enfileira uma lista de jobs em lote, mudando o status de PAUSADO para ENFILEIRADO.
+     * Isso garante que o scheduler só vai processar os jobs após o upload completo estar finalizado.
+     */
+    @Transactional
+    protected void enfileirarJobsEmLote(List<ImportJob> jobs) {
+        if (jobs == null || jobs.isEmpty()) {
+            return;
+        }
+        
+        OffsetDateTime now = OffsetDateTime.now();
+        // Define nextRunAt para 10 segundos no futuro para garantir que o scheduler rápido
+        // possa pegar esses jobs imediatamente quando rodar (a cada 2 minutos com fixedRate).
+        // Isso garante processamento em até 2 minutos após o upload completo.
+        OffsetDateTime nextRunAt = now.plusSeconds(10);
+        
+        for (ImportJob job : jobs) {
+            if (job.getStatus() == ImportJobStatusEnum.PAUSADO) {
+                job.setStatus(ImportJobStatusEnum.ENFILEIRADO);
+                job.setNextRunAt(nextRunAt);
+                job.setErrorSummary(null);
+                importJobApiRepository.save(job);
+            }
+        }
+        log.info("{} jobs enfileirados com sucesso. Próxima execução agendada para: {} (scheduler rápido roda a cada 2 minutos)", 
+                jobs.size(), nextRunAt);
     }
 
     /**

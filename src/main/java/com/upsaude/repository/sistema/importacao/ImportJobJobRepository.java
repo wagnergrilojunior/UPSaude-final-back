@@ -121,6 +121,73 @@ public interface ImportJobJobRepository extends JpaRepository<ImportJob, UUID> {
                                   @Param("lockedBy") String lockedBy,
                                   @Param("maxGlobal") int maxGlobal,
                                   @Param("maxPerTenant") int maxPerTenant);
+
+    /**
+     * Faz o claim ATÔMICO de 1 job ENFILEIRADO recém-enfileirado (criado após limiteTempo).
+     * Prioriza jobs que foram enfileirados recentemente para processamento rápido após upload.
+     * Respeita limite global e por tenant, marca como PROCESSANDO e retorna o id.
+     * 
+     * IMPORTANTE: Processa jobs agrupados por tipo. Se houver jobs de um tipo em processamento,
+     * só buscará novos jobs desse mesmo tipo. Caso contrário, buscará jobs do próximo tipo disponível.
+     *
+     * Usa SKIP LOCKED para evitar concorrência entre schedulers.
+     */
+    @Query(value = """
+        WITH tipo_em_processamento AS (
+            -- Identifica se há algum tipo em processamento
+            SELECT DISTINCT tipo
+            FROM import_job
+            WHERE status = :processingStatus
+            LIMIT 1
+        ),
+        tipo_alvo AS (
+            -- Define qual tipo deve ser processado:
+            -- Se houver tipo em processamento, usa esse tipo
+            -- Caso contrário, usa o primeiro tipo disponível (ordenado alfabeticamente)
+            SELECT COALESCE(
+                (SELECT tipo FROM tipo_em_processamento),
+                (SELECT tipo FROM import_job 
+                 WHERE status = :queuedStatus 
+                   AND (next_run_at IS NULL OR next_run_at <= :now)
+                   AND criado_em >= :limiteTempo
+                 ORDER BY tipo ASC 
+                 LIMIT 1)
+            ) AS tipo
+        ),
+        candidate AS (
+            SELECT j.id
+            FROM import_job j
+            CROSS JOIN tipo_alvo ta
+            WHERE j.status = :queuedStatus
+              AND (j.next_run_at IS NULL OR j.next_run_at <= :now)
+              AND j.criado_em >= :limiteTempo
+              AND j.tipo = ta.tipo
+              AND (SELECT COUNT(1) FROM import_job p WHERE p.status = :processingStatus) < :maxGlobal
+              AND (
+                    j.tenant_id IS NULL
+                 OR (SELECT COUNT(1) FROM import_job p WHERE p.status = :processingStatus AND p.tenant_id = j.tenant_id) < :maxPerTenant
+              )
+            ORDER BY j.priority DESC, j.criado_em DESC, j.next_run_at ASC NULLS FIRST
+            LIMIT 1
+            FOR UPDATE SKIP LOCKED
+        )
+        UPDATE import_job j
+        SET status = :processingStatus,
+            locked_at = :now,
+            locked_by = :lockedBy,
+            started_at = COALESCE(j.started_at, :now),
+            heartbeat_at = :now
+        FROM candidate c
+        WHERE j.id = c.id
+        RETURNING j.id
+        """, nativeQuery = true)
+    UUID claimNextJobRecemEnfileirado(@Param("queuedStatus") String queuedStatus,
+                                      @Param("processingStatus") String processingStatus,
+                                      @Param("now") OffsetDateTime now,
+                                      @Param("limiteTempo") OffsetDateTime limiteTempo,
+                                      @Param("lockedBy") String lockedBy,
+                                      @Param("maxGlobal") int maxGlobal,
+                                      @Param("maxPerTenant") int maxPerTenant);
     
     // ========== CONTAGEM PARA CONTROLE DE CONCORRÊNCIA (JOB) ==========
     

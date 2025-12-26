@@ -73,6 +73,17 @@ public class SigtapProcedimento extends BaseEntityWithoutTenant {
     @Column(name = "limite_maximo")
     private Integer limiteMaximo;
 
+    @Column(name = "pontos")
+    private Integer pontos;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "financiamento_id")
+    private SigtapFinanciamento financiamento;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "rubrica_id")
+    private SigtapRubrica rubrica;
+
     @Column(name = "valor_servico_hospitalar", precision = 14, scale = 2)
     private BigDecimal valorServicoHospitalar;
 
