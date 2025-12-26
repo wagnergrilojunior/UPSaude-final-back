@@ -97,4 +97,7 @@ public class SigtapProcedimentoDetalheResponse {
     
     @Schema(description = "Lista de códigos TUSS relacionados")
     private List<SigtapProcedimentoDetalheTussResponse> listaTuss;
+    
+    @Schema(description = "Lista de modalidades de atendimento")
+    private List<SigtapProcedimentoDetalheModalidadeResponse> listaModalidades;
 }

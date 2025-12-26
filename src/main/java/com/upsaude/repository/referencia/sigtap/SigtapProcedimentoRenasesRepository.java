@@ -14,4 +14,10 @@ public interface SigtapProcedimentoRenasesRepository extends JpaRepository<Sigta
            "JOIN FETCH pr.renases r " +
            "WHERE pr.procedimento.id = :procedimentoId")
     List<SigtapProcedimentoRenases> findByProcedimentoId(@Param("procedimentoId") UUID procedimentoId);
+    
+    @Query("SELECT pr FROM SigtapProcedimentoRenases pr " +
+           "WHERE pr.procedimento.id = :procedimentoId AND pr.renases.id = :renasesId")
+    java.util.Optional<SigtapProcedimentoRenases> findByProcedimentoIdAndRenasesId(
+            @Param("procedimentoId") UUID procedimentoId, 
+            @Param("renasesId") UUID renasesId);
 }

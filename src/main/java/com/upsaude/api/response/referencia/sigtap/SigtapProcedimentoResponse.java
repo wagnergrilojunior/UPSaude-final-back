@@ -42,6 +42,9 @@ public class SigtapProcedimentoResponse {
     @Schema(description = "Nome da forma de organização", example = "Pequenas cirurgias")
     private String formaOrganizacaoNome;
 
+    @Schema(description = "Tipo de complexidade do procedimento. Valores: 1 (Baixa), 2 (Média), 3 (Alta)", example = "2")
+    private String tipoComplexidade;
+
     @Schema(description = "Sexo permitido para o procedimento. Valores: M (Masculino), F (Feminino), I (Indiferente/Ambos)", example = "I")
     private String sexoPermitido;
     

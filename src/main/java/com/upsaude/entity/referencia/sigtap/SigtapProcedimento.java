@@ -52,6 +52,9 @@ public class SigtapProcedimento extends BaseEntityWithoutTenant {
     @Column(name = "competencia_final", length = 6)
     private String competenciaFinal;
 
+    @Column(name = "tipo_complexidade", length = 1)
+    private String tipoComplexidade;
+
     @Column(name = "sexo_permitido", length = 30)
     private String sexoPermitido;
 

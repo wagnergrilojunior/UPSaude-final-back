@@ -357,8 +357,27 @@ public class SigtapFileImportServiceImpl {
 
     @Transactional
     private int importarProcedimentos(ImportContext context) {
-        return importarComBatch(context, fields -> entityMapper.mapToProcedimento(fields, context.competencia),
-                procedimentoRepository::saveAll);
+        return importarComBatch(context, fields -> {
+            com.upsaude.entity.referencia.sigtap.SigtapProcedimento procedimento = entityMapper.mapToProcedimento(fields, context.competencia);
+            return procedimentoRepository.findByCodigoOficial(procedimento.getCodigoOficial())
+                    .map(existing -> {
+                        // Atualizar campos do procedimento existente
+                        existing.setNome(procedimento.getNome());
+                        existing.setCompetenciaInicial(procedimento.getCompetenciaInicial());
+                        existing.setTipoComplexidade(procedimento.getTipoComplexidade());
+                        existing.setSexoPermitido(procedimento.getSexoPermitido());
+                        existing.setIdadeMinima(procedimento.getIdadeMinima());
+                        existing.setIdadeMaxima(procedimento.getIdadeMaxima());
+                        existing.setMediaDiasInternacao(procedimento.getMediaDiasInternacao());
+                        existing.setQuantidadeMaximaDias(procedimento.getQuantidadeMaximaDias());
+                        existing.setLimiteMaximo(procedimento.getLimiteMaximo());
+                        existing.setValorServicoHospitalar(procedimento.getValorServicoHospitalar());
+                        existing.setValorServicoAmbulatorial(procedimento.getValorServicoAmbulatorial());
+                        existing.setValorServicoProfissional(procedimento.getValorServicoProfissional());
+                        return existing;
+                    })
+                    .orElse(procedimento);
+        }, procedimentoRepository::saveAll);
     }
 
     @Transactional
@@ -568,7 +587,27 @@ public class SigtapFileImportServiceImpl {
     @Transactional
     private int importarProcedimentosSiaSih(ImportContext context) {
         return importarComBatch(context, fields -> entityMapper.mapToProcedimentoSiaSih(fields, context.competencia),
-                procedimentoSiaSihRepository::saveAll);
+                entities -> {
+                    List<com.upsaude.entity.referencia.sigtap.SigtapProcedimentoSiaSih> toSave = new ArrayList<>();
+                    for (com.upsaude.entity.referencia.sigtap.SigtapProcedimentoSiaSih procSiaSih : entities) {
+                        if (procSiaSih.getProcedimento() != null && procSiaSih.getSiaSih() != null && procSiaSih.getCompetenciaInicial() != null) {
+                            java.util.Optional<com.upsaude.entity.referencia.sigtap.SigtapProcedimentoSiaSih> existing = 
+                                    procedimentoSiaSihRepository.findByProcedimentoIdAndSiaSihIdAndCompetenciaInicial(
+                                            procSiaSih.getProcedimento().getId(), 
+                                            procSiaSih.getSiaSih().getId(),
+                                            procSiaSih.getCompetenciaInicial());
+                            if (existing.isEmpty()) {
+                                toSave.add(procSiaSih);
+                            }
+                        } else {
+                            toSave.add(procSiaSih);
+                        }
+                    }
+                    if (!toSave.isEmpty()) {
+                        return procedimentoSiaSihRepository.saveAll(toSave);
+                    }
+                    return new ArrayList<>();
+                });
     }
 
     @Transactional
@@ -580,7 +619,26 @@ public class SigtapFileImportServiceImpl {
     @Transactional
     private int importarProcedimentosRenases(ImportContext context) {
         return importarComBatch(context, fields -> entityMapper.mapToProcedimentoRenases(fields),
-                procedimentoRenasesRepository::saveAll);
+                entities -> {
+                    List<com.upsaude.entity.referencia.sigtap.SigtapProcedimentoRenases> toSave = new ArrayList<>();
+                    for (com.upsaude.entity.referencia.sigtap.SigtapProcedimentoRenases procRenases : entities) {
+                        if (procRenases.getProcedimento() != null && procRenases.getRenases() != null) {
+                            java.util.Optional<com.upsaude.entity.referencia.sigtap.SigtapProcedimentoRenases> existing = 
+                                    procedimentoRenasesRepository.findByProcedimentoIdAndRenasesId(
+                                            procRenases.getProcedimento().getId(), 
+                                            procRenases.getRenases().getId());
+                            if (existing.isEmpty()) {
+                                toSave.add(procRenases);
+                            }
+                        } else {
+                            toSave.add(procRenases);
+                        }
+                    }
+                    if (!toSave.isEmpty()) {
+                        return procedimentoRenasesRepository.saveAll(toSave);
+                    }
+                    return new ArrayList<>();
+                });
     }
 
     @Transactional
@@ -628,6 +686,12 @@ public class SigtapFileImportServiceImpl {
         int linhasLidas = 0;
         long inicioTempo = System.currentTimeMillis();
         List<String> errosDetalhados = new ArrayList<>();
+        
+        // Contadores de erros por tipo
+        int errosEntidadeNaoEncontrada = 0;
+        int errosValidacao = 0;
+        int errosEntidadeNula = 0;
+        int errosOutros = 0;
 
         try (BufferedReader reader = Files.newBufferedReader(context.arquivoPath, ISO_8859_1)) {
             String linha;
@@ -648,6 +712,7 @@ public class SigtapFileImportServiceImpl {
                     
                     if (!validarCamposBasicos(fields, linhasLidas, errosDetalhados)) {
                         linhasComErro++;
+                        errosValidacao++;
                         continue;
                     }
 
@@ -687,7 +752,11 @@ public class SigtapFileImportServiceImpl {
                     
                     if (entity == null) {
                         linhasComErro++;
-                        errosDetalhados.add(String.format("Linha %d: Entidade nula ap?s mapeamento", linhasLidas));
+                        errosEntidadeNula++;
+                        String erroMsg = String.format("Linha %d: Entidade nula após mapeamento (entidade relacionada não encontrada)", linhasLidas);
+                        errosDetalhados.add(erroMsg);
+                        log.warn("Entidade nula na linha {} do arquivo {}: provavelmente entidade relacionada não encontrada", 
+                                linhasLidas, context.arquivoPath.getFileName());
                         continue;
                     }
 
@@ -733,7 +802,18 @@ public class SigtapFileImportServiceImpl {
                     linhasComErro++;
                     String erroMsg = String.format("Linha %d: %s", linhasLidas, e.getMessage());
                     errosDetalhados.add(erroMsg);
-                    log.debug("Erro de valida??o na linha {}: {}", linhasLidas, e.getMessage());
+                    
+                    // Classificar o tipo de erro baseado na mensagem
+                    String mensagemErro = e.getMessage() != null ? e.getMessage().toLowerCase() : "";
+                    if (mensagemErro.contains("não encontrado") || mensagemErro.contains("nao encontrado")) {
+                        errosEntidadeNaoEncontrada++;
+                        log.warn("Entidade não encontrada na linha {} do arquivo {}: {}", 
+                                linhasLidas, context.arquivoPath.getFileName(), e.getMessage());
+                    } else {
+                        errosValidacao++;
+                        log.warn("Erro de validação na linha {} do arquivo {}: {}", 
+                                linhasLidas, context.arquivoPath.getFileName(), e.getMessage());
+                    }
                     
                     if (errosDetalhados.size() > 100) {
                         errosDetalhados.remove(0);
@@ -754,6 +834,7 @@ public class SigtapFileImportServiceImpl {
                     break;
                 } catch (Exception e) {
                     linhasComErro++;
+                    errosOutros++;
                     String erroMsg = String.format("Linha %d: %s", linhasLidas, e.getMessage());
                     errosDetalhados.add(erroMsg);
                     log.warn("Erro ao processar linha {} do arquivo {}: {} (tipo: {})", 
@@ -768,7 +849,7 @@ public class SigtapFileImportServiceImpl {
                     }
                     
                     if (linhasComErro % 100 == 0) {
-                        log.warn("Total de {} erros at? agora no arquivo {} (?ltimo erro: {})", 
+                        log.warn("Total de {} erros até agora no arquivo {} (último erro: {})", 
                                 linhasComErro, context.arquivoPath.getFileName(), e.getMessage());
                     }
                     
@@ -796,8 +877,15 @@ public class SigtapFileImportServiceImpl {
         long tempoDecorrido = System.currentTimeMillis() - inicioTempo;
         
         if (linhasComErro > 0) {
-            log.warn("Arquivo {} conclu?do: {} linhas processadas, {} erros, {} linhas lidas, tempo: {}ms", 
+            log.warn("Arquivo {} concluído: {} linhas processadas, {} erros, {} linhas lidas, tempo: {}ms", 
                     context.arquivoPath.getFileName(), totalLinhas, linhasComErro, linhasLidas, tempoDecorrido);
+            
+            // Estatísticas de erros por tipo
+            log.warn("Estatísticas de erros por tipo:");
+            log.warn("  - Entidade não encontrada: {}", errosEntidadeNaoEncontrada);
+            log.warn("  - Entidade nula (relacionamento não encontrado): {}", errosEntidadeNula);
+            log.warn("  - Erros de validação: {}", errosValidacao);
+            log.warn("  - Outros erros: {}", errosOutros);
             
             // Log dos primeiros 10 erros detalhados
             int errosParaLogar = Math.min(10, errosDetalhados.size());
@@ -809,8 +897,8 @@ public class SigtapFileImportServiceImpl {
                         errosDetalhados.size() - 10, errosDetalhados.size());
             }
         } else {
-            log.info("Arquivo {} conclu?do com sucesso: {} linhas processadas, tempo: {}ms", 
-                    context.arquivoPath.getFileName(), totalLinhas, tempoDecorrido);
+            log.info("Arquivo {} concluído com sucesso: {} linhas processadas, {} linhas lidas, tempo: {}ms", 
+                    context.arquivoPath.getFileName(), totalLinhas, linhasLidas, tempoDecorrido);
         }
 
         return totalLinhas;

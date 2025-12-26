@@ -22,6 +22,9 @@ import com.upsaude.service.api.referencia.sigtap.SigtapConsultaService;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 
 @Slf4j
 @Service
@@ -53,6 +56,8 @@ public class SigtapConsultaServiceImpl implements SigtapConsultaService {
     private final SigtapProcedimentoRenasesRepository procedimentoRenasesRepository;
     private final SigtapProcedimentoTussRepository procedimentoTussRepository;
     private final SigtapProcedimentoSiaSihRepository procedimentoSiaSihRepository;
+    private final SigtapDescricaoRepository descricaoRepository;
+    private final SigtapProcedimentoModalidadeRepository procedimentoModalidadeRepository;
 
     private final SigtapGrupoMapper grupoMapper;
     private final SigtapProcedimentoMapper procedimentoMapper;
@@ -79,6 +84,7 @@ public class SigtapConsultaServiceImpl implements SigtapConsultaService {
     private final SigtapProcedimentoDetalheRenasesMapper procedimentoDetalheRenasesMapper;
     private final SigtapProcedimentoDetalheTussMapper procedimentoDetalheTussMapper;
     private final SigtapProcedimentoDetalheSiaSihMapper procedimentoDetalheSiaSihMapper;
+    private final SigtapProcedimentoDetalheModalidadeMapper procedimentoDetalheModalidadeMapper;
 
     @Override
     public List<SigtapGrupoResponse> listarGrupos() {
@@ -205,6 +211,19 @@ public class SigtapConsultaServiceImpl implements SigtapConsultaService {
         );
         SigtapProcedimento procedimento = page.getContent().stream().findFirst()
                 .orElseThrow(() -> new NotFoundException("Procedimento SIGTAP não encontrado: " + codigoProcedimento));
+        
+        // #region agent log
+        try {
+            String logEntry = String.format("{\"timestamp\":%d,\"location\":\"SigtapConsultaServiceImpl.java:207\",\"message\":\"Procedimento encontrado\",\"data\":{\"codigoProcedimento\":\"%s\",\"procedimentoId\":\"%s\",\"nome\":\"%s\",\"competenciaInicial\":\"%s\"},\"sessionId\":\"debug-session\",\"runId\":\"run1\",\"hypothesisId\":\"A\"}\n", 
+                System.currentTimeMillis(), codigoProcedimento, procedimento.getId(), 
+                procedimento.getNome() != null ? procedimento.getNome().substring(0, Math.min(50, procedimento.getNome().length())) : "null",
+                procedimento.getCompetenciaInicial());
+            Files.write(Paths.get("/Users/wagnergrilo/Desktop/WGB/sistemas/UPSaude/code/UPSaude-back/.cursor/debug.log"), 
+                logEntry.getBytes(), StandardOpenOption.CREATE, StandardOpenOption.APPEND);
+        } catch (Exception e) {
+            log.error("Erro ao escrever log de debug", e);
+        }
+        // #endregion
 
         // Criar resposta
         SigtapProcedimentoDetalhadoResponse resp = new SigtapProcedimentoDetalhadoResponse();
@@ -214,9 +233,28 @@ public class SigtapConsultaServiceImpl implements SigtapConsultaService {
         enrichResponseFromCodigoOficial(procedimentoResponse);
         resp.setProcedimento(procedimentoResponse);
         
+        // #region agent log
+        try {
+            String logEntry = String.format("{\"timestamp\":%d,\"location\":\"SigtapConsultaServiceImpl.java:218\",\"message\":\"Buscando procedimento detalhado\",\"data\":{\"codigoProcedimento\":\"%s\",\"procedimentoId\":\"%s\",\"competencia\":\"%s\"},\"sessionId\":\"debug-session\",\"runId\":\"run1\",\"hypothesisId\":\"A\"}\n", 
+                System.currentTimeMillis(), codigoProcedimento, procedimento.getId(), competencia);
+            Files.write(Paths.get("/Users/wagnergrilo/Desktop/WGB/sistemas/UPSaude/code/UPSaude-back/.cursor/debug.log"), 
+                logEntry.getBytes(), StandardOpenOption.CREATE, StandardOpenOption.APPEND);
+        } catch (Exception e) {}
+        // #endregion
+        
         // Buscar detalhes da tabela JSONB
         SigtapProcedimentoDetalhe detalheEntity = procedimentoDetalheRepository.findByProcedimentoId(procedimento.getId())
                 .orElse(null);
+        
+        // #region agent log
+        try {
+            String logEntry = String.format("{\"timestamp\":%d,\"location\":\"SigtapConsultaServiceImpl.java:225\",\"message\":\"DetalheEntity encontrado\",\"data\":{\"detalheEntity\":%s,\"descricaoCompleta\":\"%s\"},\"sessionId\":\"debug-session\",\"runId\":\"run1\",\"hypothesisId\":\"A\"}\n", 
+                System.currentTimeMillis(), detalheEntity != null ? "true" : "false", 
+                detalheEntity != null && detalheEntity.getDescricaoCompleta() != null ? detalheEntity.getDescricaoCompleta().substring(0, Math.min(50, detalheEntity.getDescricaoCompleta().length())) : "null");
+            Files.write(Paths.get("/Users/wagnergrilo/Desktop/WGB/sistemas/UPSaude/code/UPSaude-back/.cursor/debug.log"), 
+                logEntry.getBytes(), StandardOpenOption.CREATE, StandardOpenOption.APPEND);
+        } catch (Exception e) {}
+        // #endregion
         
         SigtapProcedimentoDetalheResponse detalheResponse = null;
         if (detalheEntity != null) {
@@ -241,6 +279,90 @@ public class SigtapConsultaServiceImpl implements SigtapConsultaService {
         
         // Buscar dados das tabelas de relacionamento
         UUID procedimentoId = procedimento.getId();
+        
+        // Buscar descrição da tabela SigtapDescricao se não estiver preenchida
+        if (detalheResponse.getDescricaoCompleta() == null || detalheResponse.getDescricaoCompleta().isBlank()) {
+            List<SigtapDescricao> descricoes = descricaoRepository.findByProcedimentoId(procedimento.getId());
+            // #region agent log
+            try {
+                String logEntry = String.format("{\"timestamp\":%d,\"location\":\"SigtapConsultaServiceImpl.java:280\",\"message\":\"Descricoes encontradas\",\"data\":{\"count\":%d,\"temDescricao\":%s},\"sessionId\":\"debug-session\",\"runId\":\"run1\",\"hypothesisId\":\"B\"}\n", 
+                    System.currentTimeMillis(), descricoes.size(), !descricoes.isEmpty() ? "true" : "false");
+                Files.write(Paths.get("/Users/wagnergrilo/Desktop/WGB/sistemas/UPSaude/code/UPSaude-back/.cursor/debug.log"), 
+                    logEntry.getBytes(), StandardOpenOption.CREATE, StandardOpenOption.APPEND);
+            } catch (Exception e) {
+                log.error("Erro ao escrever log de debug - descricoes", e);
+            }
+            // #endregion
+            
+            if (!descricoes.isEmpty()) {
+                // Filtrar por competência se informada, senão pegar a mais recente
+                SigtapDescricao descricaoSelecionada;
+                if (compFiltro != null) {
+                    final String comp = compFiltro;
+                    descricaoSelecionada = descricoes.stream()
+                        .filter(d -> {
+                            if (d.getCompetenciaInicial() == null) return false;
+                            boolean inicioOk = d.getCompetenciaInicial().compareTo(comp) <= 0;
+                            boolean fimOk = d.getCompetenciaFinal() == null || d.getCompetenciaFinal().compareTo(comp) >= 0;
+                            return inicioOk && fimOk;
+                        })
+                        .findFirst()
+                        .orElse(null);
+                } else {
+                    // Pegar a mais recente (maior competenciaInicial)
+                    descricaoSelecionada = descricoes.stream()
+                        .max((a, b) -> {
+                            String compA = a.getCompetenciaInicial() != null ? a.getCompetenciaInicial() : "";
+                            String compB = b.getCompetenciaInicial() != null ? b.getCompetenciaInicial() : "";
+                            return compA.compareTo(compB);
+                        })
+                        .orElse(null);
+                }
+                
+                if (descricaoSelecionada != null && descricaoSelecionada.getDescricaoCompleta() != null) {
+                    detalheResponse.setDescricaoCompleta(descricaoSelecionada.getDescricaoCompleta());
+                    // #region agent log
+                    try {
+                        String logEntry = String.format("{\"timestamp\":%d,\"location\":\"SigtapConsultaServiceImpl.java:305\",\"message\":\"Descricao preenchida\",\"data\":{\"descricaoLength\":%d},\"sessionId\":\"debug-session\",\"runId\":\"run1\",\"hypothesisId\":\"B\"}\n", 
+                            System.currentTimeMillis(), descricaoSelecionada.getDescricaoCompleta().length());
+                        Files.write(Paths.get("/Users/wagnergrilo/Desktop/WGB/sistemas/UPSaude/code/UPSaude-back/.cursor/debug.log"), 
+                            logEntry.getBytes(), StandardOpenOption.CREATE, StandardOpenOption.APPEND);
+                    } catch (Exception e) {
+                        log.error("Erro ao escrever log de debug - descricao preenchida", e);
+                    }
+                    // #endregion
+                }
+            }
+        }
+        
+        // Modalidades
+        List<SigtapProcedimentoModalidade> procedimentosModalidade = procedimentoModalidadeRepository.findByProcedimentoId(procedimentoId);
+        // #region agent log
+        try {
+            String logEntry = String.format("{\"timestamp\":%d,\"location\":\"SigtapConsultaServiceImpl.java:295\",\"message\":\"Modalidades encontradas\",\"data\":{\"count\":%d,\"modalidades\":%s},\"sessionId\":\"debug-session\",\"runId\":\"run1\",\"hypothesisId\":\"C\"}\n", 
+                System.currentTimeMillis(), procedimentosModalidade.size(), 
+                procedimentosModalidade.stream().map(m -> m.getModalidade() != null ? m.getModalidade().getCodigoOficial() : "null").toList());
+            Files.write(Paths.get("/Users/wagnergrilo/Desktop/WGB/sistemas/UPSaude/code/UPSaude-back/.cursor/debug.log"), 
+                logEntry.getBytes(), StandardOpenOption.CREATE, StandardOpenOption.APPEND);
+        } catch (Exception e) {
+            log.error("Erro ao escrever log de debug - modalidades", e);
+        }
+        // #endregion
+        
+        if (compFiltro != null) {
+            final String comp = compFiltro;
+            procedimentosModalidade = procedimentosModalidade.stream()
+                .filter(pm -> {
+                    if (pm.getCompetenciaInicial() == null) return false;
+                    boolean inicioOk = pm.getCompetenciaInicial().compareTo(comp) <= 0;
+                    boolean fimOk = pm.getCompetenciaFinal() == null || pm.getCompetenciaFinal().compareTo(comp) >= 0;
+                    return inicioOk && fimOk;
+                })
+                .toList();
+        }
+        detalheResponse.setListaModalidades(procedimentosModalidade.stream()
+                .map(procedimentoDetalheModalidadeMapper::toResponse)
+                .toList());
         
         // CIDs
         List<SigtapProcedimentoCid> procedimentosCid = procedimentoCidRepository.findByProcedimentoId(procedimentoId);
@@ -405,9 +527,27 @@ public class SigtapConsultaServiceImpl implements SigtapConsultaService {
                 .map(procedimentoDetalheRegraCondicionadaMapper::toResponse)
                 .toList());
         
+        // #region agent log
+        try {
+            String logEntry = String.format("{\"timestamp\":%d,\"location\":\"SigtapConsultaServiceImpl.java:410\",\"message\":\"Buscando RENASES\",\"data\":{\"procedimentoId\":\"%s\"},\"sessionId\":\"debug-session\",\"runId\":\"run1\",\"hypothesisId\":\"D\"}\n", 
+                System.currentTimeMillis(), procedimentoId);
+            Files.write(Paths.get("/Users/wagnergrilo/Desktop/WGB/sistemas/UPSaude/code/UPSaude-back/.cursor/debug.log"), 
+                logEntry.getBytes(), StandardOpenOption.CREATE, StandardOpenOption.APPEND);
+        } catch (Exception e) {}
+        // #endregion
+        
         // RENASES
         List<SigtapProcedimentoRenases> procedimentosRenases = procedimentoRenasesRepository.findByProcedimentoId(procedimentoId);
         log.debug("RENASES encontrados antes dos filtros: {}", procedimentosRenases.size());
+        
+        // #region agent log
+        try {
+            String logEntry = String.format("{\"timestamp\":%d,\"location\":\"SigtapConsultaServiceImpl.java:417\",\"message\":\"RENASES encontrados\",\"data\":{\"count\":%d,\"renases\":%s},\"sessionId\":\"debug-session\",\"runId\":\"run1\",\"hypothesisId\":\"D\"}\n", 
+                System.currentTimeMillis(), procedimentosRenases.size(), procedimentosRenases.stream().map(r -> r.getRenases() != null ? r.getRenases().getCodigoOficial() : "null").toList());
+            Files.write(Paths.get("/Users/wagnergrilo/Desktop/WGB/sistemas/UPSaude/code/UPSaude-back/.cursor/debug.log"), 
+                logEntry.getBytes(), StandardOpenOption.CREATE, StandardOpenOption.APPEND);
+        } catch (Exception e) {}
+        // #endregion
         procedimentosRenases = procedimentosRenases.stream()
                 .filter(pr -> {
                     Boolean ativo = pr.getActive();
