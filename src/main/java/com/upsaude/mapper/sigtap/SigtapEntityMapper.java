@@ -264,6 +264,7 @@ public class SigtapEntityMapper {
         procedimento.setCompetenciaInicial(fields.getOrDefault("DT_COMPETENCIA", competencia));
 
         // Campos de procedimento
+        procedimento.setTipoComplexidade(fields.get("TP_COMPLEXIDADE"));
         procedimento.setSexoPermitido(fields.get("TP_SEXO"));
         procedimento.setIdadeMinima(parseIdade(fields.get("VL_IDADE_MINIMA")));
         procedimento.setIdadeMaxima(parseIdade(fields.get("VL_IDADE_MAXIMA")));
@@ -566,14 +567,22 @@ public class SigtapEntityMapper {
     public SigtapProcedimentoOrigem mapToProcedimentoOrigem(Map<String, String> fields, String competencia) {
         String codigoProcedimento = fields.get("CO_PROCEDIMENTO");
         String codigoProcedimentoOrigem = fields.get("CO_PROCEDIMENTO_ORIGEM");
-        SigtapProcedimento procedimento = procedimentoRepository.findByCodigoOficial(codigoProcedimento)
-                .orElseThrow(() -> new IllegalArgumentException("Procedimento n?o encontrado: " + codigoProcedimento));
-        SigtapProcedimento procedimentoOrigem = procedimentoRepository.findByCodigoOficial(codigoProcedimentoOrigem)
-                .orElseThrow(() -> new IllegalArgumentException("Procedimento origem n?o encontrado: " + codigoProcedimentoOrigem));
+        
+        java.util.Optional<SigtapProcedimento> optProcedimento = procedimentoRepository.findByCodigoOficial(codigoProcedimento);
+        if (optProcedimento.isEmpty()) {
+            log.warn("Procedimento não encontrado ao mapear Origem: {} (Origem: {})", codigoProcedimento, codigoProcedimentoOrigem);
+            return null;
+        }
+        
+        java.util.Optional<SigtapProcedimento> optProcedimentoOrigem = procedimentoRepository.findByCodigoOficial(codigoProcedimentoOrigem);
+        if (optProcedimentoOrigem.isEmpty()) {
+            log.warn("Procedimento origem não encontrado ao mapear relacionamento: {} (Procedimento: {})", codigoProcedimentoOrigem, codigoProcedimento);
+            return null;
+        }
 
         SigtapProcedimentoOrigem procOrigem = new SigtapProcedimentoOrigem();
-        procOrigem.setProcedimento(procedimento);
-        procOrigem.setProcedimentoOrigem(procedimentoOrigem);
+        procOrigem.setProcedimento(optProcedimento.get());
+        procOrigem.setProcedimentoOrigem(optProcedimentoOrigem.get());
         procOrigem.setCompetenciaInicial(fields.getOrDefault("DT_COMPETENCIA", competencia));
         return procOrigem;
     }
@@ -581,14 +590,22 @@ public class SigtapEntityMapper {
     public SigtapProcedimentoSiaSih mapToProcedimentoSiaSih(Map<String, String> fields, String competencia) {
         String codigoProcedimento = fields.get("CO_PROCEDIMENTO");
         String codigoSiaSih = fields.get("CO_PROCEDIMENTO_SIA_SIH");
-        SigtapProcedimento procedimento = procedimentoRepository.findByCodigoOficial(codigoProcedimento)
-                .orElseThrow(() -> new IllegalArgumentException("Procedimento n?o encontrado: " + codigoProcedimento));
-        SigtapSiaSih siaSih = siaSihRepository.findByCodigoOficial(codigoSiaSih)
-                .orElseThrow(() -> new IllegalArgumentException("SIA/SIH n?o encontrado: " + codigoSiaSih));
+        
+        java.util.Optional<SigtapProcedimento> optProcedimento = procedimentoRepository.findByCodigoOficial(codigoProcedimento);
+        if (optProcedimento.isEmpty()) {
+            log.warn("Procedimento não encontrado ao mapear SIA/SIH: {} (SIA/SIH: {})", codigoProcedimento, codigoSiaSih);
+            return null;
+        }
+        
+        java.util.Optional<SigtapSiaSih> optSiaSih = siaSihRepository.findByCodigoOficial(codigoSiaSih);
+        if (optSiaSih.isEmpty()) {
+            log.warn("SIA/SIH não encontrado ao mapear relacionamento: {} (Procedimento: {})", codigoSiaSih, codigoProcedimento);
+            return null;
+        }
 
         SigtapProcedimentoSiaSih procSiaSih = new SigtapProcedimentoSiaSih();
-        procSiaSih.setProcedimento(procedimento);
-        procSiaSih.setSiaSih(siaSih);
+        procSiaSih.setProcedimento(optProcedimento.get());
+        procSiaSih.setSiaSih(optSiaSih.get());
         procSiaSih.setTipoProcedimento(fields.get("TP_PROCEDIMENTO"));
         procSiaSih.setCompetenciaInicial(fields.getOrDefault("DT_COMPETENCIA", competencia));
         return procSiaSih;
@@ -597,42 +614,66 @@ public class SigtapEntityMapper {
     public SigtapProcedimentoRegraCondicionada mapToProcedimentoRegraCondicionada(Map<String, String> fields) {
         String codigoProcedimento = fields.get("CO_PROCEDIMENTO");
         String codigoRegra = fields.get("CO_REGRA_CONDICIONADA");
-        SigtapProcedimento procedimento = procedimentoRepository.findByCodigoOficial(codigoProcedimento)
-                .orElseThrow(() -> new IllegalArgumentException("Procedimento n?o encontrado: " + codigoProcedimento));
-        SigtapRegraCondicionada regra = regraCondicionadaRepository.findByCodigoOficial(codigoRegra)
-                .orElseThrow(() -> new IllegalArgumentException("Regra condicionada n?o encontrada: " + codigoRegra));
+        
+        java.util.Optional<SigtapProcedimento> optProcedimento = procedimentoRepository.findByCodigoOficial(codigoProcedimento);
+        if (optProcedimento.isEmpty()) {
+            log.warn("Procedimento não encontrado ao mapear Regra Condicionada: {} (Regra: {})", codigoProcedimento, codigoRegra);
+            return null;
+        }
+        
+        java.util.Optional<SigtapRegraCondicionada> optRegra = regraCondicionadaRepository.findByCodigoOficial(codigoRegra);
+        if (optRegra.isEmpty()) {
+            log.warn("Regra condicionada não encontrada ao mapear relacionamento: {} (Procedimento: {})", codigoRegra, codigoProcedimento);
+            return null;
+        }
 
         SigtapProcedimentoRegraCondicionada procRegra = new SigtapProcedimentoRegraCondicionada();
-        procRegra.setProcedimento(procedimento);
-        procRegra.setRegraCondicionada(regra);
+        procRegra.setProcedimento(optProcedimento.get());
+        procRegra.setRegraCondicionada(optRegra.get());
         return procRegra;
     }
 
     public SigtapProcedimentoRenases mapToProcedimentoRenases(Map<String, String> fields) {
         String codigoProcedimento = fields.get("CO_PROCEDIMENTO");
         String codigoRenases = fields.get("CO_RENASES");
-        SigtapProcedimento procedimento = procedimentoRepository.findByCodigoOficial(codigoProcedimento)
-                .orElseThrow(() -> new IllegalArgumentException("Procedimento n?o encontrado: " + codigoProcedimento));
-        SigtapRenases renases = renasesRepository.findByCodigoOficial(codigoRenases)
-                .orElseThrow(() -> new IllegalArgumentException("RENASES n?o encontrado: " + codigoRenases));
+        
+        java.util.Optional<SigtapProcedimento> optProcedimento = procedimentoRepository.findByCodigoOficial(codigoProcedimento);
+        if (optProcedimento.isEmpty()) {
+            log.warn("Procedimento não encontrado ao mapear RENASES: {} (RENASES: {})", codigoProcedimento, codigoRenases);
+            return null;
+        }
+        
+        java.util.Optional<SigtapRenases> optRenases = renasesRepository.findByCodigoOficial(codigoRenases);
+        if (optRenases.isEmpty()) {
+            log.warn("RENASES não encontrado ao mapear relacionamento: {} (Procedimento: {})", codigoRenases, codigoProcedimento);
+            return null;
+        }
 
         SigtapProcedimentoRenases procRenases = new SigtapProcedimentoRenases();
-        procRenases.setProcedimento(procedimento);
-        procRenases.setRenases(renases);
+        procRenases.setProcedimento(optProcedimento.get());
+        procRenases.setRenases(optRenases.get());
         return procRenases;
     }
 
     public SigtapProcedimentoTuss mapToProcedimentoTuss(Map<String, String> fields) {
         String codigoProcedimento = fields.get("CO_PROCEDIMENTO");
         String codigoTuss = fields.get("CO_TUSS");
-        SigtapProcedimento procedimento = procedimentoRepository.findByCodigoOficial(codigoProcedimento)
-                .orElseThrow(() -> new IllegalArgumentException("Procedimento n?o encontrado: " + codigoProcedimento));
-        SigtapTuss tuss = tussRepository.findByCodigoOficial(codigoTuss)
-                .orElseThrow(() -> new IllegalArgumentException("TUSS n?o encontrado: " + codigoTuss));
+        
+        java.util.Optional<SigtapProcedimento> optProcedimento = procedimentoRepository.findByCodigoOficial(codigoProcedimento);
+        if (optProcedimento.isEmpty()) {
+            log.warn("Procedimento não encontrado ao mapear TUSS: {} (TUSS: {})", codigoProcedimento, codigoTuss);
+            return null;
+        }
+        
+        java.util.Optional<SigtapTuss> optTuss = tussRepository.findByCodigoOficial(codigoTuss);
+        if (optTuss.isEmpty()) {
+            log.warn("TUSS não encontrado ao mapear relacionamento: {} (Procedimento: {})", codigoTuss, codigoProcedimento);
+            return null;
+        }
 
         SigtapProcedimentoTuss procTuss = new SigtapProcedimentoTuss();
-        procTuss.setProcedimento(procedimento);
-        procTuss.setTuss(tuss);
+        procTuss.setProcedimento(optProcedimento.get());
+        procTuss.setTuss(optTuss.get());
         return procTuss;
     }
 

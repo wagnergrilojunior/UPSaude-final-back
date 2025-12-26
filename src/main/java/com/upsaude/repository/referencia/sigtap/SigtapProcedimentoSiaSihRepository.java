@@ -14,4 +14,12 @@ public interface SigtapProcedimentoSiaSihRepository extends JpaRepository<Sigtap
            "JOIN FETCH ps.siaSih ss " +
            "WHERE ps.procedimento.id = :procedimentoId")
     List<SigtapProcedimentoSiaSih> findByProcedimentoId(@Param("procedimentoId") UUID procedimentoId);
+    
+    @Query("SELECT ps FROM SigtapProcedimentoSiaSih ps " +
+           "WHERE ps.procedimento.id = :procedimentoId AND ps.siaSih.id = :siaSihId " +
+           "AND ps.competenciaInicial = :competenciaInicial")
+    java.util.Optional<SigtapProcedimentoSiaSih> findByProcedimentoIdAndSiaSihIdAndCompetenciaInicial(
+            @Param("procedimentoId") UUID procedimentoId, 
+            @Param("siaSihId") UUID siaSihId,
+            @Param("competenciaInicial") String competenciaInicial);
 }
