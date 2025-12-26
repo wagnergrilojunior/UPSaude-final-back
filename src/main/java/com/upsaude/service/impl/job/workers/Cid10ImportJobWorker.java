@@ -26,6 +26,7 @@ import org.springframework.transaction.support.TransactionTemplate;
 import org.springframework.util.StringUtils;
 
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
@@ -63,6 +64,9 @@ public class Cid10ImportJobWorker implements ImportJobWorker {
 
     @Value("${import.job.progress-log-interval-seconds:15}")
     private int progressLogIntervalSeconds;
+
+    @Value("${import.job.heartbeat-timeout-seconds:300}")
+    private int heartbeatTimeoutSeconds;
 
     @Value("${import.job.tx.timeout-seconds.cid10:60}")
     private int batchTxTimeoutSeconds;
@@ -122,11 +126,25 @@ public class Cid10ImportJobWorker implements ImportJobWorker {
 
         long inicio = System.currentTimeMillis();
         long lastProgressLogAtMs = System.currentTimeMillis();
+        long lastHeartbeatAtMs = System.currentTimeMillis();
+        // Atualiza heartbeat a cada 30 segundos (metade do timeout de 5 minutos) para evitar expiração
+        long heartbeatIntervalMs = Math.min(30_000, (heartbeatTimeoutSeconds * 1000L) / 2);
+
+        // Atualiza heartbeat logo no início para evitar expiração durante download/inicialização
+        atualizarHeartbeat(txBatchCommit, jobId);
+        lastHeartbeatAtMs = System.currentTimeMillis();
 
         List<Object> batch = new ArrayList<>(Math.max(100, effectiveBatchSize));
 
         try (InputStream is = supabaseStorageService.downloadStream(job.getStorageBucket(), job.getStoragePath());
              BufferedReader reader = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8))) {
+
+            // Atualiza heartbeat após download (pode ter demorado)
+            long downloadEndMs = System.currentTimeMillis();
+            if ((downloadEndMs - lastHeartbeatAtMs) >= heartbeatIntervalMs) {
+                atualizarHeartbeat(txBatchCommit, jobId);
+                lastHeartbeatAtMs = downloadEndMs;
+            }
 
             String headerLine = reader.readLine();
             if (!StringUtils.hasText(headerLine)) {
@@ -135,9 +153,17 @@ public class Cid10ImportJobWorker implements ImportJobWorker {
 
             String[] headers = parseHeaders(headerLine);
 
-            // Skip checkpoint (data lines)
+            // Skip checkpoint (data lines) - atualiza heartbeat periodicamente durante skip se checkpoint for grande
             for (long i = 0; i < checkpoint; i++) {
                 if (reader.readLine() == null) break;
+                // Atualiza heartbeat a cada 10000 linhas durante skip para evitar expiração em checkpoints grandes
+                if (i > 0 && i % 10000 == 0) {
+                    long skipCheckMs = System.currentTimeMillis();
+                    if ((skipCheckMs - lastHeartbeatAtMs) >= heartbeatIntervalMs) {
+                        atualizarHeartbeat(txBatchCommit, jobId);
+                        lastHeartbeatAtMs = skipCheckMs;
+                    }
+                }
             }
 
             String linha;
@@ -167,6 +193,13 @@ public class Cid10ImportJobWorker implements ImportJobWorker {
                     batch.add(entity);
                     linhasProcessadasTotal++;
 
+                    // Atualiza heartbeat periodicamente para evitar expiração durante processamento longo
+                    long nowMs = System.currentTimeMillis();
+                    if ((nowMs - lastHeartbeatAtMs) >= heartbeatIntervalMs) {
+                        atualizarHeartbeat(txBatchCommit, jobId);
+                        lastHeartbeatAtMs = nowMs;
+                    }
+
                     if (batch.size() >= effectiveBatchSize) {
                         long commitLineIndex = linhaDataIndex;
                         int sizeAtual = batch.size();
@@ -179,7 +212,6 @@ public class Cid10ImportJobWorker implements ImportJobWorker {
                         lastCommittedLineIndex = commitLineIndex;
                         batch.clear();
 
-                        long nowMs = System.currentTimeMillis();
                         if ((nowMs - lastProgressLogAtMs) >= progressLogIntervalMs) {
                             log.info("Job {} (CID10:{}) progresso: lidas={}, processadas={}, inseridas={}, erros={}, checkpoint={}",
                                     jobId, nomeArquivo, linhasLidasTotal, linhasProcessadasTotal, linhasInseridasTotal, linhasErroTotal, lastCommittedLineIndex);
@@ -210,10 +242,21 @@ public class Cid10ImportJobWorker implements ImportJobWorker {
 
             long duracao = System.currentTimeMillis() - inicio;
             finalizar(txBatchCommit, jobId, linhasLidasTotal, linhasProcessadasTotal, linhasInseridasTotal, linhasErroTotal, lastCommittedLineIndex, duracao);
+        } catch (ImportJobRecoverableException | ImportJobFatalException e) {
+            throw e;
+        } catch (java.io.IOException e) {
+            // Erros de IO durante leitura do stream (ConnectionClosedException, Broken pipe, etc) são recuperáveis
+            // ConnectionClosedException do Apache HttpClient 5.x é uma subclasse de IOException
+            log.warn("Erro de IO durante leitura do stream no job {} (CID10): {} - Tipo: {}", jobId, e.getMessage(), e.getClass().getSimpleName());
+            throw new ImportJobRecoverableException("Falha de rede durante leitura do arquivo (pode ser temporário): " + e.getMessage(), e);
         } catch (Exception e) {
+            // Verifica se a causa é uma IOException (inclui ConnectionClosedException)
+            Throwable cause = e.getCause();
+            if (cause instanceof IOException) {
+                log.warn("Erro de rede (via causa) durante leitura do stream no job {} (CID10): {} - Tipo: {}", jobId, e.getMessage(), cause.getClass().getSimpleName());
+                throw new ImportJobRecoverableException("Falha de rede durante leitura do arquivo (pode ser temporário): " + e.getMessage(), e);
+            }
             log.error("Erro fatal no job {} (CID10): {}", jobId, e.getMessage(), e);
-            if (e instanceof ImportJobRecoverableException re) throw re;
-            if (e instanceof ImportJobFatalException fe) throw fe;
             throw new ImportJobFatalException("Erro fatal no CID10: " + e.getMessage(), e);
         }
     }
@@ -246,6 +289,20 @@ public class Cid10ImportJobWorker implements ImportJobWorker {
     private boolean validarCamposBasicos(Map<String, String> fields) {
         if (fields == null || fields.isEmpty()) return false;
         return fields.values().stream().anyMatch(v -> v != null && !v.trim().isEmpty());
+    }
+
+    /**
+     * Atualiza apenas o heartbeat do job (sem commit de batch).
+     * Usado para evitar expiração do heartbeat durante processamento longo entre batches.
+     */
+    private void atualizarHeartbeat(TransactionTemplate txBatchCommit, UUID jobId) {
+        txBatchCommit.executeWithoutResult(status -> {
+            ImportJob j = importJobJobRepository.findById(jobId).orElse(null);
+            if (j != null && j.getStatus() == ImportJobStatusEnum.PROCESSANDO) {
+                j.setHeartbeatAt(OffsetDateTime.now());
+                importJobJobRepository.save(j);
+            }
+        });
     }
 
     /**
