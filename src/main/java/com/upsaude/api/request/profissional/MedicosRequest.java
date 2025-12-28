@@ -35,6 +35,9 @@ public class MedicosRequest {
     @Size(max = 255, message = "Nome completo deve ter no máximo 255 caracteres")
     private String nomeCompleto;
 
+    @Schema(description = "Lista de IDs de especialidades (CBO) para associar ao médico no cadastro inicial. " +
+            "Os IDs devem corresponder a CBOs válidos da tabela sigtap_ocupacao. " +
+            "Exemplo: [\"ee0e8400-e29b-41d4-a716-446655440009\", \"ee0e8400-e29b-41d4-a716-446655440010\"]")
     @Builder.Default
     private Set<UUID> especialidades = new HashSet<>();
 

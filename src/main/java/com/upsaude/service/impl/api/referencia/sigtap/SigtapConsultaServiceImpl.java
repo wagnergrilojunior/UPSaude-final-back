@@ -1,5 +1,6 @@
 package com.upsaude.service.impl.api.referencia.sigtap;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
@@ -19,6 +20,8 @@ import java.util.ArrayList;
 import com.upsaude.mapper.sigtap.*;
 import com.upsaude.repository.referencia.sigtap.*;
 import com.upsaude.service.api.referencia.sigtap.SigtapConsultaService;
+import com.upsaude.enums.GrupoCboEnum;
+import jakarta.persistence.criteria.Predicate;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -41,7 +44,7 @@ public class SigtapConsultaServiceImpl implements SigtapConsultaService {
     private final SigtapFormaOrganizacaoRepository formaOrganizacaoRepository;
     private final SigtapHabilitacaoRepository habilitacaoRepository;
     private final SigtapTussRepository tussRepository;
-    private final SigtapOcupacaoRepository ocupacaoRepository;
+    private final SigtapCboRepository cboRepository;
     private final SigtapModalidadeRepository modalidadeRepository;
     
     // Repositórios de relacionamento
@@ -70,7 +73,7 @@ public class SigtapConsultaServiceImpl implements SigtapConsultaService {
     private final SigtapFormaOrganizacaoMapper formaOrganizacaoMapper;
     private final SigtapHabilitacaoMapper habilitacaoMapper;
     private final SigtapTussMapper tussMapper;
-    private final SigtapOcupacaoMapper ocupacaoMapper;
+    private final SigtapCboMapper cboMapper;
     private final SigtapModalidadeMapper modalidadeMapper;
     
     // Mappers de detalhe
@@ -1027,12 +1030,27 @@ public class SigtapConsultaServiceImpl implements SigtapConsultaService {
     }
 
     @Override
-    public Page<SigtapOcupacaoResponse> pesquisarOcupacoes(String q, Pageable pageable) {
+    public Page<SigtapCboResponse> pesquisarCbo(String q, String grupo, Pageable pageable) {
         if (pageable == null) {
             pageable = PageRequest.of(0, 20);
         }
         Specification<SigtapOcupacao> spec = Specification.where(null);
 
+        // Filtro por grupo
+        if (grupo != null && !grupo.isBlank()) {
+            GrupoCboEnum grupoEnum = GrupoCboEnum.fromCodigo(grupo).orElse(null);
+            if (grupoEnum != null) {
+                spec = spec.and((root, query, cb) -> {
+                    List<Predicate> predicates = new ArrayList<>();
+                    for (String prefixo : grupoEnum.getPrefixos()) {
+                        predicates.add(cb.like(root.get("codigoOficial"), prefixo + "%"));
+                    }
+                    return cb.or(predicates.toArray(new Predicate[0]));
+                });
+            }
+        }
+
+        // Filtro de busca livre
         if (q != null && !q.isBlank()) {
             String like = "%" + q.trim().toLowerCase(Locale.ROOT) + "%";
             spec = spec.and((root, query, cb) -> cb.or(
@@ -1041,18 +1059,88 @@ public class SigtapConsultaServiceImpl implements SigtapConsultaService {
             ));
         }
 
-        Page<SigtapOcupacao> page = ocupacaoRepository.findAll(spec, pageable);
-        return page.map(ocupacaoMapper::toResponse);
+        Page<SigtapOcupacao> page = cboRepository.findAll(spec, pageable);
+        return page.map(cboMapper::toResponse);
     }
 
     @Override
-    public SigtapOcupacaoResponse obterOcupacaoPorCodigo(String codigoOficial) {
+    public SigtapCboResponse obterCboPorCodigo(String codigoOficial) {
         if (codigoOficial == null || codigoOficial.isBlank()) {
-            throw new NotFoundException("Ocupação SIGTAP não encontrada");
+            throw new NotFoundException("CBO SIGTAP não encontrado");
         }
-        SigtapOcupacao ocupacao = ocupacaoRepository.findByCodigoOficial(codigoOficial.trim())
-                .orElseThrow(() -> new NotFoundException("Ocupação SIGTAP não encontrada: " + codigoOficial));
-        return ocupacaoMapper.toResponse(ocupacao);
+        SigtapOcupacao ocupacao = cboRepository.findByCodigoOficial(codigoOficial.trim())
+                .orElseThrow(() -> new NotFoundException("CBO SIGTAP não encontrado: " + codigoOficial));
+        return cboMapper.toResponse(ocupacao);
+    }
+
+    @Override
+    public List<SigtapGrupoCboResponse> listarGruposCbo() {
+        return Arrays.stream(GrupoCboEnum.values())
+                .map(grupo -> {
+                    Long totalCbo = grupo.getPrefixos().stream()
+                            .mapToLong(prefixo -> cboRepository.countByPrefixo(prefixo))
+                            .sum();
+                    
+                    return SigtapGrupoCboResponse.builder()
+                            .codigo(grupo.getCodigo())
+                            .nome(grupo.getNome())
+                            .descricao(grupo.getDescricao())
+                            .totalCbo(totalCbo)
+                            .isSaude(GrupoCboEnum.isGrupoSaude(grupo))
+                            .build();
+                })
+                .toList();
+    }
+
+    @Override
+    public SigtapGrupoCboResponse obterGrupoCboPorCodigo(String codigoGrupo) {
+        GrupoCboEnum grupo = GrupoCboEnum.fromCodigo(codigoGrupo)
+                .orElseThrow(() -> new NotFoundException("Grupo CBO não encontrado: " + codigoGrupo));
+        
+        Long totalCbo = grupo.getPrefixos().stream()
+                .mapToLong(prefixo -> cboRepository.countByPrefixo(prefixo))
+                .sum();
+        
+        return SigtapGrupoCboResponse.builder()
+                .codigo(grupo.getCodigo())
+                .nome(grupo.getNome())
+                .descricao(grupo.getDescricao())
+                .totalCbo(totalCbo)
+                .isSaude(GrupoCboEnum.isGrupoSaude(grupo))
+                .build();
+    }
+
+    @Override
+    public Page<SigtapCboResponse> pesquisarCboPorGrupo(String codigoGrupo, String q, Pageable pageable) {
+        GrupoCboEnum grupo = GrupoCboEnum.fromCodigo(codigoGrupo)
+                .orElseThrow(() -> new NotFoundException("Grupo CBO não encontrado: " + codigoGrupo));
+        
+        if (pageable == null) {
+            pageable = PageRequest.of(0, 20);
+        }
+        
+        Specification<SigtapOcupacao> spec = Specification.where(null);
+        
+        // Filtro por grupo (obrigatório neste endpoint)
+        spec = spec.and((root, query, cb) -> {
+            List<Predicate> predicates = new ArrayList<>();
+            for (String prefixo : grupo.getPrefixos()) {
+                predicates.add(cb.like(root.get("codigoOficial"), prefixo + "%"));
+            }
+            return cb.or(predicates.toArray(new Predicate[0]));
+        });
+        
+        // Filtro de busca livre (opcional)
+        if (q != null && !q.isBlank()) {
+            String like = "%" + q.trim().toLowerCase(Locale.ROOT) + "%";
+            spec = spec.and((root, query, cb) -> cb.or(
+                    cb.like(cb.lower(root.get("codigoOficial")), like),
+                    cb.like(cb.lower(root.get("nome")), like)
+            ));
+        }
+        
+        Page<SigtapOcupacao> page = cboRepository.findAll(spec, pageable);
+        return page.map(cboMapper::toResponse);
     }
 
     @Override

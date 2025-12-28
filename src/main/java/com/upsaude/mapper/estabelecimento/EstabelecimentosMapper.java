@@ -10,8 +10,19 @@ import com.upsaude.entity.estabelecimento.Estabelecimentos;
 import com.upsaude.mapper.config.MappingConfig;
 import com.upsaude.mapper.geral.EnderecoMapper;
 import com.upsaude.mapper.profissional.ProfissionaisSaudeMapper;
+import com.upsaude.mapper.profissional.equipe.EquipeSaudeMapper;
+import com.upsaude.mapper.estabelecimento.EquipamentosEstabelecimentoMapper;
+import com.upsaude.mapper.estabelecimento.ServicosEstabelecimentoMapper;
+import com.upsaude.mapper.estabelecimento.InfraestruturaEstabelecimentoMapper;
 
-@Mapper(config = MappingConfig.class, uses = {EnderecoMapper.class, ProfissionaisSaudeMapper.class})
+@Mapper(config = MappingConfig.class, uses = {
+    EnderecoMapper.class, 
+    ProfissionaisSaudeMapper.class,
+    EquipamentosEstabelecimentoMapper.class,
+    ServicosEstabelecimentoMapper.class,
+    InfraestruturaEstabelecimentoMapper.class,
+    EquipeSaudeMapper.class
+})
 public interface EstabelecimentosMapper {
 
     @Mapping(target = "active", ignore = true)

@@ -9,7 +9,7 @@ import com.upsaude.api.response.estabelecimento.InfraestruturaEstabelecimentoRes
 import com.upsaude.entity.estabelecimento.InfraestruturaEstabelecimento;
 import com.upsaude.mapper.config.MappingConfig;
 
-@Mapper(config = MappingConfig.class, uses = {EstabelecimentosMapper.class})
+@Mapper(config = MappingConfig.class)
 public interface InfraestruturaEstabelecimentoMapper  {
 
     @Mapping(target = "id", ignore = true)
@@ -26,5 +26,6 @@ public interface InfraestruturaEstabelecimentoMapper  {
     @Mapping(target = "estabelecimento", ignore = true)
     void updateFromRequest(InfraestruturaEstabelecimentoRequest request, @MappingTarget InfraestruturaEstabelecimento entity);
 
+    @Mapping(target = "estabelecimento", ignore = true)
     InfraestruturaEstabelecimentoResponse toResponse(InfraestruturaEstabelecimento entity);
 }

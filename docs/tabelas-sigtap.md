@@ -1342,7 +1342,7 @@ curl -X GET "http://localhost:8080/v1/sigtap/procedimentos/0301010056?competenci
 ### Exemplo 7: Buscar Ocupações (CBO)
 
 ```bash
-curl -X GET "http://localhost:8080/v1/sigtap/ocupacoes?q=médico&page=0&size=20" \
+curl -X GET "http://localhost:8080/v1/sigtap/cbo?q=médico&page=0&size=20" \
   -H "Authorization: Bearer <token>"
 ```
 

@@ -794,28 +794,185 @@ public class SigtapController {
         }
     }
 
-    @GetMapping("/ocupacoes")
+    @GetMapping("/cbo")
     @Operation(
-            summary = "Pesquisar ocupações (CBO) SIGTAP",
-            description = "Retorna uma lista paginada de ocupações SIGTAP baseadas na Classificação Brasileira de Ocupações (CBO). " +
-                    "As ocupações representam profissões e especialidades relacionadas aos procedimentos. " +
-                    "Permite buscar por código CBO ou nome da ocupação."
+            summary = "Pesquisar CBO (Classificação Brasileira de Ocupações) SIGTAP",
+            description = "Retorna uma lista paginada de CBOs SIGTAP baseadas na Classificação Brasileira de Ocupações. " +
+                    "Permite buscar por código CBO, nome da ocupação e filtrar por grupo de ocupações."
     )
     @ApiResponses(value = {
             @ApiResponse(
                     responseCode = "200",
-                    description = "Lista de ocupações retornada com sucesso.",
-                    content = @Content(schema = @Schema(implementation = SigtapOcupacaoResponse.class))
+                    description = "Lista de CBOs retornada com sucesso.",
+                    content = @Content(schema = @Schema(implementation = SigtapCboResponse.class))
             ),
             @ApiResponse(responseCode = "400", description = "Parâmetros inválidos."),
             @ApiResponse(responseCode = "403", description = "Acesso negado. Token de autenticação inválido ou ausente."),
             @ApiResponse(responseCode = "500", description = "Erro interno do servidor.")
     })
-    public ResponseEntity<Page<SigtapOcupacaoResponse>> pesquisarOcupacoes(
+    public ResponseEntity<Page<SigtapCboResponse>> pesquisarCbo(
             @Parameter(
                     description = "Termo de busca livre (código CBO ou nome da ocupação). " +
                             "Busca parcial e case-insensitive. Exemplo: '225110' (código CBO) ou 'médico' (nome)",
                     example = "médico"
+            )
+            @RequestParam(name = "q", required = false) String q,
+            @Parameter(
+                    description = "Código do grupo CBO para filtrar. Exemplos: 'MEDICOS', 'ENFERMAGEM', 'ODONTOLOGIA'. " +
+                            "Use o endpoint /cbo/grupos para listar todos os grupos disponíveis.",
+                    example = "MEDICOS"
+            )
+            @RequestParam(name = "grupo", required = false) String grupo,
+            @Parameter(
+                    description = "Parâmetros de paginação. " +
+                            "page: número da página (padrão: 0), " +
+                            "size: tamanho da página (padrão: 20), " +
+                            "sort: ordenação (ex: 'codigoOficial,asc' ou 'nome,desc')"
+            )
+            Pageable pageable) {
+        log.debug("REQUEST GET /v1/sigtap/cbo - q: {}, grupo: {}, pageable: {}", q, grupo, pageable);
+        try {
+            Page<SigtapCboResponse> response = sigtapConsultaService.pesquisarCbo(q, grupo, pageable);
+            return ResponseEntity.ok(response);
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao pesquisar CBO SIGTAP - q: {}, grupo: {}", q, grupo, ex);
+            throw ex;
+        }
+    }
+
+    @GetMapping("/cbo/{codigo}")
+    @Operation(
+            summary = "Obter CBO por código",
+            description = "Retorna um CBO SIGTAP específico pelo código (Classificação Brasileira de Ocupações)."
+    )
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "CBO encontrado com sucesso.",
+                    content = @Content(schema = @Schema(implementation = SigtapCboResponse.class))
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "CBO não encontrado. O código informado não existe no sistema."
+            ),
+            @ApiResponse(responseCode = "403", description = "Acesso negado. Token de autenticação inválido ou ausente."),
+            @ApiResponse(responseCode = "500", description = "Erro interno do servidor.")
+    })
+    public ResponseEntity<SigtapCboResponse> obterCboPorCodigo(
+            @Parameter(
+                    description = "Código CBO (Classificação Brasileira de Ocupações). " +
+                            "Exemplo: '225110' para 'Médico clínico geral'",
+                    required = true,
+                    example = "225110"
+            )
+            @PathVariable String codigo) {
+        log.debug("REQUEST GET /v1/sigtap/cbo/{}", codigo);
+        try {
+            SigtapCboResponse response = sigtapConsultaService.obterCboPorCodigo(codigo);
+            return ResponseEntity.ok(response);
+        } catch (NotFoundException ex) {
+            log.warn("CBO SIGTAP não encontrado — código: {}, mensagem: {}", codigo, ex.getMessage());
+            throw ex;
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao obter CBO SIGTAP — código: {}", codigo, ex);
+            throw ex;
+        }
+    }
+
+    @GetMapping("/cbo/grupos")
+    @Operation(
+            summary = "Listar grupos CBO disponíveis",
+            description = "Retorna uma lista de todos os grupos CBO disponíveis no sistema, incluindo grupos da área de saúde e outras áreas."
+    )
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Lista de grupos retornada com sucesso.",
+                    content = @Content(schema = @Schema(implementation = SigtapGrupoCboResponse.class))
+            ),
+            @ApiResponse(responseCode = "403", description = "Acesso negado. Token de autenticação inválido ou ausente."),
+            @ApiResponse(responseCode = "500", description = "Erro interno do servidor.")
+    })
+    public ResponseEntity<List<SigtapGrupoCboResponse>> listarGruposCbo() {
+        log.debug("REQUEST GET /v1/sigtap/cbo/grupos");
+        try {
+            List<SigtapGrupoCboResponse> response = sigtapConsultaService.listarGruposCbo();
+            return ResponseEntity.ok(response);
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao listar grupos CBO", ex);
+            throw ex;
+        }
+    }
+
+    @GetMapping("/cbo/grupos/{codigoGrupo}")
+    @Operation(
+            summary = "Obter detalhes de um grupo CBO",
+            description = "Retorna informações detalhadas sobre um grupo CBO específico, incluindo total de CBOs no grupo."
+    )
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Grupo encontrado com sucesso.",
+                    content = @Content(schema = @Schema(implementation = SigtapGrupoCboResponse.class))
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "Grupo não encontrado. O código do grupo informado não existe."
+            ),
+            @ApiResponse(responseCode = "403", description = "Acesso negado. Token de autenticação inválido ou ausente."),
+            @ApiResponse(responseCode = "500", description = "Erro interno do servidor.")
+    })
+    public ResponseEntity<SigtapGrupoCboResponse> obterGrupoCboPorCodigo(
+            @Parameter(
+                    description = "Código do grupo CBO. Exemplos: 'MEDICOS', 'ENFERMAGEM', 'ODONTOLOGIA'",
+                    required = true,
+                    example = "MEDICOS"
+            )
+            @PathVariable String codigoGrupo) {
+        log.debug("REQUEST GET /v1/sigtap/cbo/grupos/{}", codigoGrupo);
+        try {
+            SigtapGrupoCboResponse response = sigtapConsultaService.obterGrupoCboPorCodigo(codigoGrupo);
+            return ResponseEntity.ok(response);
+        } catch (NotFoundException ex) {
+            log.warn("Grupo CBO não encontrado — código: {}, mensagem: {}", codigoGrupo, ex.getMessage());
+            throw ex;
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao obter grupo CBO — código: {}", codigoGrupo, ex);
+            throw ex;
+        }
+    }
+
+    @GetMapping("/cbo/grupos/{codigoGrupo}/cbo")
+    @Operation(
+            summary = "Pesquisar CBOs de um grupo específico",
+            description = "Retorna uma lista paginada de CBOs pertencentes a um grupo específico. " +
+                    "Permite buscar por código CBO ou nome da ocupação dentro do grupo."
+    )
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Lista de CBOs do grupo retornada com sucesso.",
+                    content = @Content(schema = @Schema(implementation = SigtapCboResponse.class))
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "Grupo não encontrado. O código do grupo informado não existe."
+            ),
+            @ApiResponse(responseCode = "400", description = "Parâmetros inválidos."),
+            @ApiResponse(responseCode = "403", description = "Acesso negado. Token de autenticação inválido ou ausente."),
+            @ApiResponse(responseCode = "500", description = "Erro interno do servidor.")
+    })
+    public ResponseEntity<Page<SigtapCboResponse>> pesquisarCboPorGrupo(
+            @Parameter(
+                    description = "Código do grupo CBO. Exemplos: 'MEDICOS', 'ENFERMAGEM', 'ODONTOLOGIA'",
+                    required = true,
+                    example = "MEDICOS"
+            )
+            @PathVariable String codigoGrupo,
+            @Parameter(
+                    description = "Termo de busca livre (código CBO ou nome da ocupação). " +
+                            "Busca parcial e case-insensitive. Exemplo: 'cardiologista'",
+                    example = "cardiologista"
             )
             @RequestParam(name = "q", required = false) String q,
             @Parameter(
@@ -825,52 +982,15 @@ public class SigtapController {
                             "sort: ordenação (ex: 'codigoOficial,asc' ou 'nome,desc')"
             )
             Pageable pageable) {
-        log.debug("REQUEST GET /v1/sigtap/ocupacoes - q: {}, pageable: {}", q, pageable);
+        log.debug("REQUEST GET /v1/sigtap/cbo/grupos/{}/cbo - q: {}, pageable: {}", codigoGrupo, q, pageable);
         try {
-            Page<SigtapOcupacaoResponse> response = sigtapConsultaService.pesquisarOcupacoes(q, pageable);
-            return ResponseEntity.ok(response);
-        } catch (Exception ex) {
-            log.error("Erro inesperado ao pesquisar ocupações SIGTAP - q: {}", q, ex);
-            throw ex;
-        }
-    }
-
-    @GetMapping("/ocupacoes/{codigo}")
-    @Operation(
-            summary = "Obter ocupação (CBO) por código",
-            description = "Retorna uma ocupação SIGTAP específica pelo código CBO (Classificação Brasileira de Ocupações). " +
-                    "As ocupações representam profissões e especialidades que podem executar procedimentos específicos."
-    )
-    @ApiResponses(value = {
-            @ApiResponse(
-                    responseCode = "200",
-                    description = "Ocupação encontrada com sucesso.",
-                    content = @Content(schema = @Schema(implementation = SigtapOcupacaoResponse.class))
-            ),
-            @ApiResponse(
-                    responseCode = "404",
-                    description = "Ocupação não encontrada. O código CBO informado não existe no sistema."
-            ),
-            @ApiResponse(responseCode = "403", description = "Acesso negado. Token de autenticação inválido ou ausente."),
-            @ApiResponse(responseCode = "500", description = "Erro interno do servidor.")
-    })
-    public ResponseEntity<SigtapOcupacaoResponse> obterOcupacaoPorCodigo(
-            @Parameter(
-                    description = "Código CBO (Classificação Brasileira de Ocupações). " +
-                            "Exemplo: '225110' para 'Médico clínico geral'",
-                    required = true,
-                    example = "225110"
-            )
-            @PathVariable String codigo) {
-        log.debug("REQUEST GET /v1/sigtap/ocupacoes/{}", codigo);
-        try {
-            SigtapOcupacaoResponse response = sigtapConsultaService.obterOcupacaoPorCodigo(codigo);
+            Page<SigtapCboResponse> response = sigtapConsultaService.pesquisarCboPorGrupo(codigoGrupo, q, pageable);
             return ResponseEntity.ok(response);
         } catch (NotFoundException ex) {
-            log.warn("Ocupação SIGTAP não encontrada — código: {}, mensagem: {}", codigo, ex.getMessage());
+            log.warn("Grupo CBO não encontrado — código: {}, mensagem: {}", codigoGrupo, ex.getMessage());
             throw ex;
         } catch (Exception ex) {
-            log.error("Erro inesperado ao obter ocupação SIGTAP — código: {}", codigo, ex);
+            log.error("Erro inesperado ao pesquisar CBOs do grupo — código: {}, q: {}", codigoGrupo, q, ex);
             throw ex;
         }
     }
