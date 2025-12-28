@@ -51,9 +51,14 @@ public interface SigtapConsultaService {
     Page<SigtapTussResponse> pesquisarTuss(String q, Pageable pageable);
     SigtapTussResponse obterTussPorCodigo(String codigoOficial);
 
-    // Ocupações
-    Page<SigtapOcupacaoResponse> pesquisarOcupacoes(String q, Pageable pageable);
-    SigtapOcupacaoResponse obterOcupacaoPorCodigo(String codigoOficial);
+    // CBO (Ocupações)
+    Page<SigtapCboResponse> pesquisarCbo(String q, String grupo, Pageable pageable);
+    SigtapCboResponse obterCboPorCodigo(String codigoOficial);
+    
+    // Grupos CBO
+    List<SigtapGrupoCboResponse> listarGruposCbo();
+    SigtapGrupoCboResponse obterGrupoCboPorCodigo(String codigoGrupo);
+    Page<SigtapCboResponse> pesquisarCboPorGrupo(String codigoGrupo, String q, Pageable pageable);
 
     // Modalidades
     Page<SigtapModalidadeResponse> pesquisarModalidades(String q, String competencia, Pageable pageable);

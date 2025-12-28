@@ -527,16 +527,26 @@ curl -X GET "http://localhost:8080/v1/sigtap/tuss?q=10101010&page=0&size=20" \
 
 #### Pesquisar Ocupações
 
-**Endpoint**: `GET /v1/sigtap/ocupacoes`
+### 9. CBO (Classificação Brasileira de Ocupações)
+
+#### Pesquisar CBO
+
+**Endpoint**: `GET /v1/sigtap/cbo`
 
 **Parâmetros de Query**:
 - `q` (opcional): Termo de busca em código ou nome
+- `grupo` (opcional): Código do grupo CBO para filtrar (ex: "MEDICOS", "ENFERMAGEM", "ODONTOLOGIA")
 - `page` (opcional): Número da página
 - `size` (opcional): Tamanho da página
 
 **Exemplo de Requisição**:
 ```bash
-curl -X GET "http://localhost:8080/v1/sigtap/ocupacoes?q=médico&page=0&size=20" \
+# Busca geral
+curl -X GET "http://localhost:8080/v1/sigtap/cbo?q=médico&page=0&size=20" \
+  -H "Authorization: Bearer <token>"
+
+# Busca por grupo
+curl -X GET "http://localhost:8080/v1/sigtap/cbo?grupo=MEDICOS&q=cardiologista&page=0&size=20" \
   -H "Authorization: Bearer <token>"
 ```
 
@@ -554,9 +564,72 @@ curl -X GET "http://localhost:8080/v1/sigtap/ocupacoes?q=médico&page=0&size=20"
 }
 ```
 
-#### Obter Ocupação por Código
+#### Obter CBO por Código
 
-**Endpoint**: `GET /v1/sigtap/ocupacoes/{codigo}`
+**Endpoint**: `GET /v1/sigtap/cbo/{codigo}`
+
+**Exemplo de Requisição**:
+```bash
+curl -X GET "http://localhost:8080/v1/sigtap/cbo/225110" \
+  -H "Authorization: Bearer <token>"
+```
+
+#### Listar Grupos CBO
+
+**Endpoint**: `GET /v1/sigtap/cbo/grupos`
+
+Retorna uma lista de todos os grupos CBO disponíveis no sistema.
+
+**Exemplo de Requisição**:
+```bash
+curl -X GET "http://localhost:8080/v1/sigtap/cbo/grupos" \
+  -H "Authorization: Bearer <token>"
+```
+
+**Exemplo de Resposta** (200):
+```json
+[
+  {
+    "codigo": "MEDICOS",
+    "nome": "Especialidades Médicas",
+    "descricao": "Ocupações relacionadas a médicos e especialidades médicas",
+    "totalCbo": 150,
+    "isSaude": true
+  },
+  {
+    "codigo": "ENFERMAGEM",
+    "nome": "Enfermagem",
+    "descricao": "Ocupações relacionadas a enfermeiros, técnicos e auxiliares de enfermagem",
+    "totalCbo": 45,
+    "isSaude": true
+  }
+]
+```
+
+#### Obter Detalhes de um Grupo CBO
+
+**Endpoint**: `GET /v1/sigtap/cbo/grupos/{codigoGrupo}`
+
+**Exemplo de Requisição**:
+```bash
+curl -X GET "http://localhost:8080/v1/sigtap/cbo/grupos/MEDICOS" \
+  -H "Authorization: Bearer <token>"
+```
+
+#### Pesquisar CBOs de um Grupo Específico
+
+**Endpoint**: `GET /v1/sigtap/cbo/grupos/{codigoGrupo}/cbo`
+
+**Parâmetros de Query**:
+- `q` (opcional): Termo de busca em código ou nome
+- `page` (opcional): Número da página
+- `size` (opcional): Tamanho da página
+
+**Exemplo de Requisição**:
+```bash
+curl -X GET "http://localhost:8080/v1/sigtap/cbo/grupos/MEDICOS/cbo?q=cardiologista&page=0&size=20" \
+  -H "Authorization: Bearer <token>"
+```
 
 ### 10. Modalidades
 

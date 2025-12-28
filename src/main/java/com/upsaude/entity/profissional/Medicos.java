@@ -10,6 +10,7 @@ import com.upsaude.entity.embeddable.ContatoMedico;
 import com.upsaude.entity.embeddable.DadosPessoaisMedico;
 import com.upsaude.entity.embeddable.FormacaoMedico;
 import com.upsaude.entity.embeddable.RegistroProfissionalMedico;
+import com.upsaude.entity.referencia.sigtap.SigtapOcupacao;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embedded;
@@ -18,6 +19,7 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinTable;
+import jakarta.persistence.ManyToMany;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
@@ -52,6 +54,7 @@ public class Medicos extends BaseEntityWithoutEstabelecimento {
         this.contato = new ContatoMedico();
         this.enderecos = new ArrayList<>();
         this.medicosEstabelecimentos = new ArrayList<>();
+        this.especialidades = new ArrayList<>();
     }
 
     @NotBlank(message = "Nome completo é obrigatório")
@@ -83,6 +86,22 @@ public class Medicos extends BaseEntityWithoutEstabelecimento {
     @OneToMany(mappedBy = "medico", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
     private List<MedicoEstabelecimento> medicosEstabelecimentos = new ArrayList<>();
 
+    @ManyToMany(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    @JoinTable(
+        name = "medicos_especialidades",
+        schema = "public",
+        joinColumns = @JoinColumn(name = "medico_id"),
+        inverseJoinColumns = @JoinColumn(name = "especialidade_id"),
+        uniqueConstraints = {
+            @UniqueConstraint(name = "uk_medico_especialidade", columnNames = {"medico_id", "especialidade_id"})
+        },
+        indexes = {
+            @Index(name = "idx_medico_especialidade_medico", columnList = "medico_id"),
+            @Index(name = "idx_medico_especialidade_ocupacao", columnList = "especialidade_id")
+        }
+    )
+    private List<SigtapOcupacao> especialidades = new ArrayList<>();
+
     @Column(name = "observacoes", columnDefinition = "TEXT")
     private String observacoes;
 
@@ -109,6 +128,9 @@ public class Medicos extends BaseEntityWithoutEstabelecimento {
         if (medicosEstabelecimentos == null) {
             medicosEstabelecimentos = new ArrayList<>();
         }
+        if (especialidades == null) {
+            especialidades = new ArrayList<>();
+        }
     }
 
     public void addMedicoEstabelecimento(MedicoEstabelecimento medicoEstabelecimento) {
@@ -131,5 +153,24 @@ public class Medicos extends BaseEntityWithoutEstabelecimento {
         if (medicosEstabelecimentos.remove(medicoEstabelecimento)) {
             medicoEstabelecimento.setMedico(null);
         }
+    }
+
+    public void addEspecialidade(SigtapOcupacao especialidade) {
+        if (especialidade == null) {
+            return;
+        }
+        if (especialidades == null) {
+            especialidades = new ArrayList<>();
+        }
+        if (!especialidades.contains(especialidade)) {
+            especialidades.add(especialidade);
+        }
+    }
+
+    public void removeEspecialidade(SigtapOcupacao especialidade) {
+        if (especialidade == null || especialidades == null) {
+            return;
+        }
+        especialidades.remove(especialidade);
     }
 }

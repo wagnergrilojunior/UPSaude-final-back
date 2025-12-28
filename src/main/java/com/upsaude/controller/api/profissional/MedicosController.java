@@ -1,6 +1,8 @@
 package com.upsaude.controller.api.profissional;
 
+import com.upsaude.api.request.profissional.AdicionarEspecialidadeRequest;
 import com.upsaude.api.request.profissional.MedicosRequest;
+import com.upsaude.api.response.profissional.EspecialidadeResponse;
 import com.upsaude.api.response.profissional.MedicosResponse;
 import com.upsaude.exception.BadRequestException;
 import com.upsaude.exception.ConflictException;
@@ -22,6 +24,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -202,6 +205,87 @@ public class MedicosController {
         } catch (Exception ex) {
             log.error("Erro inesperado ao deletar médico permanentemente — Path: /v1/medicos/{}/permanente, Method: DELETE, ID: {}, Exception: {}",
                 id, id, ex.getClass().getName(), ex);
+            throw ex;
+        }
+    }
+
+    @GetMapping("/{id}/especialidades")
+    @Operation(summary = "Listar especialidades do médico", description = "Retorna a lista de especialidades (CBO) associadas a um médico")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Lista de especialidades retornada com sucesso",
+                    content = @Content(schema = @Schema(implementation = EspecialidadeResponse.class))),
+            @ApiResponse(responseCode = "404", description = "Médico não encontrado"),
+            @ApiResponse(responseCode = "403", description = "Acesso negado")
+    })
+    public ResponseEntity<List<EspecialidadeResponse>> listarEspecialidades(
+            @Parameter(description = "ID do médico", required = true)
+            @PathVariable UUID id) {
+        log.debug("REQUEST GET /v1/medicos/{}/especialidades", id);
+        try {
+            List<EspecialidadeResponse> response = medicosService.listarEspecialidades(id);
+            return ResponseEntity.ok(response);
+        } catch (NotFoundException ex) {
+            log.warn("Médico não encontrado — ID: {}, mensagem: {}", id, ex.getMessage());
+            throw ex;
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao listar especialidades — Path: /v1/medicos/{}/especialidades, Method: GET, ID: {}, Exception: {}",
+                id, id, ex.getClass().getName(), ex);
+            throw ex;
+        }
+    }
+
+    @PostMapping("/{id}/especialidades")
+    @Operation(summary = "Adicionar especialidade ao médico", description = "Adiciona uma especialidade (CBO) a um médico")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "201", description = "Especialidade adicionada com sucesso",
+                    content = @Content(schema = @Schema(implementation = EspecialidadeResponse.class))),
+            @ApiResponse(responseCode = "400", description = "Dados inválidos fornecidos"),
+            @ApiResponse(responseCode = "404", description = "Médico ou CBO não encontrado"),
+            @ApiResponse(responseCode = "409", description = "Especialidade já está associada ao médico"),
+            @ApiResponse(responseCode = "403", description = "Acesso negado")
+    })
+    public ResponseEntity<EspecialidadeResponse> adicionarEspecialidade(
+            @Parameter(description = "ID do médico", required = true)
+            @PathVariable UUID id,
+            @Valid @RequestBody AdicionarEspecialidadeRequest request) {
+        log.debug("REQUEST POST /v1/medicos/{}/especialidades - payload: {}", id, request);
+        try {
+            EspecialidadeResponse response = medicosService.adicionarEspecialidade(id, request.getCodigoCbo());
+            log.info("Especialidade adicionada ao médico com sucesso. Médico ID: {}, CBO: {}", id, request.getCodigoCbo());
+            return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        } catch (BadRequestException | NotFoundException | ConflictException ex) {
+            log.warn("Falha ao adicionar especialidade — ID: {}, mensagem: {}, payload: {}", id, ex.getMessage(), request);
+            throw ex;
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao adicionar especialidade — Path: /v1/medicos/{}/especialidades, Method: POST, ID: {}, payload: {}, Exception: {}",
+                id, id, request, ex.getClass().getName(), ex);
+            throw ex;
+        }
+    }
+
+    @DeleteMapping("/{id}/especialidades/{codigoCbo}")
+    @Operation(summary = "Remover especialidade do médico", description = "Remove uma especialidade (CBO) de um médico")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "204", description = "Especialidade removida com sucesso"),
+            @ApiResponse(responseCode = "404", description = "Médico ou especialidade não encontrada"),
+            @ApiResponse(responseCode = "403", description = "Acesso negado")
+    })
+    public ResponseEntity<Void> removerEspecialidade(
+            @Parameter(description = "ID do médico", required = true)
+            @PathVariable UUID id,
+            @Parameter(description = "Código CBO da especialidade", required = true, example = "225110")
+            @PathVariable String codigoCbo) {
+        log.debug("REQUEST DELETE /v1/medicos/{}/especialidades/{}", id, codigoCbo);
+        try {
+            medicosService.removerEspecialidade(id, codigoCbo);
+            log.info("Especialidade removida do médico com sucesso. Médico ID: {}, CBO: {}", id, codigoCbo);
+            return ResponseEntity.noContent().build();
+        } catch (NotFoundException ex) {
+            log.warn("Médico ou especialidade não encontrada — ID: {}, CBO: {}, mensagem: {}", id, codigoCbo, ex.getMessage());
+            throw ex;
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao remover especialidade — Path: /v1/medicos/{}/especialidades/{}, Method: DELETE, ID: {}, CBO: {}, Exception: {}",
+                id, codigoCbo, id, codigoCbo, ex.getClass().getName(), ex);
             throw ex;
         }
     }

@@ -1,7 +1,9 @@
 package com.upsaude.service.impl.api.profissional;
 
+import java.util.List;
 import java.util.UUID;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
@@ -16,8 +18,13 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.upsaude.cache.CacheKeyUtil;
 import com.upsaude.api.request.profissional.MedicosRequest;
+import com.upsaude.api.response.profissional.EspecialidadeResponse;
 import com.upsaude.api.response.profissional.MedicosResponse;
 import com.upsaude.entity.profissional.Medicos;
+import com.upsaude.entity.referencia.sigtap.SigtapOcupacao;
+import com.upsaude.exception.ConflictException;
+import com.upsaude.mapper.profissional.EspecialidadeMapper;
+import com.upsaude.repository.referencia.sigtap.SigtapCboRepository;
 import com.upsaude.entity.sistema.multitenancy.Tenant;
 import com.upsaude.exception.BadRequestException;
 import com.upsaude.exception.InternalServerErrorException;
@@ -47,6 +54,8 @@ public class MedicosServiceImpl implements MedicosService {
     private final MedicoTenantEnforcer tenantEnforcer;
     private final MedicoResponseBuilder responseBuilder;
     private final MedicoDomainService domainService;
+    private final SigtapCboRepository cboRepository;
+    private final EspecialidadeMapper especialidadeMapper;
 
     @Override
     @Transactional
@@ -176,5 +185,76 @@ public class MedicosServiceImpl implements MedicosService {
             throw new BadRequestException("Não foi possível obter tenant do usuário autenticado");
         }
         return tenant;
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<EspecialidadeResponse> listarEspecialidades(UUID medicoId) {
+        if (medicoId == null) {
+            throw new BadRequestException("ID do médico é obrigatório");
+        }
+        UUID tenantId = tenantService.validarTenantAtual();
+        Medicos medico = tenantEnforcer.validarAcessoCompleto(medicoId, tenantId);
+        
+        return medico.getEspecialidades().stream()
+                .map(especialidadeMapper::toResponse)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    @Transactional
+    @CacheEvict(cacheNames = CacheKeyUtil.CACHE_MEDICOS, keyGenerator = "medicoCacheKeyGenerator", beforeInvocation = false)
+    public EspecialidadeResponse adicionarEspecialidade(UUID medicoId, String codigoCbo) {
+        if (medicoId == null) {
+            throw new BadRequestException("ID do médico é obrigatório");
+        }
+        if (codigoCbo == null || codigoCbo.isBlank()) {
+            throw new BadRequestException("Código CBO é obrigatório");
+        }
+        
+        UUID tenantId = tenantService.validarTenantAtual();
+        Medicos medico = tenantEnforcer.validarAcessoCompleto(medicoId, tenantId);
+        
+        SigtapOcupacao especialidade = cboRepository.findByCodigoOficial(codigoCbo.trim())
+                .orElseThrow(() -> new NotFoundException("CBO não encontrado: " + codigoCbo));
+        
+        // Verificar se já existe
+        boolean jaExiste = medico.getEspecialidades().stream()
+                .anyMatch(esp -> esp.getCodigoOficial().equals(codigoCbo.trim()));
+        
+        if (jaExiste) {
+            throw new ConflictException("Especialidade já está associada ao médico");
+        }
+        
+        medico.addEspecialidade(especialidade);
+        medicosRepository.save(medico);
+        
+        log.info("Especialidade {} adicionada ao médico {}", codigoCbo, medicoId);
+        return especialidadeMapper.toResponse(especialidade);
+    }
+
+    @Override
+    @Transactional
+    @CacheEvict(cacheNames = CacheKeyUtil.CACHE_MEDICOS, keyGenerator = "medicoCacheKeyGenerator", beforeInvocation = false)
+    public void removerEspecialidade(UUID medicoId, String codigoCbo) {
+        if (medicoId == null) {
+            throw new BadRequestException("ID do médico é obrigatório");
+        }
+        if (codigoCbo == null || codigoCbo.isBlank()) {
+            throw new BadRequestException("Código CBO é obrigatório");
+        }
+        
+        UUID tenantId = tenantService.validarTenantAtual();
+        Medicos medico = tenantEnforcer.validarAcessoCompleto(medicoId, tenantId);
+        
+        SigtapOcupacao especialidade = medico.getEspecialidades().stream()
+                .filter(esp -> esp.getCodigoOficial().equals(codigoCbo.trim()))
+                .findFirst()
+                .orElseThrow(() -> new NotFoundException("Especialidade não encontrada para o médico"));
+        
+        medico.removeEspecialidade(especialidade);
+        medicosRepository.save(medico);
+        
+        log.info("Especialidade {} removida do médico {}", codigoCbo, medicoId);
     }
 }

@@ -36,7 +36,7 @@ import com.upsaude.repository.referencia.sigtap.SigtapGrupoHabilitacaoRepository
 import com.upsaude.repository.referencia.sigtap.SigtapGrupoRepository;
 import com.upsaude.repository.referencia.sigtap.SigtapHabilitacaoRepository;
 import com.upsaude.repository.referencia.sigtap.SigtapModalidadeRepository;
-import com.upsaude.repository.referencia.sigtap.SigtapOcupacaoRepository;
+import com.upsaude.repository.referencia.sigtap.SigtapCboRepository;
 import com.upsaude.repository.referencia.sigtap.SigtapProcedimentoCidRepository;
 import com.upsaude.repository.referencia.sigtap.SigtapProcedimentoComponenteRedeRepository;
 import com.upsaude.repository.referencia.sigtap.SigtapProcedimentoDetalheItemRepository;
@@ -97,7 +97,7 @@ public class SigtapFileImportServiceImpl {
     private final SigtapTipoLeitoRepository tipoLeitoRepository;
     private final SigtapServicoRepository servicoRepository;
     private final SigtapServicoClassificacaoRepository servicoClassificacaoRepository;
-    private final SigtapOcupacaoRepository ocupacaoRepository;
+    private final SigtapCboRepository cboRepository;
     private final SigtapHabilitacaoRepository habilitacaoRepository;
     private final SigtapGrupoHabilitacaoRepository grupoHabilitacaoRepository;
     private final SigtapRegraCondicionadaRepository regraCondicionadaRepository;
@@ -144,7 +144,7 @@ public class SigtapFileImportServiceImpl {
             SigtapTipoLeitoRepository tipoLeitoRepository,
             SigtapServicoRepository servicoRepository,
             SigtapServicoClassificacaoRepository servicoClassificacaoRepository,
-            SigtapOcupacaoRepository ocupacaoRepository,
+            SigtapCboRepository cboRepository,
             SigtapHabilitacaoRepository habilitacaoRepository,
             SigtapGrupoHabilitacaoRepository grupoHabilitacaoRepository,
             SigtapRegraCondicionadaRepository regraCondicionadaRepository,
@@ -187,7 +187,7 @@ public class SigtapFileImportServiceImpl {
         this.tipoLeitoRepository = tipoLeitoRepository;
         this.servicoRepository = servicoRepository;
         this.servicoClassificacaoRepository = servicoClassificacaoRepository;
-        this.ocupacaoRepository = ocupacaoRepository;
+        this.cboRepository = cboRepository;
         this.habilitacaoRepository = habilitacaoRepository;
         this.grupoHabilitacaoRepository = grupoHabilitacaoRepository;
         this.regraCondicionadaRepository = regraCondicionadaRepository;
@@ -429,7 +429,7 @@ public class SigtapFileImportServiceImpl {
     @Transactional
     private int importarOcupacoes(ImportContext context) {
         return importarComBatch(context, fields -> entityMapper.mapToOcupacao(fields),
-                ocupacaoRepository::saveAll);
+                cboRepository::saveAll);
     }
 
     @Transactional

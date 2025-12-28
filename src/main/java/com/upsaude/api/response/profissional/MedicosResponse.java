@@ -42,5 +42,8 @@ public class MedicosResponse {
     @Builder.Default
     private List<MedicoEstabelecimentoResponse> medicosEstabelecimentos = new ArrayList<>();
 
+    @Builder.Default
+    private List<EspecialidadeResponse> especialidades = new ArrayList<>();
+
     private String observacoes;
 }

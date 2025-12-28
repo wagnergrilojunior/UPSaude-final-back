@@ -56,7 +56,7 @@ import com.upsaude.repository.referencia.sigtap.SigtapGrupoHabilitacaoRepository
 import com.upsaude.repository.referencia.sigtap.SigtapGrupoRepository;
 import com.upsaude.repository.referencia.sigtap.SigtapHabilitacaoRepository;
 import com.upsaude.repository.referencia.sigtap.SigtapModalidadeRepository;
-import com.upsaude.repository.referencia.sigtap.SigtapOcupacaoRepository;
+import com.upsaude.repository.referencia.sigtap.SigtapCboRepository;
 import com.upsaude.repository.referencia.sigtap.SigtapProcedimentoRepository;
 import com.upsaude.repository.referencia.sigtap.SigtapRegistroRepository;
 import com.upsaude.repository.referencia.sigtap.SigtapRegraCondicionadaRepository;
@@ -81,7 +81,7 @@ public class SigtapEntityMapper {
     private final SigtapSubgrupoRepository subgrupoRepository;
     private final SigtapProcedimentoRepository procedimentoRepository;
     private final Cid10SubcategoriasRepository cid10SubcategoriasRepository;
-    private final SigtapOcupacaoRepository ocupacaoRepository;
+    private final SigtapCboRepository cboRepository;
     private final SigtapHabilitacaoRepository habilitacaoRepository;
     private final SigtapGrupoHabilitacaoRepository grupoHabilitacaoRepository;
     private final SigtapTipoLeitoRepository tipoLeitoRepository;
@@ -104,7 +104,7 @@ public class SigtapEntityMapper {
             SigtapSubgrupoRepository subgrupoRepository,
             SigtapProcedimentoRepository procedimentoRepository,
             Cid10SubcategoriasRepository cid10SubcategoriasRepository,
-            SigtapOcupacaoRepository ocupacaoRepository,
+            SigtapCboRepository cboRepository,
             SigtapHabilitacaoRepository habilitacaoRepository,
             SigtapGrupoHabilitacaoRepository grupoHabilitacaoRepository,
             SigtapTipoLeitoRepository tipoLeitoRepository,
@@ -125,7 +125,7 @@ public class SigtapEntityMapper {
         this.subgrupoRepository = subgrupoRepository;
         this.procedimentoRepository = procedimentoRepository;
         this.cid10SubcategoriasRepository = cid10SubcategoriasRepository;
-        this.ocupacaoRepository = ocupacaoRepository;
+        this.cboRepository = cboRepository;
         this.habilitacaoRepository = habilitacaoRepository;
         this.grupoHabilitacaoRepository = grupoHabilitacaoRepository;
         this.tipoLeitoRepository = tipoLeitoRepository;
@@ -225,7 +225,7 @@ public class SigtapEntityMapper {
         }
         enforceCacheLimit();
         return ocupacaoCache.computeIfAbsent(codigoOcupacao, k ->
-                ocupacaoRepository.findByCodigoOficial(k)
+                cboRepository.findByCodigoOficial(k)
                         .orElseThrow(() -> new IllegalArgumentException("Ocupa??o n?o encontrada: " + k))
         );
     }
