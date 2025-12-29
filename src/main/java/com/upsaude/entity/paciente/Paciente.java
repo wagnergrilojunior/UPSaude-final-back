@@ -23,106 +23,80 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-@Table(name = "pacientes", schema = "public",
-       indexes = {
-           @Index(name = "idx_pacientes_nome_completo", columnList = "nome_completo"),
-           @Index(name = "idx_pacientes_data_nascimento", columnList = "data_nascimento"),
-           @Index(name = "idx_pacientes_status_paciente", columnList = "status_paciente"),
-           @Index(name = "idx_pacientes_ativo", columnList = "ativo"),
-           @Index(name = "idx_pacientes_convenio", columnList = "convenio_id"),
-           @Index(name = "idx_pacientes_criado_em", columnList = "criado_em"),
-           @Index(name = "idx_pacientes_atualizado_em", columnList = "atualizado_em"),
-           @Index(name = "idx_pacientes_ativo_nome", columnList = "ativo, nome_completo"),
-           @Index(name = "idx_pacientes_status_ativo", columnList = "status_paciente, ativo"),
-           @Index(name = "idx_pacientes_ativo_criado_em", columnList = "ativo, criado_em"),
-           @Index(name = "idx_pacientes_ativo_data_nascimento", columnList = "ativo, data_nascimento")
-       })
+@Table(name = "pacientes", schema = "public", indexes = {
+        @Index(name = "idx_pacientes_nome_completo", columnList = "nome_completo"),
+        @Index(name = "idx_pacientes_data_nascimento", columnList = "data_nascimento"),
+        @Index(name = "idx_pacientes_status_paciente", columnList = "status_paciente"),
+        @Index(name = "idx_pacientes_ativo", columnList = "ativo"),
+        @Index(name = "idx_pacientes_convenio", columnList = "convenio_id"),
+        @Index(name = "idx_pacientes_criado_em", columnList = "criado_em"),
+        @Index(name = "idx_pacientes_atualizado_em", columnList = "atualizado_em"),
+        @Index(name = "idx_pacientes_ativo_nome", columnList = "ativo, nome_completo"),
+        @Index(name = "idx_pacientes_status_ativo", columnList = "status_paciente, ativo"),
+        @Index(name = "idx_pacientes_ativo_criado_em", columnList = "ativo, criado_em"),
+        @Index(name = "idx_pacientes_ativo_data_nascimento", columnList = "ativo, data_nascimento")
+})
 @NamedEntityGraphs({
-    @NamedEntityGraph(
-        name = "Paciente.basic",
-        attributeNodes = {
-            @NamedAttributeNode("convenio")
-        }
-    ),
-    @NamedEntityGraph(
-        name = "Paciente.listagem",
-        attributeNodes = {
-            @NamedAttributeNode("convenio")
-        }
-    ),
-    @NamedEntityGraph(
-        name = "Paciente.cadastro",
-        attributeNodes = {
-            @NamedAttributeNode("convenio"),
-            @NamedAttributeNode("dadosSociodemograficos"),
-            @NamedAttributeNode("dadosClinicosBasicos"),
-            @NamedAttributeNode("responsavelLegal"),
-            @NamedAttributeNode("lgpdConsentimento"),
-            @NamedAttributeNode("dadosPessoaisComplementares"),
-            @NamedAttributeNode("obito")
-        }
-    ),
-    @NamedEntityGraph(
-        name = "Paciente.prontuarioResumido",
-        attributeNodes = {
-            @NamedAttributeNode("convenio"),
-            @NamedAttributeNode("dadosSociodemograficos"),
-            @NamedAttributeNode("dadosClinicosBasicos"),
-            @NamedAttributeNode(value = "alergias", subgraph = "alergiasSubgraph"),
-            @NamedAttributeNode("deficiencias")
-        },
-        subgraphs = {
-            @NamedSubgraph(name = "alergiasSubgraph", type = AlergiaPaciente.class, attributeNodes = {})
-        }
-    ),
-    @NamedEntityGraph(
-        name = "Paciente.integracaoGov",
-        attributeNodes = {
-            @NamedAttributeNode("convenio"),
-            @NamedAttributeNode("identificadores"),
-            @NamedAttributeNode("contatos"),
-            @NamedAttributeNode(value = "integracoesGov", subgraph = "integracoesGovSubgraph"),
-            @NamedAttributeNode("vinculosTerritoriais")
-        },
-        subgraphs = {
-            @NamedSubgraph(name = "integracoesGovSubgraph", type = IntegracaoGov.class, attributeNodes = {})
-        }
-    ),
-    @NamedEntityGraph(
-        name = "Paciente.enderecos",
-        attributeNodes = {
-            @NamedAttributeNode(value = "enderecos", subgraph = "enderecosSubgraph")
-        },
-        subgraphs = {
-            @NamedSubgraph(name = "enderecosSubgraph", type = PacienteEndereco.class, 
-                attributeNodes = {@NamedAttributeNode("endereco")})
-        }
-    ),
-    @NamedEntityGraph(
-        name = "Paciente.prontuarioCompleto",
-        attributeNodes = {
-            @NamedAttributeNode("convenio"),
-            @NamedAttributeNode(value = "enderecos", subgraph = "enderecosSubgraph"),
-            @NamedAttributeNode(value = "alergias", subgraph = "alergiasSubgraph"),
-            @NamedAttributeNode("deficiencias"),
-            @NamedAttributeNode("dadosSociodemograficos"),
-            @NamedAttributeNode("dadosClinicosBasicos"),
-            @NamedAttributeNode("responsavelLegal"),
-            @NamedAttributeNode("lgpdConsentimento"),
-            @NamedAttributeNode("dadosPessoaisComplementares"),
-            @NamedAttributeNode("obito"),
-            @NamedAttributeNode(value = "integracoesGov", subgraph = "integracoesGovSubgraph"),
-            @NamedAttributeNode("identificadores"),
-            @NamedAttributeNode("contatos"),
-            @NamedAttributeNode("vinculosTerritoriais")
-        },
-        subgraphs = {
-            @NamedSubgraph(name = "alergiasSubgraph", type = AlergiaPaciente.class, attributeNodes = {}),
-            @NamedSubgraph(name = "integracoesGovSubgraph", type = IntegracaoGov.class, attributeNodes = {}),
-            @NamedSubgraph(name = "enderecosSubgraph", type = PacienteEndereco.class, 
-                attributeNodes = {@NamedAttributeNode("endereco")})
-        }
-    )
+        @NamedEntityGraph(name = "Paciente.basic", attributeNodes = {
+                @NamedAttributeNode("convenio")
+        }),
+        @NamedEntityGraph(name = "Paciente.listagem", attributeNodes = {
+                @NamedAttributeNode("convenio")
+        }),
+        @NamedEntityGraph(name = "Paciente.cadastro", attributeNodes = {
+                @NamedAttributeNode("convenio"),
+                @NamedAttributeNode("dadosSociodemograficos"),
+                @NamedAttributeNode("dadosClinicosBasicos"),
+                @NamedAttributeNode("responsavelLegal"),
+                @NamedAttributeNode("lgpdConsentimento"),
+                @NamedAttributeNode("dadosPessoaisComplementares"),
+                @NamedAttributeNode("obito")
+        }),
+        @NamedEntityGraph(name = "Paciente.prontuarioResumo", attributeNodes = {
+                @NamedAttributeNode("convenio"),
+                @NamedAttributeNode("dadosSociodemograficos"),
+                @NamedAttributeNode("dadosClinicosBasicos"),
+                @NamedAttributeNode(value = "alergias", subgraph = "alergiasSubgraph"),
+                @NamedAttributeNode("deficiencias")
+        }, subgraphs = {
+                @NamedSubgraph(name = "alergiasSubgraph", type = AlergiaPaciente.class, attributeNodes = {})
+        }),
+        @NamedEntityGraph(name = "Paciente.integracao", attributeNodes = {
+                @NamedAttributeNode("convenio"),
+                @NamedAttributeNode("identificadores"),
+                @NamedAttributeNode("contatos"),
+                @NamedAttributeNode(value = "integracoesGov", subgraph = "integracoesGovSubgraph"),
+                @NamedAttributeNode("vinculosTerritoriais")
+        }, subgraphs = {
+                @NamedSubgraph(name = "integracoesGovSubgraph", type = IntegracaoGov.class, attributeNodes = {})
+        }),
+        @NamedEntityGraph(name = "Paciente.enderecos", attributeNodes = {
+                @NamedAttributeNode(value = "enderecos", subgraph = "enderecosSubgraph")
+        }, subgraphs = {
+                @NamedSubgraph(name = "enderecosSubgraph", type = PacienteEndereco.class, attributeNodes = {
+                        @NamedAttributeNode("endereco") })
+        }),
+        @NamedEntityGraph(name = "Paciente.prontuarioCompleto", attributeNodes = {
+                @NamedAttributeNode("convenio"),
+                @NamedAttributeNode(value = "enderecos", subgraph = "enderecosSubgraph"),
+                @NamedAttributeNode(value = "alergias", subgraph = "alergiasSubgraph"),
+                @NamedAttributeNode("deficiencias"),
+                @NamedAttributeNode("dadosSociodemograficos"),
+                @NamedAttributeNode("dadosClinicosBasicos"),
+                @NamedAttributeNode("responsavelLegal"),
+                @NamedAttributeNode("lgpdConsentimento"),
+                @NamedAttributeNode("dadosPessoaisComplementares"),
+                @NamedAttributeNode("obito"),
+                @NamedAttributeNode(value = "integracoesGov", subgraph = "integracoesGovSubgraph"),
+                @NamedAttributeNode("identificadores"),
+                @NamedAttributeNode("contatos"),
+                @NamedAttributeNode("vinculosTerritoriais")
+        }, subgraphs = {
+                @NamedSubgraph(name = "alergiasSubgraph", type = AlergiaPaciente.class, attributeNodes = {}),
+                @NamedSubgraph(name = "integracoesGovSubgraph", type = IntegracaoGov.class, attributeNodes = {}),
+                @NamedSubgraph(name = "enderecosSubgraph", type = PacienteEndereco.class, attributeNodes = {
+                        @NamedAttributeNode("endereco") })
+        })
 })
 @Getter
 @Setter
@@ -138,7 +112,7 @@ public class Paciente extends BaseEntityWithoutTenant {
         this.integracoesGov = new ArrayList<>();
         this.vinculosTerritoriais = new ArrayList<>();
     }
-    
+
     public void addEndereco(PacienteEndereco pacienteEndereco) {
         if (pacienteEndereco == null) {
             return;
@@ -208,7 +182,7 @@ public class Paciente extends BaseEntityWithoutTenant {
     @org.hibernate.annotations.Fetch(org.hibernate.annotations.FetchMode.SUBSELECT)
     private List<PacienteContato> contatos = new ArrayList<>();
 
-    @OneToMany(mappedBy = "paciente", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "paciente", cascade = { CascadeType.PERSIST, CascadeType.MERGE }, fetch = FetchType.LAZY)
     @org.hibernate.annotations.BatchSize(size = 50)
     @org.hibernate.annotations.Fetch(org.hibernate.annotations.FetchMode.SUBSELECT)
     private List<PacienteVinculoTerritorial> vinculosTerritoriais = new ArrayList<>();
@@ -231,7 +205,7 @@ public class Paciente extends BaseEntityWithoutTenant {
     @OneToOne(mappedBy = "paciente", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
     private PacienteObito obito;
 
-    @OneToMany(mappedBy = "paciente", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "paciente", cascade = { CascadeType.PERSIST, CascadeType.MERGE }, fetch = FetchType.LAZY)
     @org.hibernate.annotations.BatchSize(size = 50)
     @org.hibernate.annotations.Fetch(org.hibernate.annotations.FetchMode.SUBSELECT)
     private List<IntegracaoGov> integracoesGov = new ArrayList<>();

@@ -1,4 +1,5 @@
 package com.upsaude.entity.sistema.integracao;
+
 import com.upsaude.entity.BaseEntity;
 
 import com.upsaude.entity.paciente.Paciente;
@@ -24,15 +25,14 @@ import java.time.OffsetDateTime;
 import java.util.UUID;
 
 @Entity
-@Table(name = "paciente_integracao_gov", schema = "public",
-       indexes = {
-           @Index(name = "idx_paciente_integracao_gov_paciente", columnList = "paciente_id"),
-           @Index(name = "idx_paciente_integracao_gov_uuid_rnds", columnList = "uuid_rnds"),
-           @Index(name = "idx_paciente_integracao_gov_id_integracao", columnList = "id_integracao_gov"),
-           @Index(name = "idx_paciente_integracao_gov_sistema", columnList = "sistema"),
-           @Index(name = "idx_paciente_integracao_gov_status_sincronizacao", columnList = "status_sincronizacao"),
-           @Index(name = "idx_paciente_integracao_gov_data_sincronizacao", columnList = "data_sincronizacao")
-       })
+@Table(name = "paciente_integracao_gov", schema = "public", indexes = {
+        @Index(name = "idx_paciente_integracao_gov_paciente", columnList = "paciente_id"),
+        @Index(name = "idx_paciente_integracao_gov_uuid_rnds", columnList = "uuid_rnds"),
+        @Index(name = "idx_paciente_integracao_gov_id_integracao", columnList = "id_integracao_gov"),
+        @Index(name = "idx_paciente_integracao_gov_sistema", columnList = "sistema"),
+        @Index(name = "idx_paciente_integracao_gov_status_sincronizacao", columnList = "status_sincronizacao"),
+        @Index(name = "idx_paciente_integracao_gov_data_sincronizacao", columnList = "data_sincronizacao")
+})
 @Getter
 @Setter
 @EqualsAndHashCode(onlyExplicitlyIncluded = true, callSuper = true)
@@ -89,7 +89,4 @@ public class IntegracaoGov extends BaseEntity {
     @Size(max = 30, message = "Origem do cadastro deve ter no máximo 30 caracteres")
     @Column(name = "origem_cadastro", length = 30)
     private String origemCadastro;
-
-    @Column(name = "observacoes", columnDefinition = "TEXT")
-    private String observacoes;
 }

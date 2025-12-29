@@ -1,4 +1,5 @@
 package com.upsaude.entity.paciente;
+
 import com.upsaude.entity.BaseEntity;
 
 import jakarta.persistence.*;
@@ -9,10 +10,9 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
-@Table(name = "paciente_dados_clinicos", schema = "public",
-       indexes = {
-           @Index(name = "idx_paciente_dados_clinicos_paciente", columnList = "paciente_id")
-       })
+@Table(name = "paciente_dados_clinicos_basicos", schema = "public", indexes = {
+        @Index(name = "idx_paciente_dados_clinicos_basicos_paciente", columnList = "paciente_id")
+})
 @Getter
 @Setter
 @EqualsAndHashCode(onlyExplicitlyIncluded = true, callSuper = true)
