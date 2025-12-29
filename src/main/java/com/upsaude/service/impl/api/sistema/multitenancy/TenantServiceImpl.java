@@ -49,7 +49,7 @@ public class TenantServiceImpl implements TenantService {
         }
 
         Tenant tenant = tenantMapper.fromRequest(request);
-        tenant.setActive(true);
+        tenant.setAtivo(true);
 
         Tenant tenantSalvo = tenantRepository.save(tenant);
         log.info("Tenant criado com sucesso. ID: {}", tenantSalvo.getId());
@@ -70,7 +70,7 @@ public class TenantServiceImpl implements TenantService {
         Tenant tenant = tenantRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Tenant não encontrado com ID: " + id));
 
-        Hibernate.initialize(tenant.getEnderecos());
+        Hibernate.initialize(tenant.getEndereco());
 
         return tenantMapper.toResponse(tenant);
     }
@@ -84,7 +84,7 @@ public class TenantServiceImpl implements TenantService {
         Page<Tenant> tenants = tenantRepository.findAll(pageable);
 
         tenants.getContent().forEach(tenant -> {
-            Hibernate.initialize(tenant.getEnderecos());
+            Hibernate.initialize(tenant.getEndereco());
         });
 
         List<TenantResponse> responses = tenants.getContent().stream()
@@ -135,12 +135,12 @@ public class TenantServiceImpl implements TenantService {
         Tenant tenant = tenantRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Tenant não encontrado com ID: " + id));
 
-        if (Boolean.FALSE.equals(tenant.getActive())) {
+        if (Boolean.FALSE.equals(tenant.getAtivo())) {
             log.warn("Tentativa de excluir Tenant já inativo. ID: {}", id);
             throw new BadRequestException("Tenant já está inativo");
         }
 
-        tenant.setActive(false);
+        tenant.setAtivo(false);
         tenantRepository.save(tenant);
         log.info("Tenant excluído (desativado) com sucesso. ID: {}", id);
     }

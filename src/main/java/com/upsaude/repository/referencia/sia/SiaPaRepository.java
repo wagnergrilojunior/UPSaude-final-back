@@ -13,7 +13,6 @@ import java.util.UUID;
 
 public interface SiaPaRepository extends JpaRepository<SiaPa, UUID>, JpaSpecificationExecutor<SiaPa> {
 
-    // Buscas por competência e UF
     List<SiaPa> findByCompetenciaAndUf(String competencia, String uf);
     
     Page<SiaPa> findByCompetenciaAndUf(String competencia, String uf, Pageable pageable);
@@ -22,22 +21,18 @@ public interface SiaPaRepository extends JpaRepository<SiaPa, UUID>, JpaSpecific
     
     Page<SiaPa> findByUf(String uf, Pageable pageable);
     
-    // Busca por procedimento
     List<SiaPa> findByProcedimentoCodigo(String procedimentoCodigo);
     
     Page<SiaPa> findByProcedimentoCodigo(String procedimentoCodigo, Pageable pageable);
     
-    // Busca por CNES
     List<SiaPa> findByCodigoCnes(String codigoCnes);
     
     Page<SiaPa> findByCodigoCnes(String codigoCnes, Pageable pageable);
     
-    // Busca por CID
     List<SiaPa> findByCidPrincipalCodigo(String cidPrincipalCodigo);
     
     Page<SiaPa> findByCidPrincipalCodigo(String cidPrincipalCodigo, Pageable pageable);
     
-    // Busca combinada
     @Query("SELECT s FROM SiaPa s WHERE s.competencia = :competencia AND s.uf = :uf AND s.procedimentoCodigo = :procedimentoCodigo")
     List<SiaPa> findByCompetenciaAndUfAndProcedimento(
         @Param("competencia") String competencia,
@@ -45,7 +40,6 @@ public interface SiaPaRepository extends JpaRepository<SiaPa, UUID>, JpaSpecific
         @Param("procedimentoCodigo") String procedimentoCodigo
     );
     
-    // Contagem por competência e UF
     long countByCompetenciaAndUf(String competencia, String uf);
     
     long countByUf(String uf);

@@ -52,8 +52,12 @@ public class VinculoProfissionalEquipeServiceImpl implements VinculoProfissional
         EquipeSaude equipe = equipeSaudeRepository.findById(request.getEquipe())
                 .orElseThrow(() -> new NotFoundException("Equipe não encontrada com ID: " + request.getEquipe()));
 
-        if (profissional.getStatusRegistro() == null || profissional.getStatusRegistro().isSuspenso() || profissional.getStatusRegistro().isInativo()) {
-            throw new BadRequestException("Não é possível vincular um profissional com registro " + profissional.getStatusRegistro().getDescricao());
+        if (profissional.getRegistroProfissional() == null || profissional.getRegistroProfissional().getStatusRegistro() == null || 
+            profissional.getRegistroProfissional().getStatusRegistro() == com.upsaude.enums.StatusAtivoEnum.SUSPENSO || 
+            profissional.getRegistroProfissional().getStatusRegistro() == com.upsaude.enums.StatusAtivoEnum.INATIVO) {
+            String descricao = profissional.getRegistroProfissional() != null && profissional.getRegistroProfissional().getStatusRegistro() != null 
+                ? profissional.getRegistroProfissional().getStatusRegistro().getDescricao() : "sem status";
+            throw new BadRequestException("Não é possível vincular um profissional com registro " + descricao);
         }
 
         if (!profissional.getTenant().getId().equals(equipe.getTenant().getId())) {
@@ -167,8 +171,12 @@ public class VinculoProfissionalEquipeServiceImpl implements VinculoProfissional
         EquipeSaude equipe = equipeSaudeRepository.findById(request.getEquipe())
                 .orElseThrow(() -> new NotFoundException("Equipe não encontrada com ID: " + request.getEquipe()));
 
-        if (profissional.getStatusRegistro() == null || profissional.getStatusRegistro().isSuspenso() || profissional.getStatusRegistro().isInativo()) {
-            throw new BadRequestException("Não é possível vincular um profissional com registro " + profissional.getStatusRegistro().getDescricao());
+        if (profissional.getRegistroProfissional() == null || profissional.getRegistroProfissional().getStatusRegistro() == null || 
+            profissional.getRegistroProfissional().getStatusRegistro() == com.upsaude.enums.StatusAtivoEnum.SUSPENSO || 
+            profissional.getRegistroProfissional().getStatusRegistro() == com.upsaude.enums.StatusAtivoEnum.INATIVO) {
+            String descricao = profissional.getRegistroProfissional() != null && profissional.getRegistroProfissional().getStatusRegistro() != null 
+                ? profissional.getRegistroProfissional().getStatusRegistro().getDescricao() : "sem status";
+            throw new BadRequestException("Não é possível vincular um profissional com registro " + descricao);
         }
 
         if (!profissional.getTenant().getId().equals(equipe.getTenant().getId())) {

@@ -14,7 +14,9 @@ import java.util.UUID;
 public class MedicoValidationService {
 
     public void validarObrigatorios(MedicosRequest request) {
-        if (request == null || !StringUtils.hasText(request.getNomeCompleto())) {
+        if (request == null || 
+            request.getDadosPessoaisBasicos() == null || 
+            !StringUtils.hasText(request.getDadosPessoaisBasicos().getNomeCompleto())) {
             throw new BadRequestException("Nome completo é obrigatório");
         }
     }
@@ -31,9 +33,6 @@ public class MedicoValidationService {
 
     public void sanitizarFlags(MedicosRequest request) {
         if (request == null) return;
-        if (request.getFormacao() != null && request.getFormacao().getTituloEspecialista() == null) {
-            request.getFormacao().setTituloEspecialista(false);
-        }
     }
 
     private void validarCrmUnico(UUID medicoId, MedicosRequest request, MedicosRepository medicosRepository, UUID tenantId) {
@@ -67,17 +66,17 @@ public class MedicoValidationService {
     }
 
     private void validarCpfUnico(UUID medicoId, MedicosRequest request, MedicosRepository medicosRepository, UUID tenantId) {
-        if (request == null || request.getDadosPessoais() == null) {
+        if (request == null || request.getDocumentosBasicos() == null) {
             return;
         }
 
-        String cpf = request.getDadosPessoais().getCpf();
+        String cpf = request.getDocumentosBasicos().getCpf();
 
         if (!StringUtils.hasText(cpf)) {
             return;
         }
 
-        Optional<Medicos> medicoExistente = medicosRepository.findByDadosPessoaisCpfAndTenantId(cpf, tenantId);
+        Optional<Medicos> medicoExistente = medicosRepository.findByDocumentosBasicosCpfAndTenantId(cpf, tenantId);
 
         if (medicoExistente.isPresent()) {
             Medicos medicoEncontrado = medicoExistente.get();

@@ -1,18 +1,15 @@
 package com.upsaude.api.response.profissional;
-import java.time.LocalDate;
+
 import java.time.OffsetDateTime;
 import java.util.UUID;
 
+import com.upsaude.api.response.embeddable.ContatoProfissionalResponse;
+import com.upsaude.api.response.embeddable.DadosDeficienciaProfissionalResponse;
+import com.upsaude.api.response.embeddable.DadosDemograficosProfissionalResponse;
+import com.upsaude.api.response.embeddable.DadosPessoaisBasicosProfissionalResponse;
+import com.upsaude.api.response.embeddable.DocumentosBasicosProfissionalResponse;
+import com.upsaude.api.response.embeddable.RegistroProfissionalResponse;
 import com.upsaude.api.response.geral.EnderecoResponse;
-import com.upsaude.enums.EscolaridadeEnum;
-import com.upsaude.enums.EstadoCivilEnum;
-import com.upsaude.enums.IdentidadeGeneroEnum;
-import com.upsaude.enums.NacionalidadeEnum;
-import com.upsaude.enums.RacaCorEnum;
-import com.upsaude.enums.SexoEnum;
-import com.upsaude.enums.StatusAtivoEnum;
-import com.upsaude.enums.TipoDeficienciaEnum;
-import com.upsaude.enums.TipoProfissionalEnum;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -30,37 +27,13 @@ public class ProfissionaisSaudeResponse {
     private OffsetDateTime createdAt;
     private OffsetDateTime updatedAt;
     private Boolean active;
-    private String nomeCompleto;
-    private String cpf;
-    private LocalDate dataNascimento;
-    private SexoEnum sexo;
-    private EstadoCivilEnum estadoCivil;
-    private EscolaridadeEnum escolaridade;
-    private IdentidadeGeneroEnum identidadeGenero;
-    private RacaCorEnum racaCor;
-    private TipoDeficienciaEnum tipoDeficiencia;
-    private String rg;
-    private String orgaoEmissorRg;
-    private String ufEmissaoRg;
-    private LocalDate dataEmissaoRg;
-    private NacionalidadeEnum nacionalidade;
-    private String naturalidade;
-    private String registroProfissional;
-    private String ufRegistro;
-    private OffsetDateTime dataEmissaoRegistro;
-    private OffsetDateTime dataValidadeRegistro;
-    private StatusAtivoEnum statusRegistro;
-    private TipoProfissionalEnum tipoProfissional;
-    private String cns;
-    private String codigoCbo;
-    private String descricaoCbo;
-    private String codigoOcupacional;
-    private String telefone;
-    private String email;
-    private String telefoneInstitucional;
-    private String emailInstitucional;
+    private DadosPessoaisBasicosProfissionalResponse dadosPessoaisBasicos;
+    private DocumentosBasicosProfissionalResponse documentosBasicos;
+    private DadosDemograficosProfissionalResponse dadosDemograficos;
+    private DadosDeficienciaProfissionalResponse dadosDeficiencia;
+    private RegistroProfissionalResponse registroProfissional;
+    private UUID sigtapOcupacao;
+    private ContatoProfissionalResponse contato;
     private EnderecoResponse enderecoProfissional;
-
-
     private String observacoes;
 }

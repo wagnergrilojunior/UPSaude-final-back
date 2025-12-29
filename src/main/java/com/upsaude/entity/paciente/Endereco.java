@@ -75,14 +75,6 @@ public class Endereco extends BaseEntity {
     @Column(name = "codigo_ibge_municipio", length = 20)
     private String codigoIbgeMunicipio;
 
-    @Size(max = 50, message = "Microárea deve ter no máximo 50 caracteres")
-    @Column(name = "microarea", length = 50)
-    private String microarea;
-
-    @Size(max = 50, message = "INE da equipe deve ter no máximo 50 caracteres")
-    @Column(name = "ine_equipe", length = 50)
-    private String ineEquipe;
-
     @Size(max = 50, message = "Quadra deve ter no máximo 50 caracteres")
     @Column(name = "quadra", length = 50)
     private String quadra;

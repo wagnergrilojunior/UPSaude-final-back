@@ -30,12 +30,10 @@ public class ConvenioValidationService {
 
     public void validarUnicidadeParaCriacao(ConvenioRequest request, UUID tenantId) {
         validarCnpjUnico(null, request, tenantId);
-        validarCodigoUnico(null, request, tenantId);
     }
 
     public void validarUnicidadeParaAtualizacao(UUID id, ConvenioRequest request, UUID tenantId) {
         validarCnpjUnico(id, request, tenantId);
-        validarCodigoUnico(id, request, tenantId);
     }
 
     private void validarCnpjUnico(UUID id, ConvenioRequest request, UUID tenantId) {
@@ -48,19 +46,6 @@ public class ConvenioValidationService {
 
         if (duplicado) {
             throw new ConflictException("Já existe um convênio cadastrado com o CNPJ informado: " + request.getCnpj());
-        }
-    }
-
-    private void validarCodigoUnico(UUID id, ConvenioRequest request, UUID tenantId) {
-        if (request == null || !StringUtils.hasText(request.getCodigo())) return;
-        String codigo = request.getCodigo().trim();
-
-        boolean duplicado = (id == null)
-            ? repository.existsByCodigoAndTenantId(codigo, tenantId)
-            : repository.existsByCodigoAndTenantIdAndIdNot(codigo, tenantId, id);
-
-        if (duplicado) {
-            throw new ConflictException("Já existe um convênio cadastrado com o código informado: " + request.getCodigo());
         }
     }
 }

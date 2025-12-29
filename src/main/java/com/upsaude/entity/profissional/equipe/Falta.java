@@ -14,9 +14,9 @@ import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
-import jakarta.validation.constraints.NotNull;
-import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.time.LocalDate;
 
@@ -29,13 +29,13 @@ import java.time.LocalDate;
            @Index(name = "idx_falta_estabelecimento", columnList = "estabelecimento_id"),
            @Index(name = "idx_falta_periodo", columnList = "data_inicio,data_fim")
        })
-@Data
-@EqualsAndHashCode(callSuper = true)
+@Getter
+@Setter
+@EqualsAndHashCode(onlyExplicitlyIncluded = true, callSuper = true)
 public class Falta extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "profissional_id", nullable = false)
-    @NotNull(message = "Profissional de saúde é obrigatório")
     private ProfissionaisSaude profissional;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -43,7 +43,6 @@ public class Falta extends BaseEntity {
     private Medicos medico;
 
     @Column(name = "data_falta", nullable = false)
-    @NotNull(message = "Data da falta é obrigatória")
     private LocalDate dataFalta;
 
     @Column(name = "data_inicio")
@@ -54,7 +53,6 @@ public class Falta extends BaseEntity {
 
     @Convert(converter = TipoFaltaEnumConverter.class)
     @Column(name = "tipo_falta", nullable = false)
-    @NotNull(message = "Tipo de falta é obrigatório")
     private TipoFaltaEnum tipoFalta;
 
     @Column(name = "justificativa", columnDefinition = "TEXT")

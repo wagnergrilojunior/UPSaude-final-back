@@ -1,6 +1,5 @@
 package com.upsaude.service.api.support.convenio;
 
-import org.hibernate.Hibernate;
 import org.springframework.stereotype.Service;
 
 import com.upsaude.api.response.convenio.ConvenioResponse;
@@ -16,9 +15,6 @@ public class ConvenioResponseBuilder {
     private final ConvenioMapper mapper;
 
     public ConvenioResponse build(Convenio entity) {
-        if (entity != null) {
-            if (entity.getEndereco() != null) Hibernate.initialize(entity.getEndereco());
-        }
         return mapper.toResponse(entity);
     }
 }

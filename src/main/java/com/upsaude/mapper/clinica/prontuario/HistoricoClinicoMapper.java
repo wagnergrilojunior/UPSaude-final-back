@@ -39,5 +39,6 @@ public interface HistoricoClinicoMapper {
     @Mapping(target = "profissional", ignore = true)
     void updateFromRequest(HistoricoClinicoRequest request, @MappingTarget HistoricoClinico entity);
 
+    @Mapping(target = "paciente", source = "paciente", qualifiedByName = "toResponseCompleto")
     HistoricoClinicoResponse toResponse(HistoricoClinico entity);
 }

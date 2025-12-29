@@ -31,45 +31,54 @@ public interface ProfissionaisSaudeRepository extends JpaRepository<Profissionai
     @Query("SELECT p FROM ProfissionaisSaude p WHERE p.tenant.id = :tenantId")
     Page<ProfissionaisSaude> findAllByTenant(@Param("tenantId") UUID tenantId, Pageable pageable);
 
-    boolean existsByCpf(String cpf);
+    @Query("SELECT CASE WHEN COUNT(p) > 0 THEN true ELSE false END FROM ProfissionaisSaude p WHERE p.documentosBasicos.cpf = :cpf")
+    boolean existsByCpf(@Param("cpf") String cpf);
 
-    @Query("SELECT p FROM ProfissionaisSaude p WHERE p.cpf = :cpf AND p.tenant = :tenant")
+    @Query("SELECT p FROM ProfissionaisSaude p WHERE p.documentosBasicos.cpf = :cpf AND p.tenant = :tenant")
     Optional<ProfissionaisSaude> findByCpfAndTenant(@Param("cpf") String cpf, @Param("tenant") Tenant tenant);
 
-    @Query("SELECT p FROM ProfissionaisSaude p WHERE p.cpf = :cpf AND p.tenant.id = :tenantId")
+    @Query("SELECT p FROM ProfissionaisSaude p WHERE p.documentosBasicos.cpf = :cpf AND p.tenant.id = :tenantId")
     Optional<ProfissionaisSaude> findByCpfAndTenantId(@Param("cpf") String cpf, @Param("tenantId") UUID tenantId);
 
-    Optional<ProfissionaisSaude> findByCpf(String cpf);
+    @Query("SELECT p FROM ProfissionaisSaude p WHERE p.documentosBasicos.cpf = :cpf")
+    Optional<ProfissionaisSaude> findByCpf(@Param("cpf") String cpf);
 
-    boolean existsByEmail(String email);
+    @Query("SELECT CASE WHEN COUNT(p) > 0 THEN true ELSE false END FROM ProfissionaisSaude p WHERE p.contato.email = :email")
+    boolean existsByEmail(@Param("email") String email);
 
-    @Query("SELECT p FROM ProfissionaisSaude p WHERE p.email = :email AND p.tenant = :tenant")
+    @Query("SELECT p FROM ProfissionaisSaude p WHERE p.contato.email = :email AND p.tenant = :tenant")
     Optional<ProfissionaisSaude> findByEmailAndTenant(@Param("email") String email, @Param("tenant") Tenant tenant);
 
-    @Query("SELECT p FROM ProfissionaisSaude p WHERE p.email = :email AND p.tenant.id = :tenantId")
+    @Query("SELECT p FROM ProfissionaisSaude p WHERE p.contato.email = :email AND p.tenant.id = :tenantId")
     Optional<ProfissionaisSaude> findByEmailAndTenantId(@Param("email") String email, @Param("tenantId") UUID tenantId);
 
-    boolean existsByEmailAndIdNot(String email, UUID id);
+    @Query("SELECT CASE WHEN COUNT(p) > 0 THEN true ELSE false END FROM ProfissionaisSaude p WHERE p.contato.email = :email AND p.id != :id")
+    boolean existsByEmailAndIdNot(@Param("email") String email, @Param("id") UUID id);
 
-    boolean existsByRg(String rg);
+    @Query("SELECT CASE WHEN COUNT(p) > 0 THEN true ELSE false END FROM ProfissionaisSaude p WHERE p.documentosBasicos.rg = :rg")
+    boolean existsByRg(@Param("rg") String rg);
 
-    @Query("SELECT p FROM ProfissionaisSaude p WHERE p.rg = :rg AND p.tenant = :tenant")
+    @Query("SELECT p FROM ProfissionaisSaude p WHERE p.documentosBasicos.rg = :rg AND p.tenant = :tenant")
     Optional<ProfissionaisSaude> findByRgAndTenant(@Param("rg") String rg, @Param("tenant") Tenant tenant);
 
-    @Query("SELECT p FROM ProfissionaisSaude p WHERE p.rg = :rg AND p.tenant.id = :tenantId")
+    @Query("SELECT p FROM ProfissionaisSaude p WHERE p.documentosBasicos.rg = :rg AND p.tenant.id = :tenantId")
     Optional<ProfissionaisSaude> findByRgAndTenantId(@Param("rg") String rg, @Param("tenantId") UUID tenantId);
 
-    boolean existsByRgAndIdNot(String rg, UUID id);
+    @Query("SELECT CASE WHEN COUNT(p) > 0 THEN true ELSE false END FROM ProfissionaisSaude p WHERE p.documentosBasicos.rg = :rg AND p.id != :id")
+    boolean existsByRgAndIdNot(@Param("rg") String rg, @Param("id") UUID id);
 
-    boolean existsByCns(String cns);
+    @Query("SELECT CASE WHEN COUNT(p) > 0 THEN true ELSE false END FROM ProfissionaisSaude p WHERE p.documentosBasicos.cns = :cns")
+    boolean existsByCns(@Param("cns") String cns);
 
-    @Query("SELECT p FROM ProfissionaisSaude p WHERE p.cns = :cns AND p.tenant = :tenant")
+    @Query("SELECT p FROM ProfissionaisSaude p WHERE p.documentosBasicos.cns = :cns AND p.tenant = :tenant")
     Optional<ProfissionaisSaude> findByCnsAndTenant(@Param("cns") String cns, @Param("tenant") Tenant tenant);
 
-    @Query("SELECT p FROM ProfissionaisSaude p WHERE p.cns = :cns AND p.tenant.id = :tenantId")
+    @Query("SELECT p FROM ProfissionaisSaude p WHERE p.documentosBasicos.cns = :cns AND p.tenant.id = :tenantId")
     Optional<ProfissionaisSaude> findByCnsAndTenantId(@Param("cns") String cns, @Param("tenantId") UUID tenantId);
 
-    boolean existsByCnsAndIdNot(String cns, UUID id);
+    @Query("SELECT CASE WHEN COUNT(p) > 0 THEN true ELSE false END FROM ProfissionaisSaude p WHERE p.documentosBasicos.cns = :cns AND p.id != :id")
+    boolean existsByCnsAndIdNot(@Param("cns") String cns, @Param("id") UUID id);
 
-    boolean existsByCpfAndIdNot(String cpf, UUID id);
+    @Query("SELECT CASE WHEN COUNT(p) > 0 THEN true ELSE false END FROM ProfissionaisSaude p WHERE p.documentosBasicos.cpf = :cpf AND p.id != :id")
+    boolean existsByCpfAndIdNot(@Param("cpf") String cpf, @Param("id") UUID id);
 }

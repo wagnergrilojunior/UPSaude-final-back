@@ -1,27 +1,36 @@
 package com.upsaude.entity.sistema.multitenancy;
 
-import com.upsaude.entity.BaseEntity;
+import com.upsaude.entity.embeddable.ContatoTenant;
+import com.upsaude.entity.embeddable.DadosFiscaisTenant;
+import com.upsaude.entity.embeddable.DadosIdentificacaoTenant;
+import com.upsaude.entity.embeddable.InformacoesAdicionaisTenant;
+import com.upsaude.entity.embeddable.ResponsavelTenant;
 import com.upsaude.entity.paciente.Endereco;
 
-import jakarta.persistence.CascadeType;
+import java.time.OffsetDateTime;
+import java.util.UUID;
+
 import jakarta.persistence.Column;
+import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EntityListeners;
 import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
-import jakarta.persistence.JoinTable;
-import jakarta.persistence.OneToMany;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
-import jakarta.persistence.Index;
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Pattern;
-import jakarta.validation.constraints.Size;
-import lombok.Data;
-import java.util.ArrayList;
-import java.util.List;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.Setter;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 @Entity
 @Table(name = "tenants", schema = "public",
@@ -33,94 +42,66 @@ import java.util.List;
            @Index(name = "idx_tenants_slug", columnList = "slug"),
            @Index(name = "idx_tenants_cnpj", columnList = "cnpj")
        })
-@Data
-public class Tenant extends BaseEntity {
+@Getter
+@Setter
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
+@EntityListeners({AuditingEntityListener.class})
+public class Tenant {
 
-    public Tenant() {
-        this.enderecos = new ArrayList<>();
-    }
+    @Id
+    @GeneratedValue(strategy = GenerationType.UUID)
+    @EqualsAndHashCode.Include
+    private UUID id;
 
-    @NotBlank(message = "Nome é obrigatório")
-    @Size(max = 255, message = "Nome deve ter no máximo 255 caracteres")
-    @Column(name = "name", nullable = false, length = 255)
-    private String nome;
+    @CreatedDate
+    @Column(name = "criado_em", nullable = false, updatable = false)
+    private OffsetDateTime createdAt;
 
-    @NotBlank(message = "Slug é obrigatório")
-    @Size(max = 255, message = "Slug deve ter no máximo 255 caracteres")
-    @Pattern(regexp = "^[a-z0-9-]+$", message = "Slug deve conter apenas letras minúsculas, números e hífens")
-    @Column(name = "slug", nullable = false, length = 255, unique = true)
-    private String slug;
+    @LastModifiedDate
+    @Column(name = "atualizado_em")
+    private OffsetDateTime updatedAt;
 
-    @Column(name = "description", columnDefinition = "TEXT")
-    private String descricao;
+    @Column(name = "ativo", nullable = false)
+    private Boolean ativo = true;
 
-    @Column(name = "logo_url", columnDefinition = "TEXT")
-    private String urlLogo;
+    @Embedded
+    private DadosIdentificacaoTenant dadosIdentificacao;
 
-    @Column(name = "metadata", columnDefinition = "jsonb")
-    private String metadados;
+    @Embedded
+    private ContatoTenant contato;
 
-    @Column(name = "is_active")
-    private Boolean ativo;
+    @Embedded
+    private DadosFiscaisTenant dadosFiscais;
 
-    @OneToMany(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
-    @JoinTable(
-        name = "tenants_enderecos",
-        schema = "public",
-        joinColumns = @JoinColumn(name = "tenant_id"),
-        inverseJoinColumns = @JoinColumn(name = "endereco_id")
-    )
-    private List<Endereco> enderecos = new ArrayList<>();
+    @Embedded
+    private ResponsavelTenant responsavel;
 
-    @Pattern(regexp = "^\\d{14}$", message = "CNPJ deve ter 14 dígitos")
-    @Column(name = "cnpj", length = 14, unique = true)
-    private String cnpj;
+    @Embedded
+    private InformacoesAdicionaisTenant informacoesAdicionais;
 
-    @Column(name = "cnes", length = 20)
-    private String cnes;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "endereco_id")
+    private Endereco endereco;
 
-    @Column(name = "tipo_instituicao", length = 50)
-    private String tipoInstituicao;
-
-    @Pattern(regexp = "^\\d{10,11}$", message = "Telefone deve ter 10 ou 11 dígitos")
-    @Column(name = "telefone", length = 20)
-    private String telefone;
-
-    @Email(message = "Email inválido")
-    @Size(max = 255, message = "Email deve ter no máximo 255 caracteres")
-    @Column(name = "email", length = 255)
-    private String email;
-
-    @Column(name = "site", length = 255)
-    private String site;
-
-    @Column(name = "inscricao_estadual", length = 20)
-    private String inscricaoEstadual;
-
-    @Column(name = "inscricao_municipal", length = 20)
-    private String inscricaoMunicipal;
-
-    @Column(name = "responsavel_nome", length = 255)
-    private String responsavelNome;
-
-    @Pattern(regexp = "^\\d{11}$", message = "CPF deve ter 11 dígitos")
-    @Column(name = "responsavel_cpf", length = 11)
-    private String responsavelCpf;
-
-    @Column(name = "responsavel_telefone", length = 20)
-    private String responsavelTelefone;
-
-    @Column(name = "horario_funcionamento", columnDefinition = "TEXT")
-    private String horarioFuncionamento;
-
-    @Column(name = "observacoes", columnDefinition = "TEXT")
-    private String observacoes;
+    //===============================================================================================================
 
     @PrePersist
     @PreUpdate
-    public void validateCollections() {
-        if (enderecos == null) {
-            enderecos = new ArrayList<>();
+    public void validateEmbeddables() {
+        if (dadosIdentificacao == null) {
+            dadosIdentificacao = new DadosIdentificacaoTenant();
+        }
+        if (contato == null) {
+            contato = new ContatoTenant();
+        }
+        if (dadosFiscais == null) {
+            dadosFiscais = new DadosFiscaisTenant();
+        }
+        if (responsavel == null) {
+            responsavel = new ResponsavelTenant();
+        }
+        if (informacoesAdicionais == null) {
+            informacoesAdicionais = new InformacoesAdicionaisTenant();
         }
     }
 }

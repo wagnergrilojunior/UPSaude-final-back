@@ -19,9 +19,11 @@ public interface EstabelecimentosRepository extends JpaRepository<Estabeleciment
 
     Page<Estabelecimentos> findByTenant(Tenant tenant, Pageable pageable);
 
-    Optional<Estabelecimentos> findByCnpjAndTenant(String cnpj, Tenant tenant);
+    @Query("SELECT e FROM Estabelecimentos e WHERE e.dadosIdentificacao.cnpj = :cnpj AND e.tenant = :tenant")
+    Optional<Estabelecimentos> findByCnpjAndTenant(@Param("cnpj") String cnpj, @Param("tenant") Tenant tenant);
 
-    Optional<Estabelecimentos> findByCodigoCnesAndTenant(String codigoCnes, Tenant tenant);
+    @Query("SELECT e FROM Estabelecimentos e WHERE e.dadosIdentificacao.cnes = :codigoCnes AND e.tenant = :tenant")
+    Optional<Estabelecimentos> findByCodigoCnesAndTenant(@Param("codigoCnes") String codigoCnes, @Param("tenant") Tenant tenant);
 
     @Query("SELECT e FROM Estabelecimentos e WHERE e.id = :id AND e.tenant.id = :tenantId")
     Optional<Estabelecimentos> findByIdAndTenant(@Param("id") UUID id, @Param("tenantId") UUID tenantId);
@@ -29,15 +31,15 @@ public interface EstabelecimentosRepository extends JpaRepository<Estabeleciment
     @Query("SELECT e FROM Estabelecimentos e WHERE e.tenant.id = :tenantId")
     Page<Estabelecimentos> findAllByTenant(@Param("tenantId") UUID tenantId, Pageable pageable);
 
-    @Query("SELECT CASE WHEN COUNT(e) > 0 THEN true ELSE false END FROM Estabelecimentos e WHERE e.cnpj = :cnpj AND e.tenant.id = :tenantId")
+    @Query("SELECT CASE WHEN COUNT(e) > 0 THEN true ELSE false END FROM Estabelecimentos e WHERE e.dadosIdentificacao.cnpj = :cnpj AND e.tenant.id = :tenantId")
     boolean existsByCnpjAndTenantId(@Param("cnpj") String cnpj, @Param("tenantId") UUID tenantId);
 
-    @Query("SELECT CASE WHEN COUNT(e) > 0 THEN true ELSE false END FROM Estabelecimentos e WHERE e.cnpj = :cnpj AND e.tenant.id = :tenantId AND e.id <> :id")
+    @Query("SELECT CASE WHEN COUNT(e) > 0 THEN true ELSE false END FROM Estabelecimentos e WHERE e.dadosIdentificacao.cnpj = :cnpj AND e.tenant.id = :tenantId AND e.id <> :id")
     boolean existsByCnpjAndTenantIdAndIdNot(@Param("cnpj") String cnpj, @Param("tenantId") UUID tenantId, @Param("id") UUID id);
 
-    @Query("SELECT CASE WHEN COUNT(e) > 0 THEN true ELSE false END FROM Estabelecimentos e WHERE e.codigoCnes = :codigoCnes AND e.tenant.id = :tenantId")
+    @Query("SELECT CASE WHEN COUNT(e) > 0 THEN true ELSE false END FROM Estabelecimentos e WHERE e.dadosIdentificacao.cnes = :codigoCnes AND e.tenant.id = :tenantId")
     boolean existsByCodigoCnesAndTenantId(@Param("codigoCnes") String codigoCnes, @Param("tenantId") UUID tenantId);
 
-    @Query("SELECT CASE WHEN COUNT(e) > 0 THEN true ELSE false END FROM Estabelecimentos e WHERE e.codigoCnes = :codigoCnes AND e.tenant.id = :tenantId AND e.id <> :id")
+    @Query("SELECT CASE WHEN COUNT(e) > 0 THEN true ELSE false END FROM Estabelecimentos e WHERE e.dadosIdentificacao.cnes = :codigoCnes AND e.tenant.id = :tenantId AND e.id <> :id")
     boolean existsByCodigoCnesAndTenantIdAndIdNot(@Param("codigoCnes") String codigoCnes, @Param("tenantId") UUID tenantId, @Param("id") UUID id);
 }

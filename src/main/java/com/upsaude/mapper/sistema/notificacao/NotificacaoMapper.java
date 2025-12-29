@@ -38,5 +38,6 @@ public interface NotificacaoMapper  {
     @Mapping(target = "estabelecimento", ignore = true)
     void updateFromRequest(NotificacaoRequest request, @MappingTarget Notificacao entity);
 
+    @Mapping(target = "paciente", source = "paciente", qualifiedByName = "toResponseCompleto")
     NotificacaoResponse toResponse(Notificacao entity);
 }

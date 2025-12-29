@@ -135,10 +135,7 @@ public class PacienteRequest {
     @TelefoneValido
     private String responsavelTelefone;
 
-    @Size(max = 50, message = "Número da carteirinha deve ter no máximo 50 caracteres")
-    private String numeroCarteirinha;
-
-    private LocalDate dataValidadeCarteirinha;
+    private com.upsaude.api.request.embeddable.InformacoesConvenioPacienteRequest informacoesConvenio;
 
     @Size(max = 1000, message = "Observações deve ter no máximo 1000 caracteres")
     private String observacoes;
@@ -159,7 +156,6 @@ public class PacienteRequest {
     private Set<UUID> enderecosIds;
     private Set<UUID> deficiencias;
     private Set<UUID> medicacoes;
-    private Set<UUID> alergias;
     private Set<UUID> doencas;
 
     private List<EnderecoRequest> enderecos;

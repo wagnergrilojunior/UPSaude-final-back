@@ -32,13 +32,13 @@ public interface MedicosRepository extends JpaRepository<Medicos, UUID> {
             @Param("crmUf") String crmUf,
             @Param("tenantId") UUID tenantId);
 
-    @Query("SELECT m FROM Medicos m WHERE m.dadosPessoais.cpf = :cpf AND m.tenant = :tenant")
-    Optional<Medicos> findByDadosPessoaisCpfAndTenant(
+    @Query("SELECT m FROM Medicos m WHERE m.documentosBasicos.cpf = :cpf AND m.tenant = :tenant")
+    Optional<Medicos> findByDocumentosBasicosCpfAndTenant(
             @Param("cpf") String cpf,
             @Param("tenant") Tenant tenant);
 
-    @Query("SELECT m FROM Medicos m WHERE m.dadosPessoais.cpf = :cpf AND m.tenant.id = :tenantId")
-    Optional<Medicos> findByDadosPessoaisCpfAndTenantId(
+    @Query("SELECT m FROM Medicos m WHERE m.documentosBasicos.cpf = :cpf AND m.tenant.id = :tenantId")
+    Optional<Medicos> findByDocumentosBasicosCpfAndTenantId(
             @Param("cpf") String cpf,
             @Param("tenantId") UUID tenantId);
 
@@ -56,7 +56,7 @@ public interface MedicosRepository extends JpaRepository<Medicos, UUID> {
         "especialidades",
         "medicosEstabelecimentos",
         "medicosEstabelecimentos.estabelecimento",
-        "enderecos"
+        "enderecoMedico"
     })
     @Query("SELECT m FROM Medicos m WHERE m.id = :id AND m.tenant.id = :tenantId")
     Optional<Medicos> findByIdCompletoAndTenant(@Param("id") UUID id, @Param("tenantId") UUID tenantId);

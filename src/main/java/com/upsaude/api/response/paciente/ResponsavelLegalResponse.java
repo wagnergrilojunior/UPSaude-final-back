@@ -1,6 +1,5 @@
 package com.upsaude.api.response.paciente;
 import com.upsaude.api.response.estabelecimento.EstabelecimentosResponse;
-import com.upsaude.api.response.paciente.PacienteResponse;
 
 import com.upsaude.enums.TipoResponsavelEnum;
 import java.time.OffsetDateTime;
@@ -21,7 +20,8 @@ public class ResponsavelLegalResponse {
     private String nome;
     private String cpf;
     private String telefone;
+    private String rg;
+    private String cns;
     private TipoResponsavelEnum tipoResponsavel;
-    private Boolean autorizacaoUsoDadosLGPD;
     private Boolean autorizacaoResponsavel;
 }

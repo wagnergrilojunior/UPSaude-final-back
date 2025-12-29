@@ -26,9 +26,9 @@ public interface UsuariosSistemaRepository extends JpaRepository<UsuariosSistema
            "AND u.tenant = :tenant AND ve.active = true")
     Page<UsuariosSistema> findByEstabelecimentoIdAndTenant(@Param("estabelecimentoId") UUID estabelecimentoId, @Param("tenant") Tenant tenant, Pageable pageable);
 
-    @Query("SELECT u FROM UsuariosSistema u WHERE u.userId = :userId")
+    @Query("SELECT u FROM UsuariosSistema u WHERE u.user.id = :userId")
     java.util.Optional<UsuariosSistema> findByUserId(@Param("userId") UUID userId);
 
-    @Query("SELECT u FROM UsuariosSistema u WHERE u.username = :username AND u.active = true")
+    @Query("SELECT u FROM UsuariosSistema u WHERE u.dadosIdentificacao.username = :username AND u.ativo = true")
     java.util.Optional<UsuariosSistema> findByUsername(@Param("username") String username);
 }

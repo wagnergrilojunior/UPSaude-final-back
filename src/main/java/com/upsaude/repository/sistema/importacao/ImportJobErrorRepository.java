@@ -11,9 +11,6 @@ import org.springframework.data.repository.query.Param;
 import java.util.List;
 import java.util.UUID;
 
-/**
- * Repository para erros detalhados de processamento de jobs de importação.
- */
 public interface ImportJobErrorRepository extends JpaRepository<ImportJobError, UUID>, JpaSpecificationExecutor<ImportJobError> {
 
     Page<ImportJobError> findByJob_IdOrderByLinhaAsc(UUID jobId, Pageable pageable);

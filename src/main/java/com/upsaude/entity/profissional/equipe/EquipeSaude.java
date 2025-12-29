@@ -21,11 +21,9 @@ import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Size;
-import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.time.OffsetDateTime;
 import java.util.HashSet;
@@ -41,36 +39,26 @@ import java.util.Set;
            @Index(name = "idx_equipes_saude_estabelecimento", columnList = "estabelecimento_id"),
            @Index(name = "idx_equipes_saude_status", columnList = "status")
        })
-@Data
-@EqualsAndHashCode(callSuper = true)
+@Getter
+@Setter
+@EqualsAndHashCode(onlyExplicitlyIncluded = true, callSuper = true)
 public class EquipeSaude extends BaseEntity {
 
-    public EquipeSaude() {
-        this.vinculosProfissionais = new HashSet<>();
-    }
-
-    @NotBlank(message = "INE é obrigatório")
-    @Size(max = 15, message = "INE deve ter no máximo 15 caracteres")
     @Column(name = "ine", nullable = false, length = 15)
     private String ine;
 
-    @NotBlank(message = "Nome de referência é obrigatório")
-    @Size(max = 255, message = "Nome de referência deve ter no máximo 255 caracteres")
     @Column(name = "nome_referencia", nullable = false, length = 255)
     private String nomeReferencia;
 
-    @NotNull(message = "Tipo de equipe é obrigatório")
     @Enumerated(EnumType.STRING)
     @Column(name = "tipo_equipe", nullable = false, length = 100)
     private TipoEquipeEnum tipoEquipe;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "estabelecimento_id", nullable = false)
-    @NotNull(message = "Estabelecimento é obrigatório")
     private Estabelecimentos estabelecimento;
 
     @Column(name = "data_ativacao", nullable = false)
-    @NotNull(message = "Data de ativação é obrigatória")
     private OffsetDateTime dataAtivacao;
 
     @Column(name = "data_inativacao")
@@ -78,7 +66,6 @@ public class EquipeSaude extends BaseEntity {
 
     @Convert(converter = StatusAtivoEnumConverter.class)
     @Column(name = "status", nullable = false)
-    @NotNull(message = "Status é obrigatório")
     private StatusAtivoEnum status;
 
     @OneToMany(mappedBy = "equipe", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
@@ -86,6 +73,12 @@ public class EquipeSaude extends BaseEntity {
 
     @Column(name = "observacoes", columnDefinition = "TEXT")
     private String observacoes;
+
+    //===============================================================================================================
+
+    public EquipeSaude() {
+        this.vinculosProfissionais = new HashSet<>();
+    }
 
     @PrePersist
     @PreUpdate

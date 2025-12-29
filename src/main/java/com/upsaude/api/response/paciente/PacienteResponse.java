@@ -6,8 +6,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import com.upsaude.api.response.alergia.AlergiasPacienteResponse;
 import com.upsaude.api.response.convenio.ConvenioResponse;
 import com.upsaude.api.response.deficiencia.DeficienciasPacienteResponse;
 import com.upsaude.api.response.geral.EnderecoResponse;
@@ -23,15 +23,25 @@ import com.upsaude.enums.SexoEnum;
 import com.upsaude.enums.StatusPacienteEnum;
 import com.upsaude.enums.TipoAtendimentoPreferencialEnum;
 import com.upsaude.enums.TipoCnsEnum;
+import com.upsaude.util.converter.EscolaridadeEnumDeserializer;
 import com.upsaude.util.converter.EscolaridadeEnumSerializer;
+import com.upsaude.util.converter.EstadoCivilEnumDeserializer;
 import com.upsaude.util.converter.EstadoCivilEnumSerializer;
+import com.upsaude.util.converter.IdentidadeGeneroEnumDeserializer;
 import com.upsaude.util.converter.IdentidadeGeneroEnumSerializer;
+import com.upsaude.util.converter.NacionalidadeEnumDeserializer;
 import com.upsaude.util.converter.NacionalidadeEnumSerializer;
+import com.upsaude.util.converter.OrientacaoSexualEnumDeserializer;
 import com.upsaude.util.converter.OrientacaoSexualEnumSerializer;
+import com.upsaude.util.converter.RacaCorEnumDeserializer;
 import com.upsaude.util.converter.RacaCorEnumSerializer;
+import com.upsaude.util.converter.SexoEnumDeserializer;
 import com.upsaude.util.converter.SexoEnumSerializer;
+import com.upsaude.util.converter.StatusPacienteEnumDeserializer;
 import com.upsaude.util.converter.StatusPacienteEnumSerializer;
+import com.upsaude.util.converter.TipoAtendimentoPreferencialEnumDeserializer;
 import com.upsaude.util.converter.TipoAtendimentoPreferencialEnumSerializer;
+import com.upsaude.util.converter.TipoCnsEnumDeserializer;
 import com.upsaude.util.converter.TipoCnsEnumSerializer;
 
 import lombok.AllArgsConstructor;
@@ -45,6 +55,7 @@ import lombok.Setter;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@com.fasterxml.jackson.annotation.JsonIgnoreProperties(ignoreUnknown = true)
 public class PacienteResponse {
     private UUID id;
     private OffsetDateTime createdAt;
@@ -58,9 +69,11 @@ public class PacienteResponse {
     private Integer idade;
 
     @JsonSerialize(using = SexoEnumSerializer.class)
+    @JsonDeserialize(using = SexoEnumDeserializer.class)
     private SexoEnum sexo;
 
     @JsonSerialize(using = EstadoCivilEnumSerializer.class)
+    @JsonDeserialize(using = EstadoCivilEnumDeserializer.class)
     private EstadoCivilEnum estadoCivil;
     private String telefone;
     private String email;
@@ -70,26 +83,29 @@ public class PacienteResponse {
     private String responsavelCpf;
     private String responsavelTelefone;
     private ConvenioResponse convenio;
-    private String numeroCarteirinha;
-    private LocalDate dataValidadeCarteirinha;
+    private com.upsaude.api.response.embeddable.InformacoesConvenioPacienteResponse informacoesConvenio;
     private String observacoes;
 
     @JsonSerialize(using = RacaCorEnumSerializer.class)
+    @JsonDeserialize(using = RacaCorEnumDeserializer.class)
     private RacaCorEnum racaCor;
 
     @JsonSerialize(using = NacionalidadeEnumSerializer.class)
+    @JsonDeserialize(using = NacionalidadeEnumDeserializer.class)
     private NacionalidadeEnum nacionalidade;
     private String paisNascimento;
     private String naturalidade;
     private String municipioNascimentoIbge;
 
     @JsonSerialize(using = EscolaridadeEnumSerializer.class)
+    @JsonDeserialize(using = EscolaridadeEnumDeserializer.class)
     private EscolaridadeEnum escolaridade;
 
     private String ocupacaoProfissao;
     private Boolean situacaoRua;
 
     @JsonSerialize(using = StatusPacienteEnumSerializer.class)
+    @JsonDeserialize(using = StatusPacienteEnumDeserializer.class)
     private StatusPacienteEnum statusPaciente;
     private LocalDate dataObito;
     private String causaObitoCid10;
@@ -97,21 +113,25 @@ public class PacienteResponse {
     private LocalDate dataAtualizacaoCns;
 
     @JsonSerialize(using = TipoAtendimentoPreferencialEnumSerializer.class)
+    @JsonDeserialize(using = TipoAtendimentoPreferencialEnumDeserializer.class)
     private TipoAtendimentoPreferencialEnum tipoAtendimentoPreferencial;
 
     private String origemCadastro;
     private String nomeSocial;
 
     @JsonSerialize(using = IdentidadeGeneroEnumSerializer.class)
+    @JsonDeserialize(using = IdentidadeGeneroEnumDeserializer.class)
     private IdentidadeGeneroEnum identidadeGenero;
 
     @JsonSerialize(using = OrientacaoSexualEnumSerializer.class)
+    @JsonDeserialize(using = OrientacaoSexualEnumDeserializer.class)
     private OrientacaoSexualEnum orientacaoSexual;
     private Boolean possuiDeficiencia;
     private String tipoDeficiencia;
     private Boolean cnsValidado;
 
     @JsonSerialize(using = TipoCnsEnumSerializer.class)
+    @JsonDeserialize(using = TipoCnsEnumDeserializer.class)
     private TipoCnsEnum tipoCns;
 
     private Boolean acompanhadoPorEquipeEsf;
@@ -126,9 +146,6 @@ public class PacienteResponse {
     private IntegracaoGovResponse integracaoGov;
 
     // DoencasPacienteResponse removido - Doencas foi deletada
-
-    @Builder.Default
-    private List<AlergiasPacienteResponse> alergias = new ArrayList<>();
 
     @Builder.Default
     private List<DeficienciasPacienteResponse> deficiencias = new ArrayList<>();

@@ -27,5 +27,6 @@ public interface IntegracaoGovMapper  {
     @Mapping(target = "paciente", ignore = true)
     void updateFromRequest(IntegracaoGovRequest request, @MappingTarget IntegracaoGov entity);
 
+    @Mapping(target = "paciente", source = "paciente", qualifiedByName = "toResponseCompleto")
     IntegracaoGovResponse toResponse(IntegracaoGov entity);
 }

@@ -59,9 +59,9 @@ public class ProfissionalEstabelecimentoServiceImpl implements ProfissionalEstab
             throw new BadRequestException("Profissional e estabelecimento devem pertencer ao mesmo tenant");
         }
 
-        if (profissional.getStatusRegistro() != null &&
-            (profissional.getStatusRegistro() == com.upsaude.enums.StatusAtivoEnum.SUSPENSO ||
-             profissional.getStatusRegistro() == com.upsaude.enums.StatusAtivoEnum.INATIVO)) {
+        if (profissional.getRegistroProfissional() != null && profissional.getRegistroProfissional().getStatusRegistro() != null &&
+            (profissional.getRegistroProfissional().getStatusRegistro() == com.upsaude.enums.StatusAtivoEnum.SUSPENSO ||
+             profissional.getRegistroProfissional().getStatusRegistro() == com.upsaude.enums.StatusAtivoEnum.INATIVO)) {
             throw new BadRequestException("Não é possível vincular profissional com registro suspenso ou inativo");
         }
 

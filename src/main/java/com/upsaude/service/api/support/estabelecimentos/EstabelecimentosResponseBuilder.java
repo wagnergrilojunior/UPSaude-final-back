@@ -15,14 +15,14 @@ public class EstabelecimentosResponseBuilder {
 
     public EstabelecimentosResponse build(Estabelecimentos entity) {
         if (entity != null) {
-            if (entity.getEnderecoPrincipal() != null) Hibernate.initialize(entity.getEnderecoPrincipal());
-            if (entity.getResponsavelTecnico() != null) Hibernate.initialize(entity.getResponsavelTecnico());
-            if (entity.getResponsavelAdministrativo() != null) Hibernate.initialize(entity.getResponsavelAdministrativo());
-            if (entity.getEnderecosSecundarios() != null) Hibernate.initialize(entity.getEnderecosSecundarios());
-            if (entity.getServicos() != null) Hibernate.initialize(entity.getServicos());
+            if (entity.getEndereco() != null) Hibernate.initialize(entity.getEndereco());
+            if (entity.getResponsaveis() != null && entity.getResponsaveis().getResponsavelTecnico() != null) {
+                Hibernate.initialize(entity.getResponsaveis().getResponsavelTecnico());
+            }
+            if (entity.getResponsaveis() != null && entity.getResponsaveis().getResponsavelAdministrativo() != null) {
+                Hibernate.initialize(entity.getResponsaveis().getResponsavelAdministrativo());
+            }
             if (entity.getEquipamentos() != null) Hibernate.initialize(entity.getEquipamentos());
-            if (entity.getInfraestrutura() != null) Hibernate.initialize(entity.getInfraestrutura());
-            if (entity.getEquipes() != null) Hibernate.initialize(entity.getEquipes());
         }
         return mapper.toResponse(entity);
     }

@@ -28,5 +28,6 @@ public interface UsuarioEstabelecimentoMapper  {
     @Mapping(target = "usuario", ignore = true)
     void updateFromRequest(UsuarioEstabelecimentoRequest request, @MappingTarget UsuarioEstabelecimento entity);
 
+    @Mapping(target = "usuario.profissionalSaude.sigtapOcupacao", ignore = true)
     UsuarioEstabelecimentoResponse toResponse(UsuarioEstabelecimento entity);
 }

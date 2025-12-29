@@ -9,7 +9,7 @@ import com.upsaude.api.response.estabelecimento.ConfiguracaoEstabelecimentoRespo
 import com.upsaude.entity.estabelecimento.ConfiguracaoEstabelecimento;
 import com.upsaude.mapper.config.MappingConfig;
 
-@Mapper(config = MappingConfig.class, uses = {EstabelecimentosMapper.class})
+@Mapper(config = MappingConfig.class)
 public interface ConfiguracaoEstabelecimentoMapper {
 
     @Mapping(target = "id", ignore = true)

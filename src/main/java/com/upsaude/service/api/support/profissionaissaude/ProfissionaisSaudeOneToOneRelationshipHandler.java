@@ -10,6 +10,7 @@ import com.upsaude.entity.paciente.Endereco;
 import com.upsaude.entity.profissional.ProfissionaisSaude;
 import com.upsaude.entity.referencia.geografico.Cidades;
 import com.upsaude.entity.referencia.geografico.Estados;
+import com.upsaude.entity.referencia.sigtap.SigtapOcupacao;
 import com.upsaude.entity.sistema.multitenancy.Tenant;
 import com.upsaude.exception.BadRequestException;
 import com.upsaude.exception.NotFoundException;
@@ -17,6 +18,7 @@ import com.upsaude.mapper.geral.EnderecoMapper;
 import com.upsaude.repository.paciente.EnderecoRepository;
 import com.upsaude.repository.referencia.geografico.CidadesRepository;
 import com.upsaude.repository.referencia.geografico.EstadosRepository;
+import com.upsaude.repository.referencia.sigtap.SigtapCboRepository;
 import com.upsaude.service.api.geral.EnderecoService;
 
 import lombok.RequiredArgsConstructor;
@@ -32,10 +34,23 @@ public class ProfissionaisSaudeOneToOneRelationshipHandler {
     private final EnderecoMapper enderecoMapper;
     private final EstadosRepository estadosRepository;
     private final CidadesRepository cidadesRepository;
+    private final SigtapCboRepository sigtapCboRepository;
 
     public ProfissionaisSaude processarRelacionamentos(ProfissionaisSaude profissional, ProfissionaisSaudeRequest request, Tenant tenant) {
         processarEndereco(profissional, request, tenant);
+        processarSigtapOcupacao(profissional, request);
         return profissional;
+    }
+
+    private void processarSigtapOcupacao(ProfissionaisSaude profissional, ProfissionaisSaudeRequest request) {
+        if (request.getSigtapOcupacao() != null) {
+            log.debug("Processando sigtap ocupação: {}", request.getSigtapOcupacao());
+            SigtapOcupacao sigtapOcupacao = sigtapCboRepository.findById(Objects.requireNonNull(request.getSigtapOcupacao()))
+                    .orElseThrow(() -> new NotFoundException("SIGTAP Ocupação não encontrada com ID: " + request.getSigtapOcupacao()));
+            profissional.setSigtapOcupacao(sigtapOcupacao);
+        } else {
+            log.debug("SIGTAP Ocupação não fornecida. Mantendo ocupação existente.");
+        }
     }
 
     private void processarEndereco(ProfissionaisSaude profissional, ProfissionaisSaudeRequest request, Tenant tenant) {
