@@ -8,6 +8,8 @@ import com.upsaude.entity.paciente.Paciente;
 import com.upsaude.enums.StatusPacienteEnum;
 import com.upsaude.mapper.paciente.PacienteMapper;
 import com.upsaude.repository.paciente.PacienteRepository;
+import com.upsaude.repository.paciente.PacienteIdentificadorRepository;
+import com.upsaude.repository.paciente.PacienteContatoRepository;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -21,12 +23,14 @@ public class PacienteCreator {
     private final PacienteMapper pacienteMapper;
     private final PacienteOneToOneRelationshipHandler oneToOneHandler;
     private final PacienteRepository pacienteRepository;
+    private final PacienteIdentificadorRepository identificadorRepository;
+    private final PacienteContatoRepository contatoRepository;
 
     public Paciente criar(PacienteRequest request, UUID tenantId) {
         log.debug("Criando novo paciente: {}", request != null ? request.getNomeCompleto() : "null");
 
         validationService.validarObrigatorios(request);
-        validationService.validarUnicidadeParaCriacao(request, pacienteRepository, tenantId);
+        validationService.validarUnicidadeParaCriacao(request, pacienteRepository, identificadorRepository, contatoRepository, tenantId);
         validationService.sanitizarFlags(request);
 
         Paciente paciente = pacienteMapper.fromRequest(request);

@@ -16,25 +16,9 @@ import com.upsaude.repository.projection.PacienteSimplificadoProjection;
 
 public interface PacienteRepository extends JpaRepository<Paciente, UUID> {
 
-    Optional<Paciente> findByCpf(String cpf);
-
-    Optional<Paciente> findByEmail(String email);
-
-    Optional<Paciente> findByCns(String cns);
-
-    Optional<Paciente> findByRg(String rg);
-
-    @Query(value = "SELECT * FROM pacientes WHERE cpf = :cpf AND (:tenantId IS NULL OR :tenantId IS NOT NULL) LIMIT 1", nativeQuery = true)
-    Optional<Paciente> findByCpfAndTenantId(@Param("cpf") String cpf, @Param("tenantId") UUID tenantId);
-
-    @Query(value = "SELECT * FROM pacientes WHERE email = :email AND (:tenantId IS NULL OR :tenantId IS NOT NULL) LIMIT 1", nativeQuery = true)
-    Optional<Paciente> findByEmailAndTenantId(@Param("email") String email, @Param("tenantId") UUID tenantId);
-
-    @Query(value = "SELECT * FROM pacientes WHERE cns = :cns AND (:tenantId IS NULL OR :tenantId IS NOT NULL) LIMIT 1", nativeQuery = true)
-    Optional<Paciente> findByCnsAndTenantId(@Param("cns") String cns, @Param("tenantId") UUID tenantId);
-
-    @Query(value = "SELECT * FROM pacientes WHERE rg = :rg AND (:tenantId IS NULL OR :tenantId IS NOT NULL) LIMIT 1", nativeQuery = true)
-    Optional<Paciente> findByRgAndTenantId(@Param("rg") String rg, @Param("tenantId") UUID tenantId);
+    // Métodos findByCpf, findByEmail, findByCns, findByRg removidos
+    // Esses campos foram movidos para PacienteIdentificador e PacienteContato
+    // Use os repositories específicos: PacienteIdentificadorRepository e PacienteContatoRepository
 
     @Query(value = "SELECT p FROM Paciente p",
            countQuery = "SELECT COUNT(p) FROM Paciente p")
@@ -54,7 +38,6 @@ public interface PacienteRepository extends JpaRepository<Paciente, UUID> {
         "doencas",
         "doencas.doenca",
         "alergias",
-        "alergias.alergia",
         "deficiencias",
         "medicacoes",
         "medicacoes.medicacao",
@@ -64,7 +47,7 @@ public interface PacienteRepository extends JpaRepository<Paciente, UUID> {
         "dadosClinicosBasicos",
         "responsavelLegal",
         "lgpdConsentimento",
-        "integracaoGov",
+        "integracoesGov",
         "convenio"
     })
     @Query("SELECT p FROM Paciente p WHERE p.id = :id")
@@ -73,7 +56,8 @@ public interface PacienteRepository extends JpaRepository<Paciente, UUID> {
     @Query(value = "SELECT * FROM pacientes WHERE id = :id AND (:tenantId IS NULL OR :tenantId IS NOT NULL)", nativeQuery = true)
     Optional<Paciente> findByIdAndTenant(@Param("id") UUID id, @Param("tenantId") UUID tenantId);
 
-    @Query(value = "SELECT * FROM pacientes WHERE id = :id AND (:tenantId IS NULL OR :tenantId IS NOT NULL)", nativeQuery = true)
+    @EntityGraph(value = "Paciente.prontuarioCompleto")
+    @Query("SELECT p FROM Paciente p WHERE p.id = :id")
     Optional<Paciente> findByIdCompletoAndTenant(@Param("id") UUID id, @Param("tenantId") UUID tenantId);
 
     @Query(value = "SELECT * FROM pacientes WHERE (:tenantId IS NULL OR :tenantId IS NOT NULL)",
@@ -81,23 +65,13 @@ public interface PacienteRepository extends JpaRepository<Paciente, UUID> {
            nativeQuery = true)
     Page<Paciente> findAllByTenant(@Param("tenantId") UUID tenantId, Pageable pageable);
 
+    // Query simplificada atualizada - campos movidos para outras tabelas foram removidos
     @Query(value = "SELECT p.id, p.criado_em as createdAt, p.atualizado_em as updatedAt, p.ativo as active, " +
-           "p.nome_completo as nomeCompleto, p.cpf, p.rg, p.cns, p.data_nascimento as dataNascimento, " +
-           "p.sexo, p.estado_civil as estadoCivil, p.telefone, p.email, p.nome_mae as nomeMae, " +
-           "p.nome_pai as nomePai, p.responsavel_nome as responsavelNome, p.responsavel_cpf as responsavelCpf, " +
-           "p.responsavel_telefone as responsavelTelefone, p.numero_carteirinha as numeroCarteirinha, " +
-           "p.data_validade_carteirinha as dataValidadeCarteirinha, p.observacoes, p.raca_cor as racaCor, " +
-           "p.nacionalidade, p.pais_nascimento as paisNascimento, p.naturalidade, " +
-           "p.municipio_nascimento_ibge as municipioNascimentoIbge, p.escolaridade, " +
-           "p.ocupacao_profissao as ocupacaoProfissao, p.situacao_rua as situacaoRua, " +
-           "p.status_paciente as statusPaciente, p.data_obito as dataObito, " +
-           "p.causa_obito_cid10 as causaObitoCid10, p.cartao_sus_ativo as cartaoSusAtivo, " +
-           "p.data_atualizacao_cns as dataAtualizacaoCns, p.tipo_atendimento_preferencial as tipoAtendimentoPreferencial, " +
-           "p.origem_cadastro as origemCadastro, p.nome_social as nomeSocial, " +
-           "p.identidade_genero as identidadeGenero, p.orientacao_sexual as orientacaoSexual, " +
-           "p.possui_deficiencia as possuiDeficiencia, p.tipo_deficiencia as tipoDeficiencia, " +
-           "p.cns_validado as cnsValidado, p.tipo_cns as tipoCns, " +
-           "p.acompanhado_por_equipe_esf as acompanhadoPorEquipeEsf " +
+           "p.nome_completo as nomeCompleto, p.data_nascimento as dataNascimento, " +
+           "p.sexo, p.numero_carteirinha as numeroCarteirinha, " +
+           "p.data_validade_carteirinha as dataValidadeCarteirinha, p.observacoes, " +
+           "p.status_paciente as statusPaciente, p.tipo_atendimento_preferencial as tipoAtendimentoPreferencial, " +
+           "p.nome_social as nomeSocial " +
            "FROM pacientes p WHERE (:tenantId IS NULL OR :tenantId IS NOT NULL)",
            countQuery = "SELECT COUNT(*) FROM pacientes",
            nativeQuery = true)

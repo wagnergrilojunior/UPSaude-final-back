@@ -1,8 +1,6 @@
 package com.upsaude.entity.paciente;
 import com.upsaude.entity.BaseEntity;
 
-import com.upsaude.entity.paciente.Paciente;
-
 import com.upsaude.enums.CondicaoMoradiaEnum;
 import com.upsaude.enums.EscolaridadeEnum;
 import com.upsaude.enums.NacionalidadeEnum;
@@ -11,17 +9,19 @@ import com.upsaude.enums.SituacaoFamiliarEnum;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
-import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Entity
-@Table(name = "dados_sociodemograficos", schema = "public",
+@Table(name = "paciente_dados_sociodemograficos", schema = "public",
        indexes = {
-           @Index(name = "idx_dados_sociodemograficos_paciente", columnList = "paciente_id")
+           @Index(name = "idx_paciente_dados_sociodemograficos_paciente", columnList = "paciente_id")
        })
-@Data
-@EqualsAndHashCode(callSuper = true)
+@Getter
+@Setter
+@EqualsAndHashCode(onlyExplicitlyIncluded = true, callSuper = true)
 @NoArgsConstructor
 @AllArgsConstructor
 public class DadosSociodemograficos extends BaseEntity {

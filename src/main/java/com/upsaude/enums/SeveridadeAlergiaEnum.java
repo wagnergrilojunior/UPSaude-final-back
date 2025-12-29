@@ -6,8 +6,7 @@ import java.util.Locale;
 public enum SeveridadeAlergiaEnum {
     LEVE(1, "Leve"),
     MODERADA(2, "Moderada"),
-    GRAVE(3, "Grave"),
-    ANAFLAXIA(4, "Anafilaxia");
+    GRAVE(3, "Grave");
 
     private final Integer codigo;
     private final String descricao;

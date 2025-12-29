@@ -1,25 +1,25 @@
 package com.upsaude.entity.paciente;
 import com.upsaude.entity.BaseEntity;
 
-import com.upsaude.entity.paciente.Paciente;
-
 import com.upsaude.enums.TipoResponsavelEnum;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
-import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Entity
-@Table(name = "responsaveis_legais", schema = "public",
+@Table(name = "paciente_responsavel_legal", schema = "public",
        indexes = {
-           @Index(name = "idx_responsaveis_legais_paciente", columnList = "paciente_id"),
-           @Index(name = "idx_responsaveis_legais_cpf", columnList = "cpf")
+           @Index(name = "idx_paciente_responsavel_legal_paciente", columnList = "paciente_id"),
+           @Index(name = "idx_paciente_responsavel_legal_cpf", columnList = "cpf")
        })
-@Data
-@EqualsAndHashCode(callSuper = true)
+@Getter
+@Setter
+@EqualsAndHashCode(onlyExplicitlyIncluded = true, callSuper = true)
 @NoArgsConstructor
 @AllArgsConstructor
 public class ResponsavelLegal extends BaseEntity {

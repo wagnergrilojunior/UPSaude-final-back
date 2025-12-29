@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.UUID;
 
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import com.upsaude.api.response.alergia.AlergiasPacienteResponse;
+import com.upsaude.api.response.AlergiaPacienteResponse;
 import com.upsaude.api.response.convenio.ConvenioResponse;
 import com.upsaude.api.response.deficiencia.DeficienciasPacienteResponse;
 import com.upsaude.api.response.geral.EnderecoResponse;
@@ -128,7 +128,7 @@ public class PacienteResponse {
     // DoencasPacienteResponse removido - Doencas foi deletada
 
     @Builder.Default
-    private List<AlergiasPacienteResponse> alergias = new ArrayList<>();
+    private List<AlergiaPacienteResponse> alergias = new ArrayList<>();
 
     @Builder.Default
     private List<DeficienciasPacienteResponse> deficiencias = new ArrayList<>();

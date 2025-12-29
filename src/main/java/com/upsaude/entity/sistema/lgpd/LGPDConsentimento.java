@@ -5,19 +5,21 @@ import com.upsaude.entity.paciente.Paciente;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
-import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "lgpd_consentimentos", schema = "public",
+@Table(name = "paciente_lgpd_consentimento", schema = "public",
        indexes = {
-           @Index(name = "idx_lgpd_consentimentos_paciente", columnList = "paciente_id")
+           @Index(name = "idx_paciente_lgpd_consentimento_paciente", columnList = "paciente_id")
        })
-@Data
-@EqualsAndHashCode(callSuper = true)
+@Getter
+@Setter
+@EqualsAndHashCode(onlyExplicitlyIncluded = true, callSuper = true)
 @NoArgsConstructor
 @AllArgsConstructor
 public class LGPDConsentimento extends BaseEntity {

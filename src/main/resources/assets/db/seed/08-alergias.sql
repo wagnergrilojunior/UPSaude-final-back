@@ -1,4 +1,22 @@
--- Script de Seed: Alergias (Escopo Global)
+-- =====================================================
+-- DEPRECATED: Este seed está descontinuado
+-- =====================================================
+-- Script de Seed: Alergias (Escopo Global) - DEPRECATED
+-- 
+-- Este seed foi descontinuado porque:
+-- - Alergia não deve ser um catálogo global
+-- - Alergia é informação clínica declarada do paciente
+-- - O modelo correto é usar apenas AlergiaPaciente (tabela alergias_paciente)
+-- 
+-- A tabela alergias (catálogo global) foi removida na migration V024.
+-- Este arquivo é mantido apenas para referência histórica.
+-- 
+-- Para criar alergias, use a API: POST /v1/pacientes/{pacienteId}/alergias
+-- =====================================================
+
+-- TODOS OS INSERTS ABAIXO ESTÃO COMENTADOS - NÃO EXECUTAR
+/*
+-- Script de Seed: Alergias (Escopo Global) - DEPRECATED
 -- Cria catálogo completo de alergias comuns conforme padrões médicos - dados globais sem tenant
 -- Baseado em catálogos médicos, CID-10 e sistemas de saúde brasileiros
 -- Executado quando app.seed.enabled=true

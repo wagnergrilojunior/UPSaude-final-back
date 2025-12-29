@@ -2,8 +2,14 @@ package com.upsaude.service.api.support.paciente;
 
 import com.upsaude.api.request.paciente.PacienteRequest;
 import com.upsaude.entity.paciente.Paciente;
+import com.upsaude.entity.paciente.PacienteIdentificador;
+import com.upsaude.entity.paciente.PacienteContato;
+import com.upsaude.enums.TipoIdentificadorEnum;
+import com.upsaude.enums.TipoContatoEnum;
 import com.upsaude.exception.BadRequestException;
 import com.upsaude.repository.paciente.PacienteRepository;
+import com.upsaude.repository.paciente.PacienteIdentificadorRepository;
+import com.upsaude.repository.paciente.PacienteContatoRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
@@ -22,18 +28,26 @@ public class PacienteValidationService {
         }
     }
 
-    public void validarUnicidadeParaCriacao(PacienteRequest request, PacienteRepository pacienteRepository, UUID tenantId) {
-        validarCpfUnico(null, request.getCpf(), pacienteRepository, tenantId);
-        validarEmailUnico(null, request.getEmail(), pacienteRepository, tenantId);
-        validarCnsUnico(null, request.getCns(), pacienteRepository, tenantId);
-        validarRgUnico(null, request.getRg(), pacienteRepository, tenantId);
+    public void validarUnicidadeParaCriacao(PacienteRequest request, 
+                                           PacienteRepository pacienteRepository,
+                                           PacienteIdentificadorRepository identificadorRepository,
+                                           PacienteContatoRepository contatoRepository,
+                                           UUID tenantId) {
+        validarCpfUnico(null, request.getCpf(), identificadorRepository, tenantId);
+        validarEmailUnico(null, request.getEmail(), contatoRepository, tenantId);
+        validarCnsUnico(null, request.getCns(), identificadorRepository, tenantId);
+        validarRgUnico(null, request.getRg(), identificadorRepository, tenantId);
     }
 
-    public void validarUnicidadeParaAtualizacao(UUID id, PacienteRequest request, PacienteRepository pacienteRepository, UUID tenantId) {
-        validarCpfUnico(id, request.getCpf(), pacienteRepository, tenantId);
-        validarEmailUnico(id, request.getEmail(), pacienteRepository, tenantId);
-        validarCnsUnico(id, request.getCns(), pacienteRepository, tenantId);
-        validarRgUnico(id, request.getRg(), pacienteRepository, tenantId);
+    public void validarUnicidadeParaAtualizacao(UUID id, PacienteRequest request,
+                                                PacienteRepository pacienteRepository,
+                                                PacienteIdentificadorRepository identificadorRepository,
+                                                PacienteContatoRepository contatoRepository,
+                                                UUID tenantId) {
+        validarCpfUnico(id, request.getCpf(), identificadorRepository, tenantId);
+        validarEmailUnico(id, request.getEmail(), contatoRepository, tenantId);
+        validarCnsUnico(id, request.getCns(), identificadorRepository, tenantId);
+        validarRgUnico(id, request.getRg(), identificadorRepository, tenantId);
     }
 
     public void sanitizarFlags(PacienteRequest request) {
@@ -55,17 +69,18 @@ public class PacienteValidationService {
         }
     }
 
-    private void validarCpfUnico(UUID pacienteId, String cpf, PacienteRepository pacienteRepository, UUID tenantId) {
+    private void validarCpfUnico(UUID pacienteId, String cpf, PacienteIdentificadorRepository identificadorRepository, UUID tenantId) {
         if (!StringUtils.hasText(cpf)) {
             return;
         }
 
-        Optional<Paciente> pacienteExistente = pacienteRepository.findByCpfAndTenantId(cpf, tenantId);
+        Optional<PacienteIdentificador> identificadorExistente = identificadorRepository.findByTipoAndValorAndTenantId(TipoIdentificadorEnum.CPF, cpf, tenantId);
 
-        if (pacienteExistente.isPresent()) {
-            Paciente pacienteEncontrado = pacienteExistente.get();
+        if (identificadorExistente.isPresent()) {
+            PacienteIdentificador identificador = identificadorExistente.get();
+            UUID pacienteEncontradoId = identificador.getPaciente().getId();
 
-            if (pacienteId != null && !pacienteEncontrado.getId().equals(pacienteId)) {
+            if (pacienteId != null && !pacienteEncontradoId.equals(pacienteId)) {
                 throw new BadRequestException("Já existe um paciente cadastrado com o CPF: " + cpf);
             }
 
@@ -75,17 +90,18 @@ public class PacienteValidationService {
         }
     }
 
-    private void validarEmailUnico(UUID pacienteId, String email, PacienteRepository pacienteRepository, UUID tenantId) {
+    private void validarEmailUnico(UUID pacienteId, String email, PacienteContatoRepository contatoRepository, UUID tenantId) {
         if (!StringUtils.hasText(email)) {
             return;
         }
 
-        Optional<Paciente> pacienteExistente = pacienteRepository.findByEmailAndTenantId(email, tenantId);
+        Optional<PacienteContato> contatoExistente = contatoRepository.findByTipoAndValorAndTenantId(TipoContatoEnum.EMAIL, email, tenantId);
 
-        if (pacienteExistente.isPresent()) {
-            Paciente pacienteEncontrado = pacienteExistente.get();
+        if (contatoExistente.isPresent()) {
+            PacienteContato contato = contatoExistente.get();
+            UUID pacienteEncontradoId = contato.getPaciente().getId();
 
-            if (pacienteId != null && !pacienteEncontrado.getId().equals(pacienteId)) {
+            if (pacienteId != null && !pacienteEncontradoId.equals(pacienteId)) {
                 throw new BadRequestException("Já existe um paciente cadastrado com o email: " + email);
             }
 
@@ -95,17 +111,18 @@ public class PacienteValidationService {
         }
     }
 
-    private void validarCnsUnico(UUID pacienteId, String cns, PacienteRepository pacienteRepository, UUID tenantId) {
+    private void validarCnsUnico(UUID pacienteId, String cns, PacienteIdentificadorRepository identificadorRepository, UUID tenantId) {
         if (!StringUtils.hasText(cns)) {
             return;
         }
 
-        Optional<Paciente> pacienteExistente = pacienteRepository.findByCnsAndTenantId(cns, tenantId);
+        Optional<PacienteIdentificador> identificadorExistente = identificadorRepository.findByTipoAndValorAndTenantId(TipoIdentificadorEnum.CNS, cns, tenantId);
 
-        if (pacienteExistente.isPresent()) {
-            Paciente pacienteEncontrado = pacienteExistente.get();
+        if (identificadorExistente.isPresent()) {
+            PacienteIdentificador identificador = identificadorExistente.get();
+            UUID pacienteEncontradoId = identificador.getPaciente().getId();
 
-            if (pacienteId != null && !pacienteEncontrado.getId().equals(pacienteId)) {
+            if (pacienteId != null && !pacienteEncontradoId.equals(pacienteId)) {
                 throw new BadRequestException("Já existe um paciente cadastrado com o CNS: " + cns);
             }
 
@@ -115,17 +132,18 @@ public class PacienteValidationService {
         }
     }
 
-    private void validarRgUnico(UUID pacienteId, String rg, PacienteRepository pacienteRepository, UUID tenantId) {
+    private void validarRgUnico(UUID pacienteId, String rg, PacienteIdentificadorRepository identificadorRepository, UUID tenantId) {
         if (!StringUtils.hasText(rg)) {
             return;
         }
 
-        Optional<Paciente> pacienteExistente = pacienteRepository.findByRgAndTenantId(rg, tenantId);
+        Optional<PacienteIdentificador> identificadorExistente = identificadorRepository.findByTipoAndValorAndTenantId(TipoIdentificadorEnum.RG, rg, tenantId);
 
-        if (pacienteExistente.isPresent()) {
-            Paciente pacienteEncontrado = pacienteExistente.get();
+        if (identificadorExistente.isPresent()) {
+            PacienteIdentificador identificador = identificadorExistente.get();
+            UUID pacienteEncontradoId = identificador.getPaciente().getId();
 
-            if (pacienteId != null && !pacienteEncontrado.getId().equals(pacienteId)) {
+            if (pacienteId != null && !pacienteEncontradoId.equals(pacienteId)) {
                 throw new BadRequestException("Já existe um paciente cadastrado com o RG: " + rg);
             }
 

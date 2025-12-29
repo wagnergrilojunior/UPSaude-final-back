@@ -1,21 +1,21 @@
 package com.upsaude.entity.paciente;
 import com.upsaude.entity.BaseEntity;
 
-import com.upsaude.entity.paciente.Paciente;
-
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
-import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Entity
-@Table(name = "dados_clinicos_basicos", schema = "public",
+@Table(name = "paciente_dados_clinicos", schema = "public",
        indexes = {
-           @Index(name = "idx_dados_clinicos_basicos_paciente", columnList = "paciente_id")
+           @Index(name = "idx_paciente_dados_clinicos_paciente", columnList = "paciente_id")
        })
-@Data
-@EqualsAndHashCode(callSuper = true)
+@Getter
+@Setter
+@EqualsAndHashCode(onlyExplicitlyIncluded = true, callSuper = true)
 @NoArgsConstructor
 @AllArgsConstructor
 public class DadosClinicosBasicos extends BaseEntity {

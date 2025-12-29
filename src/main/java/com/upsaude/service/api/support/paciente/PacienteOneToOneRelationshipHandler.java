@@ -69,10 +69,19 @@ public class PacienteOneToOneRelationshipHandler {
             paciente.setLgpdConsentimento(consentimento);
         }, "Consentimento LGPD");
 
-        processarRelacionamentoOneToOne(request.getIntegracaoGov(), integracaoGovRepository, integracao -> {
+        // Integrações governamentais agora são OneToMany
+        // Se necessário, processar múltiplas integrações no futuro
+        if (request.getIntegracaoGov() != null) {
+            com.upsaude.entity.sistema.integracao.IntegracaoGov integracao = integracaoGovRepository.findById(request.getIntegracaoGov())
+                    .orElseThrow(() -> new NotFoundException("Integração governamental não encontrada com ID: " + request.getIntegracaoGov()));
             integracao.setPaciente(paciente);
-            paciente.setIntegracaoGov(integracao);
-        }, "Integração governamental");
+            if (paciente.getIntegracoesGov() == null) {
+                paciente.setIntegracoesGov(new java.util.ArrayList<>());
+            }
+            if (!paciente.getIntegracoesGov().contains(integracao)) {
+                paciente.getIntegracoesGov().add(integracao);
+            }
+        }
 
         return paciente;
     }

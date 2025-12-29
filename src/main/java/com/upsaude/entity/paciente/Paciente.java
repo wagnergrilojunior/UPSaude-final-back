@@ -1,40 +1,22 @@
 package com.upsaude.entity.paciente;
-import com.upsaude.entity.paciente.DadosSociodemograficos;
-import com.upsaude.entity.paciente.DadosClinicosBasicos;
-import com.upsaude.entity.paciente.ResponsavelLegal;
-import com.upsaude.entity.BaseEntityWithoutTenant;
 
-import com.upsaude.entity.paciente.alergia.AlergiasPaciente;
-import com.upsaude.entity.paciente.deficiencia.DeficienciasPaciente;
+import com.upsaude.entity.BaseEntityWithoutTenant;
 import com.upsaude.entity.convenio.Convenio;
+import com.upsaude.entity.paciente.deficiencia.DeficienciasPaciente;
 import com.upsaude.entity.sistema.lgpd.LGPDConsentimento;
 import com.upsaude.entity.sistema.integracao.IntegracaoGov;
+import com.upsaude.entity.paciente.AlergiaPaciente;
 
-import com.upsaude.entity.paciente.Endereco;
-
-import com.upsaude.enums.EstadoCivilEnum;
-import com.upsaude.enums.EscolaridadeEnum;
-import com.upsaude.enums.IdentidadeGeneroEnum;
-import com.upsaude.enums.NacionalidadeEnum;
-import com.upsaude.enums.OrientacaoSexualEnum;
-import com.upsaude.enums.RacaCorEnum;
 import com.upsaude.enums.SexoEnum;
 import com.upsaude.enums.StatusPacienteEnum;
 import com.upsaude.enums.TipoAtendimentoPreferencialEnum;
-import com.upsaude.enums.TipoCnsEnum;
-import com.upsaude.util.converter.EscolaridadeEnumConverter;
-import com.upsaude.util.converter.EstadoCivilEnumConverter;
-import com.upsaude.util.converter.IdentidadeGeneroEnumConverter;
-import com.upsaude.util.converter.NacionalidadeEnumConverter;
-import com.upsaude.util.converter.OrientacaoSexualEnumConverter;
-import com.upsaude.util.converter.RacaCorEnumConverter;
 import com.upsaude.util.converter.SexoEnumConverter;
 import com.upsaude.util.converter.StatusPacienteEnumConverter;
 import com.upsaude.util.converter.TipoAtendimentoPreferencialEnumConverter;
-import com.upsaude.util.converter.TipoCnsEnumConverter;
 import jakarta.persistence.*;
-import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -42,17 +24,7 @@ import java.util.List;
 
 @Entity
 @Table(name = "pacientes", schema = "public",
-       uniqueConstraints = {
-           @UniqueConstraint(name = "uk_pacientes_cpf", columnNames = {"cpf"}),
-           @UniqueConstraint(name = "uk_pacientes_cns", columnNames = {"cns"}),
-           @UniqueConstraint(name = "uk_pacientes_email", columnNames = {"email"})
-       },
        indexes = {
-
-           @Index(name = "idx_pacientes_cpf", columnList = "cpf"),
-           @Index(name = "idx_pacientes_email", columnList = "email"),
-           @Index(name = "idx_pacientes_cns", columnList = "cns"),
-           @Index(name = "idx_pacientes_rg", columnList = "rg"),
            @Index(name = "idx_pacientes_nome_completo", columnList = "nome_completo"),
            @Index(name = "idx_pacientes_data_nascimento", columnList = "data_nascimento"),
            @Index(name = "idx_pacientes_status_paciente", columnList = "status_paciente"),
@@ -60,17 +32,10 @@ import java.util.List;
            @Index(name = "idx_pacientes_convenio", columnList = "convenio_id"),
            @Index(name = "idx_pacientes_criado_em", columnList = "criado_em"),
            @Index(name = "idx_pacientes_atualizado_em", columnList = "atualizado_em"),
-
            @Index(name = "idx_pacientes_ativo_nome", columnList = "ativo, nome_completo"),
            @Index(name = "idx_pacientes_status_ativo", columnList = "status_paciente, ativo"),
            @Index(name = "idx_pacientes_ativo_criado_em", columnList = "ativo, criado_em"),
-           @Index(name = "idx_pacientes_ativo_data_nascimento", columnList = "ativo, data_nascimento"),
-
-           @Index(name = "idx_pacientes_situacao_rua", columnList = "situacao_rua"),
-           @Index(name = "idx_pacientes_cartao_sus_ativo", columnList = "cartao_sus_ativo"),
-           @Index(name = "idx_pacientes_possui_deficiencia", columnList = "possui_deficiencia"),
-           @Index(name = "idx_pacientes_cns_validado", columnList = "cns_validado"),
-           @Index(name = "idx_pacientes_acompanhado_esf", columnList = "acompanhado_por_equipe_esf")
+           @Index(name = "idx_pacientes_ativo_data_nascimento", columnList = "ativo, data_nascimento")
        })
 @NamedEntityGraphs({
     @NamedEntityGraph(
@@ -80,82 +45,125 @@ import java.util.List;
         }
     ),
     @NamedEntityGraph(
-        name = "Paciente.enderecos", 
+        name = "Paciente.listagem",
         attributeNodes = {
-            @NamedAttributeNode("enderecos")
+            @NamedAttributeNode("convenio")
         }
     ),
     @NamedEntityGraph(
-        name = "Paciente.infoClinica",
+        name = "Paciente.cadastro",
         attributeNodes = {
+            @NamedAttributeNode("convenio"),
             @NamedAttributeNode("dadosSociodemograficos"),
             @NamedAttributeNode("dadosClinicosBasicos"),
             @NamedAttributeNode("responsavelLegal"),
             @NamedAttributeNode("lgpdConsentimento"),
-            @NamedAttributeNode("integracaoGov")
+            @NamedAttributeNode("dadosPessoaisComplementares"),
+            @NamedAttributeNode("obito")
         }
     ),
     @NamedEntityGraph(
-        name = "Paciente.comAlergias",
-        attributeNodes = {
-            @NamedAttributeNode(value = "alergias", subgraph = "alergiasSubgraph")
-        },
-        subgraphs = {
-            @NamedSubgraph(name = "alergiasSubgraph", type = AlergiasPaciente.class, attributeNodes = {
-                @NamedAttributeNode("alergia")
-            })
-        }
-    ),
-    @NamedEntityGraph(
-        name = "Paciente.completo",
+        name = "Paciente.prontuarioResumido",
         attributeNodes = {
             @NamedAttributeNode("convenio"),
-            @NamedAttributeNode("enderecos"),
+            @NamedAttributeNode("dadosSociodemograficos"),
+            @NamedAttributeNode("dadosClinicosBasicos"),
+            @NamedAttributeNode(value = "alergias", subgraph = "alergiasSubgraph"),
+            @NamedAttributeNode("deficiencias")
+        },
+        subgraphs = {
+            @NamedSubgraph(name = "alergiasSubgraph", type = AlergiaPaciente.class, attributeNodes = {})
+        }
+    ),
+    @NamedEntityGraph(
+        name = "Paciente.integracaoGov",
+        attributeNodes = {
+            @NamedAttributeNode("convenio"),
+            @NamedAttributeNode("identificadores"),
+            @NamedAttributeNode("contatos"),
+            @NamedAttributeNode(value = "integracoesGov", subgraph = "integracoesGovSubgraph"),
+            @NamedAttributeNode("vinculosTerritoriais")
+        },
+        subgraphs = {
+            @NamedSubgraph(name = "integracoesGovSubgraph", type = IntegracaoGov.class, attributeNodes = {})
+        }
+    ),
+    @NamedEntityGraph(
+        name = "Paciente.enderecos",
+        attributeNodes = {
+            @NamedAttributeNode(value = "enderecos", subgraph = "enderecosSubgraph")
+        },
+        subgraphs = {
+            @NamedSubgraph(name = "enderecosSubgraph", type = PacienteEndereco.class, 
+                attributeNodes = {@NamedAttributeNode("endereco")})
+        }
+    ),
+    @NamedEntityGraph(
+        name = "Paciente.prontuarioCompleto",
+        attributeNodes = {
+            @NamedAttributeNode("convenio"),
+            @NamedAttributeNode(value = "enderecos", subgraph = "enderecosSubgraph"),
             @NamedAttributeNode(value = "alergias", subgraph = "alergiasSubgraph"),
             @NamedAttributeNode("deficiencias"),
             @NamedAttributeNode("dadosSociodemograficos"),
             @NamedAttributeNode("dadosClinicosBasicos"),
             @NamedAttributeNode("responsavelLegal"),
             @NamedAttributeNode("lgpdConsentimento"),
-            @NamedAttributeNode("integracaoGov")
+            @NamedAttributeNode("dadosPessoaisComplementares"),
+            @NamedAttributeNode("obito"),
+            @NamedAttributeNode(value = "integracoesGov", subgraph = "integracoesGovSubgraph"),
+            @NamedAttributeNode("identificadores"),
+            @NamedAttributeNode("contatos"),
+            @NamedAttributeNode("vinculosTerritoriais")
         },
         subgraphs = {
-            @NamedSubgraph(name = "alergiasSubgraph", type = AlergiasPaciente.class, attributeNodes = {
-                @NamedAttributeNode("alergia")
-            })
-        }
-    ),
-    @NamedEntityGraph(
-        name = "Paciente.listagemCompleta",
-        attributeNodes = {
-            @NamedAttributeNode("convenio"),
-            @NamedAttributeNode("enderecos"),
-            @NamedAttributeNode("alergias"),
-            @NamedAttributeNode("deficiencias")
+            @NamedSubgraph(name = "alergiasSubgraph", type = AlergiaPaciente.class, attributeNodes = {}),
+            @NamedSubgraph(name = "integracoesGovSubgraph", type = IntegracaoGov.class, attributeNodes = {}),
+            @NamedSubgraph(name = "enderecosSubgraph", type = PacienteEndereco.class, 
+                attributeNodes = {@NamedAttributeNode("endereco")})
         }
     )
 })
-@Data
-@EqualsAndHashCode(callSuper = true)
+@Getter
+@Setter
+@EqualsAndHashCode(onlyExplicitlyIncluded = true, callSuper = true)
 public class Paciente extends BaseEntityWithoutTenant {
 
     public Paciente() {
         this.enderecos = new ArrayList<>();
         this.alergias = new ArrayList<>();
         this.deficiencias = new ArrayList<>();
+        this.identificadores = new ArrayList<>();
+        this.contatos = new ArrayList<>();
+        this.integracoesGov = new ArrayList<>();
+        this.vinculosTerritoriais = new ArrayList<>();
+    }
+    
+    public void addEndereco(PacienteEndereco pacienteEndereco) {
+        if (pacienteEndereco == null) {
+            return;
+        }
+        if (enderecos == null) {
+            enderecos = new ArrayList<>();
+        }
+        enderecos.add(pacienteEndereco);
+        pacienteEndereco.setPaciente(this);
+    }
+
+    public void removeEndereco(PacienteEndereco pacienteEndereco) {
+        if (pacienteEndereco == null || enderecos == null) {
+            return;
+        }
+        if (enderecos.remove(pacienteEndereco)) {
+            pacienteEndereco.setPaciente(null);
+        }
     }
 
     @Column(name = "nome_completo", nullable = false, length = 255)
     private String nomeCompleto;
 
-    @Column(name = "cpf", length = 11)
-    private String cpf;
-
-    @Column(name = "rg", length = 20)
-    private String rg;
-
-    @Column(name = "cns", length = 15)
-    private String cns;
+    @Column(name = "nome_social", length = 255)
+    private String nomeSocial;
 
     @Column(name = "data_nascimento")
     private LocalDate dataNascimento;
@@ -164,30 +172,9 @@ public class Paciente extends BaseEntityWithoutTenant {
     @Column(name = "sexo")
     private SexoEnum sexo;
 
-    @Convert(converter = EstadoCivilEnumConverter.class)
-    @Column(name = "estado_civil")
-    private EstadoCivilEnum estadoCivil;
-
-    @Column(name = "telefone", length = 20)
-    private String telefone;
-
-    @Column(name = "email", length = 100)
-    private String email;
-
-    @Column(name = "nome_mae", length = 100)
-    private String nomeMae;
-
-    @Column(name = "nome_pai", length = 100)
-    private String nomePai;
-
-    @Column(name = "responsavel_nome", length = 255)
-    private String responsavelNome;
-
-    @Column(name = "responsavel_cpf", length = 11)
-    private String responsavelCpf;
-
-    @Column(name = "responsavel_telefone", length = 20)
-    private String responsavelTelefone;
+    @Convert(converter = StatusPacienteEnumConverter.class)
+    @Column(name = "status_paciente", nullable = false)
+    private StatusPacienteEnum statusPaciente = StatusPacienteEnum.ATIVO;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "convenio_id")
@@ -199,96 +186,32 @@ public class Paciente extends BaseEntityWithoutTenant {
     @Column(name = "data_validade_carteirinha")
     private LocalDate dataValidadeCarteirinha;
 
-    @Column(name = "observacoes", columnDefinition = "TEXT")
-    private String observacoes;
-
-    @OneToMany(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
-    @JoinTable(
-        name = "pacientes_enderecos",
-        schema = "public",
-        joinColumns = @JoinColumn(name = "paciente_id"),
-        inverseJoinColumns = @JoinColumn(name = "endereco_id")
-    )
-    @org.hibernate.annotations.BatchSize(size = 50)
-    @org.hibernate.annotations.Fetch(org.hibernate.annotations.FetchMode.SUBSELECT)
-    private List<Endereco> enderecos = new ArrayList<>();
-
-    @Convert(converter = RacaCorEnumConverter.class)
-    @Column(name = "raca_cor")
-    private RacaCorEnum racaCor;
-
-    @Convert(converter = NacionalidadeEnumConverter.class)
-    @Column(name = "nacionalidade")
-    private NacionalidadeEnum nacionalidade;
-
-    @Column(name = "pais_nascimento", length = 100)
-    private String paisNascimento;
-
-    @Column(name = "naturalidade", length = 100)
-    private String naturalidade;
-
-    @Column(name = "municipio_nascimento_ibge", length = 7)
-    private String municipioNascimentoIbge;
-
-    @Convert(converter = EscolaridadeEnumConverter.class)
-    @Column(name = "escolaridade")
-    private EscolaridadeEnum escolaridade;
-
-    @Column(name = "ocupacao_profissao", length = 150)
-    private String ocupacaoProfissao;
-
-    @Column(name = "situacao_rua", nullable = false)
-    private Boolean situacaoRua = false;
-
-    @Convert(converter = StatusPacienteEnumConverter.class)
-    @Column(name = "status_paciente", nullable = false)
-    private StatusPacienteEnum statusPaciente = StatusPacienteEnum.ATIVO;
-
-    @Column(name = "data_obito")
-    private LocalDate dataObito;
-
-    @Column(name = "causa_obito_cid10", length = 10)
-    private String causaObitoCid10;
-
-    @Column(name = "cartao_sus_ativo", nullable = false)
-    private Boolean cartaoSusAtivo = true;
-
-    @Column(name = "data_atualizacao_cns")
-    private LocalDate dataAtualizacaoCns;
-
     @Convert(converter = TipoAtendimentoPreferencialEnumConverter.class)
     @Column(name = "tipo_atendimento_preferencial")
     private TipoAtendimentoPreferencialEnum tipoAtendimentoPreferencial;
 
-    @Column(name = "origem_cadastro", length = 30)
-    private String origemCadastro;
+    @Column(name = "observacoes", columnDefinition = "TEXT")
+    private String observacoes;
 
-    @Column(name = "nome_social", length = 255)
-    private String nomeSocial;
+    @OneToMany(mappedBy = "paciente", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
+    @org.hibernate.annotations.BatchSize(size = 50)
+    @org.hibernate.annotations.Fetch(org.hibernate.annotations.FetchMode.SUBSELECT)
+    private List<PacienteEndereco> enderecos = new ArrayList<>();
 
-    @Convert(converter = IdentidadeGeneroEnumConverter.class)
-    @Column(name = "identidade_genero")
-    private IdentidadeGeneroEnum identidadeGenero;
+    @OneToMany(mappedBy = "paciente", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
+    @org.hibernate.annotations.BatchSize(size = 50)
+    @org.hibernate.annotations.Fetch(org.hibernate.annotations.FetchMode.SUBSELECT)
+    private List<PacienteIdentificador> identificadores = new ArrayList<>();
 
-    @Convert(converter = OrientacaoSexualEnumConverter.class)
-    @Column(name = "orientacao_sexual")
-    private OrientacaoSexualEnum orientacaoSexual;
+    @OneToMany(mappedBy = "paciente", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
+    @org.hibernate.annotations.BatchSize(size = 50)
+    @org.hibernate.annotations.Fetch(org.hibernate.annotations.FetchMode.SUBSELECT)
+    private List<PacienteContato> contatos = new ArrayList<>();
 
-    @Column(name = "possui_deficiencia", nullable = false)
-    private Boolean possuiDeficiencia = false;
-
-    @Column(name = "tipo_deficiencia", length = 255)
-    private String tipoDeficiencia;
-
-    @Column(name = "cns_validado", nullable = false)
-    private Boolean cnsValidado = false;
-
-    @Convert(converter = TipoCnsEnumConverter.class)
-    @Column(name = "tipo_cns")
-    private TipoCnsEnum tipoCns;
-
-    @Column(name = "acompanhado_por_equipe_esf", nullable = false)
-    private Boolean acompanhadoPorEquipeEsf = false;
+    @OneToMany(mappedBy = "paciente", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, fetch = FetchType.LAZY)
+    @org.hibernate.annotations.BatchSize(size = 50)
+    @org.hibernate.annotations.Fetch(org.hibernate.annotations.FetchMode.SUBSELECT)
+    private List<PacienteVinculoTerritorial> vinculosTerritoriais = new ArrayList<>();
 
     @OneToOne(mappedBy = "paciente", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
     private DadosSociodemograficos dadosSociodemograficos;
@@ -303,21 +226,25 @@ public class Paciente extends BaseEntityWithoutTenant {
     private LGPDConsentimento lgpdConsentimento;
 
     @OneToOne(mappedBy = "paciente", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
-    private IntegracaoGov integracaoGov;
+    private PacienteDadosPessoaisComplementares dadosPessoaisComplementares;
 
-    // DoencasPaciente removido - Doencas foi deletada
+    @OneToOne(mappedBy = "paciente", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
+    private PacienteObito obito;
+
+    @OneToMany(mappedBy = "paciente", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, fetch = FetchType.LAZY)
+    @org.hibernate.annotations.BatchSize(size = 50)
+    @org.hibernate.annotations.Fetch(org.hibernate.annotations.FetchMode.SUBSELECT)
+    private List<IntegracaoGov> integracoesGov = new ArrayList<>();
 
     @OneToMany(mappedBy = "paciente", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
     @org.hibernate.annotations.BatchSize(size = 50)
     @org.hibernate.annotations.Fetch(org.hibernate.annotations.FetchMode.SUBSELECT)
-    private List<AlergiasPaciente> alergias = new ArrayList<>();
+    private List<AlergiaPaciente> alergias = new ArrayList<>();
 
     @OneToMany(mappedBy = "paciente", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
     @org.hibernate.annotations.BatchSize(size = 50)
     @org.hibernate.annotations.Fetch(org.hibernate.annotations.FetchMode.SUBSELECT)
     private List<DeficienciasPaciente> deficiencias = new ArrayList<>();
-
-    // MedicacaoPaciente removido - Medicacao foi deletada
 
     @PrePersist
     @PreUpdate
@@ -331,22 +258,112 @@ public class Paciente extends BaseEntityWithoutTenant {
         if (deficiencias == null) {
             deficiencias = new ArrayList<>();
         }
+        if (identificadores == null) {
+            identificadores = new ArrayList<>();
+        }
+        if (contatos == null) {
+            contatos = new ArrayList<>();
+        }
+        if (integracoesGov == null) {
+            integracoesGov = new ArrayList<>();
+        }
+        if (vinculosTerritoriais == null) {
+            vinculosTerritoriais = new ArrayList<>();
+        }
     }
 
-    public void addAlergia(AlergiasPaciente alergia) {
+    public void addIdentificador(PacienteIdentificador identificador) {
+        if (identificador == null) {
+            return;
+        }
+        if (identificadores == null) {
+            identificadores = new ArrayList<>();
+        }
+        identificadores.add(identificador);
+        identificador.setPaciente(this);
+    }
+
+    public void removeIdentificador(PacienteIdentificador identificador) {
+        if (identificador == null || identificadores == null) {
+            return;
+        }
+        if (identificadores.remove(identificador)) {
+            identificador.setPaciente(null);
+        }
+    }
+
+    public void addContato(PacienteContato contato) {
+        if (contato == null) {
+            return;
+        }
+        if (contatos == null) {
+            contatos = new ArrayList<>();
+        }
+        contatos.add(contato);
+        contato.setPaciente(this);
+    }
+
+    public void removeContato(PacienteContato contato) {
+        if (contato == null || contatos == null) {
+            return;
+        }
+        if (contatos.remove(contato)) {
+            contato.setPaciente(null);
+        }
+    }
+
+    public void addVinculoTerritorial(PacienteVinculoTerritorial vinculo) {
+        if (vinculo == null) {
+            return;
+        }
+        if (vinculosTerritoriais == null) {
+            vinculosTerritoriais = new ArrayList<>();
+        }
+        vinculosTerritoriais.add(vinculo);
+        vinculo.setPaciente(this);
+    }
+
+    public void removeVinculoTerritorial(PacienteVinculoTerritorial vinculo) {
+        if (vinculo == null || vinculosTerritoriais == null) {
+            return;
+        }
+        if (vinculosTerritoriais.remove(vinculo)) {
+            vinculo.setPaciente(null);
+        }
+    }
+
+    public void addIntegracaoGov(IntegracaoGov integracao) {
+        if (integracao == null) {
+            return;
+        }
+        if (integracoesGov == null) {
+            integracoesGov = new ArrayList<>();
+        }
+        integracoesGov.add(integracao);
+        integracao.setPaciente(this);
+    }
+
+    public void removeIntegracaoGov(IntegracaoGov integracao) {
+        if (integracao == null || integracoesGov == null) {
+            return;
+        }
+        if (integracoesGov.remove(integracao)) {
+            integracao.setPaciente(null);
+        }
+    }
+
+    public void addAlergia(AlergiaPaciente alergia) {
         if (alergia == null) {
             return;
         }
         if (alergias == null) {
             alergias = new ArrayList<>();
         }
-        if (!alergias.contains(alergia)) {
-            alergias.add(alergia);
-            alergia.setPaciente(this);
-        }
+        alergias.add(alergia);
+        alergia.setPaciente(this);
     }
 
-    public void removeAlergia(AlergiasPaciente alergia) {
+    public void removeAlergia(AlergiaPaciente alergia) {
         if (alergia == null || alergias == null) {
             return;
         }
@@ -362,10 +379,8 @@ public class Paciente extends BaseEntityWithoutTenant {
         if (deficiencias == null) {
             deficiencias = new ArrayList<>();
         }
-        if (!deficiencias.contains(deficiencia)) {
-            deficiencias.add(deficiencia);
-            deficiencia.setPaciente(this);
-        }
+        deficiencias.add(deficiencia);
+        deficiencia.setPaciente(this);
     }
 
     public void removeDeficiencia(DeficienciasPaciente deficiencia) {
