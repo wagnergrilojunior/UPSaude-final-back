@@ -13,9 +13,7 @@ import lombok.Setter;
 @AllArgsConstructor
 public class ContatoMedicoResponse {
     private String telefone;
-    private String telefoneCelular;
-    private String whatsapp;
+    private String celular;
     private String email;
-    private String emailInstitucional;
     private String site;
 }

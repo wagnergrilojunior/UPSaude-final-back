@@ -15,9 +15,9 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
-import jakarta.validation.constraints.NotNull;
-import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.Setter;
 
 @Entity
 @Table(name = "usuarios_estabelecimentos", schema = "public",
@@ -28,22 +28,20 @@ import lombok.EqualsAndHashCode;
            @Index(name = "idx_usuario_estabelecimento_usuario", columnList = "usuario_id"),
            @Index(name = "idx_usuario_estabelecimento_estabelecimento", columnList = "estabelecimento_id")
        })
-@Data
-@EqualsAndHashCode(callSuper = true)
+@Getter
+@Setter
+@EqualsAndHashCode(onlyExplicitlyIncluded = true, callSuper = true)
 public class UsuarioEstabelecimento extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "usuario_id", nullable = false)
-    @NotNull(message = "Usuário é obrigatório")
     private UsuariosSistema usuario;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "estabelecimento_id", nullable = false)
-    @NotNull(message = "Estabelecimento é obrigatório")
     private Estabelecimentos estabelecimento;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "tipo_usuario", nullable = false, length = 50)
-    @NotNull(message = "Tipo de usuário é obrigatório")
     private TipoUsuarioSistemaEnum tipoUsuario;
 }

@@ -61,9 +61,6 @@ public class PacienteVinculoTerritorial extends BaseEntity {
     @Column(name = "origem")
     private OrigemVinculoTerritorialEnum origem;
 
-    // Campo 'ativo' herdado de BaseEntity (active -> ativo)
-    // Usar getActive()/setActive() em vez de getAtivo()/setAtivo()
-
     @Column(name = "observacoes", columnDefinition = "TEXT")
     private String observacoes;
 }

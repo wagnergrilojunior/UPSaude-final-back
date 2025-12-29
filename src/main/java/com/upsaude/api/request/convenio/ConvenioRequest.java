@@ -1,11 +1,6 @@
 package com.upsaude.api.request.convenio;
 
-import com.upsaude.api.request.embeddable.CoberturaConvenioRequest;
-import com.upsaude.api.request.embeddable.ContatoConvenioRequest;
-import com.upsaude.api.request.embeddable.InformacoesFinanceirasConvenioRequest;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.upsaude.api.request.embeddable.IntegracaoGovernamentalConvenioRequest;
-import com.upsaude.api.request.embeddable.RegistroANSConvenioRequest;
 import com.upsaude.enums.ModalidadeConvenioEnum;
 import com.upsaude.enums.StatusAtivoEnum;
 import com.upsaude.enums.TipoConvenioEnum;
@@ -13,12 +8,10 @@ import com.upsaude.util.converter.ModalidadeConvenioEnumDeserializer;
 import com.upsaude.util.converter.StatusAtivoEnumDeserializer;
 import com.upsaude.util.converter.TipoConvenioEnumDeserializer;
 import com.upsaude.validation.annotation.CNPJValido;
-import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import java.time.LocalDate;
-import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -37,12 +30,6 @@ public class ConvenioRequest {
     @Size(max = 255, message = "Nome deve ter no máximo 255 caracteres")
     private String nome;
 
-    @Size(max = 255, message = "Nome fantasia deve ter no máximo 255 caracteres")
-    private String nomeFantasia;
-
-    @Size(max = 50, message = "Código deve ter no máximo 50 caracteres")
-    private String codigo;
-
     @CNPJValido
     private String cnpj;
 
@@ -60,45 +47,9 @@ public class ConvenioRequest {
     @JsonDeserialize(using = ModalidadeConvenioEnumDeserializer.class)
     private ModalidadeConvenioEnum modalidade;
 
-    @Size(max = 100, message = "Categoria deve ter no máximo 100 caracteres")
-    private String categoria;
-    private UUID endereco;
-
-    @Valid
-    private ContatoConvenioRequest contato;
-
-    @Valid
-    private RegistroANSConvenioRequest registroAns;
-
-    @Valid
-    private CoberturaConvenioRequest cobertura;
-
-    @Valid
-    private InformacoesFinanceirasConvenioRequest informacoesFinanceiras;
-
     @JsonDeserialize(using = StatusAtivoEnumDeserializer.class)
     private StatusAtivoEnum status;
     private LocalDate dataCadastro;
-    private LocalDate dataAtivacao;
-    private LocalDate dataDesativacao;
-    private Integer quantidadeEstabelecimentosCredenciados;
-    private Integer quantidadeProfissionaisCredenciados;
-
-    @Size(max = 500, message = "Contrato deve ter no máximo 500 caracteres")
-    private String contrato;
-
-    @Size(max = 500, message = "Tabela de preços deve ter no máximo 500 caracteres")
-    private String tabelaPrecos;
-
-    @Size(max = 500, message = "Manual do convênio deve ter no máximo 500 caracteres")
-    private String manualConvenio;
-
-    @Size(max = 1000, message = "Descrição deve ter no máximo 1000 caracteres")
-    private String descricao;
-
-    @Size(max = 1000, message = "Observações deve ter no máximo 1000 caracteres")
-    private String observacoes;
-
-    @Valid
-    private IntegracaoGovernamentalConvenioRequest integracaoGovernamental;
+    private Boolean redeCredenciadaNacional;
+    private Boolean redeCredenciadaRegional;
 }

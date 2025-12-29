@@ -48,7 +48,7 @@ public class EstabelecimentosRelacionamentosHandler {
 
             if (!temCamposPreenchidos) {
                 log.warn("Endereço principal completo fornecido mas sem campos preenchidos. Ignorando endereço.");
-                estabelecimento.setEnderecoPrincipal(null);
+                estabelecimento.setEndereco(null);
                 return estabelecimento;
             }
 
@@ -76,12 +76,12 @@ public class EstabelecimentosRelacionamentosHandler {
                 (endereco.getCep() == null || endereco.getCep().trim().isEmpty())) {
                 log.warn("Endereço sem logradouro nem CEP. Criando novo endereço sem buscar duplicados.");
                 Endereco enderecoSalvo = enderecoRepository.save(endereco);
-                estabelecimento.setEnderecoPrincipal(enderecoSalvo);
+                estabelecimento.setEndereco(enderecoSalvo);
                 return estabelecimento;
             }
 
             Endereco enderecoProcessado = enderecoService.findOrCreate(endereco);
-            estabelecimento.setEnderecoPrincipal(enderecoProcessado);
+                estabelecimento.setEndereco(enderecoProcessado);
             return estabelecimento;
         }
 
@@ -96,11 +96,11 @@ public class EstabelecimentosRelacionamentosHandler {
                 throw new NotFoundException("Endereço principal não encontrado com ID: " + enderecoId);
             }
 
-            estabelecimento.setEnderecoPrincipal(enderecoPrincipal);
+            estabelecimento.setEndereco(enderecoPrincipal);
             return estabelecimento;
         }
 
-        estabelecimento.setEnderecoPrincipal(null);
+        estabelecimento.setEndereco(null);
         return estabelecimento;
     }
 

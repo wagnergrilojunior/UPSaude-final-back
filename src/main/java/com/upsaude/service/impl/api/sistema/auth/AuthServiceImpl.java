@@ -45,7 +45,7 @@ public class AuthServiceImpl implements AuthService {
 
             if (usuarioSistema != null) {
 
-                SupabaseAuthResponse.User user = supabaseAuthService.getUserById(usuarioSistema.getUserId());
+                SupabaseAuthResponse.User user = supabaseAuthService.getUserById(usuarioSistema.getUser() != null ? usuarioSistema.getUser().getId() : null);
 
                 if (user != null && user.getEmail() != null) {
                     emailParaLogin = user.getEmail();
@@ -111,8 +111,8 @@ public class AuthServiceImpl implements AuthService {
                         .map(ue -> UsuarioSistemaInfoResponse.EstabelecimentoVinculoResponse.builder()
                                 .id(ue.getId())
                                 .estabelecimentoId(ue.getEstabelecimento().getId())
-                                .estabelecimentoNome(ue.getEstabelecimento().getNome())
-                                .estabelecimentoCnes(ue.getEstabelecimento().getCodigoCnes())
+                                .estabelecimentoNome(ue.getEstabelecimento().getDadosIdentificacao() != null ? ue.getEstabelecimento().getDadosIdentificacao().getNome() : null)
+                                .estabelecimentoCnes(ue.getEstabelecimento().getDadosIdentificacao() != null ? ue.getEstabelecimento().getDadosIdentificacao().getCnes() : null)
                                 .estabelecimentoAtivo(ue.getEstabelecimento().getActive())
                                 .tipoUsuario(ue.getTipoUsuario())
                                 .build())
@@ -122,25 +122,25 @@ public class AuthServiceImpl implements AuthService {
                 .id(usuarioSistema.getId())
                 .createdAt(usuarioSistema.getCreatedAt())
                 .updatedAt(usuarioSistema.getUpdatedAt())
-                .active(usuarioSistema.getActive())
-                .userId(usuarioSistema.getUserId())
+                .active(usuarioSistema.getAtivo())
+                .userId(usuarioSistema.getUser() != null ? usuarioSistema.getUser().getId() : null)
 
                 .profissionalSaudeId(usuarioSistema.getProfissionalSaude() != null ? usuarioSistema.getProfissionalSaude().getId() : null)
                 .medicoId(usuarioSistema.getMedico() != null ? usuarioSistema.getMedico().getId() : null)
                 .pacienteId(usuarioSistema.getPaciente() != null ? usuarioSistema.getPaciente().getId() : null)
-                .tipoVinculo(usuarioSistema.getTipoVinculo())
+                .tipoVinculo(usuarioSistema.getConfiguracao() != null ? usuarioSistema.getConfiguracao().getTipoVinculo() : null)
 
-                .nomeExibicao(usuarioSistema.getNomeExibicao())
-                .username(usuarioSistema.getUsername())
-                .fotoUrl(usuarioSistema.getFotoUrl())
+                .nomeExibicao(usuarioSistema.getDadosExibicao() != null ? usuarioSistema.getDadosExibicao().getNomeExibicao() : null)
+                .username(usuarioSistema.getDadosIdentificacao() != null ? usuarioSistema.getDadosIdentificacao().getUsername() : null)
+                .fotoUrl(usuarioSistema.getDadosExibicao() != null ? usuarioSistema.getDadosExibicao().getFotoUrl() : null)
 
-                .adminTenant(usuarioSistema.getAdminTenant())
+                .adminTenant(usuarioSistema.getConfiguracao() != null ? usuarioSistema.getConfiguracao().getAdminTenant() : null)
 
                 .tenantId(usuarioSistema.getTenant() != null ? usuarioSistema.getTenant().getId() : null)
-                .tenantNome(usuarioSistema.getTenant() != null ? usuarioSistema.getTenant().getNome() : null)
-                .tenantSlug(usuarioSistema.getTenant() != null ? usuarioSistema.getTenant().getSlug() : null)
+                .tenantNome(usuarioSistema.getTenant() != null && usuarioSistema.getTenant().getDadosIdentificacao() != null ? usuarioSistema.getTenant().getDadosIdentificacao().getNome() : null)
+                .tenantSlug(null)
                 .tenantAtivo(usuarioSistema.getTenant() != null ? usuarioSistema.getTenant().getAtivo() : null)
-                .tenantCnes(usuarioSistema.getTenant() != null ? usuarioSistema.getTenant().getCnes() : null)
+                .tenantCnes(null)
 
                 .estabelecimentos(estabelecimentosResponse)
                 .build();
@@ -158,7 +158,7 @@ public class AuthServiceImpl implements AuthService {
             return false;
         }
         boolean temAcesso = usuariosSistemaRepository.findByUserId(userId)
-                .map(usuario -> usuario.getActive() != null && usuario.getActive())
+                .map(usuario -> usuario.getAtivo() != null && usuario.getAtivo())
                 .orElse(false);
         log.debug("Usuário {} tem acesso ao sistema: {}", userId, temAcesso);
         return temAcesso;

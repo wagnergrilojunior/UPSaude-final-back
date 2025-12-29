@@ -26,7 +26,9 @@ public class ProfissionaisSaudeCreator {
     private final ProfissionaisSaudeRepository profissionaisSaudeRepository;
 
     public ProfissionaisSaude criar(ProfissionaisSaudeRequest request, UUID tenantId, Tenant tenant) {
-        log.debug("Criando novo profissional de saúde: {}", request != null ? request.getNomeCompleto() : "null");
+        String nomeCompleto = request != null && request.getDadosPessoaisBasicos() != null 
+            ? request.getDadosPessoaisBasicos().getNomeCompleto() : "null";
+        log.debug("Criando novo profissional de saúde: {}", nomeCompleto);
 
         validationService.validarObrigatorios(request);
         validationService.validarUnicidadeParaCriacao(request, profissionaisSaudeRepository, tenantId);

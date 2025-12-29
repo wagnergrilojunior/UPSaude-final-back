@@ -1,18 +1,22 @@
 package com.upsaude.api.response.sistema.usuario;
+
+import com.upsaude.api.response.embeddable.ConfiguracaoUsuarioResponse;
+import com.upsaude.api.response.embeddable.DadosExibicaoUsuarioResponse;
+import com.upsaude.api.response.embeddable.DadosIdentificacaoUsuarioResponse;
+import com.upsaude.api.response.paciente.PacienteResponse;
 import com.upsaude.api.response.profissional.MedicosResponse;
 import com.upsaude.api.response.profissional.ProfissionaisSaudeResponse;
-import com.upsaude.api.response.paciente.PacienteResponse;
-
 import com.upsaude.enums.TipoUsuarioSistemaEnum;
-import java.time.OffsetDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+
+import java.time.OffsetDateTime;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
 
 @Getter
 @Setter
@@ -23,17 +27,14 @@ public class UsuariosSistemaResponse {
     private UUID id;
     private OffsetDateTime createdAt;
     private OffsetDateTime updatedAt;
-    private Boolean active;
+    private Boolean ativo;
     private UUID userId;
     private ProfissionaisSaudeResponse profissionalSaude;
     private MedicosResponse medico;
     private PacienteResponse paciente;
-    private Boolean adminTenant;
-    private String tipoVinculo;
-    private String nomeExibicao;
-    private String username;
-    private String email;
-    private String fotoUrl;
+    private DadosIdentificacaoUsuarioResponse dadosIdentificacao;
+    private DadosExibicaoUsuarioResponse dadosExibicao;
+    private ConfiguracaoUsuarioResponse configuracao;
 
     private UUID tenantId;
     private String tenantNome;

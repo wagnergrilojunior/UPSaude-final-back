@@ -6,7 +6,6 @@ import com.upsaude.enums.TipoResponsavelEnum;
 import com.upsaude.util.converter.TipoResponsavelEnumDeserializer;
 import com.upsaude.validation.annotation.CPFValido;
 import com.upsaude.validation.annotation.TelefoneValido;
-import java.time.OffsetDateTime;
 import java.util.UUID;
 import lombok.*;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -25,8 +24,9 @@ public class ResponsavelLegalRequest {
     private String cpf;
     @TelefoneValido
     private String telefone;
+    private String rg;
+    private String cns;
     @JsonDeserialize(using = TipoResponsavelEnumDeserializer.class)
     private TipoResponsavelEnum tipoResponsavel;
-    private Boolean autorizacaoUsoDadosLGPD;
     private Boolean autorizacaoResponsavel;
 }

@@ -12,30 +12,11 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-/**
- * Repository para operações de processamento de JOB relacionadas a ImportJob
- * 
- * USO EXCLUSIVO JOB - NÃO USAR NA API
- * 
- * Métodos de processamento: claim, atualização de status, contagem para concorrência
- */
 @Repository
 public interface ImportJobJobRepository extends JpaRepository<ImportJob, UUID> {
 
-    // ========== CONSULTAS BÁSICAS (JOB) ==========
-    
     Optional<ImportJob> findById(UUID id);
     
-    // ========== FILA - BUSCAR JOBS PENDENTES (JOB) ==========
-    
-    /**
-     * Busca jobs prontos para processamento (ENFILEIRADO, com next_run_at <= now).
-     * Usa SELECT FOR UPDATE SKIP LOCKED para evitar concorrência.
-     * Ordena por prioridade (DESC) e depois por next_run_at (ASC).
-     * Limita a quantidade retornada.
-     * 
-     * Nota: Usa query nativa porque SKIP LOCKED não é suportado em JPQL.
-     */
     @Query(value = """
         SELECT j.* FROM import_job j
         WHERE j.status = :status
@@ -50,36 +31,16 @@ public interface ImportJobJobRepository extends JpaRepository<ImportJob, UUID> {
         @Param("limit") int limit
     );
 
-    /**
-     * Lock transacional (Postgres) para serializar o "claim" global do scheduler entre instâncias.
-     * Evita race conditions no controle de concorrência global/per-tenant.
-     *
-     * Importante: é xact-level, libera automaticamente ao final da transação.
-     */
     @Query(value = "SELECT pg_try_advisory_xact_lock(:lockKey)", nativeQuery = true)
     Boolean tryAdvisoryXactLock(@Param("lockKey") long lockKey);
-
-    /**
-     * Faz o claim ATÔMICO de 1 job: seleciona um job ENFILEIRADO pronto (next_run_at <= now),
-     * respeita limite global e por tenant, marca como PROCESSANDO e retorna o id.
-     * 
-     * IMPORTANTE: Processa jobs agrupados por tipo. Se houver jobs de um tipo em processamento,
-     * só buscará novos jobs desse mesmo tipo. Caso contrário, buscará jobs do próximo tipo disponível.
-     *
-     * Usa SKIP LOCKED para evitar concorrência entre schedulers.
-     */
     @Query(value = """
         WITH tipo_em_processamento AS (
-            -- Identifica se há algum tipo em processamento
             SELECT DISTINCT tipo
             FROM import_job
             WHERE status = :processingStatus
             LIMIT 1
         ),
         tipo_alvo AS (
-            -- Define qual tipo deve ser processado:
-            -- Se houver tipo em processamento, usa esse tipo
-            -- Caso contrário, usa o primeiro tipo disponível (ordenado alfabeticamente)
             SELECT COALESCE(
                 (SELECT tipo FROM tipo_em_processamento),
                 (SELECT tipo FROM import_job 
@@ -122,28 +83,14 @@ public interface ImportJobJobRepository extends JpaRepository<ImportJob, UUID> {
                                   @Param("maxGlobal") int maxGlobal,
                                   @Param("maxPerTenant") int maxPerTenant);
 
-    /**
-     * Faz o claim ATÔMICO de 1 job ENFILEIRADO recém-enfileirado (criado após limiteTempo).
-     * Prioriza jobs que foram enfileirados recentemente para processamento rápido após upload.
-     * Respeita limite global e por tenant, marca como PROCESSANDO e retorna o id.
-     * 
-     * IMPORTANTE: Processa jobs agrupados por tipo. Se houver jobs de um tipo em processamento,
-     * só buscará novos jobs desse mesmo tipo. Caso contrário, buscará jobs do próximo tipo disponível.
-     *
-     * Usa SKIP LOCKED para evitar concorrência entre schedulers.
-     */
     @Query(value = """
         WITH tipo_em_processamento AS (
-            -- Identifica se há algum tipo em processamento
             SELECT DISTINCT tipo
             FROM import_job
             WHERE status = :processingStatus
             LIMIT 1
         ),
         tipo_alvo AS (
-            -- Define qual tipo deve ser processado:
-            -- Se houver tipo em processamento, usa esse tipo
-            -- Caso contrário, usa o primeiro tipo disponível (ordenado alfabeticamente)
             SELECT COALESCE(
                 (SELECT tipo FROM tipo_em_processamento),
                 (SELECT tipo FROM import_job 
@@ -189,32 +136,14 @@ public interface ImportJobJobRepository extends JpaRepository<ImportJob, UUID> {
                                       @Param("maxGlobal") int maxGlobal,
                                       @Param("maxPerTenant") int maxPerTenant);
     
-    // ========== CONTAGEM PARA CONTROLE DE CONCORRÊNCIA (JOB) ==========
-    
-    /**
-     * Conta quantos jobs estão em processamento globalmente.
-     */
     long countByStatus(ImportJobStatusEnum status);
     
-    /**
-     * Conta quantos jobs estão em processamento para um tenant específico.
-     */
     long countByTenant_IdAndStatus(UUID tenantId, ImportJobStatusEnum status);
 
     long countByTenant_IdAndStatusIn(UUID tenantId, List<ImportJobStatusEnum> statuses);
     
-    /**
-     * Conta quantos jobs estão em processamento para múltiplos tenants (usado pelo scheduler).
-     */
     @Query("SELECT j.tenant.id, COUNT(j) FROM ImportJob j WHERE j.status = :status GROUP BY j.tenant.id")
     List<Object[]> countByStatusGroupedByTenant(@Param("status") ImportJobStatusEnum status);
-    
-    // ========== JOBS TRAVADOS (HEARTBEAT EXPIRADO) (JOB) ==========
-    
-    /**
-     * Busca jobs em PROCESSANDO com heartbeat expirado (provavelmente travados).
-     * Usado para resetar jobs que travaram (ex.: instância caiu).
-     */
     @Query("""
         SELECT j FROM ImportJob j
         WHERE j.status = :status

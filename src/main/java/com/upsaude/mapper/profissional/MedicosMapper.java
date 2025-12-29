@@ -8,19 +8,31 @@ import com.upsaude.api.request.profissional.MedicosRequest;
 import com.upsaude.api.response.profissional.MedicosResponse;
 import com.upsaude.entity.profissional.Medicos;
 import com.upsaude.mapper.config.MappingConfig;
+import com.upsaude.mapper.embeddable.ContatoMedicoMapper;
+import com.upsaude.mapper.embeddable.DadosDemograficosMedicoMapper;
+import com.upsaude.mapper.embeddable.DadosPessoaisBasicosMedicoMapper;
+import com.upsaude.mapper.embeddable.DocumentosBasicosMedicoMapper;
+import com.upsaude.mapper.embeddable.RegistroProfissionalMedicoMapper;
 import com.upsaude.mapper.estabelecimento.MedicoEstabelecimentoMapper;
+import com.upsaude.mapper.geral.EnderecoMapper;
 
-@Mapper(config = MappingConfig.class, uses = {MedicoEstabelecimentoMapper.class, EspecialidadeMapper.class, com.upsaude.mapper.embeddable.DadosPessoaisMedicoMapper.class, com.upsaude.mapper.embeddable.RegistroProfissionalMedicoMapper.class, com.upsaude.mapper.embeddable.FormacaoMedicoMapper.class, com.upsaude.mapper.embeddable.ContatoMedicoMapper.class})
+@Mapper(config = MappingConfig.class, uses = {
+    MedicoEstabelecimentoMapper.class,
+    EspecialidadeMapper.class,
+    DadosPessoaisBasicosMedicoMapper.class,
+    DocumentosBasicosMedicoMapper.class,
+    DadosDemograficosMedicoMapper.class,
+    RegistroProfissionalMedicoMapper.class,
+    ContatoMedicoMapper.class,
+    EnderecoMapper.class
+})
 public interface MedicosMapper {
-
-    @Mapping(target = "active", ignore = true)
-    Medicos toEntity(MedicosResponse dto);
 
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
     @Mapping(target = "active", ignore = true)
-    @Mapping(target = "enderecos", ignore = true)
+    @Mapping(target = "enderecoMedico", ignore = true)
     @Mapping(target = "medicosEstabelecimentos", ignore = true)
     @Mapping(target = "especialidades", ignore = true)
     Medicos fromRequest(MedicosRequest request);
@@ -29,7 +41,7 @@ public interface MedicosMapper {
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
     @Mapping(target = "active", ignore = true)
-    @Mapping(target = "enderecos", ignore = true)
+    @Mapping(target = "enderecoMedico", ignore = true)
     @Mapping(target = "medicosEstabelecimentos", ignore = true)
     @Mapping(target = "especialidades", ignore = true)
     void updateFromRequest(MedicosRequest request, @MappingTarget Medicos entity);

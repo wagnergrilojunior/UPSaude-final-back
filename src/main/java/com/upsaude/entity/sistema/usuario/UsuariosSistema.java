@@ -1,11 +1,14 @@
 package com.upsaude.entity.sistema.usuario;
-import com.upsaude.entity.sistema.multitenancy.Tenant;
-import com.upsaude.entity.profissional.Medicos;
+
+import com.upsaude.entity.embeddable.ConfiguracaoUsuario;
+import com.upsaude.entity.embeddable.DadosExibicaoUsuario;
+import com.upsaude.entity.embeddable.DadosIdentificacaoUsuario;
 import com.upsaude.entity.estabelecimento.UsuarioEstabelecimento;
-
-import com.upsaude.entity.profissional.ProfissionaisSaude;
-
 import com.upsaude.entity.paciente.Paciente;
+import com.upsaude.entity.profissional.Medicos;
+import com.upsaude.entity.profissional.ProfissionaisSaude;
+import com.upsaude.entity.sistema.auth.User;
+import com.upsaude.entity.sistema.multitenancy.Tenant;
 
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
@@ -14,6 +17,7 @@ import java.util.UUID;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
+import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EntityListeners;
 import jakarta.persistence.FetchType;
@@ -24,13 +28,14 @@ import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
-import jakarta.validation.constraints.NotNull;
-import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.Setter;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
@@ -44,14 +49,11 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
        indexes = {
            @Index(name = "idx_usuarios_sistema_user", columnList = "user_id")
        })
-@Data
+@Getter
+@Setter
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @EntityListeners({AuditingEntityListener.class})
 public class UsuariosSistema {
-
-    public UsuariosSistema() {
-        this.estabelecimentosVinculados = new ArrayList<>();
-    }
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
@@ -67,16 +69,24 @@ public class UsuariosSistema {
     private OffsetDateTime updatedAt;
 
     @Column(name = "ativo", nullable = false)
-    private Boolean active = true;
+    private Boolean ativo = true;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "tenant_id", nullable = false)
-    @NotNull(message = "Tenant é obrigatório")
     private Tenant tenant;
 
-    @Column(name = "user_id", nullable = false)
-    @NotNull(message = "Usuário (auth) é obrigatório")
-    private UUID userId;
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false, unique = true)
+    private User user;
+
+    @Embedded
+    private DadosIdentificacaoUsuario dadosIdentificacao;
+
+    @Embedded
+    private DadosExibicaoUsuario dadosExibicao;
+
+    @Embedded
+    private ConfiguracaoUsuario configuracao;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "profissional_saude_id")
@@ -90,28 +100,24 @@ public class UsuariosSistema {
     @JoinColumn(name = "paciente_id")
     private Paciente paciente;
 
-    @Column(name = "admin_tenant", nullable = false)
-    @NotNull(message = "Admin tenant é obrigatório")
-    private Boolean adminTenant = false;
-
-    @Column(name = "tipo_vinculo", length = 50)
-    private String tipoVinculo;
-
-    @Column(name = "nome_exibicao", length = 255)
-    private String nomeExibicao;
-
-    @Column(name = "username", length = 100, unique = true)
-    private String username;
-
-    @Column(name = "foto_url", columnDefinition = "TEXT")
-    private String fotoUrl;
-
     @OneToMany(mappedBy = "usuario", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     private List<UsuarioEstabelecimento> estabelecimentosVinculados = new ArrayList<>();
 
+    //===============================================================================================================
+
     @PrePersist
     @PreUpdate
-    public void validateCollections() {
+    public void validateEmbeddablesAndCollections() {
+        if (dadosIdentificacao == null) {
+            dadosIdentificacao = new DadosIdentificacaoUsuario();
+        }
+        if (dadosExibicao == null) {
+            dadosExibicao = new DadosExibicaoUsuario();
+        }
+        if (configuracao == null) {
+            configuracao = new ConfiguracaoUsuario();
+        }
+
         if (estabelecimentosVinculados == null) {
             estabelecimentosVinculados = new ArrayList<>();
         }

@@ -50,14 +50,17 @@ public class MedicoCreator {
     }
 
     private void inicializarEmbeddables(Medicos medicos) {
-        if (medicos.getDadosPessoais() == null) {
-            medicos.setDadosPessoais(new com.upsaude.entity.embeddable.DadosPessoaisMedico());
+        if (medicos.getDadosPessoaisBasicos() == null) {
+            medicos.setDadosPessoaisBasicos(new com.upsaude.entity.embeddable.DadosPessoaisBasicosMedico());
+        }
+        if (medicos.getDocumentosBasicos() == null) {
+            medicos.setDocumentosBasicos(new com.upsaude.entity.embeddable.DocumentosBasicosMedico());
+        }
+        if (medicos.getDadosDemograficos() == null) {
+            medicos.setDadosDemograficos(new com.upsaude.entity.embeddable.DadosDemograficosMedico());
         }
         if (medicos.getRegistroProfissional() == null) {
             medicos.setRegistroProfissional(new com.upsaude.entity.embeddable.RegistroProfissionalMedico());
-        }
-        if (medicos.getFormacao() == null) {
-            medicos.setFormacao(new com.upsaude.entity.embeddable.FormacaoMedico());
         }
         if (medicos.getContato() == null) {
             medicos.setContato(new com.upsaude.entity.embeddable.ContatoMedico());

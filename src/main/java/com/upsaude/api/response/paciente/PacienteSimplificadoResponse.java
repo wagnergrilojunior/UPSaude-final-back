@@ -43,8 +43,7 @@ public class PacienteSimplificadoResponse {
     private String responsavelNome;
     private String responsavelCpf;
     private String responsavelTelefone;
-    private String numeroCarteirinha;
-    private LocalDate dataValidadeCarteirinha;
+    private com.upsaude.api.response.embeddable.InformacoesConvenioPacienteResponse informacoesConvenio;
     private String observacoes;
     private RacaCorEnum racaCor;
     private NacionalidadeEnum nacionalidade;

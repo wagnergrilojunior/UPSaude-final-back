@@ -15,12 +15,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-/**
- * Repository para gerenciar jobs de importação (fila de processamento).
- */
 public interface ImportJobRepository extends JpaRepository<ImportJob, UUID>, JpaSpecificationExecutor<ImportJob> {
-
-    // ========== CONSULTAS BÁSICAS ==========
     
     Optional<ImportJob> findByIdAndTenant_Id(UUID id, UUID tenantId);
     
@@ -32,16 +27,6 @@ public interface ImportJobRepository extends JpaRepository<ImportJob, UUID>, Jpa
     
     List<ImportJob> findByTenant_IdAndStatus(UUID tenantId, ImportJobStatusEnum status);
     
-    // ========== FILA - BUSCAR JOBS PENDENTES ==========
-    
-    /**
-     * Busca jobs prontos para processamento (ENFILEIRADO, com next_run_at <= now).
-     * Usa SELECT FOR UPDATE SKIP LOCKED para evitar concorrência.
-     * Ordena por prioridade (DESC) e depois por next_run_at (ASC).
-     * Limita a quantidade retornada.
-     * 
-     * Nota: Usa query nativa porque SKIP LOCKED não é suportado em JPQL.
-     */
     @Query(value = """
         SELECT j.* FROM import_job j
         WHERE j.status = :status
@@ -56,21 +41,8 @@ public interface ImportJobRepository extends JpaRepository<ImportJob, UUID>, Jpa
         @Param("limit") int limit
     );
 
-    /**
-     * Lock transacional (Postgres) para serializar o "claim" global do scheduler entre instâncias.
-     * Evita race conditions no controle de concorrência global/per-tenant.
-     *
-     * Importante: é xact-level, libera automaticamente ao final da transação.
-     */
     @Query(value = "SELECT pg_try_advisory_xact_lock(:lockKey)", nativeQuery = true)
     Boolean tryAdvisoryXactLock(@Param("lockKey") long lockKey);
-
-    /**
-     * Faz o claim ATÔMICO de 1 job: seleciona um job ENFILEIRADO pronto (next_run_at <= now),
-     * respeita limite global e por tenant, marca como PROCESSANDO e retorna o id.
-     *
-     * Usa SKIP LOCKED para evitar concorrência entre schedulers.
-     */
     @Query(value = """
         WITH candidate AS (
             SELECT j.id
@@ -103,32 +75,14 @@ public interface ImportJobRepository extends JpaRepository<ImportJob, UUID>, Jpa
                                   @Param("maxGlobal") int maxGlobal,
                                   @Param("maxPerTenant") int maxPerTenant);
     
-    // ========== CONTAGEM PARA CONTROLE DE CONCORRÊNCIA ==========
-    
-    /**
-     * Conta quantos jobs estão em processamento globalmente.
-     */
     long countByStatus(ImportJobStatusEnum status);
     
-    /**
-     * Conta quantos jobs estão em processamento para um tenant específico.
-     */
     long countByTenant_IdAndStatus(UUID tenantId, ImportJobStatusEnum status);
 
     long countByTenant_IdAndStatusIn(UUID tenantId, List<ImportJobStatusEnum> statuses);
     
-    /**
-     * Conta quantos jobs estão em processamento para múltiplos tenants (usado pelo scheduler).
-     */
     @Query("SELECT j.tenant.id, COUNT(j) FROM ImportJob j WHERE j.status = :status GROUP BY j.tenant.id")
     List<Object[]> countByStatusGroupedByTenant(@Param("status") ImportJobStatusEnum status);
-    
-    // ========== JOBS TRAVADOS (HEARTBEAT EXPIRADO) ==========
-    
-    /**
-     * Busca jobs em PROCESSANDO com heartbeat expirado (provavelmente travados).
-     * Usado para resetar jobs que travaram (ex.: instância caiu).
-     */
     @Query("""
         SELECT j FROM ImportJob j
         WHERE j.status = :status
@@ -139,8 +93,6 @@ public interface ImportJobRepository extends JpaRepository<ImportJob, UUID>, Jpa
         @Param("expiredBefore") OffsetDateTime expiredBefore
     );
     
-    // ========== CONSULTAS POR COMPETÊNCIA ==========
-    
     List<ImportJob> findByTenant_IdAndTipoAndCompetenciaAnoAndCompetenciaMesAndUf(
         UUID tenantId,
         ImportJobTipoEnum tipo,
@@ -148,8 +100,6 @@ public interface ImportJobRepository extends JpaRepository<ImportJob, UUID>, Jpa
         String competenciaMes,
         String uf
     );
-    
-    // ========== ESTATÍSTICAS ==========
     
     @Query("""
         SELECT COUNT(j) FROM ImportJob j

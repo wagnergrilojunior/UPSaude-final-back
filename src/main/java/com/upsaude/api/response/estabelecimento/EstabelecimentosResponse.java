@@ -7,7 +7,6 @@ import java.util.UUID;
 
 import com.upsaude.api.response.geral.EnderecoResponse;
 import com.upsaude.api.response.profissional.ProfissionaisSaudeResponse;
-import com.upsaude.api.response.profissional.equipe.EquipeSaudeResponse;
 import com.upsaude.enums.NaturezaJuridicaEnum;
 import com.upsaude.enums.StatusFuncionamentoEnum;
 import com.upsaude.enums.TipoEstabelecimentoEnum;
@@ -63,17 +62,5 @@ public class EstabelecimentosResponse {
     private String observacoes;
 
     @Builder.Default
-    private List<EnderecoResponse> enderecosSecundarios = new ArrayList<>();
-
-    @Builder.Default
-    private List<ServicosEstabelecimentoResponse> servicos = new ArrayList<>();
-
-    @Builder.Default
     private List<EquipamentosEstabelecimentoResponse> equipamentos = new ArrayList<>();
-
-    @Builder.Default
-    private List<InfraestruturaEstabelecimentoResponse> infraestrutura = new ArrayList<>();
-
-    @Builder.Default
-    private List<EquipeSaudeResponse> equipes = new ArrayList<>();
 }

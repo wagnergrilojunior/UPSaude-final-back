@@ -17,6 +17,8 @@ import com.upsaude.mapper.profissional.ProfissionaisSaudeMapper;
 public interface FilaEsperaMapper {
 
     @Mapping(target = "active", ignore = true)
+    @Mapping(target = "profissional", ignore = true)
+    @Mapping(target = "agendamento", ignore = true)
     FilaEspera toEntity(FilaEsperaResponse dto);
 
     @Mapping(target = "id", ignore = true)
@@ -41,5 +43,13 @@ public interface FilaEsperaMapper {
     @Mapping(target = "profissional", ignore = true)
     void updateFromRequest(FilaEsperaRequest request, @MappingTarget FilaEspera entity);
 
+    @Mapping(target = "profissional.sigtapOcupacao", ignore = true)
+    @Mapping(target = "agendamento.profissional.sigtapOcupacao", ignore = true)
+    @Mapping(target = "agendamento.atendimento.profissional.sigtapOcupacao", ignore = true)
+    @Mapping(target = "agendamento.atendimento.equipeSaude.vinculosProfissionais[].profissional.sigtapOcupacao", ignore = true)
+    @Mapping(target = "agendamento.notificacoes[].profissional.sigtapOcupacao", ignore = true)
+    @Mapping(target = "agendamento.checkIns[].atendimento.profissional.sigtapOcupacao", ignore = true)
+    @Mapping(target = "agendamento.checkIns[].atendimento.equipeSaude.vinculosProfissionais[].profissional.sigtapOcupacao", ignore = true)
+    @Mapping(target = "paciente", source = "paciente", qualifiedByName = "toResponseCompleto")
     FilaEsperaResponse toResponse(FilaEspera entity);
 }

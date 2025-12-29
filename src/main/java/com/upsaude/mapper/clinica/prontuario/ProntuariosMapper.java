@@ -27,5 +27,6 @@ public interface ProntuariosMapper  {
     @Mapping(target = "paciente", ignore = true)
     void updateFromRequest(ProntuariosRequest request, @MappingTarget Prontuarios entity);
 
+    @Mapping(target = "paciente", source = "paciente", qualifiedByName = "toResponseCompleto")
     ProntuariosResponse toResponse(Prontuarios entity);
 }

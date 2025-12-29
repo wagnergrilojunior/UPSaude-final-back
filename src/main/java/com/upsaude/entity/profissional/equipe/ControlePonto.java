@@ -14,9 +14,9 @@ import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
-import jakarta.validation.constraints.NotNull;
-import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.time.OffsetDateTime;
 
@@ -29,13 +29,13 @@ import java.time.OffsetDateTime;
            @Index(name = "idx_controle_ponto_estabelecimento", columnList = "estabelecimento_id"),
            @Index(name = "idx_controle_ponto_data", columnList = "data_ponto")
        })
-@Data
-@EqualsAndHashCode(callSuper = true)
+@Getter
+@Setter
+@EqualsAndHashCode(onlyExplicitlyIncluded = true, callSuper = true)
 public class ControlePonto extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "profissional_id", nullable = false)
-    @NotNull(message = "Profissional de saúde é obrigatório")
     private ProfissionaisSaude profissional;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -43,16 +43,13 @@ public class ControlePonto extends BaseEntity {
     private Medicos medico;
 
     @Column(name = "data_hora", nullable = false)
-    @NotNull(message = "Data e hora do ponto são obrigatórias")
     private OffsetDateTime dataHora;
 
     @Column(name = "data_ponto", nullable = false)
-    @NotNull(message = "Data do ponto é obrigatória")
     private java.time.LocalDate dataPonto;
 
     @Convert(converter = TipoPontoEnumConverter.class)
     @Column(name = "tipo_ponto", nullable = false)
-    @NotNull(message = "Tipo de ponto é obrigatório")
     private TipoPontoEnum tipoPonto;
 
     @Column(name = "latitude")

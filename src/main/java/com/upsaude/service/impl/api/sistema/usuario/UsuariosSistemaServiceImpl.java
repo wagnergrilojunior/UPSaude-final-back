@@ -76,11 +76,11 @@ public class UsuariosSistemaServiceImpl implements UsuariosSistemaService {
                 }
             }
 
-            validarEmailUnico(null, request.getEmail(), request.getUserId());
-            validarUsernameUnico(null, request.getUsername());
+            validarEmailUnico(null, request.getEmail(), request.getUser() != null ? request.getUser().getId() : null);
+            validarUsernameUnico(null, request.getDadosIdentificacao() != null ? request.getDadosIdentificacao().getUsername() : null);
 
             UsuariosSistema usuariosSistema = usuariosSistemaMapper.fromRequest(request);
-            usuariosSistema.setActive(true);
+            usuariosSistema.setAtivo(true);
 
             if (request.getTenantId() != null) {
                 Tenant tenant = tenantRepository.findById(request.getTenantId())
@@ -179,8 +179,8 @@ public class UsuariosSistemaServiceImpl implements UsuariosSistemaService {
         UsuariosSistema usuariosSistemaExistente = usuariosSistemaRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("UsuariosSistema não encontrado com ID: " + id));
 
-        validarEmailUnico(id, request.getEmail(), request.getUserId());
-        validarUsernameUnico(id, request.getUsername());
+        validarEmailUnico(id, request.getEmail(), usuariosSistemaExistente.getUser() != null ? usuariosSistemaExistente.getUser().getId() : null);
+        validarUsernameUnico(id, request.getDadosIdentificacao() != null ? request.getDadosIdentificacao().getUsername() : null);
 
         atualizarDadosUsuariosSistema(usuariosSistemaExistente, request);
 
@@ -209,7 +209,7 @@ public class UsuariosSistemaServiceImpl implements UsuariosSistemaService {
         UsuariosSistema usuariosSistema = usuariosSistemaRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("UsuariosSistema não encontrado com ID: " + id));
 
-        UUID userId = usuariosSistema.getUserId();
+        UUID userId = usuariosSistema.getUser() != null ? usuariosSistema.getUser().getId() : null;
 
         usuariosSistemaRepository.delete(usuariosSistema);
         log.info("ETAPA 1: UsuariosSistema e vínculos deletados PERMANENTEMENTE. ID: {}", id);
@@ -238,7 +238,7 @@ public class UsuariosSistemaServiceImpl implements UsuariosSistemaService {
                 UsuariosSistema usuariosSistemaExistente = usuariosSistemaRepository.findById(usuariosSistemaId)
                         .orElseThrow(() -> new NotFoundException("UsuariosSistema não encontrado com ID: " + usuariosSistemaId));
 
-                if (!userEncontrado.getId().equals(usuariosSistemaExistente.getUserId())) {
+                if (usuariosSistemaExistente.getUser() == null || !userEncontrado.getId().equals(usuariosSistemaExistente.getUser().getId())) {
                     throw new BadRequestException("Já existe um usuário cadastrado com o email: " + email);
                 }
             } else {
@@ -322,7 +322,7 @@ public class UsuariosSistemaServiceImpl implements UsuariosSistemaService {
         for (UsuariosSistemaRequest.EstabelecimentoVinculoRequest vinculoRequest : vinculos) {
 
             usuarioEstabelecimentoRepository
-                    .findByUsuarioUserIdAndEstabelecimentoId(usuario.getUserId(), vinculoRequest.getEstabelecimentoId())
+                    .findByUsuarioUserIdAndEstabelecimentoId(usuario.getUser() != null ? usuario.getUser().getId() : null, vinculoRequest.getEstabelecimentoId())
                     .ifPresentOrElse(
                             vinculoExistente -> {
                                 if (Boolean.FALSE.equals(vinculoExistente.getActive())) {
@@ -359,7 +359,7 @@ public class UsuariosSistemaServiceImpl implements UsuariosSistemaService {
         for (UUID estabelecimentoId : estabelecimentosIds) {
 
             usuarioEstabelecimentoRepository
-                    .findByUsuarioUserIdAndEstabelecimentoId(usuario.getUserId(), estabelecimentoId)
+                    .findByUsuarioUserIdAndEstabelecimentoId(usuario.getUser() != null ? usuario.getUser().getId() : null, estabelecimentoId)
                     .ifPresentOrElse(
                             vinculoExistente -> {
                                 if (Boolean.FALSE.equals(vinculoExistente.getActive())) {
@@ -390,7 +390,7 @@ public class UsuariosSistemaServiceImpl implements UsuariosSistemaService {
     private void atualizarVinculosComPapel(UsuariosSistema usuario, List<UsuariosSistemaRequest.EstabelecimentoVinculoRequest> vinculos) {
 
         List<UsuarioEstabelecimento> vinculosExistentes = usuarioEstabelecimentoRepository
-                .findByUsuarioUserId(usuario.getUserId());
+                .findByUsuarioUserId(usuario.getUser() != null ? usuario.getUser().getId() : null);
 
         List<UUID> novosIds = vinculos.stream()
                 .map(UsuariosSistemaRequest.EstabelecimentoVinculoRequest::getEstabelecimentoId)
@@ -407,7 +407,7 @@ public class UsuariosSistemaServiceImpl implements UsuariosSistemaService {
 
         for (UsuariosSistemaRequest.EstabelecimentoVinculoRequest vinculoRequest : vinculos) {
             usuarioEstabelecimentoRepository
-                    .findByUsuarioUserIdAndEstabelecimentoId(usuario.getUserId(), vinculoRequest.getEstabelecimentoId())
+                    .findByUsuarioUserIdAndEstabelecimentoId(usuario.getUser() != null ? usuario.getUser().getId() : null, vinculoRequest.getEstabelecimentoId())
                     .ifPresentOrElse(
                             vinculoExistente -> {
 
@@ -441,7 +441,7 @@ public class UsuariosSistemaServiceImpl implements UsuariosSistemaService {
     private void atualizarVinculosEstabelecimentos(UsuariosSistema usuario, List<UUID> estabelecimentosIds) {
 
         List<UsuarioEstabelecimento> vinculosExistentes = usuarioEstabelecimentoRepository
-                .findByUsuarioUserId(usuario.getUserId());
+                .findByUsuarioUserId(usuario.getUser() != null ? usuario.getUser().getId() : null);
 
         List<UUID> idsExistentes = vinculosExistentes.stream()
                 .filter(v -> Boolean.TRUE.equals(v.getActive()))
@@ -472,13 +472,16 @@ public class UsuariosSistemaServiceImpl implements UsuariosSistemaService {
         UsuariosSistema usuario = usuariosSistemaRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Usuário não encontrado com ID: " + id));
 
-        if (usuario.getFotoUrl() != null && !usuario.getFotoUrl().isEmpty()) {
-            supabaseStorageService.deletarFotoUsuario(usuario.getFotoUrl());
+        if (usuario.getDadosExibicao() != null && usuario.getDadosExibicao().getFotoUrl() != null && !usuario.getDadosExibicao().getFotoUrl().isEmpty()) {
+            supabaseStorageService.deletarFotoUsuario(usuario.getDadosExibicao().getFotoUrl());
         }
 
-        String fotoUrl = supabaseStorageService.uploadFotoUsuario(file, usuario.getUserId());
+        String fotoUrl = supabaseStorageService.uploadFotoUsuario(file, usuario.getUser() != null ? usuario.getUser().getId() : null);
 
-        usuario.setFotoUrl(fotoUrl);
+        if (usuario.getDadosExibicao() == null) {
+            usuario.setDadosExibicao(new com.upsaude.entity.embeddable.DadosExibicaoUsuario());
+        }
+        usuario.getDadosExibicao().setFotoUrl(fotoUrl);
         usuariosSistemaRepository.save(usuario);
 
         log.info("Foto enviada com sucesso para usuário {}. URL: {}", id, fotoUrl);
@@ -492,7 +495,7 @@ public class UsuariosSistemaServiceImpl implements UsuariosSistemaService {
         UsuariosSistema usuario = usuariosSistemaRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Usuário não encontrado com ID: " + id));
 
-        return usuario.getFotoUrl();
+        return usuario.getDadosExibicao() != null ? usuario.getDadosExibicao().getFotoUrl() : null;
     }
 
     @Override
@@ -503,9 +506,9 @@ public class UsuariosSistemaServiceImpl implements UsuariosSistemaService {
         UsuariosSistema usuario = usuariosSistemaRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Usuário não encontrado com ID: " + id));
 
-        if (usuario.getFotoUrl() != null && !usuario.getFotoUrl().isEmpty()) {
-            supabaseStorageService.deletarFotoUsuario(usuario.getFotoUrl());
-            usuario.setFotoUrl(null);
+        if (usuario.getDadosExibicao() != null && usuario.getDadosExibicao().getFotoUrl() != null && !usuario.getDadosExibicao().getFotoUrl().isEmpty()) {
+            supabaseStorageService.deletarFotoUsuario(usuario.getDadosExibicao().getFotoUrl());
+            usuario.getDadosExibicao().setFotoUrl(null);
             usuariosSistemaRepository.save(usuario);
             log.info("Foto deletada com sucesso para usuário: {}", id);
         } else {
@@ -522,19 +525,20 @@ public class UsuariosSistemaServiceImpl implements UsuariosSistemaService {
             response.setTenantSlug(usuario.getTenant().getSlug());
         }
 
-        if (usuario.getUserId() != null) {
+        if (usuario.getUser() != null && usuario.getUser().getId() != null) {
+            UUID userId = usuario.getUser().getId();
             try {
                 com.upsaude.integration.supabase.SupabaseAuthResponse.User supabaseUser =
-                        supabaseAuthService.getUserById(usuario.getUserId());
+                        supabaseAuthService.getUserById(userId);
                 if (supabaseUser != null && supabaseUser.getEmail() != null) {
                     response.setEmail(supabaseUser.getEmail());
                     log.debug("Email do Supabase recuperado: {}", supabaseUser.getEmail());
                 } else {
-                    log.warn("Email não encontrado no Supabase para userId: {}", usuario.getUserId());
+                    log.warn("Email não encontrado no Supabase para userId: {}", userId);
                 }
             } catch (RuntimeException e) {
                 log.error("Erro ao buscar email do Supabase para userId: {}, Exception: {}",
-                    usuario.getUserId(), e.getClass().getSimpleName(), e);
+                    userId, e.getClass().getSimpleName(), e);
 
             }
         }

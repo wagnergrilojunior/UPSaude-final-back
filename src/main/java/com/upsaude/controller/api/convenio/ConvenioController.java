@@ -2,9 +2,6 @@ package com.upsaude.controller.api.convenio;
 
 import com.upsaude.api.request.convenio.ConvenioRequest;
 import com.upsaude.api.response.convenio.ConvenioResponse;
-import com.upsaude.exception.BadRequestException;
-import com.upsaude.exception.ConflictException;
-import com.upsaude.exception.NotFoundException;
 import com.upsaude.service.api.convenio.ConvenioService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -39,21 +36,14 @@ public class ConvenioController {
             @ApiResponse(responseCode = "201", description = "Convênio criado com sucesso",
                     content = @Content(schema = @Schema(implementation = ConvenioResponse.class))),
             @ApiResponse(responseCode = "400", description = "Dados inválidos fornecidos"),
-            @ApiResponse(responseCode = "403", description = "Acesso negado")
+            @ApiResponse(responseCode = "403", description = "Acesso negado"),
+            @ApiResponse(responseCode = "409", description = "Conflito - convênio já existe")
     })
     public ResponseEntity<ConvenioResponse> criar(@Valid @RequestBody ConvenioRequest request) {
         log.debug("REQUEST POST /v1/convenios - payload: {}", request);
-        try {
-            ConvenioResponse response = convenioService.criar(request);
-            log.info("Convênio criado com sucesso. ID: {}", response.getId());
-            return ResponseEntity.status(HttpStatus.CREATED).body(response);
-        } catch (BadRequestException | ConflictException ex) {
-            log.warn("Falha ao criar convênio — mensagem: {}, payload: {}", ex.getMessage(), request);
-            throw ex;
-        } catch (Exception ex) {
-            log.error("Erro inesperado ao criar convênio — payload: {}", request, ex);
-            throw ex;
-        }
+        ConvenioResponse response = convenioService.criar(request);
+        log.info("Convênio criado com sucesso. ID: {}", response.getId());
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
     @GetMapping
@@ -66,13 +56,8 @@ public class ConvenioController {
             @Parameter(description = "Parâmetros de paginação (page, size, sort)")
             Pageable pageable) {
         log.debug("REQUEST GET /v1/convenios - pageable: {}", pageable);
-        try {
-            Page<ConvenioResponse> response = convenioService.listar(pageable);
-            return ResponseEntity.ok(response);
-        } catch (Exception ex) {
-            log.error("Erro inesperado ao listar convênios — pageable: {}", pageable, ex);
-            throw ex;
-        }
+        Page<ConvenioResponse> response = convenioService.listar(pageable);
+        return ResponseEntity.ok(response);
     }
 
     @GetMapping("/{id}")
@@ -87,16 +72,8 @@ public class ConvenioController {
             @Parameter(description = "ID do convênio", required = true)
             @PathVariable UUID id) {
         log.debug("REQUEST GET /v1/convenios/{}", id);
-        try {
-            ConvenioResponse response = convenioService.obterPorId(id);
-            return ResponseEntity.ok(response);
-        } catch (NotFoundException ex) {
-            log.warn("Convênio não encontrado — ID: {}, mensagem: {}", id, ex.getMessage());
-            throw ex;
-        } catch (Exception ex) {
-            log.error("Erro inesperado ao obter convênio por ID — ID: {}", id, ex);
-            throw ex;
-        }
+        ConvenioResponse response = convenioService.obterPorId(id);
+        return ResponseEntity.ok(response);
     }
 
     @PutMapping("/{id}")
@@ -106,24 +83,17 @@ public class ConvenioController {
                     content = @Content(schema = @Schema(implementation = ConvenioResponse.class))),
             @ApiResponse(responseCode = "400", description = "Dados inválidos fornecidos"),
             @ApiResponse(responseCode = "404", description = "Convênio não encontrado"),
-            @ApiResponse(responseCode = "403", description = "Acesso negado")
+            @ApiResponse(responseCode = "403", description = "Acesso negado"),
+            @ApiResponse(responseCode = "409", description = "Conflito - dados duplicados")
     })
     public ResponseEntity<ConvenioResponse> atualizar(
             @Parameter(description = "ID do convênio", required = true)
             @PathVariable UUID id,
             @Valid @RequestBody ConvenioRequest request) {
         log.debug("REQUEST PUT /v1/convenios/{} - payload: {}", id, request);
-        try {
-            ConvenioResponse response = convenioService.atualizar(id, request);
-            log.info("Convênio atualizado com sucesso. ID: {}", response.getId());
-            return ResponseEntity.ok(response);
-        } catch (BadRequestException | NotFoundException | ConflictException ex) {
-            log.warn("Falha ao atualizar convênio — ID: {}, mensagem: {}, payload: {}", id, ex.getMessage(), request);
-            throw ex;
-        } catch (Exception ex) {
-            log.error("Erro inesperado ao atualizar convênio — ID: {}, payload: {}", id, request, ex);
-            throw ex;
-        }
+        ConvenioResponse response = convenioService.atualizar(id, request);
+        log.info("Convênio atualizado com sucesso. ID: {}", response.getId());
+        return ResponseEntity.ok(response);
     }
 
     @DeleteMapping("/{id}")
@@ -137,16 +107,8 @@ public class ConvenioController {
             @Parameter(description = "ID do convênio", required = true)
             @PathVariable UUID id) {
         log.debug("REQUEST DELETE /v1/convenios/{}", id);
-        try {
-            convenioService.excluir(id);
-            log.info("Convênio excluído com sucesso. ID: {}", id);
-            return ResponseEntity.noContent().build();
-        } catch (NotFoundException ex) {
-            log.warn("Convênio não encontrado para exclusão — ID: {}, mensagem: {}", id, ex.getMessage());
-            throw ex;
-        } catch (Exception ex) {
-            log.error("Erro inesperado ao excluir convênio — ID: {}", id, ex);
-            throw ex;
-        }
+        convenioService.excluir(id);
+        log.info("Convênio excluído com sucesso. ID: {}", id);
+        return ResponseEntity.noContent().build();
     }
 }

@@ -15,17 +15,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-/**
- * Repository para operações de API HTTP relacionadas a ImportJob
- * 
- * USO EXCLUSIVO API - NÃO USAR EM JOB
- * 
- * Métodos de leitura e upload (criação de job via HTTP)
- */
 @Repository
 public interface ImportJobApiRepository extends JpaRepository<ImportJob, UUID>, JpaSpecificationExecutor<ImportJob> {
-
-    // ========== CONSULTAS BÁSICAS (API) ==========
     
     Optional<ImportJob> findByIdAndTenant_Id(UUID id, UUID tenantId);
     
@@ -37,10 +28,7 @@ public interface ImportJobApiRepository extends JpaRepository<ImportJob, UUID>, 
     
     List<ImportJob> findByTenant_IdAndStatus(UUID tenantId, ImportJobStatusEnum status);
     
-    // Método necessário para validação de limite de jobs pendentes
     long countByTenant_IdAndStatusIn(UUID tenantId, java.util.List<ImportJobStatusEnum> statuses);
-    
-    // ========== CONSULTAS POR COMPETÊNCIA (API) ==========
     
     List<ImportJob> findByTenant_IdAndTipoAndCompetenciaAnoAndCompetenciaMesAndUf(
         UUID tenantId,
@@ -50,10 +38,6 @@ public interface ImportJobApiRepository extends JpaRepository<ImportJob, UUID>, 
         String uf
     );
     
-    /**
-     * Busca jobs por tenant, tipo, competência e status.
-     * Ordena por prioridade DESC (maior primeiro) e depois por createdAt ASC.
-     */
     List<ImportJob> findByTenant_IdAndTipoAndCompetenciaAnoAndCompetenciaMesAndStatusOrderByPriorityDescCreatedAtAsc(
         UUID tenantId,
         ImportJobTipoEnum tipo,
@@ -62,30 +46,12 @@ public interface ImportJobApiRepository extends JpaRepository<ImportJob, UUID>, 
         ImportJobStatusEnum status
     );
     
-    // ========== ESTATÍSTICAS (API) ==========
-    
     @Query("""
         SELECT COUNT(j) FROM ImportJob j
         WHERE j.tenant.id = :tenantId
         AND j.status = :status
         """)
     long countJobsByTenantAndStatus(@Param("tenantId") UUID tenantId, @Param("status") ImportJobStatusEnum status);
-    
-    // ========== VALIDAÇÃO DE DUPLICATAS (API) ==========
-    
-    /**
-     * Verifica se já existe um job com as mesmas características (nome, tamanho, tipo, competência, UF, tenant).
-     * Usado para evitar uploads duplicados.
-     * 
-     * @param tenantId ID do tenant
-     * @param tipo Tipo do job
-     * @param originalFilename Nome original do arquivo
-     * @param sizeBytes Tamanho do arquivo em bytes
-     * @param competenciaAno Ano da competência
-     * @param competenciaMes Mês da competência
-     * @param uf UF (pode ser null)
-     * @return Lista de jobs duplicados encontrados
-     */
     @Query("""
         SELECT j FROM ImportJob j
         WHERE j.tenant.id = :tenantId

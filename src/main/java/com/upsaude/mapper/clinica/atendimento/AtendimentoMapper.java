@@ -36,5 +36,6 @@ public interface AtendimentoMapper {
     @Mapping(target = "profissional", ignore = true)
     void updateFromRequest(AtendimentoRequest request, @MappingTarget Atendimento entity);
 
+    @Mapping(target = "paciente", source = "paciente", qualifiedByName = "toResponseCompleto")
     AtendimentoResponse toResponse(Atendimento entity);
 }

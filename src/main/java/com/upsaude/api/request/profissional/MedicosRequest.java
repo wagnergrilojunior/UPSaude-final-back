@@ -3,13 +3,12 @@ package com.upsaude.api.request.profissional;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.upsaude.api.request.embeddable.ContatoMedicoRequest;
-import com.upsaude.api.request.embeddable.DadosPessoaisMedicoRequest;
-import com.upsaude.api.request.embeddable.FormacaoMedicoRequest;
+import com.upsaude.api.request.embeddable.DadosDemograficosMedicoRequest;
+import com.upsaude.api.request.embeddable.DadosPessoaisBasicosMedicoRequest;
+import com.upsaude.api.request.embeddable.DocumentosBasicosMedicoRequest;
 import com.upsaude.api.request.embeddable.RegistroProfissionalMedicoRequest;
+import com.upsaude.api.request.geral.EnderecoRequest;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Pattern;
-import jakarta.validation.constraints.Size;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
@@ -30,11 +29,6 @@ import io.swagger.v3.oas.annotations.media.Schema;
 @Schema(description = "Dados de médicos")
 public class MedicosRequest {
 
-    @NotBlank(message = "Nome completo é obrigatório")
-    @Pattern(regexp = "^[\\p{L}0-9 .'-]+$", message = "Caracteres inválidos no nome completo")
-    @Size(max = 255, message = "Nome completo deve ter no máximo 255 caracteres")
-    private String nomeCompleto;
-
     @Schema(description = "Lista de IDs de especialidades (CBO) para associar ao médico no cadastro inicial. " +
             "Os IDs devem corresponder a CBOs válidos da tabela sigtap_ocupacao. " +
             "Exemplo: [\"ee0e8400-e29b-41d4-a716-446655440009\", \"ee0e8400-e29b-41d4-a716-446655440010\"]")
@@ -45,17 +39,25 @@ public class MedicosRequest {
     private Set<UUID> estabelecimentos = new HashSet<>();
 
     @Valid
-    private DadosPessoaisMedicoRequest dadosPessoais;
+    private DadosPessoaisBasicosMedicoRequest dadosPessoaisBasicos;
+
+    @Valid
+    private DocumentosBasicosMedicoRequest documentosBasicos;
+
+    @Valid
+    private DadosDemograficosMedicoRequest dadosDemograficos;
 
     @Valid
     private RegistroProfissionalMedicoRequest registroProfissional;
 
     @Valid
-    private FormacaoMedicoRequest formacao;
-
-    @Valid
     private ContatoMedicoRequest contato;
 
-    @Size(max = 1000, message = "Observações deve ter no máximo 1000 caracteres")
+    private UUID enderecoMedico;
+
+    @Deprecated
+    @Valid
+    private EnderecoRequest enderecoMedicoCompleto;
+
     private String observacoes;
 }

@@ -3,14 +3,23 @@ package com.upsaude.service.api.support.medico;
 import com.upsaude.api.request.profissional.MedicosRequest;
 import com.upsaude.entity.estabelecimento.Estabelecimentos;
 import com.upsaude.entity.estabelecimento.MedicoEstabelecimento;
+import com.upsaude.entity.paciente.Endereco;
 import com.upsaude.entity.profissional.Medicos;
+import com.upsaude.entity.referencia.geografico.Cidades;
+import com.upsaude.entity.referencia.geografico.Estados;
 import com.upsaude.entity.referencia.sigtap.SigtapOcupacao;
 import com.upsaude.entity.sistema.multitenancy.Tenant;
 import com.upsaude.enums.TipoVinculoProfissionalEnum;
+import com.upsaude.exception.BadRequestException;
 import com.upsaude.exception.NotFoundException;
+import com.upsaude.mapper.geral.EnderecoMapper;
 import com.upsaude.repository.estabelecimento.EstabelecimentosRepository;
 import com.upsaude.repository.estabelecimento.MedicoEstabelecimentoRepository;
+import com.upsaude.repository.paciente.EnderecoRepository;
+import com.upsaude.repository.referencia.geografico.CidadesRepository;
+import com.upsaude.repository.referencia.geografico.EstadosRepository;
 import com.upsaude.repository.referencia.sigtap.SigtapCboRepository;
+import com.upsaude.service.api.geral.EnderecoService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -30,15 +39,68 @@ public class MedicoRelacionamentosHandler {
     private final EstabelecimentosRepository estabelecimentosRepository;
     private final MedicoEstabelecimentoRepository medicoEstabelecimentoRepository;
     private final SigtapCboRepository cboRepository;
+    private final EnderecoRepository enderecoRepository;
+    private final EnderecoService enderecoService;
+    private final EnderecoMapper enderecoMapper;
+    private final EstadosRepository estadosRepository;
+    private final CidadesRepository cidadesRepository;
 
     public Medicos processarRelacionamentos(Medicos medico, MedicosRequest request, Tenant tenant) {
         log.debug("Processando relacionamentos do médico");
 
+        processarEndereco(medico, request, tenant);
         processarEstabelecimentos(medico, request, tenant);
         processarEspecialidades(medico, request);
 
         log.debug("Relacionamentos processados. JPA gerenciará persistência automaticamente.");
         return medico;
+    }
+
+    private void processarEndereco(Medicos medico, MedicosRequest request, Tenant tenant) {
+        if (request.getEnderecoMedicoCompleto() != null) {
+            log.debug("Processando endereço médico como objeto completo. Usando findOrCreate para evitar duplicação");
+
+            Endereco endereco = enderecoMapper.fromRequest(request.getEnderecoMedicoCompleto());
+            endereco.setActive(true);
+
+            if (tenant == null) {
+                throw new BadRequestException("Não foi possível obter tenant do usuário autenticado");
+            }
+            endereco.setTenant(tenant);
+
+            if (endereco.getSemNumero() == null) {
+                endereco.setSemNumero(false);
+            }
+
+            if (request.getEnderecoMedicoCompleto().getEstado() != null) {
+                Estados estado = estadosRepository.findById(Objects.requireNonNull(request.getEnderecoMedicoCompleto().getEstado()))
+                        .orElseThrow(() -> new NotFoundException("Estado não encontrado com ID: " + request.getEnderecoMedicoCompleto().getEstado()));
+                endereco.setEstado(estado);
+            }
+
+            if (request.getEnderecoMedicoCompleto().getCidade() != null) {
+                Cidades cidade = cidadesRepository.findById(Objects.requireNonNull(request.getEnderecoMedicoCompleto().getCidade()))
+                        .orElseThrow(() -> new NotFoundException("Cidade não encontrada com ID: " + request.getEnderecoMedicoCompleto().getCidade()));
+                endereco.setCidade(cidade);
+            }
+
+            UUID idAntes = endereco.getId();
+            Endereco enderecoProcessado = enderecoService.findOrCreate(endereco);
+            medico.setEnderecoMedico(enderecoProcessado);
+
+            boolean foiCriadoNovo = idAntes == null && enderecoProcessado.getId() != null;
+            log.info("Endereço médico processado. ID: {} - {}",
+                    enderecoProcessado.getId(),
+                    foiCriadoNovo ? "Novo endereço criado" : "Endereço existente reutilizado");
+
+        } else if (request.getEnderecoMedico() != null) {
+            log.debug("Processando endereço médico como UUID: {}", request.getEnderecoMedico());
+            Endereco enderecoMedico = enderecoRepository.findById(Objects.requireNonNull(request.getEnderecoMedico()))
+                    .orElseThrow(() -> new NotFoundException("Endereço médico não encontrado com ID: " + request.getEnderecoMedico()));
+            medico.setEnderecoMedico(enderecoMedico);
+        } else {
+            log.debug("Endereço médico não fornecido. Mantendo endereço existente.");
+        }
     }
 
     private void processarEstabelecimentos(Medicos medico, MedicosRequest request, Tenant tenant) {

@@ -163,6 +163,7 @@ public class JpaConfig {
                     // para evitar erros de "does not belong to the same persistence unit"
                     "com.upsaude.entity.sistema.multitenancy", // Tenant
                     "com.upsaude.entity.sistema.usuario", // UsuariosSistema
+                    "com.upsaude.entity.sistema.auth", // User (referenciado por UsuariosSistema)
                     "com.upsaude.entity.sistema.notificacao", // Notificacao
                     "com.upsaude.entity.sistema.integracao", // IntegracaoGov
                     "com.upsaude.entity.sistema.lgpd", // LGPDConsentimento

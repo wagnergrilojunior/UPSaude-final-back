@@ -14,9 +14,9 @@ import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
-import jakarta.validation.constraints.NotNull;
-import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.time.OffsetDateTime;
 
@@ -29,13 +29,13 @@ import java.time.OffsetDateTime;
            @Index(name = "idx_plantao_estabelecimento", columnList = "estabelecimento_id"),
            @Index(name = "idx_plantao_periodo", columnList = "data_hora_inicio,data_hora_fim")
        })
-@Data
-@EqualsAndHashCode(callSuper = true)
+@Getter
+@Setter
+@EqualsAndHashCode(onlyExplicitlyIncluded = true, callSuper = true)
 public class Plantao extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "profissional_id", nullable = false)
-    @NotNull(message = "Profissional de saúde é obrigatório")
     private ProfissionaisSaude profissional;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -43,19 +43,16 @@ public class Plantao extends BaseEntity {
     private Medicos medico;
 
     @Column(name = "data_hora_inicio", nullable = false)
-    @NotNull(message = "Data e hora de início do plantão são obrigatórias")
     private OffsetDateTime dataHoraInicio;
 
     @Column(name = "data_hora_fim")
     private OffsetDateTime dataHoraFim;
 
     @Column(name = "data_hora_fim_previsto", nullable = false)
-    @NotNull(message = "Data e hora prevista de fim do plantão é obrigatória")
     private OffsetDateTime dataHoraFimPrevisto;
 
     @Convert(converter = TipoPlantaoEnumConverter.class)
     @Column(name = "tipo_plantao", nullable = false)
-    @NotNull(message = "Tipo de plantão é obrigatório")
     private TipoPlantaoEnum tipoPlantao;
 
     @Column(name = "setor", length = 255)

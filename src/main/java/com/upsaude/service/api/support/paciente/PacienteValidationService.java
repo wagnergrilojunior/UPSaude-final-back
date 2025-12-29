@@ -1,11 +1,9 @@
 package com.upsaude.service.api.support.paciente;
 
 import com.upsaude.api.request.paciente.PacienteRequest;
-import com.upsaude.entity.paciente.Paciente;
 import com.upsaude.entity.paciente.PacienteIdentificador;
 import com.upsaude.entity.paciente.PacienteContato;
 import com.upsaude.enums.TipoIdentificadorEnum;
-import com.upsaude.enums.TipoContatoEnum;
 import com.upsaude.exception.BadRequestException;
 import com.upsaude.repository.paciente.PacienteRepository;
 import com.upsaude.repository.paciente.PacienteIdentificadorRepository;
@@ -95,7 +93,7 @@ public class PacienteValidationService {
             return;
         }
 
-        Optional<PacienteContato> contatoExistente = contatoRepository.findByTipoAndValorAndTenantId(TipoContatoEnum.EMAIL, email, tenantId);
+        Optional<PacienteContato> contatoExistente = contatoRepository.findByEmailAndTenantId(email, tenantId);
 
         if (contatoExistente.isPresent()) {
             PacienteContato contato = contatoExistente.get();

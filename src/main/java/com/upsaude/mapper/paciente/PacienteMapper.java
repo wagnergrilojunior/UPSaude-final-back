@@ -3,6 +3,7 @@ package com.upsaude.mapper.paciente;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
+import org.mapstruct.Named;
 
 import com.upsaude.api.request.paciente.PacienteRequest;
 import com.upsaude.api.response.paciente.PacienteResponse;
@@ -10,16 +11,20 @@ import com.upsaude.api.response.paciente.PacienteSimplificadoResponse;
 import com.upsaude.entity.paciente.Paciente;
 import com.upsaude.mapper.config.MappingConfig;
 import com.upsaude.mapper.convenio.ConvenioMapper;
+import com.upsaude.mapper.embeddable.InformacoesConvenioPacienteMapper;
 import com.upsaude.mapper.paciente.deficiencia.DeficienciasPacienteMapper;
 import com.upsaude.mapper.sistema.lgpd.LGPDConsentimentoMapper;
 import com.upsaude.mapper.sistema.integracao.IntegracaoGovMapper;
+import org.mapstruct.factory.Mappers;
 import com.upsaude.repository.projection.PacienteSimplificadoProjection;
 import com.upsaude.enums.TipoIdentificadorEnum;
 import com.upsaude.enums.TipoContatoEnum;
 import java.time.LocalDate;
 
-@Mapper(config = MappingConfig.class, uses = {ConvenioMapper.class, DadosClinicosBasicosMapper.class, DadosSociodemograficosMapper.class, IntegracaoGovMapper.class, LGPDConsentimentoMapper.class, ResponsavelLegalMapper.class, DeficienciasPacienteMapper.class})
+@Mapper(config = MappingConfig.class, uses = {ConvenioMapper.class, DadosClinicosBasicosMapper.class, IntegracaoGovMapper.class, LGPDConsentimentoMapper.class, DeficienciasPacienteMapper.class, InformacoesConvenioPacienteMapper.class})
 public interface PacienteMapper {
+    
+    InformacoesConvenioPacienteMapper informacoesConvenioMapper = Mappers.getMapper(InformacoesConvenioPacienteMapper.class);
 
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
@@ -32,13 +37,13 @@ public interface PacienteMapper {
     @Mapping(target = "lgpdConsentimento", ignore = true)
     @Mapping(target = "responsavelLegal", ignore = true)
     @Mapping(target = "enderecos", ignore = true)
-    @Mapping(target = "alergias", ignore = true)
     @Mapping(target = "deficiencias", ignore = true)
     @Mapping(target = "identificadores", ignore = true)
     @Mapping(target = "contatos", ignore = true)
     @Mapping(target = "vinculosTerritoriais", ignore = true)
     @Mapping(target = "dadosPessoaisComplementares", ignore = true)
     @Mapping(target = "obito", ignore = true)
+    @Mapping(target = "informacoesConvenio", ignore = true)
     Paciente fromRequest(PacienteRequest request);
 
     @Mapping(target = "id", ignore = true)
@@ -52,16 +57,135 @@ public interface PacienteMapper {
     @Mapping(target = "lgpdConsentimento", ignore = true)
     @Mapping(target = "responsavelLegal", ignore = true)
     @Mapping(target = "enderecos", ignore = true)
-    @Mapping(target = "alergias", ignore = true)
     @Mapping(target = "deficiencias", ignore = true)
     @Mapping(target = "identificadores", ignore = true)
     @Mapping(target = "contatos", ignore = true)
     @Mapping(target = "vinculosTerritoriais", ignore = true)
     @Mapping(target = "dadosPessoaisComplementares", ignore = true)
     @Mapping(target = "obito", ignore = true)
+    @Mapping(target = "informacoesConvenio", ignore = true)
     void updateFromRequest(PacienteRequest request, @MappingTarget Paciente entity);
 
+    @Mapping(target = "cpf", ignore = true)
+    @Mapping(target = "rg", ignore = true)
+    @Mapping(target = "cns", ignore = true)
+    @Mapping(target = "telefone", ignore = true)
+    @Mapping(target = "email", ignore = true)
+    @Mapping(target = "nomeMae", ignore = true)
+    @Mapping(target = "nomePai", ignore = true)
+    @Mapping(target = "responsavelNome", ignore = true)
+    @Mapping(target = "responsavelCpf", ignore = true)
+    @Mapping(target = "responsavelTelefone", ignore = true)
+    @Mapping(target = "racaCor", ignore = true)
+    @Mapping(target = "nacionalidade", ignore = true)
+    @Mapping(target = "paisNascimento", ignore = true)
+    @Mapping(target = "naturalidade", ignore = true)
+    @Mapping(target = "escolaridade", ignore = true)
+    @Mapping(target = "ocupacaoProfissao", ignore = true)
+    @Mapping(target = "situacaoRua", ignore = true)
+    @Mapping(target = "estadoCivil", ignore = true)
+    @Mapping(target = "identidadeGenero", ignore = true)
+    @Mapping(target = "orientacaoSexual", ignore = true)
+    @Mapping(target = "cartaoSusAtivo", ignore = true)
+    @Mapping(target = "cnsValidado", ignore = true)
+    @Mapping(target = "acompanhadoPorEquipeEsf", ignore = true)
+    @Mapping(target = "possuiDeficiencia", ignore = true)
+    @Mapping(target = "idade", ignore = true)
+    @Mapping(target = "responsavelLegal", ignore = true)
+    @Mapping(target = "dadosSociodemograficos", ignore = true)
     PacienteResponse toResponse(Paciente entity);
+
+    @Named("toResponseCompleto")
+    default PacienteResponse toResponseCompleto(Paciente paciente) {
+        if (paciente == null) return null;
+        
+        PacienteResponse response = toResponse(paciente);
+        
+        // Mapear identificadores
+        if (paciente.getIdentificadores() != null) {
+            response.setCpf(paciente.getIdentificadores().stream()
+                    .filter(id -> id.getTipo() == TipoIdentificadorEnum.CPF && Boolean.TRUE.equals(id.getPrincipal()))
+                    .map(id -> id.getValor())
+                    .findFirst().orElse(null));
+            response.setCns(paciente.getIdentificadores().stream()
+                    .filter(id -> id.getTipo() == TipoIdentificadorEnum.CNS && Boolean.TRUE.equals(id.getPrincipal()))
+                    .map(id -> id.getValor())
+                    .findFirst().orElse(null));
+            response.setRg(paciente.getIdentificadores().stream()
+                    .filter(id -> id.getTipo() == TipoIdentificadorEnum.RG && Boolean.TRUE.equals(id.getPrincipal()))
+                    .map(id -> id.getValor())
+                    .findFirst().orElse(null));
+        }
+        
+        // Mapear contatos
+        if (paciente.getContatos() != null) {
+            // Buscar telefone
+            response.setTelefone(paciente.getContatos().stream()
+                    .filter(c -> c.getTipo() == TipoContatoEnum.TELEFONE)
+                    .map(c -> c.getTelefone())
+                    .filter(t -> t != null && !t.trim().isEmpty())
+                    .findFirst().orElse(null));
+            
+            // Buscar email
+            response.setEmail(paciente.getContatos().stream()
+                    .filter(c -> c.getTipo() == TipoContatoEnum.EMAIL)
+                    .map(c -> c.getEmail())
+                    .filter(e -> e != null && !e.trim().isEmpty())
+                    .findFirst().orElse(null));
+        }
+        
+        // Mapear dados pessoais complementares
+        if (paciente.getDadosPessoaisComplementares() != null) {
+            response.setNomeMae(paciente.getDadosPessoaisComplementares().getNomeMae());
+            response.setNomePai(paciente.getDadosPessoaisComplementares().getNomePai());
+            response.setIdentidadeGenero(paciente.getDadosPessoaisComplementares().getIdentidadeGenero());
+            response.setOrientacaoSexual(paciente.getDadosPessoaisComplementares().getOrientacaoSexual());
+        }
+        
+        // Mapear dados sociodemográficos
+        if (paciente.getDadosSociodemograficos() != null) {
+            response.setRacaCor(paciente.getDadosSociodemograficos().getRacaCor());
+            response.setNacionalidade(paciente.getDadosSociodemograficos().getNacionalidade());
+            response.setPaisNascimento(paciente.getDadosSociodemograficos().getPaisNascimento());
+            response.setNaturalidade(paciente.getDadosSociodemograficos().getNaturalidade());
+            response.setEscolaridade(paciente.getDadosSociodemograficos().getEscolaridade());
+            response.setOcupacaoProfissao(paciente.getDadosSociodemograficos().getOcupacaoProfissao());
+            response.setSituacaoRua(paciente.getDadosSociodemograficos().getSituacaoRua());
+        }
+        
+        // Mapear responsável legal (campos diretos apenas, não o objeto completo para evitar recursão)
+        if (paciente.getResponsavelLegal() != null) {
+            response.setResponsavelNome(paciente.getResponsavelLegal().getNome());
+            response.setResponsavelCpf(paciente.getResponsavelLegal().getCpf());
+            response.setResponsavelTelefone(paciente.getResponsavelLegal().getTelefone());
+            // Não mapear o objeto completo para evitar recursão circular
+        }
+        
+        // Mapear dados sociodemográficos (campos diretos apenas, não o objeto completo para evitar recursão)
+        if (paciente.getDadosSociodemograficos() != null) {
+            // Os campos já foram mapeados acima, não precisamos mapear o objeto completo
+        }
+        
+        // Mapear integração gov
+        if (paciente.getIntegracoesGov() != null && !paciente.getIntegracoesGov().isEmpty()) {
+            com.upsaude.entity.sistema.integracao.IntegracaoGov integracao = paciente.getIntegracoesGov().get(0);
+            response.setCartaoSusAtivo(integracao.getCartaoSusAtivo());
+            response.setCnsValidado(integracao.getCnsValidado());
+        }
+        
+        // Mapear vínculos territoriais
+        if (paciente.getVinculosTerritoriais() != null) {
+            response.setAcompanhadoPorEquipeEsf(paciente.getVinculosTerritoriais().stream()
+                    .anyMatch(v -> Boolean.TRUE.equals(v.getActive())));
+        }
+        
+        // Mapear deficiências
+        if (paciente.getDeficiencias() != null) {
+            response.setPossuiDeficiencia(!paciente.getDeficiencias().isEmpty());
+        }
+        
+        return response;
+    }
 
     default PacienteSimplificadoResponse toSimplified(Paciente paciente) {
         if (paciente == null) return null;
@@ -88,14 +212,16 @@ public interface PacienteMapper {
         // Buscar contatos principais
         String telefone = paciente.getContatos() != null ? 
             paciente.getContatos().stream()
-                .filter(c -> c.getTipo() == TipoContatoEnum.TELEFONE && Boolean.TRUE.equals(c.getPrincipal()))
-                .map(c -> c.getValor())
+                .filter(c -> c.getTipo() == TipoContatoEnum.TELEFONE)
+                .map(c -> c.getTelefone())
+                .filter(t -> t != null && !t.trim().isEmpty())
                 .findFirst().orElse(null) : null;
         
         String email = paciente.getContatos() != null ? 
             paciente.getContatos().stream()
-                .filter(c -> c.getTipo() == TipoContatoEnum.EMAIL && Boolean.TRUE.equals(c.getPrincipal()))
-                .map(c -> c.getValor())
+                .filter(c -> c.getTipo() == TipoContatoEnum.EMAIL)
+                .map(c -> c.getEmail())
+                .filter(e -> e != null && !e.trim().isEmpty())
                 .findFirst().orElse(null) : null;
         
         // Buscar dados pessoais complementares
@@ -184,8 +310,8 @@ public interface PacienteMapper {
                 .responsavelNome(responsavelNome)
                 .responsavelCpf(responsavelCpf)
                 .responsavelTelefone(responsavelTelefone)
-                .numeroCarteirinha(paciente.getNumeroCarteirinha())
-                .dataValidadeCarteirinha(paciente.getDataValidadeCarteirinha())
+                .informacoesConvenio(paciente.getInformacoesConvenio() != null ? 
+                    informacoesConvenioMapper.toResponse(paciente.getInformacoesConvenio()) : null)
                 .observacoes(paciente.getObservacoes())
                 .racaCor(racaCor)
                 .nacionalidade(nacionalidade)
@@ -234,8 +360,11 @@ public interface PacienteMapper {
                 .responsavelNome(projecao.getResponsavelNome())
                 .responsavelCpf(projecao.getResponsavelCpf())
                 .responsavelTelefone(projecao.getResponsavelTelefone())
-                .numeroCarteirinha(projecao.getNumeroCarteirinha())
-                .dataValidadeCarteirinha(projecao.getDataValidadeCarteirinha())
+                .informacoesConvenio(projecao.getNumeroCarteirinha() != null || projecao.getDataValidadeCarteirinha() != null ?
+                    com.upsaude.api.response.embeddable.InformacoesConvenioPacienteResponse.builder()
+                        .numeroCarteirinha(projecao.getNumeroCarteirinha())
+                        .dataValidadeCarteirinha(projecao.getDataValidadeCarteirinha())
+                        .build() : null)
                 .observacoes(projecao.getObservacoes())
                 .racaCor(projecao.getRacaCor())
                 .nacionalidade(projecao.getNacionalidade())

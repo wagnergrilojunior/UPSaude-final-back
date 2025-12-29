@@ -39,9 +39,15 @@ public class PacienteCreator {
             paciente.setStatusPaciente(StatusPacienteEnum.ATIVO);
         }
 
-        oneToOneHandler.processarRelacionamentos(paciente, request);
+        // Processar relacionamentos que usam UUIDs (buscar entidades existentes)
+        oneToOneHandler.processarRelacionamentosPorUuid(paciente, request);
 
+        // Salvar paciente primeiro para obter ID
         Paciente pacienteSalvo = pacienteRepository.save(paciente);
+        
+        // Processar relacionamentos que criam novas entidades (após paciente ter ID)
+        oneToOneHandler.processarRelacionamentosNovos(pacienteSalvo, request);
+
         log.info("Paciente criado com sucesso. ID: {}, Tenant: {}", pacienteSalvo.getId(), tenantId);
 
         return pacienteSalvo;

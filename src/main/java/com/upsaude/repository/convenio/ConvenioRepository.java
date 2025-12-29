@@ -28,10 +28,6 @@ public interface ConvenioRepository extends JpaRepository<Convenio, UUID> {
 
     boolean existsByInscricaoEstadualAndTenantAndIdNot(String inscricaoEstadual, Tenant tenant, UUID id);
 
-    boolean existsByCodigoAndTenant(String codigo, Tenant tenant);
-
-    boolean existsByCodigoAndTenantAndIdNot(String codigo, Tenant tenant, UUID id);
-
     @Query("SELECT c FROM Convenio c WHERE c.id = :id AND c.tenant.id = :tenantId")
     Optional<Convenio> findByIdAndTenant(@Param("id") UUID id, @Param("tenantId") UUID tenantId);
 
@@ -49,10 +45,4 @@ public interface ConvenioRepository extends JpaRepository<Convenio, UUID> {
 
     @Query("SELECT CASE WHEN COUNT(c) > 0 THEN true ELSE false END FROM Convenio c WHERE c.inscricaoEstadual = :inscricaoEstadual AND c.tenant.id = :tenantId AND c.id <> :id")
     boolean existsByInscricaoEstadualAndTenantIdAndIdNot(@Param("inscricaoEstadual") String inscricaoEstadual, @Param("tenantId") UUID tenantId, @Param("id") UUID id);
-
-    @Query("SELECT CASE WHEN COUNT(c) > 0 THEN true ELSE false END FROM Convenio c WHERE c.codigo = :codigo AND c.tenant.id = :tenantId")
-    boolean existsByCodigoAndTenantId(@Param("codigo") String codigo, @Param("tenantId") UUID tenantId);
-
-    @Query("SELECT CASE WHEN COUNT(c) > 0 THEN true ELSE false END FROM Convenio c WHERE c.codigo = :codigo AND c.tenant.id = :tenantId AND c.id <> :id")
-    boolean existsByCodigoAndTenantIdAndIdNot(@Param("codigo") String codigo, @Param("tenantId") UUID tenantId, @Param("id") UUID id);
 }

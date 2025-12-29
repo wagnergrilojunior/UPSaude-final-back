@@ -27,5 +27,6 @@ public interface LGPDConsentimentoMapper  {
     @Mapping(target = "paciente", ignore = true)
     void updateFromRequest(LGPDConsentimentoRequest request, @MappingTarget LGPDConsentimento entity);
 
+    @Mapping(target = "paciente", source = "paciente", qualifiedByName = "toResponseCompleto")
     LGPDConsentimentoResponse toResponse(LGPDConsentimento entity);
 }

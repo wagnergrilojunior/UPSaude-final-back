@@ -18,11 +18,11 @@ public class PacienteResponseBuilder {
     private final PacienteCalculatorService calculatorService;
 
     public PacienteResponse build(Paciente paciente) {
-        PacienteResponse response = pacienteMapper.toResponse(paciente);
+        PacienteResponse response = pacienteMapper.toResponseCompleto(paciente);
         
-        if (response.getDataNascimento() != null) {
+        if (response != null && response.getDataNascimento() != null) {
             response.setIdade(calculatorService.calcularIdade(response.getDataNascimento()));
-        } else {
+        } else if (response != null) {
             response.setIdade(null);
         }
         

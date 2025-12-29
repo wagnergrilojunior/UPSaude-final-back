@@ -17,10 +17,9 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Size;
-import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.Setter;
 
 @Entity
 @Table(name = "vinculos_profissional_equipe", schema = "public",
@@ -34,22 +33,20 @@ import lombok.EqualsAndHashCode;
            @Index(name = "idx_vinculo_profissional_equipe_status", columnList = "status"),
            @Index(name = "idx_vinculo_profissional_equipe_data_inicio", columnList = "data_inicio")
        })
-@Data
-@EqualsAndHashCode(callSuper = true)
+@Getter
+@Setter
+@EqualsAndHashCode(onlyExplicitlyIncluded = true, callSuper = true)
 public class VinculoProfissionalEquipe extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "profissional_id", nullable = false)
-    @NotNull(message = "Profissional é obrigatório")
     private ProfissionaisSaude profissional;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "equipe_id", nullable = false)
-    @NotNull(message = "Equipe é obrigatória")
     private EquipeSaude equipe;
 
     @Column(name = "data_inicio", nullable = false)
-    @NotNull(message = "Data de início do vínculo é obrigatória")
     private OffsetDateTime dataInicio;
 
     @Column(name = "data_fim")
@@ -57,11 +54,9 @@ public class VinculoProfissionalEquipe extends BaseEntity {
 
     @Convert(converter = TipoVinculoProfissionalEnumConverter.class)
     @Column(name = "tipo_vinculo", nullable = false)
-    @NotNull(message = "Tipo de vínculo é obrigatório")
     private TipoVinculoProfissionalEnum tipoVinculo;
 
     @Column(name = "funcao_equipe", length = 255)
-    @Size(max = 255, message = "Função na equipe deve ter no máximo 255 caracteres")
     private String funcaoEquipe;
 
     @Column(name = "carga_horaria_semanal")
@@ -69,7 +64,6 @@ public class VinculoProfissionalEquipe extends BaseEntity {
 
     @Convert(converter = StatusAtivoEnumConverter.class)
     @Column(name = "status", nullable = false)
-    @NotNull(message = "Status é obrigatório")
     private StatusAtivoEnum status;
 
     @Column(name = "observacoes", columnDefinition = "TEXT")

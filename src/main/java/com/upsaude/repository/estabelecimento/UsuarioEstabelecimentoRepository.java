@@ -16,12 +16,12 @@ public interface UsuarioEstabelecimentoRepository extends JpaRepository<UsuarioE
 
     @Query("SELECT ue FROM UsuarioEstabelecimento ue " +
            "JOIN ue.usuario u " +
-           "WHERE u.userId = :userId AND ue.active = true")
+           "WHERE u.user.id = :userId AND ue.active = true")
     List<UsuarioEstabelecimento> findByUsuarioUserId(@Param("userId") UUID userId);
 
     @Query("SELECT ue FROM UsuarioEstabelecimento ue " +
            "JOIN ue.usuario u " +
-           "WHERE u.userId = :userId AND ue.tenant = :tenant AND ue.active = true")
+           "WHERE u.user.id = :userId AND ue.tenant = :tenant AND ue.active = true")
     List<UsuarioEstabelecimento> findByUsuarioUserIdAndTenant(@Param("userId") UUID userId, @Param("tenant") Tenant tenant);
 
     Page<UsuarioEstabelecimento> findByEstabelecimentoId(UUID estabelecimentoId, Pageable pageable);
@@ -30,11 +30,11 @@ public interface UsuarioEstabelecimentoRepository extends JpaRepository<UsuarioE
 
     @Query("SELECT COUNT(ue) > 0 FROM UsuarioEstabelecimento ue " +
            "JOIN ue.usuario u " +
-           "WHERE u.userId = :userId AND ue.estabelecimento.id = :estabelecimentoId AND ue.active = true")
+           "WHERE u.user.id = :userId AND ue.estabelecimento.id = :estabelecimentoId AND ue.active = true")
     boolean existsByUsuarioUserIdAndEstabelecimentoId(@Param("userId") UUID userId, @Param("estabelecimentoId") UUID estabelecimentoId);
 
     @Query("SELECT ue FROM UsuarioEstabelecimento ue " +
            "JOIN ue.usuario u " +
-           "WHERE u.userId = :userId AND ue.estabelecimento.id = :estabelecimentoId")
+           "WHERE u.user.id = :userId AND ue.estabelecimento.id = :estabelecimentoId")
     java.util.Optional<UsuarioEstabelecimento> findByUsuarioUserIdAndEstabelecimentoId(@Param("userId") UUID userId, @Param("estabelecimentoId") UUID estabelecimentoId);
 }

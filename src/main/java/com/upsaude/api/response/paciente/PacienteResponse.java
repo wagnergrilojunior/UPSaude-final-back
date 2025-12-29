@@ -8,7 +8,6 @@ import java.util.UUID;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import com.upsaude.api.response.AlergiaPacienteResponse;
 import com.upsaude.api.response.convenio.ConvenioResponse;
 import com.upsaude.api.response.deficiencia.DeficienciasPacienteResponse;
 import com.upsaude.api.response.geral.EnderecoResponse;
@@ -84,8 +83,7 @@ public class PacienteResponse {
     private String responsavelCpf;
     private String responsavelTelefone;
     private ConvenioResponse convenio;
-    private String numeroCarteirinha;
-    private LocalDate dataValidadeCarteirinha;
+    private com.upsaude.api.response.embeddable.InformacoesConvenioPacienteResponse informacoesConvenio;
     private String observacoes;
 
     @JsonSerialize(using = RacaCorEnumSerializer.class)
@@ -148,9 +146,6 @@ public class PacienteResponse {
     private IntegracaoGovResponse integracaoGov;
 
     // DoencasPacienteResponse removido - Doencas foi deletada
-
-    @Builder.Default
-    private List<AlergiaPacienteResponse> alergias = new ArrayList<>();
 
     @Builder.Default
     private List<DeficienciasPacienteResponse> deficiencias = new ArrayList<>();

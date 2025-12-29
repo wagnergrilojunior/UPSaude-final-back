@@ -14,28 +14,39 @@ import java.util.UUID;
 public class ProfissionaisSaudeValidationService {
 
     public void validarObrigatorios(ProfissionaisSaudeRequest request) {
-        if (request == null || !StringUtils.hasText(request.getNomeCompleto())) {
+        if (request == null || 
+            request.getDadosPessoaisBasicos() == null || 
+            !StringUtils.hasText(request.getDadosPessoaisBasicos().getNomeCompleto())) {
             throw new BadRequestException("Nome completo é obrigatório");
         }
-        if (!StringUtils.hasText(request.getRegistroProfissional())) {
+        if (request.getRegistroProfissional() == null || 
+            !StringUtils.hasText(request.getRegistroProfissional().getRegistroProfissional())) {
             throw new BadRequestException("Registro profissional é obrigatório");
         }
     }
 
     public void validarUnicidadeParaCriacao(ProfissionaisSaudeRequest request, ProfissionaisSaudeRepository repository, UUID tenantId) {
-        validarCpfUnico(null, request.getCpf(), repository, tenantId);
-        validarEmailUnico(null, request.getEmail(), repository, tenantId);
-        validarRgUnico(null, request.getRg(), repository, tenantId);
-        validarCnsUnico(null, request.getCns(), repository, tenantId);
-        // Conselho removido - ConselhosProfissionais foi deletado
+        String cpf = request.getDocumentosBasicos() != null ? request.getDocumentosBasicos().getCpf() : null;
+        String email = request.getContato() != null ? request.getContato().getEmail() : null;
+        String rg = request.getDocumentosBasicos() != null ? request.getDocumentosBasicos().getRg() : null;
+        String cns = request.getDocumentosBasicos() != null ? request.getDocumentosBasicos().getCns() : null;
+        
+        validarCpfUnico(null, cpf, repository, tenantId);
+        validarEmailUnico(null, email, repository, tenantId);
+        validarRgUnico(null, rg, repository, tenantId);
+        validarCnsUnico(null, cns, repository, tenantId);
     }
 
     public void validarUnicidadeParaAtualizacao(UUID id, ProfissionaisSaudeRequest request, ProfissionaisSaudeRepository repository, UUID tenantId) {
-        validarCpfUnico(id, request.getCpf(), repository, tenantId);
-        validarEmailUnico(id, request.getEmail(), repository, tenantId);
-        validarRgUnico(id, request.getRg(), repository, tenantId);
-        validarCnsUnico(id, request.getCns(), repository, tenantId);
-        // Conselho removido - ConselhosProfissionais foi deletado
+        String cpf = request.getDocumentosBasicos() != null ? request.getDocumentosBasicos().getCpf() : null;
+        String email = request.getContato() != null ? request.getContato().getEmail() : null;
+        String rg = request.getDocumentosBasicos() != null ? request.getDocumentosBasicos().getRg() : null;
+        String cns = request.getDocumentosBasicos() != null ? request.getDocumentosBasicos().getCns() : null;
+        
+        validarCpfUnico(id, cpf, repository, tenantId);
+        validarEmailUnico(id, email, repository, tenantId);
+        validarRgUnico(id, rg, repository, tenantId);
+        validarCnsUnico(id, cns, repository, tenantId);
     }
 
     public void sanitizarFlags(ProfissionaisSaudeRequest request) {

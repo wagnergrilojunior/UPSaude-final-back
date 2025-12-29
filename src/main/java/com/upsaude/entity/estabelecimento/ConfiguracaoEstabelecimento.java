@@ -11,9 +11,9 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
-import jakarta.validation.constraints.NotNull;
-import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.time.LocalTime;
 
@@ -25,13 +25,13 @@ import java.time.LocalTime;
        indexes = {
            @Index(name = "idx_config_estabelecimento", columnList = "estabelecimento_id")
        })
-@Data
-@EqualsAndHashCode(callSuper = true)
+@Getter
+@Setter
+@EqualsAndHashCode(onlyExplicitlyIncluded = true, callSuper = true)
 public class ConfiguracaoEstabelecimento extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "estabelecimento_id", nullable = false, unique = true)
-    @NotNull(message = "Estabelecimento é obrigatório")
     private Estabelecimentos estabelecimento;
 
     @Column(name = "duracao_padrao_atendimento_minutos")
