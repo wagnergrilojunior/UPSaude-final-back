@@ -105,18 +105,29 @@ public class EstabelecimentosRelacionamentosHandler {
     }
 
     public Estabelecimentos processarResponsaveis(EstabelecimentosRequest request, Estabelecimentos estabelecimento, UUID tenantId) {
+        if (estabelecimento.getResponsaveis() == null) {
+            estabelecimento.setResponsaveis(new com.upsaude.entity.embeddable.ResponsaveisEstabelecimento());
+        }
+        
         if (request.getResponsavelTecnico() != null) {
             ProfissionaisSaude rt = profissionaisSaudeTenantEnforcer.validarAcesso(request.getResponsavelTecnico(), tenantId);
-            estabelecimento.setResponsavelTecnico(rt);
+            estabelecimento.getResponsaveis().setResponsavelTecnico(rt);
         } else {
-            estabelecimento.setResponsavelTecnico(null);
+            estabelecimento.getResponsaveis().setResponsavelTecnico(null);
         }
 
         if (request.getResponsavelAdministrativo() != null) {
             ProfissionaisSaude ra = profissionaisSaudeTenantEnforcer.validarAcesso(request.getResponsavelAdministrativo(), tenantId);
-            estabelecimento.setResponsavelAdministrativo(ra);
+            estabelecimento.getResponsaveis().setResponsavelAdministrativo(ra);
         } else {
-            estabelecimento.setResponsavelAdministrativo(null);
+            estabelecimento.getResponsaveis().setResponsavelAdministrativo(null);
+        }
+
+        if (request.getResponsavelLegalNome() != null) {
+            estabelecimento.getResponsaveis().setResponsavelLegalNome(request.getResponsavelLegalNome());
+        }
+        if (request.getResponsavelLegalCpf() != null) {
+            estabelecimento.getResponsaveis().setResponsavelLegalCpf(request.getResponsavelLegalCpf());
         }
 
         return estabelecimento;

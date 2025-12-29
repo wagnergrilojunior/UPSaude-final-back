@@ -66,21 +66,21 @@ public class UsuariosSistemaServiceImpl implements UsuariosSistemaService {
 
         try {
 
+            User user = null;
             if (request.getUserId() != null) {
-                User user = userRepository.findById(request.getUserId())
+                user = userRepository.findById(request.getUserId())
                         .orElseThrow(() -> new NotFoundException("User não encontrado com ID: " + request.getUserId()));
-
-                if (request.getEmail() != null && user.getEmail() != null &&
-                    !user.getEmail().equalsIgnoreCase(request.getEmail())) {
-                    throw new BadRequestException("O email informado não corresponde ao userId fornecido. Email do userId: " + user.getEmail());
-                }
             }
 
-            validarEmailUnico(null, request.getEmail(), request.getUser() != null ? request.getUser().getId() : null);
+            validarEmailUnico(null, user != null ? user.getEmail() : null, request.getUserId());
             validarUsernameUnico(null, request.getDadosIdentificacao() != null ? request.getDadosIdentificacao().getUsername() : null);
 
             UsuariosSistema usuariosSistema = usuariosSistemaMapper.fromRequest(request);
             usuariosSistema.setAtivo(true);
+
+            if (user != null) {
+                usuariosSistema.setUser(user);
+            }
 
             if (request.getTenantId() != null) {
                 Tenant tenant = tenantRepository.findById(request.getTenantId())
@@ -179,7 +179,12 @@ public class UsuariosSistemaServiceImpl implements UsuariosSistemaService {
         UsuariosSistema usuariosSistemaExistente = usuariosSistemaRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("UsuariosSistema não encontrado com ID: " + id));
 
-        validarEmailUnico(id, request.getEmail(), usuariosSistemaExistente.getUser() != null ? usuariosSistemaExistente.getUser().getId() : null);
+        User userAtualizado = null;
+        if (request.getUserId() != null) {
+            userAtualizado = userRepository.findById(request.getUserId())
+                    .orElseThrow(() -> new NotFoundException("User não encontrado com ID: " + request.getUserId()));
+        }
+        validarEmailUnico(id, userAtualizado != null ? userAtualizado.getEmail() : null, request.getUserId());
         validarUsernameUnico(id, request.getDadosIdentificacao() != null ? request.getDadosIdentificacao().getUsername() : null);
 
         atualizarDadosUsuariosSistema(usuariosSistemaExistente, request);
@@ -291,6 +296,12 @@ public class UsuariosSistemaServiceImpl implements UsuariosSistemaService {
     private void atualizarDadosUsuariosSistema(UsuariosSistema usuariosSistema, UsuariosSistemaRequest request) {
 
         usuariosSistemaMapper.updateFromRequest(request, usuariosSistema);
+
+        if (request.getUserId() != null) {
+            User user = userRepository.findById(request.getUserId())
+                    .orElseThrow(() -> new NotFoundException("User não encontrado com ID: " + request.getUserId()));
+            usuariosSistema.setUser(user);
+        }
 
         if (request.getTenantId() != null) {
             Tenant tenant = tenantRepository.findById(request.getTenantId())
@@ -521,8 +532,8 @@ public class UsuariosSistemaServiceImpl implements UsuariosSistemaService {
 
         if (usuario.getTenant() != null) {
             response.setTenantId(usuario.getTenant().getId());
-            response.setTenantNome(usuario.getTenant().getNome());
-            response.setTenantSlug(usuario.getTenant().getSlug());
+            response.setTenantNome(usuario.getTenant().getDadosIdentificacao() != null ? usuario.getTenant().getDadosIdentificacao().getNome() : null);
+            response.setTenantSlug(null);
         }
 
         if (usuario.getUser() != null && usuario.getUser().getId() != null) {
@@ -531,7 +542,6 @@ public class UsuariosSistemaServiceImpl implements UsuariosSistemaService {
                 com.upsaude.integration.supabase.SupabaseAuthResponse.User supabaseUser =
                         supabaseAuthService.getUserById(userId);
                 if (supabaseUser != null && supabaseUser.getEmail() != null) {
-                    response.setEmail(supabaseUser.getEmail());
                     log.debug("Email do Supabase recuperado: {}", supabaseUser.getEmail());
                 } else {
                     log.warn("Email não encontrado no Supabase para userId: {}", userId);
@@ -543,14 +553,14 @@ public class UsuariosSistemaServiceImpl implements UsuariosSistemaService {
             }
         }
 
-        List<UsuarioEstabelecimento> vinculos = usuarioEstabelecimentoRepository.findByUsuarioUserId(usuario.getUserId());
+        List<UsuarioEstabelecimento> vinculos = usuarioEstabelecimentoRepository.findByUsuarioUserId(usuario.getUser() != null ? usuario.getUser().getId() : null);
         if (vinculos != null && !vinculos.isEmpty()) {
             List<UsuariosSistemaResponse.EstabelecimentoVinculoSimples> vinculosResponse = vinculos.stream()
                     .filter(v -> Boolean.TRUE.equals(v.getActive()))
                     .map(v -> UsuariosSistemaResponse.EstabelecimentoVinculoSimples.builder()
                             .id(v.getId())
                             .estabelecimentoId(v.getEstabelecimento().getId())
-                            .estabelecimentoNome(v.getEstabelecimento().getNome())
+                            .estabelecimentoNome(v.getEstabelecimento().getDadosIdentificacao() != null ? v.getEstabelecimento().getDadosIdentificacao().getNome() : null)
                             .tipoUsuario(v.getTipoUsuario())
                             .active(v.getActive())
                             .build())
@@ -559,7 +569,7 @@ public class UsuariosSistemaServiceImpl implements UsuariosSistemaService {
             log.debug("Vínculos de estabelecimentos carregados: {} ativos", vinculosResponse.size());
         }
 
-        if (Boolean.TRUE.equals(usuario.getAdminTenant())) {
+        if (usuario.getConfiguracao() != null && Boolean.TRUE.equals(usuario.getConfiguracao().getAdminTenant())) {
             response.setTipoUsuario(com.upsaude.enums.TipoUsuarioSistemaEnum.ADMIN_TENANT);
         } else if (usuario.getMedico() != null) {
             response.setTipoUsuario(com.upsaude.enums.TipoUsuarioSistemaEnum.MEDICO);
