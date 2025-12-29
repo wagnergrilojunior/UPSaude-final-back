@@ -1,0 +1,21 @@
+{
+  "mcpServers": {
+    "upsaude-back-mcp": {
+      "command": "node",
+      "args": [
+        "tools/upsaude-back-mcp/build/index.js"
+      ],
+      "cwd": "/Users/wagnergrilo/Desktop/WGB/sistemas/UPSaude/code_trae/UPSaude-final-back",
+      "env": {
+        "UPSAUDE_PROJECT_ROOT": "/Users/wagnergrilo/Desktop/WGB/sistemas/UPSaude/code_trae/UPSaude-final-back"
+      }
+    },
+    "supabase": {
+      "type": "http",
+      "url": "https://mcp.supabase.com/mcp?project_ref=pririvdtylilyrtfbmmv",
+      "headers": {
+        "Authorization": "Bearer sbp_92630de7a5c1b1172f19023e1963f4523e10dc78"
+      }
+    }
+  }
+}

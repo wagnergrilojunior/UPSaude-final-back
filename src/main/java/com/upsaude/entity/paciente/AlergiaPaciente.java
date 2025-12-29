@@ -24,7 +24,7 @@ import java.time.OffsetDateTime;
        indexes = {
            @Index(name = "idx_alergia_paciente_paciente", columnList = "paciente_id"),
            @Index(name = "idx_alergia_paciente_ativo", columnList = "ativo"),
-           @Index(name = "idx_alergia_paciente_data_registro", columnList = "data_registro"),
+           // @Index(name = "idx_alergia_paciente_data_registro", columnList = "data_registro"),
            @Index(name = "idx_alergia_paciente_paciente_tipo", columnList = "paciente_id, tipo"),
            @Index(name = "idx_alergia_paciente_paciente_substancia", columnList = "paciente_id, substancia")
        })
@@ -60,14 +60,14 @@ public class AlergiaPaciente extends BaseEntity {
     @Column(name = "observacao", columnDefinition = "TEXT")
     private String observacao;
 
-    @Column(name = "data_registro", nullable = false, columnDefinition = "TIMESTAMP WITH TIME ZONE")
-    private OffsetDateTime dataRegistro;
+    // @Column(name = "data_registro", nullable = false, columnDefinition = "TIMESTAMP WITH TIME ZONE")
+    // private OffsetDateTime dataRegistro;
 
     @PrePersist
     public void prePersist() {
-        if (dataRegistro == null) {
-            dataRegistro = OffsetDateTime.now();
-        }
+        // if (dataRegistro == null) {
+        //     dataRegistro = OffsetDateTime.now();
+        // }
         if (this.getActive() == null) {
             this.setActive(true);
         }
