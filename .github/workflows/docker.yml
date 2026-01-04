@@ -1,4 +1,4 @@
-name: Build and Push Docker Image
+name: Build, Push and Deploy UPSaude Backend
 
 on:
   push:
@@ -9,14 +9,14 @@ permissions:
   packages: write
 
 jobs:
-  docker:
+  build-deploy:
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout do código
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0  # Fetch all history for better metadata
+          fetch-depth: 0
 
       - name: Configurar Java 17
         uses: actions/setup-java@v4
@@ -34,27 +34,23 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Gerar metadata e tags da imagem Docker
+      - name: Gerar metadata da imagem Docker
         id: meta
         uses: docker/metadata-action@v5
         with:
           images: ghcr.io/wagnergrilojunior/upsaude-final-back
           tags: |
             type=raw,value=latest
-            type=sha,prefix=sha-,format=short
             type=raw,value=build-${{ github.run_number }}
+            type=sha,prefix=sha-,format=short
           labels: |
             org.opencontainers.image.title=UPSaude Backend API
             org.opencontainers.image.description=Spring Boot API para UPSaude
-            org.opencontainers.image.version=${{ github.sha }}
+            org.opencontainers.image.version=1.0.0.${{ github.run_number }}
             org.opencontainers.image.revision=${{ github.sha }}
             org.opencontainers.image.source=${{ github.repositoryUrl }}
-            org.opencontainers.image.created=${{ github.event.head_commit.timestamp }}
-            org.opencontainers.image.authors=${{ github.actor }}
-            com.github.run-id=${{ github.run_id }}
-            com.github.run-number=${{ github.run_number }}
-            com.github.ref=${{ github.ref }}
-            com.github.sha=${{ github.sha }}
+            org.opencontainers.image.created=${{ github.run_started_at }}
+            org.opencontainers.image.authors=WGB Soluções de Software
 
       - name: Build e Push da imagem Docker
         uses: docker/build-push-action@v5
@@ -64,3 +60,33 @@ jobs:
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           platforms: linux/amd64
+          no-cache: true   # 🔥 força rebuild completo
+
+      - name: Deploy no servidor (limpeza total)
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SERVER_SSH_KEY }}
+          script: |
+            echo "🛑 Parando container antigo"
+            docker stop upsaude-api || true
+            docker rm upsaude-api || true
+
+            echo "🧹 Limpando cache Docker"
+            docker image prune -af
+            docker builder prune -af
+
+            echo "⬇️ Pull da nova imagem"
+            docker pull ghcr.io/wagnergrilojunior/upsaude-final-back:latest
+
+            echo "🚀 Subindo nova versão"
+            docker run -d \
+              --name upsaude-api \
+              -p 127.0.0.1:8080:8080 \
+              --restart unless-stopped \
+              -e SPRING_PROFILES_ACTIVE=prod \
+              -e SPRINGDOC_CACHE_DISABLED=true \
+              ghcr.io/wagnergrilojunior/upsaude-final-back:latest
+
+            echo "✅ Deploy concluído"
