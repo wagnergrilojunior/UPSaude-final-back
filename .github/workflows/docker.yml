@@ -112,7 +112,6 @@ jobs:
               -p 127.0.0.1:8080:8080 \
               --restart unless-stopped \
               -e SPRING_PROFILES_ACTIVE=prod \
-              -e SPRINGDOC_CACHE_DISABLED=true \
               $IMAGE
 
             echo "✅ Deploy concluído"
