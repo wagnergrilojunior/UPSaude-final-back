@@ -59,7 +59,7 @@ public class DataSourceConfig {
         config.addDataSourceProperty("cancelSignalTimeout", "30");
 
         config.setConnectionTestQuery("SELECT 1");
-        config.setInitializationFailTimeout(30000);
+        config.setInitializationFailTimeout(-1); // -1 = nunca falhar no startup, conexão lazy
         config.setRegisterMbeans(false);
 
         // Define valores padrão ANTES do @ConfigurationProperties aplicar
@@ -117,7 +117,7 @@ public class DataSourceConfig {
         config.addDataSourceProperty("cancelSignalTimeout", "30");
 
         config.setConnectionTestQuery("SELECT 1");
-        config.setInitializationFailTimeout(30000);
+        config.setInitializationFailTimeout(-1); // -1 = nunca falhar no startup, conexão lazy
         config.setRegisterMbeans(false);
 
         // Define valores padrão ANTES do @ConfigurationProperties aplicar
@@ -140,36 +140,18 @@ public class DataSourceConfig {
     @Primary
     @Qualifier("apiDataSource")
     public DataSource apiDataSource(@Qualifier("apiHikariConfig") HikariConfig apiHikariConfig) {
-        try {
-            log.info("Inicializando pool de conexões HikariCP API...");
-            HikariDataSource dataSource = new HikariDataSource(apiHikariConfig);
-
-            try (java.sql.Connection connection = dataSource.getConnection()) {
-                log.info("Conexão API com banco de dados estabelecida com sucesso!");
-            } catch (Exception e) {
-                log.error("ERRO ao validar conexão inicial API com banco de dados: {}", e.getMessage(), e);
-                log.error("Verifique se:");
-                log.error("1. O host do banco está acessível do ambiente de produção");
-                log.error("2. As credenciais estão corretas");
-                log.error("3. Não há firewall bloqueando a conexão");
-                log.error("4. A URL do banco está correta: {}", apiHikariConfig.getJdbcUrl().replaceAll("password=[^&;]*", "password=***"));
-                throw new RuntimeException("Falha ao conectar ao banco de dados (API). Verifique os logs acima para detalhes.", e);
-            }
-
-            log.info("Pool API inicializado: maxPoolSize={}, minIdle={}", 
-                    apiHikariConfig.getMaximumPoolSize(), apiHikariConfig.getMinimumIdle());
-            return dataSource;
-        } catch (Exception e) {
-            log.error("ERRO CRÍTICO ao criar DataSource API: {}", e.getMessage(), e);
-            if (e.getCause() instanceof java.net.SocketException) {
-                log.error("PROBLEMA DE REDE DETECTADO:");
-                log.error("- Verifique se o ambiente tem acesso à internet");
-                log.error("- Verifique se há firewall bloqueando conexões");
-                log.error("- Verifique se o host do banco está correto e acessível");
-                log.error("- Host tentado: {}", extractHostFromUrl(apiHikariConfig.getJdbcUrl()));
-            }
-            throw e;
-        }
+        log.info("Criando DataSource API HikariCP (lazy initialization - conexão será estabelecida sob demanda)...");
+        HikariDataSource dataSource = new HikariDataSource(apiHikariConfig);
+        
+        // NÃO validamos conexão no startup para evitar fail-fast
+        // O pool será inicializado de forma lazy quando a primeira conexão for solicitada
+        // O health check do Actuator será responsável por verificar a disponibilidade do banco
+        
+        log.info("DataSource API HikariCP criado com sucesso. Pool: maxPoolSize={}, minIdle={}", 
+                apiHikariConfig.getMaximumPoolSize(), apiHikariConfig.getMinimumIdle());
+        log.info("Nota: Conexão com o banco será estabelecida sob demanda. Use /api/actuator/health para verificar disponibilidade.");
+        
+        return dataSource;
     }
 
     /**
@@ -179,55 +161,18 @@ public class DataSourceConfig {
     @Bean
     @Qualifier("jobDataSource")
     public DataSource jobDataSource(@Qualifier("jobHikariConfig") HikariConfig jobHikariConfig) {
-        try {
-            log.info("Inicializando pool de conexões HikariCP JOB...");
-            HikariDataSource dataSource = new HikariDataSource(jobHikariConfig);
-
-            try (java.sql.Connection connection = dataSource.getConnection()) {
-                log.info("Conexão JOB com banco de dados estabelecida com sucesso!");
-            } catch (Exception e) {
-                log.error("ERRO ao validar conexão inicial JOB com banco de dados: {}", e.getMessage(), e);
-                log.error("Verifique se:");
-                log.error("1. O host do banco está acessível do ambiente de produção");
-                log.error("2. As credenciais estão corretas");
-                log.error("3. Não há firewall bloqueando a conexão");
-                log.error("4. A URL do banco está correta: {}", jobHikariConfig.getJdbcUrl().replaceAll("password=[^&;]*", "password=***"));
-                throw new RuntimeException("Falha ao conectar ao banco de dados (JOB). Verifique os logs acima para detalhes.", e);
-            }
-
-            log.info("Pool JOB inicializado: maxPoolSize={}, minIdle={}", 
-                    jobHikariConfig.getMaximumPoolSize(), jobHikariConfig.getMinimumIdle());
-            return dataSource;
-        } catch (Exception e) {
-            log.error("ERRO CRÍTICO ao criar DataSource JOB: {}", e.getMessage(), e);
-            if (e.getCause() instanceof java.net.SocketException) {
-                log.error("PROBLEMA DE REDE DETECTADO:");
-                log.error("- Verifique se o ambiente tem acesso à internet");
-                log.error("- Verifique se há firewall bloqueando conexões");
-                log.error("- Verifique se o host do banco está correto e acessível");
-                log.error("- Host tentado: {}", extractHostFromUrl(jobHikariConfig.getJdbcUrl()));
-            }
-            throw e;
-        }
+        log.info("Criando DataSource JOB HikariCP (lazy initialization - conexão será estabelecida sob demanda)...");
+        HikariDataSource dataSource = new HikariDataSource(jobHikariConfig);
+        
+        // NÃO validamos conexão no startup para evitar fail-fast
+        // O pool será inicializado de forma lazy quando a primeira conexão for solicitada
+        // O health check do Actuator será responsável por verificar a disponibilidade do banco
+        
+        log.info("DataSource JOB HikariCP criado com sucesso. Pool: maxPoolSize={}, minIdle={}", 
+                jobHikariConfig.getMaximumPoolSize(), jobHikariConfig.getMinimumIdle());
+        log.info("Nota: Conexão com o banco será estabelecida sob demanda. Use /api/actuator/health para verificar disponibilidade.");
+        
+        return dataSource;
     }
 
-    private String extractHostFromUrl(String jdbcUrl) {
-        if (jdbcUrl == null) {
-            return "null";
-        }
-        try {
-
-            int start = jdbcUrl.indexOf("://") + 3;
-            int end = jdbcUrl.indexOf("/", start);
-            if (end == -1) {
-                end = jdbcUrl.indexOf("?", start);
-            }
-            if (end == -1) {
-                end = jdbcUrl.length();
-            }
-            return jdbcUrl.substring(start, end);
-        } catch (Exception e) {
-            return jdbcUrl;
-        }
-    }
 }
