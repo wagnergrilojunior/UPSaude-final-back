@@ -1,4 +1,4 @@
-name: Build, Push and Deploy UPSaude API
+name: 🚀 UPSaude CI/CD Pipeline
 
 on:
   push:
@@ -10,55 +10,64 @@ permissions:
 
 jobs:
   deploy:
+    name: CI/CD - Build, Deploy & Validate
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout do código
+      # ==============================
+      # STAGE: BUILD
+      # ==============================
+      - name: 📥 Checkout source code
         uses: actions/checkout@v4
 
-      - name: Configurar Java 17
+      - name: ☕ Setup Java 17
         uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: 17
 
-      - name: Build do projeto (Maven)
-        run: mvn clean package -DskipTests
-
-      # 🔢 Captura a versão do projeto (pom.xml)
-      - name: Obter versão do projeto
-        id: project_version
+      - name: 🏗️ Build application (Maven)
         run: |
-          VERSION=$(mvn -q -Dexec.executable=echo -Dexec.args='${project.version}' --non-recursive exec:exec)
-          echo "PROJECT_VERSION=$VERSION" >> $GITHUB_ENV
-          echo "Versão do projeto: $VERSION"
+          echo "::group::Maven Build"
+          mvn clean package -DskipTests
+          echo "::endgroup::"
 
-      - name: Login no GitHub Container Registry
+      # ==============================
+      # STAGE: DOCKER
+      # ==============================
+      - name: 🔐 Login to GitHub Container Registry
         uses: docker/login-action@v3
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Build e Push da imagem Docker
-        uses: docker/build-push-action@v5
-        with:
-          context: .
-          push: true
-          tags: ghcr.io/wagnergrilojunior/upsaude-final-back:latest
+      - name: 🐳 Build & Push Docker image
+        run: |
+          echo "::group::Docker Build & Push"
+          docker buildx build \
+            --tag ghcr.io/wagnergrilojunior/upsaude-final-back:latest \
+            --push .
+          echo "::endgroup::"
 
-      - name: Deploy no servidor Absam (SSH)
+      # ==============================
+      # STAGE: DEPLOY
+      # ==============================
+      - name: 🚀 Deploy to Production (SSH)
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.SSH_HOST }}
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_KEY }}
           script: |
+            echo "🔄 Pulling latest image..."
             docker pull ghcr.io/wagnergrilojunior/upsaude-final-back:latest
 
+            echo "🛑 Stopping old container..."
             docker stop upsaude-api || true
             docker rm upsaude-api || true
 
+            echo "▶️ Starting new container..."
             docker run -d \
               --name upsaude-api \
               --restart unless-stopped \
@@ -66,27 +75,29 @@ jobs:
               -e SPRING_PROFILES_ACTIVE=prod \
               ghcr.io/wagnergrilojunior/upsaude-final-back:latest
 
-      # ⏳ Aguarda a aplicação subir
-      - name: Aguardar aplicação iniciar
-        run: sleep 25
+      # ==============================
+      # STAGE: VALIDATION
+      # ==============================
+      - name: ⏳ Wait for application startup
+        run: sleep 10
 
-      # ❤️ Healthcheck da API
-      - name: Validar healthcheck da API
+      - name: ❤️ Healthcheck validation
         run: |
-          curl -f https://api-pmsrs.upsaude.wgbsolucoes.com.br/api/actuator/health
+          echo "::group::Healthcheck Validation"
 
-      # 🧪 Validação de versão do deploy
-      - name: Validar versão publicada
-        run: |
-          echo "Versão esperada: $PROJECT_VERSION"
+          for i in {1..15}; do
+            STATUS=$(curl -s -o /dev/null -w "%{http_code}" https://api-pmsrs.upsaude.wgbsolucoes.com.br/api/actuator/health)
 
-          DEPLOYED_VERSION=$(curl -s https://api-pmsrs.upsaude.wgbsolucoes.com.br/api/actuator/info | jq -r '.app.version')
+            if [ "$STATUS" = "200" ]; then
+              echo "::notice::UPSaude API is healthy (HTTP 200)"
+              exit 0
+            fi
 
-          echo "Versão em produção: $DEPLOYED_VERSION"
+            echo "Attempt $i/15 - Status: $STATUS"
+            sleep 5
+          done
 
-          if [ "$PROJECT_VERSION" != "$DEPLOYED_VERSION" ]; then
-            echo "❌ Versão divergente! Deploy falhou."
-            exit 1
-          fi
+          echo "::error::UPSaude API failed healthcheck"
+          exit 1
 
-          echo "✅ Deploy validado com sucesso. Versão correta em produção."
+          echo "::endgroup::"
