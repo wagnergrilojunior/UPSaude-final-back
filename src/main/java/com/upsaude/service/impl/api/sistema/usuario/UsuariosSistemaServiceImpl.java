@@ -8,9 +8,17 @@ import java.util.stream.Collectors;
 import org.hibernate.Hibernate;
 import org.springframework.dao.DataAccessException;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import jakarta.persistence.criteria.Predicate;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -150,7 +158,15 @@ public class UsuariosSistemaServiceImpl implements UsuariosSistemaService {
                 pageable.getPageNumber(), pageable.getPageSize());
 
         try {
-            Page<UsuariosSistema> usuariosSistemas = usuariosSistemaRepository.findAll(pageable);
+            Pageable adjustedPageable = ajustarPageableParaCamposEmbeddados(pageable);
+            
+            Specification<UsuariosSistema> spec = (root, query, cb) -> {
+                List<Predicate> predicates = new ArrayList<>();
+                // Adicionar filtros de tenant se necessário
+                return cb.and(predicates.toArray(new Predicate[0]));
+            };
+            
+            Page<UsuariosSistema> usuariosSistemas = usuariosSistemaRepository.findAll(spec, adjustedPageable);
 
             usuariosSistemas.getContent().forEach(us -> {
                 Hibernate.initialize(us.getEstabelecimentosVinculados());
@@ -165,6 +181,38 @@ public class UsuariosSistemaServiceImpl implements UsuariosSistemaService {
             log.error("Erro inesperado ao listar UsuariosSistema. Exception: {}", e.getClass().getSimpleName(), e);
             throw e;
         }
+    }
+
+    private Pageable ajustarPageableParaCamposEmbeddados(Pageable pageable) {
+        if (pageable.getSort().isEmpty()) {
+            return pageable;
+        }
+
+        Sort adjustedSort = pageable.getSort().stream()
+                .map(order -> {
+                    String property = order.getProperty();
+                    // Mapear campos que estão dentro de dadosIdentificacao
+                    if ("username".equals(property)) {
+                        property = "dadosIdentificacao." + property;
+                    }
+                    // Mapear campos que estão dentro de dadosExibicao
+                    else if ("nomeExibicao".equals(property) || "fotoUrl".equals(property)) {
+                        property = "dadosExibicao." + property;
+                    }
+                    // Mapear campos que estão dentro de configuracao
+                    else if ("adminTenant".equals(property) || "adminSistema".equals(property)) {
+                        property = "configuracao." + property;
+                    }
+                    return new Sort.Order(order.getDirection(), property);
+                })
+                .collect(Collectors.collectingAndThen(Collectors.toList(), orders -> {
+                    if (orders.isEmpty()) {
+                        return Sort.unsorted();
+                    }
+                    return Sort.by(orders);
+                }));
+
+        return PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), adjustedSort);
     }
 
     @Override

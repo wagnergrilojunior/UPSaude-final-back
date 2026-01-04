@@ -7,13 +7,14 @@ import java.util.UUID;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import com.upsaude.entity.estabelecimento.Estabelecimentos;
 import com.upsaude.entity.sistema.multitenancy.Tenant;
 
-public interface EstabelecimentosRepository extends JpaRepository<Estabelecimentos, UUID> {
+public interface EstabelecimentosRepository extends JpaRepository<Estabelecimentos, UUID>, JpaSpecificationExecutor<Estabelecimentos> {
 
     List<Estabelecimentos> findByTenant(Tenant tenant);
 
