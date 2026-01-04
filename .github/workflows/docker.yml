@@ -1,4 +1,4 @@
-name: 🚀 Build, Push & Deploy UPSaude API
+name: Build, Push and Deploy UPSaude API
 
 on:
   push:
@@ -10,155 +10,50 @@ permissions:
 
 jobs:
   deploy:
-    name: Deploy Produção
     runs-on: ubuntu-latest
 
     steps:
-      # ===============================
-      # 📥 CHECKOUT
-      # ===============================
-      - name: 📥 Checkout do código
+      - name: Checkout do código
         uses: actions/checkout@v4
 
-      # ===============================
-      # ☕ JAVA
-      # ===============================
-      - name: ☕ Configurar Java 17
+      - name: Configurar Java 17
         uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: 17
 
-      # ===============================
-      # 🧱 BUILD MAVEN
-      # ===============================
-      - name: 🧱 Build do projeto (Maven)
+      - name: Build do projeto (Maven)
         run: mvn clean package -DskipTests
 
-      # ===============================
-      # 🔐 LOGIN GHCR
-      # ===============================
-      - name: 🔐 Login no GitHub Container Registry
+      - name: Login no GitHub Container Registry
         uses: docker/login-action@v3
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      # ===============================
-      # 🐳 BUILD & PUSH DOCKER
-      # ===============================
-      - name: 🐳 Build e Push da imagem Docker
+      - name: Build e Push da imagem Docker
         uses: docker/build-push-action@v5
         with:
           context: .
           push: true
           tags: ghcr.io/wagnergrilojunior/upsaude-final-back:latest
 
-      # ===============================
-      # 🚀 DEPLOY VIA SSH
-      # ===============================
-      - name: 🚀 Deploy no servidor (Docker)
+      - name: Deploy no servidor Absam (SSH)
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.SSH_HOST }}
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_KEY }}
           script: |
-            echo "📦 Pull da imagem..."
             docker pull ghcr.io/wagnergrilojunior/upsaude-final-back:latest
 
-            echo "🛑 Parando container antigo (se existir)..."
             docker stop upsaude-api || true
             docker rm upsaude-api || true
 
-            echo "▶️ Subindo novo container..."
             docker run -d \
               --name upsaude-api \
               --restart unless-stopped \
               -p 127.0.0.1:8080:8080 \
               -e SPRING_PROFILES_ACTIVE=prod \
               ghcr.io/wagnergrilojunior/upsaude-final-back:latest
-
-      # ===============================
-      # ⏳ ESPERA INICIAL
-      # ===============================
-      - name: ⏳ Aguardar inicialização do container
-        run: sleep 30
-
-      # ===============================
-      # ❤️ HEALTHCHECK INTERNO (REAL)
-      # ===============================
-      - name: ❤️ Healthcheck interno (localhost)
-        uses: appleboy/ssh-action@v1.0.3
-        with:
-          host: ${{ secrets.SSH_HOST }}
-          username: ${{ secrets.SSH_USER }}
-          key: ${{ secrets.SSH_KEY }}
-          script: |
-            echo "🔍 Verificando health interno..."
-            
-            # Verifica se o container está rodando
-            if ! docker ps | grep -q upsaude-api; then
-              echo "❌ Container não está rodando!"
-              docker ps -a | grep upsaude-api
-              docker logs upsaude-api --tail 50 || true
-              exit 1
-            fi
-            
-            echo "✅ Container está rodando, aguardando aplicação iniciar..."
-
-            for i in {1..30}; do
-              STATUS=$(curl -s -o /dev/null -w "%{http_code}" --max-time 5 http://127.0.0.1:8080/api/actuator/health 2>/dev/null || echo "000")
-
-              if [ "$STATUS" = "200" ]; then
-                echo "✅ API interna saudável (Status: $STATUS)"
-                exit 0
-              fi
-
-              if [ "$STATUS" != "000" ] && [ "$STATUS" != "" ]; then
-                echo "Tentativa $i/30 - Status: $STATUS (aplicação respondendo mas não saudável)"
-              else
-                echo "Tentativa $i/30 - Status: $STATUS (aplicação ainda não iniciou)"
-              fi
-              
-              # A cada 5 tentativas, mostra os logs
-              if [ $((i % 5)) -eq 0 ]; then
-                echo "📋 Últimas linhas do log:"
-                docker logs upsaude-api --tail 10 2>&1 | tail -5 || true
-              fi
-              
-              sleep 5
-            done
-
-            echo "❌ Falha no health interno após 30 tentativas"
-            echo "📋 Últimas 200 linhas do log:"
-            docker logs upsaude-api --tail 200
-            echo "📊 Status do container:"
-            docker ps -a | grep upsaude-api
-            exit 1
-
-      # ===============================
-      # 🌍 HEALTHCHECK EXTERNO (NGINX)
-      # ===============================
-      - name: 🌍 Healthcheck externo (HTTPS / Nginx)
-        run: |
-          echo "::group::External Healthcheck"
-
-          for i in {1..10}; do
-            STATUS=$(curl -s -o /dev/null -w "%{http_code}" \
-              https://api-pmsrs.upsaude.wgbsolucoes.com.br/api/actuator/health)
-
-            if [ "$STATUS" = "200" ]; then
-              echo "::notice::UPSaude API saudável via HTTPS"
-              exit 0
-            fi
-
-            echo "Tentativa $i/10 - Status: $STATUS"
-            sleep 5
-          done
-
-          echo "::error::Healthcheck externo falhou"
-          exit 1
-
-          echo "::endgroup::"
