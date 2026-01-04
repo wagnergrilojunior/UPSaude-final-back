@@ -62,6 +62,17 @@ public class DataSourceConfig {
         config.setInitializationFailTimeout(30000);
         config.setRegisterMbeans(false);
 
+        // Garante valores válidos (evita -1 que causa travamento)
+        // Se @ConfigurationProperties não aplicar, usa valores padrão seguros
+        if (config.getMaximumPoolSize() <= 0) {
+            config.setMaximumPoolSize(7); // Valor padrão para produção
+            log.warn("maximum-pool-size não configurado ou inválido, usando padrão: 7");
+        }
+        if (config.getMinimumIdle() < 0) {
+            config.setMinimumIdle(2); // Valor padrão para produção
+            log.warn("minimum-idle não configurado ou inválido, usando padrão: 2");
+        }
+
         log.info("DataSource API HikariCP configurado com prepared statement cache desabilitado");
         log.info("Configurações do pool API: maxPoolSize={}, minIdle={}, connectionTimeout={}ms",
                 config.getMaximumPoolSize(), config.getMinimumIdle(), config.getConnectionTimeout());
@@ -114,6 +125,17 @@ public class DataSourceConfig {
         config.setConnectionTestQuery("SELECT 1");
         config.setInitializationFailTimeout(30000);
         config.setRegisterMbeans(false);
+
+        // Garante valores válidos (evita -1 que causa travamento)
+        // Se @ConfigurationProperties não aplicar, usa valores padrão seguros
+        if (config.getMaximumPoolSize() <= 0) {
+            config.setMaximumPoolSize(4); // Valor padrão para produção
+            log.warn("maximum-pool-size não configurado ou inválido, usando padrão: 4");
+        }
+        if (config.getMinimumIdle() < 0) {
+            config.setMinimumIdle(1); // Valor padrão para produção
+            log.warn("minimum-idle não configurado ou inválido, usando padrão: 1");
+        }
 
         log.info("DataSource JOB HikariCP configurado com prepared statement cache desabilitado");
         log.info("Configurações do pool JOB: maxPoolSize={}, minIdle={}, connectionTimeout={}ms",
