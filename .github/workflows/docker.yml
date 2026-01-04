@@ -25,6 +25,14 @@ jobs:
       - name: Build do projeto (Maven)
         run: mvn clean package -DskipTests
 
+      # 🔢 Captura a versão do projeto (pom.xml)
+      - name: Obter versão do projeto
+        id: project_version
+        run: |
+          VERSION=$(mvn -q -Dexec.executable=echo -Dexec.args='${project.version}' --non-recursive exec:exec)
+          echo "PROJECT_VERSION=$VERSION" >> $GITHUB_ENV
+          echo "Versão do projeto: $VERSION"
+
       - name: Login no GitHub Container Registry
         uses: docker/login-action@v3
         with:
@@ -60,9 +68,25 @@ jobs:
 
       # ⏳ Aguarda a aplicação subir
       - name: Aguardar aplicação iniciar
-        run: sleep 20
+        run: sleep 25
 
-      # ❤️ Healthcheck da API (OPÇÃO 1)
+      # ❤️ Healthcheck da API
       - name: Validar healthcheck da API
         run: |
           curl -f https://api-pmsrs.upsaude.wgbsolucoes.com.br/api/actuator/health
+
+      # 🧪 Validação de versão do deploy
+      - name: Validar versão publicada
+        run: |
+          echo "Versão esperada: $PROJECT_VERSION"
+
+          DEPLOYED_VERSION=$(curl -s https://api-pmsrs.upsaude.wgbsolucoes.com.br/api/actuator/info | jq -r '.app.version')
+
+          echo "Versão em produção: $DEPLOYED_VERSION"
+
+          if [ "$PROJECT_VERSION" != "$DEPLOYED_VERSION" ]; then
+            echo "❌ Versão divergente! Deploy falhou."
+            exit 1
+          fi
+
+          echo "✅ Deploy validado com sucesso. Versão correta em produção."
