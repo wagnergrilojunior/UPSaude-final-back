@@ -37,7 +37,7 @@ jobs:
         run: mvn clean package -DskipTests
 
       # =========================
-      # Login GHCR
+      # Login GHCR (CI)
       # =========================
       - name: Login no GitHub Container Registry
         uses: docker/login-action@v3
@@ -78,7 +78,7 @@ jobs:
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           platforms: linux/amd64
-          no-cache: true   # 🔥 força rebuild completo
+          no-cache: true
 
       # =========================
       # Deploy no servidor
@@ -93,6 +93,11 @@ jobs:
             set -e
 
             IMAGE="ghcr.io/wagnergrilojunior/upsaude-final-back:build-${{ github.run_number }}"
+
+            echo "🔐 Login no GHCR (servidor)"
+            echo "${{ secrets.GHCR_TOKEN }}" | docker login ghcr.io \
+              -u ${{ secrets.GHCR_USER }} \
+              --password-stdin
 
             echo "⬇️ Pull da imagem do build atual: $IMAGE"
             docker pull $IMAGE
