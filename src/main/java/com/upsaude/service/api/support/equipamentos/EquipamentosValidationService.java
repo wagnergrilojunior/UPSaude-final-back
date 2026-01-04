@@ -12,10 +12,13 @@ public class EquipamentosValidationService {
         if (request == null) {
             throw new BadRequestException("Dados do equipamento são obrigatórios");
         }
-        if (!StringUtils.hasText(request.getNome())) {
+        if (request.getDadosIdentificacao() == null) {
+            throw new BadRequestException("Dados de identificação do equipamento são obrigatórios");
+        }
+        if (!StringUtils.hasText(request.getDadosIdentificacao().getNome())) {
             throw new BadRequestException("Nome do equipamento é obrigatório");
         }
-        if (request.getTipo() == null) {
+        if (request.getDadosIdentificacao().getTipo() == null) {
             throw new BadRequestException("Tipo de equipamento é obrigatório");
         }
     }
