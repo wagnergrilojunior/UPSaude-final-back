@@ -56,3 +56,12 @@ jobs:
               --restart unless-stopped \
               -p 127.0.0.1:8080:8080 \
               ghcr.io/wagnergrilojunior/upsaude-final-back:latest
+
+      # ⏳ Aguarda a aplicação subir
+      - name: Aguardar aplicação iniciar
+        run: sleep 20
+
+      # ❤️ Healthcheck da API (OPÇÃO 1)
+      - name: Validar healthcheck da API
+        run: |
+          curl -f https://api-pmsrs.upsaude.wgbsolucoes.com.br/api/actuator/health
