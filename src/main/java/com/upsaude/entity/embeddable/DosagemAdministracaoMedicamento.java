@@ -7,8 +7,6 @@ import com.upsaude.util.converter.ViaAdministracaoEnumConverter;
 import jakarta.persistence.Column;
 import jakarta.persistence.Convert;
 import jakarta.persistence.Embeddable;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -28,8 +26,6 @@ public class DosagemAdministracaoMedicamento {
         this.instrucoesUso = "";
     }
 
-    @NotBlank(message = "Dosagem é obrigatória")
-    @Size(max = 50, message = "Dosagem deve ter no máximo 50 caracteres")
     @Column(name = "dosagem", nullable = false, length = 50)
     private String dosagem;
 
@@ -44,15 +40,12 @@ public class DosagemAdministracaoMedicamento {
     @Column(name = "concentracao", precision = 10, scale = 2)
     private BigDecimal concentracao;
 
-    @Size(max = 50, message = "Unidade concentração deve ter no máximo 50 caracteres")
     @Column(name = "unidade_concentracao", length = 50)
     private String unidadeConcentracao;
 
-    @Size(max = 100, message = "Posologia padrão deve ter no máximo 100 caracteres")
     @Column(name = "posologia_padrao", length = 100)
     private String posologiaPadrao;
 
-    @Size(max = 255, message = "Instruções de uso deve ter no máximo 255 caracteres")
     @Column(name = "instrucoes_uso", length = 255)
     private String instrucoesUso;
 }

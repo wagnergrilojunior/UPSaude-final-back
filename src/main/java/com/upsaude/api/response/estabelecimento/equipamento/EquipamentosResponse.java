@@ -1,14 +1,21 @@
 package com.upsaude.api.response.estabelecimento.equipamento;
 
+import com.upsaude.api.response.embeddable.DadosIdentificacaoEquipamentoResponse;
+import com.upsaude.api.response.embeddable.DescricoesEquipamentoResponse;
+import com.upsaude.api.response.embeddable.EspecificacoesTecnicasEquipamentoResponse;
+import com.upsaude.api.response.embeddable.ManutencaoCalibracaoEquipamentoResponse;
 import com.upsaude.enums.StatusAtivoEnum;
-import com.upsaude.enums.TipoEquipamentoEnum;
-import java.math.BigDecimal;
-import java.time.LocalDate;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
 import java.time.OffsetDateTime;
 import java.util.UUID;
-import lombok.*;
 
-@Data
+@Getter
+@Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
@@ -17,51 +24,18 @@ public class EquipamentosResponse {
     private OffsetDateTime createdAt;
     private OffsetDateTime updatedAt;
     private Boolean active;
-    private String nome;
-    private String nomeComercial;
-    private String codigoInterno;
-    private String codigoCnes;
-    private String registroAnvisa;
-    private TipoEquipamentoEnum tipo;
-    private String categoria;
-    private String subcategoria;
-    private String classeRisco;
+    
+    private DadosIdentificacaoEquipamentoResponse dadosIdentificacao;
+    
     private FabricantesEquipamentoResponse fabricante;
-    private String modelo;
-    private String versao;
-    private BigDecimal potencia;
-    private String unidadePotencia;
-    private BigDecimal peso;
-    private BigDecimal altura;
-    private BigDecimal largura;
-    private BigDecimal profundidade;
-    private String tensaoEletrica;
-    private String frequencia;
-    private String corrente;
-    private String tipoAlimentacao;
-    private String certificacaoIso;
-    private String certificacaoCe;
-    private String certificacaoFda;
-    private LocalDate dataCertificacao;
-    private LocalDate dataValidadeCertificacao;
-    private Integer periodoCalibracaoMeses;
-    private Integer periodoManutencaoMeses;
-    private String tipoManutencao;
-    private BigDecimal valorAquisicao;
-    private LocalDate dataAquisicao;
-    private String fornecedor;
-    private String numeroNotaFiscal;
-    private String numeroContrato;
-    private Integer tempoGarantiaMeses;
-    private LocalDate dataInicioGarantia;
-    private LocalDate dataFimGarantia;
-    private String condicoesGarantia;
+    
+    private EspecificacoesTecnicasEquipamentoResponse especificacoesTecnicas;
+    
+    private ManutencaoCalibracaoEquipamentoResponse manutencaoCalibracao;
+    
     private StatusAtivoEnum status;
-    private String manualTecnico;
-    private String manualUsuario;
-    private String fichaTecnica;
-    private String descricao;
-    private String caracteristicas;
-    private String aplicacoes;
-    private String observacoes;
+    
+    private Boolean disponivelUso;
+    
+    private DescricoesEquipamentoResponse descricoes;
 }

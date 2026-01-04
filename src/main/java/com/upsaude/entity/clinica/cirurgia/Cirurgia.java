@@ -21,7 +21,6 @@ import jakarta.persistence.OneToMany;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
-import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -50,12 +49,10 @@ public class Cirurgia extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "paciente_id", nullable = false)
-    @NotNull(message = "Paciente é obrigatório")
     private Paciente paciente;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "cirurgiao_principal_id", nullable = false)
-    @NotNull(message = "Cirurgião principal é obrigatório")
     private ProfissionaisSaude cirurgiaoPrincipal;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -71,14 +68,12 @@ public class Cirurgia extends BaseEntity {
     private List<EquipeCirurgica> equipe = new ArrayList<>();
 
     @Column(name = "descricao", nullable = false, columnDefinition = "TEXT")
-    @NotNull(message = "Descrição da cirurgia é obrigatória")
     private String descricao;
 
     @Column(name = "codigo_procedimento", length = 50)
     private String codigoProcedimento;
 
     @Column(name = "data_hora_prevista", nullable = false)
-    @NotNull(message = "Data e hora prevista são obrigatórias")
     private OffsetDateTime dataHoraPrevista;
 
     @Column(name = "data_hora_inicio")
@@ -101,7 +96,6 @@ public class Cirurgia extends BaseEntity {
 
     @Convert(converter = StatusCirurgiaEnumConverter.class)
     @Column(name = "status", nullable = false)
-    @NotNull(message = "Status da cirurgia é obrigatório")
     private StatusCirurgiaEnum status;
 
     @Column(name = "valor_cirurgia", precision = 10, scale = 2)

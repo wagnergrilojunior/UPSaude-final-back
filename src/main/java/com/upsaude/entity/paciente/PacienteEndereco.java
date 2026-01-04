@@ -2,7 +2,6 @@ package com.upsaude.entity.paciente;
 
 import com.upsaude.entity.BaseEntity;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotNull;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
@@ -23,12 +22,10 @@ public class PacienteEndereco extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "paciente_id", nullable = false)
-    @NotNull(message = "Paciente é obrigatório")
     private Paciente paciente;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "endereco_id", nullable = false)
-    @NotNull(message = "Endereço é obrigatório")
     private Endereco endereco;
 
     @Column(name = "principal", nullable = false)

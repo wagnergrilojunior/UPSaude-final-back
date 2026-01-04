@@ -21,7 +21,6 @@ import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
-import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -61,27 +60,22 @@ public class Notificacao extends BaseEntity {
 
     @Convert(converter = TipoNotificacaoEnumConverter.class)
     @Column(name = "tipo_notificacao", nullable = false)
-    @NotNull(message = "Tipo de notificação é obrigatório")
     private TipoNotificacaoEnum tipoNotificacao;
 
     @Convert(converter = CanalNotificacaoEnumConverter.class)
     @Column(name = "canal", nullable = false)
-    @NotNull(message = "Canal de notificação é obrigatório")
     private CanalNotificacaoEnum canal;
 
     @Column(name = "destinatario", nullable = false, length = 255)
-    @NotNull(message = "Destinatário é obrigatório")
     private String destinatario;
 
     @Column(name = "assunto", length = 500)
     private String assunto;
 
     @Column(name = "mensagem", nullable = false, columnDefinition = "TEXT")
-    @NotNull(message = "Mensagem é obrigatória")
     private String mensagem;
 
     @Column(name = "status_envio", nullable = false, length = 50)
-    @NotNull(message = "Status de envio é obrigatório")
     private String statusEnvio;
 
     @Column(name = "data_envio_prevista")

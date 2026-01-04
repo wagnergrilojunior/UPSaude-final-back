@@ -12,10 +12,6 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.Index;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Pattern;
-import jakarta.validation.constraints.Size;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -37,26 +33,20 @@ import java.time.LocalDate;
 @EqualsAndHashCode(callSuper = true)
 public class Convenio extends BaseEntity {
 
-    @NotBlank(message = "Nome do convênio é obrigatório")
-    @Size(max = 255, message = "Nome deve ter no máximo 255 caracteres")
     @Column(name = "nome", nullable = false, length = 255)
     private String nome;
 
-    @Pattern(regexp = "^\\d{14}$", message = "CNPJ deve ter 14 dígitos")
     @Column(name = "cnpj", length = 14)
     private String cnpj;
 
-    @Size(max = 20, message = "Inscrição estadual deve ter no máximo 20 caracteres")
     @Column(name = "inscricao_estadual", length = 20)
     private String inscricaoEstadual;
 
-    @Size(max = 20, message = "Inscrição municipal deve ter no máximo 20 caracteres")
     @Column(name = "inscricao_municipal", length = 20)
     private String inscricaoMunicipal;
 
     @Convert(converter = TipoConvenioEnumConverter.class)
     @Column(name = "tipo", nullable = false)
-    @NotNull(message = "Tipo de convênio é obrigatório")
     private TipoConvenioEnum tipo;
 
     @Convert(converter = ModalidadeConvenioEnumConverter.class)
@@ -65,7 +55,6 @@ public class Convenio extends BaseEntity {
 
     @Convert(converter = StatusAtivoEnumConverter.class)
     @Column(name = "status", nullable = false)
-    @NotNull(message = "Status é obrigatório")
     private StatusAtivoEnum status;
 
     @Column(name = "data_cadastro")

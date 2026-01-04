@@ -11,7 +11,6 @@ import com.upsaude.util.converter.SistemaIntegracaoEnumConverter;
 import com.upsaude.util.converter.StatusSincronizacaoEnumConverter;
 import com.upsaude.util.converter.TipoCnsEnumConverter;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -48,14 +47,12 @@ public class IntegracaoGov extends BaseEntity {
     @Column(name = "sistema")
     private SistemaIntegracaoEnum sistema;
 
-    @Size(max = 100, message = "ID de integração deve ter no máximo 100 caracteres")
     @Column(name = "id_integracao_gov", length = 100)
     private String idIntegracaoGov;
 
     @Column(name = "uuid_rnds")
     private UUID uuidRnds;
 
-    @Size(max = 50, message = "Versão do layout deve ter no máximo 50 caracteres")
     @Column(name = "versao_layout", length = 50)
     private String versaoLayout;
 
@@ -86,7 +83,6 @@ public class IntegracaoGov extends BaseEntity {
     @Column(name = "cartao_sus_ativo", nullable = false)
     private Boolean cartaoSusAtivo = true;
 
-    @Size(max = 30, message = "Origem do cadastro deve ter no máximo 30 caracteres")
     @Column(name = "origem_cadastro", length = 30)
     private String origemCadastro;
 }

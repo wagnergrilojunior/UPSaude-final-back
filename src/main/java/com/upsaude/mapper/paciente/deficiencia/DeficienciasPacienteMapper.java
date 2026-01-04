@@ -14,6 +14,8 @@ import com.upsaude.mapper.paciente.PacienteMapper;
 public interface DeficienciasPacienteMapper {
 
     @Mapping(target = "active", ignore = true)
+    @Mapping(target = "paciente.responsavelLegal.estabelecimento.responsaveis.responsavelTecnico.sigtapOcupacao", ignore = true)
+    @Mapping(target = "paciente.responsavelLegal.estabelecimento.responsaveis.responsavelAdministrativo.sigtapOcupacao", ignore = true)
     DeficienciasPaciente toEntity(DeficienciasPacienteResponse dto);
 
     @Mapping(target = "id", ignore = true)

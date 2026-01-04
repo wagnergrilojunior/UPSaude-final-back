@@ -7,7 +7,6 @@ import com.upsaude.enums.NacionalidadeEnum;
 import com.upsaude.enums.RacaCorEnum;
 import com.upsaude.enums.SituacaoFamiliarEnum;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -38,15 +37,12 @@ public class DadosSociodemograficos extends BaseEntity {
     @Column(name = "nacionalidade")
     private NacionalidadeEnum nacionalidade;
 
-    @Size(max = 100, message = "País de nascimento deve ter no máximo 100 caracteres")
     @Column(name = "pais_nascimento", length = 100)
     private String paisNascimento;
 
-    @Size(max = 100, message = "Naturalidade deve ter no máximo 100 caracteres")
     @Column(name = "naturalidade", length = 100)
     private String naturalidade;
 
-    @Size(max = 7, message = "Código IBGE do município deve ter no máximo 7 caracteres")
     @Column(name = "municipio_nascimento_ibge", length = 7)
     private String municipioNascimentoIbge;
 
@@ -54,7 +50,6 @@ public class DadosSociodemograficos extends BaseEntity {
     @Column(name = "escolaridade")
     private EscolaridadeEnum escolaridade;
 
-    @Size(max = 150, message = "Ocupação/Profissão deve ter no máximo 150 caracteres")
     @Column(name = "ocupacao_profissao", length = 150)
     private String ocupacaoProfissao;
 

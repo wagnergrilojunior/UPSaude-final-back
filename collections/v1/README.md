@@ -33,7 +33,7 @@ Este diretório contém as collections e environments do Postman para a API UPSa
 2. Selecione o environment desejado:
    - **UPSaude - Local**: Para desenvolvimento local (http://localhost:8080/api)
    - **UPSaude - Dev**: Para ambiente de desenvolvimento (https://api-dev.upsaude.wgbsolucoes.com.br/api)
-   - **UPSaude - Prod**: Para ambiente de produção (https://api.upsaude.wgbsolucoes.com.br/api)
+   - **UPSaude - Prod**: Para ambiente de produção (https://api-pmsrs.upsaude.wgbsolucoes.com.br/api)
 
 ## Autenticação
 

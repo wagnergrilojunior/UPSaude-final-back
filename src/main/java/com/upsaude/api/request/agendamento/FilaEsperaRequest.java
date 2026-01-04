@@ -3,11 +3,12 @@ package com.upsaude.api.request.agendamento;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.upsaude.enums.PrioridadeAtendimentoEnum;
 import com.upsaude.util.converter.PrioridadeAtendimentoEnumDeserializer;
+import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.NotNull;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.UUID;
 import lombok.*;
-import io.swagger.v3.oas.annotations.media.Schema;
 
 @Data
 @Builder
@@ -16,10 +17,15 @@ import io.swagger.v3.oas.annotations.media.Schema;
 @Schema(description = "Dados de fila espera")
 public class FilaEsperaRequest {
     private UUID estabelecimento;
+
+    @NotNull(message = "Paciente é obrigatório")
     private UUID paciente;
+
     private UUID profissional;
     private UUID medico;
     private UUID agendamento;
+
+    @NotNull(message = "Data de entrada na fila é obrigatória")
     private OffsetDateTime dataEntrada;
     private LocalDate dataFimDesejada;
     @JsonDeserialize(using = PrioridadeAtendimentoEnumDeserializer.class)

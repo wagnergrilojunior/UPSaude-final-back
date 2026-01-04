@@ -1,12 +1,14 @@
 package com.upsaude.api.request.sistema.integracao;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.OffsetDateTime;
-import java.util.UUID;
-import lombok.*;
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.Size;
+import java.time.LocalDateTime;
+import java.util.UUID;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
 @Builder
@@ -17,10 +19,15 @@ import io.swagger.v3.oas.annotations.media.Schema;
 public class IntegracaoGovRequest {
     private UUID paciente;
     private UUID uuidRnds;
+
+    @Size(max = 100, message = "ID de integração deve ter no máximo 100 caracteres")
     private String idIntegracaoGov;
+
     private LocalDateTime dataSincronizacaoGov;
     private String ineEquipe;
     private String microarea;
     private String cnesEstabelecimentoOrigem;
+
+    @Size(max = 30, message = "Origem do cadastro deve ter no máximo 30 caracteres")
     private String origemCadastro;
 }

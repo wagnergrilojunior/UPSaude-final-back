@@ -1,9 +1,13 @@
 package com.upsaude.entity.estabelecimento.equipamento;
 import com.upsaude.entity.BaseEntityWithoutTenant;
+import com.upsaude.entity.paciente.Endereco;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.Index;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -13,7 +17,8 @@ import lombok.Setter;
 @Table(name = "fabricantes_equipamento", schema = "public",
        indexes = {
            @Index(name = "idx_fabricante_equipamento_nome", columnList = "nome"),
-           @Index(name = "idx_fabricante_equipamento_cnpj", columnList = "cnpj")
+           @Index(name = "idx_fabricante_equipamento_cnpj", columnList = "cnpj"),
+           @Index(name = "idx_fabricante_equipamento_endereco", columnList = "endereco_id")
        })
 @Getter
 @Setter
@@ -26,17 +31,9 @@ public class FabricantesEquipamento extends BaseEntityWithoutTenant {
     @Column(name = "cnpj", length = 18)
     private String cnpj;
 
-    @Column(name = "pais", length = 100)
-    private String pais;
-
-    @Column(name = "estado", length = 100)
-    private String estado;
-
-    @Column(name = "cidade", length = 100)
-    private String cidade;
-
-    @Column(name = "endereco", length = 255)
-    private String endereco;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "endereco_id")
+    private Endereco endereco;
 
     @Column(name = "telefone", length = 20)
     private String telefone;
@@ -47,9 +44,4 @@ public class FabricantesEquipamento extends BaseEntityWithoutTenant {
     @Column(name = "site", length = 255)
     private String site;
 
-    @Column(name = "registro_anvisa", length = 50)
-    private String registroAnvisa;
-
-    @Column(name = "observacoes", columnDefinition = "TEXT")
-    private String observacoes;
 }

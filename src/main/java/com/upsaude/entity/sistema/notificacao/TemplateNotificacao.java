@@ -17,7 +17,6 @@ import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
-import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -38,7 +37,6 @@ public class TemplateNotificacao extends BaseEntity {
     private Estabelecimentos estabelecimento;
 
     @Column(name = "nome", nullable = false, length = 255)
-    @NotNull(message = "Nome do template é obrigatório")
     private String nome;
 
     @Column(name = "descricao", columnDefinition = "TEXT")
@@ -46,19 +44,16 @@ public class TemplateNotificacao extends BaseEntity {
 
     @Convert(converter = TipoNotificacaoEnumConverter.class)
     @Column(name = "tipo_notificacao", nullable = false)
-    @NotNull(message = "Tipo de notificação é obrigatório")
     private TipoNotificacaoEnum tipoNotificacao;
 
     @Convert(converter = CanalNotificacaoEnumConverter.class)
     @Column(name = "canal", nullable = false)
-    @NotNull(message = "Canal é obrigatório")
     private CanalNotificacaoEnum canal;
 
     @Column(name = "assunto", length = 500)
     private String assunto;
 
     @Column(name = "mensagem", nullable = false, columnDefinition = "TEXT")
-    @NotNull(message = "Mensagem do template é obrigatória")
     private String mensagem;
 
     @Column(name = "variaveis_disponiveis", length = 1000)

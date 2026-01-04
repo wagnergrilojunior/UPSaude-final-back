@@ -6,9 +6,6 @@ import com.upsaude.enums.TipoIdentificadorEnum;
 import com.upsaude.util.converter.OrigemIdentificadorEnumConverter;
 import com.upsaude.util.converter.TipoIdentificadorEnumConverter;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Size;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
@@ -38,16 +35,12 @@ public class PacienteIdentificador extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "paciente_id", nullable = false)
-    @NotNull(message = "Paciente é obrigatório")
     private Paciente paciente;
 
     @Convert(converter = TipoIdentificadorEnumConverter.class)
     @Column(name = "tipo", nullable = false)
-    @NotNull(message = "Tipo de identificador é obrigatório")
     private TipoIdentificadorEnum tipo;
 
-    @NotBlank(message = "Valor do identificador é obrigatório")
-    @Size(max = 255, message = "Valor do identificador deve ter no máximo 255 caracteres")
     @Column(name = "valor", nullable = false, length = 255)
     private String valor;
 

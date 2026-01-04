@@ -14,7 +14,6 @@ import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
-import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -35,7 +34,6 @@ public class CheckInAtendimento extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "agendamento_id", nullable = false)
-    @NotNull(message = "Agendamento é obrigatório")
     private Agendamento agendamento;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -44,18 +42,15 @@ public class CheckInAtendimento extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "paciente_id", nullable = false)
-    @NotNull(message = "Paciente é obrigatório")
     private Paciente paciente;
 
     @Column(name = "data_checkin", nullable = false)
-    @NotNull(message = "Data do check-in é obrigatória")
     private OffsetDateTime dataCheckin;
 
     @Column(name = "data_checkout")
     private OffsetDateTime dataCheckout;
 
     @Column(name = "tipo_checkin", nullable = false, length = 50)
-    @NotNull(message = "Tipo de check-in é obrigatório")
     private String tipoCheckin;
 
     @Column(name = "eh_presencial")

@@ -23,7 +23,7 @@ public class OpenApiConfig {
         devServer.setDescription("Ambiente de Desenvolvimento");
 
         Server prodServer = new Server();
-        prodServer.setUrl("https://api.upsaude.wgbsolucoes.com.br/api");
+        prodServer.setUrl("https://api-pmsrs.upsaude.wgbsolucoes.com.br/api");
         prodServer.setDescription("Ambiente de Produção");
 
         openAPI.setServers(List.of(localServer, devServer, prodServer));

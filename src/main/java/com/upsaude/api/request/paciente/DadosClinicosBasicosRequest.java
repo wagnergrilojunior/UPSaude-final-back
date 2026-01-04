@@ -1,7 +1,6 @@
 package com.upsaude.api.request.paciente;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import java.time.OffsetDateTime;
 import java.util.UUID;
 import lombok.*;
 import io.swagger.v3.oas.annotations.media.Schema;
