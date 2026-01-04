@@ -63,6 +63,7 @@ jobs:
           no-cache: true   # 🔥 força rebuild completo
 
       - name: Deploy no servidor (limpeza total)
+        continue-on-error: true
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.SERVER_HOST }}
