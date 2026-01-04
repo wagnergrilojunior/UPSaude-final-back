@@ -1,4 +1,4 @@
-name: Build, Push and Deploy UPSaude API
+name: Build and Push Docker Image
 
 on:
   push:
@@ -9,7 +9,7 @@ permissions:
   packages: write
 
 jobs:
-  deploy:
+  docker:
     runs-on: ubuntu-latest
 
     steps:
@@ -38,22 +38,3 @@ jobs:
           context: .
           push: true
           tags: ghcr.io/wagnergrilojunior/upsaude-final-back:latest
-
-      - name: Deploy no servidor Absam (SSH)
-        uses: appleboy/ssh-action@v1.0.3
-        with:
-          host: ${{ secrets.SSH_HOST }}
-          username: ${{ secrets.SSH_USER }}
-          key: ${{ secrets.SSH_KEY }}
-          script: |
-            docker pull ghcr.io/wagnergrilojunior/upsaude-final-back:latest
-
-            docker stop upsaude-api || true
-            docker rm upsaude-api || true
-
-            docker run -d \
-              --name upsaude-api \
-              --restart unless-stopped \
-              -p 127.0.0.1:8080:8080 \
-              -e SPRING_PROFILES_ACTIVE=prod \
-              ghcr.io/wagnergrilojunior/upsaude-final-back:latest
