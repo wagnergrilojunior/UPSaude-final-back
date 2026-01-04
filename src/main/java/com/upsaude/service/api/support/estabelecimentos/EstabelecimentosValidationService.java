@@ -20,10 +20,13 @@ public class EstabelecimentosValidationService {
         if (request == null) {
             throw new BadRequestException("Dados do estabelecimento são obrigatórios");
         }
-        if (!StringUtils.hasText(request.getNome())) {
+        if (request.getDadosIdentificacao() == null) {
+            throw new BadRequestException("Dados de identificação do estabelecimento são obrigatórios");
+        }
+        if (!StringUtils.hasText(request.getDadosIdentificacao().getNome())) {
             throw new BadRequestException("Nome do estabelecimento é obrigatório");
         }
-        if (request.getTipo() == null) {
+        if (request.getDadosIdentificacao().getTipo() == null) {
             throw new BadRequestException("Tipo de estabelecimento é obrigatório");
         }
     }
@@ -39,28 +42,28 @@ public class EstabelecimentosValidationService {
     }
 
     private void validarCnpjUnico(UUID id, EstabelecimentosRequest request, UUID tenantId) {
-        if (request == null || !StringUtils.hasText(request.getCnpj())) return;
-        String cnpj = request.getCnpj().trim();
+        if (request == null || request.getDadosIdentificacao() == null || !StringUtils.hasText(request.getDadosIdentificacao().getCnpj())) return;
+        String cnpj = request.getDadosIdentificacao().getCnpj().trim();
 
         boolean duplicado = (id == null)
             ? repository.existsByCnpjAndTenantId(cnpj, tenantId)
             : repository.existsByCnpjAndTenantIdAndIdNot(cnpj, tenantId, id);
 
         if (duplicado) {
-            throw new ConflictException("Já existe um estabelecimento cadastrado com o CNPJ informado: " + request.getCnpj());
+            throw new ConflictException("Já existe um estabelecimento cadastrado com o CNPJ informado: " + request.getDadosIdentificacao().getCnpj());
         }
     }
 
     private void validarCnesUnico(UUID id, EstabelecimentosRequest request, UUID tenantId) {
-        if (request == null || !StringUtils.hasText(request.getCodigoCnes())) return;
-        String codigoCnes = request.getCodigoCnes().trim();
+        if (request == null || request.getDadosIdentificacao() == null || !StringUtils.hasText(request.getDadosIdentificacao().getCnes())) return;
+        String codigoCnes = request.getDadosIdentificacao().getCnes().trim();
 
         boolean duplicado = (id == null)
             ? repository.existsByCodigoCnesAndTenantId(codigoCnes, tenantId)
             : repository.existsByCodigoCnesAndTenantIdAndIdNot(codigoCnes, tenantId, id);
 
         if (duplicado) {
-            throw new ConflictException("Já existe um estabelecimento cadastrado com o código CNES informado: " + request.getCodigoCnes());
+            throw new ConflictException("Já existe um estabelecimento cadastrado com o código CNES informado: " + request.getDadosIdentificacao().getCnes());
         }
     }
 }

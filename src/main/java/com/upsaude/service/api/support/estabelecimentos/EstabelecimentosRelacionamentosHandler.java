@@ -109,25 +109,27 @@ public class EstabelecimentosRelacionamentosHandler {
             estabelecimento.setResponsaveis(new com.upsaude.entity.embeddable.ResponsaveisEstabelecimento());
         }
         
-        if (request.getResponsavelTecnico() != null) {
-            ProfissionaisSaude rt = profissionaisSaudeTenantEnforcer.validarAcesso(request.getResponsavelTecnico(), tenantId);
+        if (request.getResponsaveis() != null && request.getResponsaveis().getResponsavelTecnico() != null) {
+            ProfissionaisSaude rt = profissionaisSaudeTenantEnforcer.validarAcesso(request.getResponsaveis().getResponsavelTecnico(), tenantId);
             estabelecimento.getResponsaveis().setResponsavelTecnico(rt);
         } else {
             estabelecimento.getResponsaveis().setResponsavelTecnico(null);
         }
 
-        if (request.getResponsavelAdministrativo() != null) {
-            ProfissionaisSaude ra = profissionaisSaudeTenantEnforcer.validarAcesso(request.getResponsavelAdministrativo(), tenantId);
+        if (request.getResponsaveis() != null && request.getResponsaveis().getResponsavelAdministrativo() != null) {
+            ProfissionaisSaude ra = profissionaisSaudeTenantEnforcer.validarAcesso(request.getResponsaveis().getResponsavelAdministrativo(), tenantId);
             estabelecimento.getResponsaveis().setResponsavelAdministrativo(ra);
         } else {
             estabelecimento.getResponsaveis().setResponsavelAdministrativo(null);
         }
 
-        if (request.getResponsavelLegalNome() != null) {
-            estabelecimento.getResponsaveis().setResponsavelLegalNome(request.getResponsavelLegalNome());
-        }
-        if (request.getResponsavelLegalCpf() != null) {
-            estabelecimento.getResponsaveis().setResponsavelLegalCpf(request.getResponsavelLegalCpf());
+        if (request.getResponsaveis() != null) {
+            if (request.getResponsaveis().getResponsavelLegalNome() != null) {
+                estabelecimento.getResponsaveis().setResponsavelLegalNome(request.getResponsaveis().getResponsavelLegalNome());
+            }
+            if (request.getResponsaveis().getResponsavelLegalCpf() != null) {
+                estabelecimento.getResponsaveis().setResponsavelLegalCpf(request.getResponsaveis().getResponsavelLegalCpf());
+            }
         }
 
         return estabelecimento;
