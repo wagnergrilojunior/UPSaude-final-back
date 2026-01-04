@@ -55,6 +55,7 @@ jobs:
               --name upsaude-api \
               --restart unless-stopped \
               -p 127.0.0.1:8080:8080 \
+              -e SPRING_PROFILES_ACTIVE=prod \
               ghcr.io/wagnergrilojunior/upsaude-final-back:latest
 
       # ⏳ Aguarda a aplicação subir
