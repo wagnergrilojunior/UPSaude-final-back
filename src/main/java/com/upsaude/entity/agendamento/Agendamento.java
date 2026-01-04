@@ -26,7 +26,6 @@ import jakarta.persistence.OneToMany;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
-import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -58,12 +57,10 @@ public class Agendamento extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "paciente_id", nullable = false)
-    @NotNull(message = "Paciente é obrigatório")
     private Paciente paciente;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "profissional_id", nullable = false)
-    @NotNull(message = "Profissional de saúde é obrigatório")
     private ProfissionaisSaude profissional;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -93,7 +90,6 @@ public class Agendamento extends BaseEntity {
     private List<CheckInAtendimento> checkIns = new ArrayList<>();
 
     @Column(name = "data_hora", nullable = false)
-    @NotNull(message = "Data e hora do agendamento são obrigatórias")
     private OffsetDateTime dataHora;
 
     @Column(name = "data_hora_fim")
@@ -104,7 +100,6 @@ public class Agendamento extends BaseEntity {
 
     @Convert(converter = StatusAgendamentoEnumConverter.class)
     @Column(name = "status", nullable = false)
-    @NotNull(message = "Status do agendamento é obrigatório")
     private StatusAgendamentoEnum status;
 
     @Convert(converter = PrioridadeAtendimentoEnumConverter.class)

@@ -12,10 +12,10 @@ import com.upsaude.util.converter.EscolaridadeEnumDeserializer;
 import com.upsaude.util.converter.NacionalidadeEnumDeserializer;
 import com.upsaude.util.converter.RacaCorEnumDeserializer;
 import com.upsaude.util.converter.SituacaoFamiliarEnumDeserializer;
-import java.time.OffsetDateTime;
+import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.Size;
 import java.util.UUID;
 import lombok.*;
-import io.swagger.v3.oas.annotations.media.Schema;
 
 @Data
 @Builder
@@ -32,13 +32,19 @@ public class DadosSociodemograficosRequest {
     @JsonDeserialize(using = NacionalidadeEnumDeserializer.class)
     private NacionalidadeEnum nacionalidade;
 
+    @Size(max = 100, message = "País de nascimento deve ter no máximo 100 caracteres")
     private String paisNascimento;
+
+    @Size(max = 100, message = "Naturalidade deve ter no máximo 100 caracteres")
     private String naturalidade;
+
+    @Size(max = 7, message = "Código IBGE do município deve ter no máximo 7 caracteres")
     private String municipioNascimentoIbge;
 
     @JsonDeserialize(using = EscolaridadeEnumDeserializer.class)
     private EscolaridadeEnum escolaridade;
 
+    @Size(max = 150, message = "Ocupação/Profissão deve ter no máximo 150 caracteres")
     private String ocupacaoProfissao;
     private Boolean situacaoRua;
     private Integer tempoSituacaoRua;

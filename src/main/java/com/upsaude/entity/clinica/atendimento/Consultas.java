@@ -22,7 +22,6 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
-import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -51,7 +50,6 @@ public class Consultas extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "paciente_id", nullable = false)
-    @NotNull(message = "Paciente é obrigatório")
     private Paciente paciente;
 
     @ManyToOne(fetch = FetchType.LAZY)

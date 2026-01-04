@@ -2,7 +2,6 @@ package com.upsaude.entity.embeddable;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
-import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -21,11 +20,9 @@ public class ClassificacaoRiscoAtendimento {
         this.necessitaInternacao = false;
     }
 
-    @Size(max = 50, message = "Classificação de risco deve ter no máximo 50 caracteres")
     @Column(name = "classificacao_risco", length = 50)
     private String classificacaoRisco;
 
-    @Size(max = 50, message = "Prioridade deve ter no máximo 50 caracteres")
     @Column(name = "prioridade", length = 50)
     private String prioridade;
 

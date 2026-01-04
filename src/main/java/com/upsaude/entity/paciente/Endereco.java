@@ -17,7 +17,6 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
-import jakarta.validation.constraints.Size;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -75,23 +74,18 @@ public class Endereco extends BaseEntity {
     @Column(name = "codigo_ibge_municipio", length = 20)
     private String codigoIbgeMunicipio;
 
-    @Size(max = 50, message = "Quadra deve ter no máximo 50 caracteres")
     @Column(name = "quadra", length = 50)
     private String quadra;
 
-    @Size(max = 50, message = "Lote deve ter no máximo 50 caracteres")
     @Column(name = "lote", length = 50)
     private String lote;
 
-    @Size(max = 200, message = "Descrição da zona rural deve ter no máximo 200 caracteres")
     @Column(name = "zona_rural_descricao", length = 200)
     private String zonaRuralDescricao;
 
-    @Size(max = 50, message = "Andar deve ter no máximo 50 caracteres")
     @Column(name = "andar", length = 50)
     private String andar;
 
-    @Size(max = 50, message = "Bloco deve ter no máximo 50 caracteres")
     @Column(name = "bloco", length = 50)
     private String bloco;
 

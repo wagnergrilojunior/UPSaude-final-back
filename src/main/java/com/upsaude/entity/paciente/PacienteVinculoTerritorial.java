@@ -4,8 +4,6 @@ import com.upsaude.entity.BaseEntity;
 import com.upsaude.enums.OrigemVinculoTerritorialEnum;
 import com.upsaude.util.converter.OrigemVinculoTerritorialEnumConverter;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Size;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
@@ -31,27 +29,21 @@ public class PacienteVinculoTerritorial extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "paciente_id", nullable = false)
-    @NotNull(message = "Paciente é obrigatório")
     private Paciente paciente;
 
-    @Size(max = 7, message = "Código IBGE do município deve ter no máximo 7 caracteres")
     @Column(name = "municipio_ibge", length = 7)
     private String municipioIbge;
 
-    @Size(max = 7, message = "CNES do estabelecimento deve ter no máximo 7 caracteres")
     @Column(name = "cnes_estabelecimento", length = 7)
     private String cnesEstabelecimento;
 
-    @Size(max = 10, message = "INE da equipe deve ter no máximo 10 caracteres")
     @Column(name = "ine_equipe", length = 10)
     private String ineEquipe;
 
-    @Size(max = 10, message = "Microárea deve ter no máximo 10 caracteres")
     @Column(name = "microarea", length = 10)
     private String microarea;
 
     @Column(name = "data_inicio", nullable = false)
-    @NotNull(message = "Data de início é obrigatória")
     private LocalDate dataInicio;
 
     @Column(name = "data_fim")

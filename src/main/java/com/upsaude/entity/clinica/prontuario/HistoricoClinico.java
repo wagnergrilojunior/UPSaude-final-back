@@ -15,7 +15,6 @@ import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
-import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -34,7 +33,6 @@ public class HistoricoClinico extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "paciente_id", nullable = false)
-    @NotNull(message = "Paciente é obrigatório")
     private Paciente paciente;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -54,18 +52,15 @@ public class HistoricoClinico extends BaseEntity {
     private Cirurgia cirurgia;
 
     @Column(name = "data_registro", nullable = false)
-    @NotNull(message = "Data do registro é obrigatória")
     private OffsetDateTime dataRegistro;
 
     @Column(name = "tipo_registro", nullable = false, length = 50)
-    @NotNull(message = "Tipo de registro é obrigatório")
     private String tipoRegistro;
 
     @Column(name = "titulo", length = 255)
     private String titulo;
 
     @Column(name = "descricao", nullable = false, columnDefinition = "TEXT")
-    @NotNull(message = "Descrição é obrigatória")
     private String descricao;
 
     @Column(name = "observacoes", columnDefinition = "TEXT")

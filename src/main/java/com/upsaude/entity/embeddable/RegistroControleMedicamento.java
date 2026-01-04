@@ -5,7 +5,6 @@ import com.upsaude.util.converter.TipoControleMedicamentoEnumConverter;
 import jakarta.persistence.Column;
 import jakarta.persistence.Convert;
 import jakarta.persistence.Embeddable;
-import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -27,7 +26,6 @@ public class RegistroControleMedicamento {
         this.medicamentoExcepcional = false;
     }
 
-    @Size(max = 50, message = "Registro ANVISA deve ter no máximo 50 caracteres")
     @Column(name = "registro_anvisa", length = 50)
     private String registroAnvisa;
 

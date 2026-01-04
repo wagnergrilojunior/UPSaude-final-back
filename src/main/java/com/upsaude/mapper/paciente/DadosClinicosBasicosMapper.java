@@ -12,6 +12,8 @@ import org.mapstruct.MappingTarget;
 public interface DadosClinicosBasicosMapper {
 
     @Mapping(target = "active", ignore = true)
+    @Mapping(target = "paciente.responsavelLegal.estabelecimento.responsaveis.responsavelTecnico.sigtapOcupacao", ignore = true)
+    @Mapping(target = "paciente.responsavelLegal.estabelecimento.responsaveis.responsavelAdministrativo.sigtapOcupacao", ignore = true)
     DadosClinicosBasicos toEntity(DadosClinicosBasicosResponse dto);
 
     @Mapping(target = "id", ignore = true)

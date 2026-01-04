@@ -26,5 +26,7 @@ public interface ConfiguracaoEstabelecimentoMapper {
     @Mapping(target = "estabelecimento", ignore = true)
     void updateFromRequest(ConfiguracaoEstabelecimentoRequest request, @MappingTarget ConfiguracaoEstabelecimento entity);
 
+    @Mapping(target = "estabelecimento.responsaveis.responsavelTecnico.sigtapOcupacao", ignore = true)
+    @Mapping(target = "estabelecimento.responsaveis.responsavelAdministrativo.sigtapOcupacao", ignore = true)
     ConfiguracaoEstabelecimentoResponse toResponse(ConfiguracaoEstabelecimento entity);
 }

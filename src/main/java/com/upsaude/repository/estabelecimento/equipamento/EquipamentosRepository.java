@@ -22,18 +22,25 @@ public interface EquipamentosRepository extends JpaRepository<Equipamentos, UUID
     @Query("SELECT e FROM Equipamentos e WHERE e.tenant.id = :tenantId")
     Page<Equipamentos> findAllByTenant(@Param("tenantId") UUID tenantId, Pageable pageable);
 
-    Optional<Equipamentos> findByCodigoCnesAndTenantId(String codigoCnes, UUID tenantId);
+    @Query("SELECT e FROM Equipamentos e WHERE e.dadosIdentificacao.codigoCnes = :codigoCnes AND e.tenant.id = :tenantId")
+    Optional<Equipamentos> findByCodigoCnesAndTenantId(@Param("codigoCnes") String codigoCnes, @Param("tenantId") UUID tenantId);
 
-    Optional<Equipamentos> findByRegistroAnvisaAndTenantId(String registroAnvisa, UUID tenantId);
+    @Query("SELECT e FROM Equipamentos e WHERE e.dadosIdentificacao.registroAnvisa = :registroAnvisa AND e.tenant.id = :tenantId")
+    Optional<Equipamentos> findByRegistroAnvisaAndTenantId(@Param("registroAnvisa") String registroAnvisa, @Param("tenantId") UUID tenantId);
 
-    Page<Equipamentos> findByNomeContainingIgnoreCaseAndTenantIdOrderByNomeAsc(String nome, UUID tenantId, Pageable pageable);
+    @Query("SELECT e FROM Equipamentos e WHERE LOWER(e.dadosIdentificacao.nome) LIKE LOWER(CONCAT('%', :nome, '%')) AND e.tenant.id = :tenantId ORDER BY e.dadosIdentificacao.nome ASC")
+    Page<Equipamentos> findByNomeContainingIgnoreCaseAndTenantIdOrderByNomeAsc(@Param("nome") String nome, @Param("tenantId") UUID tenantId, Pageable pageable);
 
-    Page<Equipamentos> findByTipoAndTenantIdOrderByNomeAsc(TipoEquipamentoEnum tipo, UUID tenantId, Pageable pageable);
+    @Query("SELECT e FROM Equipamentos e WHERE e.dadosIdentificacao.tipo = :tipo AND e.tenant.id = :tenantId ORDER BY e.dadosIdentificacao.nome ASC")
+    Page<Equipamentos> findByTipoAndTenantIdOrderByNomeAsc(@Param("tipo") TipoEquipamentoEnum tipo, @Param("tenantId") UUID tenantId, Pageable pageable);
 
-    Page<Equipamentos> findByFabricanteIdAndTenantIdOrderByNomeAsc(UUID fabricanteId, UUID tenantId, Pageable pageable);
+    @Query("SELECT e FROM Equipamentos e WHERE e.fabricante.id = :fabricanteId AND e.tenant.id = :tenantId ORDER BY e.dadosIdentificacao.nome ASC")
+    Page<Equipamentos> findByFabricanteIdAndTenantIdOrderByNomeAsc(@Param("fabricanteId") UUID fabricanteId, @Param("tenantId") UUID tenantId, Pageable pageable);
 
-    Page<Equipamentos> findByStatusAndTenantIdOrderByNomeAsc(StatusAtivoEnum status, UUID tenantId, Pageable pageable);
+    @Query("SELECT e FROM Equipamentos e WHERE e.status = :status AND e.tenant.id = :tenantId ORDER BY e.dadosIdentificacao.nome ASC")
+    Page<Equipamentos> findByStatusAndTenantIdOrderByNomeAsc(@Param("status") StatusAtivoEnum status, @Param("tenantId") UUID tenantId, Pageable pageable);
 
-    Page<Equipamentos> findByStatusAndActiveTrueAndTenantIdOrderByNomeAsc(StatusAtivoEnum status, UUID tenantId, Pageable pageable);
+    @Query("SELECT e FROM Equipamentos e WHERE e.status = :status AND e.active = true AND e.tenant.id = :tenantId ORDER BY e.dadosIdentificacao.nome ASC")
+    Page<Equipamentos> findByStatusAndActiveTrueAndTenantIdOrderByNomeAsc(@Param("status") StatusAtivoEnum status, @Param("tenantId") UUID tenantId, Pageable pageable);
 }
 

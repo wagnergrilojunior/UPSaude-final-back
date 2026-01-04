@@ -11,8 +11,6 @@ import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Size;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -31,12 +29,10 @@ public class EquipeCirurgica extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "cirurgia_id", nullable = false)
-    @NotNull(message = "Cirurgia é obrigatória")
     private Cirurgia cirurgia;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "profissional_id", nullable = false)
-    @NotNull(message = "Profissional é obrigatório")
     private ProfissionaisSaude profissional;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -44,8 +40,6 @@ public class EquipeCirurgica extends BaseEntity {
     private Medicos medico;
 
     @Column(name = "funcao", nullable = false, length = 100)
-    @NotNull(message = "Função na cirurgia é obrigatória")
-    @Size(max = 100, message = "Função deve ter no máximo 100 caracteres")
     private String funcao;
 
     @Column(name = "eh_principal")

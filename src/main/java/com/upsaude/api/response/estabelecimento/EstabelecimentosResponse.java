@@ -1,21 +1,22 @@
 package com.upsaude.api.response.estabelecimento;
 
-import java.time.OffsetDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
-
+import com.upsaude.api.response.embeddable.ContatoEstabelecimentoResponse;
+import com.upsaude.api.response.embeddable.DadosIdentificacaoEstabelecimentoResponse;
+import com.upsaude.api.response.embeddable.InfraestruturaFisicaEstabelecimentoResponse;
+import com.upsaude.api.response.embeddable.LicenciamentoEstabelecimentoResponse;
+import com.upsaude.api.response.embeddable.LocalizacaoEstabelecimentoResponse;
+import com.upsaude.api.response.embeddable.ResponsaveisEstabelecimentoResponse;
 import com.upsaude.api.response.geral.EnderecoResponse;
-import com.upsaude.api.response.profissional.ProfissionaisSaudeResponse;
-import com.upsaude.enums.NaturezaJuridicaEnum;
-import com.upsaude.enums.StatusFuncionamentoEnum;
-import com.upsaude.enums.TipoEstabelecimentoEnum;
-
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+
+import java.time.OffsetDateTime;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
 
 @Getter
 @Setter
@@ -27,38 +28,29 @@ public class EstabelecimentosResponse {
     private OffsetDateTime createdAt;
     private OffsetDateTime updatedAt;
     private Boolean active;
-    private String nome;
-    private String nomeFantasia;
-    private TipoEstabelecimentoEnum tipo;
-    private String codigoCnes;
-    private String cnpj;
-    private NaturezaJuridicaEnum naturezaJuridica;
+    
+    private DadosIdentificacaoEstabelecimentoResponse dadosIdentificacao;
+    
     private String registroOficial;
+    
     private EnderecoResponse enderecoPrincipal;
-    private String telefone;
-    private String telefoneSecundario;
-    private String fax;
-    private String email;
-    private String site;
-    private ProfissionaisSaudeResponse responsavelTecnico;
-    private ProfissionaisSaudeResponse responsavelAdministrativo;
-    private String responsavelLegalNome;
-    private String responsavelLegalCpf;
-    private StatusFuncionamentoEnum statusFuncionamento;
+    
+    private ContatoEstabelecimentoResponse contato;
+    
+    private ResponsaveisEstabelecimentoResponse responsaveis;
+    
+    private LicenciamentoEstabelecimentoResponse licenciamento;
+    
     private OffsetDateTime dataAbertura;
+    
     private OffsetDateTime dataLicenciamento;
-    private OffsetDateTime dataValidadeLicenca;
-    private String numeroAlvara;
-    private String numeroLicencaSanitaria;
+    
     private OffsetDateTime dataValidadeLicencaSanitaria;
-    private Integer quantidadeLeitos;
-    private Integer quantidadeConsultorios;
-    private Integer quantidadeSalasCirurgia;
-    private Integer quantidadeAmbulatorios;
-    private Double areaConstruidaMetrosQuadrados;
-    private Double areaTotalMetrosQuadrados;
-    private Double latitude;
-    private Double longitude;
+    
+    private InfraestruturaFisicaEstabelecimentoResponse infraestruturaFisica;
+    
+    private LocalizacaoEstabelecimentoResponse localizacao;
+    
     private String observacoes;
 
     @Builder.Default

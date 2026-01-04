@@ -6,7 +6,6 @@ import com.upsaude.enums.OrientacaoSexualEnum;
 import com.upsaude.util.converter.IdentidadeGeneroEnumConverter;
 import com.upsaude.util.converter.OrientacaoSexualEnumConverter;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.Size;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
@@ -31,11 +30,9 @@ public class PacienteDadosPessoaisComplementares extends BaseEntity {
     @JoinColumn(name = "paciente_id", nullable = false, unique = true)
     private Paciente paciente;
 
-    @Size(max = 100, message = "Nome da mãe deve ter no máximo 100 caracteres")
     @Column(name = "nome_mae", length = 100)
     private String nomeMae;
 
-    @Size(max = 100, message = "Nome do pai deve ter no máximo 100 caracteres")
     @Column(name = "nome_pai", length = 100)
     private String nomePai;
 
