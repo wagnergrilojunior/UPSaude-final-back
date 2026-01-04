@@ -7,13 +7,14 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import com.upsaude.entity.profissional.ProfissionaisSaude;
 import com.upsaude.entity.sistema.multitenancy.Tenant;
 
-public interface ProfissionaisSaudeRepository extends JpaRepository<ProfissionaisSaude, UUID> {
+public interface ProfissionaisSaudeRepository extends JpaRepository<ProfissionaisSaude, UUID>, JpaSpecificationExecutor<ProfissionaisSaude> {
 
     Page<ProfissionaisSaude> findByTenant(Tenant tenant, Pageable pageable);
 

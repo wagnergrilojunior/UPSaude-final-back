@@ -26,12 +26,19 @@ import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.dao.DataAccessException;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import jakarta.persistence.criteria.Predicate;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -117,7 +124,15 @@ public class EstabelecimentosServiceImpl implements EstabelecimentosService {
 
         try {
             UUID tenantId = tenantService.validarTenantAtual();
-            Page<Estabelecimentos> estabelecimentos = estabelecimentosRepository.findAllByTenant(tenantId, pageable);
+            Pageable adjustedPageable = ajustarPageableParaCamposEmbeddados(pageable);
+            
+            Specification<Estabelecimentos> spec = (root, query, cb) -> {
+                List<Predicate> predicates = new ArrayList<>();
+                predicates.add(cb.equal(root.get("tenant").get("id"), tenantId));
+                return cb.and(predicates.toArray(new Predicate[0]));
+            };
+            
+            Page<Estabelecimentos> estabelecimentos = estabelecimentosRepository.findAll(spec, adjustedPageable);
             log.debug("Listagem de estabelecimentos concluída. Total de elementos: {}", estabelecimentos.getTotalElements());
             return estabelecimentos.map(responseBuilder::build);
         } catch (DataAccessException e) {
@@ -127,6 +142,32 @@ public class EstabelecimentosServiceImpl implements EstabelecimentosService {
             log.error("Erro inesperado ao listar estabelecimentos. Pageable: {}", pageable, e);
             throw e;
         }
+    }
+
+    private Pageable ajustarPageableParaCamposEmbeddados(Pageable pageable) {
+        if (pageable.getSort().isEmpty()) {
+            return pageable;
+        }
+
+        Sort adjustedSort = pageable.getSort().stream()
+                .map(order -> {
+                    String property = order.getProperty();
+                    // Mapear campos que estão dentro de dadosIdentificacao
+                    if ("nome".equals(property) || "nomeFantasia".equals(property) || 
+                        "tipo".equals(property) || "cnes".equals(property) || "cnpj".equals(property) ||
+                        "naturezaJuridica".equals(property)) {
+                        property = "dadosIdentificacao." + property;
+                    }
+                    return new Sort.Order(order.getDirection(), property);
+                })
+                .collect(Collectors.collectingAndThen(Collectors.toList(), orders -> {
+                    if (orders.isEmpty()) {
+                        return Sort.unsorted();
+                    }
+                    return Sort.by(orders);
+                }));
+
+        return PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), adjustedSort);
     }
 
     @Override

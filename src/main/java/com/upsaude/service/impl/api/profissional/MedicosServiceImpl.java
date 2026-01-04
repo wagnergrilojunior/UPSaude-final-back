@@ -12,9 +12,12 @@ import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
 import org.springframework.dao.DataAccessException;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
 
 import com.upsaude.cache.CacheKeyUtil;
 import com.upsaude.api.request.profissional.MedicosRequest;
@@ -98,9 +101,65 @@ public class MedicosServiceImpl implements MedicosService {
     @Override
     @Transactional(readOnly = true)
     public Page<MedicosResponse> listar(Pageable pageable) {
-        UUID tenantId = tenantService.validarTenantAtual();
-        Page<Medicos> medicos = medicosRepository.findAllByTenant(tenantId, pageable);
-        return medicos.map(responseBuilder::build);
+        log.debug("Listando médicos paginados. Página: {}, Tamanho: {}",
+                pageable.getPageNumber(), pageable.getPageSize());
+
+        try {
+            UUID tenantId = tenantService.validarTenantAtual();
+            Pageable adjustedPageable = ajustarPageableParaCamposEmbeddados(pageable);
+            Page<Medicos> medicos = medicosRepository.findAllByTenantId(tenantId, adjustedPageable);
+            log.debug("Listagem de médicos concluída. Total de elementos: {}", medicos.getTotalElements());
+            return medicos.map(responseBuilder::build);
+        } catch (DataAccessException e) {
+            log.error("Erro de acesso a dados ao listar médicos. Pageable: {}", pageable, e);
+            throw new InternalServerErrorException("Erro ao listar médicos", e);
+        } catch (RuntimeException e) {
+            log.error("Erro inesperado ao listar médicos. Pageable: {}", pageable, e);
+            throw e;
+        }
+    }
+
+    private Pageable ajustarPageableParaCamposEmbeddados(Pageable pageable) {
+        if (pageable.getSort().isEmpty()) {
+            return pageable;
+        }
+
+        Sort adjustedSort = pageable.getSort().stream()
+                .map(order -> {
+                    String property = order.getProperty();
+                    // Mapear campos que estão dentro de dadosPessoaisBasicos
+                    if ("nomeCompleto".equals(property) || "nomeSocial".equals(property) || 
+                        "dataNascimento".equals(property) || "sexo".equals(property)) {
+                        property = "dadosPessoaisBasicos." + property;
+                    }
+                    // Mapear campos que estão dentro de documentosBasicos
+                    else if ("cpf".equals(property) || "rg".equals(property)) {
+                        property = "documentosBasicos." + property;
+                    }
+                    // Mapear campos que estão dentro de registroProfissional
+                    else if ("crm".equals(property) || "crmUf".equals(property)) {
+                        property = "registroProfissional." + property;
+                    }
+                    // Mapear campos que estão dentro de contato
+                    else if ("telefone".equals(property) || "celular".equals(property) ||
+                            "email".equals(property) || "site".equals(property)) {
+                        property = "contato." + property;
+                    }
+                    // Mapear campos que estão dentro de dadosDemograficos
+                    else if ("estadoCivil".equals(property) || "escolaridade".equals(property) ||
+                            "nacionalidade".equals(property) || "naturalidade".equals(property)) {
+                        property = "dadosDemograficos." + property;
+                    }
+                    return new Sort.Order(order.getDirection(), property);
+                })
+                .collect(Collectors.collectingAndThen(Collectors.toList(), orders -> {
+                    if (orders.isEmpty()) {
+                        return Sort.unsorted();
+                    }
+                    return Sort.by(orders);
+                }));
+
+        return PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), Objects.requireNonNull(adjustedSort));
     }
 
     @Override

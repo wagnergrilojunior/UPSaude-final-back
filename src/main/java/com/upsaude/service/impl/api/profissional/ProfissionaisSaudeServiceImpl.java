@@ -10,9 +10,17 @@ import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
 import org.springframework.dao.DataAccessException;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import jakarta.persistence.criteria.Predicate;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import com.upsaude.cache.CacheKeyUtil;
 import com.upsaude.api.request.profissional.ProfissionaisSaudeRequest;
@@ -89,9 +97,73 @@ public class ProfissionaisSaudeServiceImpl implements ProfissionaisSaudeService 
     @Override
     @Transactional(readOnly = true)
     public Page<ProfissionaisSaudeResponse> listar(Pageable pageable) {
-        UUID tenantId = tenantService.validarTenantAtual();
-        Page<ProfissionaisSaude> profissionais = profissionaisSaudeRepository.findAllByTenant(tenantId, pageable);
-        return profissionais.map(responseBuilder::build);
+        log.debug("Listando profissionais de saúde paginados. Página: {}, Tamanho: {}",
+                pageable.getPageNumber(), pageable.getPageSize());
+
+        try {
+            UUID tenantId = tenantService.validarTenantAtual();
+            Pageable adjustedPageable = ajustarPageableParaCamposEmbeddados(pageable);
+            
+            Specification<ProfissionaisSaude> spec = (root, query, cb) -> {
+                List<Predicate> predicates = new ArrayList<>();
+                predicates.add(cb.equal(root.get("tenant").get("id"), tenantId));
+                return cb.and(predicates.toArray(new Predicate[0]));
+            };
+            
+            Page<ProfissionaisSaude> profissionais = profissionaisSaudeRepository.findAll(spec, adjustedPageable);
+            log.debug("Listagem de profissionais de saúde concluída. Total de elementos: {}", profissionais.getTotalElements());
+            return profissionais.map(responseBuilder::build);
+        } catch (DataAccessException e) {
+            log.error("Erro de acesso a dados ao listar profissionais de saúde. Pageable: {}", pageable, e);
+            throw new InternalServerErrorException("Erro ao listar profissionais de saúde", e);
+        } catch (RuntimeException e) {
+            log.error("Erro inesperado ao listar profissionais de saúde. Pageable: {}", pageable, e);
+            throw e;
+        }
+    }
+
+    private Pageable ajustarPageableParaCamposEmbeddados(Pageable pageable) {
+        if (pageable.getSort().isEmpty()) {
+            return pageable;
+        }
+
+        Sort adjustedSort = pageable.getSort().stream()
+                .map(order -> {
+                    String property = order.getProperty();
+                    // Mapear campos que estão dentro de dadosPessoaisBasicos
+                    if ("nomeCompleto".equals(property) || "dataNascimento".equals(property) || "sexo".equals(property)) {
+                        property = "dadosPessoaisBasicos." + property;
+                    }
+                    // Mapear campos que estão dentro de documentosBasicos
+                    else if ("cpf".equals(property) || "rg".equals(property) || "cns".equals(property)) {
+                        property = "documentosBasicos." + property;
+                    }
+                    // Mapear campos que estão dentro de registroProfissional
+                    else if ("registroProfissional".equals(property) || "conselho".equals(property) || "ufRegistro".equals(property)) {
+                        property = "registroProfissional." + property;
+                    }
+                    // Mapear campos que estão dentro de contato
+                    else if ("telefone".equals(property) || "celular".equals(property) ||
+                            "email".equals(property) || "telefoneInstitucional".equals(property) ||
+                            "emailInstitucional".equals(property)) {
+                        property = "contato." + property;
+                    }
+                    // Mapear campos que estão dentro de dadosDemograficos
+                    else if ("estadoCivil".equals(property) || "escolaridade".equals(property) ||
+                            "nacionalidade".equals(property) || "naturalidade".equals(property) ||
+                            "identidadeGenero".equals(property) || "racaCor".equals(property)) {
+                        property = "dadosDemograficos." + property;
+                    }
+                    return new Sort.Order(order.getDirection(), property);
+                })
+                .collect(Collectors.collectingAndThen(Collectors.toList(), orders -> {
+                    if (orders.isEmpty()) {
+                        return Sort.unsorted();
+                    }
+                    return Sort.by(orders);
+                }));
+
+        return PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), adjustedSort);
     }
 
     @Override
