@@ -84,7 +84,7 @@ jobs:
       # ⏳ ESPERA INICIAL
       # ===============================
       - name: ⏳ Aguardar inicialização do container
-        run: sleep 15
+        run: sleep 30
 
       # ===============================
       # ❤️ HEALTHCHECK INTERNO (REAL)
@@ -97,21 +97,45 @@ jobs:
           key: ${{ secrets.SSH_KEY }}
           script: |
             echo "🔍 Verificando health interno..."
+            
+            # Verifica se o container está rodando
+            if ! docker ps | grep -q upsaude-api; then
+              echo "❌ Container não está rodando!"
+              docker ps -a | grep upsaude-api
+              docker logs upsaude-api --tail 50 || true
+              exit 1
+            fi
+            
+            echo "✅ Container está rodando, aguardando aplicação iniciar..."
 
-            for i in {1..20}; do
-              STATUS=$(curl -s -o /dev/null -w "%{http_code}" http://127.0.0.1:8080/api/actuator/health)
+            for i in {1..30}; do
+              STATUS=$(curl -s -o /dev/null -w "%{http_code}" --max-time 5 http://127.0.0.1:8080/api/actuator/health 2>/dev/null || echo "000")
 
               if [ "$STATUS" = "200" ]; then
-                echo "✅ API interna saudável"
+                echo "✅ API interna saudável (Status: $STATUS)"
                 exit 0
               fi
 
-              echo "Tentativa $i/20 - Status: $STATUS"
+              if [ "$STATUS" != "000" ] && [ "$STATUS" != "" ]; then
+                echo "Tentativa $i/30 - Status: $STATUS (aplicação respondendo mas não saudável)"
+              else
+                echo "Tentativa $i/30 - Status: $STATUS (aplicação ainda não iniciou)"
+              fi
+              
+              # A cada 5 tentativas, mostra os logs
+              if [ $((i % 5)) -eq 0 ]; then
+                echo "📋 Últimas linhas do log:"
+                docker logs upsaude-api --tail 10 2>&1 | tail -5 || true
+              fi
+              
               sleep 5
             done
 
-            echo "❌ Falha no health interno"
+            echo "❌ Falha no health interno após 30 tentativas"
+            echo "📋 Últimas 200 linhas do log:"
             docker logs upsaude-api --tail 200
+            echo "📊 Status do container:"
+            docker ps -a | grep upsaude-api
             exit 1
 
       # ===============================
