@@ -1,4 +1,0 @@
-01Ambulatorial                                                                                        202512
-02Hospitalar                                                                                          202512
-03Hospital Dia                                                                                        202512
-06Atenção Domiciliar                                                                                  202512
