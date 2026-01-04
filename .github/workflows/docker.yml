@@ -9,7 +9,7 @@ permissions:
   packages: write
 
 jobs:
-  build-deploy:
+  build-push-deploy:
     runs-on: ubuntu-latest
 
     steps:
@@ -34,7 +34,7 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Gerar metadata da imagem Docker
+      - name: Gerar metadata e tags da imagem Docker
         id: meta
         uses: docker/metadata-action@v5
         with:
@@ -43,14 +43,6 @@ jobs:
             type=raw,value=latest
             type=raw,value=build-${{ github.run_number }}
             type=sha,prefix=sha-,format=short
-          labels: |
-            org.opencontainers.image.title=UPSaude Backend API
-            org.opencontainers.image.description=Spring Boot API para UPSaude
-            org.opencontainers.image.version=1.0.0.${{ github.run_number }}
-            org.opencontainers.image.revision=${{ github.sha }}
-            org.opencontainers.image.source=${{ github.repositoryUrl }}
-            org.opencontainers.image.created=${{ github.run_started_at }}
-            org.opencontainers.image.authors=WGB Soluções de Software
 
       - name: Build e Push da imagem Docker
         uses: docker/build-push-action@v5
@@ -60,26 +52,25 @@ jobs:
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           platforms: linux/amd64
-          no-cache: true   # 🔥 força rebuild completo
+          no-cache: true
 
-      - name: Deploy no servidor (limpeza total)
-        continue-on-error: true
+      - name: Deploy no servidor (via SSH)
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.SERVER_HOST }}
           username: ${{ secrets.SERVER_USER }}
           key: ${{ secrets.SERVER_SSH_KEY }}
           script: |
+            set -e
+
+            IMAGE="ghcr.io/wagnergrilojunior/upsaude-final-back:build-${{ github.run_number }}"
+
+            echo "⬇️ Pull da imagem do build atual: $IMAGE"
+            docker pull $IMAGE
+
             echo "🛑 Parando container antigo"
             docker stop upsaude-api || true
             docker rm upsaude-api || true
-
-            echo "🧹 Limpando cache Docker"
-            docker image prune -af
-            docker builder prune -af
-
-            echo "⬇️ Pull da nova imagem"
-            docker pull ghcr.io/wagnergrilojunior/upsaude-final-back:latest
 
             echo "🚀 Subindo nova versão"
             docker run -d \
@@ -88,6 +79,11 @@ jobs:
               --restart unless-stopped \
               -e SPRING_PROFILES_ACTIVE=prod \
               -e SPRINGDOC_CACHE_DISABLED=true \
-              ghcr.io/wagnergrilojunior/upsaude-final-back:latest
+              $IMAGE
 
             echo "✅ Deploy concluído"
+
+      - name: Validar versão (actuator/info)
+        run: |
+          curl -fsS https://api-pmsrs.upsaude.wgbsolucoes.com.br/api/actuator/info | head -c 300
+          echo ""
