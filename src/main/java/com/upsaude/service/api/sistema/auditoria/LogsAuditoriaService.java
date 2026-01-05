@@ -18,4 +18,6 @@ public interface LogsAuditoriaService {
     LogsAuditoriaResponse atualizar(UUID id, LogsAuditoriaRequest request);
 
     void excluir(UUID id);
+
+    void inativar(UUID id);
 }

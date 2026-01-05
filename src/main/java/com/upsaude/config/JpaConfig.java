@@ -34,6 +34,7 @@ import java.util.Map;
         "com.upsaude.repository.convenio",
         "com.upsaude.repository.deficiencia",
         "com.upsaude.repository.estabelecimento",
+        "com.upsaude.repository.farmacia",
         "com.upsaude.repository.geral",
         "com.upsaude.repository.paciente",
         "com.upsaude.repository.profissional",
@@ -82,6 +83,7 @@ public class JpaConfig {
                     "com.upsaude.entity.convenio",
                     "com.upsaude.entity.deficiencia",
                     "com.upsaude.entity.estabelecimento",
+                    "com.upsaude.entity.farmacia",
                     "com.upsaude.entity.geral",
                     "com.upsaude.entity.paciente",
                     "com.upsaude.entity.profissional",
@@ -168,6 +170,7 @@ public class JpaConfig {
                     "com.upsaude.entity.sistema.integracao", // IntegracaoGov
                     "com.upsaude.entity.sistema.lgpd", // LGPDConsentimento
                     "com.upsaude.entity.estabelecimento", // Estabelecimentos
+                    "com.upsaude.entity.farmacia", // Farmacia (referenciado por IntegracaoGov)
                     "com.upsaude.entity.paciente", // Endereco, Paciente
                     "com.upsaude.entity.profissional", // ProfissionaisSaude
                     "com.upsaude.entity.referencia", // Cidades, Estados, CID, SIGTAP, SIA

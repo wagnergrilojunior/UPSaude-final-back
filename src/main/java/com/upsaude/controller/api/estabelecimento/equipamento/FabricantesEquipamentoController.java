@@ -22,6 +22,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -137,7 +138,7 @@ public class FabricantesEquipamentoController {
     }
 
     @DeleteMapping("/{id}")
-    @Operation(summary = "Excluir fabricante de equipamento", description = "Exclui (desativa) um fabricante de equipamento do sistema")
+    @Operation(summary = "Excluir fabricante de equipamento", description = "Exclui permanentemente um fabricante de equipamento do sistema")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "204", description = "Fabricante de equipamento excluído com sucesso"),
         @ApiResponse(responseCode = "404", description = "Fabricante de equipamento não encontrado"),
@@ -150,13 +151,39 @@ public class FabricantesEquipamentoController {
         log.debug("REQUEST DELETE /v1/fabricantes-equipamento/{}", id);
         try {
             fabricantesEquipamentoService.excluir(id);
-            log.info("Fabricante de equipamento excluído com sucesso. ID: {}", id);
+            log.info("Fabricante de equipamento excluído permanentemente com sucesso. ID: {}", id);
             return ResponseEntity.noContent().build();
         } catch (NotFoundException ex) {
             log.warn("Falha ao excluir fabricante de equipamento — ID: {}, mensagem: {}", id, ex.getMessage());
             throw ex;
         } catch (Exception ex) {
             log.error("Erro inesperado ao excluir fabricante de equipamento — ID: {}", id, ex);
+            throw ex;
+        }
+    }
+
+    @PatchMapping("/{id}/inativar")
+    @Operation(summary = "Inativar fabricante de equipamento", description = "Inativa um fabricante de equipamento do sistema alterando seu status")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "204", description = "Fabricante de equipamento inativado com sucesso"),
+        @ApiResponse(responseCode = "404", description = "Fabricante de equipamento não encontrado"),
+        @ApiResponse(responseCode = "400", description = "Fabricante de equipamento já está inativo"),
+        @ApiResponse(responseCode = "403", description = "Acesso negado")
+    })
+    public ResponseEntity<Void> inativar(
+        @Parameter(description = "ID do fabricante de equipamento", required = true)
+        @PathVariable UUID id
+    ) {
+        log.debug("REQUEST PATCH /v1/fabricantes-equipamento/{}/inativar", id);
+        try {
+            fabricantesEquipamentoService.inativar(id);
+            log.info("Fabricante de equipamento inativado com sucesso. ID: {}", id);
+            return ResponseEntity.noContent().build();
+        } catch (NotFoundException ex) {
+            log.warn("Fabricante de equipamento não encontrado para inativação — ID: {}, mensagem: {}", id, ex.getMessage());
+            throw ex;
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao inativar fabricante de equipamento — ID: {}", id, ex);
             throw ex;
         }
     }

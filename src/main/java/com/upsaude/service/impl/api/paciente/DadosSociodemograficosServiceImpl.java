@@ -1,5 +1,4 @@
 package com.upsaude.service.impl.api.paciente;
-import com.upsaude.entity.paciente.Paciente;
 
 import com.upsaude.api.request.paciente.DadosSociodemograficosRequest;
 import com.upsaude.api.response.paciente.DadosSociodemograficosResponse;
@@ -198,11 +197,13 @@ public class DadosSociodemograficosServiceImpl implements DadosSociodemograficos
     @Transactional
     @CacheEvict(cacheNames = CacheKeyUtil.CACHE_DADOS_SOCIODEMOGRAFICOS, keyGenerator = "dadosSociodemograficosCacheKeyGenerator", beforeInvocation = false)
     public void excluir(UUID id) {
-        log.debug("Excluindo dados sociodemográficos. ID: {}", id);
-
+        log.debug("Excluindo dados sociodemográficos permanentemente. ID: {}", id);
         try {
             UUID tenantId = tenantService.validarTenantAtual();
-            inativarInternal(id, tenantId);
+            DadosSociodemograficos entity = tenantEnforcer.validarAcesso(id, tenantId);
+            domainService.validarPodeDeletar(entity);
+            repository.delete(Objects.requireNonNull(entity));
+            log.info("Dados sociodemográficos excluídos permanentemente. ID: {}", id);
         } catch (NotFoundException e) {
             log.warn("Tentativa de excluir dados sociodemográficos não existentes. ID: {}", id);
             throw e;
@@ -218,9 +219,32 @@ public class DadosSociodemograficosServiceImpl implements DadosSociodemograficos
         }
     }
 
+    @Override
+    @Transactional
+    @CacheEvict(cacheNames = CacheKeyUtil.CACHE_DADOS_SOCIODEMOGRAFICOS, keyGenerator = "dadosSociodemograficosCacheKeyGenerator", beforeInvocation = false)
+    public void inativar(UUID id) {
+        log.debug("Inativando dados sociodemográficos. ID: {}", id);
+        try {
+            UUID tenantId = tenantService.validarTenantAtual();
+            inativarInternal(id, tenantId);
+        } catch (NotFoundException e) {
+            log.warn("Tentativa de inativar dados sociodemográficos não existentes. ID: {}", id);
+            throw e;
+        } catch (BadRequestException e) {
+            log.warn("Erro de validação ao inativar dados sociodemográficos. ID: {}. Erro: {}", id, e.getMessage());
+            throw e;
+        } catch (DataAccessException e) {
+            log.error("Erro de acesso a dados ao inativar DadosSociodemograficos. ID: {}, Exception: {}", id, e.getClass().getSimpleName(), e);
+            throw new InternalServerErrorException("Erro ao inativar DadosSociodemograficos", e);
+        } catch (RuntimeException e) {
+            log.error("Erro inesperado ao inativar DadosSociodemograficos. ID: {}, Exception: {}", id, e.getClass().getSimpleName(), e);
+            throw e;
+        }
+    }
+
     private void inativarInternal(UUID id, UUID tenantId) {
         if (id == null) {
-            log.warn("ID nulo recebido para exclusão de dados sociodemográficos");
+            log.warn("ID nulo recebido para inativação de dados sociodemográficos");
             throw new BadRequestException("ID é obrigatório");
         }
 
@@ -228,7 +252,7 @@ public class DadosSociodemograficosServiceImpl implements DadosSociodemograficos
         domainService.validarPodeInativar(entity);
         entity.setActive(false);
         repository.save(Objects.requireNonNull(entity));
-        log.info("Dados sociodemográficos excluídos. ID: {}", id);
+        log.info("Dados sociodemográficos inativados. ID: {}", id);
     }
 
     private Tenant obterTenantAutenticadoOrThrow(UUID tenantId) {

@@ -25,9 +25,11 @@ import com.upsaude.repository.profissional.equipe.FaltaRepository;
 import com.upsaude.service.api.profissional.equipe.FaltaService;
 import com.upsaude.service.api.sistema.multitenancy.TenantService;
 import com.upsaude.service.api.support.falta.FaltaCreator;
+import com.upsaude.service.api.support.falta.FaltaDomainService;
 import com.upsaude.service.api.support.falta.FaltaResponseBuilder;
 import com.upsaude.service.api.support.falta.FaltaTenantEnforcer;
 import com.upsaude.service.api.support.falta.FaltaUpdater;
+import org.springframework.dao.DataAccessException;
 
 import java.time.LocalDate;
 import lombok.RequiredArgsConstructor;
@@ -46,6 +48,7 @@ public class FaltaServiceImpl implements FaltaService {
     private final FaltaUpdater updater;
     private final FaltaResponseBuilder responseBuilder;
     private final FaltaTenantEnforcer tenantEnforcer;
+    private final FaltaDomainService domainService;
 
     @Override
     @Transactional
@@ -136,9 +139,37 @@ public class FaltaServiceImpl implements FaltaService {
     @Transactional
     @CacheEvict(cacheNames = CacheKeyUtil.CACHE_FALTAS, keyGenerator = "faltasCacheKeyGenerator", beforeInvocation = false)
     public void excluir(UUID id) {
-        log.debug("Excluindo falta. ID: {}", id);
-        UUID tenantId = tenantService.validarTenantAtual();
-        inativarInternal(id, tenantId);
+        log.debug("Excluindo falta permanentemente. ID: {}", id);
+        try {
+            UUID tenantId = tenantService.validarTenantAtual();
+            Falta entity = tenantEnforcer.validarAcesso(id, tenantId);
+            domainService.validarPodeDeletar(entity);
+            repository.delete(Objects.requireNonNull(entity));
+            log.info("Falta excluída permanentemente com sucesso. ID: {}", id);
+        } catch (BadRequestException | com.upsaude.exception.NotFoundException e) {
+            log.warn("Erro de validação ao excluir Falta. Erro: {}", e.getMessage());
+            throw e;
+        } catch (DataAccessException e) {
+            log.error("Erro de acesso a dados ao excluir Falta. Exception: {}", e.getClass().getSimpleName(), e);
+            throw new InternalServerErrorException("Erro ao excluir Falta", e);
+        }
+    }
+
+    @Override
+    @Transactional
+    @CacheEvict(cacheNames = CacheKeyUtil.CACHE_FALTAS, keyGenerator = "faltasCacheKeyGenerator", beforeInvocation = false)
+    public void inativar(UUID id) {
+        log.debug("Inativando falta. ID: {}", id);
+        try {
+            UUID tenantId = tenantService.validarTenantAtual();
+            inativarInternal(id, tenantId);
+        } catch (BadRequestException | com.upsaude.exception.NotFoundException e) {
+            log.warn("Erro de validação ao inativar Falta. Erro: {}", e.getMessage());
+            throw e;
+        } catch (DataAccessException e) {
+            log.error("Erro de acesso a dados ao inativar Falta. Exception: {}", e.getClass().getSimpleName(), e);
+            throw new InternalServerErrorException("Erro ao inativar Falta", e);
+        }
     }
 
     private void inativarInternal(UUID id, UUID tenantId) {
@@ -147,9 +178,10 @@ public class FaltaServiceImpl implements FaltaService {
         }
 
         Falta entity = tenantEnforcer.validarAcesso(id, tenantId);
+        domainService.validarPodeInativar(entity);
         entity.setActive(false);
         repository.save(Objects.requireNonNull(entity));
-        log.info("Falta excluída (desativada) com sucesso. ID: {}", id);
+        log.info("Falta inativada com sucesso. ID: {}", id);
     }
 
     private void validarTenantAutenticadoOrThrow(UUID tenantId, Tenant tenant) {

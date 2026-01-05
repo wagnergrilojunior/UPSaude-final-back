@@ -19,6 +19,8 @@ public interface PlantaoService {
 
     void excluir(UUID id);
 
+    void inativar(UUID id);
+
     Page<PlantaoResponse> listar(Pageable pageable,
                                 UUID profissionalId,
                                 UUID medicoId,

@@ -27,5 +27,7 @@ public interface NotificacaoService {
     NotificacaoResponse atualizar(UUID id, NotificacaoRequest request);
 
     void excluir(UUID id);
+
+    void inativar(UUID id);
 }
 

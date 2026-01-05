@@ -1,5 +1,4 @@
 package com.upsaude.service.impl.api.paciente;
-import com.upsaude.entity.paciente.Paciente;
 
 import com.upsaude.api.request.paciente.DadosClinicosBasicosRequest;
 import com.upsaude.api.response.paciente.DadosClinicosBasicosResponse;
@@ -198,11 +197,13 @@ public class DadosClinicosBasicosServiceImpl implements DadosClinicosBasicosServ
     @Transactional
     @CacheEvict(cacheNames = CacheKeyUtil.CACHE_DADOS_CLINICOS_BASICOS, keyGenerator = "dadosClinicosBasicosCacheKeyGenerator", beforeInvocation = false)
     public void excluir(UUID id) {
-        log.debug("Excluindo dados clínicos básicos. ID: {}", id);
-
+        log.debug("Excluindo dados clínicos básicos permanentemente. ID: {}", id);
         try {
             UUID tenantId = tenantService.validarTenantAtual();
-            inativarInternal(id, tenantId);
+            DadosClinicosBasicos entity = tenantEnforcer.validarAcesso(id, tenantId);
+            domainService.validarPodeDeletar(entity);
+            repository.delete(Objects.requireNonNull(entity));
+            log.info("Dados clínicos básicos excluídos permanentemente. ID: {}", id);
         } catch (NotFoundException e) {
             log.warn("Tentativa de excluir dados clínicos básicos não existentes. ID: {}", id);
             throw e;
@@ -218,9 +219,32 @@ public class DadosClinicosBasicosServiceImpl implements DadosClinicosBasicosServ
         }
     }
 
+    @Override
+    @Transactional
+    @CacheEvict(cacheNames = CacheKeyUtil.CACHE_DADOS_CLINICOS_BASICOS, keyGenerator = "dadosClinicosBasicosCacheKeyGenerator", beforeInvocation = false)
+    public void inativar(UUID id) {
+        log.debug("Inativando dados clínicos básicos. ID: {}", id);
+        try {
+            UUID tenantId = tenantService.validarTenantAtual();
+            inativarInternal(id, tenantId);
+        } catch (NotFoundException e) {
+            log.warn("Tentativa de inativar dados clínicos básicos não existentes. ID: {}", id);
+            throw e;
+        } catch (BadRequestException e) {
+            log.warn("Erro de validação ao inativar dados clínicos básicos. ID: {}. Erro: {}", id, e.getMessage());
+            throw e;
+        } catch (DataAccessException e) {
+            log.error("Erro de acesso a dados ao inativar DadosClinicosBasicos. ID: {}, Exception: {}", id, e.getClass().getSimpleName(), e);
+            throw new InternalServerErrorException("Erro ao inativar DadosClinicosBasicos", e);
+        } catch (RuntimeException e) {
+            log.error("Erro inesperado ao inativar DadosClinicosBasicos. ID: {}, Exception: {}", id, e.getClass().getSimpleName(), e);
+            throw e;
+        }
+    }
+
     private void inativarInternal(UUID id, UUID tenantId) {
         if (id == null) {
-            log.warn("ID nulo recebido para exclusão de dados clínicos básicos");
+            log.warn("ID nulo recebido para inativação de dados clínicos básicos");
             throw new BadRequestException("ID é obrigatório");
         }
 
@@ -228,7 +252,7 @@ public class DadosClinicosBasicosServiceImpl implements DadosClinicosBasicosServ
         domainService.validarPodeInativar(entity);
         entity.setActive(false);
         repository.save(Objects.requireNonNull(entity));
-        log.info("Dados clínicos básicos excluídos. ID: {}", id);
+        log.info("Dados clínicos básicos inativados. ID: {}", id);
     }
 
     private Tenant obterTenantAutenticadoOrThrow(UUID tenantId) {

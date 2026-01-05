@@ -24,9 +24,11 @@ import com.upsaude.repository.estabelecimento.equipamento.EquipamentosEstabeleci
 import com.upsaude.service.api.estabelecimento.EquipamentosEstabelecimentoService;
 import com.upsaude.service.api.sistema.multitenancy.TenantService;
 import com.upsaude.service.api.support.equipamentosestabelecimento.EquipamentosEstabelecimentoCreator;
+import com.upsaude.service.api.support.equipamentosestabelecimento.EquipamentosEstabelecimentoDomainService;
 import com.upsaude.service.api.support.equipamentosestabelecimento.EquipamentosEstabelecimentoResponseBuilder;
 import com.upsaude.service.api.support.equipamentosestabelecimento.EquipamentosEstabelecimentoTenantEnforcer;
 import com.upsaude.service.api.support.equipamentosestabelecimento.EquipamentosEstabelecimentoUpdater;
+import org.springframework.dao.DataAccessException;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -44,6 +46,7 @@ public class EquipamentosEstabelecimentoServiceImpl implements EquipamentosEstab
     private final EquipamentosEstabelecimentoUpdater updater;
     private final EquipamentosEstabelecimentoResponseBuilder responseBuilder;
     private final EquipamentosEstabelecimentoTenantEnforcer tenantEnforcer;
+    private final EquipamentosEstabelecimentoDomainService domainService;
 
     @Override
     @Transactional
@@ -119,9 +122,37 @@ public class EquipamentosEstabelecimentoServiceImpl implements EquipamentosEstab
     @Transactional
     @CacheEvict(cacheNames = CacheKeyUtil.CACHE_EQUIPAMENTOS_ESTABELECIMENTO, keyGenerator = "equipamentosEstabelecimentoCacheKeyGenerator", beforeInvocation = false)
     public void excluir(UUID id) {
-        log.debug("Excluindo equipamento do estabelecimento. ID: {}", id);
-        UUID tenantId = tenantService.validarTenantAtual();
-        inativarInternal(id, tenantId);
+        log.debug("Excluindo equipamento do estabelecimento permanentemente. ID: {}", id);
+        try {
+            UUID tenantId = tenantService.validarTenantAtual();
+            EquipamentosEstabelecimento entity = tenantEnforcer.validarAcesso(id, tenantId);
+            domainService.validarPodeDeletar(entity);
+            repository.delete(Objects.requireNonNull(entity));
+            log.info("Equipamento do estabelecimento excluído permanentemente com sucesso. ID: {}", id);
+        } catch (BadRequestException | com.upsaude.exception.NotFoundException e) {
+            log.warn("Erro de validação ao excluir EquipamentosEstabelecimento. Erro: {}", e.getMessage());
+            throw e;
+        } catch (DataAccessException e) {
+            log.error("Erro de acesso a dados ao excluir EquipamentosEstabelecimento. Exception: {}", e.getClass().getSimpleName(), e);
+            throw new InternalServerErrorException("Erro ao excluir EquipamentosEstabelecimento", e);
+        }
+    }
+
+    @Override
+    @Transactional
+    @CacheEvict(cacheNames = CacheKeyUtil.CACHE_EQUIPAMENTOS_ESTABELECIMENTO, keyGenerator = "equipamentosEstabelecimentoCacheKeyGenerator", beforeInvocation = false)
+    public void inativar(UUID id) {
+        log.debug("Inativando equipamento do estabelecimento. ID: {}", id);
+        try {
+            UUID tenantId = tenantService.validarTenantAtual();
+            inativarInternal(id, tenantId);
+        } catch (BadRequestException | com.upsaude.exception.NotFoundException e) {
+            log.warn("Erro de validação ao inativar EquipamentosEstabelecimento. Erro: {}", e.getMessage());
+            throw e;
+        } catch (DataAccessException e) {
+            log.error("Erro de acesso a dados ao inativar EquipamentosEstabelecimento. Exception: {}", e.getClass().getSimpleName(), e);
+            throw new InternalServerErrorException("Erro ao inativar EquipamentosEstabelecimento", e);
+        }
     }
 
     private void inativarInternal(UUID id, UUID tenantId) {
@@ -130,9 +161,10 @@ public class EquipamentosEstabelecimentoServiceImpl implements EquipamentosEstab
         }
 
         EquipamentosEstabelecimento entity = tenantEnforcer.validarAcesso(id, tenantId);
+        domainService.validarPodeInativar(entity);
         entity.setActive(false);
         repository.save(Objects.requireNonNull(entity));
-        log.info("Equipamento do estabelecimento excluído (desativado) com sucesso. ID: {}", id);
+        log.info("Equipamento do estabelecimento inativado com sucesso. ID: {}", id);
     }
 
     private void validarTenantAutenticadoOrThrow(UUID tenantId, Tenant tenant) {

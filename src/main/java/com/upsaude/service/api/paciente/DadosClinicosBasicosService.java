@@ -20,4 +20,6 @@ public interface DadosClinicosBasicosService {
     DadosClinicosBasicosResponse atualizar(UUID id, DadosClinicosBasicosRequest request);
 
     void excluir(UUID id);
+
+    void inativar(UUID id);
 }

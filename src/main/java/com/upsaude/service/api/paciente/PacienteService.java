@@ -24,6 +24,4 @@ public interface PacienteService {
     void excluir(UUID id);
 
     void inativar(UUID id);
-
-    void deletarPermanentemente(UUID id);
 }

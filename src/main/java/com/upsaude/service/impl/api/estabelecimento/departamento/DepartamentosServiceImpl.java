@@ -171,11 +171,14 @@ public class DepartamentosServiceImpl implements DepartamentosService {
     @Transactional
     @CacheEvict(cacheNames = CacheKeyUtil.CACHE_DEPARTAMENTOS, keyGenerator = "departamentosCacheKeyGenerator", beforeInvocation = false)
     public void excluir(UUID id) {
-        log.debug("Excluindo departamento. ID: {}", id);
+        log.debug("Excluindo departamento permanentemente. ID: {}", id);
 
         try {
             UUID tenantId = tenantService.validarTenantAtual();
-            inativarInternal(id, tenantId);
+            Departamentos entity = tenantEnforcer.validarAcesso(id, tenantId);
+            domainService.validarPodeDeletar(entity);
+            departamentosRepository.delete(Objects.requireNonNull(entity));
+            log.info("Departamento excluído permanentemente com sucesso. ID: {}", id);
         } catch (NotFoundException e) {
             log.warn("Tentativa de excluir departamento não existente. ID: {}", id);
             throw e;
@@ -191,9 +194,33 @@ public class DepartamentosServiceImpl implements DepartamentosService {
         }
     }
 
+    @Override
+    @Transactional
+    @CacheEvict(cacheNames = CacheKeyUtil.CACHE_DEPARTAMENTOS, keyGenerator = "departamentosCacheKeyGenerator", beforeInvocation = false)
+    public void inativar(UUID id) {
+        log.debug("Inativando departamento. ID: {}", id);
+
+        try {
+            UUID tenantId = tenantService.validarTenantAtual();
+            inativarInternal(id, tenantId);
+        } catch (NotFoundException e) {
+            log.warn("Tentativa de inativar departamento não existente. ID: {}", id);
+            throw e;
+        } catch (BadRequestException e) {
+            log.warn("Erro de validação ao inativar departamento. ID: {}. Erro: {}", id, e.getMessage());
+            throw e;
+        } catch (DataAccessException e) {
+            log.error("Erro de acesso a dados ao inativar departamento. ID: {}", id, e);
+            throw new InternalServerErrorException("Erro ao inativar departamento", e);
+        } catch (RuntimeException e) {
+            log.error("Erro inesperado ao inativar departamento. ID: {}", id, e);
+            throw e;
+        }
+    }
+
     private void inativarInternal(UUID id, UUID tenantId) {
         if (id == null) {
-            log.warn("ID nulo recebido para exclusão de departamento");
+            log.warn("ID nulo recebido para inativação de departamento");
             throw new BadRequestException("ID do departamento é obrigatório");
         }
 
@@ -201,7 +228,7 @@ public class DepartamentosServiceImpl implements DepartamentosService {
         domainService.validarPodeInativar(entity);
         entity.setActive(false);
         departamentosRepository.save(Objects.requireNonNull(entity));
-        log.info("Departamento excluído (desativado) com sucesso. ID: {}", id);
+        log.info("Departamento inativado com sucesso. ID: {}", id);
     }
 
     private void validarTenantAutenticadoOrThrow(UUID tenantId, Tenant tenant) {

@@ -18,4 +18,6 @@ public interface EstadosService {
     EstadosResponse atualizar(UUID id, EstadosRequest request);
 
     void excluir(UUID id);
+
+    void inativar(UUID id);
 }

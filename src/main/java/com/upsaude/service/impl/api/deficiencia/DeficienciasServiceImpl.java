@@ -101,8 +101,42 @@ public class DeficienciasServiceImpl implements DeficienciasService {
     @Transactional
     @CacheEvict(cacheNames = CacheKeyUtil.CACHE_DEFICIENCIAS, keyGenerator = "deficienciasCacheKeyGenerator", beforeInvocation = false)
     public void excluir(UUID id) {
-        log.debug("Excluindo deficiência. ID: {}", id);
-        inativarInternal(id);
+        log.debug("Excluindo deficiência permanentemente. ID: {}", id);
+        try {
+            Deficiencias entity = deficienciasRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Deficiência não encontrada com ID: " + id));
+            domainService.validarPodeDeletar(entity);
+            deficienciasRepository.delete(Objects.requireNonNull(entity));
+            log.info("Deficiência excluída permanentemente com sucesso. ID: {}", id);
+        } catch (NotFoundException e) {
+            log.warn("Tentativa de excluir deficiência não existente. ID: {}", id);
+            throw e;
+        } catch (BadRequestException e) {
+            log.warn("Erro de validação ao excluir deficiência. ID: {}. Erro: {}", id, e.getMessage());
+            throw e;
+        } catch (Exception e) {
+            log.error("Erro inesperado ao excluir deficiência. ID: {}", id, e);
+            throw e;
+        }
+    }
+
+    @Override
+    @Transactional
+    @CacheEvict(cacheNames = CacheKeyUtil.CACHE_DEFICIENCIAS, keyGenerator = "deficienciasCacheKeyGenerator", beforeInvocation = false)
+    public void inativar(UUID id) {
+        log.debug("Inativando deficiência. ID: {}", id);
+        try {
+            inativarInternal(id);
+        } catch (NotFoundException e) {
+            log.warn("Tentativa de inativar deficiência não existente. ID: {}", id);
+            throw e;
+        } catch (BadRequestException e) {
+            log.warn("Erro de validação ao inativar deficiência. ID: {}. Erro: {}", id, e.getMessage());
+            throw e;
+        } catch (Exception e) {
+            log.error("Erro inesperado ao inativar deficiência. ID: {}", id, e);
+            throw e;
+        }
     }
 
     private void inativarInternal(UUID id) {
@@ -116,6 +150,6 @@ public class DeficienciasServiceImpl implements DeficienciasService {
         domainService.validarPodeInativar(entity);
         entity.setActive(false);
         deficienciasRepository.save(Objects.requireNonNull(entity));
-        log.info("Deficiência excluída (desativada) com sucesso. ID: {}", id);
+        log.info("Deficiência inativada com sucesso. ID: {}", id);
     }
 }

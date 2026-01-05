@@ -30,5 +30,7 @@ public interface CirurgiaService {
     CirurgiaResponse atualizar(UUID id, CirurgiaRequest request);
 
     void excluir(UUID id);
+
+    void inativar(UUID id);
 }
 

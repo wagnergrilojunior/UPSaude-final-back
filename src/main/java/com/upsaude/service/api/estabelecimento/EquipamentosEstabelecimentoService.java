@@ -18,4 +18,6 @@ public interface EquipamentosEstabelecimentoService {
     EquipamentosEstabelecimentoResponse atualizar(UUID id, EquipamentosEstabelecimentoRequest request);
 
     void excluir(UUID id);
+
+    void inativar(UUID id);
 }

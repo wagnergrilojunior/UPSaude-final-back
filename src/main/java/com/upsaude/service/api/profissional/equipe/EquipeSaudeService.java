@@ -23,4 +23,6 @@ public interface EquipeSaudeService {
     EquipeSaudeResponse atualizar(UUID id, EquipeSaudeRequest request);
 
     void excluir(UUID id);
+
+    void inativar(UUID id);
 }

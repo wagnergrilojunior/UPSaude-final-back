@@ -20,4 +20,6 @@ public interface CidadesService {
     CidadesResponse atualizar(UUID id, CidadesRequest request);
 
     void excluir(UUID id);
+
+    void inativar(UUID id);
 }

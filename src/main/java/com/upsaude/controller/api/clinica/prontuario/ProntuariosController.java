@@ -132,7 +132,7 @@ public class ProntuariosController {
     }
 
     @DeleteMapping("/{id}")
-    @Operation(summary = "Excluir prontuário", description = "Exclui (desativa) um prontuário do sistema")
+    @Operation(summary = "Excluir prontuário", description = "Remove permanentemente um prontuário do banco de dados")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "204", description = "Prontuário excluído com sucesso"),
             @ApiResponse(responseCode = "404", description = "Prontuário não encontrado"),
@@ -144,13 +144,38 @@ public class ProntuariosController {
         log.debug("REQUEST DELETE /v1/prontuarios/{}", id);
         try {
             prontuariosService.excluir(id);
-            log.info("Prontuário excluído com sucesso. ID: {}", id);
+            log.info("Prontuário excluído permanentemente com sucesso. ID: {}", id);
             return ResponseEntity.noContent().build();
         } catch (NotFoundException ex) {
             log.warn("Prontuário não encontrado para exclusão — ID: {}, mensagem: {}", id, ex.getMessage());
             throw ex;
         } catch (Exception ex) {
             log.error("Erro inesperado ao excluir prontuário — ID: {}", id, ex);
+            throw ex;
+        }
+    }
+
+    @PatchMapping("/{id}/inativar")
+    @Operation(summary = "Inativar prontuário", description = "Inativa um prontuário no sistema alterando seu status")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "204", description = "Prontuário inativado com sucesso"),
+            @ApiResponse(responseCode = "404", description = "Prontuário não encontrado"),
+            @ApiResponse(responseCode = "400", description = "Prontuário já está inativo"),
+            @ApiResponse(responseCode = "403", description = "Acesso negado")
+    })
+    public ResponseEntity<Void> inativar(
+            @Parameter(description = "ID do prontuário", required = true)
+            @PathVariable UUID id) {
+        log.debug("REQUEST PATCH /v1/prontuarios/{}/inativar", id);
+        try {
+            prontuariosService.inativar(id);
+            log.info("Prontuário inativado com sucesso. ID: {}", id);
+            return ResponseEntity.noContent().build();
+        } catch (NotFoundException ex) {
+            log.warn("Prontuário não encontrado para inativação — ID: {}, mensagem: {}", id, ex.getMessage());
+            throw ex;
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao inativar prontuário — ID: {}", id, ex);
             throw ex;
         }
     }

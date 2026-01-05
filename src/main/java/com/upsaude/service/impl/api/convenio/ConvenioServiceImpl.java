@@ -20,7 +20,9 @@ import com.upsaude.entity.convenio.Convenio;
 import com.upsaude.entity.sistema.multitenancy.Tenant;
 import com.upsaude.exception.BadRequestException;
 import com.upsaude.exception.InternalServerErrorException;
+import com.upsaude.exception.NotFoundException;
 import com.upsaude.repository.convenio.ConvenioRepository;
+import org.springframework.dao.DataAccessException;
 import com.upsaude.service.api.convenio.ConvenioService;
 import com.upsaude.service.api.sistema.multitenancy.TenantService;
 import com.upsaude.service.api.support.convenio.ConvenioCreator;
@@ -121,9 +123,37 @@ public class ConvenioServiceImpl implements ConvenioService {
     @Transactional
     @CacheEvict(cacheNames = CacheKeyUtil.CACHE_CONVENIOS, keyGenerator = "convenioCacheKeyGenerator", beforeInvocation = false)
     public void excluir(UUID id) {
-        log.debug("Excluindo convênio. ID: {}", id);
-        UUID tenantId = tenantService.validarTenantAtual();
-        inativarInternal(id, tenantId);
+        log.debug("Excluindo convênio permanentemente. ID: {}", id);
+        try {
+            UUID tenantId = tenantService.validarTenantAtual();
+            Convenio entity = tenantEnforcer.validarAcesso(id, tenantId);
+            domainService.validarPodeDeletar(entity);
+            repository.delete(Objects.requireNonNull(entity));
+            log.info("Convênio excluído permanentemente com sucesso. ID: {}", id);
+        } catch (BadRequestException | NotFoundException e) {
+            log.warn("Erro de validação ao excluir Convênio. Erro: {}", e.getMessage());
+            throw e;
+        } catch (DataAccessException e) {
+            log.error("Erro de acesso a dados ao excluir Convênio. Exception: {}", e.getClass().getSimpleName(), e);
+            throw new InternalServerErrorException("Erro ao excluir Convênio", e);
+        }
+    }
+
+    @Override
+    @Transactional
+    @CacheEvict(cacheNames = CacheKeyUtil.CACHE_CONVENIOS, keyGenerator = "convenioCacheKeyGenerator", beforeInvocation = false)
+    public void inativar(UUID id) {
+        log.debug("Inativando convênio. ID: {}", id);
+        try {
+            UUID tenantId = tenantService.validarTenantAtual();
+            inativarInternal(id, tenantId);
+        } catch (BadRequestException | NotFoundException e) {
+            log.warn("Erro de validação ao inativar Convênio. Erro: {}", e.getMessage());
+            throw e;
+        } catch (DataAccessException e) {
+            log.error("Erro de acesso a dados ao inativar Convênio. Exception: {}", e.getClass().getSimpleName(), e);
+            throw new InternalServerErrorException("Erro ao inativar Convênio", e);
+        }
     }
 
     private void inativarInternal(UUID id, UUID tenantId) {
@@ -135,7 +165,7 @@ public class ConvenioServiceImpl implements ConvenioService {
         domainService.validarPodeInativar(entity);
         entity.setActive(false);
         repository.save(Objects.requireNonNull(entity));
-        log.info("Convênio excluído (desativado) com sucesso. ID: {}", id);
+        log.info("Convênio inativado com sucesso. ID: {}", id);
     }
 
     private void validarTenantAutenticadoOrThrow(UUID tenantId, Tenant tenant) {

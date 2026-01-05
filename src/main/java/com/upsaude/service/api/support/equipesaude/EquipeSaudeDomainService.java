@@ -15,4 +15,9 @@ public class EquipeSaudeDomainService {
             throw new BadRequestException("Equipe já está inativa");
         }
     }
+
+    public void validarPodeDeletar(EquipeSaude equipe) {
+        log.debug("Validando se equipe pode ser deletada. ID: {}", equipe.getId());
+        // Adicione aqui qualquer lógica de validação antes de um hard delete.
+    }
 }

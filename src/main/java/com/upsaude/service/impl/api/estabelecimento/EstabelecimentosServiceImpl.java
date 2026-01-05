@@ -211,11 +211,14 @@ public class EstabelecimentosServiceImpl implements EstabelecimentosService {
     @Transactional
     @CacheEvict(cacheNames = CacheKeyUtil.CACHE_ESTABELECIMENTOS, keyGenerator = "estabelecimentosCacheKeyGenerator", beforeInvocation = false)
     public void excluir(UUID id) {
-        log.debug("Excluindo estabelecimento. ID: {}", id);
+        log.debug("Excluindo estabelecimento permanentemente. ID: {}", id);
 
         try {
             UUID tenantId = tenantService.validarTenantAtual();
-            inativarInternal(id, tenantId);
+            Estabelecimentos entity = tenantEnforcer.validarAcesso(id, tenantId);
+            domainService.validarPodeDeletar(entity);
+            estabelecimentosRepository.delete(Objects.requireNonNull(entity));
+            log.info("Estabelecimento excluído permanentemente com sucesso. ID: {}", id);
         } catch (NotFoundException e) {
             log.warn("Tentativa de excluir estabelecimento não existente. ID: {}", id);
             throw e;
@@ -230,9 +233,34 @@ public class EstabelecimentosServiceImpl implements EstabelecimentosService {
             throw e;
         }
     }
+
+    @Override
+    @Transactional
+    @CacheEvict(cacheNames = CacheKeyUtil.CACHE_ESTABELECIMENTOS, keyGenerator = "estabelecimentosCacheKeyGenerator", beforeInvocation = false)
+    public void inativar(UUID id) {
+        log.debug("Inativando estabelecimento. ID: {}", id);
+
+        try {
+            UUID tenantId = tenantService.validarTenantAtual();
+            inativarInternal(id, tenantId);
+        } catch (NotFoundException e) {
+            log.warn("Tentativa de inativar estabelecimento não existente. ID: {}", id);
+            throw e;
+        } catch (BadRequestException e) {
+            log.warn("Erro de validação ao inativar estabelecimento. ID: {}. Erro: {}", id, e.getMessage());
+            throw e;
+        } catch (DataAccessException e) {
+            log.error("Erro de acesso a dados ao inativar estabelecimento. ID: {}", id, e);
+            throw new InternalServerErrorException("Erro ao inativar estabelecimento", e);
+        } catch (RuntimeException e) {
+            log.error("Erro inesperado ao inativar estabelecimento. ID: {}", id, e);
+            throw e;
+        }
+    }
+
     private void inativarInternal(UUID id, UUID tenantId) {
         if (id == null) {
-            log.warn("ID nulo recebido para exclusão de estabelecimento");
+            log.warn("ID nulo recebido para inativação de estabelecimento");
             throw new BadRequestException("ID do estabelecimento é obrigatório");
         }
 
@@ -240,7 +268,7 @@ public class EstabelecimentosServiceImpl implements EstabelecimentosService {
         domainService.validarPodeInativar(entity);
         entity.setActive(false);
         estabelecimentosRepository.save(Objects.requireNonNull(entity));
-        log.info("Estabelecimento excluído (desativado) com sucesso. ID: {}", id);
+        log.info("Estabelecimento inativado com sucesso. ID: {}", id);
     }
 
     private void validarTenantAutenticadoOrThrow(UUID tenantId, Tenant tenant) {

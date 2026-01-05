@@ -18,4 +18,6 @@ public interface CheckInAtendimentoService {
     CheckInAtendimentoResponse atualizar(UUID id, CheckInAtendimentoRequest request);
 
     void excluir(UUID id);
+
+    void inativar(UUID id);
 }

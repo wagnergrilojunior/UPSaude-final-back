@@ -128,7 +128,9 @@ public class PacienteServiceImpl implements PacienteService {
     public void excluir(UUID id) {
         try {
             UUID tenantId = tenantService.validarTenantAtual();
-            inativarInternal(id, tenantId);
+            Paciente paciente = tenantEnforcer.validarAcesso(id, tenantId);
+            domainService.validarPodeDeletar(paciente);
+            pacienteRepository.delete(Objects.requireNonNull(paciente));
         } catch (BadRequestException | NotFoundException e) {
             log.warn("Erro de validação ao excluir Paciente. Erro: {}", e.getMessage());
             throw e;
@@ -151,24 +153,6 @@ public class PacienteServiceImpl implements PacienteService {
         } catch (DataAccessException e) {
             log.error("Erro de acesso a dados ao inativar Paciente. Exception: {}", e.getClass().getSimpleName(), e);
             throw new InternalServerErrorException("Erro ao inativar Paciente", e);
-        }
-    }
-
-    @Override
-    @Transactional
-    @CacheEvict(cacheNames = CacheKeyUtil.CACHE_PACIENTES, keyGenerator = "pacienteCacheKeyGenerator", beforeInvocation = false)
-    public void deletarPermanentemente(UUID id) {
-        try {
-            UUID tenantId = tenantService.validarTenantAtual();
-            Paciente paciente = tenantEnforcer.validarAcesso(id, tenantId);
-            domainService.validarPodeDeletar(paciente);
-            pacienteRepository.delete(Objects.requireNonNull(paciente));
-        } catch (BadRequestException | NotFoundException e) {
-            log.warn("Erro de validação ao deletar Paciente. Erro: {}", e.getMessage());
-            throw e;
-        } catch (DataAccessException e) {
-            log.error("Erro de acesso a dados ao deletar Paciente. Exception: {}", e.getClass().getSimpleName(), e);
-            throw new InternalServerErrorException("Erro ao deletar Paciente", e);
         }
     }
 

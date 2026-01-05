@@ -162,7 +162,7 @@ public class PacienteController {
     }
 
     @DeleteMapping("/{id}")
-    @Operation(summary = "Excluir paciente", description = "Exclui (inativa) um paciente do sistema")
+    @Operation(summary = "Excluir paciente", description = "Remove permanentemente um paciente do banco de dados")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "204", description = "Paciente excluído com sucesso"),
             @ApiResponse(responseCode = "404", description = "Paciente não encontrado"),
@@ -174,7 +174,7 @@ public class PacienteController {
         log.debug("REQUEST DELETE /v1/pacientes/{}", id);
         try {
             pacienteService.excluir(id);
-            log.info("Paciente excluído com sucesso. ID: {}", id);
+            log.info("Paciente excluído permanentemente com sucesso. ID: {}", id);
             return ResponseEntity.noContent().build();
         } catch (NotFoundException ex) {
             log.warn("Paciente não encontrado para exclusão — ID: {}, mensagem: {}", id, ex.getMessage());
@@ -187,7 +187,7 @@ public class PacienteController {
     }
 
     @PatchMapping("/{id}/inativar")
-    @Operation(summary = "Inativar paciente", description = "Inativa um paciente no sistema (soft delete)")
+    @Operation(summary = "Inativar paciente", description = "Inativa um paciente no sistema alterando seu status")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "204", description = "Paciente inativado com sucesso"),
             @ApiResponse(responseCode = "404", description = "Paciente não encontrado"),
@@ -207,31 +207,6 @@ public class PacienteController {
             throw ex;
         } catch (Exception ex) {
             log.error("Erro inesperado ao inativar paciente — Path: /v1/pacientes/{}/inativar, Method: PATCH, ID: {}, Exception: {}",
-                id, id, ex.getClass().getName(), ex);
-            throw ex;
-        }
-    }
-
-    @DeleteMapping("/{id}/permanente")
-    @Operation(summary = "Deletar paciente permanentemente", description = "Remove permanentemente um paciente do banco de dados (hard delete)")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "204", description = "Paciente deletado permanentemente com sucesso"),
-            @ApiResponse(responseCode = "404", description = "Paciente não encontrado"),
-            @ApiResponse(responseCode = "403", description = "Acesso negado")
-    })
-    public ResponseEntity<Void> deletarPermanentemente(
-            @Parameter(description = "ID do paciente", required = true)
-            @PathVariable UUID id) {
-        log.debug("REQUEST DELETE /v1/pacientes/{}/permanente", id);
-        try {
-            pacienteService.deletarPermanentemente(id);
-            log.info("Paciente deletado permanentemente com sucesso. ID: {}", id);
-            return ResponseEntity.noContent().build();
-        } catch (NotFoundException ex) {
-            log.warn("Paciente não encontrado para exclusão permanente — ID: {}, mensagem: {}", id, ex.getMessage());
-            throw ex;
-        } catch (Exception ex) {
-            log.error("Erro inesperado ao deletar paciente permanentemente — Path: /v1/pacientes/{}/permanente, Method: DELETE, ID: {}, Exception: {}",
                 id, id, ex.getClass().getName(), ex);
             throw ex;
         }

@@ -83,10 +83,51 @@ public class EquipamentosEstabelecimentoController {
     }
 
     @DeleteMapping("/{id}")
-    @Operation(summary = "Excluir vínculo", description = "Exclui (desativa) um vínculo de equipamento")
-    public ResponseEntity<Void> excluir(@PathVariable UUID id) {
+    @Operation(summary = "Excluir vínculo", description = "Exclui permanentemente um vínculo de equipamento do sistema")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "204", description = "Vínculo excluído com sucesso"),
+        @ApiResponse(responseCode = "404", description = "Vínculo não encontrado"),
+        @ApiResponse(responseCode = "403", description = "Acesso negado")
+    })
+    public ResponseEntity<Void> excluir(
+            @Parameter(description = "ID do vínculo", required = true)
+            @PathVariable UUID id) {
         log.debug("REQUEST DELETE /v1/equipamentos-estabelecimento/{}", id);
-        service.excluir(id);
-        return ResponseEntity.noContent().build();
+        try {
+            service.excluir(id);
+            log.info("Vínculo excluído permanentemente com sucesso. ID: {}", id);
+            return ResponseEntity.noContent().build();
+        } catch (NotFoundException ex) {
+            log.warn("Vínculo não encontrado para exclusão — ID: {}, mensagem: {}", id, ex.getMessage());
+            throw ex;
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao excluir vínculo — ID: {}", id, ex);
+            throw ex;
+        }
+    }
+
+    @PatchMapping("/{id}/inativar")
+    @Operation(summary = "Inativar vínculo", description = "Inativa um vínculo de equipamento do sistema alterando seu status")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "204", description = "Vínculo inativado com sucesso"),
+        @ApiResponse(responseCode = "404", description = "Vínculo não encontrado"),
+        @ApiResponse(responseCode = "400", description = "Vínculo já está inativo"),
+        @ApiResponse(responseCode = "403", description = "Acesso negado")
+    })
+    public ResponseEntity<Void> inativar(
+            @Parameter(description = "ID do vínculo", required = true)
+            @PathVariable UUID id) {
+        log.debug("REQUEST PATCH /v1/equipamentos-estabelecimento/{}/inativar", id);
+        try {
+            service.inativar(id);
+            log.info("Vínculo inativado com sucesso. ID: {}", id);
+            return ResponseEntity.noContent().build();
+        } catch (NotFoundException ex) {
+            log.warn("Vínculo não encontrado para inativação — ID: {}, mensagem: {}", id, ex.getMessage());
+            throw ex;
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao inativar vínculo — ID: {}", id, ex);
+            throw ex;
+        }
     }
 }

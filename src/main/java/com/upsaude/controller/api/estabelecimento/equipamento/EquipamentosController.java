@@ -83,10 +83,47 @@ public class EquipamentosController {
     }
 
     @DeleteMapping("/{id}")
-    @Operation(summary = "Excluir equipamento", description = "Exclui (desativa) um equipamento do sistema")
+    @Operation(summary = "Excluir equipamento", description = "Remove permanentemente um equipamento do banco de dados")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "204", description = "Equipamento excluído com sucesso"),
+            @ApiResponse(responseCode = "404", description = "Equipamento não encontrado"),
+            @ApiResponse(responseCode = "403", description = "Acesso negado")
+    })
     public ResponseEntity<Void> excluir(@PathVariable UUID id) {
         log.debug("REQUEST DELETE /v1/equipamentos/{}", id);
-        service.excluir(id);
-        return ResponseEntity.noContent().build();
+        try {
+            service.excluir(id);
+            log.info("Equipamento excluído permanentemente com sucesso. ID: {}", id);
+            return ResponseEntity.noContent().build();
+        } catch (NotFoundException ex) {
+            log.warn("Equipamento não encontrado para exclusão — ID: {}, mensagem: {}", id, ex.getMessage());
+            throw ex;
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao excluir equipamento — ID: {}", id, ex);
+            throw ex;
+        }
+    }
+
+    @PatchMapping("/{id}/inativar")
+    @Operation(summary = "Inativar equipamento", description = "Inativa um equipamento no sistema alterando seu status")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "204", description = "Equipamento inativado com sucesso"),
+            @ApiResponse(responseCode = "404", description = "Equipamento não encontrado"),
+            @ApiResponse(responseCode = "400", description = "Equipamento já está inativo"),
+            @ApiResponse(responseCode = "403", description = "Acesso negado")
+    })
+    public ResponseEntity<Void> inativar(@PathVariable UUID id) {
+        log.debug("REQUEST PATCH /v1/equipamentos/{}/inativar", id);
+        try {
+            service.inativar(id);
+            log.info("Equipamento inativado com sucesso. ID: {}", id);
+            return ResponseEntity.noContent().build();
+        } catch (NotFoundException ex) {
+            log.warn("Equipamento não encontrado para inativação — ID: {}, mensagem: {}", id, ex.getMessage());
+            throw ex;
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao inativar equipamento — ID: {}", id, ex);
+            throw ex;
+        }
     }
 }

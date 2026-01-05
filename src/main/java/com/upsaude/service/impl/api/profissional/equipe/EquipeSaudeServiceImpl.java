@@ -144,15 +144,36 @@ public class EquipeSaudeServiceImpl implements EquipeSaudeService {
     @Transactional
     @CacheEvict(cacheNames = CacheKeyUtil.CACHE_EQUIPES_SAUDE, keyGenerator = "equipeSaudeCacheKeyGenerator", beforeInvocation = false)
     public void excluir(UUID id) {
+        log.debug("Excluindo equipe de saúde permanentemente. ID: {}", id);
+        try {
+            UUID tenantId = tenantService.validarTenantAtual();
+            EquipeSaude equipe = tenantEnforcer.validarAcesso(id, tenantId);
+            domainService.validarPodeDeletar(equipe);
+            equipeSaudeRepository.delete(Objects.requireNonNull(equipe));
+            log.info("Equipe de saúde excluída permanentemente com sucesso. ID: {}", id);
+        } catch (BadRequestException | NotFoundException e) {
+            log.warn("Erro de validação ao excluir EquipeSaude. Erro: {}", e.getMessage());
+            throw e;
+        } catch (DataAccessException e) {
+            log.error("Erro de acesso a dados ao excluir EquipeSaude. Exception: {}", e.getClass().getSimpleName(), e);
+            throw new InternalServerErrorException("Erro ao excluir EquipeSaude", e);
+        }
+    }
+
+    @Override
+    @Transactional
+    @CacheEvict(cacheNames = CacheKeyUtil.CACHE_EQUIPES_SAUDE, keyGenerator = "equipeSaudeCacheKeyGenerator", beforeInvocation = false)
+    public void inativar(UUID id) {
+        log.debug("Inativando equipe de saúde. ID: {}", id);
         try {
             UUID tenantId = tenantService.validarTenantAtual();
             inativarInternal(id, tenantId);
         } catch (BadRequestException | NotFoundException e) {
-            log.warn("Erro de validação ao excluir(inativar) equipe de saúde. Erro: {}", e.getMessage());
+            log.warn("Erro de validação ao inativar EquipeSaude. Erro: {}", e.getMessage());
             throw e;
         } catch (DataAccessException e) {
-            log.error("Erro de acesso a dados ao excluir(inativar) equipe de saúde.", e);
-            throw new InternalServerErrorException("Erro ao excluir equipe de saúde", e);
+            log.error("Erro de acesso a dados ao inativar EquipeSaude. Exception: {}", e.getClass().getSimpleName(), e);
+            throw new InternalServerErrorException("Erro ao inativar EquipeSaude", e);
         }
     }
 
@@ -164,6 +185,7 @@ public class EquipeSaudeServiceImpl implements EquipeSaudeService {
         domainService.validarPodeInativar(equipe);
         equipe.setActive(false);
         equipeSaudeRepository.save(Objects.requireNonNull(equipe));
+        log.info("Equipe de saúde inativada com sucesso. ID: {}", id);
     }
 
     private Tenant obterTenantAutenticadoOrThrow(UUID tenantId) {

@@ -8,6 +8,7 @@ import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.dao.DataAccessException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -144,21 +145,49 @@ public class ProntuariosServiceImpl implements ProntuariosService {
     @Transactional
     @CacheEvict(cacheNames = CacheKeyUtil.CACHE_PRONTUARIOS, keyGenerator = "prontuariosCacheKeyGenerator", beforeInvocation = false)
     public void excluir(UUID id) {
-        log.debug("Excluindo prontuarios. ID: {}", id);
-        UUID tenantId = tenantService.validarTenantAtual();
-        inativarInternal(id, tenantId);
+        log.debug("Excluindo prontuário permanentemente. ID: {}", id);
+        try {
+            UUID tenantId = tenantService.validarTenantAtual();
+            Prontuarios entity = tenantEnforcer.validarAcesso(id, tenantId);
+            domainService.validarPodeDeletar(entity);
+            prontuariosRepository.delete(Objects.requireNonNull(entity));
+            log.info("Prontuário excluído permanentemente com sucesso. ID: {}", id);
+        } catch (BadRequestException | NotFoundException e) {
+            log.warn("Erro de validação ao excluir Prontuário. Erro: {}", e.getMessage());
+            throw e;
+        } catch (DataAccessException e) {
+            log.error("Erro de acesso a dados ao excluir Prontuário. Exception: {}", e.getClass().getSimpleName(), e);
+            throw new InternalServerErrorException("Erro ao excluir Prontuário", e);
+        }
+    }
+
+    @Override
+    @Transactional
+    @CacheEvict(cacheNames = CacheKeyUtil.CACHE_PRONTUARIOS, keyGenerator = "prontuariosCacheKeyGenerator", beforeInvocation = false)
+    public void inativar(UUID id) {
+        log.debug("Inativando prontuário. ID: {}", id);
+        try {
+            UUID tenantId = tenantService.validarTenantAtual();
+            inativarInternal(id, tenantId);
+        } catch (BadRequestException | NotFoundException e) {
+            log.warn("Erro de validação ao inativar Prontuário. Erro: {}", e.getMessage());
+            throw e;
+        } catch (DataAccessException e) {
+            log.error("Erro de acesso a dados ao inativar Prontuário. Exception: {}", e.getClass().getSimpleName(), e);
+            throw new InternalServerErrorException("Erro ao inativar Prontuário", e);
+        }
     }
 
     private void inativarInternal(UUID id, UUID tenantId) {
         if (id == null) {
-            throw new BadRequestException("ID do prontuarios é obrigatório");
+            throw new BadRequestException("ID do prontuário é obrigatório");
         }
 
         Prontuarios entity = tenantEnforcer.validarAcesso(id, tenantId);
         domainService.validarPodeInativar(entity);
         entity.setActive(false);
         prontuariosRepository.save(Objects.requireNonNull(entity));
-        log.info("Prontuarios excluído (desativado) com sucesso. ID: {}", id);
+        log.info("Prontuário inativado com sucesso. ID: {}", id);
     }
 
     private void validarTenantAutenticadoOrThrow(UUID tenantId, Tenant tenant) {

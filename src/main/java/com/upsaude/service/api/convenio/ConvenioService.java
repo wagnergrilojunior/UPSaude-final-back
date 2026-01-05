@@ -18,4 +18,6 @@ public interface ConvenioService {
     ConvenioResponse atualizar(UUID id, ConvenioRequest request);
 
     void excluir(UUID id);
+
+    void inativar(UUID id);
 }

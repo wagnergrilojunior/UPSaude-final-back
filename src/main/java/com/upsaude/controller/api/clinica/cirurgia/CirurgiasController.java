@@ -184,7 +184,7 @@ public class CirurgiasController {
     }
 
     @DeleteMapping("/{id}")
-    @Operation(summary = "Excluir cirurgia", description = "Exclui (desativa) uma cirurgia do sistema (tenant-aware)")
+    @Operation(summary = "Excluir cirurgia", description = "Remove permanentemente uma cirurgia do banco de dados")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "204", description = "Cirurgia excluída com sucesso"),
         @ApiResponse(responseCode = "404", description = "Cirurgia não encontrada"),
@@ -196,13 +196,38 @@ public class CirurgiasController {
         log.debug("REQUEST DELETE /v1/cirurgias/{}", id);
         try {
             cirurgiaService.excluir(id);
-            log.info("Cirurgia excluída com sucesso. ID: {}", id);
+            log.info("Cirurgia excluída permanentemente com sucesso. ID: {}", id);
             return ResponseEntity.noContent().build();
         } catch (NotFoundException ex) {
             log.warn("Cirurgia não encontrada para exclusão — ID: {}, mensagem: {}", id, ex.getMessage());
             throw ex;
         } catch (Exception ex) {
             log.error("Erro inesperado ao excluir cirurgia — ID: {}", id, ex);
+            throw ex;
+        }
+    }
+
+    @PatchMapping("/{id}/inativar")
+    @Operation(summary = "Inativar cirurgia", description = "Inativa uma cirurgia no sistema alterando seu status")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "204", description = "Cirurgia inativada com sucesso"),
+        @ApiResponse(responseCode = "404", description = "Cirurgia não encontrada"),
+        @ApiResponse(responseCode = "400", description = "Cirurgia já está inativa"),
+        @ApiResponse(responseCode = "403", description = "Acesso negado")
+    })
+    public ResponseEntity<Void> inativar(
+        @Parameter(description = "ID da cirurgia", required = true)
+        @PathVariable UUID id) {
+        log.debug("REQUEST PATCH /v1/cirurgias/{}/inativar", id);
+        try {
+            cirurgiaService.inativar(id);
+            log.info("Cirurgia inativada com sucesso. ID: {}", id);
+            return ResponseEntity.noContent().build();
+        } catch (NotFoundException ex) {
+            log.warn("Cirurgia não encontrada para inativação — ID: {}, mensagem: {}", id, ex.getMessage());
+            throw ex;
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao inativar cirurgia — ID: {}", id, ex);
             throw ex;
         }
     }

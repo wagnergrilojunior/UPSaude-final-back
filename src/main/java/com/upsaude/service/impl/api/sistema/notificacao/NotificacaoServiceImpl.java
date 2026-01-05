@@ -24,9 +24,11 @@ import com.upsaude.repository.sistema.notificacao.NotificacaoRepository;
 import com.upsaude.service.api.sistema.notificacao.NotificacaoService;
 import com.upsaude.service.api.sistema.multitenancy.TenantService;
 import com.upsaude.service.api.support.notificacao.NotificacaoCreator;
+import com.upsaude.service.api.support.notificacao.NotificacaoDomainService;
 import com.upsaude.service.api.support.notificacao.NotificacaoResponseBuilder;
 import com.upsaude.service.api.support.notificacao.NotificacaoTenantEnforcer;
 import com.upsaude.service.api.support.notificacao.NotificacaoUpdater;
+import org.springframework.dao.DataAccessException;
 
 import java.time.OffsetDateTime;
 import lombok.RequiredArgsConstructor;
@@ -45,6 +47,7 @@ public class NotificacaoServiceImpl implements NotificacaoService {
     private final NotificacaoUpdater updater;
     private final NotificacaoResponseBuilder responseBuilder;
     private final NotificacaoTenantEnforcer tenantEnforcer;
+    private final NotificacaoDomainService domainService;
 
     @Override
     @Transactional
@@ -141,9 +144,37 @@ public class NotificacaoServiceImpl implements NotificacaoService {
     @Transactional
     @CacheEvict(cacheNames = CacheKeyUtil.CACHE_NOTIFICACOES, keyGenerator = "notificacaoCacheKeyGenerator", beforeInvocation = false)
     public void excluir(UUID id) {
-        log.debug("Excluindo notificação. ID: {}", id);
-        UUID tenantId = tenantService.validarTenantAtual();
-        inativarInternal(id, tenantId);
+        log.debug("Excluindo notificação permanentemente. ID: {}", id);
+        try {
+            UUID tenantId = tenantService.validarTenantAtual();
+            Notificacao entity = tenantEnforcer.validarAcesso(id, tenantId);
+            domainService.validarPodeDeletar(entity);
+            repository.delete(Objects.requireNonNull(entity));
+            log.info("Notificação excluída permanentemente com sucesso. ID: {}", id);
+        } catch (BadRequestException | com.upsaude.exception.NotFoundException e) {
+            log.warn("Erro de validação ao excluir Notificacao. Erro: {}", e.getMessage());
+            throw e;
+        } catch (DataAccessException e) {
+            log.error("Erro de acesso a dados ao excluir Notificacao. Exception: {}", e.getClass().getSimpleName(), e);
+            throw new InternalServerErrorException("Erro ao excluir Notificacao", e);
+        }
+    }
+
+    @Override
+    @Transactional
+    @CacheEvict(cacheNames = CacheKeyUtil.CACHE_NOTIFICACOES, keyGenerator = "notificacaoCacheKeyGenerator", beforeInvocation = false)
+    public void inativar(UUID id) {
+        log.debug("Inativando notificação. ID: {}", id);
+        try {
+            UUID tenantId = tenantService.validarTenantAtual();
+            inativarInternal(id, tenantId);
+        } catch (BadRequestException | com.upsaude.exception.NotFoundException e) {
+            log.warn("Erro de validação ao inativar Notificacao. Erro: {}", e.getMessage());
+            throw e;
+        } catch (DataAccessException e) {
+            log.error("Erro de acesso a dados ao inativar Notificacao. Exception: {}", e.getClass().getSimpleName(), e);
+            throw new InternalServerErrorException("Erro ao inativar Notificacao", e);
+        }
     }
 
     private void inativarInternal(UUID id, UUID tenantId) {
@@ -152,9 +183,10 @@ public class NotificacaoServiceImpl implements NotificacaoService {
         }
 
         Notificacao entity = tenantEnforcer.validarAcesso(id, tenantId);
+        domainService.validarPodeInativar(entity);
         entity.setActive(false);
         repository.save(Objects.requireNonNull(entity));
-        log.info("Notificação excluída (desativada) com sucesso. ID: {}", id);
+        log.info("Notificação inativada com sucesso. ID: {}", id);
     }
 
     private void validarTenantAutenticadoOrThrow(UUID tenantId, Tenant tenant) {

@@ -154,7 +154,7 @@ public class ResponsavelLegalController {
     }
 
     @DeleteMapping("/{id}")
-    @Operation(summary = "Excluir responsável legal", description = "Exclui (desativa) responsável legal")
+    @Operation(summary = "Excluir responsável legal", description = "Remove permanentemente um responsável legal do banco de dados")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "204", description = "Responsável legal excluído com sucesso"),
             @ApiResponse(responseCode = "404", description = "Responsável legal não encontrado"),
@@ -166,13 +166,38 @@ public class ResponsavelLegalController {
         log.debug("REQUEST DELETE /v1/responsaveis-legais/{}", id);
         try {
             service.excluir(id);
-            log.info("Responsável legal excluído com sucesso. ID: {}", id);
+            log.info("Responsável legal excluído permanentemente com sucesso. ID: {}", id);
             return ResponseEntity.noContent().build();
         } catch (NotFoundException ex) {
             log.warn("Responsável legal não encontrado para exclusão — ID: {}, mensagem: {}", id, ex.getMessage());
             throw ex;
         } catch (Exception ex) {
             log.error("Erro inesperado ao excluir responsável legal — ID: {}", id, ex);
+            throw ex;
+        }
+    }
+
+    @PatchMapping("/{id}/inativar")
+    @Operation(summary = "Inativar responsável legal", description = "Inativa um responsável legal no sistema alterando seu status")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "204", description = "Responsável legal inativado com sucesso"),
+            @ApiResponse(responseCode = "404", description = "Responsável legal não encontrado"),
+            @ApiResponse(responseCode = "400", description = "Responsável legal já está inativo"),
+            @ApiResponse(responseCode = "403", description = "Acesso negado")
+    })
+    public ResponseEntity<Void> inativar(
+            @Parameter(description = "ID do responsável legal", required = true)
+            @PathVariable UUID id) {
+        log.debug("REQUEST PATCH /v1/responsaveis-legais/{}/inativar", id);
+        try {
+            service.inativar(id);
+            log.info("Responsável legal inativado com sucesso. ID: {}", id);
+            return ResponseEntity.noContent().build();
+        } catch (NotFoundException ex) {
+            log.warn("Responsável legal não encontrado para inativação — ID: {}, mensagem: {}", id, ex.getMessage());
+            throw ex;
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao inativar responsável legal — ID: {}", id, ex);
             throw ex;
         }
     }

@@ -174,10 +174,37 @@ public class FilaEsperaServiceImpl implements FilaEsperaService {
     @Transactional
     @CacheEvict(cacheNames = CacheKeyUtil.CACHE_FILA_ESPERA, keyGenerator = "filaEsperaCacheKeyGenerator", beforeInvocation = false)
     public void excluir(UUID id) {
-        log.debug("Excluindo item da fila de espera. ID: {}", id);
+        log.debug("Excluindo item da fila de espera permanentemente. ID: {}", id);
+        try {
+            UUID tenantId = tenantService.validarTenantAtual();
+            FilaEspera entity = tenantEnforcer.validarAcesso(id, tenantId);
+            domainService.validarPodeDeletar(entity);
+            repository.delete(Objects.requireNonNull(entity));
+            log.info("Item da fila de espera excluído permanentemente com sucesso. ID: {}", id);
+        } catch (BadRequestException | NotFoundException e) {
+            log.warn("Erro de validação ao excluir FilaEspera. Erro: {}", e.getMessage());
+            throw e;
+        } catch (DataAccessException e) {
+            log.error("Erro de acesso a dados ao excluir FilaEspera. Exception: {}", e.getClass().getSimpleName(), e);
+            throw new InternalServerErrorException("Erro ao excluir FilaEspera", e);
+        }
+    }
 
-        UUID tenantId = tenantService.validarTenantAtual();
-        inativarInternal(id, tenantId);
+    @Override
+    @Transactional
+    @CacheEvict(cacheNames = CacheKeyUtil.CACHE_FILA_ESPERA, keyGenerator = "filaEsperaCacheKeyGenerator", beforeInvocation = false)
+    public void inativar(UUID id) {
+        log.debug("Inativando item da fila de espera. ID: {}", id);
+        try {
+            UUID tenantId = tenantService.validarTenantAtual();
+            inativarInternal(id, tenantId);
+        } catch (BadRequestException | NotFoundException e) {
+            log.warn("Erro de validação ao inativar FilaEspera. Erro: {}", e.getMessage());
+            throw e;
+        } catch (DataAccessException e) {
+            log.error("Erro de acesso a dados ao inativar FilaEspera. Exception: {}", e.getClass().getSimpleName(), e);
+            throw new InternalServerErrorException("Erro ao inativar FilaEspera", e);
+        }
     }
 
     private void inativarInternal(UUID id, UUID tenantId) {
@@ -189,7 +216,7 @@ public class FilaEsperaServiceImpl implements FilaEsperaService {
         domainService.validarPodeInativar(entity);
         entity.setActive(false);
         repository.save(Objects.requireNonNull(entity));
-        log.info("Item da fila de espera excluído (desativado) com sucesso. ID: {}", id);
+        log.info("Item da fila de espera inativado com sucesso. ID: {}", id);
     }
 
     private void validarTenantAutenticadoOrThrow(UUID tenantId, Tenant tenant) {

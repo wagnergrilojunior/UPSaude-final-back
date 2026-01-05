@@ -38,6 +38,7 @@ public class ImportJobQueryController {
 
     private final ImportJobQueryService importJobQueryService;
     private final TenantService tenantService;
+    private final com.upsaude.service.impl.job.ImportJobScheduler importJobScheduler;
 
     @GetMapping("/{jobId}")
     @Operation(
@@ -318,6 +319,44 @@ public class ImportJobQueryController {
                 .toList());
         response.put("mensagem", String.format("%d jobs reprocessados com sucesso para tipo %s e competência %s/%s",
                 jobsReprocessados.size(), tipo, competenciaAno, competenciaMes));
+
+        return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/iniciar-processamento")
+    @Operation(
+            summary = "Iniciar processamento manual de jobs enfileirados",
+            description = "Inicia manualmente o processamento de jobs com status ENFILEIRADO, sem esperar o próximo schedule. " +
+                         "Processa até o limite de jobs simultâneos configurado. " +
+                         "Útil para iniciar processamento imediatamente após upload de arquivos ou para testes. " +
+                         "\n\n" +
+                         "**IMPORTANTE:** O processamento é executado em BACKGROUND no pool de threads do JOB, " +
+                         "não no pool HTTP da API. A API retorna imediatamente após enfileirar os jobs. " +
+                         "O processamento acontece em paralelo em threads dedicadas do pool do JOB.",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "Processamento iniciado com sucesso. Jobs foram enfileirados no pool do JOB para execução em background."),
+                    @ApiResponse(responseCode = "401", description = "Não autenticado"),
+                    @ApiResponse(responseCode = "500", description = "Erro ao iniciar processamento")
+            }
+    )
+    public ResponseEntity<Map<String, Object>> iniciarProcessamento() {
+        log.info("REQUEST POST /v1/import-jobs/iniciar-processamento");
+
+        Tenant tenant = tenantService.obterTenantDoUsuarioAutenticado();
+        if (tenant == null) {
+            throw new BadRequestException("Tenant não encontrado para o usuário autenticado");
+        }
+
+        // IMPORTANTE: Este método enfileira os jobs no pool do JOB (importJobExecutor)
+        // e retorna imediatamente. O processamento acontece em background em threads dedicadas.
+        // A thread da API não fica bloqueada esperando o processamento.
+        int jobsIniciados = importJobScheduler.iniciarProcessamentoManual();
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("jobsIniciados", jobsIniciados);
+        response.put("mensagem", String.format("Processamento manual iniciado. %d jobs foram enfileirados no pool do JOB para processamento em background.", jobsIniciados));
+        response.put("tenantId", tenant.getId());
+        response.put("observacao", "Os jobs estão sendo processados em background no pool dedicado do JOB. Use GET /v1/import-jobs/{jobId}/status para acompanhar o progresso.");
 
         return ResponseEntity.ok(response);
     }

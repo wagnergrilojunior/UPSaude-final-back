@@ -151,7 +151,7 @@ public class LGPDConsentimentoController {
     }
 
     @DeleteMapping("/{id}")
-    @Operation(summary = "Excluir consentimento LGPD", description = "Exclui (desativa) consentimento LGPD")
+    @Operation(summary = "Excluir consentimento LGPD", description = "Exclui permanentemente um consentimento LGPD do sistema")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "204", description = "Consentimento excluído com sucesso"),
             @ApiResponse(responseCode = "404", description = "Consentimento não encontrado"),
@@ -163,13 +163,38 @@ public class LGPDConsentimentoController {
         log.debug("REQUEST DELETE /v1/lgpd-consentimentos/{}", id);
         try {
             service.excluir(id);
-            log.info("Consentimento LGPD excluído com sucesso. ID: {}", id);
+            log.info("Consentimento LGPD excluído permanentemente com sucesso. ID: {}", id);
             return ResponseEntity.noContent().build();
         } catch (NotFoundException ex) {
             log.warn("Falha ao excluir consentimento LGPD — ID: {}, mensagem: {}", id, ex.getMessage());
             throw ex;
         } catch (Exception ex) {
             log.error("Erro inesperado ao excluir consentimento LGPD — ID: {}", id, ex);
+            throw ex;
+        }
+    }
+
+    @PatchMapping("/{id}/inativar")
+    @Operation(summary = "Inativar consentimento LGPD", description = "Inativa um consentimento LGPD do sistema alterando seu status")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "204", description = "Consentimento inativado com sucesso"),
+            @ApiResponse(responseCode = "404", description = "Consentimento não encontrado"),
+            @ApiResponse(responseCode = "400", description = "Consentimento já está inativo"),
+            @ApiResponse(responseCode = "403", description = "Acesso negado")
+    })
+    public ResponseEntity<Void> inativar(
+            @Parameter(description = "ID do consentimento LGPD", required = true)
+            @PathVariable UUID id) {
+        log.debug("REQUEST PATCH /v1/lgpd-consentimentos/{}/inativar", id);
+        try {
+            service.inativar(id);
+            log.info("Consentimento LGPD inativado com sucesso. ID: {}", id);
+            return ResponseEntity.noContent().build();
+        } catch (NotFoundException ex) {
+            log.warn("Consentimento LGPD não encontrado para inativação — ID: {}, mensagem: {}", id, ex.getMessage());
+            throw ex;
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao inativar consentimento LGPD — ID: {}", id, ex);
             throw ex;
         }
     }

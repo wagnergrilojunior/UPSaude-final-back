@@ -151,7 +151,7 @@ public class IntegracaoGovController {
     }
 
     @DeleteMapping("/{id}")
-    @Operation(summary = "Excluir integração gov", description = "Exclui (desativa) integração governamental")
+    @Operation(summary = "Excluir integração gov", description = "Exclui permanentemente uma integração governamental do sistema")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "204", description = "Integração excluída com sucesso"),
             @ApiResponse(responseCode = "404", description = "Integração não encontrada"),
@@ -163,13 +163,38 @@ public class IntegracaoGovController {
         log.debug("REQUEST DELETE /v1/integracao-gov/{}", id);
         try {
             service.excluir(id);
-            log.info("Integração governamental excluída com sucesso. ID: {}", id);
+            log.info("Integração governamental excluída permanentemente com sucesso. ID: {}", id);
             return ResponseEntity.noContent().build();
         } catch (NotFoundException ex) {
             log.warn("Falha ao excluir integração governamental — ID: {}, mensagem: {}", id, ex.getMessage());
             throw ex;
         } catch (Exception ex) {
             log.error("Erro inesperado ao excluir integração governamental — ID: {}", id, ex);
+            throw ex;
+        }
+    }
+
+    @PatchMapping("/{id}/inativar")
+    @Operation(summary = "Inativar integração gov", description = "Inativa uma integração governamental do sistema alterando seu status")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "204", description = "Integração inativada com sucesso"),
+            @ApiResponse(responseCode = "404", description = "Integração não encontrada"),
+            @ApiResponse(responseCode = "400", description = "Integração já está inativa"),
+            @ApiResponse(responseCode = "403", description = "Acesso negado")
+    })
+    public ResponseEntity<Void> inativar(
+            @Parameter(description = "ID da integração gov", required = true)
+            @PathVariable UUID id) {
+        log.debug("REQUEST PATCH /v1/integracao-gov/{}/inativar", id);
+        try {
+            service.inativar(id);
+            log.info("Integração governamental inativada com sucesso. ID: {}", id);
+            return ResponseEntity.noContent().build();
+        } catch (NotFoundException ex) {
+            log.warn("Integração governamental não encontrada para inativação — ID: {}, mensagem: {}", id, ex.getMessage());
+            throw ex;
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao inativar integração governamental — ID: {}", id, ex);
             throw ex;
         }
     }

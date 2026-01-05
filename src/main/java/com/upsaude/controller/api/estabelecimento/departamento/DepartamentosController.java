@@ -127,7 +127,7 @@ public class DepartamentosController {
     }
 
     @DeleteMapping("/{id}")
-    @Operation(summary = "Excluir departamento", description = "Exclui (desativa) um departamento do sistema")
+    @Operation(summary = "Excluir departamento", description = "Remove permanentemente um departamento do banco de dados")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "204", description = "Departamento excluído com sucesso"),
             @ApiResponse(responseCode = "404", description = "Departamento não encontrado"),
@@ -139,13 +139,38 @@ public class DepartamentosController {
         log.debug("REQUEST DELETE /v1/departamentos/{}", id);
         try {
             departamentosService.excluir(id);
-            log.info("Departamento excluído com sucesso. ID: {}", id);
+            log.info("Departamento excluído permanentemente com sucesso. ID: {}", id);
             return ResponseEntity.noContent().build();
         } catch (NotFoundException ex) {
             log.warn("Departamento não encontrado para exclusão — ID: {}, mensagem: {}", id, ex.getMessage());
             throw ex;
         } catch (Exception ex) {
             log.error("Erro inesperado ao excluir departamento — ID: {}", id, ex);
+            throw ex;
+        }
+    }
+
+    @PatchMapping("/{id}/inativar")
+    @Operation(summary = "Inativar departamento", description = "Inativa um departamento no sistema alterando seu status")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "204", description = "Departamento inativado com sucesso"),
+            @ApiResponse(responseCode = "404", description = "Departamento não encontrado"),
+            @ApiResponse(responseCode = "400", description = "Departamento já está inativo"),
+            @ApiResponse(responseCode = "403", description = "Acesso negado")
+    })
+    public ResponseEntity<Void> inativar(
+            @Parameter(description = "ID do departamento", required = true)
+            @PathVariable UUID id) {
+        log.debug("REQUEST PATCH /v1/departamentos/{}/inativar", id);
+        try {
+            departamentosService.inativar(id);
+            log.info("Departamento inativado com sucesso. ID: {}", id);
+            return ResponseEntity.noContent().build();
+        } catch (NotFoundException ex) {
+            log.warn("Departamento não encontrado para inativação — ID: {}, mensagem: {}", id, ex.getMessage());
+            throw ex;
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao inativar departamento — ID: {}", id, ex);
             throw ex;
         }
     }

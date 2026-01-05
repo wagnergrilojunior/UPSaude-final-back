@@ -6,7 +6,10 @@ import com.upsaude.cache.CacheKeyUtil;
 import com.upsaude.entity.paciente.ResponsavelLegal;
 import com.upsaude.entity.sistema.multitenancy.Tenant;
 import com.upsaude.exception.BadRequestException;
+import com.upsaude.exception.InternalServerErrorException;
+import com.upsaude.exception.NotFoundException;
 import com.upsaude.repository.paciente.ResponsavelLegalRepository;
+import org.springframework.dao.DataAccessException;
 import com.upsaude.service.api.paciente.ResponsavelLegalService;
 import com.upsaude.service.api.sistema.multitenancy.TenantService;
 import com.upsaude.service.api.support.responsavellegal.ResponsavelLegalCreator;
@@ -130,8 +133,37 @@ public class ResponsavelLegalServiceImpl implements ResponsavelLegalService {
     @Transactional
     @CacheEvict(cacheNames = CacheKeyUtil.CACHE_RESPONSAVEIS_LEGAIS, keyGenerator = "responsavelLegalCacheKeyGenerator", beforeInvocation = false)
     public void excluir(UUID id) {
-        UUID tenantId = tenantService.validarTenantAtual();
-        inativarInternal(id, tenantId);
+        log.debug("Excluindo responsável legal permanentemente. ID: {}", id);
+        try {
+            UUID tenantId = tenantService.validarTenantAtual();
+            ResponsavelLegal entity = tenantEnforcer.validarAcesso(id, tenantId);
+            domainService.validarPodeDeletar(entity);
+            repository.delete(Objects.requireNonNull(entity));
+            log.info("Responsável legal excluído permanentemente com sucesso. ID: {}", id);
+        } catch (BadRequestException | NotFoundException e) {
+            log.warn("Erro de validação ao excluir ResponsávelLegal. Erro: {}", e.getMessage());
+            throw e;
+        } catch (DataAccessException e) {
+            log.error("Erro de acesso a dados ao excluir ResponsávelLegal. Exception: {}", e.getClass().getSimpleName(), e);
+            throw new InternalServerErrorException("Erro ao excluir ResponsávelLegal", e);
+        }
+    }
+
+    @Override
+    @Transactional
+    @CacheEvict(cacheNames = CacheKeyUtil.CACHE_RESPONSAVEIS_LEGAIS, keyGenerator = "responsavelLegalCacheKeyGenerator", beforeInvocation = false)
+    public void inativar(UUID id) {
+        log.debug("Inativando responsável legal. ID: {}", id);
+        try {
+            UUID tenantId = tenantService.validarTenantAtual();
+            inativarInternal(id, tenantId);
+        } catch (BadRequestException | NotFoundException e) {
+            log.warn("Erro de validação ao inativar ResponsávelLegal. Erro: {}", e.getMessage());
+            throw e;
+        } catch (DataAccessException e) {
+            log.error("Erro de acesso a dados ao inativar ResponsávelLegal. Exception: {}", e.getClass().getSimpleName(), e);
+            throw new InternalServerErrorException("Erro ao inativar ResponsávelLegal", e);
+        }
     }
 
     private void inativarInternal(UUID id, UUID tenantId) {
@@ -143,6 +175,7 @@ public class ResponsavelLegalServiceImpl implements ResponsavelLegalService {
         domainService.validarPodeInativar(entity);
         entity.setActive(false);
         repository.save(Objects.requireNonNull(entity));
+        log.info("Responsável legal inativado com sucesso. ID: {}", id);
     }
 
     private void validarTenantAutenticadoOrThrow(UUID tenantId, Tenant tenant) {

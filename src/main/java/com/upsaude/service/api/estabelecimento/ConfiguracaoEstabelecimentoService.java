@@ -20,5 +20,7 @@ public interface ConfiguracaoEstabelecimentoService {
     ConfiguracaoEstabelecimentoResponse atualizar(UUID id, ConfiguracaoEstabelecimentoRequest request);
 
     void excluir(UUID id);
+
+    void inativar(UUID id);
 }
 

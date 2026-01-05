@@ -20,4 +20,6 @@ public interface ConsultasService {
     ConsultasResponse atualizar(UUID id, ConsultasRequest request);
 
     void excluir(UUID id);
+
+    void inativar(UUID id);
 }

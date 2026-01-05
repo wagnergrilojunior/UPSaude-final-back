@@ -179,10 +179,19 @@ public class CidadesServiceImpl implements CidadesService {
     @Transactional
     @CacheEvict(cacheNames = CacheKeyUtil.CACHE_CIDADES, keyGenerator = "cidadesCacheKeyGenerator", beforeInvocation = false)
     public void excluir(UUID id) {
-        log.debug("Excluindo cidade. ID: {}", id);
-
+        log.debug("Excluindo cidade permanentemente. ID: {}", id);
         try {
-            inativarInternal(id);
+            if (id == null) {
+                log.warn("ID nulo recebido para exclusão de cidade");
+                throw new BadRequestException("ID da cidade é obrigatório");
+            }
+
+            Cidades cidades = cidadesRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Cidade não encontrada com ID: " + id));
+
+            domainService.validarPodeDeletar(cidades);
+            cidadesRepository.delete(Objects.requireNonNull(cidades));
+            log.info("Cidade excluída permanentemente com sucesso. ID: {}", id);
         } catch (NotFoundException e) {
             log.warn("Tentativa de excluir cidade não existente. ID: {}", id);
             throw e;
@@ -198,9 +207,31 @@ public class CidadesServiceImpl implements CidadesService {
         }
     }
 
+    @Override
+    @Transactional
+    @CacheEvict(cacheNames = CacheKeyUtil.CACHE_CIDADES, keyGenerator = "cidadesCacheKeyGenerator", beforeInvocation = false)
+    public void inativar(UUID id) {
+        log.debug("Inativando cidade. ID: {}", id);
+        try {
+            inativarInternal(id);
+        } catch (NotFoundException e) {
+            log.warn("Tentativa de inativar cidade não existente. ID: {}", id);
+            throw e;
+        } catch (BadRequestException e) {
+            log.warn("Erro de validação ao inativar cidade. ID: {}. Erro: {}", id, e.getMessage());
+            throw e;
+        } catch (DataAccessException e) {
+            log.error("Erro de acesso a dados ao inativar cidade. ID: {}", id, e);
+            throw new InternalServerErrorException("Erro ao inativar cidade", e);
+        } catch (RuntimeException e) {
+            log.error("Erro inesperado ao inativar cidade. ID: {}", id, e);
+            throw e;
+        }
+    }
+
     private void inativarInternal(UUID id) {
         if (id == null) {
-            log.warn("ID nulo recebido para exclusão de cidade");
+            log.warn("ID nulo recebido para inativação de cidade");
             throw new BadRequestException("ID da cidade é obrigatório");
         }
 
@@ -210,7 +241,7 @@ public class CidadesServiceImpl implements CidadesService {
         domainService.validarPodeInativar(cidades);
         cidades.setActive(false);
         cidadesRepository.save(Objects.requireNonNull(cidades));
-        log.info("Cidade excluída (desativada) com sucesso. ID: {}", id);
+        log.info("Cidade inativada com sucesso. ID: {}", id);
     }
 
 }

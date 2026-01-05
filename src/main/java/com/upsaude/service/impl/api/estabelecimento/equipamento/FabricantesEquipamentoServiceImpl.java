@@ -23,8 +23,10 @@ import com.upsaude.exception.NotFoundException;
 import com.upsaude.repository.estabelecimento.equipamento.FabricantesEquipamentoRepository;
 import com.upsaude.service.api.estabelecimento.equipamento.FabricantesEquipamentoService;
 import com.upsaude.service.api.support.fabricantesequipamento.FabricantesEquipamentoCreator;
+import com.upsaude.service.api.support.fabricantesequipamento.FabricantesEquipamentoDomainService;
 import com.upsaude.service.api.support.fabricantesequipamento.FabricantesEquipamentoResponseBuilder;
 import com.upsaude.service.api.support.fabricantesequipamento.FabricantesEquipamentoUpdater;
+import org.springframework.dao.DataAccessException;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -40,6 +42,7 @@ public class FabricantesEquipamentoServiceImpl implements FabricantesEquipamento
     private final FabricantesEquipamentoCreator creator;
     private final FabricantesEquipamentoUpdater updater;
     private final FabricantesEquipamentoResponseBuilder responseBuilder;
+    private final FabricantesEquipamentoDomainService domainService;
 
     @Override
     @Transactional
@@ -106,8 +109,36 @@ public class FabricantesEquipamentoServiceImpl implements FabricantesEquipamento
     @Transactional
     @CacheEvict(cacheNames = CacheKeyUtil.CACHE_FABRICANTES_EQUIPAMENTO, keyGenerator = "fabricantesEquipamentoCacheKeyGenerator", beforeInvocation = false)
     public void excluir(UUID id) {
-        log.debug("Excluindo fabricante de equipamento. ID: {}", id);
-        inativarInternal(id);
+        log.debug("Excluindo fabricante de equipamento permanentemente. ID: {}", id);
+        try {
+            FabricantesEquipamento entity = repository.findById(id)
+                    .orElseThrow(() -> new NotFoundException("Fabricante de equipamento não encontrado com ID: " + id));
+            domainService.validarPodeDeletar(entity);
+            repository.delete(Objects.requireNonNull(entity));
+            log.info("Fabricante de equipamento excluído permanentemente com sucesso. ID: {}", id);
+        } catch (BadRequestException | NotFoundException e) {
+            log.warn("Erro de validação ao excluir FabricantesEquipamento. Erro: {}", e.getMessage());
+            throw e;
+        } catch (DataAccessException e) {
+            log.error("Erro de acesso a dados ao excluir FabricantesEquipamento. Exception: {}", e.getClass().getSimpleName(), e);
+            throw new InternalServerErrorException("Erro ao excluir FabricantesEquipamento", e);
+        }
+    }
+
+    @Override
+    @Transactional
+    @CacheEvict(cacheNames = CacheKeyUtil.CACHE_FABRICANTES_EQUIPAMENTO, keyGenerator = "fabricantesEquipamentoCacheKeyGenerator", beforeInvocation = false)
+    public void inativar(UUID id) {
+        log.debug("Inativando fabricante de equipamento. ID: {}", id);
+        try {
+            inativarInternal(id);
+        } catch (BadRequestException | NotFoundException e) {
+            log.warn("Erro de validação ao inativar FabricantesEquipamento. Erro: {}", e.getMessage());
+            throw e;
+        } catch (DataAccessException e) {
+            log.error("Erro de acesso a dados ao inativar FabricantesEquipamento. Exception: {}", e.getClass().getSimpleName(), e);
+            throw new InternalServerErrorException("Erro ao inativar FabricantesEquipamento", e);
+        }
     }
 
     private void inativarInternal(UUID id) {
@@ -117,8 +148,9 @@ public class FabricantesEquipamentoServiceImpl implements FabricantesEquipamento
 
         FabricantesEquipamento entity = repository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Fabricante de equipamento não encontrado com ID: " + id));
+        domainService.validarPodeInativar(entity);
         entity.setActive(false);
         repository.save(Objects.requireNonNull(entity));
-        log.info("Fabricante de equipamento excluído (desativado) com sucesso. ID: {}", id);
+        log.info("Fabricante de equipamento inativado com sucesso. ID: {}", id);
     }
 }

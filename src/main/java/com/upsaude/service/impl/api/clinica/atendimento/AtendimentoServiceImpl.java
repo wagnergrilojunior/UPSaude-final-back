@@ -23,10 +23,14 @@ import com.upsaude.repository.clinica.atendimento.AtendimentoRepository;
 import com.upsaude.service.api.clinica.atendimento.AtendimentoService;
 import com.upsaude.service.api.sistema.multitenancy.TenantService;
 import com.upsaude.service.api.support.atendimento.AtendimentoCreator;
+import com.upsaude.service.api.support.atendimento.AtendimentoDomainService;
 import com.upsaude.service.api.support.atendimento.AtendimentoResponseBuilder;
 import com.upsaude.service.api.support.atendimento.AtendimentoTenantEnforcer;
 import com.upsaude.service.api.support.atendimento.AtendimentoUpdater;
 import com.upsaude.service.api.support.atendimento.AtendimentoValidationService;
+import com.upsaude.exception.InternalServerErrorException;
+import com.upsaude.exception.NotFoundException;
+import org.springframework.dao.DataAccessException;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -45,6 +49,7 @@ public class AtendimentoServiceImpl implements AtendimentoService {
     private final AtendimentoCreator creator;
     private final AtendimentoUpdater updater;
     private final AtendimentoResponseBuilder responseBuilder;
+    private final AtendimentoDomainService domainService;
 
     @Override
     @Transactional
@@ -142,22 +147,46 @@ public class AtendimentoServiceImpl implements AtendimentoService {
     @Transactional
     @CacheEvict(cacheNames = CacheKeyUtil.CACHE_ATENDIMENTO, keyGenerator = "atendimentoCacheKeyGenerator", beforeInvocation = false)
     public void excluir(UUID id) {
-        log.debug("Excluindo atendimento. ID: {}", id);
+        log.debug("Excluindo atendimento permanentemente. ID: {}", id);
         validationService.validarId(id);
+        try {
+            UUID tenantId = tenantService.validarTenantAtual();
+            Atendimento entity = tenantEnforcer.validarAcesso(id, tenantId);
+            domainService.validarPodeDeletar(entity);
+            atendimentoRepository.delete(Objects.requireNonNull(entity));
+            log.info("Atendimento excluído permanentemente com sucesso. ID: {}, tenant: {}", id, tenantId);
+        } catch (BadRequestException | NotFoundException e) {
+            log.warn("Erro de validação ao excluir Atendimento. Erro: {}", e.getMessage());
+            throw e;
+        } catch (DataAccessException e) {
+            log.error("Erro de acesso a dados ao excluir Atendimento. Exception: {}", e.getClass().getSimpleName(), e);
+            throw new InternalServerErrorException("Erro ao excluir Atendimento", e);
+        }
+    }
 
-        UUID tenantId = tenantService.validarTenantAtual();
-        inativarInternal(id, tenantId);
+    @Override
+    @Transactional
+    @CacheEvict(cacheNames = CacheKeyUtil.CACHE_ATENDIMENTO, keyGenerator = "atendimentoCacheKeyGenerator", beforeInvocation = false)
+    public void inativar(UUID id) {
+        log.debug("Inativando atendimento. ID: {}", id);
+        validationService.validarId(id);
+        try {
+            UUID tenantId = tenantService.validarTenantAtual();
+            inativarInternal(id, tenantId);
+        } catch (BadRequestException | NotFoundException e) {
+            log.warn("Erro de validação ao inativar Atendimento. Erro: {}", e.getMessage());
+            throw e;
+        } catch (DataAccessException e) {
+            log.error("Erro de acesso a dados ao inativar Atendimento. Exception: {}", e.getClass().getSimpleName(), e);
+            throw new InternalServerErrorException("Erro ao inativar Atendimento", e);
+        }
     }
 
     private void inativarInternal(UUID id, UUID tenantId) {
         Atendimento entity = tenantEnforcer.validarAcesso(id, tenantId);
-
-        if (Boolean.FALSE.equals(entity.getActive())) {
-            throw new BadRequestException("Atendimento já está inativo");
-        }
-
+        domainService.validarPodeInativar(entity);
         entity.setActive(false);
         atendimentoRepository.save(entity);
-        log.info("Atendimento excluído (desativado) com sucesso. ID: {}, tenant: {}", id, tenantId);
+        log.info("Atendimento inativado com sucesso. ID: {}, tenant: {}", id, tenantId);
     }
 }

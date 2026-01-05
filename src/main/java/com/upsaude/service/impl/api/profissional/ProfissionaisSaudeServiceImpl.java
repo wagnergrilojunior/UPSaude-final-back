@@ -190,7 +190,9 @@ public class ProfissionaisSaudeServiceImpl implements ProfissionaisSaudeService 
     public void excluir(UUID id) {
         try {
             UUID tenantId = tenantService.validarTenantAtual();
-            inativarInternal(id, tenantId);
+            ProfissionaisSaude profissional = tenantEnforcer.validarAcesso(id, tenantId);
+            domainService.validarPodeDeletar(profissional);
+            profissionaisSaudeRepository.delete(Objects.requireNonNull(profissional));
         } catch (BadRequestException | NotFoundException e) {
             log.warn("Erro de validação ao excluir ProfissionalSaude. Erro: {}", e.getMessage());
             throw e;
@@ -213,24 +215,6 @@ public class ProfissionaisSaudeServiceImpl implements ProfissionaisSaudeService 
         } catch (DataAccessException e) {
             log.error("Erro de acesso a dados ao inativar ProfissionalSaude. Exception: {}", e.getClass().getSimpleName(), e);
             throw new InternalServerErrorException("Erro ao inativar ProfissionalSaude", e);
-        }
-    }
-
-    @Override
-    @Transactional
-    @CacheEvict(cacheNames = CacheKeyUtil.CACHE_PROFISSIONAIS_SAUDE, keyGenerator = "profissionaisSaudeCacheKeyGenerator", beforeInvocation = false)
-    public void deletarPermanentemente(UUID id) {
-        try {
-            UUID tenantId = tenantService.validarTenantAtual();
-            ProfissionaisSaude profissional = tenantEnforcer.validarAcesso(id, tenantId);
-            domainService.validarPodeDeletar(profissional);
-            profissionaisSaudeRepository.delete(Objects.requireNonNull(profissional));
-        } catch (BadRequestException | NotFoundException e) {
-            log.warn("Erro de validação ao deletar ProfissionalSaude. Erro: {}", e.getMessage());
-            throw e;
-        } catch (DataAccessException e) {
-            log.error("Erro de acesso a dados ao deletar ProfissionalSaude. Exception: {}", e.getClass().getSimpleName(), e);
-            throw new InternalServerErrorException("Erro ao deletar ProfissionalSaude", e);
         }
     }
 

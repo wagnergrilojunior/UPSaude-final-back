@@ -156,7 +156,7 @@ public class DadosClinicosBasicosController {
     }
 
     @DeleteMapping("/{id}")
-    @Operation(summary = "Excluir dados clínicos básicos", description = "Exclui (desativa) dados clínicos básicos")
+    @Operation(summary = "Excluir dados clínicos básicos", description = "Exclui permanentemente dados clínicos básicos do sistema")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "204", description = "Dados excluídos com sucesso"),
             @ApiResponse(responseCode = "404", description = "Dados não encontrados"),
@@ -168,13 +168,39 @@ public class DadosClinicosBasicosController {
         log.debug("REQUEST DELETE /v1/dados-clinicos-basicos/{}", id);
         try {
             service.excluir(id);
-            log.info("Dados clínicos básicos excluídos com sucesso. ID: {}", id);
+            log.info("Dados clínicos básicos excluídos permanentemente com sucesso. ID: {}", id);
             return ResponseEntity.noContent().build();
         } catch (NotFoundException ex) {
             log.warn("Dados clínicos básicos não encontrados para exclusão — ID: {}, mensagem: {}", id, ex.getMessage());
             throw ex;
         } catch (Exception ex) {
             log.error("Erro inesperado ao excluir dados clínicos básicos — Path: /v1/dados-clinicos-basicos/{}, Method: DELETE, ID: {}, Exception: {}",
+                id.toString(), id, ex.getClass().getName(), ex);
+            throw ex;
+        }
+    }
+
+    @PatchMapping("/{id}/inativar")
+    @Operation(summary = "Inativar dados clínicos básicos", description = "Inativa dados clínicos básicos do sistema alterando seu status")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "204", description = "Dados inativados com sucesso"),
+            @ApiResponse(responseCode = "404", description = "Dados não encontrados"),
+            @ApiResponse(responseCode = "400", description = "Dados já estão inativos"),
+            @ApiResponse(responseCode = "403", description = "Acesso negado")
+    })
+    public ResponseEntity<Void> inativar(
+            @Parameter(description = "ID dos dados clínicos básicos", required = true)
+            @PathVariable UUID id) {
+        log.debug("REQUEST PATCH /v1/dados-clinicos-basicos/{}/inativar", id);
+        try {
+            service.inativar(id);
+            log.info("Dados clínicos básicos inativados com sucesso. ID: {}", id);
+            return ResponseEntity.noContent().build();
+        } catch (NotFoundException ex) {
+            log.warn("Dados clínicos básicos não encontrados para inativação — ID: {}, mensagem: {}", id, ex.getMessage());
+            throw ex;
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao inativar dados clínicos básicos — Path: /v1/dados-clinicos-basicos/{}/inativar, Method: PATCH, ID: {}, Exception: {}",
                 id.toString(), id, ex.getClass().getName(), ex);
             throw ex;
         }

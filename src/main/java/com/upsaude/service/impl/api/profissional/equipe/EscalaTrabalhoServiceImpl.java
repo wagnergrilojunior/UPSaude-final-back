@@ -24,9 +24,11 @@ import com.upsaude.repository.profissional.equipe.EscalaTrabalhoRepository;
 import com.upsaude.service.api.profissional.equipe.EscalaTrabalhoService;
 import com.upsaude.service.api.sistema.multitenancy.TenantService;
 import com.upsaude.service.api.support.escalatrabalho.EscalaTrabalhoCreator;
+import com.upsaude.service.api.support.escalatrabalho.EscalaTrabalhoDomainService;
 import com.upsaude.service.api.support.escalatrabalho.EscalaTrabalhoResponseBuilder;
 import com.upsaude.service.api.support.escalatrabalho.EscalaTrabalhoTenantEnforcer;
 import com.upsaude.service.api.support.escalatrabalho.EscalaTrabalhoUpdater;
+import org.springframework.dao.DataAccessException;
 
 import java.time.DayOfWeek;
 import java.time.LocalDate;
@@ -46,6 +48,7 @@ public class EscalaTrabalhoServiceImpl implements EscalaTrabalhoService {
     private final EscalaTrabalhoUpdater updater;
     private final EscalaTrabalhoResponseBuilder responseBuilder;
     private final EscalaTrabalhoTenantEnforcer tenantEnforcer;
+    private final EscalaTrabalhoDomainService domainService;
 
     @Override
     @Transactional
@@ -138,9 +141,37 @@ public class EscalaTrabalhoServiceImpl implements EscalaTrabalhoService {
     @Transactional
     @CacheEvict(cacheNames = CacheKeyUtil.CACHE_ESCALA_TRABALHO, keyGenerator = "escalaTrabalhoCacheKeyGenerator", beforeInvocation = false)
     public void excluir(UUID id) {
-        log.debug("Excluindo escala de trabalho. ID: {}", id);
-        UUID tenantId = tenantService.validarTenantAtual();
-        inativarInternal(id, tenantId);
+        log.debug("Excluindo escala de trabalho permanentemente. ID: {}", id);
+        try {
+            UUID tenantId = tenantService.validarTenantAtual();
+            EscalaTrabalho entity = tenantEnforcer.validarAcesso(id, tenantId);
+            domainService.validarPodeDeletar(entity);
+            repository.delete(Objects.requireNonNull(entity));
+            log.info("Escala de trabalho excluída permanentemente com sucesso. ID: {}", id);
+        } catch (BadRequestException | com.upsaude.exception.NotFoundException e) {
+            log.warn("Erro de validação ao excluir EscalaTrabalho. Erro: {}", e.getMessage());
+            throw e;
+        } catch (DataAccessException e) {
+            log.error("Erro de acesso a dados ao excluir EscalaTrabalho. Exception: {}", e.getClass().getSimpleName(), e);
+            throw new InternalServerErrorException("Erro ao excluir EscalaTrabalho", e);
+        }
+    }
+
+    @Override
+    @Transactional
+    @CacheEvict(cacheNames = CacheKeyUtil.CACHE_ESCALA_TRABALHO, keyGenerator = "escalaTrabalhoCacheKeyGenerator", beforeInvocation = false)
+    public void inativar(UUID id) {
+        log.debug("Inativando escala de trabalho. ID: {}", id);
+        try {
+            UUID tenantId = tenantService.validarTenantAtual();
+            inativarInternal(id, tenantId);
+        } catch (BadRequestException | com.upsaude.exception.NotFoundException e) {
+            log.warn("Erro de validação ao inativar EscalaTrabalho. Erro: {}", e.getMessage());
+            throw e;
+        } catch (DataAccessException e) {
+            log.error("Erro de acesso a dados ao inativar EscalaTrabalho. Exception: {}", e.getClass().getSimpleName(), e);
+            throw new InternalServerErrorException("Erro ao inativar EscalaTrabalho", e);
+        }
     }
 
     private void inativarInternal(UUID id, UUID tenantId) {
@@ -149,9 +180,10 @@ public class EscalaTrabalhoServiceImpl implements EscalaTrabalhoService {
         }
 
         EscalaTrabalho entity = tenantEnforcer.validarAcesso(id, tenantId);
+        domainService.validarPodeInativar(entity);
         entity.setActive(false);
         repository.save(Objects.requireNonNull(entity));
-        log.info("Escala de trabalho excluída (desativada) com sucesso. ID: {}", id);
+        log.info("Escala de trabalho inativada com sucesso. ID: {}", id);
     }
 
     private void validarTenantAutenticadoOrThrow(UUID tenantId, Tenant tenant) {

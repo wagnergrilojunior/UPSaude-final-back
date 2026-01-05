@@ -15,5 +15,10 @@ public class ConfiguracaoEstabelecimentoDomainService {
             throw new BadRequestException("Configuração do estabelecimento já está inativa");
         }
     }
+
+    public void validarPodeDeletar(ConfiguracaoEstabelecimento entity) {
+        log.debug("Validando se configuração do estabelecimento pode ser deletada. ID: {}", entity.getId());
+        // Adicione aqui qualquer lógica de validação antes de um hard delete.
+    }
 }
 

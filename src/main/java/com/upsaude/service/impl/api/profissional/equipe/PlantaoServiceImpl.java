@@ -25,9 +25,11 @@ import com.upsaude.repository.profissional.equipe.PlantaoRepository;
 import com.upsaude.service.api.profissional.equipe.PlantaoService;
 import com.upsaude.service.api.sistema.multitenancy.TenantService;
 import com.upsaude.service.api.support.plantao.PlantaoCreator;
+import com.upsaude.service.api.support.plantao.PlantaoDomainService;
 import com.upsaude.service.api.support.plantao.PlantaoResponseBuilder;
 import com.upsaude.service.api.support.plantao.PlantaoTenantEnforcer;
 import com.upsaude.service.api.support.plantao.PlantaoUpdater;
+import org.springframework.dao.DataAccessException;
 
 import java.time.OffsetDateTime;
 import lombok.RequiredArgsConstructor;
@@ -46,6 +48,7 @@ public class PlantaoServiceImpl implements PlantaoService {
     private final PlantaoUpdater updater;
     private final PlantaoResponseBuilder responseBuilder;
     private final PlantaoTenantEnforcer tenantEnforcer;
+    private final PlantaoDomainService domainService;
 
     @Override
     @Transactional
@@ -139,9 +142,37 @@ public class PlantaoServiceImpl implements PlantaoService {
     @Transactional
     @CacheEvict(cacheNames = CacheKeyUtil.CACHE_PLANTOES, keyGenerator = "plantoesCacheKeyGenerator", beforeInvocation = false)
     public void excluir(UUID id) {
-        log.debug("Excluindo plantão. ID: {}", id);
-        UUID tenantId = tenantService.validarTenantAtual();
-        inativarInternal(id, tenantId);
+        log.debug("Excluindo plantão permanentemente. ID: {}", id);
+        try {
+            UUID tenantId = tenantService.validarTenantAtual();
+            Plantao entity = tenantEnforcer.validarAcesso(id, tenantId);
+            domainService.validarPodeDeletar(entity);
+            repository.delete(Objects.requireNonNull(entity));
+            log.info("Plantão excluído permanentemente com sucesso. ID: {}", id);
+        } catch (BadRequestException | com.upsaude.exception.NotFoundException e) {
+            log.warn("Erro de validação ao excluir Plantao. Erro: {}", e.getMessage());
+            throw e;
+        } catch (DataAccessException e) {
+            log.error("Erro de acesso a dados ao excluir Plantao. Exception: {}", e.getClass().getSimpleName(), e);
+            throw new InternalServerErrorException("Erro ao excluir Plantao", e);
+        }
+    }
+
+    @Override
+    @Transactional
+    @CacheEvict(cacheNames = CacheKeyUtil.CACHE_PLANTOES, keyGenerator = "plantoesCacheKeyGenerator", beforeInvocation = false)
+    public void inativar(UUID id) {
+        log.debug("Inativando plantão. ID: {}", id);
+        try {
+            UUID tenantId = tenantService.validarTenantAtual();
+            inativarInternal(id, tenantId);
+        } catch (BadRequestException | com.upsaude.exception.NotFoundException e) {
+            log.warn("Erro de validação ao inativar Plantao. Erro: {}", e.getMessage());
+            throw e;
+        } catch (DataAccessException e) {
+            log.error("Erro de acesso a dados ao inativar Plantao. Exception: {}", e.getClass().getSimpleName(), e);
+            throw new InternalServerErrorException("Erro ao inativar Plantao", e);
+        }
     }
 
     private void inativarInternal(UUID id, UUID tenantId) {
@@ -150,9 +181,10 @@ public class PlantaoServiceImpl implements PlantaoService {
         }
 
         Plantao entity = tenantEnforcer.validarAcesso(id, tenantId);
+        domainService.validarPodeInativar(entity);
         entity.setActive(false);
         repository.save(Objects.requireNonNull(entity));
-        log.info("Plantão excluído (desativado) com sucesso. ID: {}", id);
+        log.info("Plantão inativado com sucesso. ID: {}", id);
     }
 
     private void validarTenantAutenticadoOrThrow(UUID tenantId, Tenant tenant) {

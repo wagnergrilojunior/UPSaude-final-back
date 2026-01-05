@@ -129,7 +129,7 @@ public class EstabelecimentosController {
     }
 
     @DeleteMapping("/{id}")
-    @Operation(summary = "Excluir estabelecimento", description = "Exclui (desativa) um estabelecimento do sistema")
+    @Operation(summary = "Excluir estabelecimento", description = "Remove permanentemente um estabelecimento do banco de dados")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "204", description = "Estabelecimento excluído com sucesso"),
             @ApiResponse(responseCode = "404", description = "Estabelecimento não encontrado"),
@@ -141,13 +141,38 @@ public class EstabelecimentosController {
         log.debug("REQUEST DELETE /v1/estabelecimentos/{}", id);
         try {
             estabelecimentosService.excluir(id);
-            log.info("Estabelecimento excluído com sucesso. ID: {}", id);
+            log.info("Estabelecimento excluído permanentemente com sucesso. ID: {}", id);
             return ResponseEntity.noContent().build();
         } catch (NotFoundException ex) {
             log.warn("Estabelecimento não encontrado para exclusão — ID: {}, mensagem: {}", id, ex.getMessage());
             throw ex;
         } catch (Exception ex) {
             log.error("Erro inesperado ao excluir estabelecimento — ID: {}", id, ex);
+            throw ex;
+        }
+    }
+
+    @PatchMapping("/{id}/inativar")
+    @Operation(summary = "Inativar estabelecimento", description = "Inativa um estabelecimento no sistema alterando seu status")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "204", description = "Estabelecimento inativado com sucesso"),
+            @ApiResponse(responseCode = "404", description = "Estabelecimento não encontrado"),
+            @ApiResponse(responseCode = "400", description = "Estabelecimento já está inativo"),
+            @ApiResponse(responseCode = "403", description = "Acesso negado")
+    })
+    public ResponseEntity<Void> inativar(
+            @Parameter(description = "ID do estabelecimento", required = true)
+            @PathVariable UUID id) {
+        log.debug("REQUEST PATCH /v1/estabelecimentos/{}/inativar", id);
+        try {
+            estabelecimentosService.inativar(id);
+            log.info("Estabelecimento inativado com sucesso. ID: {}", id);
+            return ResponseEntity.noContent().build();
+        } catch (NotFoundException ex) {
+            log.warn("Estabelecimento não encontrado para inativação — ID: {}, mensagem: {}", id, ex.getMessage());
+            throw ex;
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao inativar estabelecimento — ID: {}", id, ex);
             throw ex;
         }
     }

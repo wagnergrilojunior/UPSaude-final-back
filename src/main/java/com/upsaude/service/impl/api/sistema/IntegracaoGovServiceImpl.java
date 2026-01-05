@@ -24,10 +24,13 @@ import com.upsaude.repository.sistema.integracao.IntegracaoGovRepository;
 import com.upsaude.service.api.sistema.multitenancy.TenantService;
 import com.upsaude.service.api.sistema.integracao.IntegracaoGovService;
 import com.upsaude.service.api.support.integracaogov.IntegracaoGovCreator;
+import com.upsaude.service.api.support.integracaogov.IntegracaoGovDomainService;
 import com.upsaude.service.api.support.integracaogov.IntegracaoGovResponseBuilder;
 import com.upsaude.service.api.support.integracaogov.IntegracaoGovTenantEnforcer;
 import com.upsaude.service.api.support.integracaogov.IntegracaoGovUpdater;
 import com.upsaude.service.api.support.integracaogov.IntegracaoGovValidationService;
+import com.upsaude.exception.InternalServerErrorException;
+import org.springframework.dao.DataAccessException;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -46,6 +49,7 @@ public class IntegracaoGovServiceImpl implements IntegracaoGovService {
     private final IntegracaoGovCreator creator;
     private final IntegracaoGovUpdater updater;
     private final IntegracaoGovResponseBuilder responseBuilder;
+    private final IntegracaoGovDomainService domainService;
 
     @Override
     @Transactional
@@ -118,22 +122,46 @@ public class IntegracaoGovServiceImpl implements IntegracaoGovService {
     @Transactional
     @CacheEvict(cacheNames = CacheKeyUtil.CACHE_INTEGRACAO_GOV, keyGenerator = "integracaoGovCacheKeyGenerator", beforeInvocation = false)
     public void excluir(UUID id) {
-        log.debug("Excluindo integração gov. ID: {}", id);
+        log.debug("Excluindo integração gov permanentemente. ID: {}", id);
         validationService.validarId(id);
+        try {
+            UUID tenantId = tenantService.validarTenantAtual();
+            IntegracaoGov entity = tenantEnforcer.validarAcesso(id, tenantId);
+            domainService.validarPodeDeletar(entity);
+            repository.delete(Objects.requireNonNull(entity));
+            log.info("Integração gov excluída permanentemente com sucesso. ID: {}, tenant: {}", id, tenantId);
+        } catch (BadRequestException | NotFoundException e) {
+            log.warn("Erro de validação ao excluir IntegracaoGov. Erro: {}", e.getMessage());
+            throw e;
+        } catch (DataAccessException e) {
+            log.error("Erro de acesso a dados ao excluir IntegracaoGov. Exception: {}", e.getClass().getSimpleName(), e);
+            throw new InternalServerErrorException("Erro ao excluir IntegracaoGov", e);
+        }
+    }
 
-        UUID tenantId = tenantService.validarTenantAtual();
-        inativarInternal(id, tenantId);
+    @Override
+    @Transactional
+    @CacheEvict(cacheNames = CacheKeyUtil.CACHE_INTEGRACAO_GOV, keyGenerator = "integracaoGovCacheKeyGenerator", beforeInvocation = false)
+    public void inativar(UUID id) {
+        log.debug("Inativando integração gov. ID: {}", id);
+        validationService.validarId(id);
+        try {
+            UUID tenantId = tenantService.validarTenantAtual();
+            inativarInternal(id, tenantId);
+        } catch (BadRequestException | NotFoundException e) {
+            log.warn("Erro de validação ao inativar IntegracaoGov. Erro: {}", e.getMessage());
+            throw e;
+        } catch (DataAccessException e) {
+            log.error("Erro de acesso a dados ao inativar IntegracaoGov. Exception: {}", e.getClass().getSimpleName(), e);
+            throw new InternalServerErrorException("Erro ao inativar IntegracaoGov", e);
+        }
     }
 
     private void inativarInternal(UUID id, UUID tenantId) {
         IntegracaoGov entity = tenantEnforcer.validarAcesso(id, tenantId);
-
-        if (Boolean.FALSE.equals(entity.getActive())) {
-            throw new BadRequestException("Integração gov já está inativa");
-        }
-
+        domainService.validarPodeInativar(entity);
         entity.setActive(false);
         repository.save(entity);
-        log.info("Integração gov excluída (desativada) com sucesso. ID: {}, tenant: {}", id, tenantId);
+        log.info("Integração gov inativada com sucesso. ID: {}, tenant: {}", id, tenantId);
     }
 }
