@@ -20,6 +20,4 @@ public interface ProfissionaisSaudeService {
     void excluir(UUID id);
 
     void inativar(UUID id);
-
-    void deletarPermanentemente(UUID id);
 }

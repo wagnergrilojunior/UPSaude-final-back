@@ -26,9 +26,11 @@ import com.upsaude.repository.sistema.notificacao.TemplateNotificacaoRepository;
 import com.upsaude.service.api.sistema.notificacao.TemplateNotificacaoService;
 import com.upsaude.service.api.sistema.multitenancy.TenantService;
 import com.upsaude.service.api.support.templatenotificacao.TemplateNotificacaoCreator;
+import com.upsaude.service.api.support.templatenotificacao.TemplateNotificacaoDomainService;
 import com.upsaude.service.api.support.templatenotificacao.TemplateNotificacaoResponseBuilder;
 import com.upsaude.service.api.support.templatenotificacao.TemplateNotificacaoTenantEnforcer;
 import com.upsaude.service.api.support.templatenotificacao.TemplateNotificacaoUpdater;
+import org.springframework.dao.DataAccessException;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -46,6 +48,7 @@ public class TemplateNotificacaoServiceImpl implements TemplateNotificacaoServic
     private final TemplateNotificacaoUpdater updater;
     private final TemplateNotificacaoResponseBuilder responseBuilder;
     private final TemplateNotificacaoTenantEnforcer tenantEnforcer;
+    private final TemplateNotificacaoDomainService domainService;
 
     @Override
     @Transactional
@@ -134,9 +137,37 @@ public class TemplateNotificacaoServiceImpl implements TemplateNotificacaoServic
     @Transactional
     @CacheEvict(cacheNames = CacheKeyUtil.CACHE_TEMPLATES_NOTIFICACAO, keyGenerator = "templateNotificacaoCacheKeyGenerator", beforeInvocation = false)
     public void excluir(UUID id) {
-        log.debug("Excluindo template de notificação. ID: {}", id);
-        UUID tenantId = tenantService.validarTenantAtual();
-        inativarInternal(id, tenantId);
+        log.debug("Excluindo template de notificação permanentemente. ID: {}", id);
+        try {
+            UUID tenantId = tenantService.validarTenantAtual();
+            TemplateNotificacao entity = tenantEnforcer.validarAcesso(id, tenantId);
+            domainService.validarPodeDeletar(entity);
+            repository.delete(Objects.requireNonNull(entity));
+            log.info("Template de notificação excluído permanentemente com sucesso. ID: {}", id);
+        } catch (BadRequestException | com.upsaude.exception.NotFoundException e) {
+            log.warn("Erro de validação ao excluir TemplateNotificacao. Erro: {}", e.getMessage());
+            throw e;
+        } catch (DataAccessException e) {
+            log.error("Erro de acesso a dados ao excluir TemplateNotificacao. Exception: {}", e.getClass().getSimpleName(), e);
+            throw new InternalServerErrorException("Erro ao excluir TemplateNotificacao", e);
+        }
+    }
+
+    @Override
+    @Transactional
+    @CacheEvict(cacheNames = CacheKeyUtil.CACHE_TEMPLATES_NOTIFICACAO, keyGenerator = "templateNotificacaoCacheKeyGenerator", beforeInvocation = false)
+    public void inativar(UUID id) {
+        log.debug("Inativando template de notificação. ID: {}", id);
+        try {
+            UUID tenantId = tenantService.validarTenantAtual();
+            inativarInternal(id, tenantId);
+        } catch (BadRequestException | com.upsaude.exception.NotFoundException e) {
+            log.warn("Erro de validação ao inativar TemplateNotificacao. Erro: {}", e.getMessage());
+            throw e;
+        } catch (DataAccessException e) {
+            log.error("Erro de acesso a dados ao inativar TemplateNotificacao. Exception: {}", e.getClass().getSimpleName(), e);
+            throw new InternalServerErrorException("Erro ao inativar TemplateNotificacao", e);
+        }
     }
 
     private void inativarInternal(UUID id, UUID tenantId) {
@@ -145,9 +176,10 @@ public class TemplateNotificacaoServiceImpl implements TemplateNotificacaoServic
         }
 
         TemplateNotificacao entity = tenantEnforcer.validarAcesso(id, tenantId);
+        domainService.validarPodeInativar(entity);
         entity.setActive(false);
         repository.save(Objects.requireNonNull(entity));
-        log.info("Template de notificação excluído (desativado) com sucesso. ID: {}", id);
+        log.info("Template de notificação inativado com sucesso. ID: {}", id);
     }
 
     private void validarTenantAutenticadoOrThrow(UUID tenantId, Tenant tenant) {

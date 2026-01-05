@@ -110,27 +110,6 @@ public class SigtapFileImportController {
         return ResponseEntity.accepted().body(response);
     }
 
-    @PostMapping("/import/{competencia}")
-    @Operation(
-            summary = "[DEPRECATED] Importar arquivos SIGTAP (legado/síncrono)",
-            description = "DEPRECATED: este endpoint não executa mais processamento pesado no ciclo HTTP. Use POST /v1/sigtap/import/upload-zip (envie arquivo ZIP completo) e acompanhe os jobs em /v1/import-jobs.",
-            deprecated = true,
-            responses = {
-                    @ApiResponse(responseCode = "410", description = "Endpoint legado desativado"),
-                    @ApiResponse(responseCode = "500", description = "Erro na importação")
-            }
-    )
-    @Deprecated
-    public ResponseEntity<Map<String, Object>> importarCompetencia(
-            @Parameter(description = "Competência no formato AAAAMM (ex: 202512)", required = true)
-            @PathVariable String competencia) {
-        log.debug("REQUEST POST /v1/sigtap/import/{}", competencia);
-        Map<String, Object> response = new HashMap<>();
-        response.put("erro", "Endpoint legado desativado. Use /v1/sigtap/import/upload-zip (envie arquivo ZIP completo) e acompanhe os jobs em /v1/import-jobs.");
-        response.put("sucesso", false);
-        response.put("novoEndpoint", "/api/v1/sigtap/import/upload-zip");
-        return ResponseEntity.status(410).body(response);
-    }
 
     @GetMapping("/import/arquivos/{competencia}")
     @Operation(

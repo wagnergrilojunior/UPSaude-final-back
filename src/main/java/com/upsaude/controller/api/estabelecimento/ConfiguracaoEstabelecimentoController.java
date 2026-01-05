@@ -88,11 +88,52 @@ public class ConfiguracaoEstabelecimentoController {
     }
 
     @DeleteMapping("/{id}")
-    @Operation(summary = "Excluir configuração", description = "Exclui (desativa) uma configuração do estabelecimento")
-    public ResponseEntity<Void> excluir(@PathVariable UUID id) {
+    @Operation(summary = "Excluir configuração", description = "Exclui permanentemente uma configuração do estabelecimento do sistema")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "204", description = "Configuração excluída com sucesso"),
+        @ApiResponse(responseCode = "404", description = "Configuração não encontrada"),
+        @ApiResponse(responseCode = "403", description = "Acesso negado")
+    })
+    public ResponseEntity<Void> excluir(
+            @Parameter(description = "ID da configuração", required = true)
+            @PathVariable UUID id) {
         log.debug("REQUEST DELETE /v1/configuracoes-estabelecimento/{}", id);
-        service.excluir(id);
-        return ResponseEntity.noContent().build();
+        try {
+            service.excluir(id);
+            log.info("Configuração excluída permanentemente com sucesso. ID: {}", id);
+            return ResponseEntity.noContent().build();
+        } catch (NotFoundException ex) {
+            log.warn("Configuração não encontrada para exclusão — ID: {}, mensagem: {}", id, ex.getMessage());
+            throw ex;
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao excluir configuração — ID: {}", id, ex);
+            throw ex;
+        }
+    }
+
+    @PatchMapping("/{id}/inativar")
+    @Operation(summary = "Inativar configuração", description = "Inativa uma configuração do estabelecimento do sistema alterando seu status")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "204", description = "Configuração inativada com sucesso"),
+        @ApiResponse(responseCode = "404", description = "Configuração não encontrada"),
+        @ApiResponse(responseCode = "400", description = "Configuração já está inativa"),
+        @ApiResponse(responseCode = "403", description = "Acesso negado")
+    })
+    public ResponseEntity<Void> inativar(
+            @Parameter(description = "ID da configuração", required = true)
+            @PathVariable UUID id) {
+        log.debug("REQUEST PATCH /v1/configuracoes-estabelecimento/{}/inativar", id);
+        try {
+            service.inativar(id);
+            log.info("Configuração inativada com sucesso. ID: {}", id);
+            return ResponseEntity.noContent().build();
+        } catch (NotFoundException ex) {
+            log.warn("Configuração não encontrada para inativação — ID: {}, mensagem: {}", id, ex.getMessage());
+            throw ex;
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao inativar configuração — ID: {}", id, ex);
+            throw ex;
+        }
     }
 }
 

@@ -97,7 +97,7 @@ public class ConvenioController {
     }
 
     @DeleteMapping("/{id}")
-    @Operation(summary = "Excluir convênio", description = "Exclui (desativa) um convênio do sistema")
+    @Operation(summary = "Excluir convênio", description = "Remove permanentemente um convênio do banco de dados")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "204", description = "Convênio excluído com sucesso"),
             @ApiResponse(responseCode = "404", description = "Convênio não encontrado"),
@@ -108,7 +108,24 @@ public class ConvenioController {
             @PathVariable UUID id) {
         log.debug("REQUEST DELETE /v1/convenios/{}", id);
         convenioService.excluir(id);
-        log.info("Convênio excluído com sucesso. ID: {}", id);
+        log.info("Convênio excluído permanentemente com sucesso. ID: {}", id);
+        return ResponseEntity.noContent().build();
+    }
+
+    @PatchMapping("/{id}/inativar")
+    @Operation(summary = "Inativar convênio", description = "Inativa um convênio no sistema alterando seu status")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "204", description = "Convênio inativado com sucesso"),
+            @ApiResponse(responseCode = "404", description = "Convênio não encontrado"),
+            @ApiResponse(responseCode = "400", description = "Convênio já está inativo"),
+            @ApiResponse(responseCode = "403", description = "Acesso negado")
+    })
+    public ResponseEntity<Void> inativar(
+            @Parameter(description = "ID do convênio", required = true)
+            @PathVariable UUID id) {
+        log.debug("REQUEST PATCH /v1/convenios/{}/inativar", id);
+        convenioService.inativar(id);
+        log.info("Convênio inativado com sucesso. ID: {}", id);
         return ResponseEntity.noContent().build();
     }
 }

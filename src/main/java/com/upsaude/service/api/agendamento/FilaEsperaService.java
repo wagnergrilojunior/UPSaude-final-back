@@ -29,5 +29,7 @@ public interface FilaEsperaService {
     FilaEsperaResponse atualizar(UUID id, FilaEsperaRequest request);
 
     void excluir(UUID id);
+
+    void inativar(UUID id);
 }
 

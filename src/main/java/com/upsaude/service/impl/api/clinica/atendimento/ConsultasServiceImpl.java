@@ -24,9 +24,11 @@ import com.upsaude.repository.clinica.atendimento.ConsultasRepository;
 import com.upsaude.service.api.clinica.atendimento.ConsultasService;
 import com.upsaude.service.api.sistema.multitenancy.TenantService;
 import com.upsaude.service.api.support.consultas.ConsultasCreator;
+import com.upsaude.service.api.support.consultas.ConsultasDomainService;
 import com.upsaude.service.api.support.consultas.ConsultasResponseBuilder;
 import com.upsaude.service.api.support.consultas.ConsultasTenantEnforcer;
 import com.upsaude.service.api.support.consultas.ConsultasUpdater;
+import org.springframework.dao.DataAccessException;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -44,6 +46,7 @@ public class ConsultasServiceImpl implements ConsultasService {
     private final ConsultasUpdater updater;
     private final ConsultasResponseBuilder responseBuilder;
     private final ConsultasTenantEnforcer tenantEnforcer;
+    private final ConsultasDomainService domainService;
 
     @Override
     @Transactional
@@ -126,8 +129,37 @@ public class ConsultasServiceImpl implements ConsultasService {
     @Transactional
     @CacheEvict(cacheNames = CacheKeyUtil.CACHE_CONSULTAS, keyGenerator = "consultasCacheKeyGenerator", beforeInvocation = false)
     public void excluir(UUID id) {
-        UUID tenantId = tenantService.validarTenantAtual();
-        inativarInternal(id, tenantId);
+        log.debug("Excluindo consulta permanentemente. ID: {}", id);
+        try {
+            UUID tenantId = tenantService.validarTenantAtual();
+            Consultas entity = tenantEnforcer.validarAcesso(id, tenantId);
+            domainService.validarPodeDeletar(entity);
+            repository.delete(Objects.requireNonNull(entity));
+            log.info("Consulta excluída permanentemente com sucesso. ID: {}", id);
+        } catch (BadRequestException | com.upsaude.exception.NotFoundException e) {
+            log.warn("Erro de validação ao excluir Consultas. Erro: {}", e.getMessage());
+            throw e;
+        } catch (DataAccessException e) {
+            log.error("Erro de acesso a dados ao excluir Consultas. Exception: {}", e.getClass().getSimpleName(), e);
+            throw new InternalServerErrorException("Erro ao excluir Consultas", e);
+        }
+    }
+
+    @Override
+    @Transactional
+    @CacheEvict(cacheNames = CacheKeyUtil.CACHE_CONSULTAS, keyGenerator = "consultasCacheKeyGenerator", beforeInvocation = false)
+    public void inativar(UUID id) {
+        log.debug("Inativando consulta. ID: {}", id);
+        try {
+            UUID tenantId = tenantService.validarTenantAtual();
+            inativarInternal(id, tenantId);
+        } catch (BadRequestException | com.upsaude.exception.NotFoundException e) {
+            log.warn("Erro de validação ao inativar Consultas. Erro: {}", e.getMessage());
+            throw e;
+        } catch (DataAccessException e) {
+            log.error("Erro de acesso a dados ao inativar Consultas. Exception: {}", e.getClass().getSimpleName(), e);
+            throw new InternalServerErrorException("Erro ao inativar Consultas", e);
+        }
     }
 
     private void inativarInternal(UUID id, UUID tenantId) {
@@ -136,13 +168,10 @@ public class ConsultasServiceImpl implements ConsultasService {
         }
 
         Consultas entity = tenantEnforcer.validarAcesso(id, tenantId);
-        if (Boolean.FALSE.equals(entity.getActive())) {
-            throw new BadRequestException("Consulta já está inativa");
-        }
-
+        domainService.validarPodeInativar(entity);
         entity.setActive(false);
         repository.save(Objects.requireNonNull(entity));
-        log.info("Consulta excluída (desativada) com sucesso. ID: {}", id);
+        log.info("Consulta inativada com sucesso. ID: {}", id);
     }
 
     private void validarTenantAutenticadoOrThrow(UUID tenantId, Tenant tenant) {

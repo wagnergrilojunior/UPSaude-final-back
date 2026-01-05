@@ -90,11 +90,48 @@ public class TemplateNotificacaoController {
     }
 
     @DeleteMapping("/{id}")
-    @Operation(summary = "Excluir template", description = "Exclui (desativa) um template de notificação")
+    @Operation(summary = "Excluir template", description = "Remove permanentemente um template de notificação do banco de dados")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "204", description = "Template excluído com sucesso"),
+        @ApiResponse(responseCode = "404", description = "Template não encontrado"),
+        @ApiResponse(responseCode = "403", description = "Acesso negado")
+    })
     public ResponseEntity<Void> excluir(@PathVariable UUID id) {
         log.debug("REQUEST DELETE /v1/templates-notificacao/{}", id);
-        service.excluir(id);
-        return ResponseEntity.noContent().build();
+        try {
+            service.excluir(id);
+            log.info("Template de notificação excluído permanentemente com sucesso. ID: {}", id);
+            return ResponseEntity.noContent().build();
+        } catch (NotFoundException ex) {
+            log.warn("Template de notificação não encontrado para exclusão — ID: {}, mensagem: {}", id, ex.getMessage());
+            throw ex;
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao excluir template de notificação — ID: {}", id, ex);
+            throw ex;
+        }
+    }
+
+    @PatchMapping("/{id}/inativar")
+    @Operation(summary = "Inativar template", description = "Inativa um template de notificação no sistema alterando seu status")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "204", description = "Template inativado com sucesso"),
+        @ApiResponse(responseCode = "404", description = "Template não encontrado"),
+        @ApiResponse(responseCode = "400", description = "Template já está inativo"),
+        @ApiResponse(responseCode = "403", description = "Acesso negado")
+    })
+    public ResponseEntity<Void> inativar(@PathVariable UUID id) {
+        log.debug("REQUEST PATCH /v1/templates-notificacao/{}/inativar", id);
+        try {
+            service.inativar(id);
+            log.info("Template de notificação inativado com sucesso. ID: {}", id);
+            return ResponseEntity.noContent().build();
+        } catch (NotFoundException ex) {
+            log.warn("Template de notificação não encontrado para inativação — ID: {}, mensagem: {}", id, ex.getMessage());
+            throw ex;
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao inativar template de notificação — ID: {}", id, ex);
+            throw ex;
+        }
     }
 }
 

@@ -15,4 +15,9 @@ public class ConvenioDomainService {
             throw new BadRequestException("Convênio já está inativo");
         }
     }
+
+    public void validarPodeDeletar(Convenio entity) {
+        // Validações adicionais podem ser adicionadas aqui se necessário
+        // Por exemplo, verificar se há registros relacionados que impedem a exclusão
+    }
 }

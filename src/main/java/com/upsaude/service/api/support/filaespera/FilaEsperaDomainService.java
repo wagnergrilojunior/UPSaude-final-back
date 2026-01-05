@@ -15,5 +15,10 @@ public class FilaEsperaDomainService {
             throw new BadRequestException("Item da fila de espera já está inativo");
         }
     }
+
+    public void validarPodeDeletar(FilaEspera entity) {
+        log.debug("Validando se item da fila de espera pode ser deletado. ID: {}", entity.getId());
+        // Adicione aqui qualquer lógica de validação antes de um hard delete.
+    }
 }
 

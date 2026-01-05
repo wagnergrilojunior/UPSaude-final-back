@@ -11,10 +11,13 @@ import com.upsaude.repository.sistema.lgpd.LGPDConsentimentoRepository;
 import com.upsaude.service.api.sistema.lgpd.LGPDConsentimentoService;
 import com.upsaude.service.api.sistema.multitenancy.TenantService;
 import com.upsaude.service.api.support.lgpdconsentimento.LGPDConsentimentoCreator;
+import com.upsaude.service.api.support.lgpdconsentimento.LGPDConsentimentoDomainService;
 import com.upsaude.service.api.support.lgpdconsentimento.LGPDConsentimentoResponseBuilder;
 import com.upsaude.service.api.support.lgpdconsentimento.LGPDConsentimentoTenantEnforcer;
 import com.upsaude.service.api.support.lgpdconsentimento.LGPDConsentimentoUpdater;
 import com.upsaude.service.api.support.lgpdconsentimento.LGPDConsentimentoValidationService;
+import com.upsaude.exception.InternalServerErrorException;
+import org.springframework.dao.DataAccessException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.Cache;
@@ -44,6 +47,7 @@ public class LGPDConsentimentoServiceImpl implements LGPDConsentimentoService {
     private final LGPDConsentimentoCreator creator;
     private final LGPDConsentimentoUpdater updater;
     private final LGPDConsentimentoResponseBuilder responseBuilder;
+    private final LGPDConsentimentoDomainService domainService;
 
     @Override
     @Transactional
@@ -117,22 +121,46 @@ public class LGPDConsentimentoServiceImpl implements LGPDConsentimentoService {
     @Transactional
     @CacheEvict(cacheNames = CacheKeyUtil.CACHE_LGPD_CONSENTIMENTO, keyGenerator = "lgpdConsentimentoCacheKeyGenerator", beforeInvocation = false)
     public void excluir(UUID id) {
-        log.debug("Excluindo consentimento LGPD. ID: {}", id);
-
+        log.debug("Excluindo consentimento LGPD permanentemente. ID: {}", id);
         validationService.validarId(id);
-        UUID tenantId = tenantService.validarTenantAtual();
-        inativarInternal(id, tenantId);
+        try {
+            UUID tenantId = tenantService.validarTenantAtual();
+            LGPDConsentimento entity = tenantEnforcer.validarAcesso(id, tenantId);
+            domainService.validarPodeDeletar(entity);
+            repository.delete(Objects.requireNonNull(entity));
+            log.info("Consentimento LGPD excluído permanentemente com sucesso. ID: {}, tenant: {}", id, tenantId);
+        } catch (BadRequestException | NotFoundException e) {
+            log.warn("Erro de validação ao excluir LGPDConsentimento. Erro: {}", e.getMessage());
+            throw e;
+        } catch (DataAccessException e) {
+            log.error("Erro de acesso a dados ao excluir LGPDConsentimento. Exception: {}", e.getClass().getSimpleName(), e);
+            throw new InternalServerErrorException("Erro ao excluir LGPDConsentimento", e);
+        }
+    }
+
+    @Override
+    @Transactional
+    @CacheEvict(cacheNames = CacheKeyUtil.CACHE_LGPD_CONSENTIMENTO, keyGenerator = "lgpdConsentimentoCacheKeyGenerator", beforeInvocation = false)
+    public void inativar(UUID id) {
+        log.debug("Inativando consentimento LGPD. ID: {}", id);
+        validationService.validarId(id);
+        try {
+            UUID tenantId = tenantService.validarTenantAtual();
+            inativarInternal(id, tenantId);
+        } catch (BadRequestException | NotFoundException e) {
+            log.warn("Erro de validação ao inativar LGPDConsentimento. Erro: {}", e.getMessage());
+            throw e;
+        } catch (DataAccessException e) {
+            log.error("Erro de acesso a dados ao inativar LGPDConsentimento. Exception: {}", e.getClass().getSimpleName(), e);
+            throw new InternalServerErrorException("Erro ao inativar LGPDConsentimento", e);
+        }
     }
 
     private void inativarInternal(UUID id, UUID tenantId) {
         LGPDConsentimento entity = tenantEnforcer.validarAcesso(id, tenantId);
-
-        if (Boolean.FALSE.equals(entity.getActive())) {
-            throw new BadRequestException("Consentimento LGPD já está inativo");
-        }
-
+        domainService.validarPodeInativar(entity);
         entity.setActive(false);
         repository.save(entity);
-        log.info("Consentimento LGPD excluído (desativado) com sucesso. ID: {}, tenant: {}", id, tenantId);
+        log.info("Consentimento LGPD inativado com sucesso. ID: {}, tenant: {}", id, tenantId);
     }
 }

@@ -18,4 +18,6 @@ public interface FabricantesEquipamentoService {
     FabricantesEquipamentoResponse atualizar(UUID id, FabricantesEquipamentoRequest request);
 
     void excluir(UUID id);
+
+    void inativar(UUID id);
 }

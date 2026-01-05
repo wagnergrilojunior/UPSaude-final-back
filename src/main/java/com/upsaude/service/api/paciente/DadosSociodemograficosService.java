@@ -20,4 +20,6 @@ public interface DadosSociodemograficosService {
     DadosSociodemograficosResponse atualizar(UUID id, DadosSociodemograficosRequest request);
 
     void excluir(UUID id);
+
+    void inativar(UUID id);
 }

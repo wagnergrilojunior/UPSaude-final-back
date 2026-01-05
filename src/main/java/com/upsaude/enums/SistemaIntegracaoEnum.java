@@ -4,9 +4,12 @@ import java.util.Arrays;
 import java.util.Locale;
 
 public enum SistemaIntegracaoEnum {
-    ESUS(1, "e-SUS APS"),
-    RNDS(2, "RNDS"),
-    CADSUS(3, "CADSUS"),
+    
+    ESUS_PEC(1, "e-SUS APS PEC"),
+    ESUS_HORUS(2, "Hórus"),
+    RNDS(3, "RNDS"),
+    CADSUS(4, "CADSUS"),
+    CNES(5, "CNES"),
     OUTRO(99, "Outro");
 
     private final Integer codigo;

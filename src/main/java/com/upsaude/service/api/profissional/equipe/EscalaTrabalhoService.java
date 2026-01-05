@@ -28,4 +28,6 @@ public interface EscalaTrabalhoService {
     EscalaTrabalhoResponse atualizar(UUID id, EscalaTrabalhoRequest request);
 
     void excluir(UUID id);
+
+    void inativar(UUID id);
 }

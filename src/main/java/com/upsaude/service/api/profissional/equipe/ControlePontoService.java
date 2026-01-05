@@ -29,4 +29,6 @@ public interface ControlePontoService {
     ControlePontoResponse atualizar(UUID id, ControlePontoRequest request);
 
     void excluir(UUID id);
+
+    void inativar(UUID id);
 }

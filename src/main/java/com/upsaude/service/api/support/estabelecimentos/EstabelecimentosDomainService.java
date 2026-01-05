@@ -15,5 +15,10 @@ public class EstabelecimentosDomainService {
             throw new BadRequestException("Estabelecimento já está inativo");
         }
     }
+
+    public void validarPodeDeletar(Estabelecimentos entity) {
+        // Validações adicionais podem ser adicionadas aqui se necessário
+        // Por exemplo, verificar se há registros relacionados que impedem a exclusão
+    }
 }
 

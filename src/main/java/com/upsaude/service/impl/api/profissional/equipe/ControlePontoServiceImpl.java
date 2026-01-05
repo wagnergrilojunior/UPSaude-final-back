@@ -24,9 +24,11 @@ import com.upsaude.repository.profissional.equipe.ControlePontoRepository;
 import com.upsaude.service.api.profissional.equipe.ControlePontoService;
 import com.upsaude.service.api.sistema.multitenancy.TenantService;
 import com.upsaude.service.api.support.controleponto.ControlePontoCreator;
+import com.upsaude.service.api.support.controleponto.ControlePontoDomainService;
 import com.upsaude.service.api.support.controleponto.ControlePontoResponseBuilder;
 import com.upsaude.service.api.support.controleponto.ControlePontoTenantEnforcer;
 import com.upsaude.service.api.support.controleponto.ControlePontoUpdater;
+import org.springframework.dao.DataAccessException;
 
 import java.time.LocalDate;
 import lombok.RequiredArgsConstructor;
@@ -45,6 +47,7 @@ public class ControlePontoServiceImpl implements ControlePontoService {
     private final ControlePontoUpdater updater;
     private final ControlePontoResponseBuilder responseBuilder;
     private final ControlePontoTenantEnforcer tenantEnforcer;
+    private final ControlePontoDomainService domainService;
 
     @Override
     @Transactional
@@ -181,9 +184,37 @@ public class ControlePontoServiceImpl implements ControlePontoService {
     @Transactional
     @CacheEvict(cacheNames = CacheKeyUtil.CACHE_CONTROLE_PONTO, keyGenerator = "controlePontoCacheKeyGenerator", beforeInvocation = false)
     public void excluir(UUID id) {
-        log.debug("Excluindo controle de ponto. ID: {}", id);
-        UUID tenantId = tenantService.validarTenantAtual();
-        inativarInternal(id, tenantId);
+        log.debug("Excluindo controle de ponto permanentemente. ID: {}", id);
+        try {
+            UUID tenantId = tenantService.validarTenantAtual();
+            ControlePonto entity = tenantEnforcer.validarAcesso(id, tenantId);
+            domainService.validarPodeDeletar(entity);
+            repository.delete(Objects.requireNonNull(entity));
+            log.info("Controle de ponto excluído permanentemente com sucesso. ID: {}", id);
+        } catch (BadRequestException | com.upsaude.exception.NotFoundException e) {
+            log.warn("Erro de validação ao excluir ControlePonto. Erro: {}", e.getMessage());
+            throw e;
+        } catch (DataAccessException e) {
+            log.error("Erro de acesso a dados ao excluir ControlePonto. Exception: {}", e.getClass().getSimpleName(), e);
+            throw new InternalServerErrorException("Erro ao excluir ControlePonto", e);
+        }
+    }
+
+    @Override
+    @Transactional
+    @CacheEvict(cacheNames = CacheKeyUtil.CACHE_CONTROLE_PONTO, keyGenerator = "controlePontoCacheKeyGenerator", beforeInvocation = false)
+    public void inativar(UUID id) {
+        log.debug("Inativando controle de ponto. ID: {}", id);
+        try {
+            UUID tenantId = tenantService.validarTenantAtual();
+            inativarInternal(id, tenantId);
+        } catch (BadRequestException | com.upsaude.exception.NotFoundException e) {
+            log.warn("Erro de validação ao inativar ControlePonto. Erro: {}", e.getMessage());
+            throw e;
+        } catch (DataAccessException e) {
+            log.error("Erro de acesso a dados ao inativar ControlePonto. Exception: {}", e.getClass().getSimpleName(), e);
+            throw new InternalServerErrorException("Erro ao inativar ControlePonto", e);
+        }
     }
 
     private void inativarInternal(UUID id, UUID tenantId) {
@@ -192,9 +223,10 @@ public class ControlePontoServiceImpl implements ControlePontoService {
         }
 
         ControlePonto entity = tenantEnforcer.validarAcesso(id, tenantId);
+        domainService.validarPodeInativar(entity);
         entity.setActive(false);
         repository.save(Objects.requireNonNull(entity));
-        log.info("Controle de ponto excluído (desativado) com sucesso. ID: {}", id);
+        log.info("Controle de ponto inativado com sucesso. ID: {}", id);
     }
 
     private void validarTenantAutenticadoOrThrow(UUID tenantId, Tenant tenant) {

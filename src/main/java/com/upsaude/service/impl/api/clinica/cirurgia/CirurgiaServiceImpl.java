@@ -233,16 +233,36 @@ public class CirurgiaServiceImpl implements CirurgiaService {
     @Transactional
     @CacheEvict(cacheNames = CacheKeyUtil.CACHE_CIRURGIAS, keyGenerator = "cirurgiaCacheKeyGenerator", beforeInvocation = false)
     public void excluir(UUID id) {
-        log.debug("Excluindo cirurgia. ID: {}", id);
+        log.debug("Excluindo cirurgia permanentemente. ID: {}", id);
         try {
             UUID tenantId = tenantService.validarTenantAtual();
-            inativarInternal(id, tenantId);
+            Cirurgia entity = tenantEnforcer.validarAcesso(id, tenantId);
+            domainService.validarPodeDeletar(entity);
+            repository.delete(Objects.requireNonNull(entity));
+            log.info("Cirurgia excluída permanentemente com sucesso. ID: {}", id);
         } catch (BadRequestException | NotFoundException e) {
             log.warn("Erro de validação ao excluir cirurgia. ID: {}, erro: {}", id, e.getMessage());
             throw e;
         } catch (DataAccessException e) {
             log.error("Erro de acesso a dados ao excluir cirurgia. ID: {}", id, e);
             throw new InternalServerErrorException("Erro ao excluir cirurgia", e);
+        }
+    }
+
+    @Override
+    @Transactional
+    @CacheEvict(cacheNames = CacheKeyUtil.CACHE_CIRURGIAS, keyGenerator = "cirurgiaCacheKeyGenerator", beforeInvocation = false)
+    public void inativar(UUID id) {
+        log.debug("Inativando cirurgia. ID: {}", id);
+        try {
+            UUID tenantId = tenantService.validarTenantAtual();
+            inativarInternal(id, tenantId);
+        } catch (BadRequestException | NotFoundException e) {
+            log.warn("Erro de validação ao inativar cirurgia. ID: {}, erro: {}", id, e.getMessage());
+            throw e;
+        } catch (DataAccessException e) {
+            log.error("Erro de acesso a dados ao inativar cirurgia. ID: {}", id, e);
+            throw new InternalServerErrorException("Erro ao inativar cirurgia", e);
         }
     }
 
@@ -254,7 +274,7 @@ public class CirurgiaServiceImpl implements CirurgiaService {
         domainService.validarPodeInativar(entity);
         entity.setActive(false);
         repository.save(Objects.requireNonNull(entity));
-        log.info("Cirurgia excluída (desativada) com sucesso. ID: {}", id);
+        log.info("Cirurgia inativada com sucesso. ID: {}", id);
     }
 
     private Tenant obterTenantAutenticadoOrThrow(UUID tenantId) {

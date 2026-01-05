@@ -127,7 +127,7 @@ public class DeficienciasController {
     }
 
     @DeleteMapping("/{id}")
-    @Operation(summary = "Excluir deficiência", description = "Exclui (desativa) uma deficiência do sistema")
+    @Operation(summary = "Excluir deficiência", description = "Remove permanentemente uma deficiência do banco de dados")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "204", description = "Deficiência excluída com sucesso"),
             @ApiResponse(responseCode = "404", description = "Deficiência não encontrada"),
@@ -139,13 +139,38 @@ public class DeficienciasController {
         log.debug("REQUEST DELETE /v1/deficiencias/{}", id);
         try {
             deficienciasService.excluir(id);
-            log.info("Deficiência excluída com sucesso. ID: {}", id);
+            log.info("Deficiência excluída permanentemente com sucesso. ID: {}", id);
             return ResponseEntity.noContent().build();
         } catch (NotFoundException ex) {
             log.warn("Falha ao excluir deficiência — ID: {}, mensagem: {}", id, ex.getMessage());
             throw ex;
         } catch (Exception ex) {
             log.error("Erro inesperado ao excluir deficiência — ID: {}", id, ex);
+            throw ex;
+        }
+    }
+
+    @PatchMapping("/{id}/inativar")
+    @Operation(summary = "Inativar deficiência", description = "Inativa uma deficiência no sistema alterando seu status")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "204", description = "Deficiência inativada com sucesso"),
+            @ApiResponse(responseCode = "404", description = "Deficiência não encontrada"),
+            @ApiResponse(responseCode = "400", description = "Deficiência já está inativa"),
+            @ApiResponse(responseCode = "403", description = "Acesso negado")
+    })
+    public ResponseEntity<Void> inativar(
+            @Parameter(description = "ID da deficiência", required = true)
+            @PathVariable UUID id) {
+        log.debug("REQUEST PATCH /v1/deficiencias/{}/inativar", id);
+        try {
+            deficienciasService.inativar(id);
+            log.info("Deficiência inativada com sucesso. ID: {}", id);
+            return ResponseEntity.noContent().build();
+        } catch (NotFoundException ex) {
+            log.warn("Falha ao inativar deficiência — ID: {}, mensagem: {}", id, ex.getMessage());
+            throw ex;
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao inativar deficiência — ID: {}", id, ex);
             throw ex;
         }
     }

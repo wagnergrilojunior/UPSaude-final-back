@@ -18,4 +18,6 @@ public interface HistoricoClinicoService {
     HistoricoClinicoResponse atualizar(UUID id, HistoricoClinicoRequest request);
 
     void excluir(UUID id);
+
+    void inativar(UUID id);
 }

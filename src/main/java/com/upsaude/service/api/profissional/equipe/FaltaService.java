@@ -26,5 +26,7 @@ public interface FaltaService {
     FaltaResponse atualizar(UUID id, FaltaRequest request);
 
     void excluir(UUID id);
+
+    void inativar(UUID id);
 }
 

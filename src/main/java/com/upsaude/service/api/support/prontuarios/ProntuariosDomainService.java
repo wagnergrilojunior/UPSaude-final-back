@@ -15,5 +15,10 @@ public class ProntuariosDomainService {
             throw new BadRequestException("Prontuário já está inativo");
         }
     }
+
+    public void validarPodeDeletar(Prontuarios entity) {
+        // Validações adicionais podem ser adicionadas aqui se necessário
+        // Por exemplo, verificar se há registros relacionados que impedem a exclusão
+    }
 }
 

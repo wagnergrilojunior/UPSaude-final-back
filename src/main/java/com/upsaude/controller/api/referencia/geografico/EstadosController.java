@@ -127,7 +127,7 @@ public class EstadosController {
     }
 
     @DeleteMapping("/{id}")
-    @Operation(summary = "Excluir estado", description = "Exclui (desativa) um estado do sistema")
+    @Operation(summary = "Excluir estado", description = "Exclui permanentemente um estado do sistema")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "204", description = "Estado excluído com sucesso"),
             @ApiResponse(responseCode = "404", description = "Estado não encontrado"),
@@ -139,13 +139,38 @@ public class EstadosController {
         log.debug("REQUEST DELETE /v1/estados/{}", id);
         try {
             estadosService.excluir(id);
-            log.info("Estado excluído com sucesso. ID: {}", id);
+            log.info("Estado excluído permanentemente com sucesso. ID: {}", id);
             return ResponseEntity.noContent().build();
         } catch (NotFoundException ex) {
             log.warn("Estado não encontrado para exclusão — ID: {}, mensagem: {}", id, ex.getMessage());
             throw ex;
         } catch (Exception ex) {
             log.error("Erro inesperado ao excluir estado — ID: {}", id, ex);
+            throw ex;
+        }
+    }
+
+    @PatchMapping("/{id}/inativar")
+    @Operation(summary = "Inativar estado", description = "Inativa um estado do sistema alterando seu status")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "204", description = "Estado inativado com sucesso"),
+            @ApiResponse(responseCode = "404", description = "Estado não encontrado"),
+            @ApiResponse(responseCode = "400", description = "Estado já está inativo"),
+            @ApiResponse(responseCode = "403", description = "Acesso negado")
+    })
+    public ResponseEntity<Void> inativar(
+            @Parameter(description = "ID do estado", required = true)
+            @PathVariable UUID id) {
+        log.debug("REQUEST PATCH /v1/estados/{}/inativar", id);
+        try {
+            estadosService.inativar(id);
+            log.info("Estado inativado com sucesso. ID: {}", id);
+            return ResponseEntity.noContent().build();
+        } catch (NotFoundException ex) {
+            log.warn("Estado não encontrado para inativação — ID: {}, mensagem: {}", id, ex.getMessage());
+            throw ex;
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao inativar estado — ID: {}", id, ex);
             throw ex;
         }
     }

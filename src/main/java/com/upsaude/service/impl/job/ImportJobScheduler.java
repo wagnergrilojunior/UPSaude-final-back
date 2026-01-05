@@ -62,7 +62,7 @@ public class ImportJobScheduler {
     private static final long SCHEDULER_CLAIM_LOCK_KEY = 88123499123L;
 
     /**
-     * Consumidor principal da fila (executa a cada 1 hora).
+     * Consumidor principal da fila (executa a cada 30 minutos).
      * Processa jobs enfileirados de forma geral.
      */
     @Scheduled(fixedDelayString = "#{${import.job.scheduler-interval-seconds:3600} * 1000}")
@@ -226,6 +226,65 @@ public class ImportJobScheduler {
                     maxConcurrentPerTenant
             );
         });
+    }
+
+    /**
+     * Inicia manualmente o processamento de jobs enfileirados, sem esperar o próximo schedule.
+     * Processa até o limite de jobs simultâneos configurado.
+     * 
+     * IMPORTANTE: Este método é chamado pela API, mas o processamento é executado em BACKGROUND
+     * no pool de threads do JOB (importJobExecutor), não no pool HTTP da API.
+     * 
+     * Fluxo:
+     * 1. API recebe requisição (pool HTTP)
+     * 2. Controller chama este método (ainda no pool HTTP, mas retorna imediatamente)
+     * 3. importJobExecutor.execute() enfileira o processamento no pool do JOB (assíncrono)
+     * 4. API retorna resposta imediatamente (não espera o processamento)
+     * 5. Processamento executa em paralelo no pool do JOB (threads dedicadas)
+     * 
+     * @return Número de jobs iniciados para processamento
+     */
+    public int iniciarProcessamentoManual() {
+        if (!jobsEnabled) {
+            log.warn("Tentativa de iniciar processamento manual com jobs desabilitados");
+            return 0;
+        }
+        
+        try {
+            long processando = importJobJobRepository.countByStatus(ImportJobStatusEnum.PROCESSANDO);
+            long slots = (long) maxConcurrentGlobal - processando;
+            if (slots <= 0) {
+                log.debug("Processamento manual: sem slots disponíveis (processando: {})", processando);
+                return 0;
+            }
+
+            int jobsIniciados = 0;
+            for (int i = 0; i < slots; i++) {
+                UUID jobId = claimNextJobParaProcessar();
+                if (jobId == null) {
+                    break;
+                }
+
+                try {
+                    // IMPORTANTE: execute() é assíncrono - enfileira no pool do JOB e retorna imediatamente
+                    // O processamento acontece em background no pool dedicado (importJobExecutor)
+                    // A thread da API não fica bloqueada esperando o processamento
+                    importJobExecutor.execute(() -> importJobProcessor.processar(jobId));
+                    jobsIniciados++;
+                    log.info("Processamento manual: job {} enfileirado no pool do JOB para processamento em background", jobId);
+                } catch (RejectedExecutionException rex) {
+                    log.warn("Executor de import jobs cheio no processamento manual; re-enfileirando job {}. Motivo: {}", jobId, rex.getMessage());
+                    importJobQueueService.reEnfileirarOuFalhar(jobId, "Executor cheio (RejectedExecutionException)");
+                    break;
+                }
+            }
+            
+            log.info("Processamento manual: {} jobs enfileirados no pool do JOB para processamento em background", jobsIniciados);
+            return jobsIniciados;
+        } catch (Exception e) {
+            log.error("Erro no processamento manual de import jobs: {}", e.getMessage(), e);
+            throw new RuntimeException("Erro ao iniciar processamento manual de jobs", e);
+        }
     }
 
 }

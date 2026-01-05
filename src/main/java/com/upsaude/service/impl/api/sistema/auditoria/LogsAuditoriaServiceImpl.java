@@ -10,10 +10,14 @@ import com.upsaude.repository.sistema.auditoria.LogsAuditoriaRepository;
 import com.upsaude.service.api.sistema.auditoria.LogsAuditoriaService;
 import com.upsaude.service.api.sistema.multitenancy.TenantService;
 import com.upsaude.service.api.support.logsauditoria.LogsAuditoriaCreator;
+import com.upsaude.service.api.support.logsauditoria.LogsAuditoriaDomainService;
 import com.upsaude.service.api.support.logsauditoria.LogsAuditoriaResponseBuilder;
 import com.upsaude.service.api.support.logsauditoria.LogsAuditoriaTenantEnforcer;
 import com.upsaude.service.api.support.logsauditoria.LogsAuditoriaUpdater;
 import com.upsaude.service.api.support.logsauditoria.LogsAuditoriaValidationService;
+import com.upsaude.exception.InternalServerErrorException;
+import com.upsaude.exception.NotFoundException;
+import org.springframework.dao.DataAccessException;
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
 import org.springframework.transaction.annotation.Transactional;
@@ -43,6 +47,7 @@ public class LogsAuditoriaServiceImpl implements LogsAuditoriaService {
     private final LogsAuditoriaCreator creator;
     private final LogsAuditoriaUpdater updater;
     private final LogsAuditoriaResponseBuilder responseBuilder;
+    private final LogsAuditoriaDomainService domainService;
 
     @Override
     @Transactional
@@ -107,22 +112,46 @@ public class LogsAuditoriaServiceImpl implements LogsAuditoriaService {
     @Transactional
     @CacheEvict(cacheNames = CacheKeyUtil.CACHE_LOGS_AUDITORIA, keyGenerator = "logsAuditoriaCacheKeyGenerator", beforeInvocation = false)
     public void excluir(UUID id) {
-        log.debug("Excluindo LogsAuditoria. ID: {}", id);
-
+        log.debug("Excluindo log de auditoria permanentemente. ID: {}", id);
         validationService.validarId(id);
-        UUID tenantId = tenantService.validarTenantAtual();
-        inativarInternal(id, tenantId);
+        try {
+            UUID tenantId = tenantService.validarTenantAtual();
+            LogsAuditoria entity = tenantEnforcer.validarAcesso(id, tenantId);
+            domainService.validarPodeDeletar(entity);
+            logsAuditoriaRepository.delete(Objects.requireNonNull(entity));
+            log.info("Log de auditoria excluído permanentemente com sucesso. ID: {}, tenant: {}", id, tenantId);
+        } catch (BadRequestException | NotFoundException e) {
+            log.warn("Erro de validação ao excluir LogsAuditoria. Erro: {}", e.getMessage());
+            throw e;
+        } catch (DataAccessException e) {
+            log.error("Erro de acesso a dados ao excluir LogsAuditoria. Exception: {}", e.getClass().getSimpleName(), e);
+            throw new InternalServerErrorException("Erro ao excluir LogsAuditoria", e);
+        }
+    }
+
+    @Override
+    @Transactional
+    @CacheEvict(cacheNames = CacheKeyUtil.CACHE_LOGS_AUDITORIA, keyGenerator = "logsAuditoriaCacheKeyGenerator", beforeInvocation = false)
+    public void inativar(UUID id) {
+        log.debug("Inativando log de auditoria. ID: {}", id);
+        validationService.validarId(id);
+        try {
+            UUID tenantId = tenantService.validarTenantAtual();
+            inativarInternal(id, tenantId);
+        } catch (BadRequestException | NotFoundException e) {
+            log.warn("Erro de validação ao inativar LogsAuditoria. Erro: {}", e.getMessage());
+            throw e;
+        } catch (DataAccessException e) {
+            log.error("Erro de acesso a dados ao inativar LogsAuditoria. Exception: {}", e.getClass().getSimpleName(), e);
+            throw new InternalServerErrorException("Erro ao inativar LogsAuditoria", e);
+        }
     }
 
     private void inativarInternal(UUID id, UUID tenantId) {
         LogsAuditoria entity = tenantEnforcer.validarAcesso(id, tenantId);
-
-        if (Boolean.FALSE.equals(entity.getActive())) {
-            throw new BadRequestException("Log de auditoria já está inativo");
-        }
-
+        domainService.validarPodeInativar(entity);
         entity.setActive(false);
         logsAuditoriaRepository.save(entity);
-        log.info("Log de auditoria excluído (desativado) com sucesso. ID: {}, tenant: {}", id, tenantId);
+        log.info("Log de auditoria inativado com sucesso. ID: {}, tenant: {}", id, tenantId);
     }
 }

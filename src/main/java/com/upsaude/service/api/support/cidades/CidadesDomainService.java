@@ -15,5 +15,10 @@ public class CidadesDomainService {
             throw new BadRequestException("Cidade já está inativa");
         }
     }
+
+    public void validarPodeDeletar(Cidades entity) {
+        log.debug("Validando se cidade pode ser deletada. ID: {}", entity.getId());
+        // Adicione aqui qualquer lógica de validação antes de um hard delete.
+    }
 }
 

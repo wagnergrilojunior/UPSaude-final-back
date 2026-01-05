@@ -24,9 +24,11 @@ import com.upsaude.repository.clinica.prontuario.HistoricoClinicoRepository;
 import com.upsaude.service.api.clinica.prontuario.HistoricoClinicoService;
 import com.upsaude.service.api.sistema.multitenancy.TenantService;
 import com.upsaude.service.api.support.historicoclinico.HistoricoClinicoCreator;
+import com.upsaude.service.api.support.historicoclinico.HistoricoClinicoDomainService;
 import com.upsaude.service.api.support.historicoclinico.HistoricoClinicoResponseBuilder;
 import com.upsaude.service.api.support.historicoclinico.HistoricoClinicoTenantEnforcer;
 import com.upsaude.service.api.support.historicoclinico.HistoricoClinicoUpdater;
+import org.springframework.dao.DataAccessException;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -44,6 +46,7 @@ public class HistoricoClinicoServiceImpl implements HistoricoClinicoService {
     private final HistoricoClinicoUpdater updater;
     private final HistoricoClinicoResponseBuilder responseBuilder;
     private final HistoricoClinicoTenantEnforcer tenantEnforcer;
+    private final HistoricoClinicoDomainService domainService;
 
     @Override
     @Transactional
@@ -119,9 +122,37 @@ public class HistoricoClinicoServiceImpl implements HistoricoClinicoService {
     @Transactional
     @CacheEvict(cacheNames = CacheKeyUtil.CACHE_HISTORICO_CLINICO, keyGenerator = "historicoClinicoCacheKeyGenerator", beforeInvocation = false)
     public void excluir(UUID id) {
-        log.debug("Excluindo histórico clínico. ID: {}", id);
-        UUID tenantId = tenantService.validarTenantAtual();
-        inativarInternal(id, tenantId);
+        log.debug("Excluindo histórico clínico permanentemente. ID: {}", id);
+        try {
+            UUID tenantId = tenantService.validarTenantAtual();
+            HistoricoClinico entity = tenantEnforcer.validarAcesso(id, tenantId);
+            domainService.validarPodeDeletar(entity);
+            repository.delete(Objects.requireNonNull(entity));
+            log.info("Histórico clínico excluído permanentemente com sucesso. ID: {}", id);
+        } catch (BadRequestException | com.upsaude.exception.NotFoundException e) {
+            log.warn("Erro de validação ao excluir HistoricoClinico. Erro: {}", e.getMessage());
+            throw e;
+        } catch (DataAccessException e) {
+            log.error("Erro de acesso a dados ao excluir HistoricoClinico. Exception: {}", e.getClass().getSimpleName(), e);
+            throw new InternalServerErrorException("Erro ao excluir HistoricoClinico", e);
+        }
+    }
+
+    @Override
+    @Transactional
+    @CacheEvict(cacheNames = CacheKeyUtil.CACHE_HISTORICO_CLINICO, keyGenerator = "historicoClinicoCacheKeyGenerator", beforeInvocation = false)
+    public void inativar(UUID id) {
+        log.debug("Inativando histórico clínico. ID: {}", id);
+        try {
+            UUID tenantId = tenantService.validarTenantAtual();
+            inativarInternal(id, tenantId);
+        } catch (BadRequestException | com.upsaude.exception.NotFoundException e) {
+            log.warn("Erro de validação ao inativar HistoricoClinico. Erro: {}", e.getMessage());
+            throw e;
+        } catch (DataAccessException e) {
+            log.error("Erro de acesso a dados ao inativar HistoricoClinico. Exception: {}", e.getClass().getSimpleName(), e);
+            throw new InternalServerErrorException("Erro ao inativar HistoricoClinico", e);
+        }
     }
 
     private void inativarInternal(UUID id, UUID tenantId) {
@@ -130,9 +161,10 @@ public class HistoricoClinicoServiceImpl implements HistoricoClinicoService {
         }
 
         HistoricoClinico entity = tenantEnforcer.validarAcesso(id, tenantId);
+        domainService.validarPodeInativar(entity);
         entity.setActive(false);
         repository.save(Objects.requireNonNull(entity));
-        log.info("Histórico clínico excluído (desativado) com sucesso. ID: {}", id);
+        log.info("Histórico clínico inativado com sucesso. ID: {}", id);
     }
 
     private void validarTenantAutenticadoOrThrow(UUID tenantId, Tenant tenant) {

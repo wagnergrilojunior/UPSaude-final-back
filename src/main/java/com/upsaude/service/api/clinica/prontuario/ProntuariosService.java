@@ -22,4 +22,6 @@ public interface ProntuariosService {
     ProntuariosResponse atualizar(UUID id, ProntuariosRequest request);
 
     void excluir(UUID id);
+
+    void inativar(UUID id);
 }

@@ -27,9 +27,7 @@ import java.util.stream.Stream;
 
 @RestController
 @RequestMapping("/v1/sia")
-@Tag(name = "SIA-SUS Importação", description = "Endpoints para importação de arquivos CSV do SIA-SUS (Sistema de Informações Ambulatoriais do SUS). " +
-        "O SIA-SUS contém dados de procedimentos ambulatoriais realizados no SUS, utilizados para indicadores de produção, " +
-        "análises por município/estado/estabelecimento e relatórios gerenciais.")
+@Tag(name = "SIA-SUS Importação", description = "Endpoints para importação de arquivos CSV do SIA-SUS (Sistema de Informações Ambulatoriais do SUS)")
 @Slf4j
 public class SiaPaFileImportController {
 
@@ -49,30 +47,22 @@ public class SiaPaFileImportController {
     @PostMapping("/import/upload")
     @Operation(
             summary = "Upload de arquivo SIA-SUS PA (assíncrono)",
-            description = "Recebe um arquivo CSV do SIA-SUS (Sistema de Informações Ambulatoriais do SUS) e cria um job " +
-                    "ENFILEIRADO para processamento em background. " +
-                    "O SIA-SUS contém informações sobre procedimentos ambulatoriais realizados no SUS. " +
-                    "O processamento é executado de forma assíncrona, permitindo que o upload retorne imediatamente " +
-                    "com status 202 Accepted. O progresso do processamento pode ser acompanhado através do endpoint " +
-                    "/v1/import-jobs/{jobId}/status. " +
-                    "Os dados do SIA-SUS são utilizados para indicadores de produção ambulatorial, análises por " +
-                    "município/estado/estabelecimento e relatórios gerenciais.",
+            description = "Recebe um arquivo CSV do SIA-SUS e cria um job para processamento em background. O progresso pode ser acompanhado em /v1/import-jobs/{jobId}/status.",
             responses = {
-                    @ApiResponse(responseCode = "202", description = "Upload aceito e job criado. O processamento será executado em background."),
-                    @ApiResponse(responseCode = "400", description = "Dados inválidos (arquivo vazio, formato inválido, parâmetros incorretos)"),
+                    @ApiResponse(responseCode = "202", description = "Upload aceito e job criado"),
+                    @ApiResponse(responseCode = "400", description = "Dados inválidos"),
                     @ApiResponse(responseCode = "401", description = "Não autenticado"),
                     @ApiResponse(responseCode = "500", description = "Erro ao criar job")
             }
     )
     public ResponseEntity<Map<String, Object>> uploadSiaPa(
-            @Parameter(description = "Arquivo CSV do SIA-SUS PA (Sistema de Informações Ambulatoriais - Produção Ambulatorial). " +
-                    "O arquivo deve conter dados de procedimentos ambulatoriais do SUS no formato CSV.", required = true)
+            @Parameter(description = "Arquivo CSV do SIA-SUS PA", required = true)
             @RequestParam("file") MultipartFile file,
-            @Parameter(description = "Ano da competência no formato YYYY (ex: 2025)", required = true)
+            @Parameter(description = "Ano da competência (YYYY)", required = true)
             @RequestParam("competenciaAno") String competenciaAno,
-            @Parameter(description = "Mês da competência no formato MM (ex: 01 para janeiro)", required = true)
+            @Parameter(description = "Mês da competência (MM)", required = true)
             @RequestParam("competenciaMes") String competenciaMes,
-            @Parameter(description = "Unidade Federativa (UF) no formato de 2 letras maiúsculas (ex: MG, SP, RJ)", required = true)
+            @Parameter(description = "UF (2 letras maiúsculas)", required = true)
             @RequestParam("uf") String uf
     ) {
         log.debug("REQUEST POST /v1/sia/import/upload - ano={}, mes={}, uf={}, filename={}",
@@ -115,64 +105,14 @@ public class SiaPaFileImportController {
         return ResponseEntity.accepted().body(response);
     }
 
-    @PostMapping("/import/{ano}/{uf}/{mes}")
-    @Operation(
-            summary = "[DEPRECATED] Importar arquivos SIA-SUS PA (legado/síncrono)",
-            description = "DEPRECATED: este endpoint não executa mais processamento pesado no ciclo HTTP. Use POST /v1/sia/import/upload (202 Accepted) e acompanhe o job em /v1/import-jobs/{jobId}/status.",
-            deprecated = true,
-            responses = {
-                    @ApiResponse(responseCode = "410", description = "Endpoint legado desativado"),
-                    @ApiResponse(responseCode = "400", description = "Parâmetros inválidos"),
-                    @ApiResponse(responseCode = "500", description = "Erro na importação")
-            }
-    )
-    @Deprecated
-    public ResponseEntity<Map<String, Object>> importarMes(
-            @Parameter(description = "Ano no formato YYYY (ex: 2025)", required = true, example = "2025")
-            @PathVariable String ano,
-            @Parameter(description = "UF no formato de 2 letras (ex: MG)", required = true, example = "MG")
-            @PathVariable String uf,
-            @Parameter(description = "Mês no formato MM (ex: 01)", required = true, example = "01")
-            @PathVariable String mes) {
-        log.debug("REQUEST POST /v1/sia/import/{}/{}/{}", ano, uf, mes);
-        
-        // Validação básica
-        if (!ano.matches("\\d{4}")) {
-            Map<String, Object> errorResponse = new HashMap<>();
-            errorResponse.put("erro", "Ano inválido. Deve estar no formato YYYY");
-            errorResponse.put("sucesso", false);
-            return ResponseEntity.badRequest().body(errorResponse);
-        }
-        
-        if (!uf.matches("[A-Z]{2}")) {
-            Map<String, Object> errorResponse = new HashMap<>();
-            errorResponse.put("erro", "UF inválida. Deve estar no formato de 2 letras maiúsculas");
-            errorResponse.put("sucesso", false);
-            return ResponseEntity.badRequest().body(errorResponse);
-        }
-        
-        if (!mes.matches("(0[1-9]|1[0-2])")) {
-            Map<String, Object> errorResponse = new HashMap<>();
-            errorResponse.put("erro", "Mês inválido. Deve estar no formato MM (01-12)");
-            errorResponse.put("sucesso", false);
-            return ResponseEntity.badRequest().body(errorResponse);
-        }
-        
-        Map<String, Object> response = new HashMap<>();
-        response.put("erro", "Endpoint legado desativado. Use /v1/sia/import/upload (202 Accepted) e acompanhe o job em /v1/import-jobs/{jobId}/status.");
-        response.put("sucesso", false);
-        response.put("novoEndpoint", "/api/v1/sia/import/upload");
-        return ResponseEntity.status(410).body(response);
-    }
 
     @GetMapping("/import/arquivos/{ano}/{uf}/{mes}")
     @Operation(
             summary = "Listar arquivos SIA-SUS disponíveis",
-            description = "Lista todos os arquivos CSV do SIA-SUS disponíveis para importação de um mês específico. " +
-                    "Os arquivos são organizados por ano, UF e mês no sistema de arquivos.",
+            description = "Lista arquivos CSV do SIA-SUS disponíveis para importação",
             responses = {
-                    @ApiResponse(responseCode = "200", description = "Lista de arquivos CSV do SIA-SUS encontrados"),
-                    @ApiResponse(responseCode = "404", description = "Pasta do mês não encontrada")
+                    @ApiResponse(responseCode = "200", description = "Lista de arquivos encontrados"),
+                    @ApiResponse(responseCode = "404", description = "Pasta não encontrada")
             }
     )
     public ResponseEntity<Map<String, Object>> listarArquivos(
@@ -218,11 +158,10 @@ public class SiaPaFileImportController {
     @GetMapping("/import/meses/{ano}/{uf}")
     @Operation(
             summary = "Listar meses SIA-SUS disponíveis",
-            description = "Lista todos os meses com dados SIA-SUS disponíveis para importação de um estado específico. " +
-                    "Os meses são organizados em pastas no formato MM (01-12) dentro da pasta do estado.",
+            description = "Lista meses com dados SIA-SUS disponíveis para importação",
             responses = {
-                    @ApiResponse(responseCode = "200", description = "Lista de meses com dados SIA-SUS disponíveis"),
-                    @ApiResponse(responseCode = "404", description = "Pasta do estado não encontrada")
+                    @ApiResponse(responseCode = "200", description = "Lista de meses encontrados"),
+                    @ApiResponse(responseCode = "404", description = "Pasta não encontrada")
             }
     )
     public ResponseEntity<Map<String, Object>> listarMeses(

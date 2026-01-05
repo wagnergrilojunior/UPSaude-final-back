@@ -93,11 +93,48 @@ public class NotificacaoController {
     }
 
     @DeleteMapping("/{id}")
-    @Operation(summary = "Excluir notificação", description = "Exclui (desativa) uma notificação")
+    @Operation(summary = "Excluir notificação", description = "Remove permanentemente uma notificação do banco de dados")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "204", description = "Notificação excluída com sucesso"),
+        @ApiResponse(responseCode = "404", description = "Notificação não encontrada"),
+        @ApiResponse(responseCode = "403", description = "Acesso negado")
+    })
     public ResponseEntity<Void> excluir(@PathVariable UUID id) {
         log.debug("REQUEST DELETE /v1/notificacoes/{}", id);
-        service.excluir(id);
-        return ResponseEntity.noContent().build();
+        try {
+            service.excluir(id);
+            log.info("Notificação excluída permanentemente com sucesso. ID: {}", id);
+            return ResponseEntity.noContent().build();
+        } catch (NotFoundException ex) {
+            log.warn("Notificação não encontrada para exclusão — ID: {}, mensagem: {}", id, ex.getMessage());
+            throw ex;
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao excluir notificação — ID: {}", id, ex);
+            throw ex;
+        }
+    }
+
+    @PatchMapping("/{id}/inativar")
+    @Operation(summary = "Inativar notificação", description = "Inativa uma notificação no sistema alterando seu status")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "204", description = "Notificação inativada com sucesso"),
+        @ApiResponse(responseCode = "404", description = "Notificação não encontrada"),
+        @ApiResponse(responseCode = "400", description = "Notificação já está inativa"),
+        @ApiResponse(responseCode = "403", description = "Acesso negado")
+    })
+    public ResponseEntity<Void> inativar(@PathVariable UUID id) {
+        log.debug("REQUEST PATCH /v1/notificacoes/{}/inativar", id);
+        try {
+            service.inativar(id);
+            log.info("Notificação inativada com sucesso. ID: {}", id);
+            return ResponseEntity.noContent().build();
+        } catch (NotFoundException ex) {
+            log.warn("Notificação não encontrada para inativação — ID: {}, mensagem: {}", id, ex.getMessage());
+            throw ex;
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao inativar notificação — ID: {}", id, ex);
+            throw ex;
+        }
     }
 }
 

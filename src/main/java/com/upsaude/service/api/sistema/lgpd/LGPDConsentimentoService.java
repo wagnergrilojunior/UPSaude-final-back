@@ -20,4 +20,6 @@ public interface LGPDConsentimentoService {
     LGPDConsentimentoResponse atualizar(UUID id, LGPDConsentimentoRequest request);
 
     void excluir(UUID id);
+
+    void inativar(UUID id);
 }

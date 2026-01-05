@@ -18,4 +18,6 @@ public interface DeficienciasService {
     DeficienciasResponse atualizar(UUID id, DeficienciasRequest request);
 
     void excluir(UUID id);
+
+    void inativar(UUID id);
 }

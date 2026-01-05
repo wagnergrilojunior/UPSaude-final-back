@@ -15,5 +15,10 @@ public class EstadosDomainService {
             throw new BadRequestException("Estado já está inativo");
         }
     }
+
+    public void validarPodeDeletar(Estados entity) {
+        log.debug("Validando se estado pode ser deletado. ID: {}", entity.getId());
+        // Adicione aqui qualquer lógica de validação antes de um hard delete.
+    }
 }
 

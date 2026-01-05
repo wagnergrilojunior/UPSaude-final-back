@@ -6,7 +6,10 @@ import com.upsaude.cache.CacheKeyUtil;
 import com.upsaude.entity.estabelecimento.ConfiguracaoEstabelecimento;
 import com.upsaude.entity.sistema.multitenancy.Tenant;
 import com.upsaude.exception.BadRequestException;
+import com.upsaude.exception.InternalServerErrorException;
+import com.upsaude.exception.NotFoundException;
 import com.upsaude.repository.estabelecimento.ConfiguracaoEstabelecimentoRepository;
+import org.springframework.dao.DataAccessException;
 import com.upsaude.service.api.estabelecimento.ConfiguracaoEstabelecimentoService;
 import com.upsaude.service.api.sistema.multitenancy.TenantService;
 import com.upsaude.service.api.support.configuracaoestabelecimento.ConfiguracaoEstabelecimentoCreator;
@@ -120,8 +123,37 @@ public class ConfiguracaoEstabelecimentoServiceImpl implements ConfiguracaoEstab
     @Transactional
     @CacheEvict(cacheNames = CacheKeyUtil.CACHE_CONFIGURACOES_ESTABELECIMENTO, keyGenerator = "configuracaoEstabelecimentoCacheKeyGenerator", beforeInvocation = false)
     public void excluir(UUID id) {
-        UUID tenantId = tenantService.validarTenantAtual();
-        inativarInternal(id, tenantId);
+        log.debug("Excluindo configuração do estabelecimento permanentemente. ID: {}", id);
+        try {
+            UUID tenantId = tenantService.validarTenantAtual();
+            ConfiguracaoEstabelecimento entity = tenantEnforcer.validarAcesso(id, tenantId);
+            domainService.validarPodeDeletar(entity);
+            repository.delete(Objects.requireNonNull(entity));
+            log.info("Configuração do estabelecimento excluída permanentemente com sucesso. ID: {}", id);
+        } catch (BadRequestException | NotFoundException e) {
+            log.warn("Erro de validação ao excluir ConfiguracaoEstabelecimento. Erro: {}", e.getMessage());
+            throw e;
+        } catch (DataAccessException e) {
+            log.error("Erro de acesso a dados ao excluir ConfiguracaoEstabelecimento. Exception: {}", e.getClass().getSimpleName(), e);
+            throw new InternalServerErrorException("Erro ao excluir ConfiguracaoEstabelecimento", e);
+        }
+    }
+
+    @Override
+    @Transactional
+    @CacheEvict(cacheNames = CacheKeyUtil.CACHE_CONFIGURACOES_ESTABELECIMENTO, keyGenerator = "configuracaoEstabelecimentoCacheKeyGenerator", beforeInvocation = false)
+    public void inativar(UUID id) {
+        log.debug("Inativando configuração do estabelecimento. ID: {}", id);
+        try {
+            UUID tenantId = tenantService.validarTenantAtual();
+            inativarInternal(id, tenantId);
+        } catch (BadRequestException | NotFoundException e) {
+            log.warn("Erro de validação ao inativar ConfiguracaoEstabelecimento. Erro: {}", e.getMessage());
+            throw e;
+        } catch (DataAccessException e) {
+            log.error("Erro de acesso a dados ao inativar ConfiguracaoEstabelecimento. Exception: {}", e.getClass().getSimpleName(), e);
+            throw new InternalServerErrorException("Erro ao inativar ConfiguracaoEstabelecimento", e);
+        }
     }
 
     private void inativarInternal(UUID id, UUID tenantId) {
@@ -133,6 +165,7 @@ public class ConfiguracaoEstabelecimentoServiceImpl implements ConfiguracaoEstab
         domainService.validarPodeInativar(entity);
         entity.setActive(false);
         repository.save(Objects.requireNonNull(entity));
+        log.info("Configuração do estabelecimento inativada com sucesso. ID: {}", id);
     }
 
     private void validarTenantAutenticadoOrThrow(UUID tenantId, Tenant tenant) {

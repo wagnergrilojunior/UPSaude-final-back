@@ -152,7 +152,7 @@ public class CidadesController {
     }
 
     @DeleteMapping("/{id}")
-    @Operation(summary = "Excluir cidade", description = "Exclui (desativa) uma cidade do sistema")
+    @Operation(summary = "Excluir cidade", description = "Exclui permanentemente uma cidade do sistema")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "204", description = "Cidade excluída com sucesso"),
             @ApiResponse(responseCode = "404", description = "Cidade não encontrada"),
@@ -164,13 +164,38 @@ public class CidadesController {
         log.debug("REQUEST DELETE /v1/cidades/{}", id);
         try {
             cidadesService.excluir(id);
-            log.info("Cidade excluída com sucesso. ID: {}", id);
+            log.info("Cidade excluída permanentemente com sucesso. ID: {}", id);
             return ResponseEntity.noContent().build();
         } catch (NotFoundException ex) {
             log.warn("Cidade não encontrada para exclusão — ID: {}, mensagem: {}", id, ex.getMessage());
             throw ex;
         } catch (Exception ex) {
             log.error("Erro inesperado ao excluir cidade — ID: {}", id, ex);
+            throw ex;
+        }
+    }
+
+    @PatchMapping("/{id}/inativar")
+    @Operation(summary = "Inativar cidade", description = "Inativa uma cidade do sistema alterando seu status")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "204", description = "Cidade inativada com sucesso"),
+            @ApiResponse(responseCode = "404", description = "Cidade não encontrada"),
+            @ApiResponse(responseCode = "400", description = "Cidade já está inativa"),
+            @ApiResponse(responseCode = "403", description = "Acesso negado")
+    })
+    public ResponseEntity<Void> inativar(
+            @Parameter(description = "ID da cidade", required = true)
+            @PathVariable UUID id) {
+        log.debug("REQUEST PATCH /v1/cidades/{}/inativar", id);
+        try {
+            cidadesService.inativar(id);
+            log.info("Cidade inativada com sucesso. ID: {}", id);
+            return ResponseEntity.noContent().build();
+        } catch (NotFoundException ex) {
+            log.warn("Cidade não encontrada para inativação — ID: {}, mensagem: {}", id, ex.getMessage());
+            throw ex;
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao inativar cidade — ID: {}", id, ex);
             throw ex;
         }
     }

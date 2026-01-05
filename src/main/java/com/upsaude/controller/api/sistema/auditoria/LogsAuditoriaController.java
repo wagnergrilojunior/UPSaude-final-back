@@ -127,7 +127,7 @@ public class LogsAuditoriaController {
     }
 
     @DeleteMapping("/{id}")
-    @Operation(summary = "Excluir log de auditoria", description = "Exclui (desativa) um log de auditoria do sistema")
+    @Operation(summary = "Excluir log de auditoria", description = "Exclui permanentemente um log de auditoria do sistema")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "204", description = "Log de auditoria excluído com sucesso"),
             @ApiResponse(responseCode = "404", description = "Log de auditoria não encontrado"),
@@ -139,13 +139,38 @@ public class LogsAuditoriaController {
         log.debug("REQUEST DELETE /v1/logs-auditoria/{}", id);
         try {
             logsAuditoriaService.excluir(id);
-            log.info("Log de auditoria excluído com sucesso. ID: {}", id);
+            log.info("Log de auditoria excluído permanentemente com sucesso. ID: {}", id);
             return ResponseEntity.noContent().build();
         } catch (NotFoundException ex) {
             log.warn("Falha ao excluir log de auditoria — ID: {}, mensagem: {}", id, ex.getMessage());
             throw ex;
         } catch (Exception ex) {
             log.error("Erro inesperado ao excluir log de auditoria — ID: {}", id, ex);
+            throw ex;
+        }
+    }
+
+    @PatchMapping("/{id}/inativar")
+    @Operation(summary = "Inativar log de auditoria", description = "Inativa um log de auditoria do sistema alterando seu status")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "204", description = "Log de auditoria inativado com sucesso"),
+            @ApiResponse(responseCode = "404", description = "Log de auditoria não encontrado"),
+            @ApiResponse(responseCode = "400", description = "Log de auditoria já está inativo"),
+            @ApiResponse(responseCode = "403", description = "Acesso negado")
+    })
+    public ResponseEntity<Void> inativar(
+            @Parameter(description = "ID do log de auditoria", required = true)
+            @PathVariable UUID id) {
+        log.debug("REQUEST PATCH /v1/logs-auditoria/{}/inativar", id);
+        try {
+            logsAuditoriaService.inativar(id);
+            log.info("Log de auditoria inativado com sucesso. ID: {}", id);
+            return ResponseEntity.noContent().build();
+        } catch (NotFoundException ex) {
+            log.warn("Log de auditoria não encontrado para inativação — ID: {}, mensagem: {}", id, ex.getMessage());
+            throw ex;
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao inativar log de auditoria — ID: {}", id, ex);
             throw ex;
         }
     }

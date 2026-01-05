@@ -15,5 +15,10 @@ public class DeficienciasDomainService {
             throw new BadRequestException("Deficiência já está inativa");
         }
     }
+
+    public void validarPodeDeletar(Deficiencias entity) {
+        // Validações adicionais podem ser adicionadas aqui se necessário
+        // Por exemplo, verificar se há registros relacionados que impedem a exclusão
+    }
 }
 

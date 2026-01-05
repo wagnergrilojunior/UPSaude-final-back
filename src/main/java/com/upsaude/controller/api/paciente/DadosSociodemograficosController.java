@@ -156,7 +156,7 @@ public class DadosSociodemograficosController {
     }
 
     @DeleteMapping("/{id}")
-    @Operation(summary = "Excluir dados sociodemográficos", description = "Exclui (desativa) dados sociodemográficos")
+    @Operation(summary = "Excluir dados sociodemográficos", description = "Exclui permanentemente dados sociodemográficos do sistema")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "204", description = "Dados excluídos com sucesso"),
             @ApiResponse(responseCode = "404", description = "Dados não encontrados"),
@@ -168,13 +168,39 @@ public class DadosSociodemograficosController {
         log.debug("REQUEST DELETE /v1/dados-sociodemograficos/{}", id);
         try {
             service.excluir(id);
-            log.info("Dados sociodemográficos excluídos com sucesso. ID: {}", id);
+            log.info("Dados sociodemográficos excluídos permanentemente com sucesso. ID: {}", id);
             return ResponseEntity.noContent().build();
         } catch (NotFoundException ex) {
             log.warn("Falha ao excluir dados sociodemográficos — ID: {}, mensagem: {}", id, ex.getMessage());
             throw ex;
         } catch (Exception ex) {
             log.error("Erro inesperado ao excluir dados sociodemográficos — Path: /v1/dados-sociodemograficos/{}, Method: DELETE, ID: {}, Exception: {}",
+                id.toString(), id, ex.getClass().getName(), ex);
+            throw ex;
+        }
+    }
+
+    @PatchMapping("/{id}/inativar")
+    @Operation(summary = "Inativar dados sociodemográficos", description = "Inativa dados sociodemográficos do sistema alterando seu status")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "204", description = "Dados inativados com sucesso"),
+            @ApiResponse(responseCode = "404", description = "Dados não encontrados"),
+            @ApiResponse(responseCode = "400", description = "Dados já estão inativos"),
+            @ApiResponse(responseCode = "403", description = "Acesso negado")
+    })
+    public ResponseEntity<Void> inativar(
+            @Parameter(description = "ID dos dados sociodemográficos", required = true)
+            @PathVariable UUID id) {
+        log.debug("REQUEST PATCH /v1/dados-sociodemograficos/{}/inativar", id);
+        try {
+            service.inativar(id);
+            log.info("Dados sociodemográficos inativados com sucesso. ID: {}", id);
+            return ResponseEntity.noContent().build();
+        } catch (NotFoundException ex) {
+            log.warn("Dados sociodemográficos não encontrados para inativação — ID: {}, mensagem: {}", id, ex.getMessage());
+            throw ex;
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao inativar dados sociodemográficos — Path: /v1/dados-sociodemograficos/{}/inativar, Method: PATCH, ID: {}, Exception: {}",
                 id.toString(), id, ex.getClass().getName(), ex);
             throw ex;
         }

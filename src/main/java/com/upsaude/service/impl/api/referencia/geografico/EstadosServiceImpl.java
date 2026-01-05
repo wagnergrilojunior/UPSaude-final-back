@@ -154,10 +154,19 @@ public class EstadosServiceImpl implements EstadosService {
     @Transactional
     @CacheEvict(cacheNames = CacheKeyUtil.CACHE_ESTADOS, keyGenerator = "estadosCacheKeyGenerator", beforeInvocation = false)
     public void excluir(UUID id) {
-        log.debug("Excluindo estado. ID: {}", id);
-
+        log.debug("Excluindo estado permanentemente. ID: {}", id);
         try {
-            inativarInternal(id);
+            if (id == null) {
+                log.warn("ID nulo recebido para exclusão de estado");
+                throw new BadRequestException("ID do estado é obrigatório");
+            }
+
+            Estados entity = estadosRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Estado não encontrado com ID: " + id));
+
+            domainService.validarPodeDeletar(entity);
+            estadosRepository.delete(Objects.requireNonNull(entity));
+            log.info("Estado excluído permanentemente com sucesso. ID: {}", id);
         } catch (NotFoundException e) {
             log.warn("Tentativa de excluir estado não existente. ID: {}", id);
             throw e;
@@ -173,9 +182,31 @@ public class EstadosServiceImpl implements EstadosService {
         }
     }
 
+    @Override
+    @Transactional
+    @CacheEvict(cacheNames = CacheKeyUtil.CACHE_ESTADOS, keyGenerator = "estadosCacheKeyGenerator", beforeInvocation = false)
+    public void inativar(UUID id) {
+        log.debug("Inativando estado. ID: {}", id);
+        try {
+            inativarInternal(id);
+        } catch (NotFoundException e) {
+            log.warn("Tentativa de inativar estado não existente. ID: {}", id);
+            throw e;
+        } catch (BadRequestException e) {
+            log.warn("Erro de validação ao inativar estado. ID: {}. Erro: {}", id, e.getMessage());
+            throw e;
+        } catch (DataAccessException e) {
+            log.error("Erro de acesso a dados ao inativar estado. ID: {}", id, e);
+            throw new InternalServerErrorException("Erro ao inativar estado", e);
+        } catch (RuntimeException e) {
+            log.error("Erro inesperado ao inativar estado. ID: {}", id, e);
+            throw e;
+        }
+    }
+
     private void inativarInternal(UUID id) {
         if (id == null) {
-            log.warn("ID nulo recebido para exclusão de estado");
+            log.warn("ID nulo recebido para inativação de estado");
             throw new BadRequestException("ID do estado é obrigatório");
         }
 
@@ -185,7 +216,7 @@ public class EstadosServiceImpl implements EstadosService {
         domainService.validarPodeInativar(entity);
         entity.setActive(false);
         estadosRepository.save(Objects.requireNonNull(entity));
-        log.info("Estado excluído (desativado) com sucesso. ID: {}", id);
+        log.info("Estado inativado com sucesso. ID: {}", id);
     }
 
 }

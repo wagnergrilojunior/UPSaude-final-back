@@ -20,4 +20,6 @@ public interface IntegracaoGovService {
     IntegracaoGovResponse atualizar(UUID id, IntegracaoGovRequest request);
 
     void excluir(UUID id);
+
+    void inativar(UUID id);
 }

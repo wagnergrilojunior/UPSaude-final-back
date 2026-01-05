@@ -24,4 +24,6 @@ public interface AtendimentoService {
     AtendimentoResponse atualizar(UUID id, AtendimentoRequest request);
 
     void excluir(UUID id);
+
+    void inativar(UUID id);
 }

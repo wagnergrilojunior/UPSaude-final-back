@@ -20,5 +20,7 @@ public interface TemplateNotificacaoService {
     TemplateNotificacaoResponse atualizar(UUID id, TemplateNotificacaoRequest request);
 
     void excluir(UUID id);
+
+    void inativar(UUID id);
 }
 

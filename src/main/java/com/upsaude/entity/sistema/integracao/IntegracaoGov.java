@@ -1,9 +1,8 @@
 package com.upsaude.entity.sistema.integracao;
 
 import com.upsaude.entity.BaseEntity;
-
+import com.upsaude.entity.farmacia.Farmacia;
 import com.upsaude.entity.paciente.Paciente;
-
 import com.upsaude.enums.SistemaIntegracaoEnum;
 import com.upsaude.enums.StatusSincronizacaoEnum;
 import com.upsaude.enums.TipoCnsEnum;
@@ -26,6 +25,7 @@ import java.util.UUID;
 @Entity
 @Table(name = "paciente_integracao_gov", schema = "public", indexes = {
         @Index(name = "idx_paciente_integracao_gov_paciente", columnList = "paciente_id"),
+        @Index(name = "idx_paciente_integracao_gov_farmacia", columnList = "farmacia_id"),
         @Index(name = "idx_paciente_integracao_gov_uuid_rnds", columnList = "uuid_rnds"),
         @Index(name = "idx_paciente_integracao_gov_id_integracao", columnList = "id_integracao_gov"),
         @Index(name = "idx_paciente_integracao_gov_sistema", columnList = "sistema"),
@@ -42,6 +42,10 @@ public class IntegracaoGov extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "paciente_id", nullable = false)
     private Paciente paciente;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "farmacia_id")
+    private Farmacia farmacia;
 
     @Convert(converter = SistemaIntegracaoEnumConverter.class)
     @Column(name = "sistema")

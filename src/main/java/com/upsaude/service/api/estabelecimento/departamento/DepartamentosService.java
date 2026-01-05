@@ -18,4 +18,6 @@ public interface DepartamentosService {
     DepartamentosResponse atualizar(UUID id, DepartamentosRequest request);
 
     void excluir(UUID id);
+
+    void inativar(UUID id);
 }

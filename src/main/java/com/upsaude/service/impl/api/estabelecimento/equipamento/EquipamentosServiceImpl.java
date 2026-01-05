@@ -20,7 +20,9 @@ import com.upsaude.entity.estabelecimento.equipamento.Equipamentos;
 import com.upsaude.entity.sistema.multitenancy.Tenant;
 import com.upsaude.exception.BadRequestException;
 import com.upsaude.exception.InternalServerErrorException;
+import com.upsaude.exception.NotFoundException;
 import com.upsaude.repository.estabelecimento.equipamento.EquipamentosRepository;
+import org.springframework.dao.DataAccessException;
 import com.upsaude.service.api.estabelecimento.equipamento.EquipamentosService;
 import com.upsaude.service.api.sistema.multitenancy.TenantService;
 import com.upsaude.service.api.support.equipamentos.EquipamentosCreator;
@@ -119,9 +121,48 @@ public class EquipamentosServiceImpl implements EquipamentosService {
     @Transactional
     @CacheEvict(cacheNames = CacheKeyUtil.CACHE_EQUIPAMENTOS, keyGenerator = "equipamentosCacheKeyGenerator", beforeInvocation = false)
     public void excluir(UUID id) {
-        log.debug("Excluindo equipamento. ID: {}", id);
-        UUID tenantId = tenantService.validarTenantAtual();
-        inativarInternal(id, tenantId);
+        log.debug("Excluindo equipamento permanentemente. ID: {}", id);
+        try {
+            UUID tenantId = tenantService.validarTenantAtual();
+            Equipamentos entity = tenantEnforcer.validarAcesso(id, tenantId);
+            repository.delete(Objects.requireNonNull(entity));
+            log.info("Equipamento excluído permanentemente com sucesso. ID: {}", id);
+        } catch (NotFoundException e) {
+            log.warn("Tentativa de excluir equipamento não existente. ID: {}", id);
+            throw e;
+        } catch (BadRequestException e) {
+            log.warn("Erro de validação ao excluir equipamento. ID: {}. Erro: {}", id, e.getMessage());
+            throw e;
+        } catch (DataAccessException e) {
+            log.error("Erro de acesso a dados ao excluir equipamento. ID: {}", id, e);
+            throw new InternalServerErrorException("Erro ao excluir equipamento", e);
+        } catch (Exception e) {
+            log.error("Erro inesperado ao excluir equipamento. ID: {}", id, e);
+            throw e;
+        }
+    }
+
+    @Override
+    @Transactional
+    @CacheEvict(cacheNames = CacheKeyUtil.CACHE_EQUIPAMENTOS, keyGenerator = "equipamentosCacheKeyGenerator", beforeInvocation = false)
+    public void inativar(UUID id) {
+        log.debug("Inativando equipamento. ID: {}", id);
+        try {
+            UUID tenantId = tenantService.validarTenantAtual();
+            inativarInternal(id, tenantId);
+        } catch (NotFoundException e) {
+            log.warn("Tentativa de inativar equipamento não existente. ID: {}", id);
+            throw e;
+        } catch (BadRequestException e) {
+            log.warn("Erro de validação ao inativar equipamento. ID: {}. Erro: {}", id, e.getMessage());
+            throw e;
+        } catch (DataAccessException e) {
+            log.error("Erro de acesso a dados ao inativar equipamento. ID: {}", id, e);
+            throw new InternalServerErrorException("Erro ao inativar equipamento", e);
+        } catch (Exception e) {
+            log.error("Erro inesperado ao inativar equipamento. ID: {}", id, e);
+            throw e;
+        }
     }
 
     private void inativarInternal(UUID id, UUID tenantId) {
@@ -132,7 +173,7 @@ public class EquipamentosServiceImpl implements EquipamentosService {
         Equipamentos entity = tenantEnforcer.validarAcesso(id, tenantId);
         entity.setActive(false);
         repository.save(Objects.requireNonNull(entity));
-        log.info("Equipamento excluído (desativado) com sucesso. ID: {}", id);
+        log.info("Equipamento inativado com sucesso. ID: {}", id);
     }
 
     private void validarTenantAutenticadoOrThrow(UUID tenantId, Tenant tenant) {

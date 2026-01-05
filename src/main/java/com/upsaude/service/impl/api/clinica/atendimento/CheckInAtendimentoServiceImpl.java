@@ -23,10 +23,14 @@ import com.upsaude.repository.clinica.atendimento.CheckInAtendimentoRepository;
 import com.upsaude.service.api.clinica.atendimento.CheckInAtendimentoService;
 import com.upsaude.service.api.sistema.multitenancy.TenantService;
 import com.upsaude.service.api.support.checkinatendimento.CheckInAtendimentoCreator;
+import com.upsaude.service.api.support.checkinatendimento.CheckInAtendimentoDomainService;
 import com.upsaude.service.api.support.checkinatendimento.CheckInAtendimentoResponseBuilder;
 import com.upsaude.service.api.support.checkinatendimento.CheckInAtendimentoTenantEnforcer;
 import com.upsaude.service.api.support.checkinatendimento.CheckInAtendimentoUpdater;
 import com.upsaude.service.api.support.checkinatendimento.CheckInAtendimentoValidationService;
+import com.upsaude.exception.InternalServerErrorException;
+import com.upsaude.exception.NotFoundException;
+import org.springframework.dao.DataAccessException;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -45,6 +49,7 @@ public class CheckInAtendimentoServiceImpl implements CheckInAtendimentoService 
     private final CheckInAtendimentoCreator creator;
     private final CheckInAtendimentoUpdater updater;
     private final CheckInAtendimentoResponseBuilder responseBuilder;
+    private final CheckInAtendimentoDomainService domainService;
 
     @Override
     @Transactional
@@ -99,20 +104,46 @@ public class CheckInAtendimentoServiceImpl implements CheckInAtendimentoService 
     @Transactional
     @CacheEvict(cacheNames = CacheKeyUtil.CACHE_CHECKIN_ATENDIMENTO, keyGenerator = "checkInAtendimentoCacheKeyGenerator", beforeInvocation = false)
     public void excluir(UUID id) {
+        log.debug("Excluindo check-in permanentemente. ID: {}", id);
         validationService.validarId(id);
-        UUID tenantId = tenantService.validarTenantAtual();
-        inativarInternal(id, tenantId);
+        try {
+            UUID tenantId = tenantService.validarTenantAtual();
+            CheckInAtendimento entity = tenantEnforcer.validarAcesso(id, tenantId);
+            domainService.validarPodeDeletar(entity);
+            repository.delete(Objects.requireNonNull(entity));
+            log.info("Check-in excluído permanentemente com sucesso. ID: {}, tenant: {}", id, tenantId);
+        } catch (BadRequestException | NotFoundException e) {
+            log.warn("Erro de validação ao excluir CheckInAtendimento. Erro: {}", e.getMessage());
+            throw e;
+        } catch (DataAccessException e) {
+            log.error("Erro de acesso a dados ao excluir CheckInAtendimento. Exception: {}", e.getClass().getSimpleName(), e);
+            throw new InternalServerErrorException("Erro ao excluir CheckInAtendimento", e);
+        }
+    }
+
+    @Override
+    @Transactional
+    @CacheEvict(cacheNames = CacheKeyUtil.CACHE_CHECKIN_ATENDIMENTO, keyGenerator = "checkInAtendimentoCacheKeyGenerator", beforeInvocation = false)
+    public void inativar(UUID id) {
+        log.debug("Inativando check-in. ID: {}", id);
+        validationService.validarId(id);
+        try {
+            UUID tenantId = tenantService.validarTenantAtual();
+            inativarInternal(id, tenantId);
+        } catch (BadRequestException | NotFoundException e) {
+            log.warn("Erro de validação ao inativar CheckInAtendimento. Erro: {}", e.getMessage());
+            throw e;
+        } catch (DataAccessException e) {
+            log.error("Erro de acesso a dados ao inativar CheckInAtendimento. Exception: {}", e.getClass().getSimpleName(), e);
+            throw new InternalServerErrorException("Erro ao inativar CheckInAtendimento", e);
+        }
     }
 
     private void inativarInternal(UUID id, UUID tenantId) {
         CheckInAtendimento entity = tenantEnforcer.validarAcesso(id, tenantId);
-
-        if (Boolean.FALSE.equals(entity.getActive())) {
-            throw new BadRequestException("Check-in já está inativo");
-        }
-
+        domainService.validarPodeInativar(entity);
         entity.setActive(false);
         repository.save(entity);
-        log.info("Check-in excluído (desativado) com sucesso. ID: {}, tenant: {}", id, tenantId);
+        log.info("Check-in inativado com sucesso. ID: {}, tenant: {}", id, tenantId);
     }
 }

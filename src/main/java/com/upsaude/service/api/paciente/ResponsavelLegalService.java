@@ -20,4 +20,6 @@ public interface ResponsavelLegalService {
     ResponsavelLegalResponse atualizar(UUID id, ResponsavelLegalRequest request);
 
     void excluir(UUID id);
+
+    void inativar(UUID id);
 }

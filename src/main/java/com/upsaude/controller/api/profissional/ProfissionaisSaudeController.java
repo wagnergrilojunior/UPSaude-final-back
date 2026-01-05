@@ -127,7 +127,7 @@ public class ProfissionaisSaudeController {
     }
 
     @DeleteMapping("/{id}")
-    @Operation(summary = "Excluir profissional de saúde", description = "Exclui (inativa) um profissional de saúde do sistema")
+    @Operation(summary = "Excluir profissional de saúde", description = "Remove permanentemente um profissional de saúde do banco de dados")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "204", description = "Profissional de saúde excluído com sucesso"),
             @ApiResponse(responseCode = "404", description = "Profissional de saúde não encontrado"),
@@ -139,7 +139,7 @@ public class ProfissionaisSaudeController {
         log.debug("REQUEST DELETE /v1/profissionais-saude/{}", id);
         try {
             profissionaisSaudeService.excluir(id);
-            log.info("Profissional de saúde excluído com sucesso. ID: {}", id);
+            log.info("Profissional de saúde excluído permanentemente com sucesso. ID: {}", id);
             return ResponseEntity.noContent().build();
         } catch (NotFoundException ex) {
             log.warn("Profissional de saúde não encontrado para exclusão — ID: {}, mensagem: {}", id, ex.getMessage());
@@ -151,7 +151,7 @@ public class ProfissionaisSaudeController {
     }
 
     @PatchMapping("/{id}/inativar")
-    @Operation(summary = "Inativar profissional de saúde", description = "Inativa um profissional de saúde no sistema (soft delete)")
+    @Operation(summary = "Inativar profissional de saúde", description = "Inativa um profissional de saúde no sistema alterando seu status")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "204", description = "Profissional de saúde inativado com sucesso"),
             @ApiResponse(responseCode = "404", description = "Profissional de saúde não encontrado"),
@@ -171,30 +171,6 @@ public class ProfissionaisSaudeController {
             throw ex;
         } catch (Exception ex) {
             log.error("Erro inesperado ao inativar profissional de saúde — ID: {}", id, ex);
-            throw ex;
-        }
-    }
-
-    @DeleteMapping("/{id}/permanente")
-    @Operation(summary = "Deletar profissional de saúde permanentemente", description = "Remove permanentemente um profissional de saúde do banco de dados (hard delete)")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "204", description = "Profissional de saúde deletado permanentemente com sucesso"),
-            @ApiResponse(responseCode = "404", description = "Profissional de saúde não encontrado"),
-            @ApiResponse(responseCode = "403", description = "Acesso negado")
-    })
-    public ResponseEntity<Void> deletarPermanentemente(
-            @Parameter(description = "ID do profissional de saúde", required = true)
-            @PathVariable UUID id) {
-        log.debug("REQUEST DELETE /v1/profissionais-saude/{}/permanente", id);
-        try {
-            profissionaisSaudeService.deletarPermanentemente(id);
-            log.info("Profissional de saúde deletado permanentemente com sucesso. ID: {}", id);
-            return ResponseEntity.noContent().build();
-        } catch (NotFoundException ex) {
-            log.warn("Profissional de saúde não encontrado para exclusão permanente — ID: {}, mensagem: {}", id, ex.getMessage());
-            throw ex;
-        } catch (Exception ex) {
-            log.error("Erro inesperado ao deletar profissional de saúde permanentemente — ID: {}", id, ex);
             throw ex;
         }
     }

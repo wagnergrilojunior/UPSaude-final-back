@@ -23,8 +23,6 @@ public interface MedicosService {
 
     void inativar(UUID id);
 
-    void deletarPermanentemente(UUID id);
-
     // Especialidades
     List<EspecialidadeResponse> listarEspecialidades(UUID medicoId);
     
