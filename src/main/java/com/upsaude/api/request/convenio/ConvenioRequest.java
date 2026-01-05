@@ -43,7 +43,7 @@ public class ConvenioRequest {
     @JsonDeserialize(using = TipoConvenioEnumDeserializer.class)
     private TipoConvenioEnum tipo;
 
-    @NotNull(message = "Modalidade de convênio é obrigatória")
+    // Modalidade é opcional (nullable na Entity) - removido @NotNull para manter consistência
     @JsonDeserialize(using = ModalidadeConvenioEnumDeserializer.class)
     private ModalidadeConvenioEnum modalidade;
 
@@ -52,4 +52,9 @@ public class ConvenioRequest {
     private LocalDate dataCadastro;
     private Boolean redeCredenciadaNacional;
     private Boolean redeCredenciadaRegional;
+    private Boolean coberturaObstetricia;
+    private Boolean habilitadoTiss;
+    private Boolean sincronizarAns;
+    private Boolean sincronizarSus;
+    private Boolean sincronizarTiss;
 }

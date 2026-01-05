@@ -19,6 +19,7 @@ import com.upsaude.cache.CacheKeyUtil;
 import com.upsaude.entity.convenio.Convenio;
 import com.upsaude.entity.sistema.multitenancy.Tenant;
 import com.upsaude.exception.BadRequestException;
+import com.upsaude.exception.ConflictException;
 import com.upsaude.exception.InternalServerErrorException;
 import com.upsaude.exception.NotFoundException;
 import com.upsaude.repository.convenio.ConvenioRepository;
@@ -69,7 +70,7 @@ public class ConvenioServiceImpl implements ConvenioService {
             }
 
             return response;
-        } catch (BadRequestException e) {
+        } catch (BadRequestException | ConflictException e) {
             throw e;
         } catch (Exception e) {
             throw new InternalServerErrorException("Erro ao criar convênio", e);
@@ -81,9 +82,7 @@ public class ConvenioServiceImpl implements ConvenioService {
     @Cacheable(cacheNames = CacheKeyUtil.CACHE_CONVENIOS, keyGenerator = "convenioCacheKeyGenerator")
     public ConvenioResponse obterPorId(UUID id) {
         log.debug("Buscando convênio por ID: {} (cache miss)", id);
-        if (id == null) {
-            throw new BadRequestException("ID do convênio é obrigatório");
-        }
+        // Validação de ID nulo removida - Spring valida automaticamente path parameters
 
         UUID tenantId = tenantService.validarTenantAtual();
         Convenio entity = tenantEnforcer.validarAcessoCompleto(id, tenantId);
@@ -106,10 +105,7 @@ public class ConvenioServiceImpl implements ConvenioService {
     @CachePut(cacheNames = CacheKeyUtil.CACHE_CONVENIOS, keyGenerator = "convenioCacheKeyGenerator")
     public ConvenioResponse atualizar(UUID id, ConvenioRequest request) {
         log.debug("Atualizando convênio. ID: {}", id);
-
-        if (id == null) {
-            throw new BadRequestException("ID do convênio é obrigatório");
-        }
+        // Validação de ID nulo removida - Spring valida automaticamente path parameters
 
         UUID tenantId = tenantService.validarTenantAtual();
         Tenant tenant = tenantService.obterTenantDoUsuarioAutenticado();
@@ -157,9 +153,7 @@ public class ConvenioServiceImpl implements ConvenioService {
     }
 
     private void inativarInternal(UUID id, UUID tenantId) {
-        if (id == null) {
-            throw new BadRequestException("ID do convênio é obrigatório");
-        }
+        // Validação de ID nulo removida - Spring valida automaticamente path parameters
 
         Convenio entity = tenantEnforcer.validarAcesso(id, tenantId);
         domainService.validarPodeInativar(entity);

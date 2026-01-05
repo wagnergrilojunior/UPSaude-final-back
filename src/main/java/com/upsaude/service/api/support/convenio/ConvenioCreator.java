@@ -25,11 +25,36 @@ public class ConvenioCreator {
     private final ConvenioRelacionamentosHandler relacionamentosHandler;
 
     public Convenio criar(ConvenioRequest request, UUID tenantId, Tenant tenant) {
-        validationService.validarObrigatorios(request);
         validationService.validarUnicidadeParaCriacao(request, tenantId);
 
         Convenio entity = mapper.fromRequest(request);
         entity.setActive(true);
+        
+        // Inicializar campos obrigatórios com valores padrão se não foram fornecidos
+        if (entity.getCoberturaObstetricia() == null) {
+            entity.setCoberturaObstetricia(false);
+        }
+        if (entity.getHabilitadoTiss() == null) {
+            entity.setHabilitadoTiss(false);
+        }
+        if (entity.getSincronizarAns() == null) {
+            entity.setSincronizarAns(false);
+        }
+        if (entity.getSincronizarSus() == null) {
+            entity.setSincronizarSus(false);
+        }
+        if (entity.getSincronizarTiss() == null) {
+            entity.setSincronizarTiss(false);
+        }
+        if (entity.getRedeCredenciadaNacional() == null) {
+            entity.setRedeCredenciadaNacional(false);
+        }
+        if (entity.getRedeCredenciadaRegional() == null) {
+            entity.setRedeCredenciadaRegional(false);
+        }
+        if (entity.getStatus() == null) {
+            entity.setStatus(com.upsaude.enums.StatusAtivoEnum.ATIVO);
+        }
 
         relacionamentosHandler.resolver(entity, request, tenantId, tenant);
 

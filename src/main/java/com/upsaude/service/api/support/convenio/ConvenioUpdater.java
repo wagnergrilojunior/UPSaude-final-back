@@ -26,7 +26,6 @@ public class ConvenioUpdater {
     private final ConvenioRelacionamentosHandler relacionamentosHandler;
 
     public Convenio atualizar(UUID id, ConvenioRequest request, UUID tenantId, Tenant tenant) {
-        validationService.validarObrigatorios(request);
         validationService.validarUnicidadeParaAtualizacao(id, request, tenantId);
 
         Convenio entity = tenantEnforcer.validarAcesso(id, tenantId);
