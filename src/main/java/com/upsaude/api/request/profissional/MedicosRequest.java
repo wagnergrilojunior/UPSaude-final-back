@@ -51,5 +51,11 @@ public class MedicosRequest {
 
     private UUID enderecoMedico;
 
+    @Schema(description = "ID do estabelecimento para vincular o médico no cadastro inicial")
+    private UUID estabelecimentoId;
+
+    @Schema(description = "Tipo de vínculo profissional (1=EFETIVO, 2=CONTRATO, 3=TEMPORARIO, etc.). Padrão: 1 (EFETIVO)")
+    private Integer tipoVinculo;
+
     private String observacoes;
 }

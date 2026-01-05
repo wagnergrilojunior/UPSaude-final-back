@@ -1,5 +1,6 @@
 package com.upsaude.api.request.embeddable;
 
+import com.upsaude.validation.annotation.CelularValido;
 import com.upsaude.validation.annotation.EmailValido;
 import com.upsaude.validation.annotation.SiteValido;
 import com.upsaude.validation.annotation.TelefoneValido;
@@ -21,7 +22,7 @@ public class ContatoMedicoRequest {
     @TelefoneValido
     private String telefone;
 
-    @TelefoneValido
+    @CelularValido
     private String celular;
 
     @EmailValido

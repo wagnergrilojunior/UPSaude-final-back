@@ -3,6 +3,7 @@ package com.upsaude.api.request.paciente;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.upsaude.enums.OrigemVinculoTerritorialEnum;
+import com.upsaude.validation.annotation.CNESValido;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -31,6 +32,7 @@ public class PacienteVinculoTerritorialRequest {
     @Size(max = 7, message = "Código IBGE do município deve ter no máximo 7 caracteres")
     private String municipioIbge;
 
+    @CNESValido
     @Size(max = 7, message = "CNES do estabelecimento deve ter no máximo 7 caracteres")
     private String cnesEstabelecimento;
 

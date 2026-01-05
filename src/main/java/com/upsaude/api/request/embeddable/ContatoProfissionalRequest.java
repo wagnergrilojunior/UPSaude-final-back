@@ -1,5 +1,6 @@
 package com.upsaude.api.request.embeddable;
 
+import com.upsaude.validation.annotation.CelularValido;
 import com.upsaude.validation.annotation.EmailValido;
 import com.upsaude.validation.annotation.TelefoneValido;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -21,7 +22,7 @@ public class ContatoProfissionalRequest {
     @TelefoneValido
     private String telefone;
 
-    @TelefoneValido
+    @CelularValido
     private String celular;
 
     @EmailValido

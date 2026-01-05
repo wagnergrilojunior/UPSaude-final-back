@@ -5,6 +5,7 @@ import com.upsaude.api.request.embeddable.DadosFiscaisTenantRequest;
 import com.upsaude.api.request.embeddable.DadosIdentificacaoTenantRequest;
 import com.upsaude.api.request.embeddable.InformacoesAdicionaisTenantRequest;
 import com.upsaude.api.request.embeddable.ResponsavelTenantRequest;
+import com.upsaude.validation.annotation.CNESValido;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
@@ -36,6 +37,7 @@ public class TenantRequest {
 
     private Boolean ativo;
 
+    @CNESValido
     @Size(max = 7, message = "CNES deve ter no máximo 7 caracteres")
     private String cnes;
 

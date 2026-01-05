@@ -1,6 +1,7 @@
 package com.upsaude.api.request.sistema.integracao;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.upsaude.validation.annotation.CNESValido;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Size;
 import java.time.LocalDateTime;
@@ -26,6 +27,7 @@ public class IntegracaoGovRequest {
     private LocalDateTime dataSincronizacaoGov;
     private String ineEquipe;
     private String microarea;
+    @CNESValido
     private String cnesEstabelecimentoOrigem;
 
     @Size(max = 30, message = "Origem do cadastro deve ter no máximo 30 caracteres")
