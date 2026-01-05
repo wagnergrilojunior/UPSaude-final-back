@@ -1,17 +1,22 @@
 package com.upsaude.service.api.support.medico;
 
 import com.upsaude.api.request.profissional.MedicosRequest;
+import com.upsaude.entity.estabelecimento.Estabelecimentos;
+import com.upsaude.entity.estabelecimento.MedicoEstabelecimento;
 import com.upsaude.entity.paciente.Endereco;
 import com.upsaude.entity.profissional.Medicos;
 import com.upsaude.entity.referencia.sigtap.SigtapOcupacao;
 import com.upsaude.entity.sistema.multitenancy.Tenant;
+import com.upsaude.enums.TipoVinculoProfissionalEnum;
 import com.upsaude.exception.NotFoundException;
+import com.upsaude.repository.estabelecimento.EstabelecimentosRepository;
 import com.upsaude.repository.paciente.EnderecoRepository;
 import com.upsaude.repository.referencia.sigtap.SigtapCboRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.time.OffsetDateTime;
 import java.util.LinkedHashSet;
 import java.util.Objects;
 import java.util.Set;
@@ -24,6 +29,7 @@ public class MedicoRelacionamentosHandler {
 
     private final SigtapCboRepository cboRepository;
     private final EnderecoRepository enderecoRepository;
+    private final EstabelecimentosRepository estabelecimentosRepository;
 
     public Medicos processarRelacionamentos(Medicos medico, MedicosRequest request, Tenant tenant) {
         log.debug("Processando relacionamentos do médico");
@@ -48,9 +54,47 @@ public class MedicoRelacionamentosHandler {
     }
 
     private void processarEstabelecimentos(Medicos medico, MedicosRequest request, Tenant tenant) {
-        // Estabelecimentos devem ser processados através do endpoint específico de vínculos
-        // (medicosEstabelecimentos) quando enviado separadamente via endpoint específico
-        log.debug("Estabelecimentos devem ser processados através do endpoint específico de vínculos para médico ID: {}", medico.getId());
+        if (request.getEstabelecimentoId() != null) {
+            log.debug("Processando estabelecimento médico. Estabelecimento ID: {}", request.getEstabelecimentoId());
+            
+            Estabelecimentos estabelecimento = estabelecimentosRepository.findByIdAndTenant(
+                    request.getEstabelecimentoId(), 
+                    tenant.getId()
+            ).orElseThrow(() -> new NotFoundException(
+                    "Estabelecimento não encontrado com ID: " + request.getEstabelecimentoId() + " para o tenant"));
+            
+            // Verificar se já existe vínculo (apenas na atualização)
+            boolean jaExiste = medico.getMedicosEstabelecimentos().stream()
+                    .anyMatch(me -> me.getEstabelecimento().getId().equals(request.getEstabelecimentoId()) 
+                            && me.getDataFim() == null);
+            
+            if (!jaExiste) {
+                MedicoEstabelecimento medicoEstabelecimento = new MedicoEstabelecimento();
+                medicoEstabelecimento.setMedico(medico);
+                medicoEstabelecimento.setEstabelecimento(estabelecimento);
+                medicoEstabelecimento.setTenant(tenant);
+                medicoEstabelecimento.setDataInicio(OffsetDateTime.now());
+                medicoEstabelecimento.setActive(true);
+                
+                // Tipo de vínculo: usar o fornecido ou padrão EFETIVO (1)
+                TipoVinculoProfissionalEnum tipoVinculo = request.getTipoVinculo() != null 
+                        ? TipoVinculoProfissionalEnum.fromCodigo(request.getTipoVinculo())
+                        : TipoVinculoProfissionalEnum.EFETIVO;
+                
+                if (tipoVinculo == null) {
+                    throw new IllegalArgumentException("Tipo de vínculo inválido: " + request.getTipoVinculo());
+                }
+                
+                medicoEstabelecimento.setTipoVinculo(tipoVinculo);
+                
+                medico.addMedicoEstabelecimento(medicoEstabelecimento);
+                log.debug("Vínculo com estabelecimento {} criado para o médico", request.getEstabelecimentoId());
+            } else {
+                log.debug("Vínculo com estabelecimento {} já existe. Mantendo vínculo existente.", request.getEstabelecimentoId());
+            }
+        } else {
+            log.debug("Estabelecimento não fornecido. Médico será cadastrado sem vínculo inicial.");
+        }
     }
 
     private void processarEspecialidades(Medicos medico, MedicosRequest request) {

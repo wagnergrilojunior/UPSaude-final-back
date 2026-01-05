@@ -94,8 +94,10 @@ public class PacienteServiceImpl implements PacienteService {
     @Override
     @Transactional(readOnly = true)
     public Page<PacienteResponse> listar(Pageable pageable) {
-        UUID tenantId = tenantService.validarTenantAtual();
-        Page<Paciente> pacientes = pacienteRepository.findAllByTenant(tenantId, pageable);
+        // Paciente estende BaseEntityWithoutTenant, então não tem tenant_id
+        // Usar findAll padrão do JpaRepository
+        UUID tenantId = tenantService.validarTenantAtual(); // Mantido para compatibilidade, mas não usado na query
+        Page<Paciente> pacientes = pacienteRepository.findAll(pageable);
         return pacientes.map(responseBuilder::build);
     }
 

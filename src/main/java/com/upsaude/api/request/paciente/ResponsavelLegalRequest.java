@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.upsaude.enums.TipoResponsavelEnum;
 import com.upsaude.util.converter.TipoResponsavelEnumDeserializer;
+import com.upsaude.validation.annotation.CNSValido;
 import com.upsaude.validation.annotation.CPFValido;
 import com.upsaude.validation.annotation.TelefoneValido;
 import java.util.UUID;
@@ -25,6 +26,7 @@ public class ResponsavelLegalRequest {
     @TelefoneValido
     private String telefone;
     private String rg;
+    @CNSValido
     private String cns;
     @JsonDeserialize(using = TipoResponsavelEnumDeserializer.class)
     private TipoResponsavelEnum tipoResponsavel;

@@ -18,9 +18,9 @@ import java.util.UUID;
 public class PacienteValidationService {
 
     public void validarObrigatorios(PacienteRequest request) {
-        if (request == null || !StringUtils.hasText(request.getNomeCompleto())) {
-            throw new BadRequestException("Nome completo é obrigatório");
-        }
+        // Validações de campos obrigatórios são feitas via Bean Validation na Request
+        // Este método permanece vazio para manter compatibilidade com chamadas existentes
+        // Se request for null, o Spring já retorna 400 antes de chegar aqui
     }
 
     public void validarUnicidadeParaCriacao(PacienteRequest request, 

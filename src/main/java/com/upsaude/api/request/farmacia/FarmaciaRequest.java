@@ -2,8 +2,10 @@ package com.upsaude.api.request.farmacia;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.upsaude.validation.annotation.CNESValido;
+import com.upsaude.validation.annotation.EmailValido;
+import com.upsaude.validation.annotation.TelefoneValido;
 import io.swagger.v3.oas.annotations.media.Schema;
-import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -28,6 +30,7 @@ public class FarmaciaRequest {
     @Size(max = 255, message = "Nome deve ter no máximo 255 caracteres")
     private String nome;
 
+    @CNESValido
     @Size(max = 20, message = "Código CNES deve ter no máximo 20 caracteres")
     private String codigoCnes;
 
@@ -40,10 +43,11 @@ public class FarmaciaRequest {
     @Size(max = 30, message = "CRF do responsável deve ter no máximo 30 caracteres")
     private String crfResponsavel;
 
+    @TelefoneValido
     @Size(max = 20, message = "Telefone deve ter no máximo 20 caracteres")
     private String telefone;
 
-    @Email(message = "Email deve ter um formato válido")
+    @EmailValido
     @Size(max = 150, message = "Email deve ter no máximo 150 caracteres")
     private String email;
 

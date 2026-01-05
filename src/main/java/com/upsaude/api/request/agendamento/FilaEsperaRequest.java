@@ -3,6 +3,8 @@ package com.upsaude.api.request.agendamento;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.upsaude.enums.PrioridadeAtendimentoEnum;
 import com.upsaude.util.converter.PrioridadeAtendimentoEnumDeserializer;
+import com.upsaude.validation.annotation.EmailValido;
+import com.upsaude.validation.annotation.TelefoneValido;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotNull;
 import java.time.LocalDate;
@@ -37,6 +39,8 @@ public class FilaEsperaRequest {
     private OffsetDateTime dataNotificacao;
     private Integer notificacoesEnviadas;
     private Boolean aceitaQualquerHorario;
+    @TelefoneValido
     private String telefoneContato;
+    @EmailValido
     private String emailContato;
 }
