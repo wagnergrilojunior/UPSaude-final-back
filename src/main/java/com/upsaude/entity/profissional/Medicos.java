@@ -66,7 +66,7 @@ public class Medicos extends BaseEntityWithoutEstabelecimento {
     private Endereco enderecoMedico;
 
     @OneToMany(mappedBy = "medico", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
-    private List<MedicoEstabelecimento> medicosEstabelecimentos = new ArrayList<>();
+    private List<MedicoEstabelecimento> estabelecimentos = new ArrayList<>();
 
     @ManyToMany(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinTable(
@@ -106,8 +106,8 @@ public class Medicos extends BaseEntityWithoutEstabelecimento {
             contato = new ContatoMedico();
         }
 
-        if (medicosEstabelecimentos == null) {
-            medicosEstabelecimentos = new ArrayList<>();
+        if (estabelecimentos == null) {
+            estabelecimentos = new ArrayList<>();
         }
         if (especialidades == null) {
             especialidades = new ArrayList<>();
@@ -118,20 +118,20 @@ public class Medicos extends BaseEntityWithoutEstabelecimento {
         if (medicoEstabelecimento == null) {
             return;
         }
-        if (medicosEstabelecimentos == null) {
-            medicosEstabelecimentos = new ArrayList<>();
+        if (estabelecimentos == null) {
+            estabelecimentos = new ArrayList<>();
         }
-        if (!medicosEstabelecimentos.contains(medicoEstabelecimento)) {
-            medicosEstabelecimentos.add(medicoEstabelecimento);
+        if (!estabelecimentos.contains(medicoEstabelecimento)) {
+            estabelecimentos.add(medicoEstabelecimento);
             medicoEstabelecimento.setMedico(this);
         }
     }
 
     public void removeMedicoEstabelecimento(MedicoEstabelecimento medicoEstabelecimento) {
-        if (medicoEstabelecimento == null || medicosEstabelecimentos == null) {
+        if (medicoEstabelecimento == null || estabelecimentos == null) {
             return;
         }
-        if (medicosEstabelecimentos.remove(medicoEstabelecimento)) {
+        if (estabelecimentos.remove(medicoEstabelecimento)) {
             medicoEstabelecimento.setMedico(null);
         }
     }
