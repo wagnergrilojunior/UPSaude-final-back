@@ -34,4 +34,6 @@ public class ConvenioResponse {
     private LocalDate dataCadastro;
     private Boolean redeCredenciadaNacional;
     private Boolean redeCredenciadaRegional;
+    private UUID tenantId;
+    private UUID estabelecimentoId;
 }

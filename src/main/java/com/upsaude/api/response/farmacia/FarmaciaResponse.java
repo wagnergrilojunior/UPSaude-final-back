@@ -1,7 +1,5 @@
 package com.upsaude.api.response.farmacia;
 
-import com.upsaude.api.response.estabelecimento.EstabelecimentosResponse;
-import com.upsaude.api.response.sistema.multitenancy.TenantResponse;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -31,7 +29,7 @@ public class FarmaciaResponse {
     private String email;
     private String observacoes;
     
-    private TenantResponse tenant;
-    private EstabelecimentosResponse estabelecimento;
+    private UUID tenantId;
+    private UUID estabelecimentoId;
 }
 

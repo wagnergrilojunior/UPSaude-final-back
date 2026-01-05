@@ -1,9 +1,7 @@
 package com.upsaude.service.impl.api.farmacia;
 
 import com.upsaude.api.request.farmacia.FarmaciaRequest;
-import com.upsaude.api.response.estabelecimento.EstabelecimentosResponse;
 import com.upsaude.api.response.farmacia.FarmaciaResponse;
-import com.upsaude.api.response.sistema.multitenancy.TenantResponse;
 import com.upsaude.entity.estabelecimento.Estabelecimentos;
 import com.upsaude.entity.farmacia.Farmacia;
 import com.upsaude.entity.sistema.multitenancy.Tenant;
@@ -287,7 +285,17 @@ public class FarmaciaServiceImpl implements FarmaciaService {
             return null;
         }
 
-        FarmaciaResponse.FarmaciaResponseBuilder builder = FarmaciaResponse.builder()
+        UUID tenantId = entity.getTenantId();
+        if (tenantId == null && entity.getTenant() != null) {
+            tenantId = entity.getTenant().getId();
+        }
+
+        UUID estabelecimentoId = entity.getEstabelecimentoId();
+        if (estabelecimentoId == null && entity.getEstabelecimento() != null) {
+            estabelecimentoId = entity.getEstabelecimento().getId();
+        }
+
+        return FarmaciaResponse.builder()
             .id(entity.getId())
             .createdAt(entity.getCreatedAt())
             .updatedAt(entity.getUpdatedAt())
@@ -299,31 +307,10 @@ public class FarmaciaServiceImpl implements FarmaciaService {
             .crfResponsavel(entity.getCrfResponsavel())
             .telefone(entity.getTelefone())
             .email(entity.getEmail())
-            .observacoes(entity.getObservacoes());
-
-        // Mapear tenant (apenas ID por enquanto)
-        if (entity.getTenant() != null) {
-            TenantResponse tenantResponse = TenantResponse.builder()
-                .id(entity.getTenant().getId())
-                .ativo(entity.getTenant().getAtivo())
-                .createdAt(entity.getTenant().getCreatedAt())
-                .updatedAt(entity.getTenant().getUpdatedAt())
-                .build();
-            builder.tenant(tenantResponse);
-        }
-
-        // Mapear estabelecimento
-        if (entity.getEstabelecimento() != null) {
-            EstabelecimentosResponse estabelecimentoResponse = EstabelecimentosResponse.builder()
-                .id(entity.getEstabelecimento().getId())
-                .createdAt(entity.getEstabelecimento().getCreatedAt())
-                .updatedAt(entity.getEstabelecimento().getUpdatedAt())
-                .active(entity.getEstabelecimento().getActive())
-                .build();
-            builder.estabelecimento(estabelecimentoResponse);
-        }
-
-        return builder.build();
+            .observacoes(entity.getObservacoes())
+            .tenantId(tenantId)
+            .estabelecimentoId(estabelecimentoId)
+            .build();
     }
 }
 

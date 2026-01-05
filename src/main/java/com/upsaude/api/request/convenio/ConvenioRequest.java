@@ -57,4 +57,5 @@ public class ConvenioRequest {
     private Boolean sincronizarAns;
     private Boolean sincronizarSus;
     private Boolean sincronizarTiss;
+    private java.util.UUID estabelecimentoId;
 }

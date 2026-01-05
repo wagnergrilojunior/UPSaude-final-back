@@ -24,5 +24,7 @@ public interface ConvenioMapper {
     @Mapping(target = "active", ignore = true)
     void updateFromRequest(ConvenioRequest request, @MappingTarget Convenio entity);
 
+    @Mapping(target = "tenantId", expression = "java(entity.getTenantId() != null ? entity.getTenantId() : (entity.getTenant() != null ? entity.getTenant().getId() : null))")
+    @Mapping(target = "estabelecimentoId", expression = "java(entity.getEstabelecimentoId() != null ? entity.getEstabelecimentoId() : (entity.getEstabelecimento() != null ? entity.getEstabelecimento().getId() : null))")
     ConvenioResponse toResponse(Convenio entity);
 }

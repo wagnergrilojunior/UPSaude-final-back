@@ -14,6 +14,7 @@ import lombok.Setter;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 @Entity
 @Table(name = "farmacias", schema = "public", indexes = {
@@ -27,6 +28,12 @@ import java.util.List;
 @Setter
 @EqualsAndHashCode(onlyExplicitlyIncluded = true, callSuper = true)
 public class Farmacia extends BaseEntity {
+
+    @Column(name = "tenant_id", insertable = false, updatable = false)
+    private UUID tenantId;
+
+    @Column(name = "estabelecimento_id", insertable = false, updatable = false)
+    private UUID estabelecimentoId;
 
     @Column(name = "nome", nullable = false, length = 255)
     private String nome;
