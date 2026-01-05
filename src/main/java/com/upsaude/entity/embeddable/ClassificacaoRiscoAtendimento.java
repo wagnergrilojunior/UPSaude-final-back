@@ -1,6 +1,11 @@
 package com.upsaude.entity.embeddable;
 
+import com.upsaude.enums.ClassificacaoRiscoEnum;
+import com.upsaude.enums.PrioridadeAtendimentoEnum;
+import com.upsaude.util.converter.ClassificacaoRiscoEnumConverter;
+import com.upsaude.util.converter.PrioridadeAtendimentoEnumConverter;
 import jakarta.persistence.Column;
+import jakarta.persistence.Convert;
 import jakarta.persistence.Embeddable;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -13,21 +18,25 @@ import lombok.Data;
 public class ClassificacaoRiscoAtendimento {
 
     public ClassificacaoRiscoAtendimento() {
-        this.classificacaoRisco = "";
-        this.prioridade = "";
         this.gravidade = "";
+        this.protocoloClassificacao = "";
         this.necessitaObservacao = false;
         this.necessitaInternacao = false;
     }
 
-    @Column(name = "classificacao_risco", length = 50)
-    private String classificacaoRisco;
+    @Convert(converter = ClassificacaoRiscoEnumConverter.class)
+    @Column(name = "classificacao_risco")
+    private ClassificacaoRiscoEnum classificacaoRisco;
 
-    @Column(name = "prioridade", length = 50)
-    private String prioridade;
+    @Convert(converter = PrioridadeAtendimentoEnumConverter.class)
+    @Column(name = "prioridade")
+    private PrioridadeAtendimentoEnum prioridade;
 
     @Column(name = "gravidade", length = 50)
     private String gravidade;
+
+    @Column(name = "protocolo_classificacao", length = 100)
+    private String protocoloClassificacao;
 
     @Column(name = "necessita_observacao", nullable = false)
     @Builder.Default

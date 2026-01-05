@@ -19,11 +19,15 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "consultas", schema = "public",
@@ -32,7 +36,8 @@ import lombok.EqualsAndHashCode;
            @Index(name = "idx_consulta_medico", columnList = "medico_id"),
            @Index(name = "idx_consulta_data", columnList = "data_consulta"),
            @Index(name = "idx_consulta_status", columnList = "status_consulta"),
-           @Index(name = "idx_consulta_estabelecimento", columnList = "estabelecimento_id")
+           @Index(name = "idx_consulta_estabelecimento", columnList = "estabelecimento_id"),
+           @Index(name = "idx_consulta_atendimento", columnList = "atendimento_id")
        })
 @Data
 @EqualsAndHashCode(callSuper = true)
@@ -64,6 +69,13 @@ public class Consultas extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "convenio_id")
     private Convenio convenio;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "atendimento_id", nullable = true)
+    private Atendimento atendimento;
+
+    @OneToMany(mappedBy = "consulta", fetch = FetchType.LAZY)
+    private List<com.upsaude.entity.clinica.prontuario.Prontuarios> registrosProntuario = new ArrayList<>();
 
     @Embedded
     private InformacoesConsulta informacoes;

@@ -4,20 +4,21 @@ import java.util.Arrays;
 import java.util.Locale;
 
 /**
- * Enum para prioridade de atendimento.
- * Utilizado em atendimentos para classificação de urgência.
+ * Enum para classificação de risco segundo protocolo Manchester.
+ * Utilizado em atendimentos para padronização conforme e-SUS APS.
  */
-public enum PrioridadeAtendimentoEnum {
-    CRITICA(1, "Crítica"),
-    ALTA(2, "Alta"),
-    MEDIA(3, "Média"),
-    BAIXA(4, "Baixa"),
-    ROTINA(5, "Rotina");
+public enum ClassificacaoRiscoEnum {
+    VERMELHO(1, "Vermelho"),
+    LARANJA(2, "Laranja"),
+    AMARELO(3, "Amarelo"),
+    VERDE(4, "Verde"),
+    AZUL(5, "Azul"),
+    OUTRO(99, "Outro");
 
     private final Integer codigo;
     private final String descricao;
 
-    PrioridadeAtendimentoEnum(Integer codigo, String descricao) {
+    ClassificacaoRiscoEnum(Integer codigo, String descricao) {
         this.codigo = codigo;
         this.descricao = descricao;
     }
@@ -30,7 +31,7 @@ public enum PrioridadeAtendimentoEnum {
         return descricao;
     }
 
-    public static PrioridadeAtendimentoEnum fromCodigo(Integer codigo) {
+    public static ClassificacaoRiscoEnum fromCodigo(Integer codigo) {
         if (codigo == null) return null;
         return Arrays.stream(values())
                 .filter(v -> v.codigo.equals(codigo))
@@ -38,7 +39,7 @@ public enum PrioridadeAtendimentoEnum {
                 .orElse(null);
     }
 
-    public static PrioridadeAtendimentoEnum fromDescricao(String descricao) {
+    public static ClassificacaoRiscoEnum fromDescricao(String descricao) {
         if (descricao == null) return null;
         String d = descricao.trim().toLowerCase(Locale.ROOT);
         return Arrays.stream(values())
@@ -47,3 +48,4 @@ public enum PrioridadeAtendimentoEnum {
                 .orElse(null);
     }
 }
+

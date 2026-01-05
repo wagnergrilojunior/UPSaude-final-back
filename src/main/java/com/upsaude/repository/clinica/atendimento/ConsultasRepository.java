@@ -20,4 +20,10 @@ public interface ConsultasRepository extends JpaRepository<Consultas, UUID> {
     Page<Consultas> findAllByTenant(@Param("tenantId") UUID tenantId, Pageable pageable);
 
     Page<Consultas> findByEstabelecimentoIdAndTenantIdOrderByInformacoesDataConsultaDesc(UUID estabelecimentoId, UUID tenantId, Pageable pageable);
+
+    @Query("SELECT c FROM Consultas c WHERE c.paciente.id = :pacienteId AND c.tenant.id = :tenantId ORDER BY c.informacoes.dataConsulta DESC")
+    Page<Consultas> findByPacienteIdAndTenantIdOrderByInformacoesDataConsultaDesc(
+        @Param("pacienteId") UUID pacienteId,
+        @Param("tenantId") UUID tenantId,
+        Pageable pageable);
 }

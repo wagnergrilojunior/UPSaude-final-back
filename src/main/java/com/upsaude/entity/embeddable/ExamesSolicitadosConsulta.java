@@ -20,6 +20,12 @@ public class ExamesSolicitadosConsulta {
         this.urgenciaExames = false;
     }
 
+    @Column(name = "exames_solicitados_json", columnDefinition = "TEXT")
+    private String examesSolicitadosJson;
+
+    @Column(name = "quantidade_exames")
+    private Integer quantidadeExames;
+
     @Column(name = "exames_solicitados", columnDefinition = "TEXT")
     private String examesSolicitados;
 

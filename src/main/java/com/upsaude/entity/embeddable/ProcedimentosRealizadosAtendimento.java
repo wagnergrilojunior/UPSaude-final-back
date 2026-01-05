@@ -23,6 +23,15 @@ public class ProcedimentosRealizadosAtendimento {
     @Column(name = "procedimentos_realizados", columnDefinition = "TEXT")
     private String procedimentosRealizados;
 
+    @Column(name = "procedimentos_realizados_json", columnDefinition = "TEXT")
+    private String procedimentosRealizadosJson;
+
+    @Column(name = "quantidade_procedimentos")
+    private Integer quantidadeProcedimentos;
+
+    @Column(name = "observacoes_procedimentos", columnDefinition = "TEXT")
+    private String observacoesProcedimentos;
+
     @Column(name = "exames_solicitados", columnDefinition = "TEXT")
     private String examesSolicitados;
 
