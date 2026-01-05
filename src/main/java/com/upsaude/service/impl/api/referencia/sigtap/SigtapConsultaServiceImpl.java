@@ -1034,6 +1034,10 @@ public class SigtapConsultaServiceImpl implements SigtapConsultaService {
         if (pageable == null) {
             pageable = PageRequest.of(0, 20);
         }
+        
+        // Valida e mapeia campos de ordenação
+        pageable = validarEMapearPageable(pageable);
+        
         Specification<SigtapOcupacao> spec = Specification.where(null);
 
         // Filtro por grupo
@@ -1061,6 +1065,56 @@ public class SigtapConsultaServiceImpl implements SigtapConsultaService {
 
         Page<SigtapOcupacao> page = cboRepository.findAll(spec, pageable);
         return page.map(cboMapper::toResponse);
+    }
+    
+    @SuppressWarnings("null")
+    private Pageable validarEMapearPageable(Pageable pageable) {
+        if (pageable == null || pageable.getSort().isUnsorted()) {
+            return pageable;
+        }
+        
+        List<Sort.Order> orders = new ArrayList<>();
+        for (Sort.Order order : pageable.getSort()) {
+            String property = order.getProperty();
+            String mappedProperty = mapearCampoOrdenacao(property);
+            
+            if (mappedProperty != null) {
+                orders.add(new Sort.Order(order.getDirection(), mappedProperty));
+            } else {
+                log.warn("Campo de ordenação inválido ignorado: {}", property);
+            }
+        }
+        
+        if (orders.isEmpty()) {
+            return PageRequest.of(pageable.getPageNumber(), pageable.getPageSize());
+        }
+        
+        return PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), Sort.by(orders));
+    }
+    
+    private String mapearCampoOrdenacao(String campo) {
+        if (campo == null) {
+            return null;
+        }
+        
+        String campoLower = campo.toLowerCase();
+        
+        // Mapeia campos comuns para os campos reais da entidade
+        switch (campoLower) {
+            case "codigo":
+            case "codigoficial":
+            case "codigo_oficial":
+                return "codigoOficial";
+            case "nome":
+            case "descricao":
+                return "nome";
+            default:
+                // Se o campo já é válido (codigoOficial ou nome), retorna como está
+                if (campo.equals("codigoOficial") || campo.equals("nome")) {
+                    return campo;
+                }
+                return null;
+        }
     }
 
     @Override
@@ -1118,6 +1172,9 @@ public class SigtapConsultaServiceImpl implements SigtapConsultaService {
         if (pageable == null) {
             pageable = PageRequest.of(0, 20);
         }
+        
+        // Valida e mapeia campos de ordenação
+        pageable = validarEMapearPageable(pageable);
         
         Specification<SigtapOcupacao> spec = Specification.where(null);
         

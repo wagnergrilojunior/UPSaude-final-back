@@ -112,6 +112,22 @@ public class ConvenioController {
         return ResponseEntity.noContent().build();
     }
 
+    @DeleteMapping("/{id}/permanente")
+    @Operation(summary = "Excluir convênio permanentemente", description = "Remove permanentemente um convênio do banco de dados")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "204", description = "Convênio excluído com sucesso"),
+            @ApiResponse(responseCode = "404", description = "Convênio não encontrado"),
+            @ApiResponse(responseCode = "403", description = "Acesso negado")
+    })
+    public ResponseEntity<Void> excluirPermanente(
+            @Parameter(description = "ID do convênio", required = true)
+            @PathVariable UUID id) {
+        log.debug("REQUEST DELETE /v1/convenios/{}/permanente", id);
+        convenioService.excluir(id);
+        log.info("Convênio excluído permanentemente com sucesso. ID: {}", id);
+        return ResponseEntity.noContent().build();
+    }
+
     @PatchMapping("/{id}/inativar")
     @Operation(summary = "Inativar convênio", description = "Inativa um convênio no sistema alterando seu status")
     @ApiResponses(value = {

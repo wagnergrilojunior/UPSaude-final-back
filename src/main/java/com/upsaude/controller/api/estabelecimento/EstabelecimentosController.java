@@ -1,7 +1,5 @@
 package com.upsaude.controller.api.estabelecimento;
 
-import com.upsaude.entity.estabelecimento.Estabelecimentos;
-
 import com.upsaude.api.request.estabelecimento.EstabelecimentosRequest;
 import com.upsaude.api.response.estabelecimento.EstabelecimentosResponse;
 import com.upsaude.exception.BadRequestException;
@@ -148,6 +146,31 @@ public class EstabelecimentosController {
             throw ex;
         } catch (Exception ex) {
             log.error("Erro inesperado ao excluir estabelecimento — ID: {}", id, ex);
+            throw ex;
+        }
+    }
+
+    @DeleteMapping("/{id}/permanente")
+    @Operation(summary = "Excluir estabelecimento permanentemente", description = "Remove permanentemente um estabelecimento do banco de dados")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "204", description = "Estabelecimento excluído com sucesso"),
+            @ApiResponse(responseCode = "404", description = "Estabelecimento não encontrado"),
+            @ApiResponse(responseCode = "403", description = "Acesso negado")
+    })
+    public ResponseEntity<Void> excluirPermanente(
+            @Parameter(description = "ID do estabelecimento", required = true)
+            @PathVariable UUID id) {
+        log.debug("REQUEST DELETE /v1/estabelecimentos/{}/permanente", id);
+        try {
+            estabelecimentosService.excluir(id);
+            log.info("Estabelecimento excluído permanentemente com sucesso. ID: {}", id);
+            return ResponseEntity.noContent().build();
+        } catch (NotFoundException ex) {
+            log.warn("Estabelecimento não encontrado para exclusão — ID: {}, mensagem: {}", id, ex.getMessage());
+            throw ex;
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao excluir estabelecimento — Path: /v1/estabelecimentos/{}/permanente, Method: DELETE, ID: {}, Exception: {}",
+                id, id, ex.getClass().getName(), ex);
             throw ex;
         }
     }

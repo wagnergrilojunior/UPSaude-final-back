@@ -177,6 +177,31 @@ public class ResponsavelLegalController {
         }
     }
 
+    @DeleteMapping("/{id}/permanente")
+    @Operation(summary = "Excluir responsável legal permanentemente", description = "Remove permanentemente um responsável legal do banco de dados")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "204", description = "Responsável legal excluído com sucesso"),
+            @ApiResponse(responseCode = "404", description = "Responsável legal não encontrado"),
+            @ApiResponse(responseCode = "403", description = "Acesso negado")
+    })
+    public ResponseEntity<Void> excluirPermanente(
+            @Parameter(description = "ID do responsável legal", required = true)
+            @PathVariable UUID id) {
+        log.debug("REQUEST DELETE /v1/responsaveis-legais/{}/permanente", id);
+        try {
+            service.excluir(id);
+            log.info("Responsável legal excluído permanentemente com sucesso. ID: {}", id);
+            return ResponseEntity.noContent().build();
+        } catch (NotFoundException ex) {
+            log.warn("Responsável legal não encontrado para exclusão — ID: {}, mensagem: {}", id, ex.getMessage());
+            throw ex;
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao excluir responsável legal — Path: /v1/responsaveis-legais/{}/permanente, Method: DELETE, ID: {}, Exception: {}",
+                id, id, ex.getClass().getName(), ex);
+            throw ex;
+        }
+    }
+
     @PatchMapping("/{id}/inativar")
     @Operation(summary = "Inativar responsável legal", description = "Inativa um responsável legal no sistema alterando seu status")
     @ApiResponses(value = {
