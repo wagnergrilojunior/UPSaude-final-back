@@ -33,7 +33,7 @@ public interface MedicosMapper {
     @Mapping(target = "updatedAt", ignore = true)
     @Mapping(target = "active", ignore = true)
     @Mapping(target = "enderecoMedico", ignore = true)
-    @Mapping(target = "medicosEstabelecimentos", ignore = true)
+    @Mapping(target = "estabelecimentos", ignore = true)
     @Mapping(target = "especialidades", ignore = true)
     Medicos fromRequest(MedicosRequest request);
 
@@ -42,7 +42,7 @@ public interface MedicosMapper {
     @Mapping(target = "updatedAt", ignore = true)
     @Mapping(target = "active", ignore = true)
     @Mapping(target = "enderecoMedico", ignore = true)
-    @Mapping(target = "medicosEstabelecimentos", ignore = true)
+    @Mapping(target = "estabelecimentos", ignore = true)
     @Mapping(target = "especialidades", ignore = true)
     void updateFromRequest(MedicosRequest request, @MappingTarget Medicos entity);
 

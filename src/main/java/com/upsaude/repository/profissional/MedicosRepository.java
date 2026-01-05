@@ -55,8 +55,6 @@ public interface MedicosRepository extends JpaRepository<Medicos, UUID>, JpaSpec
 
     @EntityGraph(attributePaths = {
         "especialidades",
-        "medicosEstabelecimentos",
-        "medicosEstabelecimentos.estabelecimento",
         "enderecoMedico"
     })
     @Query("SELECT m FROM Medicos m WHERE m.id = :id AND m.tenant.id = :tenantId")

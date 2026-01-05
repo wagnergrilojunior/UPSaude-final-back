@@ -64,7 +64,7 @@ public class MedicoRelacionamentosHandler {
                     "Estabelecimento não encontrado com ID: " + request.getEstabelecimentoId() + " para o tenant"));
             
             // Verificar se já existe vínculo (apenas na atualização)
-            boolean jaExiste = medico.getMedicosEstabelecimentos().stream()
+            boolean jaExiste = medico.getEstabelecimentos().stream()
                     .anyMatch(me -> me.getEstabelecimento().getId().equals(request.getEstabelecimentoId()) 
                             && me.getDataFim() == null);
             
