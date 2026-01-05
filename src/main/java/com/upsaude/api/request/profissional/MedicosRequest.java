@@ -7,7 +7,6 @@ import com.upsaude.api.request.embeddable.DadosDemograficosMedicoRequest;
 import com.upsaude.api.request.embeddable.DadosPessoaisBasicosMedicoRequest;
 import com.upsaude.api.request.embeddable.DocumentosBasicosMedicoRequest;
 import com.upsaude.api.request.embeddable.RegistroProfissionalMedicoRequest;
-import com.upsaude.api.request.geral.EnderecoRequest;
 import jakarta.validation.Valid;
 import java.util.HashSet;
 import java.util.Set;
@@ -35,9 +34,6 @@ public class MedicosRequest {
     @Builder.Default
     private Set<UUID> especialidades = new HashSet<>();
 
-    @Builder.Default
-    private Set<UUID> estabelecimentos = new HashSet<>();
-
     @Valid
     private DadosPessoaisBasicosMedicoRequest dadosPessoaisBasicos;
 
@@ -54,10 +50,6 @@ public class MedicosRequest {
     private ContatoMedicoRequest contato;
 
     private UUID enderecoMedico;
-
-    @Deprecated
-    @Valid
-    private EnderecoRequest enderecoMedicoCompleto;
 
     private String observacoes;
 }

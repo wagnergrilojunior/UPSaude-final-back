@@ -8,7 +8,6 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.OffsetDateTime;
-import java.util.UUID;
 
 @Getter
 @Setter
@@ -17,7 +16,6 @@ import java.util.UUID;
 @AllArgsConstructor
 public class RegistroProfissionalResponse {
     private String registroProfissional;
-    private UUID conselho;
     private String ufRegistro;
     private OffsetDateTime dataEmissaoRegistro;
     private OffsetDateTime dataValidadeRegistro;

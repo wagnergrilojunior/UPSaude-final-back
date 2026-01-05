@@ -95,39 +95,9 @@ public class PacienteOneToOneRelationshipHandler {
             paciente.setInformacoesConvenio(null);
         }
 
-        processarRelacionamentoOneToOne(request.getDadosSociodemograficos(), dadosSociodemograficosRepository, dados -> {
-            dados.setPaciente(paciente);
-            paciente.setDadosSociodemograficos(dados);
-        }, "Dados sociodemográficos");
-
-        processarRelacionamentoOneToOne(request.getDadosClinicosBasicos(), dadosClinicosBasicosRepository, dados -> {
-            dados.setPaciente(paciente);
-            paciente.setDadosClinicosBasicos(dados);
-        }, "Dados clínicos básicos");
-
-        processarRelacionamentoOneToOne(request.getResponsavelLegal(), responsavelLegalRepository, responsavel -> {
-            responsavel.setPaciente(paciente);
-            paciente.setResponsavelLegal(responsavel);
-        }, "Responsável legal");
-
-        processarRelacionamentoOneToOne(request.getLgpdConsentimento(), lgpdConsentimentoRepository, consentimento -> {
-            consentimento.setPaciente(paciente);
-            paciente.setLgpdConsentimento(consentimento);
-        }, "Consentimento LGPD");
-
-        // Integrações governamentais agora são OneToMany
-        // Se necessário, processar múltiplas integrações no futuro
-        if (request.getIntegracaoGov() != null) {
-            com.upsaude.entity.sistema.integracao.IntegracaoGov integracao = integracaoGovRepository.findById(request.getIntegracaoGov())
-                    .orElseThrow(() -> new NotFoundException("Integração governamental não encontrada com ID: " + request.getIntegracaoGov()));
-            integracao.setPaciente(paciente);
-            if (paciente.getIntegracoesGov() == null) {
-                paciente.setIntegracoesGov(new java.util.ArrayList<>());
-            }
-            if (!paciente.getIntegracoesGov().contains(integracao)) {
-                paciente.getIntegracoesGov().add(integracao);
-            }
-        }
+        // Relacionamentos OneToOne devem ser processados através dos Request específicos
+        // (DadosSociodemograficosRequest, DadosClinicosBasicosRequest, ResponsavelLegalRequest, etc.)
+        // quando esses dados forem enviados separadamente
 
         return paciente;
     }
@@ -143,168 +113,15 @@ public class PacienteOneToOneRelationshipHandler {
     }
 
     private void processarDadosSociodemograficos(Paciente paciente, PacienteRequest request) {
-        // Se foi fornecido UUID, buscar entidade existente
-        if (request.getDadosSociodemograficos() != null) {
-            DadosSociodemograficos dados = dadosSociodemograficosRepository.findById(request.getDadosSociodemograficos())
-                    .orElseThrow(() -> new NotFoundException("Dados sociodemográficos não encontrados com ID: " + request.getDadosSociodemograficos()));
-            dados.setPaciente(paciente);
-            paciente.setDadosSociodemograficos(dados);
-            return;
-        }
-
-        // Verificar se há campos diretos no request para criar nova entidade
-        boolean temDados = request.getEscolaridade() != null ||
-                           request.getRacaCor() != null ||
-                           request.getNacionalidade() != null ||
-                           (request.getPaisNascimento() != null && !request.getPaisNascimento().trim().isEmpty()) ||
-                           (request.getNaturalidade() != null && !request.getNaturalidade().trim().isEmpty()) ||
-                           (request.getOcupacaoProfissao() != null && !request.getOcupacaoProfissao().trim().isEmpty()) ||
-                           request.getSituacaoRua() != null ||
-                           request.getEstadoCivil() != null;
-
-        if (!temDados) {
-            log.debug("Nenhum dado sociodemográfico para processar para paciente ID: {}", paciente.getId());
-            return;
-        }
-
-        log.debug("Criando dados sociodemográficos a partir dos campos do request para paciente ID: {}", paciente.getId());
-
-        try {
-            // Verificar se já existe registro (só funciona se paciente já foi salvo)
-            DadosSociodemograficos dados = null;
-            if (paciente.getId() != null) {
-                dados = dadosSociodemograficosRepository
-                        .findByPacienteId(paciente.getId())
-                        .orElse(null);
-            }
-            if (dados == null) {
-                dados = new DadosSociodemograficos();
-            }
-
-            // Criar DTO a partir dos campos do request
-            DadosSociodemograficosRequest dadosRequest = DadosSociodemograficosRequest.builder()
-                    .escolaridade(request.getEscolaridade())
-                    .racaCor(request.getRacaCor())
-                    .nacionalidade(request.getNacionalidade())
-                    .paisNascimento(request.getPaisNascimento())
-                    .naturalidade(request.getNaturalidade())
-                    .ocupacaoProfissao(request.getOcupacaoProfissao())
-                    .situacaoRua(request.getSituacaoRua())
-                    .build();
-
-            // Mapear para entidade
-            if (dados.getId() == null) {
-                DadosSociodemograficos novosDados = dadosSociodemograficosMapper.fromRequest(dadosRequest);
-                dados.setRacaCor(novosDados.getRacaCor());
-                dados.setNacionalidade(novosDados.getNacionalidade());
-                dados.setPaisNascimento(novosDados.getPaisNascimento());
-                dados.setNaturalidade(novosDados.getNaturalidade());
-                dados.setEscolaridade(novosDados.getEscolaridade());
-                dados.setOcupacaoProfissao(novosDados.getOcupacaoProfissao());
-                dados.setSituacaoRua(novosDados.getSituacaoRua());
-            } else {
-                dadosSociodemograficosMapper.updateFromRequest(dadosRequest, dados);
-            }
-
-            dados.setPaciente(paciente);
-            dados.setActive(true);
-
-            // Definir tenant se não tiver
-            if (dados.getTenant() == null) {
-                Tenant tenant = tenantService.obterTenantDoUsuarioAutenticado();
-                if (tenant != null) {
-                    dados.setTenant(tenant);
-                }
-            }
-
-            // Não salvar aqui - será salvo pelo cascade quando o paciente for salvo
-            // Apenas definir o relacionamento
-            paciente.setDadosSociodemograficos(dados);
-
-            log.info("Dados sociodemográficos criados/atualizados para paciente ID: {}", paciente.getId());
-        } catch (Exception e) {
-            log.warn("Erro ao criar dados sociodemográficos para paciente ID: {}. Erro: {}", 
-                    paciente.getId(), e.getMessage());
-            // Não lança exceção para não bloquear a criação do paciente
-        }
+        // Dados sociodemográficos devem ser processados através do DadosSociodemograficosRequest
+        // quando enviado separadamente via endpoint específico
+        log.debug("Dados sociodemográficos devem ser processados através do endpoint específico para paciente ID: {}", paciente.getId());
     }
 
     private void processarResponsavelLegal(Paciente paciente, PacienteRequest request) {
-        // Se foi fornecido UUID, buscar entidade existente
-        if (request.getResponsavelLegal() != null) {
-            ResponsavelLegal responsavel = responsavelLegalRepository.findById(request.getResponsavelLegal())
-                    .orElseThrow(() -> new NotFoundException("Responsável legal não encontrado com ID: " + request.getResponsavelLegal()));
-            responsavel.setPaciente(paciente);
-            paciente.setResponsavelLegal(responsavel);
-            return;
-        }
-
-        // Verificar se há campos diretos no request para criar nova entidade
-        boolean temDados = (request.getResponsavelNome() != null && !request.getResponsavelNome().trim().isEmpty()) ||
-                           (request.getResponsavelCpf() != null && !request.getResponsavelCpf().trim().isEmpty()) ||
-                           (request.getResponsavelTelefone() != null && !request.getResponsavelTelefone().trim().isEmpty());
-
-        if (!temDados) {
-            log.debug("Nenhum dado de responsável legal para processar para paciente ID: {}", paciente.getId());
-            return;
-        }
-
-        log.debug("Criando responsável legal a partir dos campos do request para paciente ID: {}", paciente.getId());
-
-        try {
-            // Verificar se já existe registro (só funciona se paciente já foi salvo)
-            ResponsavelLegal responsavel = null;
-            if (paciente.getId() != null) {
-                responsavel = responsavelLegalRepository
-                        .findByPacienteId(paciente.getId())
-                        .orElse(null);
-            }
-            if (responsavel == null) {
-                responsavel = new ResponsavelLegal();
-            }
-
-            // Criar DTO a partir dos campos do request
-            ResponsavelLegalRequest responsavelRequest = ResponsavelLegalRequest.builder()
-                    .nome(request.getResponsavelNome())
-                    .cpf(request.getResponsavelCpf())
-                    .telefone(request.getResponsavelTelefone())
-                    .build();
-
-            // Mapear para entidade
-            if (responsavel.getId() == null) {
-                ResponsavelLegal novoResponsavel = responsavelLegalMapper.fromRequest(responsavelRequest);
-                responsavel.setNome(novoResponsavel.getNome());
-                responsavel.setCpf(novoResponsavel.getCpf());
-                responsavel.setTelefone(novoResponsavel.getTelefone());
-                responsavel.setRg(novoResponsavel.getRg());
-                responsavel.setCns(novoResponsavel.getCns());
-                responsavel.setTipoResponsavel(novoResponsavel.getTipoResponsavel());
-                responsavel.setAutorizacaoResponsavel(novoResponsavel.getAutorizacaoResponsavel());
-            } else {
-                responsavelLegalMapper.updateFromRequest(responsavelRequest, responsavel);
-            }
-
-            responsavel.setPaciente(paciente);
-            responsavel.setActive(true);
-
-            // Definir tenant se não tiver
-            if (responsavel.getTenant() == null) {
-                Tenant tenant = tenantService.obterTenantDoUsuarioAutenticado();
-                if (tenant != null) {
-                    responsavel.setTenant(tenant);
-                }
-            }
-
-            // Não salvar aqui - será salvo pelo cascade quando o paciente for salvo
-            // Apenas definir o relacionamento
-            paciente.setResponsavelLegal(responsavel);
-
-            log.info("Responsável legal criado/atualizado para paciente ID: {}", paciente.getId());
-        } catch (Exception e) {
-            log.warn("Erro ao criar responsável legal para paciente ID: {}. Erro: {}", 
-                    paciente.getId(), e.getMessage());
-            // Não lança exceção para não bloquear a criação do paciente
-        }
+        // Responsável legal deve ser processado através do ResponsavelLegalRequest
+        // quando enviado separadamente via endpoint específico
+        log.debug("Responsável legal deve ser processado através do endpoint específico para paciente ID: {}", paciente.getId());
     }
 
     public <T> void processarRelacionamentoOneToOne(

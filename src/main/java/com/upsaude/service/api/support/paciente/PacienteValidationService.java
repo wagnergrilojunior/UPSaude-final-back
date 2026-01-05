@@ -21,9 +21,6 @@ public class PacienteValidationService {
         if (request == null || !StringUtils.hasText(request.getNomeCompleto())) {
             throw new BadRequestException("Nome completo é obrigatório");
         }
-        if (StringUtils.hasText(request.getRg()) && request.getRg().length() > 20) {
-            throw new BadRequestException("RG deve ter no máximo 20 caracteres");
-        }
     }
 
     public void validarUnicidadeParaCriacao(PacienteRequest request, 
@@ -31,10 +28,8 @@ public class PacienteValidationService {
                                            PacienteIdentificadorRepository identificadorRepository,
                                            PacienteContatoRepository contatoRepository,
                                            UUID tenantId) {
-        validarCpfUnico(null, request.getCpf(), identificadorRepository, tenantId);
-        validarEmailUnico(null, request.getEmail(), contatoRepository, tenantId);
-        validarCnsUnico(null, request.getCns(), identificadorRepository, tenantId);
-        validarRgUnico(null, request.getRg(), identificadorRepository, tenantId);
+        // Validações de CPF, CNS, RG e Email devem ser feitas através dos Request específicos
+        // (PacienteIdentificadorRequest, PacienteContatoRequest) quando esses dados forem enviados
     }
 
     public void validarUnicidadeParaAtualizacao(UUID id, PacienteRequest request,
@@ -42,29 +37,13 @@ public class PacienteValidationService {
                                                 PacienteIdentificadorRepository identificadorRepository,
                                                 PacienteContatoRepository contatoRepository,
                                                 UUID tenantId) {
-        validarCpfUnico(id, request.getCpf(), identificadorRepository, tenantId);
-        validarEmailUnico(id, request.getEmail(), contatoRepository, tenantId);
-        validarCnsUnico(id, request.getCns(), identificadorRepository, tenantId);
-        validarRgUnico(id, request.getRg(), identificadorRepository, tenantId);
+        // Validações de CPF, CNS, RG e Email devem ser feitas através dos Request específicos
+        // (PacienteIdentificadorRequest, PacienteContatoRequest) quando esses dados forem enviados
     }
 
     public void sanitizarFlags(PacienteRequest request) {
-        if (request == null) return;
-        if (request.getAcompanhadoPorEquipeEsf() == null) {
-            request.setAcompanhadoPorEquipeEsf(false);
-        }
-        if (request.getPossuiDeficiencia() == null) {
-            request.setPossuiDeficiencia(false);
-        }
-        if (request.getCnsValidado() == null) {
-            request.setCnsValidado(false);
-        }
-        if (request.getSituacaoRua() == null) {
-            request.setSituacaoRua(false);
-        }
-        if (request.getCartaoSusAtivo() == null) {
-            request.setCartaoSusAtivo(true);
-        }
+        // Campos removidos do PacienteRequest - devem ser processados através dos Request específicos
+        // das entidades relacionadas (DadosSociodemograficosRequest, etc.)
     }
 
     private void validarCpfUnico(UUID pacienteId, String cpf, PacienteIdentificadorRepository identificadorRepository, UUID tenantId) {
