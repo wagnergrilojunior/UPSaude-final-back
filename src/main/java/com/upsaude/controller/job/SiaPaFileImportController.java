@@ -11,6 +11,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -44,7 +45,7 @@ public class SiaPaFileImportController {
         this.tenantService = tenantService;
     }
 
-    @PostMapping("/import/upload")
+    @PostMapping(value = "/import/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @Operation(
             summary = "Upload de arquivo SIA-SUS PA (assíncrono)",
             description = "Recebe um arquivo CSV do SIA-SUS e cria um job para processamento em background. O progresso pode ser acompanhado em /v1/import-jobs/{jobId}/status.",
