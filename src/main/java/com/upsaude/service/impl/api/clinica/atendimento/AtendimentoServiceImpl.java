@@ -13,11 +13,19 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.upsaude.api.request.clinica.atendimento.AtendimentoCreateRequest;
 import com.upsaude.api.request.clinica.atendimento.AtendimentoRequest;
+import com.upsaude.api.request.clinica.atendimento.AtendimentoTriagemRequest;
 import com.upsaude.api.response.clinica.atendimento.AtendimentoResponse;
 import com.upsaude.cache.CacheKeyUtil;
 import com.upsaude.entity.clinica.atendimento.Atendimento;
+import com.upsaude.entity.clinica.prontuario.Prontuarios;
 import com.upsaude.entity.sistema.multitenancy.Tenant;
+import com.upsaude.enums.StatusAtendimentoEnum;
+import com.upsaude.enums.TipoAtendimentoEnum;
+import com.upsaude.mapper.embeddable.AnamneseAtendimentoMapper;
+import com.upsaude.mapper.embeddable.ClassificacaoRiscoAtendimentoMapper;
+import com.upsaude.repository.clinica.prontuario.ProntuariosRepository;
 import com.upsaude.exception.BadRequestException;
 import com.upsaude.repository.clinica.atendimento.AtendimentoRepository;
 import com.upsaude.service.api.clinica.atendimento.AtendimentoService;
@@ -41,8 +49,11 @@ import lombok.extern.slf4j.Slf4j;
 public class AtendimentoServiceImpl implements AtendimentoService {
 
     private final AtendimentoRepository atendimentoRepository;
+    private final ProntuariosRepository prontuariosRepository;
     private final TenantService tenantService;
     private final CacheManager cacheManager;
+    private final AnamneseAtendimentoMapper anamneseAtendimentoMapper;
+    private final ClassificacaoRiscoAtendimentoMapper classificacaoRiscoAtendimentoMapper;
 
     private final AtendimentoValidationService validationService;
     private final AtendimentoTenantEnforcer tenantEnforcer;
@@ -53,14 +64,36 @@ public class AtendimentoServiceImpl implements AtendimentoService {
 
     @Override
     @Transactional
-    public AtendimentoResponse criar(AtendimentoRequest request) {
+    public AtendimentoResponse criar(AtendimentoCreateRequest request) {
         log.debug("Criando novo atendimento. Request: {}", request);
-        validationService.validarObrigatorios(request);
+        if (request == null || request.getPacienteId() == null || request.getProfissionalId() == null) {
+            throw new BadRequestException("Paciente e profissional são obrigatórios");
+        }
 
         UUID tenantId = tenantService.validarTenantAtual();
         Tenant tenant = tenantService.obterTenantDoUsuarioAutenticado();
 
-        Atendimento saved = creator.criar(request, tenantId, tenant);
+        AtendimentoRequest atendimentoRequest = new AtendimentoRequest();
+        atendimentoRequest.setPaciente(request.getPacienteId());
+        atendimentoRequest.setProfissional(request.getProfissionalId());
+        atendimentoRequest.setEquipeSaude(request.getEquipeSaudeId());
+        atendimentoRequest.setConvenio(request.getConvenioId());
+        if (request.getTipoAtendimento() != null || request.getMotivo() != null || request.getLocalAtendimento() != null) {
+            com.upsaude.api.request.embeddable.InformacoesAtendimentoRequest info = new com.upsaude.api.request.embeddable.InformacoesAtendimentoRequest();
+            if (request.getTipoAtendimento() != null) {
+                try {
+                    info.setTipoAtendimento(TipoAtendimentoEnum.valueOf(request.getTipoAtendimento()));
+                } catch (IllegalArgumentException e) {
+                    log.warn("Tipo de atendimento inválido: {}", request.getTipoAtendimento());
+                }
+            }
+            info.setMotivo(request.getMotivo());
+            info.setLocalAtendimento(request.getLocalAtendimento());
+            info.setDataHora(java.time.OffsetDateTime.now());
+            atendimentoRequest.setInformacoes(info);
+        }
+
+        Atendimento saved = creator.criar(atendimentoRequest, tenantId, tenant);
         AtendimentoResponse response = responseBuilder.build(saved);
 
         Cache cache = cacheManager.getCache(CacheKeyUtil.CACHE_ATENDIMENTO);
@@ -188,5 +221,149 @@ public class AtendimentoServiceImpl implements AtendimentoService {
         entity.setActive(false);
         atendimentoRepository.save(entity);
         log.info("Atendimento inativado com sucesso. ID: {}, tenant: {}", id, tenantId);
+    }
+
+    @Override
+    @Transactional
+    @CachePut(cacheNames = CacheKeyUtil.CACHE_ATENDIMENTO, keyGenerator = "atendimentoCacheKeyGenerator")
+    public AtendimentoResponse iniciar(UUID id) {
+        log.debug("Iniciando atendimento. ID: {}", id);
+        validationService.validarId(id);
+        UUID tenantId = tenantService.validarTenantAtual();
+        Atendimento entity = tenantEnforcer.validarAcesso(id, tenantId);
+
+        if (entity.getInformacoes() == null) {
+            entity.setInformacoes(new com.upsaude.entity.embeddable.InformacoesAtendimento());
+        }
+
+        if (entity.getInformacoes().getStatusAtendimento() != StatusAtendimentoEnum.AGENDADO &&
+            entity.getInformacoes().getStatusAtendimento() != StatusAtendimentoEnum.EM_ESPERA) {
+            throw new BadRequestException("Atendimento só pode ser iniciado se estiver agendado ou em espera");
+        }
+
+        entity.getInformacoes().setStatusAtendimento(StatusAtendimentoEnum.EM_ANDAMENTO);
+        entity.getInformacoes().setDataInicio(java.time.OffsetDateTime.now());
+
+        Atendimento saved = atendimentoRepository.save(entity);
+        log.info("Atendimento iniciado com sucesso. ID: {}", id);
+        return responseBuilder.build(saved);
+    }
+
+    @Override
+    @Transactional
+    @CachePut(cacheNames = CacheKeyUtil.CACHE_ATENDIMENTO, keyGenerator = "atendimentoCacheKeyGenerator")
+    public AtendimentoResponse atualizarTriagem(UUID id, AtendimentoTriagemRequest request) {
+        log.debug("Atualizando triagem do atendimento. ID: {}", id);
+        validationService.validarId(id);
+        UUID tenantId = tenantService.validarTenantAtual();
+        Atendimento entity = tenantEnforcer.validarAcesso(id, tenantId);
+
+        if (request.getAnamnese() != null) {
+            if (entity.getAnamnese() == null) {
+                entity.setAnamnese(new com.upsaude.entity.embeddable.AnamneseAtendimento());
+            }
+            anamneseAtendimentoMapper.updateFromRequest(request.getAnamnese(), entity.getAnamnese());
+        }
+
+        if (request.getClassificacaoRisco() != null) {
+            if (entity.getClassificacaoRisco() == null) {
+                entity.setClassificacaoRisco(new com.upsaude.entity.embeddable.ClassificacaoRiscoAtendimento());
+            }
+            classificacaoRiscoAtendimentoMapper.updateFromRequest(request.getClassificacaoRisco(), entity.getClassificacaoRisco());
+        }
+
+        Atendimento saved = atendimentoRepository.save(entity);
+        log.info("Triagem do atendimento atualizada com sucesso. ID: {}", id);
+        return responseBuilder.build(saved);
+    }
+
+    @Override
+    @Transactional
+    @CachePut(cacheNames = CacheKeyUtil.CACHE_ATENDIMENTO, keyGenerator = "atendimentoCacheKeyGenerator")
+    public AtendimentoResponse atualizarClassificacaoRisco(UUID id, AtendimentoTriagemRequest request) {
+        log.debug("Atualizando classificação de risco do atendimento. ID: {}", id);
+        validationService.validarId(id);
+        UUID tenantId = tenantService.validarTenantAtual();
+        Atendimento entity = tenantEnforcer.validarAcesso(id, tenantId);
+
+        if (request.getClassificacaoRisco() == null) {
+            throw new BadRequestException("Dados de classificação de risco são obrigatórios");
+        }
+
+        if (entity.getClassificacaoRisco() == null) {
+            entity.setClassificacaoRisco(new com.upsaude.entity.embeddable.ClassificacaoRiscoAtendimento());
+        }
+        classificacaoRiscoAtendimentoMapper.updateFromRequest(request.getClassificacaoRisco(), entity.getClassificacaoRisco());
+
+        Atendimento saved = atendimentoRepository.save(entity);
+        log.info("Classificação de risco do atendimento atualizada com sucesso. ID: {}", id);
+        return responseBuilder.build(saved);
+    }
+
+    @Override
+    @Transactional
+    @CachePut(cacheNames = CacheKeyUtil.CACHE_ATENDIMENTO, keyGenerator = "atendimentoCacheKeyGenerator")
+    public AtendimentoResponse encerrar(UUID id) {
+        log.debug("Encerrando atendimento. ID: {}", id);
+        validationService.validarId(id);
+        UUID tenantId = tenantService.validarTenantAtual();
+        Tenant tenant = tenantService.obterTenantDoUsuarioAutenticado();
+        Atendimento entity = tenantEnforcer.validarAcesso(id, tenantId);
+
+        if (entity.getInformacoes() == null) {
+            throw new BadRequestException("Atendimento não possui informações");
+        }
+
+        if (entity.getInformacoes().getStatusAtendimento() == StatusAtendimentoEnum.CONCLUIDO ||
+            entity.getInformacoes().getStatusAtendimento() == StatusAtendimentoEnum.CANCELADO) {
+            throw new BadRequestException("Atendimento já está encerrado ou cancelado");
+        }
+
+        if (entity.getInformacoes().getDataInicio() == null) {
+            throw new BadRequestException("Não é possível encerrar atendimento sem data de início");
+        }
+
+        entity.getInformacoes().setStatusAtendimento(StatusAtendimentoEnum.CONCLUIDO);
+        entity.getInformacoes().setDataFim(java.time.OffsetDateTime.now());
+
+        if (entity.getInformacoes().getDataInicio() != null && entity.getInformacoes().getDataFim() != null) {
+            long minutos = java.time.Duration.between(
+                entity.getInformacoes().getDataInicio(),
+                entity.getInformacoes().getDataFim()
+            ).toMinutes();
+            entity.getInformacoes().setDuracaoRealMinutos((int) minutos);
+        }
+
+        Atendimento saved = atendimentoRepository.save(entity);
+
+        criarRegistroProntuario(saved, tenant);
+
+        log.info("Atendimento encerrado com sucesso. ID: {}", id);
+        return responseBuilder.build(saved);
+    }
+
+    private void criarRegistroProntuario(Atendimento atendimento, Tenant tenant) {
+        Prontuarios prontuario = new Prontuarios();
+        prontuario.setPaciente(atendimento.getPaciente());
+        prontuario.setAtendimento(atendimento);
+        prontuario.setTenant(tenant);
+        prontuario.setEstabelecimento(atendimento.getEstabelecimento());
+        prontuario.setTipoRegistro("ATENDIMENTO");
+        prontuario.setTipoRegistroEnum("ATENDIMENTO");
+        prontuario.setDataRegistro(java.time.OffsetDateTime.now());
+        prontuario.setActive(true);
+
+        StringBuilder resumo = new StringBuilder();
+        resumo.append("Atendimento encerrado");
+        if (atendimento.getInformacoes() != null && atendimento.getInformacoes().getMotivo() != null) {
+            resumo.append(" - Motivo: ").append(atendimento.getInformacoes().getMotivo());
+        }
+        if (atendimento.getProfissional() != null && atendimento.getProfissional().getDadosPessoaisBasicos() != null) {
+            resumo.append(" - Profissional: ").append(atendimento.getProfissional().getDadosPessoaisBasicos().getNomeCompleto());
+        }
+        prontuario.setResumo(resumo.toString());
+
+        prontuariosRepository.save(Objects.requireNonNull(prontuario));
+        log.debug("Registro de prontuário criado para atendimento. ID: {}", atendimento.getId());
     }
 }

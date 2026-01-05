@@ -20,6 +20,15 @@ public class DiagnosticoAtendimento {
         this.evolucao = "";
     }
 
+    @Column(name = "codigo_cid_principal", length = 10)
+    private String codigoCidPrincipal;
+
+    @Column(name = "codigo_cid_secundario", length = 10)
+    private String codigoCidSecundario;
+
+    @Column(name = "diagnosticos_secundarios_json", columnDefinition = "TEXT")
+    private String diagnosticosSecundariosJson;
+
     @Column(name = "diagnostico", columnDefinition = "TEXT")
     private String diagnostico;
 

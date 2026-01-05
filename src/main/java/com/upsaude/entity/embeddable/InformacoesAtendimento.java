@@ -28,6 +28,12 @@ public class InformacoesAtendimento {
     @Column(name = "data_hora", nullable = false)
     private OffsetDateTime dataHora;
 
+    @Column(name = "data_execucao")
+    private OffsetDateTime dataExecucao;
+
+    @Column(name = "cnes_executor", length = 7)
+    private String cnesExecutor;
+
     @Column(name = "data_agendamento")
     private OffsetDateTime dataAgendamento;
 
