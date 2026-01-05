@@ -1,0 +1,2200 @@
+{
+	"info": {
+		"_postman_id": "upsaude-api-v2",
+		"name": "UPSaude API v2",
+		"description": "Collection completa da API UPSaude versão 2.0 - Refatorada com arquitetura orientada a casos de uso",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"auth": {
+		"type": "bearer",
+		"bearer": [
+			{
+				"key": "token",
+				"value": "{{auth_token}}",
+				"type": "string"
+			}
+		]
+	},
+	"item": [
+		{
+			"name": "01 - Autenticação",
+			"item": [
+				{
+					"name": "Login",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"usuario@example.com\",\n  \"password\": \"senha123\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/v1/auth/login",
+							"host": ["{{base_url}}"],
+							"path": ["v1", "auth", "login"]
+						},
+						"description": "Realizar login e obter token de autenticação"
+					},
+					"response": [],
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 200) {",
+									"    const response = pm.response.json();",
+									"    if (response.token) {",
+									"        pm.environment.set(\"auth_token\", response.token);",
+									"    } else if (response.access_token) {",
+									"        pm.environment.set(\"auth_token\", response.access_token);",
+									"    } else if (response.data && response.data.token) {",
+									"        pm.environment.set(\"auth_token\", response.data.token);",
+									"    }",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					]
+				},
+				{
+					"name": "Verificar Acesso",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/v1/auth/verificar-acesso",
+							"host": ["{{base_url}}"],
+							"path": ["v1", "auth", "verificar-acesso"]
+						},
+						"description": "Verifica se o usuário autenticado tem acesso ao sistema"
+					},
+					"response": []
+				},
+				{
+					"name": "Obter Usuário Atual",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/v1/auth/me",
+							"host": ["{{base_url}}"],
+							"path": ["v1", "auth", "me"]
+						},
+						"description": "Retorna informações do usuário autenticado"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "02 - Clínica - Atendimentos",
+			"item": [
+				{
+					"name": "Criar Atendimento",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"pacienteId\": \"00000000-0000-0000-0000-000000000000\",\n  \"profissionalId\": \"00000000-0000-0000-0000-000000000000\",\n  \"equipeSaudeId\": \"00000000-0000-0000-0000-000000000000\",\n  \"convenioId\": \"00000000-0000-0000-0000-000000000000\",\n  \"tipoAtendimento\": \"CONSULTA_MEDICA\",\n  \"motivo\": \"Consulta de rotina\",\n  \"localAtendimento\": \"UBS Centro\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/v1/atendimentos",
+							"host": ["{{base_url}}"],
+							"path": ["v1", "atendimentos"]
+						},
+						"description": "Cria um novo atendimento com status inicial AGENDADO ou EM_ATENDIMENTO"
+					},
+					"response": []
+				},
+				{
+					"name": "Iniciar Atendimento",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/v1/atendimentos/:id/iniciar",
+							"host": ["{{base_url}}"],
+							"path": ["v1", "atendimentos", ":id", "iniciar"],
+							"variable": [
+								{
+									"key": "id",
+									"value": ""
+								}
+							]
+						},
+						"description": "Inicia um atendimento, alterando status para EM_ANDAMENTO"
+					},
+					"response": []
+				},
+				{
+					"name": "Atualizar Triagem",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"queixaPrincipal\": \"Dor de cabeça\",\n  \"classificacaoRisco\": \"VERDE\",\n  \"prioridade\": \"NORMAL\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/v1/atendimentos/:id/triagem",
+							"host": ["{{base_url}}"],
+							"path": ["v1", "atendimentos", ":id", "triagem"],
+							"variable": [
+								{
+									"key": "id",
+									"value": ""
+								}
+							]
+						},
+						"description": "Atualiza dados de triagem (anamnese e classificação de risco) do atendimento"
+					},
+					"response": []
+				},
+				{
+					"name": "Atualizar Classificação de Risco",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"classificacaoRisco\": \"AMARELO\",\n  \"prioridade\": \"ALTA\",\n  \"gravidade\": \"MODERADA\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/v1/atendimentos/:id/classificacao-risco",
+							"host": ["{{base_url}}"],
+							"path": ["v1", "atendimentos", ":id", "classificacao-risco"],
+							"variable": [
+								{
+									"key": "id",
+									"value": ""
+								}
+							]
+						},
+						"description": "Atualiza a classificação de risco do atendimento"
+					},
+					"response": []
+				},
+				{
+					"name": "Encerrar Atendimento",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/v1/atendimentos/:id/encerrar",
+							"host": ["{{base_url}}"],
+							"path": ["v1", "atendimentos", ":id", "encerrar"],
+							"variable": [
+								{
+									"key": "id",
+									"value": ""
+								}
+							]
+						},
+						"description": "Encerra um atendimento, alterando status para CONCLUIDO e criando registro no prontuário"
+					},
+					"response": []
+				},
+				{
+					"name": "Listar Atendimentos do Paciente",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/v1/atendimentos/pacientes/:pacienteId/atendimentos?page=0&size=20&sort=dataHora,desc",
+							"host": ["{{base_url}}"],
+							"path": ["v1", "atendimentos", "pacientes", ":pacienteId", "atendimentos"],
+							"query": [
+								{
+									"key": "page",
+									"value": "0"
+								},
+								{
+									"key": "size",
+									"value": "20"
+								},
+								{
+									"key": "sort",
+									"value": "dataHora,desc"
+								}
+							],
+							"variable": [
+								{
+									"key": "pacienteId",
+									"value": ""
+								}
+							]
+						},
+						"description": "Retorna uma lista paginada de atendimentos de um paciente específico"
+					},
+					"response": []
+				},
+				{
+					"name": "Obter Atendimento por ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/v1/atendimentos/:id",
+							"host": ["{{base_url}}"],
+							"path": ["v1", "atendimentos", ":id"],
+							"variable": [
+								{
+									"key": "id",
+									"value": ""
+								}
+							]
+						},
+						"description": "Retorna um atendimento específico pelo seu ID"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "03 - Clínica - Consultas Médicas",
+			"item": [
+				{
+					"name": "Criar Consulta",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"pacienteId\": \"00000000-0000-0000-0000-000000000000\",\n  \"medicoId\": \"00000000-0000-0000-0000-000000000000\",\n  \"atendimentoId\": \"00000000-0000-0000-0000-000000000000\",\n  \"convenioId\": \"00000000-0000-0000-0000-000000000000\",\n  \"tipoConsulta\": \"CONSULTA_MEDICA\",\n  \"motivo\": \"Consulta de rotina\",\n  \"local\": \"UBS Centro\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/v1/consultas",
+							"host": ["{{base_url}}"],
+							"path": ["v1", "consultas"]
+						},
+						"description": "Cria uma nova consulta médica (pode vir com atendimentoId opcional)"
+					},
+					"response": []
+				},
+				{
+					"name": "Atualizar Anamnese",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"queixaPrincipal\": \"Dor de cabeça há 3 dias\",\n  \"historiaDoencaAtual\": \"Início súbito, sem fatores desencadeantes\",\n  \"medicamentosUso\": \"Paracetamol 500mg\",\n  \"alergias\": \"Nenhuma conhecida\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/v1/consultas/:id/anamnese",
+							"host": ["{{base_url}}"],
+							"path": ["v1", "consultas", ":id", "anamnese"],
+							"variable": [
+								{
+									"key": "id",
+									"value": ""
+								}
+							]
+						},
+						"description": "Atualiza a anamnese da consulta"
+					},
+					"response": []
+				},
+				{
+					"name": "Atualizar Diagnóstico",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"codigoCidPrincipal\": \"G44.1\",\n  \"codigoCidSecundario\": \"R51\",\n  \"conduta\": \"Prescrição de analgésico e retorno em 7 dias\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/v1/consultas/:id/diagnostico",
+							"host": ["{{base_url}}"],
+							"path": ["v1", "consultas", ":id", "diagnostico"],
+							"variable": [
+								{
+									"key": "id",
+									"value": ""
+								}
+							]
+						},
+						"description": "Atualiza o diagnóstico da consulta"
+					},
+					"response": []
+				},
+				{
+					"name": "Atualizar Prescrição",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"observacoesPrescricao\": \"Tomar após as refeições\",\n  \"orientacoes\": \"Repouso relativo\",\n  \"dieta\": \"Dieta leve\",\n  \"repouso\": \"Repouso relativo por 3 dias\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/v1/consultas/:id/prescricao",
+							"host": ["{{base_url}}"],
+							"path": ["v1", "consultas", ":id", "prescricao"],
+							"variable": [
+								{
+									"key": "id",
+									"value": ""
+								}
+							]
+						},
+						"description": "Atualiza a prescrição da consulta"
+					},
+					"response": []
+				},
+				{
+					"name": "Atualizar Exames",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"examesSolicitadosJson\": \"[{\\\"tipoExame\\\": \\\"HEMOGRAMA\\\", \\\"observacoes\\\": \\\"Jejum de 12h\\\"}]\",\n  \"quantidadeExames\": 1,\n  \"urgenciaExames\": false\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/v1/consultas/:id/exames",
+							"host": ["{{base_url}}"],
+							"path": ["v1", "consultas", ":id", "exames"],
+							"variable": [
+								{
+									"key": "id",
+									"value": ""
+								}
+							]
+						},
+						"description": "Atualiza os exames solicitados da consulta"
+					},
+					"response": []
+				},
+				{
+					"name": "Atualizar Encaminhamento",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"especialistaEncaminhado\": \"CARDIOLOGIA\",\n  \"motivoEncaminhamento\": \"Avaliação cardiológica\",\n  \"urgenciaEncaminhamento\": \"NORMAL\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/v1/consultas/:id/encaminhamento",
+							"host": ["{{base_url}}"],
+							"path": ["v1", "consultas", ":id", "encaminhamento"],
+							"variable": [
+								{
+									"key": "id",
+									"value": ""
+								}
+							]
+						},
+						"description": "Atualiza o encaminhamento da consulta"
+					},
+					"response": []
+				},
+				{
+					"name": "Atualizar Atestado",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"atestadoEmitido\": true,\n  \"tipoAtestado\": \"ATESTADO_MEDICO\",\n  \"diasAfastamento\": 3,\n  \"motivoAtestado\": \"Cefaleia\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/v1/consultas/:id/atestado",
+							"host": ["{{base_url}}"],
+							"path": ["v1", "consultas", ":id", "atestado"],
+							"variable": [
+								{
+									"key": "id",
+									"value": ""
+								}
+							]
+						},
+						"description": "Atualiza o atestado da consulta"
+					},
+					"response": []
+				},
+				{
+					"name": "Encerrar Consulta",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/v1/consultas/:id/encerrar",
+							"host": ["{{base_url}}"],
+							"path": ["v1", "consultas", ":id", "encerrar"],
+							"variable": [
+								{
+									"key": "id",
+									"value": ""
+								}
+							]
+						},
+						"description": "Encerra uma consulta, alterando status para CONCLUIDA e criando registro no prontuário"
+					},
+					"response": []
+				},
+				{
+					"name": "Listar Consultas do Paciente",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/v1/consultas/pacientes/:pacienteId/consultas?page=0&size=20&sort=dataConsulta,desc",
+							"host": ["{{base_url}}"],
+							"path": ["v1", "consultas", "pacientes", ":pacienteId", "consultas"],
+							"query": [
+								{
+									"key": "page",
+									"value": "0"
+								},
+								{
+									"key": "size",
+									"value": "20"
+								},
+								{
+									"key": "sort",
+									"value": "dataConsulta,desc"
+								}
+							],
+							"variable": [
+								{
+									"key": "pacienteId",
+									"value": ""
+								}
+							]
+						},
+						"description": "Retorna uma lista paginada de consultas de um paciente específico"
+					},
+					"response": []
+				},
+				{
+					"name": "Obter Consulta por ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/v1/consultas/:id",
+							"host": ["{{base_url}}"],
+							"path": ["v1", "consultas", ":id"],
+							"variable": [
+								{
+									"key": "id",
+									"value": ""
+								}
+							]
+						},
+						"description": "Retorna uma consulta específica pelo seu ID"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "04 - Clínica - Prontuário",
+			"item": [
+				{
+					"name": "Obter Timeline do Prontuário",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/v1/pacientes/:pacienteId/prontuario",
+							"host": ["{{base_url}}"],
+							"path": ["v1", "pacientes", ":pacienteId", "prontuario"],
+							"variable": [
+								{
+									"key": "pacienteId",
+									"value": ""
+								}
+							]
+						},
+						"description": "Retorna timeline completa do prontuário do paciente (atendimentos, consultas, receitas, dispensações)"
+					},
+					"response": []
+				},
+				{
+					"name": "Obter Resumo do Prontuário",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/v1/pacientes/:pacienteId/prontuario/resumo",
+							"host": ["{{base_url}}"],
+							"path": ["v1", "pacientes", ":pacienteId", "prontuario", "resumo"],
+							"variable": [
+								{
+									"key": "pacienteId",
+									"value": ""
+								}
+							]
+						},
+						"description": "Retorna resumo clínico do paciente (últimos eventos, principais diagnósticos, prescrições recentes)"
+					},
+					"response": []
+				},
+				{
+					"name": "Listar Eventos do Prontuário",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/v1/pacientes/:pacienteId/prontuario/eventos?page=0&size=20&sort=dataRegistro,desc",
+							"host": ["{{base_url}}"],
+							"path": ["v1", "pacientes", ":pacienteId", "prontuario", "eventos"],
+							"query": [
+								{
+									"key": "page",
+									"value": "0"
+								},
+								{
+									"key": "size",
+									"value": "20"
+								},
+								{
+									"key": "sort",
+									"value": "dataRegistro,desc"
+								},
+								{
+									"key": "tipoRegistro",
+									"value": "",
+									"description": "Filtrar por tipo (ATENDIMENTO, CONSULTA, RECEITA, DISPENSACAO)",
+									"disabled": true
+								},
+								{
+									"key": "dataInicio",
+									"value": "",
+									"description": "Data de início (ISO 8601)",
+									"disabled": true
+								},
+								{
+									"key": "dataFim",
+									"value": "",
+									"description": "Data de fim (ISO 8601)",
+									"disabled": true
+								}
+							],
+							"variable": [
+								{
+									"key": "pacienteId",
+									"value": ""
+								}
+							]
+						},
+						"description": "Retorna uma lista paginada e filtrável de eventos do prontuário"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "05 - Farmácia",
+			"item": [
+				{
+					"name": "Listar Receitas Pendentes",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/v1/farmacias/:farmaciaId/receitas-pendentes?page=0&size=20&sort=dataPrescricao,desc",
+							"host": ["{{base_url}}"],
+							"path": ["v1", "farmacias", ":farmaciaId", "receitas-pendentes"],
+							"query": [
+								{
+									"key": "page",
+									"value": "0"
+								},
+								{
+									"key": "size",
+									"value": "20"
+								},
+								{
+									"key": "sort",
+									"value": "dataPrescricao,desc"
+								}
+							],
+							"variable": [
+								{
+									"key": "farmaciaId",
+									"value": ""
+								}
+							]
+						},
+						"description": "Retorna uma lista paginada de receitas pendentes de dispensação para a farmácia"
+					},
+					"response": []
+				},
+				{
+					"name": "Registrar Dispensação",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"pacienteId\": \"00000000-0000-0000-0000-000000000000\",\n  \"receitaId\": \"00000000-0000-0000-0000-000000000000\",\n  \"profissionalSaudeId\": \"00000000-0000-0000-0000-000000000000\",\n  \"itens\": [\n    {\n      \"receitaItemId\": \"00000000-0000-0000-0000-000000000000\",\n      \"sigtapProcedimentoId\": \"00000000-0000-0000-0000-000000000000\",\n      \"quantidade\": 1,\n      \"unidade\": \"UNIDADE\",\n      \"lote\": \"LOTE123\",\n      \"validade\": \"2025-12-31\"\n    }\n  ]\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/v1/farmacias/:farmaciaId/dispensacoes",
+							"host": ["{{base_url}}"],
+							"path": ["v1", "farmacias", ":farmaciaId", "dispensacoes"],
+							"variable": [
+								{
+									"key": "farmaciaId",
+									"value": ""
+								}
+							]
+						},
+						"description": "Registra uma nova dispensação de medicamentos na farmácia"
+					},
+					"response": []
+				},
+				{
+					"name": "Listar Dispensações",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/v1/farmacias/:farmaciaId/dispensacoes?page=0&size=20&sort=dataDispensacao,desc",
+							"host": ["{{base_url}}"],
+							"path": ["v1", "farmacias", ":farmaciaId", "dispensacoes"],
+							"query": [
+								{
+									"key": "page",
+									"value": "0"
+								},
+								{
+									"key": "size",
+									"value": "20"
+								},
+								{
+									"key": "sort",
+									"value": "dataDispensacao,desc"
+								}
+							],
+							"variable": [
+								{
+									"key": "farmaciaId",
+									"value": ""
+								}
+							]
+						},
+						"description": "Retorna uma lista paginada de dispensações realizadas na farmácia"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "06 - Receitas",
+			"item": [
+				{
+					"name": "Criar Receita",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"pacienteId\": \"00000000-0000-0000-0000-000000000000\",\n  \"medicoId\": \"00000000-0000-0000-0000-000000000000\",\n  \"consultaId\": \"00000000-0000-0000-0000-000000000000\",\n  \"itens\": [\n    {\n      \"sigtapProcedimentoId\": \"00000000-0000-0000-0000-000000000000\",\n      \"quantidade\": 1,\n      \"unidade\": \"UNIDADE\",\n      \"posologia\": \"1 comprimido de 8/8h\",\n      \"duracaoTratamento\": 7\n    }\n  ]\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/v1/receitas",
+							"host": ["{{base_url}}"],
+							"path": ["v1", "receitas"]
+						},
+						"description": "Cria uma nova receita médica com seus itens"
+					},
+					"response": []
+				},
+				{
+					"name": "Obter Receita por ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/v1/receitas/:id",
+							"host": ["{{base_url}}"],
+							"path": ["v1", "receitas", ":id"],
+							"variable": [
+								{
+									"key": "id",
+									"value": ""
+								}
+							]
+						},
+						"description": "Retorna uma receita específica pelo seu ID com todos os itens"
+					},
+					"response": []
+				},
+				{
+					"name": "Listar Receitas do Paciente",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/v1/receitas/pacientes/:pacienteId?page=0&size=20&sort=dataPrescricao,desc",
+							"host": ["{{base_url}}"],
+							"path": ["v1", "receitas", "pacientes", ":pacienteId"],
+							"query": [
+								{
+									"key": "page",
+									"value": "0"
+								},
+								{
+									"key": "size",
+									"value": "20"
+								},
+								{
+									"key": "sort",
+									"value": "dataPrescricao,desc"
+								}
+							],
+							"variable": [
+								{
+									"key": "pacienteId",
+									"value": ""
+								}
+							]
+						},
+						"description": "Retorna uma lista paginada de receitas de um paciente específico"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "07 - Pacientes",
+			"item": [
+				{
+					"name": "Criar Paciente",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"nomeCompleto\": \"João Silva\",\n  \"sexo\": \"MASCULINO\",\n  \"dataNascimento\": \"1990-01-01\",\n  \"statusPaciente\": \"ATIVO\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/v1/pacientes",
+							"host": ["{{base_url}}"],
+							"path": ["v1", "pacientes"]
+						},
+						"description": "Cria um novo paciente no sistema"
+					},
+					"response": []
+				},
+				{
+					"name": "Listar Pacientes",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/v1/pacientes?page=0&size=20&sort=nomeCompleto,asc",
+							"host": ["{{base_url}}"],
+							"path": ["v1", "pacientes"],
+							"query": [
+								{
+									"key": "page",
+									"value": "0"
+								},
+								{
+									"key": "size",
+									"value": "20"
+								},
+								{
+									"key": "sort",
+									"value": "nomeCompleto,asc"
+								}
+							]
+						},
+						"description": "Retorna uma lista paginada de pacientes com apenas os dados básicos, sem relacionamentos"
+					},
+					"response": []
+				},
+				{
+					"name": "Obter Paciente por ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/v1/pacientes/:id",
+							"host": ["{{base_url}}"],
+							"path": ["v1", "pacientes", ":id"],
+							"variable": [
+								{
+									"key": "id",
+									"value": ""
+								}
+							]
+						},
+						"description": "Retorna um paciente específico pelo seu ID"
+					},
+					"response": []
+				},
+				{
+					"name": "Listar Pacientes Completo",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/v1/pacientes/completo?page=0&size=20&sort=nomeCompleto,asc",
+							"host": ["{{base_url}}"],
+							"path": ["v1", "pacientes", "completo"],
+							"query": [
+								{
+									"key": "page",
+									"value": "0"
+								},
+								{
+									"key": "size",
+									"value": "20"
+								},
+								{
+									"key": "sort",
+									"value": "nomeCompleto,asc"
+								}
+							]
+						},
+						"description": "Retorna uma lista paginada de pacientes com todos os relacionamentos"
+					},
+					"response": []
+				},
+				{
+					"name": "Atualizar Paciente",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"nomeCompleto\": \"João Silva Santos\",\n  \"sexo\": \"MASCULINO\",\n  \"dataNascimento\": \"1990-01-01\",\n  \"statusPaciente\": \"ATIVO\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/v1/pacientes/:id",
+							"host": ["{{base_url}}"],
+							"path": ["v1", "pacientes", ":id"],
+							"variable": [
+								{
+									"key": "id",
+									"value": ""
+								}
+							]
+						},
+						"description": "Atualiza um paciente existente"
+					},
+					"response": []
+				},
+				{
+					"name": "Excluir Paciente (Soft Delete)",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/v1/pacientes/:id",
+							"host": ["{{base_url}}"],
+							"path": ["v1", "pacientes", ":id"],
+							"variable": [
+								{
+									"key": "id",
+									"value": ""
+								}
+							]
+						},
+						"description": "Exclui um paciente (soft delete - marca como excluído)"
+					},
+					"response": []
+				},
+				{
+					"name": "Excluir Paciente Permanentemente",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/v1/pacientes/:id/permanente",
+							"host": ["{{base_url}}"],
+							"path": ["v1", "pacientes", ":id", "permanente"],
+							"variable": [
+								{
+									"key": "id",
+									"value": ""
+								}
+							]
+						},
+						"description": "Exclui um paciente permanentemente do banco de dados"
+					},
+					"response": []
+				},
+				{
+					"name": "Inativar Paciente",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/v1/pacientes/:id/inativar",
+							"host": ["{{base_url}}"],
+							"path": ["v1", "pacientes", ":id", "inativar"],
+							"variable": [
+								{
+									"key": "id",
+									"value": ""
+								}
+							]
+						},
+						"description": "Inativa um paciente (marca como inativo)"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "08 - Profissionais de Saúde",
+			"item": [
+				{
+					"name": "Criar Profissional de Saúde",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"nomeCompleto\": \"Dr. Maria Santos\",\n  \"dataNascimento\": \"1980-05-15\",\n  \"sexo\": \"FEMININO\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/v1/profissionais-saude",
+							"host": ["{{base_url}}"],
+							"path": ["v1", "profissionais-saude"]
+						},
+						"description": "Cria um novo profissional de saúde no sistema"
+					},
+					"response": []
+				},
+				{
+					"name": "Listar Profissionais de Saúde",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/v1/profissionais-saude?page=0&size=20&sort=nomeCompleto,asc",
+							"host": ["{{base_url}}"],
+							"path": ["v1", "profissionais-saude"],
+							"query": [
+								{
+									"key": "page",
+									"value": "0"
+								},
+								{
+									"key": "size",
+									"value": "20"
+								},
+								{
+									"key": "sort",
+									"value": "nomeCompleto,asc"
+								}
+							]
+						},
+						"description": "Retorna uma lista paginada de profissionais de saúde"
+					},
+					"response": []
+				},
+				{
+					"name": "Obter Profissional de Saúde por ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/v1/profissionais-saude/:id",
+							"host": ["{{base_url}}"],
+							"path": ["v1", "profissionais-saude", ":id"],
+							"variable": [
+								{
+									"key": "id",
+									"value": ""
+								}
+							]
+						},
+						"description": "Retorna um profissional de saúde específico pelo seu ID"
+					},
+					"response": []
+				},
+				{
+					"name": "Atualizar Profissional de Saúde",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"nomeCompleto\": \"Dr. Maria Santos Silva\",\n  \"dataNascimento\": \"1980-05-15\",\n  \"sexo\": \"FEMININO\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/v1/profissionais-saude/:id",
+							"host": ["{{base_url}}"],
+							"path": ["v1", "profissionais-saude", ":id"],
+							"variable": [
+								{
+									"key": "id",
+									"value": ""
+								}
+							]
+						},
+						"description": "Atualiza um profissional de saúde existente"
+					},
+					"response": []
+				},
+				{
+					"name": "Excluir Profissional de Saúde (Soft Delete)",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/v1/profissionais-saude/:id",
+							"host": ["{{base_url}}"],
+							"path": ["v1", "profissionais-saude", ":id"],
+							"variable": [
+								{
+									"key": "id",
+									"value": ""
+								}
+							]
+						},
+						"description": "Exclui um profissional de saúde (soft delete)"
+					},
+					"response": []
+				},
+				{
+					"name": "Excluir Profissional de Saúde Permanentemente",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/v1/profissionais-saude/:id/permanente",
+							"host": ["{{base_url}}"],
+							"path": ["v1", "profissionais-saude", ":id", "permanente"],
+							"variable": [
+								{
+									"key": "id",
+									"value": ""
+								}
+							]
+						},
+						"description": "Exclui um profissional de saúde permanentemente do banco de dados"
+					},
+					"response": []
+				},
+				{
+					"name": "Inativar Profissional de Saúde",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/v1/profissionais-saude/:id/inativar",
+							"host": ["{{base_url}}"],
+							"path": ["v1", "profissionais-saude", ":id", "inativar"],
+							"variable": [
+								{
+									"key": "id",
+									"value": ""
+								}
+							]
+						},
+						"description": "Inativa um profissional de saúde"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "09 - Médicos",
+			"item": [
+				{
+					"name": "Criar Médico",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"nomeCompleto\": \"Dr. João Silva\",\n  \"dataNascimento\": \"1975-03-20\",\n  \"sexo\": \"MASCULINO\",\n  \"crm\": \"12345\",\n  \"ufCrm\": \"SP\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/v1/medicos",
+							"host": ["{{base_url}}"],
+							"path": ["v1", "medicos"]
+						},
+						"description": "Cria um novo médico no sistema"
+					},
+					"response": []
+				},
+				{
+					"name": "Listar Médicos",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/v1/medicos?page=0&size=20&sort=nomeCompleto,asc",
+							"host": ["{{base_url}}"],
+							"path": ["v1", "medicos"],
+							"query": [
+								{
+									"key": "page",
+									"value": "0"
+								},
+								{
+									"key": "size",
+									"value": "20"
+								},
+								{
+									"key": "sort",
+									"value": "nomeCompleto,asc"
+								}
+							]
+						},
+						"description": "Retorna uma lista paginada de médicos"
+					},
+					"response": []
+				},
+				{
+					"name": "Obter Médico por ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/v1/medicos/:id",
+							"host": ["{{base_url}}"],
+							"path": ["v1", "medicos", ":id"],
+							"variable": [
+								{
+									"key": "id",
+									"value": ""
+								}
+							]
+						},
+						"description": "Retorna um médico específico pelo seu ID"
+					},
+					"response": []
+				},
+				{
+					"name": "Atualizar Médico",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"nomeCompleto\": \"Dr. João Silva Santos\",\n  \"dataNascimento\": \"1975-03-20\",\n  \"sexo\": \"MASCULINO\",\n  \"crm\": \"12345\",\n  \"ufCrm\": \"SP\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/v1/medicos/:id",
+							"host": ["{{base_url}}"],
+							"path": ["v1", "medicos", ":id"],
+							"variable": [
+								{
+									"key": "id",
+									"value": ""
+								}
+							]
+						},
+						"description": "Atualiza um médico existente"
+					},
+					"response": []
+				},
+				{
+					"name": "Excluir Médico (Soft Delete)",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/v1/medicos/:id",
+							"host": ["{{base_url}}"],
+							"path": ["v1", "medicos", ":id"],
+							"variable": [
+								{
+									"key": "id",
+									"value": ""
+								}
+							]
+						},
+						"description": "Exclui um médico (soft delete)"
+					},
+					"response": []
+				},
+				{
+					"name": "Excluir Médico Permanentemente",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/v1/medicos/:id/permanente",
+							"host": ["{{base_url}}"],
+							"path": ["v1", "medicos", ":id", "permanente"],
+							"variable": [
+								{
+									"key": "id",
+									"value": ""
+								}
+							]
+						},
+						"description": "Exclui um médico permanentemente do banco de dados"
+					},
+					"response": []
+				},
+				{
+					"name": "Inativar Médico",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/v1/medicos/:id/inativar",
+							"host": ["{{base_url}}"],
+							"path": ["v1", "medicos", ":id", "inativar"],
+							"variable": [
+								{
+									"key": "id",
+									"value": ""
+								}
+							]
+						},
+						"description": "Inativa um médico"
+					},
+					"response": []
+				},
+				{
+					"name": "Listar Especialidades do Médico",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/v1/medicos/:id/especialidades",
+							"host": ["{{base_url}}"],
+							"path": ["v1", "medicos", ":id", "especialidades"],
+							"variable": [
+								{
+									"key": "id",
+									"value": ""
+								}
+							]
+						},
+						"description": "Retorna lista de especialidades de um médico"
+					},
+					"response": []
+				},
+				{
+					"name": "Adicionar Especialidade ao Médico",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"codigoCbo\": \"225110\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/v1/medicos/:id/especialidades",
+							"host": ["{{base_url}}"],
+							"path": ["v1", "medicos", ":id", "especialidades"],
+							"variable": [
+								{
+									"key": "id",
+									"value": ""
+								}
+							]
+						},
+						"description": "Adiciona uma especialidade a um médico"
+					},
+					"response": []
+				},
+				{
+					"name": "Remover Especialidade do Médico",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/v1/medicos/:id/especialidades/:codigoCbo",
+							"host": ["{{base_url}}"],
+							"path": ["v1", "medicos", ":id", "especialidades", ":codigoCbo"],
+							"variable": [
+								{
+									"key": "id",
+									"value": ""
+								},
+								{
+									"key": "codigoCbo",
+									"value": ""
+								}
+							]
+						},
+						"description": "Remove uma especialidade de um médico"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "10 - Convênios",
+			"item": [
+				{
+					"name": "Criar Convênio",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"nome\": \"Convênio Exemplo\",\n  \"codigoAns\": \"123456\",\n  \"tipoConvenio\": \"PLANO_SAUDE\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/v1/convenios",
+							"host": ["{{base_url}}"],
+							"path": ["v1", "convenios"]
+						},
+						"description": "Cria um novo convênio no sistema"
+					},
+					"response": []
+				},
+				{
+					"name": "Listar Convênios",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/v1/convenios?page=0&size=20&sort=nome,asc",
+							"host": ["{{base_url}}"],
+							"path": ["v1", "convenios"],
+							"query": [
+								{
+									"key": "page",
+									"value": "0"
+								},
+								{
+									"key": "size",
+									"value": "20"
+								},
+								{
+									"key": "sort",
+									"value": "nome,asc"
+								}
+							]
+						},
+						"description": "Retorna uma lista paginada de convênios"
+					},
+					"response": []
+				},
+				{
+					"name": "Obter Convênio por ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/v1/convenios/:id",
+							"host": ["{{base_url}}"],
+							"path": ["v1", "convenios", ":id"],
+							"variable": [
+								{
+									"key": "id",
+									"value": ""
+								}
+							]
+						},
+						"description": "Retorna um convênio específico pelo seu ID"
+					},
+					"response": []
+				},
+				{
+					"name": "Atualizar Convênio",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"nome\": \"Convênio Exemplo Atualizado\",\n  \"codigoAns\": \"123456\",\n  \"tipoConvenio\": \"PLANO_SAUDE\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/v1/convenios/:id",
+							"host": ["{{base_url}}"],
+							"path": ["v1", "convenios", ":id"],
+							"variable": [
+								{
+									"key": "id",
+									"value": ""
+								}
+							]
+						},
+						"description": "Atualiza um convênio existente"
+					},
+					"response": []
+				},
+				{
+					"name": "Excluir Convênio (Soft Delete)",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/v1/convenios/:id",
+							"host": ["{{base_url}}"],
+							"path": ["v1", "convenios", ":id"],
+							"variable": [
+								{
+									"key": "id",
+									"value": ""
+								}
+							]
+						},
+						"description": "Exclui um convênio (soft delete)"
+					},
+					"response": []
+				},
+				{
+					"name": "Excluir Convênio Permanentemente",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/v1/convenios/:id/permanente",
+							"host": ["{{base_url}}"],
+							"path": ["v1", "convenios", ":id", "permanente"],
+							"variable": [
+								{
+									"key": "id",
+									"value": ""
+								}
+							]
+						},
+						"description": "Exclui um convênio permanentemente do banco de dados"
+					},
+					"response": []
+				},
+				{
+					"name": "Inativar Convênio",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/v1/convenios/:id/inativar",
+							"host": ["{{base_url}}"],
+							"path": ["v1", "convenios", ":id", "inativar"],
+							"variable": [
+								{
+									"key": "id",
+									"value": ""
+								}
+							]
+						},
+						"description": "Inativa um convênio"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "11 - Estabelecimentos",
+			"item": [
+				{
+					"name": "Criar Estabelecimento",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"nome\": \"UBS Centro\",\n  \"codigoCnes\": \"1234567\",\n  \"tipoEstabelecimento\": \"UNIDADE_BASICA_SAUDE\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/v1/estabelecimentos",
+							"host": ["{{base_url}}"],
+							"path": ["v1", "estabelecimentos"]
+						},
+						"description": "Cria um novo estabelecimento no sistema"
+					},
+					"response": []
+				},
+				{
+					"name": "Listar Estabelecimentos",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/v1/estabelecimentos?page=0&size=20&sort=nome,asc",
+							"host": ["{{base_url}}"],
+							"path": ["v1", "estabelecimentos"],
+							"query": [
+								{
+									"key": "page",
+									"value": "0"
+								},
+								{
+									"key": "size",
+									"value": "20"
+								},
+								{
+									"key": "sort",
+									"value": "nome,asc"
+								}
+							]
+						},
+						"description": "Retorna uma lista paginada de estabelecimentos"
+					},
+					"response": []
+				},
+				{
+					"name": "Obter Estabelecimento por ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/v1/estabelecimentos/:id",
+							"host": ["{{base_url}}"],
+							"path": ["v1", "estabelecimentos", ":id"],
+							"variable": [
+								{
+									"key": "id",
+									"value": ""
+								}
+							]
+						},
+						"description": "Retorna um estabelecimento específico pelo seu ID"
+					},
+					"response": []
+				},
+				{
+					"name": "Atualizar Estabelecimento",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"nome\": \"UBS Centro Atualizado\",\n  \"codigoCnes\": \"1234567\",\n  \"tipoEstabelecimento\": \"UNIDADE_BASICA_SAUDE\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/v1/estabelecimentos/:id",
+							"host": ["{{base_url}}"],
+							"path": ["v1", "estabelecimentos", ":id"],
+							"variable": [
+								{
+									"key": "id",
+									"value": ""
+								}
+							]
+						},
+						"description": "Atualiza um estabelecimento existente"
+					},
+					"response": []
+				},
+				{
+					"name": "Excluir Estabelecimento (Soft Delete)",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/v1/estabelecimentos/:id",
+							"host": ["{{base_url}}"],
+							"path": ["v1", "estabelecimentos", ":id"],
+							"variable": [
+								{
+									"key": "id",
+									"value": ""
+								}
+							]
+						},
+						"description": "Exclui um estabelecimento (soft delete)"
+					},
+					"response": []
+				},
+				{
+					"name": "Excluir Estabelecimento Permanentemente",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/v1/estabelecimentos/:id/permanente",
+							"host": ["{{base_url}}"],
+							"path": ["v1", "estabelecimentos", ":id", "permanente"],
+							"variable": [
+								{
+									"key": "id",
+									"value": ""
+								}
+							]
+						},
+						"description": "Exclui um estabelecimento permanentemente do banco de dados"
+					},
+					"response": []
+				},
+				{
+					"name": "Inativar Estabelecimento",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/v1/estabelecimentos/:id/inativar",
+							"host": ["{{base_url}}"],
+							"path": ["v1", "estabelecimentos", ":id", "inativar"],
+							"variable": [
+								{
+									"key": "id",
+									"value": ""
+								}
+							]
+						},
+						"description": "Inativa um estabelecimento"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "12 - Referência - SIGTAP",
+			"item": [
+				{
+					"name": "Listar Grupos SIGTAP",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/v1/sigtap/grupos",
+							"host": ["{{base_url}}"],
+							"path": ["v1", "sigtap", "grupos"]
+						},
+						"description": "Retorna a lista completa de todos os grupos SIGTAP ordenados por código"
+					},
+					"response": []
+				},
+				{
+					"name": "Pesquisar Procedimentos SIGTAP",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/v1/sigtap/procedimentos?page=0&size=20&sort=nome,asc",
+							"host": ["{{base_url}}"],
+							"path": ["v1", "sigtap", "procedimentos"],
+							"query": [
+								{
+									"key": "page",
+									"value": "0"
+								},
+								{
+									"key": "size",
+									"value": "20"
+								},
+								{
+									"key": "sort",
+									"value": "nome,asc"
+								},
+								{
+									"key": "grupoCodigo",
+									"value": "",
+									"description": "Código do grupo (ex: 06 para medicamentos)",
+									"disabled": true
+								},
+								{
+									"key": "subgrupoCodigo",
+									"value": "",
+									"description": "Código do subgrupo",
+									"disabled": true
+								},
+								{
+									"key": "busca",
+									"value": "",
+									"description": "Busca por código ou nome",
+									"disabled": true
+								}
+							]
+						},
+						"description": "Retorna uma lista paginada de procedimentos SIGTAP com filtros hierárquicos opcionais"
+					},
+					"response": []
+				},
+				{
+					"name": "Pesquisar CBO",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/v1/sigtap/cbo?page=0&size=50&sort=nome,asc",
+							"host": ["{{base_url}}"],
+							"path": ["v1", "sigtap", "cbo"],
+							"query": [
+								{
+									"key": "page",
+									"value": "0"
+								},
+								{
+									"key": "size",
+									"value": "50"
+								},
+								{
+									"key": "sort",
+									"value": "nome,asc"
+								},
+								{
+									"key": "grupoCodigo",
+									"value": "",
+									"description": "Código do grupo CBO",
+									"disabled": true
+								},
+								{
+									"key": "busca",
+									"value": "",
+									"description": "Busca por código ou nome",
+									"disabled": true
+								}
+							]
+						},
+						"description": "Pesquisa CBO (Classificação Brasileira de Ocupações) do SIGTAP"
+					},
+					"response": []
+				},
+				{
+					"name": "Pesquisar Medicamentos",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/v1/sigtap/medicamentos?page=0&size=20&sort=nome,asc",
+							"host": ["{{base_url}}"],
+							"path": ["v1", "sigtap", "medicamentos"],
+							"query": [
+								{
+									"key": "page",
+									"value": "0"
+								},
+								{
+									"key": "size",
+									"value": "20"
+								},
+								{
+									"key": "sort",
+									"value": "nome,asc"
+								},
+								{
+									"key": "busca",
+									"value": "",
+									"description": "Busca por código ou nome",
+									"disabled": true
+								}
+							]
+						},
+						"description": "Pesquisa medicamentos do SIGTAP"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "13 - Referência - CID",
+			"item": [
+				{
+					"name": "Listar Capítulos CID-10",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/v1/cid/cid10/capitulos",
+							"host": ["{{base_url}}"],
+							"path": ["v1", "cid", "cid10", "capitulos"]
+						},
+						"description": "Retorna lista de todos os capítulos CID-10"
+					},
+					"response": []
+				},
+				{
+					"name": "Obter Capítulo CID-10 por Número",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/v1/cid/cid10/capitulos/:numcap",
+							"host": ["{{base_url}}"],
+							"path": ["v1", "cid", "cid10", "capitulos", ":numcap"],
+							"variable": [
+								{
+									"key": "numcap",
+									"value": ""
+								}
+							]
+						},
+						"description": "Retorna um capítulo CID-10 específico pelo número"
+					},
+					"response": []
+				},
+				{
+					"name": "Pesquisar Categorias CID-10",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/v1/cid/cid10/categorias?page=0&size=20&sort=codigo,asc",
+							"host": ["{{base_url}}"],
+							"path": ["v1", "cid", "cid10", "categorias"],
+							"query": [
+								{
+									"key": "page",
+									"value": "0"
+								},
+								{
+									"key": "size",
+									"value": "20"
+								},
+								{
+									"key": "sort",
+									"value": "codigo,asc"
+								},
+								{
+									"key": "busca",
+									"value": "",
+									"description": "Busca por código ou descrição",
+									"disabled": true
+								}
+							]
+						},
+						"description": "Retorna uma lista paginada de categorias CID-10"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "14 - Sistema - Enums",
+			"item": [
+				{
+					"name": "Listar Todos os Enums",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/v1/enums",
+							"host": ["{{base_url}}"],
+							"path": ["v1", "enums"]
+						},
+						"description": "Retorna lista de todos os enums disponíveis"
+					},
+					"response": []
+				},
+				{
+					"name": "Obter Enum Específico",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/v1/enums/:enumName",
+							"host": ["{{base_url}}"],
+							"path": ["v1", "enums", ":enumName"],
+							"variable": [
+								{
+									"key": "enumName",
+									"value": "status-paciente",
+									"description": "Nome do enum (ex: status-paciente, sexo, tipo-consulta)"
+								}
+							]
+						},
+						"description": "Retorna valores de um enum específico"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "15 - Cirurgias",
+			"item": [
+				{
+					"name": "Criar Cirurgia",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"pacienteId\": \"00000000-0000-0000-0000-000000000000\",\n  \"medicoId\": \"00000000-0000-0000-0000-000000000000\",\n  \"estabelecimentoId\": \"00000000-0000-0000-0000-000000000000\",\n  \"dataCirurgia\": \"2025-01-15T10:00:00Z\",\n  \"tipoCirurgia\": \"ELETIVA\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/v1/cirurgias",
+							"host": ["{{base_url}}"],
+							"path": ["v1", "cirurgias"]
+						},
+						"description": "Cria uma nova cirurgia no sistema"
+					},
+					"response": []
+				},
+				{
+					"name": "Listar Cirurgias",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/v1/cirurgias?page=0&size=20&sort=dataCirurgia,desc",
+							"host": ["{{base_url}}"],
+							"path": ["v1", "cirurgias"],
+							"query": [
+								{
+									"key": "page",
+									"value": "0"
+								},
+								{
+									"key": "size",
+									"value": "20"
+								},
+								{
+									"key": "sort",
+									"value": "dataCirurgia,desc"
+								}
+							]
+						},
+						"description": "Retorna uma lista paginada de cirurgias"
+					},
+					"response": []
+				},
+				{
+					"name": "Obter Cirurgia por ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/v1/cirurgias/:id",
+							"host": ["{{base_url}}"],
+							"path": ["v1", "cirurgias", ":id"],
+							"variable": [
+								{
+									"key": "id",
+									"value": ""
+								}
+							]
+						},
+						"description": "Retorna uma cirurgia específica pelo seu ID"
+					},
+					"response": []
+				},
+				{
+					"name": "Listar Cirurgias por Paciente",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/v1/cirurgias/por-paciente/:pacienteId",
+							"host": ["{{base_url}}"],
+							"path": ["v1", "cirurgias", "por-paciente", ":pacienteId"],
+							"variable": [
+								{
+									"key": "pacienteId",
+									"value": ""
+								}
+							]
+						},
+						"description": "Retorna lista de cirurgias de um paciente"
+					},
+					"response": []
+				},
+				{
+					"name": "Atualizar Cirurgia",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"dataCirurgia\": \"2025-01-15T10:00:00Z\",\n  \"statusCirurgia\": \"AGENDADA\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/v1/cirurgias/:id",
+							"host": ["{{base_url}}"],
+							"path": ["v1", "cirurgias", ":id"],
+							"variable": [
+								{
+									"key": "id",
+									"value": ""
+								}
+							]
+						},
+						"description": "Atualiza uma cirurgia existente"
+					},
+					"response": []
+				},
+				{
+					"name": "Excluir Cirurgia (Soft Delete)",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/v1/cirurgias/:id",
+							"host": ["{{base_url}}"],
+							"path": ["v1", "cirurgias", ":id"],
+							"variable": [
+								{
+									"key": "id",
+									"value": ""
+								}
+							]
+						},
+						"description": "Exclui uma cirurgia (soft delete)"
+					},
+					"response": []
+				},
+				{
+					"name": "Excluir Cirurgia Permanentemente",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/v1/cirurgias/:id/permanente",
+							"host": ["{{base_url}}"],
+							"path": ["v1", "cirurgias", ":id", "permanente"],
+							"variable": [
+								{
+									"key": "id",
+									"value": ""
+								}
+							]
+						},
+						"description": "Exclui uma cirurgia permanentemente do banco de dados"
+					},
+					"response": []
+				},
+				{
+					"name": "Inativar Cirurgia",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/v1/cirurgias/:id/inativar",
+							"host": ["{{base_url}}"],
+							"path": ["v1", "cirurgias", ":id", "inativar"],
+							"variable": [
+								{
+									"key": "id",
+									"value": ""
+								}
+							]
+						},
+						"description": "Inativa uma cirurgia"
+					},
+					"response": []
+				}
+			]
+		}
+	]
+}
+

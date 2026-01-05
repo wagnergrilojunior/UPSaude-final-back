@@ -1,4 +1,6 @@
 package com.upsaude.service.impl.api.paciente;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -9,7 +11,9 @@ import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.dao.DataAccessException;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -100,8 +104,70 @@ public class PacienteServiceImpl implements PacienteService {
     public Page<PacienteSimplificadoResponse> listarSimplificado(Pageable pageable) {
         tenantService.validarTenantAtual();
         // Paciente é BaseEntityWithoutTenant: listagem simplificada via Entity evita problemas de projeção em native query
-        Page<Paciente> pacientes = pacienteRepository.findAllSemRelacionamentos(Objects.requireNonNull(pageable, "pageable"));
+        Pageable pageableMapeado = validarEMapearPageable(pageable);
+        Page<Paciente> pacientes = pacienteRepository.findAllSemRelacionamentos(Objects.requireNonNull(pageableMapeado, "pageable"));
         return pacientes.map(responseBuilder::buildSimplificado);
+    }
+
+    private Pageable validarEMapearPageable(Pageable pageable) {
+        if (pageable == null || pageable.getSort().isUnsorted()) {
+            return pageable;
+        }
+        
+        List<Sort.Order> orders = new ArrayList<>();
+        for (Sort.Order order : pageable.getSort()) {
+            String property = order.getProperty();
+            String mappedProperty = mapearCampoOrdenacao(property);
+            
+            if (mappedProperty != null) {
+                orders.add(new Sort.Order(order.getDirection(), mappedProperty));
+            } else {
+                log.warn("Campo de ordenação inválido ignorado: {}", property);
+            }
+        }
+        
+        if (orders.isEmpty()) {
+            return PageRequest.of(pageable.getPageNumber(), pageable.getPageSize());
+        }
+        
+        return PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), Sort.by(orders));
+    }
+    
+    private String mapearCampoOrdenacao(String campo) {
+        if (campo == null) {
+            return null;
+        }
+        
+        String campoLower = campo.toLowerCase();
+        
+        // Mapear campos comuns para os campos reais da entidade
+        switch (campoLower) {
+            case "nome":
+                return "nomeCompleto";
+            case "nomecompleto":
+            case "nome_completo":
+                return "nomeCompleto";
+            case "datanascimento":
+            case "data_nascimento":
+                return "dataNascimento";
+            case "status":
+            case "statuspaciente":
+            case "status_paciente":
+                return "statusPaciente";
+            case "createdat":
+            case "created_at":
+            case "criadoem":
+            case "criado_em":
+                return "createdAt";
+            case "updatedat":
+            case "updated_at":
+            case "atualizadoem":
+            case "atualizado_em":
+                return "updatedAt";
+            default:
+                // Se o campo já está correto (camelCase), retorna como está
+                return campo;
+        }
     }
 
     @Override

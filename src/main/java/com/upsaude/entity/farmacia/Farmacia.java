@@ -2,7 +2,6 @@ package com.upsaude.entity.farmacia;
 
 import com.upsaude.entity.BaseEntity;
 import com.upsaude.entity.sistema.integracao.IntegracaoGov;
-import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -54,7 +53,6 @@ public class Farmacia extends BaseEntity {
     private String observacoes;
 
     @OneToMany(mappedBy = "farmacia",
-               cascade = { CascadeType.PERSIST, CascadeType.MERGE },
                fetch = FetchType.LAZY)
     private List<IntegracaoGov> integracoesGov = new ArrayList<>();
 }
