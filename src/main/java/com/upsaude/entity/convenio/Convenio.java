@@ -16,6 +16,7 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 
 import java.time.LocalDate;
+import java.util.UUID;
 
 @Entity
 @Table(name = "convenios", schema = "public",
@@ -32,6 +33,12 @@ import java.time.LocalDate;
 @Data
 @EqualsAndHashCode(callSuper = true)
 public class Convenio extends BaseEntity {
+
+    @Column(name = "tenant_id", insertable = false, updatable = false)
+    private UUID tenantId;
+
+    @Column(name = "estabelecimento_id", insertable = false, updatable = false)
+    private UUID estabelecimentoId;
 
     @Column(name = "nome", nullable = false, length = 255)
     private String nome;
