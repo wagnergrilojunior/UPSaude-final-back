@@ -55,7 +55,7 @@ public class Convenio extends BaseEntity {
 
     @Convert(converter = StatusAtivoEnumConverter.class)
     @Column(name = "status", nullable = false)
-    private StatusAtivoEnum status;
+    private StatusAtivoEnum status = StatusAtivoEnum.ATIVO;
 
     @Column(name = "data_cadastro")
     private LocalDate dataCadastro;
@@ -65,6 +65,21 @@ public class Convenio extends BaseEntity {
 
     @Column(name = "rede_credenciada_regional", nullable = false)
     private Boolean redeCredenciadaRegional = false;
+
+    @Column(name = "cobertura_obstetricia", nullable = false)
+    private Boolean coberturaObstetricia = false;
+
+    @Column(name = "habilitado_tiss", nullable = false)
+    private Boolean habilitadoTiss = false;
+
+    @Column(name = "sincronizar_ans", nullable = false)
+    private Boolean sincronizarAns = false;
+
+    @Column(name = "sincronizar_sus", nullable = false)
+    private Boolean sincronizarSus = false;
+
+    @Column(name = "sincronizar_tiss", nullable = false)
+    private Boolean sincronizarTiss = false;
 
     public Convenio() {
     }
