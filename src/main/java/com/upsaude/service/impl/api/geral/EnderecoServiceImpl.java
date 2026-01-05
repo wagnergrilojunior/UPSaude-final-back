@@ -1,6 +1,5 @@
 package com.upsaude.service.impl.api.geral;
 
-
 import java.util.List;
 import java.util.UUID;
 
@@ -62,19 +61,22 @@ public class EnderecoServiceImpl implements EnderecoService {
 
             if (request.getEstado() != null) {
                 Estados estado = estadosRepository.findById(request.getEstado())
-                        .orElseThrow(() -> new NotFoundException("Estado não encontrado com ID: " + request.getEstado()));
+                        .orElseThrow(
+                                () -> new NotFoundException("Estado não encontrado com ID: " + request.getEstado()));
                 endereco.setEstado(estado);
             }
 
             if (request.getCidade() != null) {
                 Cidades cidade = cidadesRepository.findById(request.getCidade())
-                        .orElseThrow(() -> new NotFoundException("Cidade não encontrada com ID: " + request.getCidade()));
+                        .orElseThrow(
+                                () -> new NotFoundException("Cidade não encontrada com ID: " + request.getCidade()));
                 endereco.setCidade(cidade);
             }
 
             Endereco enderecoSalvo = findOrCreate(endereco);
             log.info("Endereço processado. ID: {} - {}", enderecoSalvo.getId(),
-                    enderecoSalvo.getId().equals(endereco.getId()) ? "Novo endereço criado" : "Endereço existente reutilizado");
+                    enderecoSalvo.getId().equals(endereco.getId()) ? "Novo endereço criado"
+                            : "Endereço existente reutilizado");
 
             return enderecoMapper.toResponse(enderecoSalvo);
         } catch (BadRequestException | NotFoundException e) {
@@ -165,7 +167,8 @@ public class EnderecoServiceImpl implements EnderecoService {
 
             if (request.getEstado() != null) {
                 Estados estado = estadosRepository.findById(request.getEstado())
-                        .orElseThrow(() -> new NotFoundException("Estado não encontrado com ID: " + request.getEstado()));
+                        .orElseThrow(
+                                () -> new NotFoundException("Estado não encontrado com ID: " + request.getEstado()));
                 enderecoExistente.setEstado(estado);
             } else {
                 enderecoExistente.setEstado(null);
@@ -173,7 +176,8 @@ public class EnderecoServiceImpl implements EnderecoService {
 
             if (request.getCidade() != null) {
                 Cidades cidade = cidadesRepository.findById(request.getCidade())
-                        .orElseThrow(() -> new NotFoundException("Cidade não encontrada com ID: " + request.getCidade()));
+                        .orElseThrow(
+                                () -> new NotFoundException("Cidade não encontrada com ID: " + request.getCidade()));
                 enderecoExistente.setCidade(cidade);
             } else {
                 enderecoExistente.setCidade(null);
@@ -187,7 +191,8 @@ public class EnderecoServiceImpl implements EnderecoService {
             log.warn("Tentativa de atualizar endereço não existente. ID: {}", id);
             throw e;
         } catch (BadRequestException e) {
-            log.warn("Erro de validação ao atualizar endereço. ID: {}, Request: {}. Erro: {}", id, request, e.getMessage());
+            log.warn("Erro de validação ao atualizar endereço. ID: {}, Request: {}. Erro: {}", id, request,
+                    e.getMessage());
             throw e;
         } catch (DataAccessException e) {
             log.error("Erro de acesso a dados ao atualizar endereço. ID: {}, Request: {}", id, request, e);
@@ -255,7 +260,7 @@ public class EnderecoServiceImpl implements EnderecoService {
             String cepNormalizado = normalizarCep(endereco.getCep());
 
             if ((logradouroNormalizado == null || logradouroNormalizado.trim().isEmpty()) &&
-                (cepNormalizado == null || cepNormalizado.trim().isEmpty())) {
+                    (cepNormalizado == null || cepNormalizado.trim().isEmpty())) {
                 log.debug("Endereço sem logradouro nem CEP. Criando novo sem buscar duplicados.");
 
             } else {
@@ -263,9 +268,15 @@ public class EnderecoServiceImpl implements EnderecoService {
                 UUID cidadeId = endereco.getCidade() != null ? endereco.getCidade().getId() : null;
                 UUID estadoId = endereco.getEstado() != null ? endereco.getEstado().getId() : null;
 
-                String tipoLogradouroStr = endereco.getTipoLogradouro() != null ? endereco.getTipoLogradouro().getCodigo().toString() : null;
+                String tipoLogradouroStr = endereco.getTipoLogradouro() != null
+                        ? endereco.getTipoLogradouro().getCodigo().toString()
+                        : null;
                 String cidadeIdStr = cidadeId != null ? cidadeId.toString() : null;
                 String estadoIdStr = estadoId != null ? estadoId.toString() : null;
+                String tipoEnderecoStr = endereco.getTipoEndereco() != null
+                        ? endereco.getTipoEndereco().getCodigo().toString()
+                        : null;
+                String zonaStr = endereco.getZona() != null ? endereco.getZona().getCodigo().toString() : null;
 
                 List<Endereco> enderecosExistentes = enderecoRepository.findByFieldsList(
                         tipoLogradouroStr,
@@ -274,17 +285,20 @@ public class EnderecoServiceImpl implements EnderecoService {
                         bairroNormalizado,
                         cepNormalizado,
                         cidadeIdStr,
-                        estadoIdStr
-                );
+                        estadoIdStr,
+                        tipoEnderecoStr,
+                        zonaStr);
 
                 if (!enderecosExistentes.isEmpty()) {
 
                     Endereco encontrado = enderecosExistentes.get(0);
                     if (enderecosExistentes.size() > 1) {
-                        log.warn("Múltiplos endereços encontrados ({}) para os mesmos campos. Usando o primeiro (ID: {})",
+                        log.warn(
+                                "Múltiplos endereços encontrados ({}) para os mesmos campos. Usando o primeiro (ID: {})",
                                 enderecosExistentes.size(), encontrado.getId());
                     } else {
-                        log.info("Endereço existente encontrado. ID: {} - Reutilizando endereço existente", encontrado.getId());
+                        log.info("Endereço existente encontrado. ID: {} - Reutilizando endereço existente",
+                                encontrado.getId());
                     }
                     return encontrado;
                 }
@@ -310,7 +324,8 @@ public class EnderecoServiceImpl implements EnderecoService {
             throw e;
         } catch (IncorrectResultSizeDataAccessException e) {
 
-            log.warn("Múltiplos endereços encontrados para os mesmos campos. Tentando buscar lista: {}", e.getMessage());
+            log.warn("Múltiplos endereços encontrados para os mesmos campos. Tentando buscar lista: {}",
+                    e.getMessage());
             UUID cidadeId = endereco.getCidade() != null ? endereco.getCidade().getId() : null;
             UUID estadoId = endereco.getEstado() != null ? endereco.getEstado().getId() : null;
             String logradouroNormalizado = normalizarString(endereco.getLogradouro());
@@ -318,9 +333,15 @@ public class EnderecoServiceImpl implements EnderecoService {
             String bairroNormalizado = normalizarString(endereco.getBairro());
             String cepNormalizado = normalizarCep(endereco.getCep());
 
-            String tipoLogradouroStr = endereco.getTipoLogradouro() != null ? endereco.getTipoLogradouro().getCodigo().toString() : null;
+            String tipoLogradouroStr = endereco.getTipoLogradouro() != null
+                    ? endereco.getTipoLogradouro().getCodigo().toString()
+                    : null;
             String cidadeIdStr = cidadeId != null ? cidadeId.toString() : null;
             String estadoIdStr = estadoId != null ? estadoId.toString() : null;
+            String tipoEnderecoStr = endereco.getTipoEndereco() != null
+                    ? endereco.getTipoEndereco().getCodigo().toString()
+                    : null;
+            String zonaStr = endereco.getZona() != null ? endereco.getZona().getCodigo().toString() : null;
 
             List<Endereco> enderecosExistentes = enderecoRepository.findByFieldsList(
                     tipoLogradouroStr,
@@ -329,12 +350,14 @@ public class EnderecoServiceImpl implements EnderecoService {
                     bairroNormalizado,
                     cepNormalizado,
                     cidadeIdStr,
-                    estadoIdStr
-            );
+                    estadoIdStr,
+                    tipoEnderecoStr,
+                    zonaStr);
 
             if (!enderecosExistentes.isEmpty()) {
                 Endereco encontrado = enderecosExistentes.get(0);
-                log.info("Endereço existente encontrado após tratamento de múltiplos resultados. ID: {}", encontrado.getId());
+                log.info("Endereço existente encontrado após tratamento de múltiplos resultados. ID: {}",
+                        encontrado.getId());
                 return encontrado;
             }
 
