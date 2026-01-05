@@ -7,6 +7,7 @@ import com.upsaude.api.request.embeddable.DadosDemograficosMedicoRequest;
 import com.upsaude.api.request.embeddable.DadosPessoaisBasicosMedicoRequest;
 import com.upsaude.api.request.embeddable.DocumentosBasicosMedicoRequest;
 import com.upsaude.api.request.embeddable.RegistroProfissionalMedicoRequest;
+import com.upsaude.api.request.geral.EnderecoRequest;
 import jakarta.validation.Valid;
 import java.util.HashSet;
 import java.util.Set;
@@ -49,13 +50,13 @@ public class MedicosRequest {
     @Valid
     private ContatoMedicoRequest contato;
 
-    private UUID enderecoMedico;
+    @Valid
+    @Schema(description = "Endereço médico como objeto completo. Se fornecido, será criado/atualizado.")
+    private EnderecoRequest enderecoMedico;
 
-    @Schema(description = "ID do estabelecimento para vincular o médico no cadastro inicial")
-    private UUID estabelecimentoId;
-
-    @Schema(description = "Tipo de vínculo profissional (1=EFETIVO, 2=CONTRATO, 3=TEMPORARIO, etc.). Padrão: 1 (EFETIVO)")
-    private Integer tipoVinculo;
+    @Schema(description = "Lista de IDs de estabelecimentos para vincular o médico. Se fornecido, substituirá os estabelecimentos existentes na atualização.")
+    @Builder.Default
+    private Set<UUID> estabelecimentos = new HashSet<>();
 
     private String observacoes;
 }
