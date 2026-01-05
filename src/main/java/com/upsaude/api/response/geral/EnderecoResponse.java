@@ -2,6 +2,7 @@ package com.upsaude.api.response.geral;
 import com.upsaude.api.response.referencia.geografico.CidadesResponse;
 import com.upsaude.api.response.referencia.geografico.EstadosResponse;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.upsaude.enums.TipoEnderecoEnum;
 import com.upsaude.enums.TipoLogradouroEnum;
@@ -49,6 +50,9 @@ public class EnderecoResponse {
     private String andar;
     private String bloco;
     private Boolean semNumero;
+    
+    @JsonIgnore // Estado já está dentro de cidade.estado, então não precisa ser exposto no nível raiz
     private EstadosResponse estado;
+    
     private CidadesResponse cidade;
 }

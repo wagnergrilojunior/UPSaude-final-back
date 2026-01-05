@@ -10,7 +10,7 @@ import com.upsaude.api.response.embeddable.DadosDemograficosMedicoResponse;
 import com.upsaude.api.response.embeddable.DadosPessoaisBasicosMedicoResponse;
 import com.upsaude.api.response.embeddable.DocumentosBasicosMedicoResponse;
 import com.upsaude.api.response.embeddable.RegistroProfissionalMedicoResponse;
-import com.upsaude.api.response.estabelecimento.MedicoEstabelecimentoResponse;
+import com.upsaude.api.response.estabelecimento.EstabelecimentosResponse;
 import com.upsaude.api.response.geral.EnderecoResponse;
 
 import lombok.AllArgsConstructor;
@@ -36,7 +36,7 @@ public class MedicosResponse {
     private ContatoMedicoResponse contato;
     private EnderecoResponse enderecoMedico;
     @Builder.Default
-    private List<MedicoEstabelecimentoResponse> estabelecimentos = new ArrayList<>();
+    private List<EstabelecimentosResponse> estabelecimentos = new ArrayList<>();
     @Builder.Default
     private List<EspecialidadeResponse> especialidades = new ArrayList<>();
     private String observacoes;

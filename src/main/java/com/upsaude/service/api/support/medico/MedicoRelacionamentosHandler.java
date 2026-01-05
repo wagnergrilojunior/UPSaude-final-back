@@ -5,20 +5,25 @@ import com.upsaude.entity.estabelecimento.Estabelecimentos;
 import com.upsaude.entity.estabelecimento.MedicoEstabelecimento;
 import com.upsaude.entity.paciente.Endereco;
 import com.upsaude.entity.profissional.Medicos;
+import com.upsaude.entity.referencia.geografico.Cidades;
+import com.upsaude.entity.referencia.geografico.Estados;
 import com.upsaude.entity.referencia.sigtap.SigtapOcupacao;
 import com.upsaude.entity.sistema.multitenancy.Tenant;
 import com.upsaude.enums.TipoVinculoProfissionalEnum;
 import com.upsaude.exception.NotFoundException;
+import com.upsaude.mapper.geral.EnderecoMapper;
 import com.upsaude.repository.estabelecimento.EstabelecimentosRepository;
 import com.upsaude.repository.paciente.EnderecoRepository;
+import com.upsaude.repository.referencia.geografico.CidadesRepository;
+import com.upsaude.repository.referencia.geografico.EstadosRepository;
 import com.upsaude.repository.referencia.sigtap.SigtapCboRepository;
+import com.upsaude.service.api.geral.EnderecoService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.time.OffsetDateTime;
 import java.util.LinkedHashSet;
-import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 
@@ -29,6 +34,10 @@ public class MedicoRelacionamentosHandler {
 
     private final SigtapCboRepository cboRepository;
     private final EnderecoRepository enderecoRepository;
+    private final EnderecoMapper enderecoMapper;
+    private final EnderecoService enderecoService;
+    private final CidadesRepository cidadesRepository;
+    private final EstadosRepository estadosRepository;
     private final EstabelecimentosRepository estabelecimentosRepository;
 
     public Medicos processarRelacionamentos(Medicos medico, MedicosRequest request, Tenant tenant) {
@@ -44,56 +53,122 @@ public class MedicoRelacionamentosHandler {
 
     private void processarEndereco(Medicos medico, MedicosRequest request, Tenant tenant) {
         if (request.getEnderecoMedico() != null) {
-            log.debug("Processando endereço médico como UUID: {}", request.getEnderecoMedico());
-            Endereco enderecoMedico = enderecoRepository.findById(Objects.requireNonNull(request.getEnderecoMedico()))
-                    .orElseThrow(() -> new NotFoundException("Endereço médico não encontrado com ID: " + request.getEnderecoMedico()));
-            medico.setEnderecoMedico(enderecoMedico);
+            log.debug("Processando endereço médico como objeto completo");
+            
+            var enderecoRequest = request.getEnderecoMedico();
+            boolean temCamposPreenchidos = (enderecoRequest.getLogradouro() != null && !enderecoRequest.getLogradouro().trim().isEmpty()) ||
+                (enderecoRequest.getCep() != null && !enderecoRequest.getCep().trim().isEmpty()) ||
+                (enderecoRequest.getCidade() != null) ||
+                (enderecoRequest.getEstado() != null);
+
+            if (!temCamposPreenchidos) {
+                log.warn("Endereço médico fornecido mas sem campos preenchidos. Ignorando endereço.");
+                medico.setEnderecoMedico(null);
+                return;
+            }
+
+            Endereco endereco = enderecoMapper.fromRequest(enderecoRequest);
+            endereco.setActive(true);
+            endereco.setTenant(tenant);
+
+            if (endereco.getSemNumero() == null) {
+                endereco.setSemNumero(false);
+            }
+
+            if (enderecoRequest.getEstado() != null) {
+                Estados estado = estadosRepository.findById(enderecoRequest.getEstado())
+                    .orElseThrow(() -> new NotFoundException("Estado não encontrado com ID: " + enderecoRequest.getEstado()));
+                endereco.setEstado(estado);
+            }
+
+            if (enderecoRequest.getCidade() != null) {
+                Cidades cidade = cidadesRepository.findById(enderecoRequest.getCidade())
+                    .orElseThrow(() -> new NotFoundException("Cidade não encontrada com ID: " + enderecoRequest.getCidade()));
+                endereco.setCidade(cidade);
+            }
+
+            if ((endereco.getLogradouro() == null || endereco.getLogradouro().trim().isEmpty()) &&
+                (endereco.getCep() == null || endereco.getCep().trim().isEmpty())) {
+                log.warn("Endereço sem logradouro nem CEP. Criando novo endereço sem buscar duplicados.");
+                Endereco enderecoSalvo = enderecoRepository.save(endereco);
+                medico.setEnderecoMedico(enderecoSalvo);
+                return;
+            }
+
+            Endereco enderecoProcessado = enderecoService.findOrCreate(endereco);
+            medico.setEnderecoMedico(enderecoProcessado);
         } else {
             log.debug("Endereço médico não fornecido. Mantendo endereço existente.");
         }
     }
 
     private void processarEstabelecimentos(Medicos medico, MedicosRequest request, Tenant tenant) {
-        if (request.getEstabelecimentoId() != null) {
-            log.debug("Processando estabelecimento médico. Estabelecimento ID: {}", request.getEstabelecimentoId());
-            
-            Estabelecimentos estabelecimento = estabelecimentosRepository.findByIdAndTenant(
-                    request.getEstabelecimentoId(), 
-                    tenant.getId()
-            ).orElseThrow(() -> new NotFoundException(
-                    "Estabelecimento não encontrado com ID: " + request.getEstabelecimentoId() + " para o tenant"));
-            
-            // Verificar se já existe vínculo (apenas na atualização)
-            boolean jaExiste = medico.getEstabelecimentos().stream()
-                    .anyMatch(me -> me.getEstabelecimento().getId().equals(request.getEstabelecimentoId()) 
-                            && me.getDataFim() == null);
-            
-            if (!jaExiste) {
-                MedicoEstabelecimento medicoEstabelecimento = new MedicoEstabelecimento();
-                medicoEstabelecimento.setMedico(medico);
-                medicoEstabelecimento.setEstabelecimento(estabelecimento);
-                medicoEstabelecimento.setTenant(tenant);
-                medicoEstabelecimento.setDataInicio(OffsetDateTime.now());
-                medicoEstabelecimento.setActive(true);
-                
-                // Tipo de vínculo: usar o fornecido ou padrão EFETIVO (1)
-                TipoVinculoProfissionalEnum tipoVinculo = request.getTipoVinculo() != null 
-                        ? TipoVinculoProfissionalEnum.fromCodigo(request.getTipoVinculo())
-                        : TipoVinculoProfissionalEnum.EFETIVO;
-                
-                if (tipoVinculo == null) {
-                    throw new IllegalArgumentException("Tipo de vínculo inválido: " + request.getTipoVinculo());
-                }
-                
-                medicoEstabelecimento.setTipoVinculo(tipoVinculo);
-                
-                medico.addMedicoEstabelecimento(medicoEstabelecimento);
-                log.debug("Vínculo com estabelecimento {} criado para o médico", request.getEstabelecimentoId());
-            } else {
-                log.debug("Vínculo com estabelecimento {} já existe. Mantendo vínculo existente.", request.getEstabelecimentoId());
+        if (request.getEstabelecimentos() != null && !request.getEstabelecimentos().isEmpty()) {
+            log.debug("Processando {} estabelecimento(s) para o médico", request.getEstabelecimentos().size());
+
+            Set<UUID> estabelecimentosIdsUnicos = new LinkedHashSet<>(request.getEstabelecimentos());
+
+            if (estabelecimentosIdsUnicos.size() != request.getEstabelecimentos().size()) {
+                log.warn("Lista de estabelecimentos contém IDs duplicados. Removendo duplicatas.");
             }
+
+            // Se é uma atualização (médico já tem ID), remover vínculos existentes que não estão na lista
+            // Se é uma criação (médico não tem ID), apenas adicionar os novos
+            if (medico.getId() != null) {
+                Set<UUID> estabelecimentosParaManter = new LinkedHashSet<>(estabelecimentosIdsUnicos);
+                // Remover vínculos que não estão na lista (marcar dataFim ou remover)
+                medico.getEstabelecimentos().removeIf(medicoEstabelecimento ->
+                    !estabelecimentosParaManter.contains(medicoEstabelecimento.getEstabelecimento().getId())
+                );
+            } else {
+                // Na criação, limpar lista inicial
+                medico.getEstabelecimentos().clear();
+            }
+
+            // Adicionar novos estabelecimentos
+            for (UUID estabelecimentoId : estabelecimentosIdsUnicos) {
+                if (estabelecimentoId == null) {
+                    log.warn("ID de estabelecimento nulo encontrado na lista. Ignorando.");
+                    continue;
+                }
+
+                Estabelecimentos estabelecimento = estabelecimentosRepository.findByIdAndTenant(
+                        estabelecimentoId, 
+                        tenant.getId()
+                ).orElseThrow(() -> new NotFoundException(
+                        "Estabelecimento não encontrado com ID: " + estabelecimentoId + " para o tenant"));
+
+                // Verificar se já está associado
+                boolean jaExiste = medico.getEstabelecimentos().stream()
+                        .anyMatch(me -> me.getEstabelecimento().getId().equals(estabelecimentoId)
+                                && me.getDataFim() == null);
+
+                if (!jaExiste) {
+                    MedicoEstabelecimento medicoEstabelecimento = new MedicoEstabelecimento();
+                    medicoEstabelecimento.setMedico(medico);
+                    medicoEstabelecimento.setEstabelecimento(estabelecimento);
+                    medicoEstabelecimento.setTenant(tenant);
+                    medicoEstabelecimento.setDataInicio(OffsetDateTime.now());
+                    medicoEstabelecimento.setActive(true);
+                    medicoEstabelecimento.setTipoVinculo(TipoVinculoProfissionalEnum.EFETIVO); // Padrão EFETIVO
+
+                    medico.addMedicoEstabelecimento(medicoEstabelecimento);
+                    log.debug("Vínculo com estabelecimento {} criado para o médico", estabelecimentoId);
+                } else {
+                    log.debug("Vínculo com estabelecimento {} já existe. Mantendo vínculo existente.", estabelecimentoId);
+                }
+            }
+
+            log.debug("{} estabelecimento(s) vinculado(s) ao médico com sucesso", medico.getEstabelecimentos().size());
         } else {
-            log.debug("Estabelecimento não fornecido. Médico será cadastrado sem vínculo inicial.");
+            // Se lista vazia ou null na criação, não adiciona estabelecimentos
+            // Se for atualização, mantém os existentes (não limpa)
+            if (medico.getId() == null) {
+                medico.getEstabelecimentos().clear();
+                log.debug("Nenhum estabelecimento fornecido no cadastro inicial. Lista de estabelecimentos será vazia.");
+            } else {
+                log.debug("Nenhum estabelecimento fornecido no request de atualização. Mantendo estabelecimentos existentes.");
+            }
         }
     }
 
