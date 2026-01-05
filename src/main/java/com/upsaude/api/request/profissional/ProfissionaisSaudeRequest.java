@@ -1,7 +1,5 @@
 package com.upsaude.api.request.profissional;
 
-import java.util.HashSet;
-import java.util.Set;
 import java.util.UUID;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -12,7 +10,6 @@ import com.upsaude.api.request.embeddable.DadosDemograficosProfissionalRequest;
 import com.upsaude.api.request.embeddable.DadosPessoaisBasicosProfissionalRequest;
 import com.upsaude.api.request.embeddable.DocumentosBasicosProfissionalRequest;
 import com.upsaude.api.request.embeddable.RegistroProfissionalRequest;
-import com.upsaude.api.request.geral.EnderecoRequest;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.Valid;
@@ -54,13 +51,6 @@ public class ProfissionaisSaudeRequest {
     private ContatoProfissionalRequest contato;
 
     private UUID enderecoProfissional;
-
-    @Deprecated
-    @Valid
-    private EnderecoRequest enderecoProfissionalCompleto;
-
-    @Builder.Default
-    private Set<UUID> especialidades = new HashSet<>();
 
     private String observacoes;
 }

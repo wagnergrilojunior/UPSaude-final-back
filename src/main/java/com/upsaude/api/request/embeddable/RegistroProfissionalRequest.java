@@ -5,7 +5,6 @@ import com.upsaude.enums.StatusAtivoEnum;
 import com.upsaude.util.converter.StatusAtivoEnumDeserializer;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -14,7 +13,6 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.OffsetDateTime;
-import java.util.UUID;
 
 @Getter
 @Setter
@@ -27,9 +25,6 @@ public class RegistroProfissionalRequest {
     @NotBlank(message = "Registro profissional é obrigatório")
     @Size(max = 20, message = "Registro deve ter no máximo 20 caracteres")
     private String registroProfissional;
-
-    @NotNull(message = "Conselho profissional é obrigatório")
-    private UUID conselho;
 
     @Size(max = 2, message = "UF registro deve ter no máximo 2 caracteres")
     private String ufRegistro;
