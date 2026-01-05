@@ -207,6 +207,31 @@ public class CirurgiasController {
         }
     }
 
+    @DeleteMapping("/{id}/permanente")
+    @Operation(summary = "Excluir cirurgia permanentemente", description = "Remove permanentemente uma cirurgia do banco de dados")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "204", description = "Cirurgia excluída com sucesso"),
+        @ApiResponse(responseCode = "404", description = "Cirurgia não encontrada"),
+        @ApiResponse(responseCode = "403", description = "Acesso negado")
+    })
+    public ResponseEntity<Void> excluirPermanente(
+        @Parameter(description = "ID da cirurgia", required = true)
+        @PathVariable UUID id) {
+        log.debug("REQUEST DELETE /v1/cirurgias/{}/permanente", id);
+        try {
+            cirurgiaService.excluir(id);
+            log.info("Cirurgia excluída permanentemente com sucesso. ID: {}", id);
+            return ResponseEntity.noContent().build();
+        } catch (NotFoundException ex) {
+            log.warn("Cirurgia não encontrada para exclusão — ID: {}, mensagem: {}", id, ex.getMessage());
+            throw ex;
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao excluir cirurgia — Path: /v1/cirurgias/{}/permanente, Method: DELETE, ID: {}, Exception: {}",
+                id, id, ex.getClass().getName(), ex);
+            throw ex;
+        }
+    }
+
     @PatchMapping("/{id}/inativar")
     @Operation(summary = "Inativar cirurgia", description = "Inativa uma cirurgia no sistema alterando seu status")
     @ApiResponses(value = {
