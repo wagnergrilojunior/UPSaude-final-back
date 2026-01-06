@@ -10,8 +10,8 @@ import com.upsaude.entity.sistema.lgpd.LGPDConsentimento;
 import com.upsaude.mapper.config.MappingConfig;
 import com.upsaude.mapper.paciente.PacienteMapper;
 
-@Mapper(config = MappingConfig.class, uses = {PacienteMapper.class})
-public interface LGPDConsentimentoMapper  {
+@Mapper(config = MappingConfig.class)
+public interface LGPDConsentimentoMapper {
 
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
@@ -27,6 +27,6 @@ public interface LGPDConsentimentoMapper  {
     @Mapping(target = "paciente", ignore = true)
     void updateFromRequest(LGPDConsentimentoRequest request, @MappingTarget LGPDConsentimento entity);
 
-    @Mapping(target = "paciente", source = "paciente", qualifiedByName = "toResponseCompleto")
+    @Mapping(target = "paciente", ignore = true)
     LGPDConsentimentoResponse toResponse(LGPDConsentimento entity);
 }

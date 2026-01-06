@@ -1,4 +1,5 @@
 package com.upsaude.service.api.support.paciente;
+
 import java.util.UUID;
 
 import org.springframework.stereotype.Service;
@@ -21,7 +22,7 @@ public class PacienteCreator {
 
     private final PacienteValidationService validationService;
     private final PacienteMapper pacienteMapper;
-    private final PacienteOneToOneRelationshipHandler oneToOneHandler;
+    private final PacienteAssociacoesManager associacoesManager;
     private final PacienteRepository pacienteRepository;
     private final PacienteIdentificadorRepository identificadorRepository;
     private final PacienteContatoRepository contatoRepository;
@@ -30,7 +31,8 @@ public class PacienteCreator {
         log.debug("Criando novo paciente: {}", request != null ? request.getNomeCompleto() : "null");
 
         validationService.validarObrigatorios(request);
-        validationService.validarUnicidadeParaCriacao(request, pacienteRepository, identificadorRepository, contatoRepository, tenantId);
+        validationService.validarUnicidadeParaCriacao(request, pacienteRepository, identificadorRepository,
+                contatoRepository, tenantId);
         validationService.sanitizarFlags(request);
 
         Paciente paciente = pacienteMapper.fromRequest(request);
@@ -39,14 +41,11 @@ public class PacienteCreator {
             paciente.setStatusPaciente(StatusPacienteEnum.ATIVO);
         }
 
-        // Processar relacionamentos que usam UUIDs (buscar entidades existentes)
-        oneToOneHandler.processarRelacionamentosPorUuid(paciente, request);
+        // Processar todas as associações (usando cascades para salvar)
+        associacoesManager.processarTodas(paciente, request, tenantId);
 
-        // Salvar paciente primeiro para obter ID
+        // Salvar paciente e todas as associações em cascata
         Paciente pacienteSalvo = pacienteRepository.save(paciente);
-        
-        // Processar relacionamentos que criam novas entidades (após paciente ter ID)
-        oneToOneHandler.processarRelacionamentosNovos(pacienteSalvo, request);
 
         log.info("Paciente criado com sucesso. ID: {}, Tenant: {}", pacienteSalvo.getId(), tenantId);
 

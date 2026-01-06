@@ -13,7 +13,7 @@ public class EstadoCivilEnumSerializer extends JsonSerializer<EstadoCivilEnum> {
         if (value == null) {
             gen.writeNull();
         } else {
-            gen.writeString(value.getDescricao());
+            gen.writeNumber(value.getCodigo());
         }
     }
 }

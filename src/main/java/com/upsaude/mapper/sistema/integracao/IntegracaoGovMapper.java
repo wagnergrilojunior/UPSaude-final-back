@@ -9,9 +9,10 @@ import com.upsaude.mapper.paciente.PacienteMapper;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
+import org.mapstruct.Named;
 
-@Mapper(config = MappingConfig.class, uses = {PacienteMapper.class})
-public interface IntegracaoGovMapper  {
+@Mapper(config = MappingConfig.class, uses = { PacienteMapper.class })
+public interface IntegracaoGovMapper {
 
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
@@ -27,6 +28,10 @@ public interface IntegracaoGovMapper  {
     @Mapping(target = "paciente", ignore = true)
     void updateFromRequest(IntegracaoGovRequest request, @MappingTarget IntegracaoGov entity);
 
-    @Mapping(target = "paciente", source = "paciente", qualifiedByName = "toResponseCompleto")
+    @Mapping(target = "paciente", source = "paciente")
     IntegracaoGovResponse toResponse(IntegracaoGov entity);
+
+    @Named("toResponseWithoutPatient")
+    @Mapping(target = "paciente", ignore = true)
+    IntegracaoGovResponse toResponseWithoutPatient(IntegracaoGov entity);
 }

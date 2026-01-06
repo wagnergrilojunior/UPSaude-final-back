@@ -1,4 +1,5 @@
 package com.upsaude.service.api.support.paciente;
+
 import java.util.Objects;
 import java.util.UUID;
 
@@ -22,7 +23,7 @@ public class PacienteUpdater {
     private final PacienteValidationService validationService;
     private final PacienteMapper pacienteMapper;
     private final PacienteTenantEnforcer tenantEnforcer;
-    private final PacienteOneToOneRelationshipHandler oneToOneHandler;
+    private final PacienteAssociacoesManager associacoesManager;
     private final PacienteRepository pacienteRepository;
     private final PacienteIdentificadorRepository identificadorRepository;
     private final PacienteContatoRepository contatoRepository;
@@ -31,13 +32,16 @@ public class PacienteUpdater {
         log.debug("Atualizando paciente. ID: {}", id);
 
         validationService.validarObrigatorios(request);
-        validationService.validarUnicidadeParaAtualizacao(id, request, pacienteRepository, identificadorRepository, contatoRepository, tenantId);
+        validationService.validarUnicidadeParaAtualizacao(id, request, pacienteRepository, identificadorRepository,
+                contatoRepository, tenantId);
         validationService.sanitizarFlags(request);
 
         Paciente pacienteExistente = tenantEnforcer.validarAcesso(id, tenantId);
 
         pacienteMapper.updateFromRequest(request, pacienteExistente);
-        oneToOneHandler.processarRelacionamentos(pacienteExistente, request);
+
+        // Processar todas as associações (incluindo atualizações)
+        associacoesManager.processarTodas(pacienteExistente, request, tenantId);
 
         Paciente pacienteAtualizado = pacienteRepository.save(Objects.requireNonNull(pacienteExistente));
         log.info("Paciente atualizado com sucesso. ID: {}, Tenant: {}", pacienteAtualizado.getId(), tenantId);

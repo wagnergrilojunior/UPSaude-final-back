@@ -1,4 +1,5 @@
 package com.upsaude.service.impl.api.paciente;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -16,6 +17,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.context.annotation.Primary;
+import jakarta.annotation.PostConstruct;
 
 import com.upsaude.api.request.paciente.PacienteRequest;
 import com.upsaude.api.response.paciente.PacienteResponse;
@@ -28,7 +31,6 @@ import com.upsaude.exception.NotFoundException;
 import com.upsaude.repository.paciente.PacienteRepository;
 import com.upsaude.service.api.paciente.PacienteService;
 import com.upsaude.service.api.sistema.multitenancy.TenantService;
-import com.upsaude.service.api.support.paciente.PacienteAssociacoesManager;
 import com.upsaude.service.api.support.paciente.PacienteCreator;
 import com.upsaude.service.api.support.paciente.PacienteDomainService;
 import com.upsaude.service.api.support.paciente.PacienteResponseBuilder;
@@ -40,6 +42,7 @@ import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Service
+@Primary
 @RequiredArgsConstructor
 public class PacienteServiceImpl implements PacienteService {
 
@@ -48,10 +51,14 @@ public class PacienteServiceImpl implements PacienteService {
     private final TenantService tenantService;
     private final PacienteCreator pacienteCreator;
     private final PacienteUpdater pacienteUpdater;
-    private final PacienteAssociacoesManager associacoesManager;
     private final PacienteTenantEnforcer tenantEnforcer;
     private final PacienteResponseBuilder responseBuilder;
     private final PacienteDomainService domainService;
+
+    @PostConstruct
+    public void init() {
+        log.info("PACIENTE SERVICE IMPL INITIALIZED SUCCESSFULLY");
+    }
 
     @Override
     @Transactional
@@ -59,7 +66,6 @@ public class PacienteServiceImpl implements PacienteService {
         try {
             UUID tenantId = tenantService.validarTenantAtual();
             Paciente paciente = pacienteCreator.criar(request, tenantId);
-            associacoesManager.processarTodas(paciente, request, tenantId);
             PacienteResponse response = responseBuilder.build(paciente);
 
             Cache cache = cacheManager.getCache(CacheKeyUtil.CACHE_PACIENTES);
@@ -90,7 +96,6 @@ public class PacienteServiceImpl implements PacienteService {
         return responseBuilder.build(paciente);
     }
 
-
     @Override
     @Transactional(readOnly = true)
     public Page<PacienteResponse> listar(Pageable pageable) {
@@ -105,9 +110,11 @@ public class PacienteServiceImpl implements PacienteService {
     @Transactional(readOnly = true)
     public Page<PacienteSimplificadoResponse> listarSimplificado(Pageable pageable) {
         tenantService.validarTenantAtual();
-        // Paciente é BaseEntityWithoutTenant: listagem simplificada via Entity evita problemas de projeção em native query
+        // Paciente é BaseEntityWithoutTenant: listagem simplificada via Entity evita
+        // problemas de projeção em native query
         Pageable pageableMapeado = validarEMapearPageable(pageable);
-        Page<Paciente> pacientes = pacienteRepository.findAllSemRelacionamentos(Objects.requireNonNull(pageableMapeado, "pageable"));
+        Page<Paciente> pacientes = pacienteRepository
+                .findAllSemRelacionamentos(Objects.requireNonNull(pageableMapeado, "pageable"));
         return pacientes.map(responseBuilder::buildSimplificado);
     }
 
@@ -115,33 +122,33 @@ public class PacienteServiceImpl implements PacienteService {
         if (pageable == null || pageable.getSort().isUnsorted()) {
             return pageable;
         }
-        
+
         List<Sort.Order> orders = new ArrayList<>();
         for (Sort.Order order : pageable.getSort()) {
             String property = order.getProperty();
             String mappedProperty = mapearCampoOrdenacao(property);
-            
+
             if (mappedProperty != null) {
                 orders.add(new Sort.Order(order.getDirection(), mappedProperty));
             } else {
                 log.warn("Campo de ordenação inválido ignorado: {}", property);
             }
         }
-        
+
         if (orders.isEmpty()) {
             return PageRequest.of(pageable.getPageNumber(), pageable.getPageSize());
         }
-        
+
         return PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), Sort.by(orders));
     }
-    
+
     private String mapearCampoOrdenacao(String campo) {
         if (campo == null) {
             return null;
         }
-        
+
         String campoLower = campo.toLowerCase();
-        
+
         // Mapear campos comuns para os campos reais da entidade
         switch (campoLower) {
             case "nome":
@@ -179,7 +186,6 @@ public class PacienteServiceImpl implements PacienteService {
         try {
             UUID tenantId = tenantService.validarTenantAtual();
             Paciente paciente = pacienteUpdater.atualizar(id, request, tenantId);
-            associacoesManager.processarTodas(paciente, request, tenantId);
             return responseBuilder.build(paciente);
         } catch (BadRequestException | NotFoundException e) {
             log.warn("Erro de validação ao atualizar Paciente. Erro: {}", e.getMessage());

@@ -13,36 +13,15 @@ import com.upsaude.api.response.deficiencia.DeficienciasPacienteResponse;
 import com.upsaude.api.response.geral.EnderecoResponse;
 import com.upsaude.api.response.sistema.lgpd.LGPDConsentimentoResponse;
 import com.upsaude.api.response.sistema.integracao.IntegracaoGovResponse;
-import com.upsaude.enums.EscolaridadeEnum;
-import com.upsaude.enums.EstadoCivilEnum;
-import com.upsaude.enums.IdentidadeGeneroEnum;
-import com.upsaude.enums.NacionalidadeEnum;
-import com.upsaude.enums.OrientacaoSexualEnum;
-import com.upsaude.enums.RacaCorEnum;
 import com.upsaude.enums.SexoEnum;
 import com.upsaude.enums.StatusPacienteEnum;
 import com.upsaude.enums.TipoAtendimentoPreferencialEnum;
-import com.upsaude.enums.TipoCnsEnum;
-import com.upsaude.util.converter.EscolaridadeEnumDeserializer;
-import com.upsaude.util.converter.EscolaridadeEnumSerializer;
-import com.upsaude.util.converter.EstadoCivilEnumDeserializer;
-import com.upsaude.util.converter.EstadoCivilEnumSerializer;
-import com.upsaude.util.converter.IdentidadeGeneroEnumDeserializer;
-import com.upsaude.util.converter.IdentidadeGeneroEnumSerializer;
-import com.upsaude.util.converter.NacionalidadeEnumDeserializer;
-import com.upsaude.util.converter.NacionalidadeEnumSerializer;
-import com.upsaude.util.converter.OrientacaoSexualEnumDeserializer;
-import com.upsaude.util.converter.OrientacaoSexualEnumSerializer;
-import com.upsaude.util.converter.RacaCorEnumDeserializer;
-import com.upsaude.util.converter.RacaCorEnumSerializer;
 import com.upsaude.util.converter.SexoEnumDeserializer;
 import com.upsaude.util.converter.SexoEnumSerializer;
 import com.upsaude.util.converter.StatusPacienteEnumDeserializer;
 import com.upsaude.util.converter.StatusPacienteEnumSerializer;
 import com.upsaude.util.converter.TipoAtendimentoPreferencialEnumDeserializer;
 import com.upsaude.util.converter.TipoAtendimentoPreferencialEnumSerializer;
-import com.upsaude.util.converter.TipoCnsEnumDeserializer;
-import com.upsaude.util.converter.TipoCnsEnumSerializer;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -62,9 +41,7 @@ public class PacienteResponse {
     private OffsetDateTime updatedAt;
     private Boolean active;
     private String nomeCompleto;
-    private String cpf;
-    private String rg;
-    private String cns;
+    private String nomeSocial;
     private LocalDate dataNascimento;
     private Integer idade;
 
@@ -72,83 +49,41 @@ public class PacienteResponse {
     @JsonDeserialize(using = SexoEnumDeserializer.class)
     private SexoEnum sexo;
 
-    @JsonSerialize(using = EstadoCivilEnumSerializer.class)
-    @JsonDeserialize(using = EstadoCivilEnumDeserializer.class)
-    private EstadoCivilEnum estadoCivil;
-    private String telefone;
-    private String email;
-    private String nomeMae;
-    private String nomePai;
-    private String responsavelNome;
-    private String responsavelCpf;
-    private String responsavelTelefone;
-    private ConvenioResponse convenio;
-    private com.upsaude.api.response.embeddable.InformacoesConvenioPacienteResponse informacoesConvenio;
-    private String observacoes;
-
-    @JsonSerialize(using = RacaCorEnumSerializer.class)
-    @JsonDeserialize(using = RacaCorEnumDeserializer.class)
-    private RacaCorEnum racaCor;
-
-    @JsonSerialize(using = NacionalidadeEnumSerializer.class)
-    @JsonDeserialize(using = NacionalidadeEnumDeserializer.class)
-    private NacionalidadeEnum nacionalidade;
-    private String paisNascimento;
-    private String naturalidade;
-    private String municipioNascimentoIbge;
-
-    @JsonSerialize(using = EscolaridadeEnumSerializer.class)
-    @JsonDeserialize(using = EscolaridadeEnumDeserializer.class)
-    private EscolaridadeEnum escolaridade;
-
-    private String ocupacaoProfissao;
-    private Boolean situacaoRua;
-
     @JsonSerialize(using = StatusPacienteEnumSerializer.class)
     @JsonDeserialize(using = StatusPacienteEnumDeserializer.class)
     private StatusPacienteEnum statusPaciente;
-    private LocalDate dataObito;
-    private String causaObitoCid10;
-    private Boolean cartaoSusAtivo;
-    private LocalDate dataAtualizacaoCns;
+
+    private String telefone;
+    private String email;
+    private String observacoes;
 
     @JsonSerialize(using = TipoAtendimentoPreferencialEnumSerializer.class)
     @JsonDeserialize(using = TipoAtendimentoPreferencialEnumDeserializer.class)
     private TipoAtendimentoPreferencialEnum tipoAtendimentoPreferencial;
 
-    private String origemCadastro;
-    private String nomeSocial;
-
-    @JsonSerialize(using = IdentidadeGeneroEnumSerializer.class)
-    @JsonDeserialize(using = IdentidadeGeneroEnumDeserializer.class)
-    private IdentidadeGeneroEnum identidadeGenero;
-
-    @JsonSerialize(using = OrientacaoSexualEnumSerializer.class)
-    @JsonDeserialize(using = OrientacaoSexualEnumDeserializer.class)
-    private OrientacaoSexualEnum orientacaoSexual;
-    private Boolean possuiDeficiencia;
-    private String tipoDeficiencia;
-    private Boolean cnsValidado;
-
-    @JsonSerialize(using = TipoCnsEnumSerializer.class)
-    @JsonDeserialize(using = TipoCnsEnumDeserializer.class)
-    private TipoCnsEnum tipoCns;
-
-    private Boolean acompanhadoPorEquipeEsf;
+    private ConvenioResponse convenio;
+    private com.upsaude.api.response.embeddable.InformacoesConvenioPacienteResponse informacoesConvenio;
 
     @Builder.Default
     private List<EnderecoResponse> enderecos = new ArrayList<>();
 
+    @Builder.Default
+    private List<PacienteIdentificadorResponse> identificadores = new ArrayList<>();
+
+    @Builder.Default
+    private List<PacienteContatoResponse> contatos = new ArrayList<>();
+
     private DadosSociodemograficosResponse dadosSociodemograficos;
     private DadosClinicosBasicosResponse dadosClinicosBasicos;
     private ResponsavelLegalResponse responsavelLegal;
+    private PacienteDadosPessoaisComplementaresResponse dadosPessoaisComplementares;
+    private PacienteObitoResponse obito;
     private LGPDConsentimentoResponse lgpdConsentimento;
     private IntegracaoGovResponse integracaoGov;
-
-    // DoencasPacienteResponse removido - Doencas foi deletada
 
     @Builder.Default
     private List<DeficienciasPacienteResponse> deficiencias = new ArrayList<>();
 
-    // MedicacaoPacienteResponse removido - Medicacao foi deletada
+    @Builder.Default
+    private List<PacienteVinculoTerritorialResponse> vinculosTerritoriais = new ArrayList<>();
 }
