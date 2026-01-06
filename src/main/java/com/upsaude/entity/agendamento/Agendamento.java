@@ -60,7 +60,7 @@ public class Agendamento extends BaseEntity {
     private Paciente paciente;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "profissional_id", nullable = false)
+    @JoinColumn(name = "profissional_id")
     private ProfissionaisSaude profissional;
 
     @ManyToOne(fetch = FetchType.LAZY)

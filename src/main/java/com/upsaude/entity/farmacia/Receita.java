@@ -1,7 +1,7 @@
 package com.upsaude.entity.farmacia;
 
 import com.upsaude.entity.BaseEntity;
-import com.upsaude.entity.clinica.atendimento.Consultas;
+import com.upsaude.entity.clinica.atendimento.Consulta;
 import com.upsaude.entity.paciente.Paciente;
 import com.upsaude.entity.profissional.Medicos;
 import com.upsaude.enums.TipoControleMedicamentoEnum;
@@ -42,7 +42,7 @@ public class Receita extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "consulta_id")
-    private Consultas consulta;
+    private Consulta consulta;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "medico_id")

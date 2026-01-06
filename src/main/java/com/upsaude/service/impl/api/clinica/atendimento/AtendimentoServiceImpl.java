@@ -19,13 +19,12 @@ import com.upsaude.api.request.clinica.atendimento.AtendimentoTriagemRequest;
 import com.upsaude.api.response.clinica.atendimento.AtendimentoResponse;
 import com.upsaude.cache.CacheKeyUtil;
 import com.upsaude.entity.clinica.atendimento.Atendimento;
-import com.upsaude.entity.clinica.prontuario.Prontuarios;
+import com.upsaude.entity.clinica.prontuario.Prontuario;
 import com.upsaude.entity.sistema.multitenancy.Tenant;
 import com.upsaude.enums.StatusAtendimentoEnum;
 import com.upsaude.enums.TipoAtendimentoEnum;
 import com.upsaude.mapper.embeddable.AnamneseAtendimentoMapper;
 import com.upsaude.mapper.embeddable.ClassificacaoRiscoAtendimentoMapper;
-import com.upsaude.repository.clinica.prontuario.ProntuariosRepository;
 import com.upsaude.exception.BadRequestException;
 import com.upsaude.repository.clinica.atendimento.AtendimentoRepository;
 import com.upsaude.service.api.clinica.atendimento.AtendimentoService;
@@ -49,7 +48,6 @@ import lombok.extern.slf4j.Slf4j;
 public class AtendimentoServiceImpl implements AtendimentoService {
 
     private final AtendimentoRepository atendimentoRepository;
-    private final ProntuariosRepository prontuariosRepository;
     private final TenantService tenantService;
     private final CacheManager cacheManager;
     private final AnamneseAtendimentoMapper anamneseAtendimentoMapper;
@@ -336,34 +334,7 @@ public class AtendimentoServiceImpl implements AtendimentoService {
 
         Atendimento saved = atendimentoRepository.save(entity);
 
-        criarRegistroProntuario(saved, tenant);
-
         log.info("Atendimento encerrado com sucesso. ID: {}", id);
         return responseBuilder.build(saved);
-    }
-
-    private void criarRegistroProntuario(Atendimento atendimento, Tenant tenant) {
-        Prontuarios prontuario = new Prontuarios();
-        prontuario.setPaciente(atendimento.getPaciente());
-        prontuario.setAtendimento(atendimento);
-        prontuario.setTenant(tenant);
-        prontuario.setEstabelecimento(atendimento.getEstabelecimento());
-        prontuario.setTipoRegistro("ATENDIMENTO");
-        prontuario.setTipoRegistroEnum("ATENDIMENTO");
-        prontuario.setDataRegistro(java.time.OffsetDateTime.now());
-        prontuario.setActive(true);
-
-        StringBuilder resumo = new StringBuilder();
-        resumo.append("Atendimento encerrado");
-        if (atendimento.getInformacoes() != null && atendimento.getInformacoes().getMotivo() != null) {
-            resumo.append(" - Motivo: ").append(atendimento.getInformacoes().getMotivo());
-        }
-        if (atendimento.getProfissional() != null && atendimento.getProfissional().getDadosPessoaisBasicos() != null) {
-            resumo.append(" - Profissional: ").append(atendimento.getProfissional().getDadosPessoaisBasicos().getNomeCompleto());
-        }
-        prontuario.setResumo(resumo.toString());
-
-        prontuariosRepository.save(Objects.requireNonNull(prontuario));
-        log.debug("Registro de prontuário criado para atendimento. ID: {}", atendimento.getId());
     }
 }

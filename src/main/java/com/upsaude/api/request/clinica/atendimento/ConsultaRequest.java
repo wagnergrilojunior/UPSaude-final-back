@@ -1,14 +1,5 @@
 package com.upsaude.api.request.clinica.atendimento;
 
-import com.upsaude.entity.paciente.Paciente;
-import com.upsaude.api.request.embeddable.AnamneseConsultaRequest;
-import com.upsaude.api.request.embeddable.AtestadoConsultaRequest;
-import com.upsaude.api.request.embeddable.DiagnosticoConsultaRequest;
-import com.upsaude.api.request.embeddable.EncaminhamentoConsultaRequest;
-import com.upsaude.api.request.embeddable.ExamesSolicitadosConsultaRequest;
-import com.upsaude.api.request.embeddable.InformacoesConsultaRequest;
-import com.upsaude.api.request.embeddable.PrescricaoConsultaRequest;
-
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.upsaude.api.request.embeddable.AnamneseConsultaRequest;
@@ -18,6 +9,7 @@ import com.upsaude.api.request.embeddable.EncaminhamentoConsultaRequest;
 import com.upsaude.api.request.embeddable.ExamesSolicitadosConsultaRequest;
 import com.upsaude.api.request.embeddable.InformacoesConsultaRequest;
 import com.upsaude.api.request.embeddable.PrescricaoConsultaRequest;
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -27,7 +19,6 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import io.swagger.v3.oas.annotations.media.Schema;
 
 @Getter
 @Setter
@@ -36,16 +27,14 @@ import io.swagger.v3.oas.annotations.media.Schema;
 @AllArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
-@Schema(description = "Dados de consultas")
-public class ConsultasRequest {
+@Schema(description = "Dados de consulta")
+public class ConsultaRequest {
 
-    @NotNull(message = "Paciente é obrigatório")
-    private UUID paciente;
+    @NotNull(message = "Atendimento é obrigatório")
+    private UUID atendimento;
 
+    @NotNull(message = "Médico é obrigatório")
     private UUID medico;
-    private UUID profissionalSaude;
-    private UUID especialidade;
-    private UUID convenio;
 
     @Valid
     private InformacoesConsultaRequest informacoes;
@@ -74,3 +63,4 @@ public class ConsultasRequest {
     @Size(max = 1000, message = "Observações internas deve ter no máximo 1000 caracteres")
     private String observacoesInternas;
 }
+

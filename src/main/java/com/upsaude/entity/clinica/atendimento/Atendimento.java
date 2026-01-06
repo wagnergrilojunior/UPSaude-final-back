@@ -19,6 +19,7 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
@@ -83,6 +84,9 @@ public class Atendimento extends BaseEntity {
 
     @Column(name = "observacoes_internas", columnDefinition = "TEXT")
     private String observacoesInternas;
+
+    @OneToOne(mappedBy = "atendimento", fetch = FetchType.LAZY)
+    private Consulta consulta;
 
     @PrePersist
     @PreUpdate

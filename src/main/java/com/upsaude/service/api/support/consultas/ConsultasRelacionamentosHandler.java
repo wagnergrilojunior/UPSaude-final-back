@@ -5,17 +5,14 @@ import java.util.UUID;
 
 import org.springframework.stereotype.Service;
 
-import com.upsaude.api.request.clinica.atendimento.ConsultasRequest;
-import com.upsaude.entity.clinica.atendimento.Consultas;
+import com.upsaude.api.request.clinica.atendimento.ConsultaRequest;
+import com.upsaude.entity.clinica.atendimento.Consulta;
+import com.upsaude.entity.clinica.atendimento.Atendimento;
 import com.upsaude.entity.profissional.Medicos;
-import com.upsaude.entity.profissional.ProfissionaisSaude;
 import com.upsaude.entity.sistema.multitenancy.Tenant;
-import com.upsaude.entity.convenio.Convenio;
 import com.upsaude.exception.NotFoundException;
-import com.upsaude.repository.convenio.ConvenioRepository;
+import com.upsaude.repository.clinica.atendimento.AtendimentoRepository;
 import com.upsaude.service.api.support.medico.MedicoTenantEnforcer;
-import com.upsaude.service.api.support.paciente.PacienteTenantEnforcer;
-import com.upsaude.service.api.support.profissionaissaude.ProfissionaisSaudeTenantEnforcer;
 
 import lombok.RequiredArgsConstructor;
 
@@ -23,45 +20,21 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class ConsultasRelacionamentosHandler {
 
-    private final PacienteTenantEnforcer pacienteTenantEnforcer;
     private final MedicoTenantEnforcer medicoTenantEnforcer;
-    private final ProfissionaisSaudeTenantEnforcer profissionaisSaudeTenantEnforcer;
-    private final ConvenioRepository convenioRepository;
+    private final AtendimentoRepository atendimentoRepository;
 
-    public void resolver(Consultas entity, ConsultasRequest request, UUID tenantId, Tenant tenant) {
+    public void resolver(Consulta entity, ConsultaRequest request, UUID tenantId, Tenant tenant) {
         if (request == null) return;
 
         entity.setTenant(Objects.requireNonNull(tenant, "tenant é obrigatório"));
 
-        UUID pacienteId = Objects.requireNonNull(request.getPaciente(), "paciente é obrigatório");
-        entity.setPaciente(pacienteTenantEnforcer.validarAcesso(pacienteId, tenantId));
+        UUID atendimentoId = Objects.requireNonNull(request.getAtendimento(), "atendimento é obrigatório");
+        Atendimento atendimento = atendimentoRepository.findByIdAndTenant(atendimentoId, tenantId)
+            .orElseThrow(() -> new NotFoundException("Atendimento não encontrado com ID: " + atendimentoId));
+        entity.setAtendimento(atendimento);
 
-        if (request.getMedico() != null) {
-            Medicos medico = medicoTenantEnforcer.validarAcesso(request.getMedico(), tenantId);
-            entity.setMedico(medico);
-        } else {
-            entity.setMedico(null);
-        }
-
-        if (request.getProfissionalSaude() != null) {
-            ProfissionaisSaude profissional = profissionaisSaudeTenantEnforcer.validarAcesso(request.getProfissionalSaude(), tenantId);
-            entity.setProfissionalSaude(profissional);
-        } else {
-            entity.setProfissionalSaude(null);
-        }
-
-        if (request.getConvenio() != null) {
-            Convenio convenio = convenioRepository.findByIdAndTenant(request.getConvenio(), tenantId)
-                    .orElseThrow(() -> new NotFoundException("Convênio não encontrado com ID: " + request.getConvenio()));
-            entity.setConvenio(convenio);
-        } else {
-            entity.setConvenio(null);
-        }
-
-        if (entity.getProfissionalSaude() != null && entity.getProfissionalSaude().getEstabelecimento() != null) {
-            entity.setEstabelecimento(entity.getProfissionalSaude().getEstabelecimento());
-        } else {
-            entity.setEstabelecimento(null);
-        }
+        UUID medicoId = Objects.requireNonNull(request.getMedico(), "médico é obrigatório");
+        Medicos medico = medicoTenantEnforcer.validarAcesso(medicoId, tenantId);
+        entity.setMedico(medico);
     }
 }

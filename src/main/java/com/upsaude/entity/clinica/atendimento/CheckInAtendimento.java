@@ -1,10 +1,7 @@
 package com.upsaude.entity.clinica.atendimento;
+
 import com.upsaude.entity.BaseEntity;
-
 import com.upsaude.entity.agendamento.Agendamento;
-
-import com.upsaude.entity.clinica.atendimento.Atendimento;
-
 import com.upsaude.entity.paciente.Paciente;
 
 import jakarta.persistence.Column;
@@ -25,15 +22,14 @@ import java.time.OffsetDateTime;
            @Index(name = "idx_checkin_agendamento", columnList = "agendamento_id"),
            @Index(name = "idx_checkin_atendimento", columnList = "atendimento_id"),
            @Index(name = "idx_checkin_data_checkin", columnList = "data_checkin"),
-           @Index(name = "idx_checkin_paciente", columnList = "paciente_id"),
-           @Index(name = "idx_checkin_estabelecimento", columnList = "estabelecimento_id")
+           @Index(name = "idx_checkin_paciente", columnList = "paciente_id")
        })
 @Data
 @EqualsAndHashCode(callSuper = true)
 public class CheckInAtendimento extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "agendamento_id", nullable = false)
+    @JoinColumn(name = "agendamento_id")
     private Agendamento agendamento;
 
     @ManyToOne(fetch = FetchType.LAZY)

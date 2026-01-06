@@ -5,10 +5,10 @@ import java.util.UUID;
 
 import org.springframework.stereotype.Service;
 
-import com.upsaude.api.request.clinica.atendimento.ConsultasRequest;
-import com.upsaude.entity.clinica.atendimento.Consultas;
+import com.upsaude.api.request.clinica.atendimento.ConsultaRequest;
+import com.upsaude.entity.clinica.atendimento.Consulta;
 import com.upsaude.entity.sistema.multitenancy.Tenant;
-import com.upsaude.mapper.clinica.atendimento.ConsultasMapper;
+import com.upsaude.mapper.clinica.atendimento.ConsultaMapper;
 import com.upsaude.repository.clinica.atendimento.ConsultasRepository;
 
 import lombok.RequiredArgsConstructor;
@@ -20,21 +20,21 @@ import lombok.extern.slf4j.Slf4j;
 public class ConsultasCreator {
 
     private final ConsultasRepository repository;
-    private final ConsultasMapper mapper;
+    private final ConsultaMapper mapper;
     private final ConsultasValidationService validationService;
     private final ConsultasRelacionamentosHandler relacionamentosHandler;
     private final ConsultasDomainService domainService;
 
-    public Consultas criar(ConsultasRequest request, UUID tenantId, Tenant tenant) {
+    public Consulta criar(ConsultaRequest request, UUID tenantId, Tenant tenant) {
         validationService.validarObrigatorios(request);
 
-        Consultas entity = mapper.fromRequest(request);
+        Consulta entity = mapper.fromRequest(request);
         entity.setActive(true);
 
         domainService.aplicarDefaults(entity);
         relacionamentosHandler.resolver(entity, request, tenantId, tenant);
 
-        Consultas saved = repository.save(Objects.requireNonNull(entity));
+        Consulta saved = repository.save(Objects.requireNonNull(entity));
         log.info("Consulta criada com sucesso. ID: {}, tenant: {}", saved.getId(), tenantId);
         return saved;
     }

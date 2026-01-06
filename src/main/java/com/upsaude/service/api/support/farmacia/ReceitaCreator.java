@@ -2,7 +2,7 @@ package com.upsaude.service.api.support.farmacia;
 
 import com.upsaude.api.request.farmacia.ReceitaItemRequest;
 import com.upsaude.api.request.farmacia.ReceitaRequest;
-import com.upsaude.entity.clinica.atendimento.Consultas;
+import com.upsaude.entity.clinica.atendimento.Consulta;
 import com.upsaude.entity.farmacia.Receita;
 import com.upsaude.entity.farmacia.ReceitaItem;
 import com.upsaude.entity.paciente.Paciente;
@@ -49,7 +49,7 @@ public class ReceitaCreator {
         receita.setPaciente(paciente);
 
         if (request.getConsultaId() != null) {
-            Consultas consulta = consultasRepository.findByIdAndTenant(request.getConsultaId(), tenantId)
+            Consulta consulta = consultasRepository.findByIdAndTenant(request.getConsultaId(), tenantId)
                     .orElseThrow(() -> {
                         log.warn("Consulta não encontrada com ID: {} para tenant: {}", request.getConsultaId(), tenantId);
                         return new NotFoundException("Consulta não encontrada com ID: " + request.getConsultaId());
