@@ -35,8 +35,7 @@ public class DispensacaoResponse {
     private LocalDateTime dataDispensacao;
     private String tipoDispensacao;
     private String observacoes;
-    
+
     @Builder.Default
     private List<DispensacaoItemResponse> itens = new ArrayList<>();
 }
-

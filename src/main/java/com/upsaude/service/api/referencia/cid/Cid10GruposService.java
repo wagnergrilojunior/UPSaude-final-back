@@ -20,4 +20,3 @@ public interface Cid10GruposService {
 
     java.util.List<Cid10Grupos> listarPorIntervalo(String catinic, String catfim);
 }
-

@@ -37,4 +37,3 @@ public class DadosDemograficosMedicoRequest {
     @Size(max = 50, message = "Naturalidade deve ter no máximo 50 caracteres")
     private String naturalidade;
 }
-

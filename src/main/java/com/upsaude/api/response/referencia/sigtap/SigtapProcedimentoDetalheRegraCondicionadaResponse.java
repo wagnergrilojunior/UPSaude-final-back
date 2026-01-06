@@ -8,7 +8,7 @@ import lombok.Data;
 public class SigtapProcedimentoDetalheRegraCondicionadaResponse {
     @Schema(description = "Código da regra condicionada", example = "0001")
     private String codigoRegra;
-    
+
     @Schema(description = "Nome da regra condicionada", example = "REGRAS ESPECIAIS")
     private String nomeRegra;
 }

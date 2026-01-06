@@ -25,6 +25,6 @@ public class ConsultasDomainService {
 
     public void validarPodeDeletar(Consultas entity) {
         log.debug("Validando se consulta pode ser deletada. ID: {}", entity.getId());
-        // Adicione aqui qualquer lógica de validação antes de um hard delete.
+
     }
 }

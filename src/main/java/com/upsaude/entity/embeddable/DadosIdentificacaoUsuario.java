@@ -20,4 +20,3 @@ public class DadosIdentificacaoUsuario {
     @Column(name = "cpf", length = 11, unique = true)
     private String cpf;
 }
-

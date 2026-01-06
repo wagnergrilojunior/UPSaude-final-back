@@ -29,4 +29,3 @@ public class ResponsavelLegalTenantEnforcer {
         return validarAcesso(id, tenantId);
     }
 }
-

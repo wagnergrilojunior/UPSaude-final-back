@@ -194,8 +194,6 @@ public class Paciente extends BaseEntityWithoutTenant {
     @org.hibernate.annotations.Fetch(org.hibernate.annotations.FetchMode.SUBSELECT)
     private List<DeficienciasPaciente> deficiencias = new ArrayList<>();
 
-    //=============================================================================================================
-
     public Paciente() {
         this.enderecos = new ArrayList<>();
         this.deficiencias = new ArrayList<>();
@@ -246,8 +244,7 @@ public class Paciente extends BaseEntityWithoutTenant {
         if (vinculosTerritoriais == null) {
             vinculosTerritoriais = new ArrayList<>();
         }
-        
-        // Se não há convênio, limpar informações do convênio
+
         if (convenio == null) {
             this.informacoesConvenio = null;
         }

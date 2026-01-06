@@ -40,7 +40,7 @@ public class FarmaciaServiceImpl implements FarmaciaService {
         try {
             UUID tenantId = tenantService.validarTenantAtual();
             Tenant tenant = tenantService.obterTenantDoUsuarioAutenticado();
-            
+
             if (tenant == null || tenant.getId() == null || !tenant.getId().equals(tenantId)) {
                 throw new BadRequestException("Não foi possível obter tenant do usuário autenticado");
             }
@@ -57,23 +57,21 @@ public class FarmaciaServiceImpl implements FarmaciaService {
             entity.setActive(true);
             entity.setTenant(tenant);
 
-            // Processar estabelecimento se fornecido
             if (request.getEstabelecimentoId() != null) {
                 Estabelecimentos estabelecimento = estabelecimentosRepository
                     .findById(request.getEstabelecimentoId())
                     .orElseThrow(() -> new BadRequestException("Estabelecimento não encontrado com ID: " + request.getEstabelecimentoId()));
-                
-                // Validar que o estabelecimento pertence ao mesmo tenant
+
                 if (!estabelecimento.getTenant().getId().equals(tenantId)) {
                     throw new BadRequestException("Estabelecimento não pertence ao tenant atual");
                 }
-                
+
                 entity.setEstabelecimento(estabelecimento);
             }
 
             Farmacia saved = farmaciaRepository.save(Objects.requireNonNull(entity));
             log.info("Farmácia criada com sucesso. ID: {}, tenant: {}", saved.getId(), tenantId);
-            
+
             return buildResponse(saved);
         } catch (BadRequestException | NotFoundException e) {
             log.warn("Erro de validação ao criar farmácia. Erro: {}", e.getMessage());
@@ -156,7 +154,7 @@ public class FarmaciaServiceImpl implements FarmaciaService {
         try {
             UUID tenantId = tenantService.validarTenantAtual();
             Tenant tenant = tenantService.obterTenantDoUsuarioAutenticado();
-            
+
             if (tenant == null || tenant.getId() == null || !tenant.getId().equals(tenantId)) {
                 throw new BadRequestException("Não foi possível obter tenant do usuário autenticado");
             }
@@ -167,7 +165,6 @@ public class FarmaciaServiceImpl implements FarmaciaService {
                     return new NotFoundException("Farmácia não encontrada com ID: " + id);
                 });
 
-            // Atualizar campos
             entity.setNome(request.getNome());
             entity.setCodigoCnes(request.getCodigoCnes());
             entity.setCodigoFarmaciaInterno(request.getCodigoFarmaciaInterno());
@@ -178,17 +175,15 @@ public class FarmaciaServiceImpl implements FarmaciaService {
             entity.setObservacoes(request.getObservacoes());
             entity.setTenant(tenant);
 
-            // Processar estabelecimento se fornecido
             if (request.getEstabelecimentoId() != null) {
                 Estabelecimentos estabelecimento = estabelecimentosRepository
                     .findById(request.getEstabelecimentoId())
                     .orElseThrow(() -> new BadRequestException("Estabelecimento não encontrado com ID: " + request.getEstabelecimentoId()));
-                
-                // Validar que o estabelecimento pertence ao mesmo tenant
+
                 if (!estabelecimento.getTenant().getId().equals(tenantId)) {
                     throw new BadRequestException("Estabelecimento não pertence ao tenant atual");
                 }
-                
+
                 entity.setEstabelecimento(estabelecimento);
             } else {
                 entity.setEstabelecimento(null);
@@ -224,7 +219,7 @@ public class FarmaciaServiceImpl implements FarmaciaService {
                     log.warn("Farmácia não encontrada para exclusão. ID: {}, tenant: {}", id, tenantId);
                     return new NotFoundException("Farmácia não encontrada com ID: " + id);
                 });
-            
+
             farmaciaRepository.delete(Objects.requireNonNull(entity));
             log.info("Farmácia excluída permanentemente com sucesso. ID: {}", id);
         } catch (NotFoundException e) {
@@ -246,7 +241,7 @@ public class FarmaciaServiceImpl implements FarmaciaService {
 
         try {
             UUID tenantId = tenantService.validarTenantAtual();
-            
+
             if (id == null) {
                 log.warn("ID nulo recebido para inativação de farmácia");
                 throw new BadRequestException("ID da farmácia é obrigatório");
@@ -257,11 +252,11 @@ public class FarmaciaServiceImpl implements FarmaciaService {
                     log.warn("Farmácia não encontrada para inativação. ID: {}, tenant: {}", id, tenantId);
                     return new NotFoundException("Farmácia não encontrada com ID: " + id);
                 });
-            
+
             if (!entity.getActive()) {
                 throw new BadRequestException("Farmácia já está inativa");
             }
-            
+
             entity.setActive(false);
             farmaciaRepository.save(Objects.requireNonNull(entity));
             log.info("Farmácia inativada com sucesso. ID: {}", id);
@@ -313,4 +308,3 @@ public class FarmaciaServiceImpl implements FarmaciaService {
             .build();
     }
 }
-

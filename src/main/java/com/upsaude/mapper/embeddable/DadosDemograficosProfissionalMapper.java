@@ -13,4 +13,3 @@ public interface DadosDemograficosProfissionalMapper {
     DadosDemograficosProfissionalResponse toResponse(DadosDemograficosProfissional entity);
     void updateFromRequest(DadosDemograficosProfissionalRequest request, @MappingTarget DadosDemograficosProfissional entity);
 }
-

@@ -5,19 +5,12 @@ import org.springframework.stereotype.Service;
 
 import java.util.*;
 
-/**
- * Serviço responsável por definir ordem de processamento e prioridades dos arquivos SIGTAP.
- */
 @Slf4j
 @Service
 public class SigtapJobOrchestrator {
 
     private static final Map<String, Integer> MAPA_PRIORIDADES = criarMapaPrioridades();
 
-    /**
-     * Calcula a prioridade de um arquivo baseado no seu nome.
-     * Maior número = maior prioridade (será processado primeiro).
-     */
     public int calcularPrioridade(String nomeArquivo) {
         if (nomeArquivo == null) {
             return 0;
@@ -30,14 +23,10 @@ public class SigtapJobOrchestrator {
             return prioridade;
         }
 
-        // Prioridade padrão para arquivos não mapeados (menor prioridade)
         log.warn("Arquivo não mapeado na ordem de prioridades: {}. Usando prioridade padrão 0.", nomeArquivo);
         return 0;
     }
 
-    /**
-     * Ordena arquivos por prioridade (maior primeiro).
-     */
     public List<ArquivoComPrioridade> ordenarArquivos(List<SigtapZipExtractionService.ArquivoPar> pares) {
         if (pares == null || pares.isEmpty()) {
             return Collections.emptyList();
@@ -57,7 +46,6 @@ public class SigtapJobOrchestrator {
             arquivosComPrioridade.add(acp);
         }
 
-        // Ordena por prioridade descendente (maior primeiro)
         arquivosComPrioridade.sort((a, b) -> Integer.compare(b.getPrioridade(), a.getPrioridade()));
 
         log.info("Arquivos ordenados por prioridade. Total: {}", arquivosComPrioridade.size());
@@ -68,20 +56,13 @@ public class SigtapJobOrchestrator {
         return arquivosComPrioridade;
     }
 
-    /**
-     * Retorna o mapa completo de prioridades.
-     */
     public Map<String, Integer> obterMapaPrioridades() {
         return new HashMap<>(MAPA_PRIORIDADES);
     }
 
-    /**
-     * Cria o mapa de prioridades baseado nas dependências dos arquivos SIGTAP.
-     */
     private static Map<String, Integer> criarMapaPrioridades() {
         Map<String, Integer> mapa = new HashMap<>();
 
-        // Prioridade 1000 (maior) - Tabelas base sem dependências
         int prioridadeBase = 1000;
         mapa.put("tb_grupo.txt", prioridadeBase);
         mapa.put("tb_sub_grupo.txt", prioridadeBase);
@@ -103,7 +84,6 @@ public class SigtapJobOrchestrator {
         mapa.put("tb_sia_sih.txt", prioridadeBase);
         mapa.put("tb_cid.txt", prioridadeBase);
 
-        // Prioridade 800 - Tabelas que dependem das base
         int prioridadeDependentes = 800;
         mapa.put("tb_procedimento.txt", prioridadeDependentes);
         mapa.put("tb_forma_organizacao.txt", prioridadeDependentes);
@@ -111,7 +91,6 @@ public class SigtapJobOrchestrator {
         mapa.put("tb_descricao.txt", prioridadeDependentes);
         mapa.put("tb_descricao_detalhe.txt", prioridadeDependentes);
 
-        // Prioridade 500 - Relações simples
         int prioridadeRelacoesSimples = 500;
         mapa.put("rl_procedimento_modalidade.txt", prioridadeRelacoesSimples);
         mapa.put("rl_procedimento_registro.txt", prioridadeRelacoesSimples);
@@ -121,7 +100,6 @@ public class SigtapJobOrchestrator {
         mapa.put("rl_procedimento_renases.txt", prioridadeRelacoesSimples);
         mapa.put("rl_procedimento_tuss.txt", prioridadeRelacoesSimples);
 
-        // Prioridade 300 - Relações intermediárias
         int prioridadeRelacoesIntermediarias = 300;
         mapa.put("rl_procedimento_cid.txt", prioridadeRelacoesIntermediarias);
         mapa.put("rl_procedimento_ocupacao.txt", prioridadeRelacoesIntermediarias);
@@ -131,7 +109,6 @@ public class SigtapJobOrchestrator {
         mapa.put("rl_procedimento_incremento.txt", prioridadeRelacoesIntermediarias);
         mapa.put("rl_procedimento_sia_sih.txt", prioridadeRelacoesIntermediarias);
 
-        // Prioridade 100 (menor) - Relações complexas
         int prioridadeRelacoesComplexas = 100;
         mapa.put("rl_procedimento_detalhe.txt", prioridadeRelacoesComplexas);
         mapa.put("rl_excecao_compatibilidade.txt", prioridadeRelacoesComplexas);
@@ -139,9 +116,6 @@ public class SigtapJobOrchestrator {
         return Collections.unmodifiableMap(mapa);
     }
 
-    /**
-     * Representa um arquivo com sua prioridade calculada.
-     */
     public static class ArquivoComPrioridade {
         private SigtapZipExtractionService.ArquivoPar par;
         private int prioridade;

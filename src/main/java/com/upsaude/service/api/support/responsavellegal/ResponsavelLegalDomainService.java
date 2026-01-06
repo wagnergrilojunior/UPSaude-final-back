@@ -17,8 +17,6 @@ public class ResponsavelLegalDomainService {
     }
 
     public void validarPodeDeletar(ResponsavelLegal entity) {
-        // Validações adicionais podem ser adicionadas aqui se necessário
-        // Por exemplo, verificar se há registros relacionados que impedem a exclusão
+
     }
 }
-

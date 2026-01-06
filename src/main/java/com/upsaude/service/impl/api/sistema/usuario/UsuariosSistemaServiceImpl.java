@@ -159,13 +159,13 @@ public class UsuariosSistemaServiceImpl implements UsuariosSistemaService {
 
         try {
             Pageable adjustedPageable = ajustarPageableParaCamposEmbeddados(pageable);
-            
+
             Specification<UsuariosSistema> spec = (root, query, cb) -> {
                 List<Predicate> predicates = new ArrayList<>();
-                // Adicionar filtros de tenant se necessário
+
                 return cb.and(predicates.toArray(new Predicate[0]));
             };
-            
+
             Page<UsuariosSistema> usuariosSistemas = usuariosSistemaRepository.findAll(spec, adjustedPageable);
 
             usuariosSistemas.getContent().forEach(us -> {
@@ -191,15 +191,15 @@ public class UsuariosSistemaServiceImpl implements UsuariosSistemaService {
         Sort adjustedSort = pageable.getSort().stream()
                 .map(order -> {
                     String property = order.getProperty();
-                    // Mapear campos que estão dentro de dadosIdentificacao
+
                     if ("username".equals(property)) {
                         property = "dadosIdentificacao." + property;
                     }
-                    // Mapear campos que estão dentro de dadosExibicao
+
                     else if ("nomeExibicao".equals(property) || "fotoUrl".equals(property)) {
                         property = "dadosExibicao." + property;
                     }
-                    // Mapear campos que estão dentro de configuracao
+
                     else if ("adminTenant".equals(property) || "adminSistema".equals(property)) {
                         property = "configuracao." + property;
                     }

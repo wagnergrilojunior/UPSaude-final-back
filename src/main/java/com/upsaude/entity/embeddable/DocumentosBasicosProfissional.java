@@ -34,4 +34,3 @@ public class DocumentosBasicosProfissional {
     @Column(name = "cns", length = 15)
     private String cns;
 }
-

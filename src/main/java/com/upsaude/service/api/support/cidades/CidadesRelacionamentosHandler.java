@@ -21,4 +21,3 @@ public class CidadesRelacionamentosHandler {
         return entity;
     }
 }
-

@@ -29,8 +29,7 @@ public class ConvenioCreator {
 
         Convenio entity = mapper.fromRequest(request);
         entity.setActive(true);
-        
-        // Inicializar campos obrigatórios com valores padrão se não foram fornecidos
+
         if (entity.getCoberturaObstetricia() == null) {
             entity.setCoberturaObstetricia(false);
         }

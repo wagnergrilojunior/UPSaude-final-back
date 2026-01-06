@@ -29,4 +29,3 @@ public class CirurgiaTenantEnforcer {
         return validarAcesso(id, tenantId);
     }
 }
-

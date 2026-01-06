@@ -22,4 +22,3 @@ public interface PacienteVinculoTerritorialService {
 
     void desativarVinculoAtivo(UUID pacienteId);
 }
-

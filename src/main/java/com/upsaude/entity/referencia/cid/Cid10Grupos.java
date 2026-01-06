@@ -37,4 +37,3 @@ public class Cid10Grupos extends BaseEntityWithoutTenant {
     @Column(name = "descricao_abreviada", columnDefinition = "TEXT")
     private String descricaoAbreviada;
 }
-

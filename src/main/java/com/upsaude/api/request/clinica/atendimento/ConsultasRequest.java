@@ -9,7 +9,6 @@ import com.upsaude.api.request.embeddable.ExamesSolicitadosConsultaRequest;
 import com.upsaude.api.request.embeddable.InformacoesConsultaRequest;
 import com.upsaude.api.request.embeddable.PrescricaoConsultaRequest;
 
-
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.upsaude.api.request.embeddable.AnamneseConsultaRequest;

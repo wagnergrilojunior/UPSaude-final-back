@@ -22,4 +22,3 @@ public class ProntuariosResponseBuilder {
         return mapper.toResponse(entity);
     }
 }
-

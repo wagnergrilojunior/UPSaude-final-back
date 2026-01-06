@@ -36,4 +36,3 @@ public class ContatoProfissionalRequest {
     @Size(max = 255, message = "Email institucional deve ter no máximo 255 caracteres")
     private String emailInstitucional;
 }
-

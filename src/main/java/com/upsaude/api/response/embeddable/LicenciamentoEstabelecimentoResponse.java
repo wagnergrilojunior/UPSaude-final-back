@@ -24,4 +24,3 @@ public class LicenciamentoEstabelecimentoResponse {
 
     private String numeroLicencaSanitaria;
 }
-

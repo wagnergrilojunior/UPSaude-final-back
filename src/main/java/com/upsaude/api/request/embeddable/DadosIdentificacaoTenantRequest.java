@@ -31,4 +31,3 @@ public class DadosIdentificacaoTenantRequest {
     @CNPJValido
     private String cnpj;
 }
-

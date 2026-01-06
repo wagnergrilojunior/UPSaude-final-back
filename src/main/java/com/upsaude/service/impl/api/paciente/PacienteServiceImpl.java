@@ -99,9 +99,8 @@ public class PacienteServiceImpl implements PacienteService {
     @Override
     @Transactional(readOnly = true)
     public Page<PacienteResponse> listar(Pageable pageable) {
-        // Paciente estende BaseEntityWithoutTenant, então não tem tenant_id
-        // Usar findAll padrão do JpaRepository
-        UUID tenantId = tenantService.validarTenantAtual(); // Mantido para compatibilidade, mas não usado na query
+
+        UUID tenantId = tenantService.validarTenantAtual(); 
         Page<Paciente> pacientes = pacienteRepository.findAll(pageable);
         return pacientes.map(responseBuilder::build);
     }
@@ -110,8 +109,7 @@ public class PacienteServiceImpl implements PacienteService {
     @Transactional(readOnly = true)
     public Page<PacienteSimplificadoResponse> listarSimplificado(Pageable pageable) {
         tenantService.validarTenantAtual();
-        // Paciente é BaseEntityWithoutTenant: listagem simplificada via Entity evita
-        // problemas de projeção em native query
+
         Pageable pageableMapeado = validarEMapearPageable(pageable);
         Page<Paciente> pacientes = pacienteRepository
                 .findAllSemRelacionamentos(Objects.requireNonNull(pageableMapeado, "pageable"));
@@ -149,7 +147,6 @@ public class PacienteServiceImpl implements PacienteService {
 
         String campoLower = campo.toLowerCase();
 
-        // Mapear campos comuns para os campos reais da entidade
         switch (campoLower) {
             case "nome":
                 return "nomeCompleto";
@@ -174,7 +171,7 @@ public class PacienteServiceImpl implements PacienteService {
             case "atualizado_em":
                 return "updatedAt";
             default:
-                // Se o campo já está correto (camelCase), retorna como está
+
                 return campo;
         }
     }

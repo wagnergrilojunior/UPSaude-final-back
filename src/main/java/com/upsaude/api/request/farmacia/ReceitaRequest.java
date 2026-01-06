@@ -63,4 +63,3 @@ public class ReceitaRequest {
     @Builder.Default
     private List<ReceitaItemRequest> itens = new ArrayList<>();
 }
-

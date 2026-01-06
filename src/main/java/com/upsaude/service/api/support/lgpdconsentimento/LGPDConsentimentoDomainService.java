@@ -30,6 +30,6 @@ public class LGPDConsentimentoDomainService {
 
     public void validarPodeDeletar(LGPDConsentimento entity) {
         log.debug("Validando se consentimento LGPD pode ser deletado. ID: {}", entity.getId());
-        // Adicione aqui qualquer lógica de validação antes de um hard delete.
+
     }
 }

@@ -11,9 +11,6 @@ import jakarta.persistence.Table;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
-/**
- * Descri??o Detalhe do SIGTAP.
- */
 @Entity
 @Table(
         name = "sigtap_descricao_detalhe",

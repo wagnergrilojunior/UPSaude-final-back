@@ -43,7 +43,6 @@ public class ConvenioRequest {
     @JsonDeserialize(using = TipoConvenioEnumDeserializer.class)
     private TipoConvenioEnum tipo;
 
-    // Modalidade é opcional (nullable na Entity) - removido @NotNull para manter consistência
     @JsonDeserialize(using = ModalidadeConvenioEnumDeserializer.class)
     private ModalidadeConvenioEnum modalidade;
 

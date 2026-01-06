@@ -37,7 +37,6 @@ public interface CirurgiaMapper  {
     @Mapping(target = "equipe", ignore = true)
     void updateFromRequest(CirurgiaRequest request, @MappingTarget Cirurgia entity);
 
-    // Evita ciclos/recursões indiretas via PacienteResponse/ResponsavelLegalResponse e grafos grandes.
     @Mapping(target = "paciente", ignore = true)
     @Mapping(target = "cirurgiaoPrincipal", ignore = true)
     @Mapping(target = "medicoCirurgiao", ignore = true)

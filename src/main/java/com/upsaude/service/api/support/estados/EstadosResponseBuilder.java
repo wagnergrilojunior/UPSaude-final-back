@@ -18,4 +18,3 @@ public class EstadosResponseBuilder {
         return mapper.toResponse(entity);
     }
 }
-

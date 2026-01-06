@@ -41,25 +41,24 @@ public interface ReceitaMapper {
 
     default ReceitaResponse toResponseCompleto(Receita receita) {
         if (receita == null) return null;
-        
+
         ReceitaResponse response = toResponse(receita);
-        
+
         if (receita.getPaciente() != null) {
             response.setPacienteNome(receita.getPaciente().getNomeCompleto());
         }
-        
+
         if (receita.getMedico() != null && receita.getMedico().getDadosPessoaisBasicos() != null) {
             response.setMedicoNome(receita.getMedico().getDadosPessoaisBasicos().getNomeCompleto());
         }
-        
+
         if (receita.getItens() != null && !receita.getItens().isEmpty()) {
             ReceitaItemMapper itemMapper = org.mapstruct.factory.Mappers.getMapper(ReceitaItemMapper.class);
             response.setItens(receita.getItens().stream()
                     .map(itemMapper::toResponseCompleto)
                     .toList());
         }
-        
+
         return response;
     }
 }
-

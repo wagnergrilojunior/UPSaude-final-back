@@ -21,4 +21,3 @@ public class DocumentosBasicosProfissionalResponse {
     private LocalDate dataEmissaoRg;
     private String cns;
 }
-

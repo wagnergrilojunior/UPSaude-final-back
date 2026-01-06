@@ -73,8 +73,6 @@ public class Estabelecimentos extends BaseEntityWithoutEstabelecimento {
     @Column(name = "observacoes", columnDefinition = "TEXT")
     private String observacoes;
 
-    //===============================================================================================================
-
     @PrePersist
     @PreUpdate
     public void validateEmbeddablesAndCollections() {

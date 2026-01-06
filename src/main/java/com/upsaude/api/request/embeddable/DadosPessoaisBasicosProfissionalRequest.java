@@ -33,4 +33,3 @@ public class DadosPessoaisBasicosProfissionalRequest {
     @JsonDeserialize(using = SexoEnumDeserializer.class)
     private SexoEnum sexo;
 }
-

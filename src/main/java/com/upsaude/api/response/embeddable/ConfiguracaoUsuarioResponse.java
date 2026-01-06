@@ -15,4 +15,3 @@ public class ConfiguracaoUsuarioResponse {
     private Boolean adminTenant;
     private String tipoVinculo;
 }
-

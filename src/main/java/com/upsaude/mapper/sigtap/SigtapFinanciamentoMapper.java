@@ -9,4 +9,3 @@ import com.upsaude.entity.referencia.sigtap.SigtapFinanciamento;
 public interface SigtapFinanciamentoMapper {
     SigtapFinanciamentoResponse toResponse(SigtapFinanciamento entity);
 }
-

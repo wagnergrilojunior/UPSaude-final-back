@@ -40,7 +40,6 @@ public class PacienteUpdater {
 
         pacienteMapper.updateFromRequest(request, pacienteExistente);
 
-        // Processar todas as associações (incluindo atualizações)
         associacoesManager.processarTodas(pacienteExistente, request, tenantId);
 
         Paciente pacienteAtualizado = pacienteRepository.save(Objects.requireNonNull(pacienteExistente));

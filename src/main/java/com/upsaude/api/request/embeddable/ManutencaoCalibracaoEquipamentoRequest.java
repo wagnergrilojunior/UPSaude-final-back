@@ -29,4 +29,3 @@ public class ManutencaoCalibracaoEquipamentoRequest {
     @Size(max = 100, message = "Tipo de manutenção deve ter no máximo 100 caracteres")
     private String tipoManutencao;
 }
-

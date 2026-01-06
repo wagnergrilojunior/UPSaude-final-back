@@ -13,4 +13,3 @@ public interface ContatoTenantMapper {
     ContatoTenantResponse toResponse(ContatoTenant entity);
     void updateFromRequest(ContatoTenantRequest request, @MappingTarget ContatoTenant entity);
 }
-

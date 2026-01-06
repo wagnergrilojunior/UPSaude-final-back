@@ -10,10 +10,10 @@ import org.springframework.stereotype.Service;
 public class DispensacaoDomainService {
 
     public void validarQuantidadeDispensada(ReceitaItem receitaItem, java.math.BigDecimal quantidadeDispensada) {
-        // Validação de regra de negócio - implementar conforme necessário
+
         if (quantidadeDispensada == null || quantidadeDispensada.compareTo(java.math.BigDecimal.ZERO) <= 0) {
             throw new IllegalArgumentException("Quantidade dispensada deve ser maior que zero");
         }
-        // Adicionar outras validações conforme necessário
+
     }
 }

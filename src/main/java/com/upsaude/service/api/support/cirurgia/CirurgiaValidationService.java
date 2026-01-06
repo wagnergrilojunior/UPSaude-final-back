@@ -40,9 +40,8 @@ public class CirurgiaValidationService {
             throw new BadRequestException("Data/hora fim não pode ser anterior à data/hora início");
         }
         if (inicio != null && prevista != null && inicio.isBefore(prevista.minusDays(3650))) {
-            // guarda simples para evitar datas absurdas; sem regra de domínio rígida aqui
+
             throw new BadRequestException("Data/hora início inválida");
         }
     }
 }
-

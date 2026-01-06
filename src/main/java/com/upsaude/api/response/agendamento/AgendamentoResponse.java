@@ -8,7 +8,6 @@ import com.upsaude.api.response.clinica.atendimento.AtendimentoResponse;
 import com.upsaude.api.response.paciente.PacienteResponse;
 import com.upsaude.api.response.convenio.ConvenioResponse;
 
-
 import com.upsaude.enums.PrioridadeAtendimentoEnum;
 import com.upsaude.enums.StatusAgendamentoEnum;
 import java.time.OffsetDateTime;

@@ -49,4 +49,3 @@ public class ConsultaCreateRequest {
     @Schema(description = "Local da consulta")
     private String local;
 }
-

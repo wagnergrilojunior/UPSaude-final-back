@@ -20,4 +20,3 @@ public interface Cid10CategoriasService {
 
     java.util.List<Cid10Categorias> listarPorIntervalo(String catinic, String catfim);
 }
-

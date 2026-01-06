@@ -11,9 +11,6 @@ import jakarta.persistence.UniqueConstraint;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
-/**
- * Relacionamento entre Procedimento e Regra Condicionada.
- */
 @Entity
 @Table(
         name = "sigtap_procedimento_regra_condicionada",

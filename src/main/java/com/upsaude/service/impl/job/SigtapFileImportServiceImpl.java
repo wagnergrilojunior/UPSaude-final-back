@@ -84,12 +84,12 @@ public class SigtapFileImportServiceImpl {
     private final SigtapLayoutReader layoutReader;
     private final SigtapFileParser fileParser;
     private final SigtapEntityMapper entityMapper;
-    
+
     private final SigtapGrupoRepository grupoRepository;
     private final SigtapSubgrupoRepository subgrupoRepository;
     private final SigtapFormaOrganizacaoRepository formaOrganizacaoRepository;
     private final SigtapProcedimentoRepository procedimentoRepository;
-    
+
     private final SigtapFinanciamentoRepository financiamentoRepository;
     private final SigtapRubricaRepository rubricaRepository;
     private final SigtapModalidadeRepository modalidadeRepository;
@@ -109,8 +109,7 @@ public class SigtapFileImportServiceImpl {
     private final SigtapDetalheRepository detalheRepository;
     private final SigtapDescricaoRepository descricaoRepository;
     private final SigtapDescricaoDetalheRepository descricaoDetalheRepository;
-    
-    // Repositories relacionais
+
     private final SigtapProcedimentoCidRepository procedimentoCidRepository;
     private final SigtapProcedimentoOcupacaoRepository procedimentoOcupacaoRepository;
     private final SigtapProcedimentoHabilitacaoRepository procedimentoHabilitacaoRepository;
@@ -219,7 +218,7 @@ public class SigtapFileImportServiceImpl {
     }
 
     public ImportResult importarCompetencia(String competencia) {
-        // #region agent log
+
         log.info("Iniciando importa??o da compet?ncia: {}", competencia);
         ImportResult result = new ImportResult(competencia);
 
@@ -251,10 +250,8 @@ public class SigtapFileImportServiceImpl {
             importarArquivo(competenciaPath, "tb_sub_grupo.txt", competencia, result, this::importarSubgrupos);
             importarArquivo(competenciaPath, "tb_forma_organizacao.txt", competencia, result, this::importarFormasOrganizacao);
 
-            // Fase 3: Procedimentos (deve vir ANTES de tb_descricao.txt que depende deles)
             importarArquivo(competenciaPath, "tb_procedimento.txt", competencia, result, this::importarProcedimentos);
 
-            // Fase 4: Descrições (dependem dos procedimentos)
             importarArquivo(competenciaPath, "tb_descricao.txt", competencia, result, this::importarDescricoes);
             importarArquivo(competenciaPath, "tb_descricao_detalhe.txt", competencia, result, this::importarDescricoesDetalhe);
 
@@ -280,10 +277,10 @@ public class SigtapFileImportServiceImpl {
             log.info("Importa??o da compet?ncia {} conclu?da. Total: {} linhas processadas, {} erros", 
                     competencia, result.getTotalLinhasProcessadas(), result.getTotalErros());
         } catch (Exception e) {
-            // Capturar exceções sem propagar para evitar fechamento do contexto Spring
+
             log.error("Erro ao importar compet?ncia {}: {}", competencia, e.getMessage(), e);
             result.addErro("Erro geral: " + e.getMessage());
-            // NÃO relançar a exceção para evitar fechamento do contexto Spring
+
         }
 
         return result;
@@ -291,7 +288,7 @@ public class SigtapFileImportServiceImpl {
 
     private void importarArquivo(Path competenciaPath, String nomeArquivo, String competencia, 
                                 ImportResult result, Function<ImportContext, Integer> importador) {
-        // #region agent log
+
         try {
             java.nio.file.Files.write(
                 java.nio.file.Paths.get("/Users/wagnergrilo/Desktop/WGB/sistemas/UPSaude/code/UPSaude-back/.cursor/debug.log"),
@@ -299,7 +296,7 @@ public class SigtapFileImportServiceImpl {
                     nomeArquivo, competencia, System.currentTimeMillis(), System.currentTimeMillis())).getBytes(),
                 java.nio.file.StandardOpenOption.CREATE, java.nio.file.StandardOpenOption.APPEND);
         } catch (Exception e) {}
-        // #endregion
+
         Path arquivoPath = competenciaPath.resolve(nomeArquivo);
         Path layoutPath = competenciaPath.resolve(nomeArquivo.replace(".txt", "_layout.txt"));
 
@@ -361,7 +358,7 @@ public class SigtapFileImportServiceImpl {
             com.upsaude.entity.referencia.sigtap.SigtapProcedimento procedimento = entityMapper.mapToProcedimento(fields, context.competencia);
             return procedimentoRepository.findByCodigoOficial(procedimento.getCodigoOficial())
                     .map(existing -> {
-                        // Atualizar campos do procedimento existente
+
                         existing.setNome(procedimento.getNome());
                         existing.setCompetenciaInicial(procedimento.getCompetenciaInicial());
                         existing.setTipoComplexidade(procedimento.getTipoComplexidade());
@@ -424,7 +421,6 @@ public class SigtapFileImportServiceImpl {
         return importarComBatch(context, fields -> entityMapper.mapToServicoClassificacao(fields, context.competencia),
                 servicoClassificacaoRepository::saveAll);
     }
-
 
     @Transactional
     private int importarOcupacoes(ImportContext context) {
@@ -534,12 +530,12 @@ public class SigtapFileImportServiceImpl {
 
     @Transactional
     private int importarCompatibilidades(ImportContext context) {
-        // TODO: Implementar quando tivermos o mapeamento de compatibilidade
+
         log.warn("Importa??o de compatibilidades ainda n?o implementada");
         return 0;
     }
 
-    @Transactional(timeout = 3600) // Timeout de 1 hora para arquivos grandes (81k linhas)
+    @Transactional(timeout = 3600) 
     private int importarProcedimentosCid(ImportContext context) {
         return importarComBatch(context, fields -> entityMapper.mapToProcedimentoCid(fields, context.competencia),
                 procedimentoCidRepository::saveAll);
@@ -674,12 +670,6 @@ public class SigtapFileImportServiceImpl {
                 excecaoCompatibilidadeRepository::saveAll);
     }
 
-    // ========== M?TODO GEN?RICO DE IMPORTA??O COM BATCH ==========
-    // 
-    // IMPORTANTE: Este método NÃO tem @Transactional porque é chamado por métodos
-    // que já têm @Transactional. Isso evita problemas com transações aninhadas
-    // e fechamento do contexto Spring em caso de erro.
-
     private <T> int importarComBatch(ImportContext context, 
                                      Function<Map<String, String>, T> mapper,
                                      Function<List<T>, List<T>> saver) {
@@ -689,8 +679,7 @@ public class SigtapFileImportServiceImpl {
         int linhasLidas = 0;
         long inicioTempo = System.currentTimeMillis();
         List<String> errosDetalhados = new ArrayList<>();
-        
-        // Contadores de erros por tipo
+
         int errosEntidadeNaoEncontrada = 0;
         int errosValidacao = 0;
         int errosEntidadeNula = 0;
@@ -700,7 +689,7 @@ public class SigtapFileImportServiceImpl {
             String linha;
             while ((linha = reader.readLine()) != null) {
                 linhasLidas++;
-                
+
                 if (linhasLidas % 1000 == 0) {
                     log.info("Processando arquivo {}: {} linhas lidas, {} processadas, {} erros", 
                             context.arquivoPath.getFileName(), linhasLidas, totalLinhas, linhasComErro);
@@ -712,7 +701,7 @@ public class SigtapFileImportServiceImpl {
                     }
 
                     Map<String, String> fields = fileParser.parseLine(linha, context.layout);
-                    
+
                     if (!validarCamposBasicos(fields, linhasLidas, errosDetalhados)) {
                         linhasComErro++;
                         errosValidacao++;
@@ -727,7 +716,7 @@ public class SigtapFileImportServiceImpl {
                             linhasComErro++;
                             String erroMsg = String.format("Linha %d: ERRO CRÍTICO - Contexto Spring fechado durante mapeamento: %s", linhasLidas, e.getMessage());
                             errosDetalhados.add(erroMsg);
-                            // #region agent log
+
                             try {
                                 java.nio.file.Files.write(
                                     java.nio.file.Paths.get("/Users/wagnergrilo/Desktop/WGB/sistemas/UPSaude/code/UPSaude-back/.cursor/debug.log"),
@@ -735,16 +724,16 @@ public class SigtapFileImportServiceImpl {
                                         context.arquivoPath.getFileName().toString(), linhasLidas, e.getMessage().replace("\"", "'"), System.currentTimeMillis(), System.currentTimeMillis())).getBytes(),
                                     java.nio.file.StandardOpenOption.CREATE, java.nio.file.StandardOpenOption.APPEND);
                             } catch (Exception ex) {}
-                            // #endregion
+
                             log.error("ERRO CRÍTICO ao mapear linha {} do arquivo {}: Contexto Spring fechado. Parando processamento deste arquivo.", 
                                     linhasLidas, context.arquivoPath.getFileName(), e);
-                            // Parar processamento deste arquivo para evitar mais erros
+
                             break;
                         }
-                        // Se não for erro de contexto fechado, relançar
+
                         throw e;
                     } catch (org.springframework.boot.context.properties.ConfigurationPropertiesBindException e) {
-                        // Erro crítico: Spring tentando recriar bean quando contexto está fechado durante mapeamento
+
                         linhasComErro++;
                         String erroMsg = String.format("Linha %d: ERRO CRÍTICO - Spring tentando recriar bean quando contexto fechado durante mapeamento: %s", linhasLidas, e.getMessage());
                         errosDetalhados.add(erroMsg);
@@ -752,7 +741,7 @@ public class SigtapFileImportServiceImpl {
                                 linhasLidas, context.arquivoPath.getFileName(), e);
                         break;
                     }
-                    
+
                     if (entity == null) {
                         linhasComErro++;
                         errosEntidadeNula++;
@@ -805,8 +794,7 @@ public class SigtapFileImportServiceImpl {
                     linhasComErro++;
                     String erroMsg = String.format("Linha %d: %s", linhasLidas, e.getMessage());
                     errosDetalhados.add(erroMsg);
-                    
-                    // Classificar o tipo de erro baseado na mensagem
+
                     String mensagemErro = e.getMessage() != null ? e.getMessage().toLowerCase() : "";
                     if (mensagemErro.contains("não encontrado") || mensagemErro.contains("nao encontrado")) {
                         errosEntidadeNaoEncontrada++;
@@ -817,7 +805,7 @@ public class SigtapFileImportServiceImpl {
                         log.warn("Erro de validação na linha {} do arquivo {}: {}", 
                                 linhasLidas, context.arquivoPath.getFileName(), e.getMessage());
                     }
-                    
+
                     if (errosDetalhados.size() > 100) {
                         errosDetalhados.remove(0);
                     }
@@ -845,17 +833,17 @@ public class SigtapFileImportServiceImpl {
                     if (e.getCause() != null) {
                         log.warn("Causa do erro: {} - {}", e.getCause().getClass().getName(), e.getCause().getMessage());
                     }
-                    
+
                     if (e instanceof IllegalStateException && e.getMessage() != null && e.getMessage().contains("closed")) {
                         log.error("ERRO CRÍTICO: Contexto Spring fechado detectado. Parando processamento deste arquivo.");
                         break;
                     }
-                    
+
                     if (linhasComErro % 100 == 0) {
                         log.warn("Total de {} erros até agora no arquivo {} (último erro: {})", 
                                 linhasComErro, context.arquivoPath.getFileName(), e.getMessage());
                     }
-                    
+
                     if (errosDetalhados.size() > 100) {
                         errosDetalhados.remove(0);
                     }
@@ -878,19 +866,17 @@ public class SigtapFileImportServiceImpl {
         }
 
         long tempoDecorrido = System.currentTimeMillis() - inicioTempo;
-        
+
         if (linhasComErro > 0) {
             log.warn("Arquivo {} concluído: {} linhas processadas, {} erros, {} linhas lidas, tempo: {}ms", 
                     context.arquivoPath.getFileName(), totalLinhas, linhasComErro, linhasLidas, tempoDecorrido);
-            
-            // Estatísticas de erros por tipo
+
             log.warn("Estatísticas de erros por tipo:");
             log.warn("  - Entidade não encontrada: {}", errosEntidadeNaoEncontrada);
             log.warn("  - Entidade nula (relacionamento não encontrado): {}", errosEntidadeNula);
             log.warn("  - Erros de validação: {}", errosValidacao);
             log.warn("  - Outros erros: {}", errosOutros);
-            
-            // Log dos primeiros 10 erros detalhados
+
             int errosParaLogar = Math.min(10, errosDetalhados.size());
             for (int i = 0; i < errosParaLogar; i++) {
                 log.warn("  Erro {}: {}", i + 1, errosDetalhados.get(i));
@@ -909,16 +895,14 @@ public class SigtapFileImportServiceImpl {
 
     private boolean validarCamposBasicos(Map<String, String> fields, int numeroLinha, List<String> errosDetalhados) {
         boolean temCampos = fields.values().stream().anyMatch(v -> v != null && !v.trim().isEmpty());
-        
+
         if (!temCampos) {
             errosDetalhados.add(String.format("Linha %d: Linha vazia ou sem campos v?lidos", numeroLinha));
             return false;
         }
-        
+
         return true;
     }
-
-    // ========== CLASSES AUXILIARES ==========
 
     private static class ImportContext {
         final Path arquivoPath;

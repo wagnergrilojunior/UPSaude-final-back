@@ -29,4 +29,3 @@ public class ContatoEstabelecimento {
     @Column(name = "site", length = 500)
     private String site;
 }
-

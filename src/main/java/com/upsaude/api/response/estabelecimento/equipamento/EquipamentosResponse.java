@@ -24,18 +24,18 @@ public class EquipamentosResponse {
     private OffsetDateTime createdAt;
     private OffsetDateTime updatedAt;
     private Boolean active;
-    
+
     private DadosIdentificacaoEquipamentoResponse dadosIdentificacao;
-    
+
     private FabricantesEquipamentoResponse fabricante;
-    
+
     private EspecificacoesTecnicasEquipamentoResponse especificacoesTecnicas;
-    
+
     private ManutencaoCalibracaoEquipamentoResponse manutencaoCalibracao;
-    
+
     private StatusAtivoEnum status;
-    
+
     private Boolean disponivelUso;
-    
+
     private DescricoesEquipamentoResponse descricoes;
 }

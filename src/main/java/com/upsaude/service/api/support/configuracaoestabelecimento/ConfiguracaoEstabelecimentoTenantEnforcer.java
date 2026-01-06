@@ -35,4 +35,3 @@ public class ConfiguracaoEstabelecimentoTenantEnforcer {
             .orElseThrow(() -> new NotFoundException("Configuração do estabelecimento não encontrada para estabelecimento: " + estabelecimentoId));
     }
 }
-

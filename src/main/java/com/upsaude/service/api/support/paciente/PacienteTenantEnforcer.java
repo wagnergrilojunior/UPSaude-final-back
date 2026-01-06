@@ -19,8 +19,6 @@ public class PacienteTenantEnforcer {
     public Paciente validarAcesso(UUID id, UUID tenantId) {
         log.debug("Validando acesso ao paciente ID: {} para tenant: {}", id, tenantId);
 
-        // Paciente estende BaseEntityWithoutTenant, então não tem tenant_id
-        // Usar findById padrão do JpaRepository
         return pacienteRepository.findById(id)
                 .orElseThrow(() -> {
                     log.warn("Paciente não encontrado com ID: {}", id);
@@ -31,9 +29,6 @@ public class PacienteTenantEnforcer {
     public Paciente validarAcessoCompleto(UUID id, UUID tenantId) {
         log.debug("Validando acesso completo ao paciente ID: {} para tenant: {}", id, tenantId);
 
-        // Paciente estende BaseEntityWithoutTenant, então não tem tenant_id
-        // Usar findById padrão - EntityGraphs causam MultipleBagFetchException
-        // Relacionamentos serão carregados lazy quando necessário
         return pacienteRepository.findById(id)
                 .orElseThrow(() -> {
                     log.warn("Paciente não encontrado com ID: {}", id);
@@ -41,4 +36,3 @@ public class PacienteTenantEnforcer {
                 });
     }
 }
-

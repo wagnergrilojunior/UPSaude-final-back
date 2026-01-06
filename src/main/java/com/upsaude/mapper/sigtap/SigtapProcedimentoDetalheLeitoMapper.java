@@ -8,7 +8,7 @@ import com.upsaude.entity.referencia.sigtap.SigtapProcedimentoLeito;
 
 @Mapper(componentModel = "spring")
 public interface SigtapProcedimentoDetalheLeitoMapper {
-    
+
     @Mapping(target = "codigoLeito", source = "tipoLeito.codigoOficial")
     @Mapping(target = "nomeLeito", source = "tipoLeito.nome")
     SigtapProcedimentoDetalheLeitoResponse toResponse(SigtapProcedimentoLeito entity);

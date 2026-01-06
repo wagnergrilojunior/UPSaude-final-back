@@ -1,6 +1,5 @@
 package com.upsaude.service.api.support.consultas;
 
-
 import java.util.UUID;
 
 import org.springframework.stereotype.Service;

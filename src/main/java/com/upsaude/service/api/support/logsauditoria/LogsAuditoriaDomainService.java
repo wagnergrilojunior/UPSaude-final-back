@@ -10,7 +10,7 @@ import org.springframework.stereotype.Service;
 public class LogsAuditoriaDomainService {
 
     public void aplicarDefaults(LogsAuditoria entity) {
-        // sem regras adicionais por enquanto
+
     }
 
     public void validarPodeInativar(LogsAuditoria entity) {
@@ -22,6 +22,6 @@ public class LogsAuditoriaDomainService {
 
     public void validarPodeDeletar(LogsAuditoria entity) {
         log.debug("Validando se log de auditoria pode ser deletado. ID: {}", entity.getId());
-        // Adicione aqui qualquer lógica de validação antes de um hard delete.
+
     }
 }

@@ -37,4 +37,3 @@ public class DadosClinicosBasicosCreator {
         return saved;
     }
 }
-

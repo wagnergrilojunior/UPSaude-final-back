@@ -33,13 +33,12 @@ public class DispensacaoItemResponse {
     private String procedimentoCodigo;
     private String procedimentoNome;
     private BigDecimal quantidadeDispensada;
-    
+
     @JsonSerialize(using = UnidadeMedidaEnumSerializer.class)
     @JsonDeserialize(using = UnidadeMedidaEnumDeserializer.class)
     private UnidadeMedidaEnum unidadeMedida;
-    
+
     private String lote;
     private LocalDate validadeLote;
     private String observacoes;
 }
-

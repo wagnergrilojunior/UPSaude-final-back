@@ -8,7 +8,6 @@ import java.util.stream.Collectors;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-// import org.springframework.web.bind.annotation.RestController; // TEMPORARIAMENTE DESATIVADO
 
 import com.upsaude.api.response.sistema.enums.EnumInfoResponse;
 import com.upsaude.api.response.sistema.enums.EnumItemResponse;
@@ -88,7 +87,6 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-// @RestController // TEMPORARIAMENTE DESATIVADO
 @RequestMapping("/v1/enums")
 @Tag(name = "Enums", description = "API para listagem de todos os enums do sistema. " +
         "Cada endpoint retorna os valores de um enum específico com seus códigos e descrições.")
@@ -272,8 +270,6 @@ public class EnumsController {
             throw ex;
         }
     }
-
-    // FrequenciaMedicacaoEnum removido - Medicacao foi deletada
 
     @GetMapping("/gravidade-doenca")
     @Operation(summary = "Listar valores de GravidadeDoencaEnum")

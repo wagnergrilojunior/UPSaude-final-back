@@ -49,14 +49,6 @@ public class SiaPaFileImportServiceImpl {
         this.siaPaRepository = siaPaRepository;
     }
 
-    /**
-     * Importa arquivos CSV do SIA-SUS PA para um mês específico.
-     * 
-     * @param ano Ano no formato YYYY (ex: "2025")
-     * @param uf UF no formato de 2 letras (ex: "MG")
-     * @param mes Mês no formato MM (ex: "01")
-     * @return Resultado da importação com estatísticas
-     */
     public ImportResult importarMes(String ano, String uf, String mes) {
         log.info("Iniciando importação SIA-SUS PA: {}/{}/{}", ano, uf, mes);
         ImportResult result = new ImportResult(ano, uf, mes);
@@ -67,7 +59,7 @@ public class SiaPaFileImportServiceImpl {
         }
 
         try {
-            // Lista todos os arquivos CSV na pasta do mês
+
             try (var paths = Files.list(mesPath)) {
                 List<Path> arquivosCsv = paths
                     .filter(Files::isRegularFile)
@@ -81,10 +73,8 @@ public class SiaPaFileImportServiceImpl {
                     return result;
                 }
 
-                // Extrai competência do primeiro arquivo (formato: PA{UF}{ANO}{MES}*.csv)
                 String competencia = extrairCompetencia(ano, mes);
 
-                // Processa cada arquivo CSV
                 for (Path arquivoCsv : arquivosCsv) {
                     importarArquivo(arquivoCsv, competencia, uf, result);
                 }
@@ -100,16 +90,10 @@ public class SiaPaFileImportServiceImpl {
         return result;
     }
 
-    /**
-     * Extrai competência no formato AAAAMM do ano e mês.
-     */
     private String extrairCompetencia(String ano, String mes) {
         return ano + mes;
     }
 
-    /**
-     * Importa um arquivo CSV específico.
-     */
     private void importarArquivo(Path arquivoPath, String competencia, String uf, ImportResult result) {
         String nomeArquivo = arquivoPath.getFileName().toString();
         log.info("Processando arquivo: {}", nomeArquivo);
@@ -125,10 +109,7 @@ public class SiaPaFileImportServiceImpl {
         }
     }
 
-    /**
-     * Método genérico de importação com batch processing.
-     */
-    @Transactional(timeout = 7200) // 2 horas timeout
+    @Transactional(timeout = 7200) 
     private int importarComBatch(ImportContext context) {
         List<SiaPa> batch = new ArrayList<>();
         int totalLinhas = 0;
@@ -155,14 +136,12 @@ public class SiaPaFileImportServiceImpl {
                         continue;
                     }
 
-                    // Primeira linha contém o cabeçalho
                     if (primeiraLinha) {
                         headers = parseCsvHeaders(linha);
                         primeiraLinha = false;
                         continue;
                     }
 
-                    // Parseia a linha usando os headers
                     Map<String, String> fields = csvParser.parseLine(linha, headers);
 
                     if (!validarCamposBasicos(fields, linhasLidas, errosDetalhados)) {
@@ -189,7 +168,6 @@ public class SiaPaFileImportServiceImpl {
 
                     batch.add(entity);
 
-                    // Salva batch quando atinge o tamanho configurado
                     if (batch.size() >= batchSize) {
                         try {
                             siaPaRepository.saveAll(batch);
@@ -217,7 +195,6 @@ public class SiaPaFileImportServiceImpl {
                 }
             }
 
-            // Salva batch final
             if (!batch.isEmpty()) {
                 try {
                     siaPaRepository.saveAll(batch);
@@ -238,8 +215,7 @@ public class SiaPaFileImportServiceImpl {
         if (linhasComErro > 0) {
             log.warn("Arquivo {} concluído: {} linhas processadas, {} erros, tempo: {}ms", 
                     context.arquivoPath.getFileName(), totalLinhas, linhasComErro, tempoDecorrido);
-            
-            // Log dos primeiros 10 erros detalhados
+
             int errosParaLogar = Math.min(10, errosDetalhados.size());
             for (int i = 0; i < errosParaLogar; i++) {
                 log.warn("  Erro {}: {}", i + 1, errosDetalhados.get(i));
@@ -256,16 +232,11 @@ public class SiaPaFileImportServiceImpl {
         return totalLinhas;
     }
 
-    /**
-     * Parseia a linha de cabeçalho do CSV.
-     */
     private String[] parseCsvHeaders(String linhaHeader) {
         if (linhaHeader == null || linhaHeader.trim().isEmpty()) {
             throw new IllegalArgumentException("Cabeçalho CSV vazio");
         }
 
-        // Usa o parser CSV para parsear o cabeçalho
-        // Primeiro parseia os valores
         java.util.List<String> headersList = new java.util.ArrayList<>();
         StringBuilder campoAtual = new StringBuilder();
         boolean dentroAspas = false;
@@ -275,17 +246,17 @@ public class SiaPaFileImportServiceImpl {
 
             if (c == '"') {
                 if (dentroAspas && i + 1 < linhaHeader.length() && linhaHeader.charAt(i + 1) == '"') {
-                    // Aspas duplas (escape)
+
                     campoAtual.append('"');
-                    i++; // Pula a próxima aspas
+                    i++; 
                 } else {
-                    // Inverte o estado (entra ou sai das aspas)
+
                     dentroAspas = !dentroAspas;
                 }
             } else if (c == ',' && !dentroAspas) {
-                // Vírgula fora de aspas = delimitador
+
                 String header = campoAtual.toString().trim();
-                // Remove aspas se existirem
+
                 if (header.startsWith("\"") && header.endsWith("\"") && header.length() >= 2) {
                     header = header.substring(1, header.length() - 1);
                 }
@@ -296,9 +267,8 @@ public class SiaPaFileImportServiceImpl {
             }
         }
 
-        // Adiciona o último campo
         String header = campoAtual.toString().trim();
-        // Remove aspas se existirem
+
         if (header.startsWith("\"") && header.endsWith("\"") && header.length() >= 2) {
             header = header.substring(1, header.length() - 1);
         }
@@ -307,9 +277,6 @@ public class SiaPaFileImportServiceImpl {
         return headersList.toArray(new String[0]);
     }
 
-    /**
-     * Valida campos básicos da linha.
-     */
     private boolean validarCamposBasicos(Map<String, String> fields, int numeroLinha, List<String> errosDetalhados) {
         boolean temCampos = fields.values().stream().anyMatch(v -> v != null && !v.trim().isEmpty());
 
@@ -318,7 +285,6 @@ public class SiaPaFileImportServiceImpl {
             return false;
         }
 
-        // Valida que tem pelo menos o código do procedimento (campo obrigatório)
         String procedimento = fields.get("PA_PROC_ID");
         if (procedimento == null || procedimento.trim().isEmpty()) {
             errosDetalhados.add(String.format("Linha %d: Campo PA_PROC_ID obrigatório ausente", numeroLinha));
@@ -327,8 +293,6 @@ public class SiaPaFileImportServiceImpl {
 
         return true;
     }
-
-    // ========== CLASSES AUXILIARES ==========
 
     private static class ImportContext {
         final Path arquivoPath;
@@ -376,4 +340,3 @@ public class SiaPaFileImportServiceImpl {
         public java.util.List<String> getErros() { return erros; }
     }
 }
-

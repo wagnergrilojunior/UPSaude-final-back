@@ -31,4 +31,3 @@ public class DepartamentosTenantEnforcer {
         return validarAcesso(id, tenantId);
     }
 }
-

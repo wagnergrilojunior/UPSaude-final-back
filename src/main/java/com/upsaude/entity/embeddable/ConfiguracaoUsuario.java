@@ -21,4 +21,3 @@ public class ConfiguracaoUsuario {
     @Column(name = "tipo_vinculo", length = 50)
     private String tipoVinculo;
 }
-

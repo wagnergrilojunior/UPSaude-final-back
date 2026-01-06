@@ -13,4 +13,3 @@ public interface DadosIdentificacaoTenantMapper {
     DadosIdentificacaoTenantResponse toResponse(DadosIdentificacaoTenant entity);
     void updateFromRequest(DadosIdentificacaoTenantRequest request, @MappingTarget DadosIdentificacaoTenant entity);
 }
-

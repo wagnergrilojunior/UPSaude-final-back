@@ -32,4 +32,3 @@ public interface FilaEsperaService {
 
     void inativar(UUID id);
 }
-

@@ -20,4 +20,3 @@ public class DadosFiscaisTenant {
     @Column(name = "inscricao_municipal", length = 20)
     private String inscricaoMunicipal;
 }
-

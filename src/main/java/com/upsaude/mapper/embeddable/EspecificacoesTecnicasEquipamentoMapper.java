@@ -13,4 +13,3 @@ public interface EspecificacoesTecnicasEquipamentoMapper {
     EspecificacoesTecnicasEquipamentoResponse toResponse(EspecificacoesTecnicasEquipamento entity);
     void updateFromRequest(EspecificacoesTecnicasEquipamentoRequest request, @MappingTarget EspecificacoesTecnicasEquipamento entity);
 }
-

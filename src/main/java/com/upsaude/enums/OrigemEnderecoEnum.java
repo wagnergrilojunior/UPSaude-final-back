@@ -43,4 +43,3 @@ public enum OrigemEnderecoEnum {
                 .orElse(null);
     }
 }
-

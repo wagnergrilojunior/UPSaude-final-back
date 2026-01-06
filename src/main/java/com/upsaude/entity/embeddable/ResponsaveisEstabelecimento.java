@@ -32,4 +32,3 @@ public class ResponsaveisEstabelecimento {
     @Column(name = "responsavel_legal_cpf", length = 11)
     private String responsavelLegalCpf;
 }
-

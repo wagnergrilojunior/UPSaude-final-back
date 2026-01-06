@@ -82,7 +82,6 @@ public class ConvenioServiceImpl implements ConvenioService {
     @Cacheable(cacheNames = CacheKeyUtil.CACHE_CONVENIOS, keyGenerator = "convenioCacheKeyGenerator")
     public ConvenioResponse obterPorId(UUID id) {
         log.debug("Buscando convênio por ID: {} (cache miss)", id);
-        // Validação de ID nulo removida - Spring valida automaticamente path parameters
 
         UUID tenantId = tenantService.validarTenantAtual();
         Convenio entity = tenantEnforcer.validarAcessoCompleto(id, tenantId);
@@ -105,7 +104,6 @@ public class ConvenioServiceImpl implements ConvenioService {
     @CachePut(cacheNames = CacheKeyUtil.CACHE_CONVENIOS, keyGenerator = "convenioCacheKeyGenerator")
     public ConvenioResponse atualizar(UUID id, ConvenioRequest request) {
         log.debug("Atualizando convênio. ID: {}", id);
-        // Validação de ID nulo removida - Spring valida automaticamente path parameters
 
         UUID tenantId = tenantService.validarTenantAtual();
         Tenant tenant = tenantService.obterTenantDoUsuarioAutenticado();
@@ -153,7 +151,6 @@ public class ConvenioServiceImpl implements ConvenioService {
     }
 
     private void inativarInternal(UUID id, UUID tenantId) {
-        // Validação de ID nulo removida - Spring valida automaticamente path parameters
 
         Convenio entity = tenantEnforcer.validarAcesso(id, tenantId);
         domainService.validarPodeInativar(entity);

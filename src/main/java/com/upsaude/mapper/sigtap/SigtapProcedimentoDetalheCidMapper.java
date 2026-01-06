@@ -8,7 +8,7 @@ import com.upsaude.entity.referencia.sigtap.SigtapProcedimentoCid;
 
 @Mapper(componentModel = "spring")
 public interface SigtapProcedimentoDetalheCidMapper {
-    
+
     @Mapping(target = "codigoCid", source = "cid10Subcategoria.subcat")
     @Mapping(target = "nomeCid", source = "cid10Subcategoria.descricao")
     SigtapProcedimentoDetalheCidResponse toResponse(SigtapProcedimentoCid entity);

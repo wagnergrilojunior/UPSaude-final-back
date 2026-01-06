@@ -14,12 +14,6 @@ import lombok.EqualsAndHashCode;
 
 import java.math.BigDecimal;
 
-/**
- * Procedimento SIGTAP.
- *
- * <p>Representa o cadastro principal do procedimento. Detalhes adicionais (listas) ficam em
- * {@link SigtapProcedimentoDetalhe}.
- */
 @Entity
 @Table(
         name = "sigtap_procedimento",
@@ -93,4 +87,3 @@ public class SigtapProcedimento extends BaseEntityWithoutTenant {
     @Column(name = "valor_servico_profissional", precision = 14, scale = 2)
     private BigDecimal valorServicoProfissional;
 }
-

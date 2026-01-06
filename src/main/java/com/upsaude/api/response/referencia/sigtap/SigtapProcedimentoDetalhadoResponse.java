@@ -8,7 +8,7 @@ import lombok.Data;
 public class SigtapProcedimentoDetalhadoResponse {
     @Schema(description = "Informações principais do procedimento")
     private SigtapProcedimentoResponse procedimento;
-    
+
     @Schema(description = "Detalhes adicionais do procedimento (quando disponíveis)")
     private SigtapProcedimentoDetalheResponse detalhe;
 }

@@ -67,4 +67,3 @@ public class ReceitaItem extends BaseEntity {
     @Column(name = "observacoes", columnDefinition = "TEXT")
     private String observacoes;
 }
-

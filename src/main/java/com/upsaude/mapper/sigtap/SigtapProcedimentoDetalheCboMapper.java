@@ -8,7 +8,7 @@ import com.upsaude.entity.referencia.sigtap.SigtapProcedimentoOcupacao;
 
 @Mapper(componentModel = "spring")
 public interface SigtapProcedimentoDetalheCboMapper {
-    
+
     @Mapping(target = "codigoCbo", source = "ocupacao.codigoOficial")
     @Mapping(target = "nomeCbo", source = "ocupacao.nome")
     SigtapProcedimentoDetalheCboResponse toResponse(SigtapProcedimentoOcupacao entity);

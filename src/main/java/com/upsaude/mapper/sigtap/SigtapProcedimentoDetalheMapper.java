@@ -12,4 +12,3 @@ public interface SigtapProcedimentoDetalheMapper {
     @Mapping(target = "procedimentoId", source = "procedimento.id")
     SigtapProcedimentoDetalheResponse toResponse(SigtapProcedimentoDetalhe entity);
 }
-

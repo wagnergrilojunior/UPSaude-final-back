@@ -23,4 +23,3 @@ public interface PacienteIdentificadorService {
 
     Optional<PacienteIdentificador> buscarPorTipoEValor(TipoIdentificadorEnum tipo, String valor, UUID tenantId);
 }
-

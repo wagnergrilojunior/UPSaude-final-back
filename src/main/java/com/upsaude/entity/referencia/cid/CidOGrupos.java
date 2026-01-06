@@ -25,7 +25,6 @@ import lombok.EqualsAndHashCode;
 @EqualsAndHashCode(callSuper = true)
 public class CidOGrupos extends BaseEntityWithoutTenant {
 
-    // CSV: CATINIC;CATFIM;DESCRICAO;REFER;
     @Column(name = "catinic", nullable = false, length = 20)
     private String catinic;
 
@@ -38,4 +37,3 @@ public class CidOGrupos extends BaseEntityWithoutTenant {
     @Column(name = "refer", columnDefinition = "TEXT")
     private String refer;
 }
-

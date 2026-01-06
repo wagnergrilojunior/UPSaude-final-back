@@ -15,4 +15,3 @@ public interface ReceitaService {
 
     Page<ReceitaResponse> listarPorPaciente(UUID pacienteId, Pageable pageable);
 }
-

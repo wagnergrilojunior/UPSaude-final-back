@@ -16,4 +16,3 @@ public class ResponsavelTenantResponse {
     private String responsavelCpf;
     private String responsavelTelefone;
 }
-

@@ -13,4 +13,3 @@ public interface ConfiguracaoUsuarioMapper {
 
     ConfiguracaoUsuarioResponse toResponse(ConfiguracaoUsuario entity);
 }
-

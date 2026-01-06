@@ -25,4 +25,3 @@ public class ConfiguracaoEstabelecimentoRelacionamentosHandler {
         entity.setEstabelecimento(estabelecimento);
     }
 }
-

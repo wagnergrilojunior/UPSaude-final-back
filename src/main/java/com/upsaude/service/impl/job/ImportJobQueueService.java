@@ -14,19 +14,13 @@ import org.springframework.transaction.support.TransactionTemplate;
 import java.time.OffsetDateTime;
 import java.util.UUID;
 
-/**
- * Centraliza transições de estado da fila (import_job), especialmente retry/backoff.
- * Evita duplicação de lógica entre Scheduler e Processor.
- */
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class ImportJobQueueService {
 
-    // USO EXCLUSIVO JOB - Queue service usa pool JOB
     private final ImportJobJobRepository importJobJobRepository;
-    
-    // USO EXCLUSIVO JOB - TransactionManager do JOB
+
     @Qualifier("jobTransactionManager")
     private final PlatformTransactionManager jobTransactionManager;
 
@@ -36,9 +30,6 @@ public class ImportJobQueueService {
     @Value("${import.job.retry-min-interval-seconds:30}")
     private int retryMinIntervalSeconds;
 
-    /**
-     * IMPORTANTE: Usa TransactionManager do JOB explicitamente
-     */
     public void reEnfileirarOuFalhar(UUID jobId, String motivo) {
         TransactionTemplate txTemplate = new TransactionTemplate(jobTransactionManager);
         txTemplate.execute(status -> {
@@ -78,5 +69,3 @@ public class ImportJobQueueService {
         });
     }
 }
-
-

@@ -76,4 +76,3 @@ public class Cid10Subcategorias extends BaseEntityWithoutTenant {
         }
     }
 }
-

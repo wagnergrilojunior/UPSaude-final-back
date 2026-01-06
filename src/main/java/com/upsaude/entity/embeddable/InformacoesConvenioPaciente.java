@@ -22,4 +22,3 @@ public class InformacoesConvenioPaciente {
     @Column(name = "data_validade_carteirinha")
     private LocalDate dataValidadeCarteirinha;
 }
-

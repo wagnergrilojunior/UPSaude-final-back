@@ -15,4 +15,3 @@ public class DadosExibicaoUsuarioResponse {
     private String nomeExibicao;
     private String fotoUrl;
 }
-

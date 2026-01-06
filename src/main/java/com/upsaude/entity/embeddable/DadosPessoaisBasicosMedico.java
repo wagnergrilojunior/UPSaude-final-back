@@ -32,4 +32,3 @@ public class DadosPessoaisBasicosMedico {
     @Column(name = "sexo")
     private SexoEnum sexo;
 }
-

@@ -23,4 +23,3 @@ public class ResponsavelTenant {
     @Column(name = "responsavel_telefone", length = 20)
     private String responsavelTelefone;
 }
-

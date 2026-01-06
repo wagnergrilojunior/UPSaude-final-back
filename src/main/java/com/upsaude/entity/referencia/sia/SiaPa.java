@@ -10,12 +10,6 @@ import lombok.EqualsAndHashCode;
 
 import java.math.BigDecimal;
 
-/**
- * Produção Ambulatorial do SIA-SUS (Sistema de Informações Ambulatoriais).
- * 
- * <p>Representa registros de procedimentos ambulatoriais realizados no SUS.
- * Os dados são importados de arquivos CSV do DATASUS.</p>
- */
 @Entity
 @Table(
     name = "sia_pa",
@@ -34,216 +28,189 @@ import java.math.BigDecimal;
 @EqualsAndHashCode(callSuper = true)
 public class SiaPa extends BaseEntityWithoutTenant {
 
-    // ========== COMPETÊNCIA E CONTROLE ==========
-    
     @Column(name = "competencia", length = 6, nullable = false)
-    private String competencia; // PA_CMP - formato AAAAMM
+    private String competencia; 
 
     @Column(name = "uf", length = 2, nullable = false)
-    private String uf; // UF do arquivo/estado
+    private String uf; 
 
     @Column(name = "mes_movimentacao", length = 6)
-    private String mesMovimentacao; // PA_MVM
+    private String mesMovimentacao; 
 
-    // ========== ESTABELECIMENTO ==========
-    
     @Column(name = "codigo_cnes", length = 7, nullable = false)
-    private String codigoCnes; // PA_CODUNI
+    private String codigoCnes; 
 
     @Column(name = "municipio_ufmun_codigo", length = 6)
-    private String municipioUfmunCodigo; // PA_UFMUN
+    private String municipioUfmunCodigo; 
 
     @Column(name = "municipio_gestao_codigo", length = 6)
-    private String municipioGestaoCodigo; // PA_GESTAO
+    private String municipioGestaoCodigo; 
 
     @Column(name = "condicao_estabelecimento", length = 2)
-    private String condicaoEstabelecimento; // PA_CONDIC
+    private String condicaoEstabelecimento; 
 
     @Column(name = "regiao_controle", length = 4)
-    private String regiaoControle; // PA_REGCT
+    private String regiaoControle; 
 
     @Column(name = "inconsistencia_saida", length = 4)
-    private String inconsistenciaSaida; // PA_INCOUT
+    private String inconsistenciaSaida; 
 
     @Column(name = "inconsistencia_urgencia", length = 4)
-    private String inconsistenciaUrgencia; // PA_INCURG
+    private String inconsistenciaUrgencia; 
 
     @Column(name = "tipo_unidade", length = 2)
-    private String tipoUnidade; // PA_TPUPS
+    private String tipoUnidade; 
 
     @Column(name = "tipo_prestador", length = 2)
-    private String tipoPrestador; // PA_TIPPRE
+    private String tipoPrestador; 
 
     @Column(name = "indicador_manual", length = 1)
-    private String indicadorManual; // PA_MN_IND
+    private String indicadorManual; 
 
     @Column(name = "cnpj_cpf", length = 14)
-    private String cnpjCpf; // PA_CNPJCPF
+    private String cnpjCpf; 
 
     @Column(name = "cnpj_mantenedor", length = 14)
-    private String cnpjMantenedor; // PA_CNPJMNT
+    private String cnpjMantenedor; 
 
     @Column(name = "cnpj_contratante", length = 14)
-    private String cnpjContratante; // PA_CNPJ_CC
+    private String cnpjContratante; 
 
     @Column(name = "natureza_juridica", length = 4)
-    private String naturezaJuridica; // PA_NAT_JUR
+    private String naturezaJuridica; 
 
     @Column(name = "codigo_orgao_contratante")
-    private String codigoOrgaoContratante; // PA_CODOCO
+    private String codigoOrgaoContratante; 
 
     @Column(name = "servico_contratualizado")
-    private String servicoContratualizado; // PA_SRV_C
+    private String servicoContratualizado; 
 
     @Column(name = "codigo_ine")
-    private String codigoIne; // PA_INE
+    private String codigoIne; 
 
-    // ========== PROCEDIMENTO ==========
-    
     @Column(name = "procedimento_codigo", length = 10, nullable = false)
-    private String procedimentoCodigo; // PA_PROC_ID
+    private String procedimentoCodigo; 
 
     @Column(name = "nivel_complexidade", length = 1)
-    private String nivelComplexidade; // PA_NIVCPL
+    private String nivelComplexidade; 
 
     @Column(name = "indicador", length = 5)
-    private String indicador; // PA_INDICA
+    private String indicador; 
 
-    // ========== FINANCIAMENTO ==========
-    
     @Column(name = "tipo_financiamento", length = 2)
-    private String tipoFinanciamento; // PA_TPFIN
+    private String tipoFinanciamento; 
 
     @Column(name = "subfinanciamento", length = 4)
-    private String subfinanciamento; // PA_SUBFIN
+    private String subfinanciamento; 
 
-    // ========== DOCUMENTAÇÃO E AUTORIZAÇÃO ==========
-    
     @Column(name = "documento_origem", length = 13)
-    private String documentoOrigem; // PA_DOCORIG
+    private String documentoOrigem; 
 
     @Column(name = "numero_autorizacao", length = 15)
-    private String numeroAutorizacao; // PA_AUTORIZ
+    private String numeroAutorizacao; 
 
     @Column(name = "tipo_documento_origem", length = 1)
-    private String tipoDocumentoOrigem; // PA_DOCORIG (tipo)
+    private String tipoDocumentoOrigem; 
 
-    // ========== PROFISSIONAL ==========
-    
     @Column(name = "cns_profissional", length = 15)
-    private String cnsProfissional; // PA_CNSMED
+    private String cnsProfissional; 
 
     @Column(name = "cbo_codigo", length = 6)
-    private String cboCodigo; // PA_CBOCOD
+    private String cboCodigo; 
 
-    // ========== CID (DIAGNÓSTICO) ==========
-    
     @Column(name = "cid_principal_codigo", length = 10)
-    private String cidPrincipalCodigo; // PA_CIDPRI
+    private String cidPrincipalCodigo; 
 
     @Column(name = "cid_secundario_codigo", length = 10)
-    private String cidSecundarioCodigo; // PA_CIDSEC
+    private String cidSecundarioCodigo; 
 
     @Column(name = "cid_causa_codigo", length = 10)
-    private String cidCausaCodigo; // PA_CIDCAS
+    private String cidCausaCodigo; 
 
-    // ========== ATENDIMENTO ==========
-    
     @Column(name = "carater_atendimento", length = 2)
-    private String caraterAtendimento; // PA_CATEND
+    private String caraterAtendimento; 
 
-    // ========== USUÁRIO/PACIENTE ==========
-    
     @Column(name = "idade")
-    private Integer idade; // PA_IDADE
+    private Integer idade; 
 
     @Column(name = "idade_minima")
-    private Integer idadeMinima; // IDADEMIN
+    private Integer idadeMinima; 
 
     @Column(name = "idade_maxima")
-    private Integer idadeMaxima; // IDADEMAX
+    private Integer idadeMaxima; 
 
     @Column(name = "flag_idade", length = 1)
-    private String flagIdade; // PA_FLIDADE
+    private String flagIdade; 
 
     @Column(name = "sexo", length = 1)
-    private String sexo; // PA_SEXO
+    private String sexo; 
 
     @Column(name = "raca_cor", length = 2)
-    private String racaCor; // PA_RACACOR
+    private String racaCor; 
 
     @Column(name = "etnia")
-    private String etnia; // PA_ETNIA
+    private String etnia; 
 
     @Column(name = "municipio_paciente_codigo", length = 6)
-    private String municipioPacienteCodigo; // PA_MUNPCN
+    private String municipioPacienteCodigo; 
 
-    // ========== CONTROLE DE FLUXO/STATUS ==========
-    
     @Column(name = "motivo_saida", length = 2)
-    private String motivoSaida; // PA_MOTSAI
+    private String motivoSaida; 
 
     @Column(name = "flag_obito", length = 1)
-    private String flagObito; // PA_OBITO
+    private String flagObito; 
 
     @Column(name = "flag_encerramento", length = 1)
-    private String flagEncerramento; // PA_ENCERR
+    private String flagEncerramento; 
 
     @Column(name = "flag_permanencia", length = 1)
-    private String flagPermanencia; // PA_PERMAN
+    private String flagPermanencia; 
 
     @Column(name = "flag_alta", length = 1)
-    private String flagAlta; // PA_ALTA
+    private String flagAlta; 
 
     @Column(name = "flag_transferencia", length = 1)
-    private String flagTransferencia; // PA_TRANSF
+    private String flagTransferencia; 
 
-    // ========== PRODUÇÃO E QUANTIDADES ==========
-    
     @Column(name = "quantidade_produzida")
-    private Integer quantidadeProduzida; // PA_QTDPRO
+    private Integer quantidadeProduzida; 
 
     @Column(name = "quantidade_aprovada")
-    private Integer quantidadeAprovada; // PA_QTDAPR
+    private Integer quantidadeAprovada; 
 
     @Column(name = "flag_quantidade", length = 1)
-    private String flagQuantidade; // PA_FLQT
+    private String flagQuantidade; 
 
     @Column(name = "flag_erro", length = 1)
-    private String flagErro; // PA_FLER
+    private String flagErro; 
 
-    // ========== VALORES FINANCEIROS ==========
-    
     @Column(name = "valor_produzido", precision = 14, scale = 2)
-    private BigDecimal valorProduzido; // PA_VALPRO
+    private BigDecimal valorProduzido; 
 
     @Column(name = "valor_aprovado", precision = 14, scale = 2)
-    private BigDecimal valorAprovado; // PA_VALAPR
+    private BigDecimal valorAprovado; 
 
     @Column(name = "valor_cofinanciado", precision = 14, scale = 2)
-    private BigDecimal valorCofinanciado; // PA_VL_CF
+    private BigDecimal valorCofinanciado; 
 
     @Column(name = "valor_clinico", precision = 14, scale = 2)
-    private BigDecimal valorClinico; // PA_VL_CL
+    private BigDecimal valorClinico; 
 
     @Column(name = "valor_incrementado", precision = 14, scale = 2)
-    private BigDecimal valorIncrementado; // PA_VL_INC
+    private BigDecimal valorIncrementado; 
 
     @Column(name = "valor_total_vpa", precision = 14, scale = 2)
-    private BigDecimal valorTotalVpa; // NU_VPA_TOT
+    private BigDecimal valorTotalVpa; 
 
     @Column(name = "total_pa", precision = 14, scale = 2)
-    private BigDecimal totalPa; // NU_PA_TOT
+    private BigDecimal totalPa; 
 
-    // ========== DIFERENÇAS ==========
-    
     @Column(name = "uf_diferente", length = 1)
-    private String ufDiferente; // PA_UFDIF
+    private String ufDiferente; 
 
     @Column(name = "municipio_diferente", length = 1)
-    private String municipioDiferente; // PA_MNDIF
+    private String municipioDiferente; 
 
     @Column(name = "diferenca_valor", precision = 14, scale = 2)
-    private BigDecimal diferencaValor; // PA_DIF_VAL
+    private BigDecimal diferencaValor; 
 }
-

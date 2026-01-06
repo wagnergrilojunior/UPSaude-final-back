@@ -29,4 +29,3 @@ public interface FaltaService {
 
     void inativar(UUID id);
 }
-

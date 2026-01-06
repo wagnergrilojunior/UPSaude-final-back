@@ -23,4 +23,3 @@ public class ConsultaUpdateDiagnosticoRequest {
     @Schema(description = "Dados de diagnóstico", required = true)
     private DiagnosticoConsultaRequest diagnostico;
 }
-

@@ -33,4 +33,3 @@ public interface CirurgiaService {
 
     void inativar(UUID id);
 }
-

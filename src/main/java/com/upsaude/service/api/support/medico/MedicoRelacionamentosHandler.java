@@ -54,7 +54,7 @@ public class MedicoRelacionamentosHandler {
     private void processarEndereco(Medicos medico, MedicosRequest request, Tenant tenant) {
         if (request.getEnderecoMedico() != null) {
             log.debug("Processando endereço médico como objeto completo");
-            
+
             var enderecoRequest = request.getEnderecoMedico();
             boolean temCamposPreenchidos = (enderecoRequest.getLogradouro() != null && !enderecoRequest.getLogradouro().trim().isEmpty()) ||
                 (enderecoRequest.getCep() != null && !enderecoRequest.getCep().trim().isEmpty()) ||
@@ -112,20 +112,17 @@ public class MedicoRelacionamentosHandler {
                 log.warn("Lista de estabelecimentos contém IDs duplicados. Removendo duplicatas.");
             }
 
-            // Se é uma atualização (médico já tem ID), remover vínculos existentes que não estão na lista
-            // Se é uma criação (médico não tem ID), apenas adicionar os novos
             if (medico.getId() != null) {
                 Set<UUID> estabelecimentosParaManter = new LinkedHashSet<>(estabelecimentosIdsUnicos);
-                // Remover vínculos que não estão na lista (marcar dataFim ou remover)
+
                 medico.getEstabelecimentos().removeIf(medicoEstabelecimento ->
                     !estabelecimentosParaManter.contains(medicoEstabelecimento.getEstabelecimento().getId())
                 );
             } else {
-                // Na criação, limpar lista inicial
+
                 medico.getEstabelecimentos().clear();
             }
 
-            // Adicionar novos estabelecimentos
             for (UUID estabelecimentoId : estabelecimentosIdsUnicos) {
                 if (estabelecimentoId == null) {
                     log.warn("ID de estabelecimento nulo encontrado na lista. Ignorando.");
@@ -138,7 +135,6 @@ public class MedicoRelacionamentosHandler {
                 ).orElseThrow(() -> new NotFoundException(
                         "Estabelecimento não encontrado com ID: " + estabelecimentoId + " para o tenant"));
 
-                // Verificar se já está associado
                 boolean jaExiste = medico.getEstabelecimentos().stream()
                         .anyMatch(me -> me.getEstabelecimento().getId().equals(estabelecimentoId)
                                 && me.getDataFim() == null);
@@ -150,7 +146,7 @@ public class MedicoRelacionamentosHandler {
                     medicoEstabelecimento.setTenant(tenant);
                     medicoEstabelecimento.setDataInicio(OffsetDateTime.now());
                     medicoEstabelecimento.setActive(true);
-                    medicoEstabelecimento.setTipoVinculo(TipoVinculoProfissionalEnum.EFETIVO); // Padrão EFETIVO
+                    medicoEstabelecimento.setTipoVinculo(TipoVinculoProfissionalEnum.EFETIVO); 
 
                     medico.addMedicoEstabelecimento(medicoEstabelecimento);
                     log.debug("Vínculo com estabelecimento {} criado para o médico", estabelecimentoId);
@@ -161,8 +157,7 @@ public class MedicoRelacionamentosHandler {
 
             log.debug("{} estabelecimento(s) vinculado(s) ao médico com sucesso", medico.getEstabelecimentos().size());
         } else {
-            // Se lista vazia ou null na criação, não adiciona estabelecimentos
-            // Se for atualização, mantém os existentes (não limpa)
+
             if (medico.getId() == null) {
                 medico.getEstabelecimentos().clear();
                 log.debug("Nenhum estabelecimento fornecido no cadastro inicial. Lista de estabelecimentos será vazia.");
@@ -182,26 +177,22 @@ public class MedicoRelacionamentosHandler {
                 log.warn("Lista de especialidades contém IDs duplicados. Removendo duplicatas.");
             }
 
-            // Se é uma atualização (médico já tem ID), limpar especialidades existentes que não estão na lista
-            // Se é uma criação (médico não tem ID), apenas adicionar as novas
             if (medico.getId() != null) {
                 Set<UUID> especialidadesParaManter = new LinkedHashSet<>(especialidadesIdsUnicos);
                 medico.getEspecialidades().removeIf(especialidade ->
                     !especialidadesParaManter.contains(especialidade.getId())
                 );
             } else {
-                // Na criação, limpar lista inicial
+
                 medico.getEspecialidades().clear();
             }
 
-            // Adicionar novas especialidades
             for (UUID especialidadeId : especialidadesIdsUnicos) {
                 if (especialidadeId == null) {
                     log.warn("ID de especialidade nulo encontrado na lista. Ignorando.");
                     continue;
                 }
 
-                // Verificar se já está associada
                 boolean jaExiste = medico.getEspecialidades().stream()
                         .anyMatch(esp -> esp.getId().equals(especialidadeId));
 
@@ -217,8 +208,7 @@ public class MedicoRelacionamentosHandler {
 
             log.debug("{} especialidade(s) vinculada(s) ao médico com sucesso", medico.getEspecialidades().size());
         } else {
-            // Se lista vazia ou null na criação, não adiciona especialidades
-            // Se for atualização, mantém as existentes (não limpa)
+
             if (medico.getId() == null) {
                 medico.getEspecialidades().clear();
                 log.debug("Nenhuma especialidade fornecida no cadastro inicial. Lista de especialidades será vazia.");

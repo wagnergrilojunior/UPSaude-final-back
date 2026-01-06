@@ -37,7 +37,7 @@ public class PacienteIdentificadorServiceImpl implements PacienteIdentificadorSe
         tenantService.validarTenantAtual();
         PacienteIdentificador existente = repository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Identificador não encontrado"));
-        
+
         existente.setTipo(identificador.getTipo());
         existente.setValor(identificador.getValor());
         existente.setOrigem(identificador.getOrigem());
@@ -45,7 +45,7 @@ public class PacienteIdentificadorServiceImpl implements PacienteIdentificadorSe
         existente.setDataValidacao(identificador.getDataValidacao());
         existente.setPrincipal(identificador.getPrincipal());
         existente.setObservacoes(identificador.getObservacoes());
-        
+
         return repository.save(existente);
     }
 
@@ -85,4 +85,3 @@ public class PacienteIdentificadorServiceImpl implements PacienteIdentificadorSe
         return repository.findByTipoAndValorAndTenantId(tipo, valor, tenantId);
     }
 }
-

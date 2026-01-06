@@ -9,10 +9,10 @@ import org.springframework.stereotype.Service;
 public class ReceitaDomainService {
 
     public void validarReceitaValida(Receita receita) {
-        // Validação de regra de negócio - implementar conforme necessário
+
         if (receita == null) {
             throw new IllegalArgumentException("Receita não pode ser nula");
         }
-        // Adicionar outras validações conforme necessário
+
     }
 }

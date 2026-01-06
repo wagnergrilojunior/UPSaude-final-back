@@ -15,4 +15,3 @@ public class DadosFiscaisTenantResponse {
     private String inscricaoEstadual;
     private String inscricaoMunicipal;
 }
-

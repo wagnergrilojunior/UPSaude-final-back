@@ -22,4 +22,3 @@ public class CidadesResponseBuilder {
         return mapper.toResponse(entity);
     }
 }
-

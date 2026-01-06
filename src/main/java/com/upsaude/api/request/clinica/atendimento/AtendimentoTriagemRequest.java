@@ -28,4 +28,3 @@ public class AtendimentoTriagemRequest {
     @Schema(description = "Dados de classificação de risco")
     private ClassificacaoRiscoAtendimentoRequest classificacaoRisco;
 }
-

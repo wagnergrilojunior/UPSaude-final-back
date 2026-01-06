@@ -31,4 +31,3 @@ public class DadosSociodemograficosResponseBuilder {
         return response;
     }
 }
-

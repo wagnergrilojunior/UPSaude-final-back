@@ -29,4 +29,3 @@ public class ContatoProfissional {
     @Column(name = "email_institucional", length = 255)
     private String emailInstitucional;
 }
-

@@ -35,14 +35,6 @@ import java.time.OffsetDateTime;
 import java.util.*;
 import java.util.function.Function;
 
-/**
- * Worker de importação SIGTAP: processa 1 arquivo TXT + 1 arquivo de layout (CSV) por job.
- *
- * Convenção:
- * - O arquivo principal vem em storagePath.
- * - O layout vem em payloadJson (layoutPath).
- * - Competência vem de competenciaAno+competenciaMes.
- */
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -50,7 +42,6 @@ public class SigtapImportJobWorker implements ImportJobWorker {
 
     private static final int ERROR_SAMPLE_LIMIT = 200;
 
-    // USO EXCLUSIVO JOB - Worker usa pool JOB
     private final com.upsaude.repository.sistema.importacao.ImportJobJobRepository importJobJobRepository;
     private final com.upsaude.repository.sistema.importacao.ImportJobErrorRepository importJobErrorRepository;
     private final SupabaseStorageService supabaseStorageService;
@@ -59,11 +50,9 @@ public class SigtapImportJobWorker implements ImportJobWorker {
     private final SigtapEntityMapper entityMapper;
     private final JdbcEntityBatchWriter jdbcEntityBatchWriter;
 
-    // USO EXCLUSIVO JOB - TransactionManager do JOB
     @Qualifier("jobTransactionManager")
     private final PlatformTransactionManager jobTransactionManager;
 
-    // USO EXCLUSIVO JOB - EntityManager do JOB (persistence unit "job")
     @PersistenceContext(unitName = "job")
     private EntityManager entityManager;
 
@@ -100,8 +89,7 @@ public class SigtapImportJobWorker implements ImportJobWorker {
 
         TransactionTemplate txBatchCommit = new TransactionTemplate(jobTransactionManager);
         txBatchCommit.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
-        // PostgreSQL usa READ_COMMITTED por padrão, que é o nível desejado
-        // Não configuramos isolamento customizado para evitar problemas com Hibernate 6.x
+
         txBatchCommit.setTimeout(Math.max(5, batchTxTimeoutSeconds));
 
         ImportJob job = txReadSnapshot.execute(status -> importJobJobRepository.findById(jobId).orElse(null));
@@ -131,7 +119,7 @@ public class SigtapImportJobWorker implements ImportJobWorker {
         Charset charset = Charset.forName(StringUtils.hasText(sigtapEncoding) ? sigtapEncoding : "ISO-8859-1");
 
         long checkpoint = job.getCheckpointLinha() != null ? job.getCheckpointLinha() : 0L;
-        long lastCommittedLineIndex = checkpoint; // última linha efetivamente commitada no banco
+        long lastCommittedLineIndex = checkpoint; 
         long linhasLidasTotal = job.getLinhasLidas() != null ? job.getLinhasLidas() : 0L;
         long linhasProcessadasTotal = job.getLinhasProcessadas() != null ? job.getLinhasProcessadas() : 0L;
         long linhasInseridasTotal = job.getLinhasInseridas() != null ? job.getLinhasInseridas() : 0L;
@@ -140,10 +128,9 @@ public class SigtapImportJobWorker implements ImportJobWorker {
         long inicio = System.currentTimeMillis();
         long lastProgressLogAtMs = System.currentTimeMillis();
         long lastHeartbeatAtMs = System.currentTimeMillis();
-        // Atualiza heartbeat a cada 30 segundos (metade do timeout de 5 minutos) para evitar expiração
+
         long heartbeatIntervalMs = Math.min(30_000, (heartbeatTimeoutSeconds * 1000L) / 2);
 
-        // Atualiza heartbeat logo no início para evitar expiração durante download/inicialização
         atualizarHeartbeat(txBatchCommit, jobId);
         lastHeartbeatAtMs = System.currentTimeMillis();
 
@@ -154,7 +141,7 @@ public class SigtapImportJobWorker implements ImportJobWorker {
         }
 
         try (InputStream layoutIs = supabaseStorageService.downloadStream(job.getStorageBucket(), layoutPath)) {
-            // Atualiza heartbeat após download do layout (pode ter demorado)
+
             long layoutDownloadEndMs = System.currentTimeMillis();
             if ((layoutDownloadEndMs - lastHeartbeatAtMs) >= heartbeatIntervalMs) {
                 atualizarHeartbeat(txBatchCommit, jobId);
@@ -168,17 +155,15 @@ public class SigtapImportJobWorker implements ImportJobWorker {
             try (InputStream dataIs = supabaseStorageService.downloadStream(job.getStorageBucket(), job.getStoragePath());
                  BufferedReader reader = new BufferedReader(new InputStreamReader(dataIs, charset))) {
 
-                // Atualiza heartbeat após download do arquivo de dados (pode ter demorado)
                 long dataDownloadEndMs = System.currentTimeMillis();
                 if ((dataDownloadEndMs - lastHeartbeatAtMs) >= heartbeatIntervalMs) {
                     atualizarHeartbeat(txBatchCommit, jobId);
                     lastHeartbeatAtMs = dataDownloadEndMs;
                 }
 
-                // Skip checkpoint - atualiza heartbeat periodicamente durante skip se checkpoint for grande
                 for (long i = 0; i < checkpoint; i++) {
                     if (reader.readLine() == null) break;
-                    // Atualiza heartbeat a cada 10000 linhas durante skip para evitar expiração em checkpoints grandes
+
                     if (i > 0 && i % 10000 == 0) {
                         long skipCheckMs = System.currentTimeMillis();
                         if ((skipCheckMs - lastHeartbeatAtMs) >= heartbeatIntervalMs) {
@@ -215,7 +200,6 @@ public class SigtapImportJobWorker implements ImportJobWorker {
                         batch.add(entity);
                         linhasProcessadasTotal++;
 
-                        // Atualiza heartbeat periodicamente para evitar expiração durante processamento longo
                         long nowMs = System.currentTimeMillis();
                         if ((nowMs - lastHeartbeatAtMs) >= heartbeatIntervalMs) {
                             atualizarHeartbeat(txBatchCommit, jobId);
@@ -265,12 +249,11 @@ public class SigtapImportJobWorker implements ImportJobWorker {
         } catch (ImportJobRecoverableException | ImportJobFatalException e) {
             throw e;
         } catch (java.io.IOException e) {
-            // Erros de IO durante leitura do stream (ConnectionClosedException, Broken pipe, etc) são recuperáveis
-            // ConnectionClosedException do Apache HttpClient 5.x é uma subclasse de IOException
+
             log.warn("Erro de IO durante leitura do stream no job {} (SIGTAP): {} - Tipo: {}", jobId, e.getMessage(), e.getClass().getSimpleName());
             throw new ImportJobRecoverableException("Falha de rede durante leitura do arquivo (pode ser temporário): " + e.getMessage(), e);
         } catch (Exception e) {
-            // Verifica se a causa é uma IOException (inclui ConnectionClosedException)
+
             Throwable cause = e.getCause();
             if (cause instanceof IOException) {
                 log.warn("Erro de rede (via causa) durante leitura do stream no job {} (SIGTAP): {} - Tipo: {}", jobId, e.getMessage(), cause.getClass().getSimpleName());
@@ -302,7 +285,7 @@ public class SigtapImportJobWorker implements ImportJobWorker {
     }
 
     private SigtapLayoutDefinition readLayoutFromStream(InputStream is) throws Exception {
-        // LayoutReader atual só lê Path; aqui fazemos leitura equivalente por stream
+
         SigtapLayoutDefinition definition = new SigtapLayoutDefinition();
         definition.setCampos(new ArrayList<>());
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(is, java.nio.charset.StandardCharsets.UTF_8))) {
@@ -334,10 +317,6 @@ public class SigtapImportJobWorker implements ImportJobWorker {
         return fields.values().stream().anyMatch(v -> v != null && !v.trim().isEmpty());
     }
 
-    /**
-     * Atualiza apenas o heartbeat do job (sem commit de batch).
-     * Usado para evitar expiração do heartbeat durante processamento longo entre batches.
-     */
     private void atualizarHeartbeat(TransactionTemplate txBatchCommit, UUID jobId) {
         txBatchCommit.executeWithoutResult(status -> {
             ImportJob j = importJobJobRepository.findById(jobId).orElse(null);
@@ -348,10 +327,6 @@ public class SigtapImportJobWorker implements ImportJobWorker {
         });
     }
 
-    /**
-     * Commit atômico por batch: persiste o batch + atualiza checkpoint/heartbeat no MESMO commit.
-     * Isso garante que checkpoint nunca avance além do que foi efetivamente persistido.
-     */
     private void persistirBatchEAtualizarCheckpoint(TransactionTemplate txBatchCommit,
                                                    UUID jobId,
                                                    ImportStrategy<?> strategy,
@@ -362,7 +337,7 @@ public class SigtapImportJobWorker implements ImportJobWorker {
                                                    long erros,
                                                    long checkpointLinha) {
         txBatchCommit.executeWithoutResult(status -> {
-            // UPSERT em JDBC baseado em @UniqueConstraint (evita overhead do Hibernate)
+
             @SuppressWarnings("unchecked")
             List<Object> entities = (List<Object>) (List<?>) batch;
             jdbcEntityBatchWriter.upsertBatch(entities);
@@ -453,7 +428,7 @@ public class SigtapImportJobWorker implements ImportJobWorker {
     private String extrairLayoutPath(String payloadJson) {
         if (!StringUtils.hasText(payloadJson)) return null;
         try {
-            // parsing simples sem depender de lib: procura "layoutPath":"..."
+
             String key = "\"layoutPath\"";
             int k = payloadJson.indexOf(key);
             if (k < 0) return null;
@@ -512,9 +487,9 @@ public class SigtapImportJobWorker implements ImportJobWorker {
             case "rl_procedimento_registro.txt" -> simpleMapper(entityMapper::mapToProcedimentoRegistro, competencia);
             case "rl_procedimento_detalhe.txt" -> new ImportStrategy<>(entityMapper::mapToProcedimentoDetalheItem);
             case "rl_excecao_compatibilidade.txt" -> simpleMapper(entityMapper::mapToExcecaoCompatibilidade, competencia);
-            // tb_cid.txt não é processado pelo SIGTAP - os dados de CID-10 são importados separadamente via endpoint CID-10
+
             case "tb_cid.txt" -> new ImportStrategy<>(fields -> null);
-            // rl_procedimento_compativel.txt não é mais usado/processado pelo sistema SIGTAP atual
+
             case "rl_procedimento_compativel.txt" -> new ImportStrategy<>(fields -> null);
             default -> null;
         };
@@ -536,5 +511,3 @@ public class SigtapImportJobWorker implements ImportJobWorker {
         }
     }
 }
-
-

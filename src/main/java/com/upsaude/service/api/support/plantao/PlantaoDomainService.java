@@ -18,7 +18,6 @@ public class PlantaoDomainService {
 
     public void validarPodeDeletar(Plantao entity) {
         log.debug("Validando se plantão pode ser deletado. ID: {}", entity.getId());
-        // Adicione aqui qualquer lógica de validação antes de um hard delete.
+
     }
 }
-

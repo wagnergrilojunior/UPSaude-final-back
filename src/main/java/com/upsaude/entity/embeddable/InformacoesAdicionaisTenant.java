@@ -20,4 +20,3 @@ public class InformacoesAdicionaisTenant {
     @Column(name = "observacoes", columnDefinition = "TEXT")
     private String observacoes;
 }
-

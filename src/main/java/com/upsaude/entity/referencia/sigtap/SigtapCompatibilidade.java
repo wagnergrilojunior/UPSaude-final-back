@@ -12,12 +12,6 @@ import jakarta.persistence.UniqueConstraint;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
-/**
- * Compatibilidade entre procedimentos no SIGTAP.
- *
- * <p>Relaciona um procedimento principal a um secund?rio, vinculando a uma
- * {@link SigtapCompatibilidadePossivel} (cat?logo) e mantendo o per?odo de vig?ncia.
- */
 @Entity
 @Table(
         name = "sigtap_compatibilidade",
@@ -64,4 +58,3 @@ public class SigtapCompatibilidade extends BaseEntityWithoutTenant {
     @Column(name = "documento_revogacao", columnDefinition = "jsonb")
     private String documentoRevogacao;
 }
-

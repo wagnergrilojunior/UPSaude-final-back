@@ -16,4 +16,3 @@ public class ReceitaResponseBuilder {
         return receitaMapper.toResponseCompleto(receita);
     }
 }
-

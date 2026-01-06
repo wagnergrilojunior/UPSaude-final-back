@@ -18,4 +18,3 @@ public interface CidOCategoriasService {
 
     void excluir(UUID id);
 }
-

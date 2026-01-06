@@ -26,4 +26,3 @@ public class DadosIdentificacaoTenant {
     @Column(name = "cnpj", length = 14, unique = true)
     private String cnpj;
 }
-

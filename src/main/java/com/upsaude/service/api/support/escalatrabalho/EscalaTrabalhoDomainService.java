@@ -18,7 +18,6 @@ public class EscalaTrabalhoDomainService {
 
     public void validarPodeDeletar(EscalaTrabalho entity) {
         log.debug("Validando se escala de trabalho pode ser deletada. ID: {}", entity.getId());
-        // Adicione aqui qualquer lógica de validação antes de um hard delete.
+
     }
 }
-

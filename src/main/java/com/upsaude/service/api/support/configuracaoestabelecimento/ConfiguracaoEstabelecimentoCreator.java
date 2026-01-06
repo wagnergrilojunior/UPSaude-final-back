@@ -37,4 +37,3 @@ public class ConfiguracaoEstabelecimentoCreator {
         return saved;
     }
 }
-

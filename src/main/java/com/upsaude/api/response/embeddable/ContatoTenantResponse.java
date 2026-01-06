@@ -16,4 +16,3 @@ public class ContatoTenantResponse {
     private String email;
     private String site;
 }
-

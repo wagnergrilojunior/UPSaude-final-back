@@ -28,8 +28,6 @@ public class CidController {
 
     private final Cid10ConsultaService cid10ConsultaService;
 
-    // ========== CID-10 Capítulos ==========
-
     @GetMapping("/cid10/capitulos")
     @Operation(summary = "Listar capítulos CID-10", description = "Retorna lista de todos os capítulos CID-10")
     @ApiResponses(value = {
@@ -70,8 +68,6 @@ public class CidController {
             throw ex;
         }
     }
-
-    // ========== CID-10 Categorias ==========
 
     @GetMapping("/cid10/categorias")
     @Operation(summary = "Pesquisar categorias CID-10", description = "Retorna uma lista paginada de categorias CID-10")
@@ -139,8 +135,6 @@ public class CidController {
         }
     }
 
-    // ========== CID-10 Subcategorias ==========
-
     @GetMapping("/cid10/subcategorias")
     @Operation(summary = "Pesquisar subcategorias CID-10", description = "Retorna uma lista paginada de subcategorias CID-10")
     @ApiResponses(value = {
@@ -207,8 +201,6 @@ public class CidController {
         }
     }
 
-    // ========== CID-10 Grupos ==========
-
     @GetMapping("/cid10/grupos")
     @Operation(summary = "Listar grupos CID-10", description = "Retorna lista de todos os grupos CID-10")
     @ApiResponses(value = {
@@ -230,8 +222,6 @@ public class CidController {
         }
     }
 
-    // ========== CID-O Grupos ==========
-
     @GetMapping("/cid-o/grupos")
     @Operation(summary = "Listar grupos CID-O", description = "Retorna lista de todos os grupos CID-O")
     @ApiResponses(value = {
@@ -252,8 +242,6 @@ public class CidController {
             throw ex;
         }
     }
-
-    // ========== CID-O Categorias ==========
 
     @GetMapping("/cid-o/categorias")
     @Operation(summary = "Pesquisar categorias CID-O", description = "Retorna uma lista paginada de categorias CID-O")

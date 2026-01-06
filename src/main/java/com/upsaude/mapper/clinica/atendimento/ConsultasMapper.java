@@ -35,7 +35,6 @@ public interface ConsultasMapper {
     @Mapping(target = "profissionalSaude", ignore = true)
     void updateFromRequest(ConsultasRequest request, @MappingTarget Consultas entity);
 
-    // Evita ciclos/recursões indiretas via PacienteResponse/ResponsavelLegalResponse e grafos grandes.
     @Mapping(target = "paciente", ignore = true)
     @Mapping(target = "medico", ignore = true)
     @Mapping(target = "profissionalSaude", ignore = true)

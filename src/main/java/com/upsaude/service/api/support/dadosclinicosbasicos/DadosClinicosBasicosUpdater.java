@@ -41,4 +41,3 @@ public class DadosClinicosBasicosUpdater {
         return updated;
     }
 }
-

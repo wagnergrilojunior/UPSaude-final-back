@@ -10,7 +10,6 @@ import com.upsaude.api.response.profissional.equipe.EquipeSaudeResponse;
 import com.upsaude.api.response.embeddable.InformacoesAtendimentoResponse;
 import com.upsaude.api.response.embeddable.ProcedimentosRealizadosAtendimentoResponse;
 
-
 import com.upsaude.api.response.embeddable.AnamneseAtendimentoResponse;
 import com.upsaude.api.response.embeddable.ClassificacaoRiscoAtendimentoResponse;
 import com.upsaude.api.response.embeddable.DiagnosticoAtendimentoResponse;

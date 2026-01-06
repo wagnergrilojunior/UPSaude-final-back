@@ -23,4 +23,3 @@ public interface ConfiguracaoEstabelecimentoService {
 
     void inativar(UUID id);
 }
-

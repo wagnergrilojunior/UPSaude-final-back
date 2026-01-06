@@ -41,4 +41,3 @@ public enum StatusSincronizacaoEnum {
                 .orElse(null);
     }
 }
-

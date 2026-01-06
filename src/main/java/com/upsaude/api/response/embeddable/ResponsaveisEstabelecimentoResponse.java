@@ -22,4 +22,3 @@ public class ResponsaveisEstabelecimentoResponse {
 
     private String responsavelLegalCpf;
 }
-

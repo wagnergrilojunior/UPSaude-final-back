@@ -55,4 +55,3 @@ public class FarmaciaRequest {
 
     private UUID estabelecimentoId;
 }
-

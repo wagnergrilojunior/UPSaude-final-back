@@ -67,7 +67,6 @@ public class Agendamento extends BaseEntity {
     @JoinColumn(name = "medico_id")
     private Medicos medico;
 
-
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "convenio_id")
     private Convenio convenio;

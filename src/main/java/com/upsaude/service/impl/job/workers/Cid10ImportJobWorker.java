@@ -42,7 +42,6 @@ public class Cid10ImportJobWorker implements ImportJobWorker {
 
     private static final int ERROR_SAMPLE_LIMIT = 200;
 
-    // USO EXCLUSIVO JOB - Worker usa pool JOB
     private final com.upsaude.repository.sistema.importacao.ImportJobJobRepository importJobJobRepository;
     private final com.upsaude.repository.sistema.importacao.ImportJobErrorRepository importJobErrorRepository;
     private final SupabaseStorageService supabaseStorageService;
@@ -51,11 +50,9 @@ public class Cid10ImportJobWorker implements ImportJobWorker {
     private final Cid10EntityMapper entityMapper;
     private final JdbcEntityBatchWriter jdbcEntityBatchWriter;
 
-    // USO EXCLUSIVO JOB - TransactionManager do JOB
     @Qualifier("jobTransactionManager")
     private final PlatformTransactionManager jobTransactionManager;
 
-    // USO EXCLUSIVO JOB - EntityManager do JOB (persistence unit "job")
     @PersistenceContext(unitName = "job")
     private EntityManager entityManager;
 
@@ -89,8 +86,7 @@ public class Cid10ImportJobWorker implements ImportJobWorker {
 
         TransactionTemplate txBatchCommit = new TransactionTemplate(jobTransactionManager);
         txBatchCommit.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
-        // PostgreSQL usa READ_COMMITTED por padrão, que é o nível desejado
-        // Não configuramos isolamento customizado para evitar problemas com Hibernate 6.x
+
         txBatchCommit.setTimeout(Math.max(5, batchTxTimeoutSeconds));
 
         ImportJob job = txReadSnapshot.execute(status -> importJobJobRepository.findById(jobId).orElse(null));
@@ -117,8 +113,8 @@ public class Cid10ImportJobWorker implements ImportJobWorker {
             throw new ImportJobFatalException("Arquivo CID10 não suportado: " + nomeArquivo);
         }
 
-        long checkpoint = job.getCheckpointLinha() != null ? job.getCheckpointLinha() : 0L; // data lines (sem header)
-        long lastCommittedLineIndex = checkpoint; // última linha (data line) efetivamente commitada no banco
+        long checkpoint = job.getCheckpointLinha() != null ? job.getCheckpointLinha() : 0L; 
+        long lastCommittedLineIndex = checkpoint; 
         long linhasLidasTotal = job.getLinhasLidas() != null ? job.getLinhasLidas() : 0L;
         long linhasProcessadasTotal = job.getLinhasProcessadas() != null ? job.getLinhasProcessadas() : 0L;
         long linhasInseridasTotal = job.getLinhasInseridas() != null ? job.getLinhasInseridas() : 0L;
@@ -127,10 +123,9 @@ public class Cid10ImportJobWorker implements ImportJobWorker {
         long inicio = System.currentTimeMillis();
         long lastProgressLogAtMs = System.currentTimeMillis();
         long lastHeartbeatAtMs = System.currentTimeMillis();
-        // Atualiza heartbeat a cada 30 segundos (metade do timeout de 5 minutos) para evitar expiração
+
         long heartbeatIntervalMs = Math.min(30_000, (heartbeatTimeoutSeconds * 1000L) / 2);
 
-        // Atualiza heartbeat logo no início para evitar expiração durante download/inicialização
         atualizarHeartbeat(txBatchCommit, jobId);
         lastHeartbeatAtMs = System.currentTimeMillis();
 
@@ -139,7 +134,6 @@ public class Cid10ImportJobWorker implements ImportJobWorker {
         try (InputStream is = supabaseStorageService.downloadStream(job.getStorageBucket(), job.getStoragePath());
              BufferedReader reader = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8))) {
 
-            // Atualiza heartbeat após download (pode ter demorado)
             long downloadEndMs = System.currentTimeMillis();
             if ((downloadEndMs - lastHeartbeatAtMs) >= heartbeatIntervalMs) {
                 atualizarHeartbeat(txBatchCommit, jobId);
@@ -153,10 +147,9 @@ public class Cid10ImportJobWorker implements ImportJobWorker {
 
             String[] headers = parseHeaders(headerLine);
 
-            // Skip checkpoint (data lines) - atualiza heartbeat periodicamente durante skip se checkpoint for grande
             for (long i = 0; i < checkpoint; i++) {
                 if (reader.readLine() == null) break;
-                // Atualiza heartbeat a cada 10000 linhas durante skip para evitar expiração em checkpoints grandes
+
                 if (i > 0 && i % 10000 == 0) {
                     long skipCheckMs = System.currentTimeMillis();
                     if ((skipCheckMs - lastHeartbeatAtMs) >= heartbeatIntervalMs) {
@@ -193,7 +186,6 @@ public class Cid10ImportJobWorker implements ImportJobWorker {
                     batch.add(entity);
                     linhasProcessadasTotal++;
 
-                    // Atualiza heartbeat periodicamente para evitar expiração durante processamento longo
                     long nowMs = System.currentTimeMillis();
                     if ((nowMs - lastHeartbeatAtMs) >= heartbeatIntervalMs) {
                         atualizarHeartbeat(txBatchCommit, jobId);
@@ -245,12 +237,11 @@ public class Cid10ImportJobWorker implements ImportJobWorker {
         } catch (ImportJobRecoverableException | ImportJobFatalException e) {
             throw e;
         } catch (java.io.IOException e) {
-            // Erros de IO durante leitura do stream (ConnectionClosedException, Broken pipe, etc) são recuperáveis
-            // ConnectionClosedException do Apache HttpClient 5.x é uma subclasse de IOException
+
             log.warn("Erro de IO durante leitura do stream no job {} (CID10): {} - Tipo: {}", jobId, e.getMessage(), e.getClass().getSimpleName());
             throw new ImportJobRecoverableException("Falha de rede durante leitura do arquivo (pode ser temporário): " + e.getMessage(), e);
         } catch (Exception e) {
-            // Verifica se a causa é uma IOException (inclui ConnectionClosedException)
+
             Throwable cause = e.getCause();
             if (cause instanceof IOException) {
                 log.warn("Erro de rede (via causa) durante leitura do stream no job {} (CID10): {} - Tipo: {}", jobId, e.getMessage(), cause.getClass().getSimpleName());
@@ -291,10 +282,6 @@ public class Cid10ImportJobWorker implements ImportJobWorker {
         return fields.values().stream().anyMatch(v -> v != null && !v.trim().isEmpty());
     }
 
-    /**
-     * Atualiza apenas o heartbeat do job (sem commit de batch).
-     * Usado para evitar expiração do heartbeat durante processamento longo entre batches.
-     */
     private void atualizarHeartbeat(TransactionTemplate txBatchCommit, UUID jobId) {
         txBatchCommit.executeWithoutResult(status -> {
             ImportJob j = importJobJobRepository.findById(jobId).orElse(null);
@@ -305,10 +292,6 @@ public class Cid10ImportJobWorker implements ImportJobWorker {
         });
     }
 
-    /**
-     * Commit atômico por batch: persiste o batch + atualiza checkpoint/heartbeat no MESMO commit.
-     * Isso garante que checkpoint nunca avance além do que foi efetivamente persistido.
-     */
     private void persistirBatchLookupEAtualizarCheckpoint(TransactionTemplate txBatchCommit,
                                                          UUID jobId,
                                                          ImportStrategy<?> strategy,
@@ -319,7 +302,7 @@ public class Cid10ImportJobWorker implements ImportJobWorker {
                                                          long erros,
                                                          long checkpointLinha) {
         txBatchCommit.executeWithoutResult(status -> {
-            // UPSERT em JDBC baseado em @UniqueConstraint (evita lookup/merge via JPA)
+
             @SuppressWarnings("unchecked")
             List<Object> entities = (List<Object>) (List<?>) batch;
             jdbcEntityBatchWriter.upsertBatch(entities);
@@ -426,5 +409,3 @@ public class Cid10ImportJobWorker implements ImportJobWorker {
         }
     }
 }
-
-

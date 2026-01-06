@@ -23,4 +23,3 @@ public class ContatoEstabelecimentoResponse {
 
     private String site;
 }
-

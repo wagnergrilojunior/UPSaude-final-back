@@ -13,4 +13,3 @@ public interface LicenciamentoEstabelecimentoMapper {
     LicenciamentoEstabelecimentoResponse toResponse(LicenciamentoEstabelecimento entity);
     void updateFromRequest(LicenciamentoEstabelecimentoRequest request, @MappingTarget LicenciamentoEstabelecimento entity);
 }
-

@@ -3,7 +3,6 @@ package com.upsaude.api.response.estabelecimento;
 import com.upsaude.api.response.estabelecimento.EstabelecimentosResponse;
 import com.upsaude.api.response.estabelecimento.equipamento.EquipamentosResponse;
 
-
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;

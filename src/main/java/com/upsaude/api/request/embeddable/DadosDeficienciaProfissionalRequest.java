@@ -24,4 +24,3 @@ public class DadosDeficienciaProfissionalRequest {
     @JsonDeserialize(using = TipoDeficienciaEnumDeserializer.class)
     private TipoDeficienciaEnum tipoDeficiencia;
 }
-

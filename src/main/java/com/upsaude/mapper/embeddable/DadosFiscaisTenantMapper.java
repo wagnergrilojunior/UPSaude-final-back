@@ -13,4 +13,3 @@ public interface DadosFiscaisTenantMapper {
     DadosFiscaisTenantResponse toResponse(DadosFiscaisTenant entity);
     void updateFromRequest(DadosFiscaisTenantRequest request, @MappingTarget DadosFiscaisTenant entity);
 }
-

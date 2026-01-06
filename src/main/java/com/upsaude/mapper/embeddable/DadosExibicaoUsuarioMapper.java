@@ -13,4 +13,3 @@ public interface DadosExibicaoUsuarioMapper {
 
     DadosExibicaoUsuarioResponse toResponse(DadosExibicaoUsuario entity);
 }
-

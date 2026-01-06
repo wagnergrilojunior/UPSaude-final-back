@@ -83,8 +83,6 @@ public class Tenant {
     @JoinColumn(name = "endereco_id")
     private Endereco endereco;
 
-    //===============================================================================================================
-
     @PrePersist
     @PreUpdate
     public void validateEmbeddables() {

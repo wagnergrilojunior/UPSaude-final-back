@@ -13,9 +13,6 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import java.math.BigDecimal;
 
-/**
- * Relacionamento entre Procedimento e Habilitacao com Incrementos.
- */
 @Entity
 @Table(
         name = "sigtap_procedimento_incremento",

@@ -1,6 +1,5 @@
 package com.upsaude.service.api.support.prontuarios;
 
-
 import java.util.UUID;
 
 import org.springframework.stereotype.Service;
@@ -32,4 +31,3 @@ public class ProntuariosTenantEnforcer {
         return validarAcesso(id, tenantId);
     }
 }
-

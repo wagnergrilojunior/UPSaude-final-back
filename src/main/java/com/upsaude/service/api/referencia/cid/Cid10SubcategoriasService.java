@@ -20,4 +20,3 @@ public interface Cid10SubcategoriasService {
 
     java.util.List<Cid10Subcategorias> listarPorCategoria(String categoriaCat);
 }
-

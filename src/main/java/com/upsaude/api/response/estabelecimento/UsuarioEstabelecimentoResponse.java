@@ -3,7 +3,6 @@ package com.upsaude.api.response.estabelecimento;
 import com.upsaude.api.response.estabelecimento.EstabelecimentosResponse;
 import com.upsaude.api.response.sistema.usuario.UsuariosSistemaResponse;
 
-
 import com.upsaude.enums.TipoUsuarioSistemaEnum;
 import java.time.OffsetDateTime;
 import java.util.UUID;

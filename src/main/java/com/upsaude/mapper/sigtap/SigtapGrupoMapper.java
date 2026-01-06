@@ -9,4 +9,3 @@ import com.upsaude.entity.referencia.sigtap.SigtapGrupo;
 public interface SigtapGrupoMapper {
     SigtapGrupoResponse toResponse(SigtapGrupo entity);
 }
-

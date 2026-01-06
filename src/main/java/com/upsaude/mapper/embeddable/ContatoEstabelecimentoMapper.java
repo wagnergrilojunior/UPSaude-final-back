@@ -13,4 +13,3 @@ public interface ContatoEstabelecimentoMapper {
     ContatoEstabelecimentoResponse toResponse(ContatoEstabelecimento entity);
     void updateFromRequest(ContatoEstabelecimentoRequest request, @MappingTarget ContatoEstabelecimento entity);
 }
-

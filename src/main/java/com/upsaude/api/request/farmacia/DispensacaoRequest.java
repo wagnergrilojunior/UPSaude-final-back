@@ -57,4 +57,3 @@ public class DispensacaoRequest {
     @Builder.Default
     private List<DispensacaoItemRequest> itens = new ArrayList<>();
 }
-

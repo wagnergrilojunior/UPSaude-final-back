@@ -125,13 +125,13 @@ public class EstabelecimentosServiceImpl implements EstabelecimentosService {
         try {
             UUID tenantId = tenantService.validarTenantAtual();
             Pageable adjustedPageable = ajustarPageableParaCamposEmbeddados(pageable);
-            
+
             Specification<Estabelecimentos> spec = (root, query, cb) -> {
                 List<Predicate> predicates = new ArrayList<>();
                 predicates.add(cb.equal(root.get("tenant").get("id"), tenantId));
                 return cb.and(predicates.toArray(new Predicate[0]));
             };
-            
+
             Page<Estabelecimentos> estabelecimentos = estabelecimentosRepository.findAll(spec, adjustedPageable);
             log.debug("Listagem de estabelecimentos concluída. Total de elementos: {}", estabelecimentos.getTotalElements());
             return estabelecimentos.map(responseBuilder::build);
@@ -152,7 +152,7 @@ public class EstabelecimentosServiceImpl implements EstabelecimentosService {
         Sort adjustedSort = pageable.getSort().stream()
                 .map(order -> {
                     String property = order.getProperty();
-                    // Mapear campos que estão dentro de dadosIdentificacao
+
                     if ("nome".equals(property) || "nomeFantasia".equals(property) || 
                         "tipo".equals(property) || "cnes".equals(property) || "cnpj".equals(property) ||
                         "naturezaJuridica".equals(property)) {

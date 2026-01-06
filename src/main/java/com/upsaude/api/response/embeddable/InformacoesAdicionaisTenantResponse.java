@@ -15,4 +15,3 @@ public class InformacoesAdicionaisTenantResponse {
     private String horarioFuncionamento;
     private String observacoes;
 }
-

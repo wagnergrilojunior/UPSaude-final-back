@@ -23,4 +23,3 @@ public interface TemplateNotificacaoService {
 
     void inativar(UUID id);
 }
-

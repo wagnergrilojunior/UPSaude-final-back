@@ -11,9 +11,6 @@ import jakarta.persistence.UniqueConstraint;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
-/**
- * Relacionamento entre Procedimento e TUSS.
- */
 @Entity
 @Table(
         name = "sigtap_procedimento_tuss",

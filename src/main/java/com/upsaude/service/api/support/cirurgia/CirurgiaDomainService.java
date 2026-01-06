@@ -17,8 +17,6 @@ public class CirurgiaDomainService {
     }
 
     public void validarPodeDeletar(Cirurgia entity) {
-        // Validações adicionais podem ser adicionadas aqui se necessário
-        // Por exemplo, verificar se há registros relacionados que impedem a exclusão
+
     }
 }
-

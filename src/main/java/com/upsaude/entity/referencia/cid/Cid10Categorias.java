@@ -59,4 +59,3 @@ public class Cid10Categorias extends BaseEntityWithoutTenant {
     @OneToMany(mappedBy = "categoria", fetch = FetchType.LAZY)
     private List<Cid10Subcategorias> subcategorias = new ArrayList<>();
 }
-

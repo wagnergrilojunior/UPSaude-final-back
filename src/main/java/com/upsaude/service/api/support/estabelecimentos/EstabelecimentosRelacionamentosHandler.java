@@ -92,7 +92,7 @@ public class EstabelecimentosRelacionamentosHandler {
 
             if (enderecoPrincipal.getTenant() != null && enderecoPrincipal.getTenant().getId() != null
                 && !enderecoPrincipal.getTenant().getId().equals(tenantId)) {
-                // não vazar info de tenant
+
                 throw new NotFoundException("Endereço principal não encontrado com ID: " + enderecoId);
             }
 
@@ -108,7 +108,7 @@ public class EstabelecimentosRelacionamentosHandler {
         if (estabelecimento.getResponsaveis() == null) {
             estabelecimento.setResponsaveis(new com.upsaude.entity.embeddable.ResponsaveisEstabelecimento());
         }
-        
+
         if (request.getResponsaveis() != null && request.getResponsaveis().getResponsavelTecnico() != null) {
             ProfissionaisSaude rt = profissionaisSaudeTenantEnforcer.validarAcesso(request.getResponsaveis().getResponsavelTecnico(), tenantId);
             estabelecimento.getResponsaveis().setResponsavelTecnico(rt);
@@ -141,4 +141,3 @@ public class EstabelecimentosRelacionamentosHandler {
         }
     }
 }
-

@@ -8,14 +8,13 @@ import lombok.Data;
 public class SigtapRubricaResponse {
     @Schema(description = "Código oficial da rubrica", example = "010101")
     private String codigoOficial;
-    
+
     @Schema(description = "Nome da rubrica", example = "Atenção Básica - Ações de Saúde")
     private String nome;
-    
+
     @Schema(description = "Competência inicial de vigência (formato AAAAMM)", example = "202512")
     private String competenciaInicial;
-    
+
     @Schema(description = "Competência final de vigência (formato AAAAMM). Null se ainda está vigente")
     private String competenciaFinal;
 }
-

@@ -13,4 +13,3 @@ public interface InfraestruturaFisicaEstabelecimentoMapper {
     InfraestruturaFisicaEstabelecimentoResponse toResponse(InfraestruturaFisicaEstabelecimento entity);
     void updateFromRequest(InfraestruturaFisicaEstabelecimentoRequest request, @MappingTarget InfraestruturaFisicaEstabelecimento entity);
 }
-

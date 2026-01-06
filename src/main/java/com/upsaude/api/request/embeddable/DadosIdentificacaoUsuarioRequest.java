@@ -25,4 +25,3 @@ public class DadosIdentificacaoUsuarioRequest {
     @CPFValido
     private String cpf;
 }
-

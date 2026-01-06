@@ -20,4 +20,3 @@ public class LocalizacaoEstabelecimento {
     @Column(name = "longitude")
     private Double longitude;
 }
-

@@ -1,8 +1,5 @@
 package com.upsaude.enums;
 
-/**
- * Status possíveis de um job de importação.
- */
 public enum ImportJobStatusEnum {
     ENFILEIRADO("ENFILEIRADO", "Aguardando processamento"),
     PROCESSANDO("PROCESSANDO", "Em processamento"),
@@ -37,4 +34,3 @@ public enum ImportJobStatusEnum {
         return null;
     }
 }
-

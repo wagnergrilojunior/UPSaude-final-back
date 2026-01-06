@@ -16,4 +16,3 @@ public class DadosDeficienciaProfissionalResponse {
     private Boolean temDeficiencia;
     private TipoDeficienciaEnum tipoDeficiencia;
 }
-

@@ -40,4 +40,3 @@ public class EstabelecimentosUpdater {
         return saved;
     }
 }
-

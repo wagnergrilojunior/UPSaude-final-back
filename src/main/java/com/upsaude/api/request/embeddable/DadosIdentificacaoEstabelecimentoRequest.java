@@ -49,4 +49,3 @@ public class DadosIdentificacaoEstabelecimentoRequest {
     @JsonDeserialize(using = NaturezaJuridicaEnumDeserializer.class)
     private NaturezaJuridicaEnum naturezaJuridica;
 }
-

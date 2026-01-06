@@ -18,7 +18,6 @@ public class HistoricoClinicoDomainService {
 
     public void validarPodeDeletar(HistoricoClinico entity) {
         log.debug("Validando se histórico clínico pode ser deletado. ID: {}", entity.getId());
-        // Adicione aqui qualquer lógica de validação antes de um hard delete.
+
     }
 }
-

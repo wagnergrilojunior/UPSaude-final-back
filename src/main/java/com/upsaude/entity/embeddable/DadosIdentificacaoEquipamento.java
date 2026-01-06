@@ -45,4 +45,3 @@ public class DadosIdentificacaoEquipamento {
     @Column(name = "classe_risco", length = 50)
     private String classeRisco;
 }
-

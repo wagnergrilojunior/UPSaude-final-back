@@ -10,9 +10,8 @@ import org.mapstruct.MappingTarget;
 @Mapper(config = MappingConfig.class)
 public interface RegistroProfissionalMapper {
     RegistroProfissional toEntity(RegistroProfissionalRequest request);
-    
+
     RegistroProfissionalResponse toResponse(RegistroProfissional entity);
-    
+
     void updateFromRequest(RegistroProfissionalRequest request, @MappingTarget RegistroProfissional entity);
 }
-

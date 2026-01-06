@@ -17,7 +17,7 @@ public class Cid10EntityMapper {
 
     public Cid10Capitulos mapToCapitulo(Map<String, String> fields, String competencia) {
         Cid10Capitulos capitulo = new Cid10Capitulos();
-        
+
         String numcapStr = fields.get("NUMCAP");
         if (numcapStr != null && !numcapStr.trim().isEmpty()) {
             try {
@@ -40,7 +40,7 @@ public class Cid10EntityMapper {
 
     public Cid10Grupos mapToGrupo(Map<String, String> fields, String competencia) {
         Cid10Grupos grupo = new Cid10Grupos();
-        
+
         grupo.setCatinic(limparString(fields.get("CATINIC")));
         grupo.setCatfim(limparString(fields.get("CATFIM")));
         grupo.setDescricao(limparString(fields.get("DESCRICAO")));
@@ -51,7 +51,7 @@ public class Cid10EntityMapper {
 
     public Cid10Categorias mapToCategoria(Map<String, String> fields, String competencia) {
         Cid10Categorias categoria = new Cid10Categorias();
-        
+
         categoria.setCat(limparString(fields.get("CAT")));
         categoria.setClassif(limparString(fields.get("CLASSIF")));
         categoria.setDescricao(limparString(fields.get("DESCRICAO")));
@@ -64,7 +64,7 @@ public class Cid10EntityMapper {
 
     public Cid10Subcategorias mapToSubcategoria(Map<String, String> fields, String competencia) {
         Cid10Subcategorias subcategoria = new Cid10Subcategorias();
-        
+
         String subcat = limparString(fields.get("SUBCAT"));
         if (subcat == null || subcat.isEmpty()) {
             throw new IllegalArgumentException("SUBCAT é obrigatório");
@@ -89,7 +89,7 @@ public class Cid10EntityMapper {
 
     public CidOGrupos mapToCidOGrupo(Map<String, String> fields, String competencia) {
         CidOGrupos grupo = new CidOGrupos();
-        
+
         grupo.setCatinic(limparString(fields.get("CATINIC")));
         grupo.setCatfim(limparString(fields.get("CATFIM")));
         grupo.setDescricao(limparString(fields.get("DESCRICAO")));
@@ -100,7 +100,7 @@ public class Cid10EntityMapper {
 
     public CidOCategorias mapToCidOCategoria(Map<String, String> fields, String competencia) {
         CidOCategorias categoria = new CidOCategorias();
-        
+
         categoria.setCat(limparString(fields.get("CAT")));
         categoria.setDescricao(limparString(fields.get("DESCRICAO")));
         categoria.setRefer(limparString(fields.get("REFER")));

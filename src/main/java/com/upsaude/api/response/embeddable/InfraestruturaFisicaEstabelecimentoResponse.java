@@ -25,4 +25,3 @@ public class InfraestruturaFisicaEstabelecimentoResponse {
 
     private Double areaTotalMetrosQuadrados;
 }
-

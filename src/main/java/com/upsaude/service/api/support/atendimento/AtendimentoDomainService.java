@@ -10,7 +10,7 @@ import org.springframework.stereotype.Service;
 public class AtendimentoDomainService {
 
     public void aplicarDefaults(Atendimento entity) {
-        // sem regras adicionais por enquanto
+
     }
 
     public void validarPodeInativar(Atendimento entity) {
@@ -22,6 +22,6 @@ public class AtendimentoDomainService {
 
     public void validarPodeDeletar(Atendimento entity) {
         log.debug("Validando se atendimento pode ser deletado. ID: {}", entity.getId());
-        // Adicione aqui qualquer lógica de validação antes de um hard delete.
+
     }
 }

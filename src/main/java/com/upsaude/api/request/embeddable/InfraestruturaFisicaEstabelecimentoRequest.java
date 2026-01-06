@@ -37,4 +37,3 @@ public class InfraestruturaFisicaEstabelecimentoRequest {
 
     private Double areaTotalMetrosQuadrados;
 }
-

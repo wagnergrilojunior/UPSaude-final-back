@@ -33,13 +33,12 @@ public class ReceitaItemResponse {
     private Integer posicao;
     private BigDecimal quantidadePrescrita;
     private BigDecimal quantidadeJaDispensada;
-    
+
     @JsonSerialize(using = UnidadeMedidaEnumSerializer.class)
     @JsonDeserialize(using = UnidadeMedidaEnumDeserializer.class)
     private UnidadeMedidaEnum unidadeMedida;
-    
+
     private String posologia;
     private Integer duracaoTratamento;
     private String observacoes;
 }
-

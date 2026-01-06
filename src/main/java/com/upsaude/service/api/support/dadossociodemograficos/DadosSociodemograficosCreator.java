@@ -39,4 +39,3 @@ public class DadosSociodemograficosCreator {
         return saved;
     }
 }
-

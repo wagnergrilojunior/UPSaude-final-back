@@ -22,4 +22,3 @@ public class InformacoesAdicionaisTenantRequest {
     @Size(max = 1000, message = "Observações deve ter no máximo 1000 caracteres")
     private String observacoes;
 }
-

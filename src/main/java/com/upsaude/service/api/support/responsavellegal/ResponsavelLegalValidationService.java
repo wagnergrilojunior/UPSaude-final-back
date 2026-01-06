@@ -44,4 +44,3 @@ public class ResponsavelLegalValidationService {
         return valor.replaceAll("\\\\D", "");
     }
 }
-

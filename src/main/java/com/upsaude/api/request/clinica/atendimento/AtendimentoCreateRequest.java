@@ -47,4 +47,3 @@ public class AtendimentoCreateRequest {
     @Schema(description = "Local de atendimento")
     private String localAtendimento;
 }
-

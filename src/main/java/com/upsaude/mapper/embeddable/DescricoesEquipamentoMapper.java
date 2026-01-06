@@ -13,4 +13,3 @@ public interface DescricoesEquipamentoMapper {
     DescricoesEquipamentoResponse toResponse(DescricoesEquipamento entity);
     void updateFromRequest(DescricoesEquipamentoRequest request, @MappingTarget DescricoesEquipamento entity);
 }
-

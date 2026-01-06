@@ -64,8 +64,6 @@ public class Equipamentos extends BaseEntity {
     @Embedded
     private DescricoesEquipamento descricoes;
 
-    //==========================================================================
-
     @PrePersist
     @PreUpdate
     public void validateEmbeddables() {

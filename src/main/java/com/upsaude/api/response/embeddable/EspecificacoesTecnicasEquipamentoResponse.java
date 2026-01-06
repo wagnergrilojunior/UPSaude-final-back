@@ -39,4 +39,3 @@ public class EspecificacoesTecnicasEquipamentoResponse {
 
     private String tipoAlimentacao;
 }
-

@@ -17,4 +17,3 @@ public class DadosIdentificacaoTenantResponse {
     private String urlLogo;
     private String cnpj;
 }
-

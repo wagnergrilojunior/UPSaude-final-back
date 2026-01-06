@@ -16,6 +16,6 @@ public class LogsAuditoriaRelacionamentosHandler {
     public void resolver(LogsAuditoria entity, LogsAuditoriaRequest request, UUID tenantId, Tenant tenant) {
         if (request == null) return;
         entity.setTenant(Objects.requireNonNull(tenant, "tenant é obrigatório"));
-        // sem relacionamentos adicionais
+
     }
 }
