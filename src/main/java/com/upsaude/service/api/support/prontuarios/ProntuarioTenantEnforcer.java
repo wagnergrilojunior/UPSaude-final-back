@@ -4,9 +4,9 @@ import java.util.UUID;
 
 import org.springframework.stereotype.Service;
 
-import com.upsaude.entity.clinica.prontuario.Prontuarios;
+import com.upsaude.entity.clinica.prontuario.Prontuario;
 import com.upsaude.exception.NotFoundException;
-import com.upsaude.repository.clinica.prontuario.ProntuariosRepository;
+import com.upsaude.repository.clinica.prontuario.ProntuarioRepository;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -14,11 +14,11 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class ProntuariosTenantEnforcer {
+public class ProntuarioTenantEnforcer {
 
-    private final ProntuariosRepository repository;
+    private final ProntuarioRepository repository;
 
-    public Prontuarios validarAcesso(UUID id, UUID tenantId) {
+    public Prontuario validarAcesso(UUID id, UUID tenantId) {
         log.debug("Validando acesso ao prontuário. ID: {}, tenant: {}", id, tenantId);
         return repository.findByIdAndTenant(id, tenantId)
             .orElseThrow(() -> {
@@ -27,7 +27,8 @@ public class ProntuariosTenantEnforcer {
             });
     }
 
-    public Prontuarios validarAcessoCompleto(UUID id, UUID tenantId) {
+    public Prontuario validarAcessoCompleto(UUID id, UUID tenantId) {
         return validarAcesso(id, tenantId);
     }
 }
+

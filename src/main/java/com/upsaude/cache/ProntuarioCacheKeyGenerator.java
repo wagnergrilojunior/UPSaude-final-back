@@ -10,9 +10,9 @@ import java.lang.reflect.Method;
 import java.util.Objects;
 import java.util.UUID;
 
-@Component("prontuariosCacheKeyGenerator")
+@Component("prontuarioCacheKeyGenerator")
 @RequiredArgsConstructor
-public class ProntuariosCacheKeyGenerator implements KeyGenerator {
+public class ProntuarioCacheKeyGenerator implements KeyGenerator {
 
     private final TenantService tenantService;
 

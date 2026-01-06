@@ -4,7 +4,7 @@ import java.util.UUID;
 
 import org.springframework.stereotype.Service;
 
-import com.upsaude.entity.clinica.atendimento.Consultas;
+import com.upsaude.entity.clinica.atendimento.Consulta;
 import com.upsaude.exception.NotFoundException;
 import com.upsaude.repository.clinica.atendimento.ConsultasRepository;
 
@@ -18,7 +18,7 @@ public class ConsultasTenantEnforcer {
 
     private final ConsultasRepository repository;
 
-    public Consultas validarAcesso(UUID id, UUID tenantId) {
+    public Consulta validarAcesso(UUID id, UUID tenantId) {
         log.debug("Validando acesso à consulta. ID: {}, tenant: {}", id, tenantId);
         return repository.findByIdAndTenant(id, tenantId)
             .orElseThrow(() -> {
@@ -27,7 +27,7 @@ public class ConsultasTenantEnforcer {
             });
     }
 
-    public Consultas validarAcessoCompleto(UUID id, UUID tenantId) {
+    public Consulta validarAcessoCompleto(UUID id, UUID tenantId) {
         return validarAcesso(id, tenantId);
     }
 }

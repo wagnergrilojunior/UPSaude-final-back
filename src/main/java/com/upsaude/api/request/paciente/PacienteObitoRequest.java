@@ -4,7 +4,6 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.upsaude.enums.OrigemObitoEnum;
 import io.swagger.v3.oas.annotations.media.Schema;
-import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -27,7 +26,6 @@ public class PacienteObitoRequest {
 
     private UUID paciente;
 
-    @NotNull(message = "Data de óbito é obrigatória")
     private LocalDate dataObito;
 
     @Size(max = 10, message = "Causa do óbito CID-10 deve ter no máximo 10 caracteres")

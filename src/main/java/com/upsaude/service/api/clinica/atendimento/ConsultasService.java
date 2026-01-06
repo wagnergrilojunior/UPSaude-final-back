@@ -7,8 +7,8 @@ import com.upsaude.api.request.clinica.atendimento.ConsultaUpdateDiagnosticoRequ
 import com.upsaude.api.request.clinica.atendimento.ConsultaUpdateEncaminhamentoRequest;
 import com.upsaude.api.request.clinica.atendimento.ConsultaUpdateExamesRequest;
 import com.upsaude.api.request.clinica.atendimento.ConsultaUpdatePrescricaoRequest;
-import com.upsaude.api.request.clinica.atendimento.ConsultasRequest;
-import com.upsaude.api.response.clinica.atendimento.ConsultasResponse;
+import com.upsaude.api.request.clinica.atendimento.ConsultaRequest;
+import com.upsaude.api.response.clinica.atendimento.ConsultaResponse;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -16,33 +16,33 @@ import java.util.UUID;
 
 public interface ConsultasService {
 
-    ConsultasResponse criar(ConsultaCreateRequest request);
+    ConsultaResponse criar(ConsultaCreateRequest request);
 
-    ConsultasResponse obterPorId(UUID id);
+    ConsultaResponse obterPorId(UUID id);
 
-    Page<ConsultasResponse> listar(Pageable pageable);
+    Page<ConsultaResponse> listar(Pageable pageable);
 
-    Page<ConsultasResponse> listarPorPaciente(UUID pacienteId, Pageable pageable);
+    Page<ConsultaResponse> listarPorPaciente(UUID pacienteId, Pageable pageable);
 
-    Page<ConsultasResponse> listarPorEstabelecimento(UUID estabelecimentoId, Pageable pageable);
+    Page<ConsultaResponse> listarPorEstabelecimento(UUID estabelecimentoId, Pageable pageable);
 
-    ConsultasResponse atualizar(UUID id, ConsultasRequest request);
+    ConsultaResponse atualizar(UUID id, ConsultaRequest request);
 
     void excluir(UUID id);
 
     void inativar(UUID id);
 
-    ConsultasResponse atualizarAnamnese(UUID id, ConsultaUpdateAnamneseRequest request);
+    ConsultaResponse atualizarAnamnese(UUID id, ConsultaUpdateAnamneseRequest request);
 
-    ConsultasResponse atualizarDiagnostico(UUID id, ConsultaUpdateDiagnosticoRequest request);
+    ConsultaResponse atualizarDiagnostico(UUID id, ConsultaUpdateDiagnosticoRequest request);
 
-    ConsultasResponse atualizarPrescricao(UUID id, ConsultaUpdatePrescricaoRequest request);
+    ConsultaResponse atualizarPrescricao(UUID id, ConsultaUpdatePrescricaoRequest request);
 
-    ConsultasResponse atualizarExames(UUID id, ConsultaUpdateExamesRequest request);
+    ConsultaResponse atualizarExames(UUID id, ConsultaUpdateExamesRequest request);
 
-    ConsultasResponse atualizarEncaminhamento(UUID id, ConsultaUpdateEncaminhamentoRequest request);
+    ConsultaResponse atualizarEncaminhamento(UUID id, ConsultaUpdateEncaminhamentoRequest request);
 
-    ConsultasResponse atualizarAtestado(UUID id, ConsultaUpdateAtestadoRequest request);
+    ConsultaResponse atualizarAtestado(UUID id, ConsultaUpdateAtestadoRequest request);
 
-    ConsultasResponse encerrar(UUID id);
+    ConsultaResponse encerrar(UUID id);
 }

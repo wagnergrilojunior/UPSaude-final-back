@@ -5,10 +5,10 @@ import java.util.UUID;
 
 import org.springframework.stereotype.Service;
 
-import com.upsaude.api.request.clinica.atendimento.ConsultasRequest;
-import com.upsaude.entity.clinica.atendimento.Consultas;
+import com.upsaude.api.request.clinica.atendimento.ConsultaRequest;
+import com.upsaude.entity.clinica.atendimento.Consulta;
 import com.upsaude.entity.sistema.multitenancy.Tenant;
-import com.upsaude.mapper.clinica.atendimento.ConsultasMapper;
+import com.upsaude.mapper.clinica.atendimento.ConsultaMapper;
 import com.upsaude.repository.clinica.atendimento.ConsultasRepository;
 
 import lombok.RequiredArgsConstructor;
@@ -20,22 +20,22 @@ import lombok.extern.slf4j.Slf4j;
 public class ConsultasUpdater {
 
     private final ConsultasRepository repository;
-    private final ConsultasMapper mapper;
+    private final ConsultaMapper mapper;
     private final ConsultasTenantEnforcer tenantEnforcer;
     private final ConsultasValidationService validationService;
     private final ConsultasRelacionamentosHandler relacionamentosHandler;
     private final ConsultasDomainService domainService;
 
-    public Consultas atualizar(UUID id, ConsultasRequest request, UUID tenantId, Tenant tenant) {
+    public Consulta atualizar(UUID id, ConsultaRequest request, UUID tenantId, Tenant tenant) {
         validationService.validarObrigatorios(request);
 
-        Consultas entity = tenantEnforcer.validarAcesso(id, tenantId);
+        Consulta entity = tenantEnforcer.validarAcesso(id, tenantId);
 
         mapper.updateFromRequest(request, entity);
         domainService.aplicarDefaults(entity);
         relacionamentosHandler.resolver(entity, request, tenantId, tenant);
 
-        Consultas saved = repository.save(Objects.requireNonNull(entity));
+        Consulta saved = repository.save(Objects.requireNonNull(entity));
         log.info("Consulta atualizada com sucesso. ID: {}, tenant: {}", saved.getId(), tenantId);
         return saved;
     }

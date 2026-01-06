@@ -25,13 +25,11 @@ import lombok.Setter;
 @Entity
 @Table(name = "profissionais_saude", schema = "public",
        uniqueConstraints = {
-           @UniqueConstraint(name = "uk_profissional_cpf", columnNames = {"cpf"}),
-           @UniqueConstraint(name = "uk_profissional_registro_conselho", columnNames = {"registro_profissional", "conselho_id", "uf_registro"})
+           @UniqueConstraint(name = "uk_profissional_cpf", columnNames = {"cpf"})
        },
        indexes = {
            @Index(name = "idx_profissional_cpf", columnList = "cpf"),
            @Index(name = "idx_profissional_registro", columnList = "registro_profissional"),
-           @Index(name = "idx_profissional_conselho", columnList = "conselho_id"),
            @Index(name = "idx_profissional_status_registro", columnList = "status_registro"),
            @Index(name = "idx_profissional_cbo", columnList = "codigo_cbo")
        })

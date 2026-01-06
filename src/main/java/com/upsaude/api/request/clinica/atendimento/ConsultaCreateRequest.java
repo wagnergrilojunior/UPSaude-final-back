@@ -21,21 +21,13 @@ import java.util.UUID;
 @Schema(description = "Dados para criação de consulta médica")
 public class ConsultaCreateRequest {
 
-    @NotNull(message = "ID do paciente é obrigatório")
-    @Schema(description = "ID do paciente", required = true)
-    private UUID pacienteId;
-
-    @Schema(description = "ID do médico")
-    private UUID medicoId;
-
-    @Schema(description = "ID do profissional de saúde")
-    private UUID profissionalSaudeId;
-
-    @Schema(description = "ID do atendimento (opcional)")
+    @NotNull(message = "ID do atendimento é obrigatório")
+    @Schema(description = "ID do atendimento", required = true)
     private UUID atendimentoId;
 
-    @Schema(description = "ID do convênio")
-    private UUID convenioId;
+    @NotNull(message = "ID do médico é obrigatório")
+    @Schema(description = "ID do médico", required = true)
+    private UUID medicoId;
 
     @Size(max = 50, message = "Tipo de consulta deve ter no máximo 50 caracteres")
     @Schema(description = "Tipo de consulta")

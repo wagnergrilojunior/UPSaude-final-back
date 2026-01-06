@@ -9,20 +9,21 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-import com.upsaude.entity.clinica.atendimento.Consultas;
+import com.upsaude.entity.clinica.atendimento.Consulta;
 
-public interface ConsultasRepository extends JpaRepository<Consultas, UUID> {
+public interface ConsultasRepository extends JpaRepository<Consulta, UUID> {
 
-    @Query("SELECT c FROM Consultas c WHERE c.id = :id AND c.tenant.id = :tenantId")
-    Optional<Consultas> findByIdAndTenant(@Param("id") UUID id, @Param("tenantId") UUID tenantId);
+    @Query("SELECT c FROM Consulta c WHERE c.id = :id AND c.tenant.id = :tenantId")
+    Optional<Consulta> findByIdAndTenant(@Param("id") UUID id, @Param("tenantId") UUID tenantId);
 
-    @Query("SELECT c FROM Consultas c WHERE c.tenant.id = :tenantId")
-    Page<Consultas> findAllByTenant(@Param("tenantId") UUID tenantId, Pageable pageable);
+    @Query("SELECT c FROM Consulta c WHERE c.tenant.id = :tenantId")
+    Page<Consulta> findAllByTenant(@Param("tenantId") UUID tenantId, Pageable pageable);
 
-    Page<Consultas> findByEstabelecimentoIdAndTenantIdOrderByInformacoesDataConsultaDesc(UUID estabelecimentoId, UUID tenantId, Pageable pageable);
+    @Query("SELECT c FROM Consulta c JOIN c.atendimento a WHERE a.estabelecimento.id = :estabelecimentoId AND c.tenant.id = :tenantId ORDER BY c.informacoes.dataConsulta DESC")
+    Page<Consulta> findByEstabelecimentoIdAndTenantIdOrderByInformacoesDataConsultaDesc(UUID estabelecimentoId, UUID tenantId, Pageable pageable);
 
-    @Query("SELECT c FROM Consultas c WHERE c.paciente.id = :pacienteId AND c.tenant.id = :tenantId ORDER BY c.informacoes.dataConsulta DESC")
-    Page<Consultas> findByPacienteIdAndTenantIdOrderByInformacoesDataConsultaDesc(
+    @Query("SELECT c FROM Consulta c JOIN c.atendimento a WHERE a.paciente.id = :pacienteId AND c.tenant.id = :tenantId ORDER BY c.informacoes.dataConsulta DESC")
+    Page<Consulta> findByPacienteIdAndTenantIdOrderByInformacoesDataConsultaDesc(
         @Param("pacienteId") UUID pacienteId,
         @Param("tenantId") UUID tenantId,
         Pageable pageable);
