@@ -3,6 +3,7 @@ package com.upsaude.mapper.geral;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
+import org.mapstruct.Named;
 
 import com.upsaude.api.request.geral.EnderecoRequest;
 import com.upsaude.api.response.geral.EnderecoResponse;
@@ -31,4 +32,9 @@ public interface EnderecoMapper  {
     void updateFromRequest(EnderecoRequest request, @MappingTarget Endereco entity);
 
     EnderecoResponse toResponse(Endereco entity);
+
+    @Named("toResponseSimplificado")
+    @Mapping(target = "cidade", ignore = true)
+    @Mapping(target = "estado", ignore = true)
+    EnderecoResponse toResponseSimplificado(Endereco entity);
 }

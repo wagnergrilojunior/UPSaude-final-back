@@ -1,6 +1,6 @@
 package com.upsaude.api.response.clinica.prontuario;
-import com.upsaude.api.response.paciente.PacienteResponse;
-import com.upsaude.api.response.profissional.ProfissionaisSaudeResponse;
+import com.upsaude.api.response.clinica.atendimento.PacienteAtendimentoResponse;
+import com.upsaude.api.response.clinica.atendimento.ProfissionalAtendimentoResponse;
 
 import java.time.OffsetDateTime;
 import java.util.List;
@@ -16,8 +16,8 @@ public class ProntuarioResponse {
     private OffsetDateTime createdAt;
     private OffsetDateTime updatedAt;
     private Boolean active;
-    private PacienteResponse paciente;
-    private ProfissionaisSaudeResponse profissionalCriador;
+    private PacienteAtendimentoResponse paciente;
+    private ProfissionalAtendimentoResponse profissionalCriador;
     private OffsetDateTime dataAbertura;
     private List<AlergiaPacienteResponse> alergias;
     private List<VacinacaoPacienteResponse> vacinacoes;

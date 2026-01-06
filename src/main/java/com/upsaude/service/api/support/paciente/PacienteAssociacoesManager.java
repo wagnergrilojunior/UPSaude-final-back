@@ -184,15 +184,37 @@ public class PacienteAssociacoesManager {
             paciente.setDadosPessoaisComplementares(entity);
         }
 
+        // Processar óbito apenas se o objeto obito for fornecido com dados válidos (obito = true)
+        // Quando obito não é fornecido (null) ou está vazio, significa obito = false e deve remover o óbito existente
         if (request.getObito() != null) {
-            // Validar que a data do óbito é obrigatória quando o objeto óbito é fornecido
-            if (request.getObito().getDataObito() == null) {
-                throw new com.upsaude.exception.BadRequestException("Data de óbito é obrigatória quando os dados de óbito são fornecidos");
+            // Verificar se o objeto obito tem pelo menos a data do óbito preenchida
+            // Se todos os campos estiverem vazios/null, trata como se não tivesse sido enviado
+            boolean obitoVazio = request.getObito().getDataObito() == null
+                    && (request.getObito().getCausaObitoCid10() == null || request.getObito().getCausaObitoCid10().trim().isEmpty())
+                    && request.getObito().getOrigem() == null
+                    && (request.getObito().getObservacoes() == null || request.getObito().getObservacoes().trim().isEmpty());
+
+            if (obitoVazio) {
+                // Se obito foi enviado vazio, remove o óbito existente se houver (obito = false)
+                if (paciente.getObito() != null) {
+                    paciente.setObito(null);
+                }
+            } else {
+                // Se obito foi fornecido com dados (obito = true), valida e processa
+                // Validar que a data do óbito é obrigatória quando informações de óbito são fornecidas
+                if (request.getObito().getDataObito() == null) {
+                    throw new com.upsaude.exception.BadRequestException("Data de óbito é obrigatória quando informações de óbito são fornecidas");
+                }
+                var entity = pacienteObitoMapper.fromRequest(request.getObito());
+                entity.setPaciente(paciente);
+                entity.setTenant(tenant);
+                paciente.setObito(entity);
             }
-            var entity = pacienteObitoMapper.fromRequest(request.getObito());
-            entity.setPaciente(paciente);
-            entity.setTenant(tenant);
-            paciente.setObito(entity);
+        } else {
+            // Se obito não foi fornecido (obito = false), remove o óbito existente se houver
+            if (paciente.getObito() != null) {
+                paciente.setObito(null);
+            }
         }
 
         if (request.getDeficiencias() != null) {
@@ -388,6 +410,19 @@ public class PacienteAssociacoesManager {
         }
 
         var responsavel = request.getResponsavelLegal();
+
+        // Se todos os campos do responsável estão vazios/null, trata como se não tivesse sido enviado
+        boolean todosCamposVazios = (responsavel.getNome() == null || responsavel.getNome().trim().isEmpty())
+                && (responsavel.getCpf() == null || responsavel.getCpf().trim().isEmpty())
+                && (responsavel.getTelefone() == null || responsavel.getTelefone().trim().isEmpty());
+
+        if (todosCamposVazios) {
+            // Se o paciente já tem um responsável, remove ele
+            if (paciente.getResponsavelLegal() != null) {
+                paciente.setResponsavelLegal(null);
+            }
+            return;
+        }
 
         if (paciente.getResponsavelLegal() == null) {
             com.upsaude.entity.paciente.ResponsavelLegal entity = new com.upsaude.entity.paciente.ResponsavelLegal();

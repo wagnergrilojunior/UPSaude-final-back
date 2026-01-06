@@ -1,6 +1,5 @@
 package com.upsaude.api.response.clinica.atendimento;
 import com.upsaude.api.response.agendamento.AgendamentoResponse;
-import com.upsaude.api.response.paciente.PacienteResponse;
 
 import java.time.OffsetDateTime;
 import java.util.UUID;
@@ -22,7 +21,7 @@ public class CheckInAtendimentoResponse {
     private Boolean active;
     private AgendamentoResponse agendamento;
     private AtendimentoResponse atendimento;
-    private PacienteResponse paciente;
+    private PacienteAtendimentoResponse paciente;
     private OffsetDateTime dataCheckin;
     private OffsetDateTime dataCheckout;
     private String tipoCheckin;

@@ -1,12 +1,11 @@
 package com.upsaude.api.response.agendamento;
 
 import com.upsaude.api.response.sistema.notificacao.NotificacaoResponse;
-import com.upsaude.api.response.profissional.MedicosResponse;
-import com.upsaude.api.response.profissional.ProfissionaisSaudeResponse;
 import com.upsaude.api.response.clinica.atendimento.CheckInAtendimentoResponse;
 import com.upsaude.api.response.clinica.atendimento.AtendimentoResponse;
-import com.upsaude.api.response.paciente.PacienteResponse;
-import com.upsaude.api.response.convenio.ConvenioResponse;
+import com.upsaude.api.response.clinica.atendimento.PacienteAtendimentoResponse;
+import com.upsaude.api.response.clinica.atendimento.ProfissionalAtendimentoResponse;
+import com.upsaude.api.response.clinica.atendimento.MedicoConsultaResponse;
 
 import com.upsaude.enums.PrioridadeAtendimentoEnum;
 import com.upsaude.enums.StatusAgendamentoEnum;
@@ -30,10 +29,10 @@ public class AgendamentoResponse {
     private OffsetDateTime createdAt;
     private OffsetDateTime updatedAt;
     private Boolean active;
-    private PacienteResponse paciente;
-    private ProfissionaisSaudeResponse profissional;
-    private MedicosResponse medico;
-    private ConvenioResponse convenio;
+    private PacienteAtendimentoResponse paciente;
+    private ProfissionalAtendimentoResponse profissional;
+    private MedicoConsultaResponse medico;
+    private ConvenioAgendamentoResponse convenio;
     private AtendimentoResponse atendimento;
     private AgendamentoResponse agendamentoOriginal;
     private OffsetDateTime dataHora;

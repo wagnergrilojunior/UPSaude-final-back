@@ -1,10 +1,10 @@
 package com.upsaude.api.response.clinica.cirurgia;
 
 import com.upsaude.api.response.clinica.cirurgia.EquipeCirurgicaResponse;
-import com.upsaude.api.response.profissional.MedicosResponse;
-import com.upsaude.api.response.profissional.ProfissionaisSaudeResponse;
-import com.upsaude.api.response.paciente.PacienteResponse;
-import com.upsaude.api.response.convenio.ConvenioResponse;
+import com.upsaude.api.response.clinica.atendimento.PacienteAtendimentoResponse;
+import com.upsaude.api.response.clinica.atendimento.ProfissionalAtendimentoResponse;
+import com.upsaude.api.response.clinica.atendimento.MedicoConsultaResponse;
+import com.upsaude.api.response.agendamento.ConvenioAgendamentoResponse;
 
 import com.upsaude.enums.StatusCirurgiaEnum;
 import java.math.BigDecimal;
@@ -28,10 +28,10 @@ public class CirurgiaResponse {
     private OffsetDateTime createdAt;
     private OffsetDateTime updatedAt;
     private Boolean active;
-    private PacienteResponse paciente;
-    private ProfissionaisSaudeResponse cirurgiaoPrincipal;
-    private MedicosResponse medicoCirurgiao;
-    private ConvenioResponse convenio;
+    private PacienteAtendimentoResponse paciente;
+    private ProfissionalAtendimentoResponse cirurgiaoPrincipal;
+    private MedicoConsultaResponse medicoCirurgiao;
+    private ConvenioAgendamentoResponse convenio;
     private String descricao;
     private String codigoProcedimento;
     private OffsetDateTime dataHoraPrevista;
