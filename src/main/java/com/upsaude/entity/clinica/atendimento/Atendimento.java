@@ -33,8 +33,7 @@ import lombok.EqualsAndHashCode;
            @Index(name = "idx_atendimento_data_hora", columnList = "data_hora"),
            @Index(name = "idx_atendimento_tipo", columnList = "tipo_atendimento"),
            @Index(name = "idx_atendimento_status", columnList = "status_atendimento"),
-           @Index(name = "idx_atendimento_estabelecimento", columnList = "estabelecimento_id"),
-           @Index(name = "idx_atendimento_consulta", columnList = "consulta_id")
+           @Index(name = "idx_atendimento_estabelecimento", columnList = "estabelecimento_id")
        })
 @Data
 @EqualsAndHashCode(callSuper = true)
@@ -63,10 +62,6 @@ public class Atendimento extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "convenio_id")
     private Convenio convenio;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "consulta_id", nullable = true)
-    private Consultas consulta;
 
     @Embedded
     private InformacoesAtendimento informacoes;

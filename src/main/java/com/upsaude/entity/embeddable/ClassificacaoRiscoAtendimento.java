@@ -19,7 +19,6 @@ public class ClassificacaoRiscoAtendimento {
 
     public ClassificacaoRiscoAtendimento() {
         this.gravidade = "";
-        this.protocoloClassificacao = "";
         this.necessitaObservacao = false;
         this.necessitaInternacao = false;
     }
@@ -34,9 +33,6 @@ public class ClassificacaoRiscoAtendimento {
 
     @Column(name = "gravidade", length = 50)
     private String gravidade;
-
-    @Column(name = "protocolo_classificacao", length = 100)
-    private String protocoloClassificacao;
 
     @Column(name = "necessita_observacao", nullable = false)
     @Builder.Default
