@@ -36,8 +36,7 @@ import java.util.List;
            @Index(name = "idx_consulta_medico", columnList = "medico_id"),
            @Index(name = "idx_consulta_data", columnList = "data_consulta"),
            @Index(name = "idx_consulta_status", columnList = "status_consulta"),
-           @Index(name = "idx_consulta_estabelecimento", columnList = "estabelecimento_id"),
-           @Index(name = "idx_consulta_atendimento", columnList = "atendimento_id")
+           @Index(name = "idx_consulta_estabelecimento", columnList = "estabelecimento_id")
        })
 @Data
 @EqualsAndHashCode(callSuper = true)
@@ -68,10 +67,6 @@ public class Consultas extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "convenio_id")
     private Convenio convenio;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "atendimento_id", nullable = true)
-    private Atendimento atendimento;
 
     @OneToMany(mappedBy = "consulta", fetch = FetchType.LAZY)
     private List<com.upsaude.entity.clinica.prontuario.Prontuarios> registrosProntuario = new ArrayList<>();
