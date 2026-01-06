@@ -1,6 +1,5 @@
 package com.upsaude.api.response.paciente;
 
-import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -10,14 +9,16 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.upsaude.api.response.convenio.ConvenioResponse;
 import com.upsaude.api.response.deficiencia.DeficienciasPacienteResponse;
+import com.upsaude.api.response.embeddable.ContatoPacienteResponse;
+import com.upsaude.api.response.embeddable.DadosDemograficosPacienteResponse;
+import com.upsaude.api.response.embeddable.DadosPessoaisBasicosPacienteResponse;
+import com.upsaude.api.response.embeddable.DocumentosBasicosPacienteResponse;
+import com.upsaude.api.response.embeddable.IntegracaoGovPacienteResponse;
+import com.upsaude.api.response.embeddable.ResponsavelLegalPacienteResponse;
 import com.upsaude.api.response.geral.EnderecoResponse;
 import com.upsaude.api.response.sistema.lgpd.LGPDConsentimentoResponse;
-import com.upsaude.api.response.sistema.integracao.IntegracaoGovResponse;
-import com.upsaude.enums.SexoEnum;
 import com.upsaude.enums.StatusPacienteEnum;
 import com.upsaude.enums.TipoAtendimentoPreferencialEnum;
-import com.upsaude.util.converter.SexoEnumDeserializer;
-import com.upsaude.util.converter.SexoEnumSerializer;
 import com.upsaude.util.converter.StatusPacienteEnumDeserializer;
 import com.upsaude.util.converter.StatusPacienteEnumSerializer;
 import com.upsaude.util.converter.TipoAtendimentoPreferencialEnumDeserializer;
@@ -40,22 +41,15 @@ public class PacienteResponse {
     private OffsetDateTime createdAt;
     private OffsetDateTime updatedAt;
     private Boolean active;
-    private String nomeCompleto;
-    private String nomeSocial;
-    private LocalDate dataNascimento;
-    private Integer idade;
-
-    @JsonSerialize(using = SexoEnumSerializer.class)
-    @JsonDeserialize(using = SexoEnumDeserializer.class)
-    private SexoEnum sexo;
-
+    
+    private DadosPessoaisBasicosPacienteResponse dadosPessoaisBasicos;
+    private DocumentosBasicosPacienteResponse documentosBasicos;
+    private DadosDemograficosPacienteResponse dadosDemograficos;
+    private ContatoPacienteResponse contato;
+    
     @JsonSerialize(using = StatusPacienteEnumSerializer.class)
     @JsonDeserialize(using = StatusPacienteEnumDeserializer.class)
     private StatusPacienteEnum statusPaciente;
-
-    private String telefone;
-    private String email;
-    private String observacoes;
 
     @JsonSerialize(using = TipoAtendimentoPreferencialEnumSerializer.class)
     @JsonDeserialize(using = TipoAtendimentoPreferencialEnumDeserializer.class)
@@ -67,23 +61,18 @@ public class PacienteResponse {
     @Builder.Default
     private List<EnderecoResponse> enderecos = new ArrayList<>();
 
-    @Builder.Default
-    private List<PacienteIdentificadorResponse> identificadores = new ArrayList<>();
-
-    @Builder.Default
-    private List<PacienteContatoResponse> contatos = new ArrayList<>();
-
-    private DadosSociodemograficosResponse dadosSociodemograficos;
     private DadosClinicosBasicosResponse dadosClinicosBasicos;
-    private ResponsavelLegalResponse responsavelLegal;
+    private ResponsavelLegalPacienteResponse responsavelLegal;
     private PacienteDadosPessoaisComplementaresResponse dadosPessoaisComplementares;
     private PacienteObitoResponse obito;
     private LGPDConsentimentoResponse lgpdConsentimento;
-    private IntegracaoGovResponse integracaoGov;
+    private IntegracaoGovPacienteResponse integracaoGov;
 
     @Builder.Default
     private List<DeficienciasPacienteResponse> deficiencias = new ArrayList<>();
 
     @Builder.Default
     private List<PacienteVinculoTerritorialResponse> vinculosTerritoriais = new ArrayList<>();
+    
+    private String observacoes;
 }

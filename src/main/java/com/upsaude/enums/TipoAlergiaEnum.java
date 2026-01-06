@@ -1,10 +1,5 @@
 package com.upsaude.enums;
 
-/**
- * Enum representando a categoria geral da alergia.
- * Modelo simplificado e conceitualmente correto para prontuário eletrônico.
- * Alergia é informação clínica declarada do paciente, não diagnóstico CID.
- */
 public enum TipoAlergiaEnum {
     MEDICAMENTO,
     ALIMENTO,
@@ -13,10 +8,6 @@ public enum TipoAlergiaEnum {
     INSETO,
     OUTRO;
 
-    /**
-     * Retorna a descrição formatada do tipo de alergia.
-     * @return Descrição em português
-     */
     public String getDescricao() {
         switch (this) {
             case MEDICAMENTO:

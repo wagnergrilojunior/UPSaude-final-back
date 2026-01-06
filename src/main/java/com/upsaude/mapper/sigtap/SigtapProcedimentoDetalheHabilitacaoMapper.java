@@ -8,7 +8,7 @@ import com.upsaude.entity.referencia.sigtap.SigtapProcedimentoHabilitacao;
 
 @Mapper(componentModel = "spring")
 public interface SigtapProcedimentoDetalheHabilitacaoMapper {
-    
+
     @Mapping(target = "codigoHabilitacao", source = "habilitacao.codigoOficial")
     @Mapping(target = "nomeHabilitacao", source = "habilitacao.nome")
     @Mapping(target = "codigoGrupoHabilitacao", source = "grupoHabilitacao.codigoOficial")

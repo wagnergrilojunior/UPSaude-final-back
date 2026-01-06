@@ -4,9 +4,6 @@ import com.upsaude.api.response.sistema.importacao.ImportJobErrorResponse;
 import com.upsaude.entity.sistema.importacao.ImportJobError;
 import org.springframework.stereotype.Component;
 
-/**
- * Mapper para converter entidades ImportJobError em DTOs de resposta.
- */
 @Component
 public class ImportJobErrorMapper {
 
@@ -29,4 +26,3 @@ public class ImportJobErrorMapper {
                 .build();
     }
 }
-

@@ -57,7 +57,6 @@ public class HistoricoClinicoRelacionamentosHandler {
             entity.setAgendamento(agendamento);
         }
 
-
         if (request.getCirurgia() != null) {
             Cirurgia cirurgia = cirurgiaRepository.findByIdAndTenant(request.getCirurgia(), tenantId)
                     .orElseThrow(() -> new NotFoundException("Cirurgia não encontrada com ID: " + request.getCirurgia()));

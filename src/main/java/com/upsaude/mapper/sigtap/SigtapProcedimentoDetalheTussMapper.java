@@ -8,7 +8,7 @@ import com.upsaude.entity.referencia.sigtap.SigtapProcedimentoTuss;
 
 @Mapper(componentModel = "spring")
 public interface SigtapProcedimentoDetalheTussMapper {
-    
+
     @Mapping(target = "codigoTuss", source = "tuss.codigoOficial")
     @Mapping(target = "nomeTuss", source = "tuss.nome")
     SigtapProcedimentoDetalheTussResponse toResponse(SigtapProcedimentoTuss entity);

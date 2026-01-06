@@ -65,7 +65,6 @@ public class Consultas extends BaseEntity {
     @JoinColumn(name = "profissional_saude_id")
     private ProfissionaisSaude profissionalSaude;
 
-
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "convenio_id")
     private Convenio convenio;

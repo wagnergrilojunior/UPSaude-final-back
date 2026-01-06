@@ -8,7 +8,7 @@ import com.upsaude.entity.referencia.sigtap.SigtapProcedimentoRegraCondicionada;
 
 @Mapper(componentModel = "spring")
 public interface SigtapProcedimentoDetalheRegraCondicionadaMapper {
-    
+
     @Mapping(target = "codigoRegra", source = "regraCondicionada.codigoOficial")
     @Mapping(target = "nomeRegra", source = "regraCondicionada.nome")
     SigtapProcedimentoDetalheRegraCondicionadaResponse toResponse(SigtapProcedimentoRegraCondicionada entity);

@@ -49,7 +49,6 @@ public class FilaEspera extends BaseEntity {
     @JoinColumn(name = "medico_id")
     private Medicos medico;
 
-
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "agendamento_id")
     private Agendamento agendamento;

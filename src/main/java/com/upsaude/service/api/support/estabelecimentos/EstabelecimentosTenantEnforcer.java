@@ -29,4 +29,3 @@ public class EstabelecimentosTenantEnforcer {
         return validarAcesso(id, tenantId);
     }
 }
-

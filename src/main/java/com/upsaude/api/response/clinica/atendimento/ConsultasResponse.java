@@ -12,7 +12,6 @@ import com.upsaude.api.response.embeddable.ExamesSolicitadosConsultaResponse;
 import com.upsaude.api.response.embeddable.InformacoesConsultaResponse;
 import com.upsaude.api.response.embeddable.PrescricaoConsultaResponse;
 
-
 import com.upsaude.api.response.embeddable.AnamneseConsultaResponse;
 import com.upsaude.api.response.embeddable.AtestadoConsultaResponse;
 import com.upsaude.api.response.embeddable.DiagnosticoConsultaResponse;

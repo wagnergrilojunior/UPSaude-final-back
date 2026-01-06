@@ -13,4 +13,3 @@ public interface LocalizacaoEstabelecimentoMapper {
     LocalizacaoEstabelecimentoResponse toResponse(LocalizacaoEstabelecimento entity);
     void updateFromRequest(LocalizacaoEstabelecimentoRequest request, @MappingTarget LocalizacaoEstabelecimento entity);
 }
-

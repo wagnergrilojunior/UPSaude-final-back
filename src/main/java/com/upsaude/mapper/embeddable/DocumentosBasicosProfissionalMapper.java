@@ -13,4 +13,3 @@ public interface DocumentosBasicosProfissionalMapper {
     DocumentosBasicosProfissionalResponse toResponse(DocumentosBasicosProfissional entity);
     void updateFromRequest(DocumentosBasicosProfissionalRequest request, @MappingTarget DocumentosBasicosProfissional entity);
 }
-

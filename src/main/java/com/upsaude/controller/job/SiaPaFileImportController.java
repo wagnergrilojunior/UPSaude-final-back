@@ -69,7 +69,6 @@ public class SiaPaFileImportController {
         log.debug("REQUEST POST /v1/sia/import/upload - ano={}, mes={}, uf={}, filename={}",
                 competenciaAno, competenciaMes, uf, file != null ? file.getOriginalFilename() : null);
 
-        // Validação do arquivo
         if (file == null || file.isEmpty()) {
             log.warn("Upload rejeitado: arquivo não fornecido ou vazio");
             Map<String, Object> errorResponse = new HashMap<>();

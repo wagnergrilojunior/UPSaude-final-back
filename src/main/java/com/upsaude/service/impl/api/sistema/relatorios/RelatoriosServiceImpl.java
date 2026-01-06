@@ -104,7 +104,6 @@ public class RelatoriosServiceImpl implements RelatoriosService {
                 .count();
     }
 
-
     private long contarAgendamentos(RelatorioEstatisticasRequest request, OffsetDateTime inicio, OffsetDateTime fim) {
 
         List<Agendamento> agendamentos = agendamentoRepository.findByDataHoraBetweenOrderByDataHoraAsc(

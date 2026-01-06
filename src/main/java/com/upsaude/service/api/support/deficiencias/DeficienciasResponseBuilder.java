@@ -16,4 +16,3 @@ public class DeficienciasResponseBuilder {
         return mapper.toResponse(entity);
     }
 }
-

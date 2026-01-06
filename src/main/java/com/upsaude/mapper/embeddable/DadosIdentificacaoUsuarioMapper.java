@@ -13,4 +13,3 @@ public interface DadosIdentificacaoUsuarioMapper {
 
     DadosIdentificacaoUsuarioResponse toResponse(DadosIdentificacaoUsuario entity);
 }
-

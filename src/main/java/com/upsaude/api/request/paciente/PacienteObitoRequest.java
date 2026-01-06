@@ -37,4 +37,3 @@ public class PacienteObitoRequest {
 
     private String observacoes;
 }
-

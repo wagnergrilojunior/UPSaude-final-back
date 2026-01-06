@@ -9,9 +9,6 @@ import jakarta.persistence.UniqueConstraint;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
-/**
- * Regra Condicionada do SIGTAP.
- */
 @Entity
 @Table(
         name = "sigtap_regra_condicionada",

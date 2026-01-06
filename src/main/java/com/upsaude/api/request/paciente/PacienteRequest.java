@@ -1,6 +1,6 @@
 package com.upsaude.api.request.paciente;
 
-import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -8,27 +8,30 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.upsaude.api.request.deficiencia.DeficienciasPacienteRequest;
+import com.upsaude.api.request.embeddable.ContatoPacienteRequest;
+import com.upsaude.api.request.embeddable.DadosDemograficosPacienteRequest;
+import com.upsaude.api.request.embeddable.DadosPessoaisBasicosPacienteRequest;
+import com.upsaude.api.request.embeddable.DocumentosBasicosPacienteRequest;
 import com.upsaude.api.request.embeddable.InformacoesConvenioPacienteRequest;
+import com.upsaude.api.request.embeddable.IntegracaoGovPacienteRequest;
+import com.upsaude.api.request.embeddable.ResponsavelLegalPacienteRequest;
+import com.upsaude.api.request.geral.EnderecoRequest;
 import com.upsaude.api.request.sistema.lgpd.LGPDConsentimentoRequest;
-import com.upsaude.enums.SexoEnum;
 import com.upsaude.enums.StatusPacienteEnum;
 import com.upsaude.enums.TipoAtendimentoPreferencialEnum;
-import com.upsaude.util.converter.SexoEnumDeserializer;
 import com.upsaude.util.converter.StatusPacienteEnumDeserializer;
 import com.upsaude.util.converter.TipoAtendimentoPreferencialEnumDeserializer;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Pattern;
-import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
-@Data
+@Getter
+@Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
@@ -37,19 +40,17 @@ import lombok.NoArgsConstructor;
 @Schema(description = "Dados de paciente")
 public class PacienteRequest {
 
-    @NotBlank(message = "Nome completo é obrigatório")
-    @Pattern(regexp = "^[\\p{L}0-9 .'-]+$", message = "Caracteres inválidos no nome completo")
-    @Size(max = 255, message = "Nome completo deve ter no máximo 255 caracteres")
-    private String nomeCompleto;
+    @Valid
+    private DadosPessoaisBasicosPacienteRequest dadosPessoaisBasicos;
 
-    @Size(max = 255, message = "Nome social deve ter no máximo 255 caracteres")
-    private String nomeSocial;
+    @Valid
+    private DocumentosBasicosPacienteRequest documentosBasicos;
 
-    private LocalDate dataNascimento;
+    @Valid
+    private DadosDemograficosPacienteRequest dadosDemograficos;
 
-    @NotNull(message = "Sexo é obrigatório")
-    @JsonDeserialize(using = SexoEnumDeserializer.class)
-    private SexoEnum sexo;
+    @Valid
+    private ContatoPacienteRequest contato;
 
     @JsonDeserialize(using = StatusPacienteEnumDeserializer.class)
     private StatusPacienteEnum statusPaciente;
@@ -61,17 +62,21 @@ public class PacienteRequest {
     @JsonDeserialize(using = TipoAtendimentoPreferencialEnumDeserializer.class)
     private TipoAtendimentoPreferencialEnum tipoAtendimentoPreferencial;
 
-    @Size(max = 1000, message = "Observações deve ter no máximo 1000 caracteres")
-    private String observacoes;
+    @Valid
+    @Schema(description = "Endereço principal do paciente. Se fornecido, será criado/atualizado.")
+    private EnderecoRequest enderecoPrincipal;
 
     @Valid
-    private List<PacienteEnderecoRequest> enderecos;
+    @Builder.Default
+    private List<PacienteEnderecoRequest> enderecos = new ArrayList<>();
 
     @Valid
-    private List<PacienteIdentificadorRequest> identificadores;
+    @Builder.Default
+    private List<PacienteIdentificadorRequest> identificadores = new ArrayList<>();
 
     @Valid
-    private List<PacienteContatoRequest> contatos;
+    @Builder.Default
+    private List<PacienteContatoRequest> contatos = new ArrayList<>();
 
     @Valid
     private DadosSociodemograficosRequest dadosSociodemograficos;
@@ -80,7 +85,7 @@ public class PacienteRequest {
     private DadosClinicosBasicosRequest dadosClinicosBasicos;
 
     @Valid
-    private ResponsavelLegalRequest responsavelLegal;
+    private ResponsavelLegalPacienteRequest responsavelLegal;
 
     @Valid
     private PacienteDadosPessoaisComplementaresRequest dadosPessoaisComplementares;
@@ -89,11 +94,19 @@ public class PacienteRequest {
     private PacienteObitoRequest obito;
 
     @Valid
-    private List<DeficienciasPacienteRequest> deficiencias;
+    private IntegracaoGovPacienteRequest integracaoGov;
 
     @Valid
-    private List<PacienteVinculoTerritorialRequest> vinculosTerritoriais;
+    @Builder.Default
+    private List<DeficienciasPacienteRequest> deficiencias = new ArrayList<>();
+
+    @Valid
+    @Builder.Default
+    private List<PacienteVinculoTerritorialRequest> vinculosTerritoriais = new ArrayList<>();
 
     @Valid
     private LGPDConsentimentoRequest lgpdConsentimento;
+
+    @Schema(description = "Observações gerais sobre o paciente")
+    private String observacoes;
 }

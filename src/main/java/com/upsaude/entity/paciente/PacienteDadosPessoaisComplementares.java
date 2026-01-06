@@ -44,4 +44,3 @@ public class PacienteDadosPessoaisComplementares extends BaseEntity {
     @Column(name = "orientacao_sexual")
     private OrientacaoSexualEnum orientacaoSexual;
 }
-

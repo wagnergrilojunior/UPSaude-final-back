@@ -44,7 +44,6 @@ public class AtendimentoRelacionamentosHandler {
             entity.setProfissional(profissional);
         }
 
-
         if (request.getEquipeSaude() != null) {
             EquipeSaude equipeSaude = equipeSaudeTenantEnforcer.validarAcesso(request.getEquipeSaude(), tenantId);
             entity.setEquipeSaude(equipeSaude);
@@ -59,8 +58,6 @@ public class AtendimentoRelacionamentosHandler {
         } else {
             entity.setConvenio(null);
         }
-
-        // CidPrincipal removido - CidDoencas foi deletado
 
         if (entity.getProfissional() != null && entity.getProfissional().getEstabelecimento() != null) {
             entity.setEstabelecimento(entity.getProfissional().getEstabelecimento());

@@ -52,4 +52,3 @@ public class ReceitaItemRequest {
     @Schema(description = "Observações do item")
     private String observacoes;
 }
-

@@ -12,12 +12,6 @@ import jakarta.persistence.UniqueConstraint;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
-/**
- * Detalhes adicionais do procedimento (retorno do detalharProcedimento).
- *
- * <p>Os detalhes podem conter listas grandes; persistimos como JSONB para manter o escopo dentro
- * das entidades solicitadas (7 tabelas) e ainda assim preservar o conte?do retornado.
- */
 @Entity
 @Table(
         name = "sigtap_procedimento_detalhe",
@@ -88,4 +82,3 @@ public class SigtapProcedimentoDetalhe extends BaseEntityWithoutTenant {
     @Column(name = "tuss", columnDefinition = "jsonb")
     private String tuss;
 }
-

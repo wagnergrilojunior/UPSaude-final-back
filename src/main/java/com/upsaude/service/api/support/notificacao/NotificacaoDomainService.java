@@ -18,7 +18,6 @@ public class NotificacaoDomainService {
 
     public void validarPodeDeletar(Notificacao entity) {
         log.debug("Validando se notificação pode ser deletada. ID: {}", entity.getId());
-        // Adicione aqui qualquer lógica de validação antes de um hard delete.
+
     }
 }
-

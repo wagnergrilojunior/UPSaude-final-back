@@ -21,4 +21,3 @@ public interface ProntuarioQueryService {
             OffsetDateTime dataFim,
             Pageable pageable);
 }
-

@@ -36,14 +36,13 @@ public class ReceitaResponse {
     private String numeroReceita;
     private LocalDate dataPrescricao;
     private LocalDate dataValidade;
-    
+
     @JsonSerialize(using = TipoControleMedicamentoEnumSerializer.class)
     @JsonDeserialize(using = TipoControleMedicamentoEnumDeserializer.class)
     private TipoControleMedicamentoEnum tipoReceita;
-    
+
     private String observacoes;
-    
+
     @Builder.Default
     private List<ReceitaItemResponse> itens = new ArrayList<>();
 }
-

@@ -16,16 +16,11 @@ import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.UUID;
 
-/**
- * Dispatcher de processamento: carrega o job, encontra o worker correto por tipo
- * e executa fora do ciclo HTTP.
- */
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class ImportJobProcessorImpl implements ImportJobProcessor {
 
-    // USO EXCLUSIVO JOB - Processor usa pool JOB
     private final ImportJobJobRepository importJobJobRepository;
     private final List<ImportJobWorker> workers;
     private final ImportJobQueueService importJobQueueService;
@@ -61,10 +56,6 @@ public class ImportJobProcessorImpl implements ImportJobProcessor {
         }
     }
 
-    /**
-     * IMPORTANTE: Este método não usa @Transactional porque pode ser chamado de contextos diferentes.
-     * Se necessário, usar TransactionTemplate com jobTransactionManager.
-     */
     protected void marcarErro(UUID jobId, String resumo) {
         if (jobId == null) return;
         ImportJob job = importJobJobRepository.findById(jobId)
@@ -82,5 +73,3 @@ public class ImportJobProcessorImpl implements ImportJobProcessor {
         importJobJobRepository.save(job);
     }
 }
-
-

@@ -18,7 +18,6 @@ public class DadosClinicosBasicosDomainService {
 
     public void validarPodeDeletar(DadosClinicosBasicos entity) {
         log.debug("Validando se dados clínicos básicos podem ser deletados. ID: {}", entity.getId());
-        // Adicione aqui qualquer lógica de validação antes de um hard delete.
+
     }
 }
-

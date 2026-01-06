@@ -103,8 +103,6 @@ public class UsuariosSistema {
     @OneToMany(mappedBy = "usuario", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     private List<UsuarioEstabelecimento> estabelecimentosVinculados = new ArrayList<>();
 
-    //===============================================================================================================
-
     @PrePersist
     @PreUpdate
     public void validateEmbeddablesAndCollections() {

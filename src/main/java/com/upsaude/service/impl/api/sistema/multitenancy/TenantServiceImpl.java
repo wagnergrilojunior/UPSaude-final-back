@@ -186,9 +186,7 @@ public class TenantServiceImpl implements TenantService {
                     UsuariosSistema usuario = usuarioOpt.get();
                     Tenant tenant = usuario.getTenant();
                     if (tenant != null) {
-                        // Evita LazyInitializationException caso o relacionamento esteja LAZY e fora de
-                        // transação
-                        // (acessar tenant.getNome() pode inicializar o proxy sem sessão).
+
                         log.debug("Tenant obtido com sucesso. ID: {}", tenant.getId());
                         return tenant;
                     } else {
@@ -213,7 +211,6 @@ public class TenantServiceImpl implements TenantService {
             return tenant.getId();
         }
 
-        // TEMPORÁRIO: Fallback para o tenant da Prefeitura de Santa Rita (local test)
         UUID defaultTenantId = UUID.fromString("26c54644-56c9-4237-9a01-737b6625099f");
         log.warn("Nenhum tenant encontrado via autenticação. Usando fallback temporário: {}", defaultTenantId);
         return defaultTenantId;

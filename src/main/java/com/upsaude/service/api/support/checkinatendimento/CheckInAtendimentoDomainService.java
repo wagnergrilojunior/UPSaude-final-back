@@ -10,7 +10,7 @@ import org.springframework.stereotype.Service;
 public class CheckInAtendimentoDomainService {
 
     public void aplicarDefaults(CheckInAtendimento entity) {
-        // sem regras adicionais por enquanto
+
     }
 
     public void validarPodeInativar(CheckInAtendimento entity) {
@@ -22,6 +22,6 @@ public class CheckInAtendimentoDomainService {
 
     public void validarPodeDeletar(CheckInAtendimento entity) {
         log.debug("Validando se check-in pode ser deletado. ID: {}", entity.getId());
-        // Adicione aqui qualquer lógica de validação antes de um hard delete.
+
     }
 }

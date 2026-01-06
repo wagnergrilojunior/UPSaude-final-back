@@ -23,4 +23,3 @@ public class ConsultaUpdatePrescricaoRequest {
     @Schema(description = "Dados de prescrição", required = true)
     private PrescricaoConsultaRequest prescricao;
 }
-

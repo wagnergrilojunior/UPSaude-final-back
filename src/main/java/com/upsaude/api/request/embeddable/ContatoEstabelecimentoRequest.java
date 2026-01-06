@@ -40,4 +40,3 @@ public class ContatoEstabelecimentoRequest {
     @Size(max = 500, message = "Site deve ter no máximo 500 caracteres")
     private String site;
 }
-

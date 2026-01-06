@@ -18,9 +18,7 @@ import java.util.UUID;
 public class PacienteValidationService {
 
     public void validarObrigatorios(PacienteRequest request) {
-        // Validações de campos obrigatórios são feitas via Bean Validation na Request
-        // Este método permanece vazio para manter compatibilidade com chamadas existentes
-        // Se request for null, o Spring já retorna 400 antes de chegar aqui
+
     }
 
     public void validarUnicidadeParaCriacao(PacienteRequest request, 
@@ -28,8 +26,7 @@ public class PacienteValidationService {
                                            PacienteIdentificadorRepository identificadorRepository,
                                            PacienteContatoRepository contatoRepository,
                                            UUID tenantId) {
-        // Validações de CPF, CNS, RG e Email devem ser feitas através dos Request específicos
-        // (PacienteIdentificadorRequest, PacienteContatoRequest) quando esses dados forem enviados
+
     }
 
     public void validarUnicidadeParaAtualizacao(UUID id, PacienteRequest request,
@@ -37,13 +34,11 @@ public class PacienteValidationService {
                                                 PacienteIdentificadorRepository identificadorRepository,
                                                 PacienteContatoRepository contatoRepository,
                                                 UUID tenantId) {
-        // Validações de CPF, CNS, RG e Email devem ser feitas através dos Request específicos
-        // (PacienteIdentificadorRequest, PacienteContatoRequest) quando esses dados forem enviados
+
     }
 
     public void sanitizarFlags(PacienteRequest request) {
-        // Campos removidos do PacienteRequest - devem ser processados através dos Request específicos
-        // das entidades relacionadas (DadosSociodemograficosRequest, etc.)
+
     }
 
     private void validarCpfUnico(UUID pacienteId, String cpf, PacienteIdentificadorRepository identificadorRepository, UUID tenantId) {

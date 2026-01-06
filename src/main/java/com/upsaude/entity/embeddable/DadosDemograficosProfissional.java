@@ -48,4 +48,3 @@ public class DadosDemograficosProfissional {
     @Column(name = "naturalidade", length = 100)
     private String naturalidade;
 }
-

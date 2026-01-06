@@ -28,7 +28,8 @@ public class PacienteCreator {
     private final PacienteContatoRepository contatoRepository;
 
     public Paciente criar(PacienteRequest request, UUID tenantId) {
-        log.debug("Criando novo paciente: {}", request != null ? request.getNomeCompleto() : "null");
+        log.debug("Criando novo paciente: {}", request != null && request.getDadosPessoaisBasicos() != null 
+                ? request.getDadosPessoaisBasicos().getNomeCompleto() : "null");
 
         validationService.validarObrigatorios(request);
         validationService.validarUnicidadeParaCriacao(request, pacienteRepository, identificadorRepository,
@@ -41,10 +42,8 @@ public class PacienteCreator {
             paciente.setStatusPaciente(StatusPacienteEnum.ATIVO);
         }
 
-        // Processar todas as associações (usando cascades para salvar)
         associacoesManager.processarTodas(paciente, request, tenantId);
 
-        // Salvar paciente e todas as associações em cascata
         Paciente pacienteSalvo = pacienteRepository.save(paciente);
 
         log.info("Paciente criado com sucesso. ID: {}, Tenant: {}", pacienteSalvo.getId(), tenantId);

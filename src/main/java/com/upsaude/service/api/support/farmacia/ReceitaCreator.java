@@ -87,4 +87,3 @@ public class ReceitaCreator {
         return receita;
     }
 }
-

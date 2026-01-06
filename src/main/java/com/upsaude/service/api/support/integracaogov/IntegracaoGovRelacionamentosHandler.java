@@ -28,6 +28,5 @@ public class IntegracaoGovRelacionamentosHandler {
         Paciente paciente = pacienteTenantEnforcer.validarAcesso(pacienteId, tenantId);
         entity.setPaciente(paciente);
 
-        // estabelecimento: manter comportamento atual (pode ser null)
     }
 }

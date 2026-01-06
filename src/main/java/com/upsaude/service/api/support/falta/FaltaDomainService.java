@@ -18,7 +18,6 @@ public class FaltaDomainService {
 
     public void validarPodeDeletar(Falta entity) {
         log.debug("Validando se falta pode ser deletada. ID: {}", entity.getId());
-        // Adicione aqui qualquer lógica de validação antes de um hard delete.
+
     }
 }
-

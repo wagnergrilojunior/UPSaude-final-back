@@ -13,4 +13,3 @@ public interface DadosIdentificacaoEstabelecimentoMapper {
     DadosIdentificacaoEstabelecimentoResponse toResponse(DadosIdentificacaoEstabelecimento entity);
     void updateFromRequest(DadosIdentificacaoEstabelecimentoRequest request, @MappingTarget DadosIdentificacaoEstabelecimento entity);
 }
-

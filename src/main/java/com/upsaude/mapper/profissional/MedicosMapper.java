@@ -68,7 +68,7 @@ public abstract class MedicosMapper {
         return estabelecimentos.stream()
                 .map(MedicoEstabelecimento::getEstabelecimento)
                 .filter(Objects::nonNull)
-                .distinct() // Garante unicidade dos estabelecimentos
+                .distinct() 
                 .map(estabelecimentosMapper::toResponse)
                 .collect(Collectors.toList());
     }

@@ -32,4 +32,3 @@ public class LicenciamentoEstabelecimentoRequest {
     @Size(max = 100, message = "Número da licença sanitária deve ter no máximo 100 caracteres")
     private String numeroLicencaSanitaria;
 }
-

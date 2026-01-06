@@ -18,7 +18,7 @@ public class ProfissionaisSaudeTenantEnforcer {
 
     public ProfissionaisSaude validarAcesso(UUID id, UUID tenantId) {
         log.debug("Validando acesso ao profissional de saúde ID: {} para tenant: {}", id, tenantId);
-        
+
         return profissionaisSaudeRepository.findByIdAndTenant(id, tenantId)
                 .orElseThrow(() -> {
                     log.warn("Profissional de saúde não encontrado com ID: {} para tenant: {}", id, tenantId);
@@ -28,7 +28,7 @@ public class ProfissionaisSaudeTenantEnforcer {
 
     public ProfissionaisSaude validarAcessoCompleto(UUID id, UUID tenantId) {
         log.debug("Validando acesso completo ao profissional de saúde ID: {} para tenant: {}", id, tenantId);
-        
+
         return profissionaisSaudeRepository.findByIdCompletoAndTenant(id, tenantId)
                 .orElseThrow(() -> {
                     log.warn("Profissional de saúde não encontrado com ID: {} para tenant: {}", id, tenantId);

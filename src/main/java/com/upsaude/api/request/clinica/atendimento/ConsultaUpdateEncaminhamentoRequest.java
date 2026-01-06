@@ -23,4 +23,3 @@ public class ConsultaUpdateEncaminhamentoRequest {
     @Schema(description = "Dados de encaminhamento", required = true)
     private EncaminhamentoConsultaRequest encaminhamento;
 }
-

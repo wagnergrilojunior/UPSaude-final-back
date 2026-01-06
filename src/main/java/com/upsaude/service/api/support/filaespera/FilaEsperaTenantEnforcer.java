@@ -29,4 +29,3 @@ public class FilaEsperaTenantEnforcer {
         return validarAcesso(id, tenantId);
     }
 }
-

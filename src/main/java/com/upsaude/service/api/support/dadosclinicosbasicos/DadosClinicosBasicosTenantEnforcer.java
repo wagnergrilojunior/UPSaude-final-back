@@ -29,4 +29,3 @@ public class DadosClinicosBasicosTenantEnforcer {
         return validarAcesso(id, tenantId);
     }
 }
-

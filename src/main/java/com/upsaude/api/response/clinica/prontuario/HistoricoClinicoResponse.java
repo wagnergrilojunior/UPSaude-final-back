@@ -6,7 +6,6 @@ import com.upsaude.api.response.agendamento.AgendamentoResponse;
 import com.upsaude.api.response.clinica.atendimento.AtendimentoResponse;
 import com.upsaude.api.response.paciente.PacienteResponse;
 
-
 import java.time.OffsetDateTime;
 import java.util.UUID;
 import lombok.*;

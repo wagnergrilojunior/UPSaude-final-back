@@ -23,4 +23,3 @@ public class ConsultaUpdateAtestadoRequest {
     @Schema(description = "Dados de atestado", required = true)
     private AtestadoConsultaRequest atestado;
 }
-

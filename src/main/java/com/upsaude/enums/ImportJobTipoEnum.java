@@ -1,8 +1,5 @@
 package com.upsaude.enums;
 
-/**
- * Tipos de importação suportados pelo sistema.
- */
 public enum ImportJobTipoEnum {
     SIA_PA("SIA_PA", "SIA-SUS Produção Ambulatorial"),
     SIGTAP("SIGTAP", "SIGTAP"),
@@ -34,4 +31,3 @@ public enum ImportJobTipoEnum {
         return null;
     }
 }
-

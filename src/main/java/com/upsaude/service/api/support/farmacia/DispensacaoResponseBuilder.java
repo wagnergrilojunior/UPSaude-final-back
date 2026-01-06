@@ -16,4 +16,3 @@ public class DispensacaoResponseBuilder {
         return dispensacaoMapper.toResponseCompleto(dispensacao);
     }
 }
-

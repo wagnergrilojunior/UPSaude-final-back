@@ -18,4 +18,3 @@ public class ContatoProfissionalResponse {
     private String telefoneInstitucional;
     private String emailInstitucional;
 }
-

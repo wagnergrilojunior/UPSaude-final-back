@@ -15,4 +15,3 @@ public class DadosIdentificacaoUsuarioResponse {
     private String username;
     private String cpf;
 }
-

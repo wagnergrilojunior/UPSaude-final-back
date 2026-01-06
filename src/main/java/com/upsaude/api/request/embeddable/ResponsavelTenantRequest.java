@@ -27,4 +27,3 @@ public class ResponsavelTenantRequest {
     @TelefoneValido
     private String responsavelTelefone;
 }
-

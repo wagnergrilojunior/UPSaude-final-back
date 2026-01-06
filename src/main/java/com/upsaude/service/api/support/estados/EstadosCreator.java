@@ -32,4 +32,3 @@ public class EstadosCreator {
         return saved;
     }
 }
-

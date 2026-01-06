@@ -7,7 +7,6 @@ import com.upsaude.api.request.embeddable.DiagnosticoAtendimentoRequest;
 import com.upsaude.api.request.embeddable.InformacoesAtendimentoRequest;
 import com.upsaude.api.request.embeddable.ProcedimentosRealizadosAtendimentoRequest;
 
-
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.upsaude.api.request.embeddable.AnamneseAtendimentoRequest;

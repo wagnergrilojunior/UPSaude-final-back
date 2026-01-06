@@ -21,4 +21,3 @@ public class RegistroProfissionalResponse {
     private OffsetDateTime dataValidadeRegistro;
     private StatusAtivoEnum statusRegistro;
 }
-

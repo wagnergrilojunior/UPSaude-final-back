@@ -8,7 +8,7 @@ import lombok.Data;
 public class SigtapProcedimentoDetalheRedeResponse {
     @Schema(description = "Código do componente de rede", example = "0101010101")
     private String codigoRede;
-    
+
     @Schema(description = "Nome do componente de rede", example = "COMPONENTE REDE ESPECIAL")
     private String nomeRede;
 }

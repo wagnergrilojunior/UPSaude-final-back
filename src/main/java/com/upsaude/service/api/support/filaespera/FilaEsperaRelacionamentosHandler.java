@@ -59,8 +59,6 @@ public class FilaEsperaRelacionamentosHandler {
             entity.setAgendamento(null);
         }
 
-
         return entity;
     }
 }
-

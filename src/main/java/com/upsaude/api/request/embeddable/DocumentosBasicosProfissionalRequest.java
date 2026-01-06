@@ -37,4 +37,3 @@ public class DocumentosBasicosProfissionalRequest {
     @CNSValido
     private String cns;
 }
-

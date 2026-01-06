@@ -18,4 +18,3 @@ public interface PacienteContatoService {
 
     List<PacienteContato> listarPorPaciente(UUID pacienteId);
 }
-

@@ -9,4 +9,3 @@ import com.upsaude.entity.referencia.sigtap.SigtapRubrica;
 public interface SigtapRubricaMapper {
     SigtapRubricaResponse toResponse(SigtapRubrica entity);
 }
-

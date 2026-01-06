@@ -42,4 +42,3 @@ public interface SigtapProcedimentoMapper {
         return sh.add(sp);
     }
 }
-

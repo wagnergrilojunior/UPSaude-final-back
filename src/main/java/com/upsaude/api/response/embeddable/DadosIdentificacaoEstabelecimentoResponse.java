@@ -27,4 +27,3 @@ public class DadosIdentificacaoEstabelecimentoResponse {
 
     private NaturezaJuridicaEnum naturezaJuridica;
 }
-

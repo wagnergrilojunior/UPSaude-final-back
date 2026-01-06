@@ -50,9 +50,9 @@ public class EnderecoResponse {
     private String andar;
     private String bloco;
     private Boolean semNumero;
-    
-    @JsonIgnore // Estado já está dentro de cidade.estado, então não precisa ser exposto no nível raiz
+
+    @JsonIgnore 
     private EstadosResponse estado;
-    
+
     private CidadesResponse cidade;
 }

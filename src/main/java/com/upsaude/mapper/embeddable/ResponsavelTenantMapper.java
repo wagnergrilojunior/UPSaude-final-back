@@ -13,4 +13,3 @@ public interface ResponsavelTenantMapper {
     ResponsavelTenantResponse toResponse(ResponsavelTenant entity);
     void updateFromRequest(ResponsavelTenantRequest request, @MappingTarget ResponsavelTenant entity);
 }
-

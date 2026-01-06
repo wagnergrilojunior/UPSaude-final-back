@@ -13,4 +13,3 @@ public interface DadosDemograficosMedicoMapper {
     DadosDemograficosMedicoResponse toResponse(DadosDemograficosMedico entity);
     void updateFromRequest(DadosDemograficosMedicoRequest request, @MappingTarget DadosDemograficosMedico entity);
 }
-

@@ -74,8 +74,6 @@ public class EquipeSaude extends BaseEntity {
     @Column(name = "observacoes", columnDefinition = "TEXT")
     private String observacoes;
 
-    //===============================================================================================================
-
     public EquipeSaude() {
         this.vinculosProfissionais = new HashSet<>();
     }

@@ -29,4 +29,3 @@ public class DocumentosBasicosMedicoRequest {
     @Size(max = 2, message = "UF emissor RG deve ter no máximo 2 caracteres")
     private String ufEmissorRg;
 }
-

@@ -9,13 +9,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-/**
- * Response com campos complementares de classificação da doença.
- * 
- * NOTA: Os campos categoria, subcategoria e codigoCidPrincipal foram removidos
- * pois agora são retornados diretamente nos campos de nível superior do 
- * DoencasResponse (codigoCid, etc.) vindos da tabela oficial CID-10.
- */
 @Getter
 @Setter
 @Builder
@@ -23,16 +16,16 @@ import lombok.Setter;
 @AllArgsConstructor
 @Schema(description = "Dados complementares de classificação da doença")
 public class ClassificacaoDoencaResponse {
-    
+
     @Schema(description = "Tipo de doença (classificação interna)")
     private TipoDoencaEnum tipoDoenca;
-    
+
     @Schema(description = "Gravidade da doença (classificação interna)")
     private GravidadeDoencaEnum gravidade;
-    
+
     @Schema(description = "Indica se a doença é de notificação compulsória")
     private Boolean doencaNotificavel;
-    
+
     @Schema(description = "Indica se a doença é transmissível")
     private Boolean doencaTransmissivel;
 }

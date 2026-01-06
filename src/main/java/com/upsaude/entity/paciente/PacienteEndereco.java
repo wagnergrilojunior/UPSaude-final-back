@@ -41,4 +41,3 @@ public class PacienteEndereco extends BaseEntity {
         }
     }
 }
-

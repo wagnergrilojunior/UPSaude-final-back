@@ -18,7 +18,6 @@ public class TemplateNotificacaoDomainService {
 
     public void validarPodeDeletar(TemplateNotificacao entity) {
         log.debug("Validando se template de notificação pode ser deletado. ID: {}", entity.getId());
-        // Adicione aqui qualquer lógica de validação antes de um hard delete.
+
     }
 }
-

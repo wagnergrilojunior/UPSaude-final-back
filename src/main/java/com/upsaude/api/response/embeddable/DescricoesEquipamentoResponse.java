@@ -21,4 +21,3 @@ public class DescricoesEquipamentoResponse {
 
     private String observacoes;
 }
-

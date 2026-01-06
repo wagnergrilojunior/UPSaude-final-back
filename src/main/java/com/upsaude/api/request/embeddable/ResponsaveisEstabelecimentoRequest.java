@@ -30,4 +30,3 @@ public class ResponsaveisEstabelecimentoRequest {
     @Size(max = 11, message = "CPF do responsável legal deve ter no máximo 11 caracteres")
     private String responsavelLegalCpf;
 }
-

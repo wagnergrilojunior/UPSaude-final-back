@@ -1,6 +1,5 @@
 package com.upsaude.service.api.support.paciente;
 
-
 import java.util.UUID;
 import java.util.function.Consumer;
 
@@ -77,50 +76,42 @@ public class PacienteOneToOneRelationshipHandler {
             Convenio convenio = convenioRepository.findById(request.getConvenio())
                     .orElseThrow(() -> new NotFoundException("Convênio não encontrado com ID: " + request.getConvenio()));
             paciente.setConvenio(convenio);
-            
-            // Processar informações do convênio se fornecidas
+
             if (request.getInformacoesConvenio() != null) {
                 if (paciente.getInformacoesConvenio() == null) {
-                    // Criar nova instância se não existe
+
                     InformacoesConvenioPaciente informacoes = informacoesConvenioMapper.toEntity(request.getInformacoesConvenio());
                     paciente.setInformacoesConvenio(informacoes);
                 } else {
-                    // Atualizar instância existente
+
                     informacoesConvenioMapper.updateFromRequest(request.getInformacoesConvenio(), paciente.getInformacoesConvenio());
                 }
             }
         } else {
-            // Se não há convênio, limpar informações do convênio
+
             paciente.setConvenio(null);
             paciente.setInformacoesConvenio(null);
         }
-
-        // Relacionamentos OneToOne devem ser processados através dos Request específicos
-        // (DadosSociodemograficosRequest, DadosClinicosBasicosRequest, ResponsavelLegalRequest, etc.)
-        // quando esses dados forem enviados separadamente
 
         return paciente;
     }
 
     public Paciente processarRelacionamentosNovos(Paciente paciente, PacienteRequest request) {
-        // Processar dados sociodemográficos (criar nova entidade se necessário)
+
         processarDadosSociodemograficos(paciente, request);
 
-        // Processar responsável legal (criar nova entidade se necessário)
         processarResponsavelLegal(paciente, request);
 
         return paciente;
     }
 
     private void processarDadosSociodemograficos(Paciente paciente, PacienteRequest request) {
-        // Dados sociodemográficos devem ser processados através do DadosSociodemograficosRequest
-        // quando enviado separadamente via endpoint específico
+
         log.debug("Dados sociodemográficos devem ser processados através do endpoint específico para paciente ID: {}", paciente.getId());
     }
 
     private void processarResponsavelLegal(Paciente paciente, PacienteRequest request) {
-        // Responsável legal deve ser processado através do ResponsavelLegalRequest
-        // quando enviado separadamente via endpoint específico
+
         log.debug("Responsável legal deve ser processado através do endpoint específico para paciente ID: {}", paciente.getId());
     }
 

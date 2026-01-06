@@ -28,4 +28,3 @@ public class DepartamentosRelacionamentosHandler {
         return entity;
     }
 }
-

@@ -18,38 +18,14 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.UUID;
 
-/**
- * Writer genérico para persistência em batch via JDBC, com suporte a INSERT e UPSERT (Postgres).
- *
- * Estratégia:
- * - Descobre tabela/colunas via anotações JPA (@Table/@Column/@JoinColumn).
- * - Ignora colunas de auditoria/base (id, criado_em, atualizado_em, ativo).
- * - Para @JoinColumn (ManyToOne), persiste o ID do objeto referenciado (getId()) quando insertable/updatable.
- * - Para UPSERT, usa o primeiro @UniqueConstraint definido na @Table (quando existir).
- *
- * Observação: para entidades sem unique constraint, use insertBatch().
- */
-/**
- * Writer genérico para persistência em batch via JDBC, com suporte a INSERT e UPSERT (Postgres).
- * 
- * USO EXCLUSIVO JOB - NÃO USAR NA API
- * 
- * Usa jobDataSource para garantir isolamento de conexões.
- */
 @Slf4j
 @Service
 public class JdbcEntityBatchWriter {
 
-    // Colunas que são gerenciadas automaticamente (criado_em, atualizado_em, ativo)
-    // NOTA: "id" NÃO está mais aqui - será incluído quando necessário e gerado se null
     private static final Set<String> BASE_COLUMNS = Set.of("criado_em", "atualizado_em", "ativo");
 
-    // USO EXCLUSIVO JOB - JdbcTemplate criado a partir do jobDataSource
     private final JdbcTemplate jdbcTemplate;
 
-    /**
-     * Construtor: cria JdbcTemplate a partir do jobDataSource
-     */
     public JdbcEntityBatchWriter(@Qualifier("jobDataSource") DataSource jobDataSource) {
         this.jdbcTemplate = new JdbcTemplate(jobDataSource);
         log.info("JdbcEntityBatchWriter inicializado com jobDataSource");
@@ -117,8 +93,7 @@ public class JdbcEntityBatchWriter {
 
         List<ColumnBinding> bindings = new ArrayList<>();
         Field idField = null;
-        
-        // Primeiro, procura o campo "id" para incluí-lo na lista de colunas
+
         for (Field f : allFields(clazz)) {
             if ("id".equals(f.getName()) && UUID.class.isAssignableFrom(f.getType())) {
                 f.setAccessible(true);
@@ -126,17 +101,15 @@ public class JdbcEntityBatchWriter {
                 break;
             }
         }
-        
-        // Se encontrou campo id, adiciona como primeira coluna
+
         if (idField != null) {
             bindings.add(new ColumnBinding("id", idField, BindingKind.ID_FIELD));
         }
-        
-        // Depois, processa as outras colunas
+
         for (Field f : allFields(clazz)) {
-            // Pula o campo id (já foi processado)
+
             if ("id".equals(f.getName())) continue;
-            
+
             Column col = f.getAnnotation(Column.class);
             if (col != null) {
                 String colName = col.name();
@@ -149,7 +122,7 @@ public class JdbcEntityBatchWriter {
 
             JoinColumn join = f.getAnnotation(JoinColumn.class);
             if (join != null) {
-                // respeita insertable/updatable (evita colunas computadas)
+
                 if (!join.insertable() && !join.updatable()) continue;
 
                 String colName = join.name();
@@ -164,7 +137,6 @@ public class JdbcEntityBatchWriter {
             throw new IllegalArgumentException("Nenhuma coluna bindável encontrada para: " + clazz.getName());
         }
 
-        // conflito: usa o primeiro unique constraint definido na entidade
         List<String> conflictCols = new ArrayList<>();
         if (table.uniqueConstraints() != null && table.uniqueConstraints().length > 0) {
             var uc = table.uniqueConstraints()[0];
@@ -182,13 +154,12 @@ public class JdbcEntityBatchWriter {
 
         String upsertSql = null;
         if (!conflictCols.isEmpty()) {
-            // Atualiza todas as colunas exceto as de conflito e o id (mantém chave natural e primária intactas)
-            // O id não deve ser atualizado porque é uma chave primária e pode estar sendo referenciado por foreign keys
+
             Set<String> conflictSet = new HashSet<>(conflictCols);
             List<String> updates = new ArrayList<>();
             for (ColumnBinding b : bindings) {
                 if (conflictSet.contains(b.columnName)) continue;
-                if ("id".equals(b.columnName)) continue; // Não atualiza o id em caso de conflito
+                if ("id".equals(b.columnName)) continue; 
                 updates.add(b.columnName + " = EXCLUDED." + b.columnName);
             }
             String updateSql = updates.isEmpty() ? "DO NOTHING" : ("DO UPDATE SET " + String.join(", ", updates));
@@ -252,15 +223,15 @@ public class JdbcEntityBatchWriter {
                 Object value = null;
                 try {
                     if (b.kind == BindingKind.ID_FIELD) {
-                        // Para campo id, gera UUID se estiver null
+
                         Object raw = b.field.get(entity);
                         if (raw == null) {
                             value = UUID.randomUUID();
-                            // Opcional: define o UUID gerado de volta na entidade
+
                             try {
                                 b.field.set(entity, value);
                             } catch (Exception e) {
-                                // Ignora se não conseguir setar (pode ser final)
+
                             }
                         } else {
                             value = raw;
@@ -273,11 +244,11 @@ public class JdbcEntityBatchWriter {
                             if (raw == null) {
                                 value = null;
                             } else {
-                                // tenta getId() via reflexão
+
                                 try {
                                     value = raw.getClass().getMethod("getId").invoke(raw);
                                 } catch (Exception ex) {
-                                    // fallback: campo "id"
+
                                     Field idField = raw.getClass().getDeclaredField("id");
                                     idField.setAccessible(true);
                                     value = idField.get(raw);
@@ -293,5 +264,3 @@ public class JdbcEntityBatchWriter {
         }
     }
 }
-
-

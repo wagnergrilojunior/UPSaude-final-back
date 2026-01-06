@@ -9,9 +9,6 @@ import jakarta.persistence.UniqueConstraint;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
-/**
- * Ocupa??o (CBO) do SIGTAP.
- */
 @Entity
 @Table(
         name = "sigtap_ocupacao",

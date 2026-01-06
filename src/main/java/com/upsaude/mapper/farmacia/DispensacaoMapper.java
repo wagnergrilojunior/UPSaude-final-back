@@ -46,30 +46,29 @@ public interface DispensacaoMapper {
 
     default DispensacaoResponse toResponseCompleto(Dispensacao dispensacao) {
         if (dispensacao == null) return null;
-        
+
         DispensacaoResponse response = toResponse(dispensacao);
-        
+
         if (dispensacao.getPaciente() != null) {
             response.setPacienteNome(dispensacao.getPaciente().getNomeCompleto());
         }
-        
+
         if (dispensacao.getFarmacia() != null) {
             response.setFarmaciaNome(dispensacao.getFarmacia().getNome());
         }
-        
+
         if (dispensacao.getProfissionalSaude() != null && 
             dispensacao.getProfissionalSaude().getDadosPessoaisBasicos() != null) {
             response.setProfissionalNome(dispensacao.getProfissionalSaude().getDadosPessoaisBasicos().getNomeCompleto());
         }
-        
+
         if (dispensacao.getItens() != null && !dispensacao.getItens().isEmpty()) {
             DispensacaoItemMapper itemMapper = org.mapstruct.factory.Mappers.getMapper(DispensacaoItemMapper.class);
             response.setItens(dispensacao.getItens().stream()
                     .map(itemMapper::toResponseCompleto)
                     .toList());
         }
-        
+
         return response;
     }
 }
-

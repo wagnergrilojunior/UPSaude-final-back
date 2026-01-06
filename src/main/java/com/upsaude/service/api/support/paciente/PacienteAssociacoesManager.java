@@ -9,7 +9,10 @@ import com.upsaude.api.request.paciente.PacienteRequest;
 import com.upsaude.entity.paciente.Endereco;
 import com.upsaude.entity.paciente.Paciente;
 import com.upsaude.entity.paciente.PacienteEndereco;
+import com.upsaude.entity.sistema.integracao.IntegracaoGov;
 import com.upsaude.entity.sistema.multitenancy.Tenant;
+import com.upsaude.enums.TipoContatoEnum;
+import com.upsaude.enums.TipoIdentificadorEnum;
 import com.upsaude.mapper.geral.EnderecoMapper;
 import com.upsaude.mapper.paciente.DadosClinicosBasicosMapper;
 import com.upsaude.mapper.paciente.DadosSociodemograficosMapper;
@@ -46,7 +49,6 @@ public class PacienteAssociacoesManager {
     private final PacienteContatoMapper pacienteContatoMapper;
     private final DadosSociodemograficosMapper dadosSociodemograficosMapper;
     private final DadosClinicosBasicosMapper dadosClinicosBasicosMapper;
-    private final ResponsavelLegalMapper responsavelLegalMapper;
     private final PacienteDadosPessoaisComplementaresMapper dadosPessoaisComplementaresMapper;
     private final PacienteObitoMapper pacienteObitoMapper;
     private final DeficienciasPacienteMapper deficienciasPacienteMapper;
@@ -59,13 +61,18 @@ public class PacienteAssociacoesManager {
 
         Tenant tenant = tenantRepository.getReferenceById(tenantId);
 
-        // 1. Processar Convênio
         if (request.getConvenio() != null) {
             convenioRepository.findById(request.getConvenio())
                     .ifPresent(paciente::setConvenio);
         }
 
-        // 2. Processar Endereços
+        processarDocumentosBasicos(paciente, request, tenant);
+        processarContatoBasico(paciente, request, tenant);
+        processarDadosDemograficosBasicos(paciente, request);
+        processarResponsavelLegalBasico(paciente, request, tenant);
+        processarIntegracaoGovBasica(paciente, request, tenant);
+        processarEnderecoPrincipal(paciente, request, tenant);
+
         if (request.getEnderecos() != null) {
             paciente.getEnderecos().clear();
             request.getEnderecos().forEach(req -> {
@@ -81,18 +88,15 @@ public class PacienteAssociacoesManager {
             });
         }
 
-        // 3. Processar Identificadores
         if (request.getIdentificadores() != null) {
-            // Identificar quais manter (chave: tipo + valor)
+
             java.util.Set<String> keysToKeep = request.getIdentificadores().stream()
                     .map(req -> req.getTipo() + "|" + req.getValor())
                     .collect(java.util.stream.Collectors.toSet());
 
-            // Remover os que não estão na request
             paciente.getIdentificadores()
                     .removeIf(existing -> !keysToKeep.contains(existing.getTipo() + "|" + existing.getValor()));
 
-            // Atualizar ou Adicionar
             request.getIdentificadores().forEach(req -> {
                 java.util.Optional<com.upsaude.entity.paciente.PacienteIdentificador> existingOpt = paciente
                         .getIdentificadores().stream()
@@ -100,7 +104,7 @@ public class PacienteAssociacoesManager {
                         .findFirst();
 
                 if (existingOpt.isPresent()) {
-                    // Atualizar existente
+
                     var existing = existingOpt.get();
                     existing.setOrigem(req.getOrigem());
                     existing.setPrincipal(req.getPrincipal() != null ? req.getPrincipal() : false);
@@ -108,7 +112,7 @@ public class PacienteAssociacoesManager {
                     existing.setDataValidacao(req.getDataValidacao());
                     existing.setObservacoes(req.getObservacoes());
                 } else {
-                    // Adicionar novo
+
                     var entity = pacienteIdentificadorMapper.fromRequest(req);
                     entity.setPaciente(paciente);
                     entity.setTenant(tenant);
@@ -117,9 +121,8 @@ public class PacienteAssociacoesManager {
             });
         }
 
-        // 4. Processar Contatos
         if (request.getContatos() != null) {
-            // Chave: Tipo + (Telefone ou Email ou Celular)
+
             java.util.Set<String> keysToKeep = request.getContatos().stream()
                     .map(req -> {
                         String val = req.getTelefone() != null ? req.getTelefone()
@@ -150,7 +153,7 @@ public class PacienteAssociacoesManager {
                 if (existingOpt.isPresent()) {
                     var existing = existingOpt.get();
                     existing.setNome(req.getNome());
-                    // outros campos se houver
+
                 } else {
                     var entity = pacienteContatoMapper.fromRequest(req);
                     entity.setPaciente(paciente);
@@ -160,7 +163,6 @@ public class PacienteAssociacoesManager {
             });
         }
 
-        // 5. Processar Dados Sociodemográficos
         if (request.getDadosSociodemograficos() != null) {
             var entity = dadosSociodemograficosMapper.fromRequest(request.getDadosSociodemograficos());
             entity.setPaciente(paciente);
@@ -168,7 +170,6 @@ public class PacienteAssociacoesManager {
             paciente.setDadosSociodemograficos(entity);
         }
 
-        // 6. Processar Dados Clínicos Básicos
         if (request.getDadosClinicosBasicos() != null) {
             var entity = dadosClinicosBasicosMapper.fromRequest(request.getDadosClinicosBasicos());
             entity.setPaciente(paciente);
@@ -176,15 +177,6 @@ public class PacienteAssociacoesManager {
             paciente.setDadosClinicosBasicos(entity);
         }
 
-        // 7. Processar Responsável Legal
-        if (request.getResponsavelLegal() != null) {
-            var entity = responsavelLegalMapper.fromRequest(request.getResponsavelLegal());
-            entity.setPaciente(paciente);
-            entity.setTenant(tenant);
-            paciente.setResponsavelLegal(entity);
-        }
-
-        // 8. Processar Dados Pessoais Complementares
         if (request.getDadosPessoaisComplementares() != null) {
             var entity = dadosPessoaisComplementaresMapper.fromRequest(request.getDadosPessoaisComplementares());
             entity.setPaciente(paciente);
@@ -192,7 +184,6 @@ public class PacienteAssociacoesManager {
             paciente.setDadosPessoaisComplementares(entity);
         }
 
-        // 9. Processar Óbito
         if (request.getObito() != null) {
             var entity = pacienteObitoMapper.fromRequest(request.getObito());
             entity.setPaciente(paciente);
@@ -200,7 +191,6 @@ public class PacienteAssociacoesManager {
             paciente.setObito(entity);
         }
 
-        // 10. Processar Deficiências
         if (request.getDeficiencias() != null) {
             java.util.Set<UUID> keysToKeep = request.getDeficiencias().stream()
                     .map(com.upsaude.api.request.deficiencia.DeficienciasPacienteRequest::getDeficiencia)
@@ -242,7 +232,6 @@ public class PacienteAssociacoesManager {
             });
         }
 
-        // 11. Processar Vínculos Territoriais
         if (request.getVinculosTerritoriais() != null) {
             paciente.getVinculosTerritoriais().clear();
             request.getVinculosTerritoriais().forEach(req -> {
@@ -253,7 +242,6 @@ public class PacienteAssociacoesManager {
             });
         }
 
-        // 12. Processar LGPD Consentimento
         if (request.getLgpdConsentimento() != null) {
             var entity = lgpdConsentimentoMapper.fromRequest(request.getLgpdConsentimento());
             entity.setPaciente(paciente);
@@ -262,5 +250,199 @@ public class PacienteAssociacoesManager {
         }
 
         log.debug("Associações processadas com sucesso para paciente ID: {}", paciente.getId());
+    }
+
+    private void processarDocumentosBasicos(Paciente paciente, PacienteRequest request, Tenant tenant) {
+        if (request.getDocumentosBasicos() == null) {
+            return;
+        }
+
+        var docs = request.getDocumentosBasicos();
+
+        if (docs.getCpf() != null && !docs.getCpf().trim().isEmpty()) {
+            adicionarOuAtualizarIdentificador(paciente, TipoIdentificadorEnum.CPF, docs.getCpf(), true, tenant);
+        }
+
+        if (docs.getRg() != null && !docs.getRg().trim().isEmpty()) {
+            adicionarOuAtualizarIdentificador(paciente, TipoIdentificadorEnum.RG, docs.getRg(), false, tenant);
+        }
+
+        if (docs.getCns() != null && !docs.getCns().trim().isEmpty()) {
+            adicionarOuAtualizarIdentificador(paciente, TipoIdentificadorEnum.CNS, docs.getCns(), false, tenant);
+        }
+    }
+
+    private void adicionarOuAtualizarIdentificador(Paciente paciente, TipoIdentificadorEnum tipo, String valor,
+            boolean principal, Tenant tenant) {
+        var existingOpt = paciente.getIdentificadores().stream()
+                .filter(id -> id.getTipo() == tipo && id.getValor().equals(valor))
+                .findFirst();
+
+        if (existingOpt.isPresent()) {
+            var existing = existingOpt.get();
+            existing.setPrincipal(principal);
+        } else {
+            var entity = new com.upsaude.entity.paciente.PacienteIdentificador();
+            entity.setPaciente(paciente);
+            entity.setTenant(tenant);
+            entity.setTipo(tipo);
+            entity.setValor(valor);
+            entity.setPrincipal(principal);
+            paciente.addIdentificador(entity);
+        }
+    }
+
+    private void processarContatoBasico(Paciente paciente, PacienteRequest request, Tenant tenant) {
+        if (request.getContato() == null) {
+            return;
+        }
+
+        var contato = request.getContato();
+
+        if (contato.getTelefone() != null && !contato.getTelefone().trim().isEmpty()) {
+            adicionarOuAtualizarContato(paciente, TipoContatoEnum.TELEFONE, contato.getTelefone(), null, null, tenant);
+        }
+
+        if (contato.getCelular() != null && !contato.getCelular().trim().isEmpty()) {
+            adicionarOuAtualizarContato(paciente, TipoContatoEnum.WHATSAPP, null, contato.getCelular(), null, tenant);
+        }
+
+        if (contato.getEmail() != null && !contato.getEmail().trim().isEmpty()) {
+            adicionarOuAtualizarContato(paciente, TipoContatoEnum.EMAIL, null, null, contato.getEmail(), tenant);
+        }
+    }
+
+    private void adicionarOuAtualizarContato(Paciente paciente, TipoContatoEnum tipo, String telefone, String celular,
+            String email, Tenant tenant) {
+        String valor = telefone != null ? telefone : (celular != null ? celular : email);
+
+        var existingOpt = paciente.getContatos().stream()
+                .filter(c -> {
+                    String cVal = c.getTelefone() != null ? c.getTelefone()
+                            : (c.getCelular() != null ? c.getCelular() : c.getEmail());
+                    return c.getTipo() == tipo && java.util.Objects.equals(cVal, valor);
+                })
+                .findFirst();
+
+        if (existingOpt.isPresent()) {
+            var existing = existingOpt.get();
+            if (telefone != null)
+                existing.setTelefone(telefone);
+            if (celular != null)
+                existing.setCelular(celular);
+            if (email != null)
+                existing.setEmail(email);
+        } else {
+            var entity = new com.upsaude.entity.paciente.PacienteContato();
+            entity.setPaciente(paciente);
+            entity.setTenant(tenant);
+            entity.setTipo(tipo);
+            entity.setTelefone(telefone);
+            entity.setCelular(celular);
+            entity.setEmail(email);
+            paciente.addContato(entity);
+        }
+    }
+
+    private void processarDadosDemograficosBasicos(Paciente paciente, PacienteRequest request) {
+        if (request.getDadosDemograficos() == null) {
+            return;
+        }
+
+        var demograficos = request.getDadosDemograficos();
+
+        if (paciente.getDadosSociodemograficos() == null) {
+            var entity = new com.upsaude.entity.paciente.DadosSociodemograficos();
+            entity.setPaciente(paciente);
+            paciente.setDadosSociodemograficos(entity);
+        }
+
+        var dados = paciente.getDadosSociodemograficos();
+        dados.setRacaCor(demograficos.getRacaCor());
+        dados.setNacionalidade(demograficos.getNacionalidade());
+        dados.setPaisNascimento(demograficos.getPaisNascimento());
+        dados.setNaturalidade(demograficos.getNaturalidade());
+        dados.setMunicipioNascimentoIbge(demograficos.getMunicipioNascimentoIbge());
+        dados.setEscolaridade(demograficos.getEscolaridade());
+        dados.setOcupacaoProfissao(demograficos.getOcupacaoProfissao());
+        dados.setSituacaoRua(demograficos.getSituacaoRua());
+
+        if (paciente.getDadosPessoaisComplementares() == null) {
+            var entity = new com.upsaude.entity.paciente.PacienteDadosPessoaisComplementares();
+            entity.setPaciente(paciente);
+            paciente.setDadosPessoaisComplementares(entity);
+        }
+
+        var complementares = paciente.getDadosPessoaisComplementares();
+        complementares.setIdentidadeGenero(demograficos.getIdentidadeGenero());
+        complementares.setOrientacaoSexual(demograficos.getOrientacaoSexual());
+    }
+
+    private void processarResponsavelLegalBasico(Paciente paciente, PacienteRequest request, Tenant tenant) {
+        if (request.getResponsavelLegal() == null) {
+            return;
+        }
+
+        var responsavel = request.getResponsavelLegal();
+
+        if (paciente.getResponsavelLegal() == null) {
+            com.upsaude.entity.paciente.ResponsavelLegal entity = new com.upsaude.entity.paciente.ResponsavelLegal();
+            entity.setPaciente(paciente);
+            entity.setTenant(tenant);
+            paciente.setResponsavelLegal(entity);
+        }
+
+        com.upsaude.entity.paciente.ResponsavelLegal entity = paciente.getResponsavelLegal();
+        entity.setNome(responsavel.getNome());
+        entity.setCpf(responsavel.getCpf());
+        entity.setTelefone(responsavel.getTelefone());
+    }
+
+    private void processarIntegracaoGovBasica(Paciente paciente, PacienteRequest request, Tenant tenant) {
+        if (request.getIntegracaoGov() == null) {
+            return;
+        }
+
+        var integracao = request.getIntegracaoGov();
+
+        IntegracaoGov integracaoGov = paciente.getIntegracoesGov() != null && !paciente.getIntegracoesGov().isEmpty()
+                ? paciente.getIntegracoesGov().get(0)
+                : new IntegracaoGov();
+
+        integracaoGov.setPaciente(paciente);
+        integracaoGov.setTenant(tenant);
+        integracaoGov.setCartaoSusAtivo(integracao.getCartaoSusAtivo());
+        integracaoGov.setDataAtualizacaoCns(integracao.getDataAtualizacaoCns());
+        integracaoGov.setOrigemCadastro(integracao.getOrigemCadastro());
+        integracaoGov.setCnsValidado(integracao.getCnsValidado());
+        integracaoGov.setTipoCns(integracao.getTipoCns());
+
+        if (paciente.getIntegracoesGov() == null || paciente.getIntegracoesGov().isEmpty()) {
+            paciente.setIntegracoesGov(new java.util.ArrayList<>());
+            paciente.getIntegracoesGov().add(integracaoGov);
+        }
+    }
+
+    private void processarEnderecoPrincipal(Paciente paciente, PacienteRequest request, Tenant tenant) {
+        if (request.getEnderecoPrincipal() == null) {
+            return;
+        }
+
+        Endereco transientEndereco = enderecoMapper.fromRequest(request.getEnderecoPrincipal());
+        transientEndereco.setTenant(tenant);
+        Endereco endereco = enderecoService.findOrCreate(transientEndereco);
+
+        PacienteEndereco pacienteEndereco = paciente.getEnderecos().stream()
+                .filter(pe -> pe.getEndereco() != null && pe.getEndereco().getId().equals(endereco.getId()))
+                .findFirst()
+                .orElse(null);
+
+        if (pacienteEndereco == null) {
+            pacienteEndereco = new PacienteEndereco();
+            pacienteEndereco.setPaciente(paciente);
+            pacienteEndereco.setTenant(tenant);
+            pacienteEndereco.setEndereco(endereco);
+            paciente.addEndereco(pacienteEndereco);
+        }
     }
 }

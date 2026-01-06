@@ -28,15 +28,11 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-/**
- * Implementação do service de consulta de jobs de importação.
- */
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class ImportJobQueryServiceImpl implements ImportJobQueryService {
 
-    // USO EXCLUSIVO API - Queries são operações HTTP, usa pool API
     private final ImportJobApiRepository importJobApiRepository;
     private final ImportJobErrorRepository importJobErrorRepository;
     private final ImportJobMapper importJobMapper;
@@ -117,7 +113,6 @@ public class ImportJobQueryServiceImpl implements ImportJobQueryService {
         log.debug("Listando erros do job: {} para tenant: {}, página: {}, tamanho: {}",
                 jobId, tenantId, pageable.getPageNumber(), pageable.getPageSize());
 
-        // Verifica se o job existe e pertence ao tenant
         importJobApiRepository.findByIdAndTenant_Id(jobId, tenantId)
                 .orElseThrow(() -> new NotFoundException("Job de importação não encontrado com ID: " + jobId));
 
@@ -135,7 +130,6 @@ public class ImportJobQueryServiceImpl implements ImportJobQueryService {
     public long contarErrosPorJob(UUID jobId, UUID tenantId) {
         log.debug("Contando erros do job: {} para tenant: {}", jobId, tenantId);
 
-        // Verifica se o job existe e pertence ao tenant
         importJobApiRepository.findByIdAndTenant_Id(jobId, tenantId)
                 .orElseThrow(() -> new NotFoundException("Job de importação não encontrado com ID: " + jobId));
 
@@ -154,15 +148,13 @@ public class ImportJobQueryServiceImpl implements ImportJobQueryService {
             throw new BadRequestException("Apenas jobs com status ERRO podem ser reprocessados. Status atual: " + job.getStatus());
         }
 
-        // Valida que o arquivo ainda existe no storage
         if (!StringUtils.hasText(job.getStorageBucket()) || !StringUtils.hasText(job.getStoragePath())) {
             throw new BadRequestException("Job não possui informações de storage válidas. Não é possível reprocessar.");
         }
 
-        // Reseta o job para ENFILEIRADO
         job.setStatus(ImportJobStatusEnum.ENFILEIRADO);
-        job.setAttempts(0); // Reseta tentativas
-        job.setNextRunAt(OffsetDateTime.now()); // Processa imediatamente
+        job.setAttempts(0); 
+        job.setNextRunAt(OffsetDateTime.now()); 
         job.setLockedAt(null);
         job.setLockedBy(null);
         job.setHeartbeatAt(null);
@@ -195,7 +187,6 @@ public class ImportJobQueryServiceImpl implements ImportJobQueryService {
         log.info("Reprocessando jobs por tipo e competência - tipo: {}, competência: {}/{}, tenant: {}",
                 tipo, competenciaAno, competenciaMes, tenantId);
 
-        // Validações
         if (tipo == null) {
             throw new BadRequestException("Tipo do job é obrigatório");
         }
@@ -203,8 +194,6 @@ public class ImportJobQueryServiceImpl implements ImportJobQueryService {
             throw new BadRequestException("Competência (ano e mês) é obrigatória");
         }
 
-        // Busca todos os jobs com ERRO do tipo e competência especificados
-        // Ordena por prioridade DESC (maior primeiro) e depois por createdAt ASC
         List<ImportJob> jobsComErro = importJobApiRepository
                 .findByTenant_IdAndTipoAndCompetenciaAnoAndCompetenciaMesAndStatusOrderByPriorityDescCreatedAtAsc(
                         tenantId,
@@ -227,19 +216,17 @@ public class ImportJobQueryServiceImpl implements ImportJobQueryService {
             log.info("  {}. {} - prioridade: {}", i + 1, job.getOriginalFilename(), job.getPriority());
         }
 
-        // Reprocessa cada job na ordem correta
         OffsetDateTime now = OffsetDateTime.now();
         List<ImportJobResponse> jobsReprocessados = new ArrayList<>();
 
         for (ImportJob job : jobsComErro) {
-            // Valida que o arquivo ainda existe no storage
+
             if (!StringUtils.hasText(job.getStorageBucket()) || !StringUtils.hasText(job.getStoragePath())) {
                 log.warn("Job {} não possui informações de storage válidas. Pulando reprocessamento.",
                         job.getId());
                 continue;
             }
 
-            // Reseta o job para ENFILEIRADO (mesma lógica do reprocessarJob individual)
             job.setStatus(ImportJobStatusEnum.ENFILEIRADO);
             job.setAttempts(0);
             job.setNextRunAt(now);
@@ -270,4 +257,3 @@ public class ImportJobQueryServiceImpl implements ImportJobQueryService {
         return jobsReprocessados;
     }
 }
-

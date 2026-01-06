@@ -438,14 +438,12 @@ public class SigtapController {
             Pageable pageable) {
         log.debug("REQUEST GET /v1/sigtap/subgrupos - q: {}, grupoCodigo: {}, subgrupoCodigo: {}, competencia: {}, pageable: {}", q, grupoCodigo, subgrupoCodigo, competencia, pageable);
         try {
-            // Se tiver grupoCodigo e subgrupoCodigo, retornar formas de organização
             if (grupoCodigo != null && !grupoCodigo.isBlank() && 
                 subgrupoCodigo != null && !subgrupoCodigo.isBlank()) {
                 Page<SigtapFormaOrganizacaoResponse> response = sigtapConsultaService.pesquisarFormasOrganizacao(q, grupoCodigo, subgrupoCodigo, competencia, pageable);
                 return ResponseEntity.ok(response);
             }
             
-            // Caso contrário, retornar subgrupos
             Page<SigtapSubgrupoResponse> response = sigtapConsultaService.pesquisarSubgrupos(q, grupoCodigo, subgrupoCodigo, competencia, pageable);
             return ResponseEntity.ok(response);
         } catch (Exception ex) {

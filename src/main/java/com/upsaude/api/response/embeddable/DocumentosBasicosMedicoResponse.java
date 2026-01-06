@@ -17,4 +17,3 @@ public class DocumentosBasicosMedicoResponse {
     private String orgaoEmissorRg;
     private String ufEmissorRg;
 }
-

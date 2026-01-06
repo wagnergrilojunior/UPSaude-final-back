@@ -36,13 +36,13 @@ public class PacienteContatoServiceImpl implements PacienteContatoService {
         tenantService.validarTenantAtual();
         PacienteContato existente = repository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Contato não encontrado"));
-        
+
         existente.setTipo(contato.getTipo());
         existente.setNome(contato.getNome());
         existente.setEmail(contato.getEmail());
         existente.setCelular(contato.getCelular());
         existente.setTelefone(contato.getTelefone());
-        
+
         return repository.save(existente);
     }
 
@@ -69,4 +69,3 @@ public class PacienteContatoServiceImpl implements PacienteContatoService {
         return repository.findByPacienteIdAndActiveTrue(pacienteId);
     }
 }
-

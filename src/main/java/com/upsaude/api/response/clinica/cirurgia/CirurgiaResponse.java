@@ -6,7 +6,6 @@ import com.upsaude.api.response.profissional.ProfissionaisSaudeResponse;
 import com.upsaude.api.response.paciente.PacienteResponse;
 import com.upsaude.api.response.convenio.ConvenioResponse;
 
-
 import com.upsaude.enums.StatusCirurgiaEnum;
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;

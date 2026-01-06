@@ -174,4 +174,3 @@ public class ConfiguracaoEstabelecimentoServiceImpl implements ConfiguracaoEstab
         }
     }
 }
-

@@ -11,7 +11,7 @@ import lombok.extern.slf4j.Slf4j;
 public class IntegracaoGovDomainService {
 
     public void aplicarDefaults(IntegracaoGov entity) {
-        // sem regras adicionais por enquanto
+
     }
 
     public void validarPodeInativar(IntegracaoGov entity) {
@@ -23,6 +23,6 @@ public class IntegracaoGovDomainService {
 
     public void validarPodeDeletar(IntegracaoGov entity) {
         log.debug("Validando se integração gov pode ser deletada. ID: {}", entity.getId());
-        // Adicione aqui qualquer lógica de validação antes de um hard delete.
+
     }
 }

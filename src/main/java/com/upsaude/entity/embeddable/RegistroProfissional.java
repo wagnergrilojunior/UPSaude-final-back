@@ -35,4 +35,3 @@ public class RegistroProfissional {
     @Column(name = "status_registro")
     private StatusAtivoEnum statusRegistro;
 }
-

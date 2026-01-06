@@ -36,4 +36,3 @@ public class ProntuarioTimelineResponse {
         private UUID dispensacaoId;
     }
 }
-

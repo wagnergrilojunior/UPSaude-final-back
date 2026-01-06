@@ -36,4 +36,3 @@ public class CirurgiaCreator {
         return saved;
     }
 }
-

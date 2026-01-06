@@ -29,4 +29,3 @@ public class DadosSociodemograficosTenantEnforcer {
         return validarAcesso(id, tenantId);
     }
 }
-

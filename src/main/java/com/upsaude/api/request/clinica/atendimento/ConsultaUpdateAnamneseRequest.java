@@ -23,4 +23,3 @@ public class ConsultaUpdateAnamneseRequest {
     @Schema(description = "Dados de anamnese", required = true)
     private AnamneseConsultaRequest anamnese;
 }
-

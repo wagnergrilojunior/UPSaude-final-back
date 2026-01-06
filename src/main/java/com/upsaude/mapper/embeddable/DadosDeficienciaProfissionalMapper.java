@@ -13,4 +13,3 @@ public interface DadosDeficienciaProfissionalMapper {
     DadosDeficienciaProfissionalResponse toResponse(DadosDeficienciaProfissional entity);
     void updateFromRequest(DadosDeficienciaProfissionalRequest request, @MappingTarget DadosDeficienciaProfissional entity);
 }
-

@@ -23,4 +23,3 @@ public class ResponsavelLegalResponseBuilder {
         return mapper.toResponse(entity);
     }
 }
-

@@ -13,4 +13,3 @@ public interface InformacoesConvenioPacienteMapper {
     InformacoesConvenioPacienteResponse toResponse(InformacoesConvenioPaciente entity);
     void updateFromRequest(InformacoesConvenioPacienteRequest request, @MappingTarget InformacoesConvenioPaciente entity);
 }
-

@@ -38,4 +38,3 @@ public class DepartamentosCreator {
         return saved;
     }
 }
-

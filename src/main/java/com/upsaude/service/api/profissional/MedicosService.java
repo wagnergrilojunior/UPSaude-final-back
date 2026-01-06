@@ -23,10 +23,9 @@ public interface MedicosService {
 
     void inativar(UUID id);
 
-    // Especialidades
     List<EspecialidadeResponse> listarEspecialidades(UUID medicoId);
-    
+
     EspecialidadeResponse adicionarEspecialidade(UUID medicoId, String codigoCbo);
-    
+
     void removerEspecialidade(UUID medicoId, String codigoCbo);
 }

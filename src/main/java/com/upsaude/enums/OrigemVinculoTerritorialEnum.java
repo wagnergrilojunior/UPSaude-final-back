@@ -42,4 +42,3 @@ public enum OrigemVinculoTerritorialEnum {
                 .orElse(null);
     }
 }
-

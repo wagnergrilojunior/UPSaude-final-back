@@ -19,4 +19,3 @@ public class DadosPessoaisBasicosProfissionalResponse {
     private LocalDate dataNascimento;
     private SexoEnum sexo;
 }
-

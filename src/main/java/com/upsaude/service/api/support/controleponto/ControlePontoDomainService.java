@@ -18,7 +18,6 @@ public class ControlePontoDomainService {
 
     public void validarPodeDeletar(ControlePonto entity) {
         log.debug("Validando se controle de ponto pode ser deletado. ID: {}", entity.getId());
-        // Adicione aqui qualquer lógica de validação antes de um hard delete.
+
     }
 }
-

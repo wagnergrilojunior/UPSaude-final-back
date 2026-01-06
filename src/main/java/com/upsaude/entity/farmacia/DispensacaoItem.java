@@ -58,4 +58,3 @@ public class DispensacaoItem extends BaseEntity {
     @Column(name = "observacoes", columnDefinition = "TEXT")
     private String observacoes;
 }
-

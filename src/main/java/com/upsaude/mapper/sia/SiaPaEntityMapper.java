@@ -7,30 +7,17 @@ import org.springframework.stereotype.Component;
 import java.math.BigDecimal;
 import java.util.Map;
 
-/**
- * Mapper para converter campos do CSV do SIA-SUS PA em entidade SiaPa.
- */
 @Slf4j
 @Component
 public class SiaPaEntityMapper {
 
-    /**
-     * Mapeia os campos do CSV para a entidade SiaPa.
-     * 
-     * @param fields Map com os campos parseados do CSV
-     * @param competencia Competência no formato AAAAMM
-     * @param uf UF (unidade federativa)
-     * @return Entidade SiaPa mapeada
-     */
     public SiaPa mapToSiaPa(Map<String, String> fields, String competencia, String uf) {
         SiaPa siaPa = new SiaPa();
 
-        // Competência e controle
         siaPa.setCompetencia(competencia != null ? competencia : limparString(fields.get("PA_CMP")));
         siaPa.setUf(uf);
         siaPa.setMesMovimentacao(limparString(fields.get("PA_MVM")));
 
-        // Estabelecimento
         siaPa.setCodigoCnes(limparString(fields.get("PA_CODUNI")));
         siaPa.setMunicipioUfmunCodigo(limparString(fields.get("PA_UFMUN")));
         siaPa.setMunicipioGestaoCodigo(limparString(fields.get("PA_GESTAO")));
@@ -49,32 +36,25 @@ public class SiaPaEntityMapper {
         siaPa.setServicoContratualizado(limparString(fields.get("PA_SRV_C")));
         siaPa.setCodigoIne(limparString(fields.get("PA_INE")));
 
-        // Procedimento
         siaPa.setProcedimentoCodigo(limparString(fields.get("PA_PROC_ID")));
         siaPa.setNivelComplexidade(limparString(fields.get("PA_NIVCPL")));
         siaPa.setIndicador(limparString(fields.get("PA_INDICA")));
 
-        // Financiamento
         siaPa.setTipoFinanciamento(limparString(fields.get("PA_TPFIN")));
         siaPa.setSubfinanciamento(limparString(fields.get("PA_SUBFIN")));
 
-        // Documentação e autorização
         siaPa.setDocumentoOrigem(limparString(fields.get("PA_DOCORIG")));
         siaPa.setNumeroAutorizacao(limparString(fields.get("PA_AUTORIZ")));
 
-        // Profissional
         siaPa.setCnsProfissional(limparString(fields.get("PA_CNSMED")));
         siaPa.setCboCodigo(limparString(fields.get("PA_CBOCOD")));
 
-        // CID (Diagnóstico)
         siaPa.setCidPrincipalCodigo(limparString(fields.get("PA_CIDPRI")));
         siaPa.setCidSecundarioCodigo(limparString(fields.get("PA_CIDSEC")));
         siaPa.setCidCausaCodigo(limparString(fields.get("PA_CIDCAS")));
 
-        // Atendimento
         siaPa.setCaraterAtendimento(limparString(fields.get("PA_CATEND")));
 
-        // Usuário/Paciente
         siaPa.setIdade(parseInteger(fields.get("PA_IDADE")));
         siaPa.setIdadeMinima(parseInteger(fields.get("IDADEMIN")));
         siaPa.setIdadeMaxima(parseInteger(fields.get("IDADEMAX")));
@@ -84,7 +64,6 @@ public class SiaPaEntityMapper {
         siaPa.setEtnia(limparString(fields.get("PA_ETNIA")));
         siaPa.setMunicipioPacienteCodigo(limparString(fields.get("PA_MUNPCN")));
 
-        // Controle de fluxo/status
         siaPa.setMotivoSaida(limparString(fields.get("PA_MOTSAI")));
         siaPa.setFlagObito(limparString(fields.get("PA_OBITO")));
         siaPa.setFlagEncerramento(limparString(fields.get("PA_ENCERR")));
@@ -92,13 +71,11 @@ public class SiaPaEntityMapper {
         siaPa.setFlagAlta(limparString(fields.get("PA_ALTA")));
         siaPa.setFlagTransferencia(limparString(fields.get("PA_TRANSF")));
 
-        // Produção e quantidades
         siaPa.setQuantidadeProduzida(parseInteger(fields.get("PA_QTDPRO")));
         siaPa.setQuantidadeAprovada(parseInteger(fields.get("PA_QTDAPR")));
         siaPa.setFlagQuantidade(limparString(fields.get("PA_FLQT")));
         siaPa.setFlagErro(limparString(fields.get("PA_FLER")));
 
-        // Valores financeiros
         siaPa.setValorProduzido(parseBigDecimal(fields.get("PA_VALPRO")));
         siaPa.setValorAprovado(parseBigDecimal(fields.get("PA_VALAPR")));
         siaPa.setValorCofinanciado(parseBigDecimal(fields.get("PA_VL_CF")));
@@ -107,7 +84,6 @@ public class SiaPaEntityMapper {
         siaPa.setValorTotalVpa(parseBigDecimal(fields.get("NU_VPA_TOT")));
         siaPa.setTotalPa(parseBigDecimal(fields.get("NU_PA_TOT")));
 
-        // Diferenças
         siaPa.setUfDiferente(limparString(fields.get("PA_UFDIF")));
         siaPa.setMunicipioDiferente(limparString(fields.get("PA_MNDIF")));
         siaPa.setDiferencaValor(parseBigDecimal(fields.get("PA_DIF_VAL")));
@@ -115,11 +91,6 @@ public class SiaPaEntityMapper {
         return siaPa;
     }
 
-    // ========== MÉTODOS AUXILIARES ==========
-
-    /**
-     * Limpa e normaliza strings.
-     */
     private String limparString(String valor) {
         if (valor == null) {
             return null;
@@ -128,10 +99,6 @@ public class SiaPaEntityMapper {
         return limpo.isEmpty() ? null : limpo;
     }
 
-    /**
-     * Converte String para Integer.
-     * Trata valores vazios, nulos e valores especiais.
-     */
     private Integer parseInteger(String valor) {
         if (valor == null || valor.trim().isEmpty()) {
             return null;
@@ -145,10 +112,6 @@ public class SiaPaEntityMapper {
         }
     }
 
-    /**
-     * Converte String para BigDecimal.
-     * Valores monetários já vêm com casas decimais no CSV.
-     */
     private BigDecimal parseBigDecimal(String valor) {
         if (valor == null || valor.trim().isEmpty()) {
             return null;
@@ -156,13 +119,12 @@ public class SiaPaEntityMapper {
         try {
             String valorLimpo = valor.trim();
             BigDecimal bd = new BigDecimal(valorLimpo);
-            
-            // Validação de valores muito grandes
+
             if (bd.abs().compareTo(new BigDecimal("999999999999")) > 0) {
                 log.debug("Valor BigDecimal suspeito (muito grande): {}", valor);
                 return null;
             }
-            
+
             return bd;
         } catch (NumberFormatException e) {
             log.debug("Erro ao converter para BigDecimal: {}", valor);
@@ -173,4 +135,3 @@ public class SiaPaEntityMapper {
         }
     }
 }
-

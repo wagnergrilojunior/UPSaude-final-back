@@ -285,4 +285,3 @@ public class CirurgiaServiceImpl implements CirurgiaService {
         return tenant;
     }
 }
-

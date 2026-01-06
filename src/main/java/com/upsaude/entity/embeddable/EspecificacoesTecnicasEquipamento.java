@@ -52,4 +52,3 @@ public class EspecificacoesTecnicasEquipamento {
     @Column(name = "tipo_alimentacao", length = 100)
     private String tipoAlimentacao;
 }
-

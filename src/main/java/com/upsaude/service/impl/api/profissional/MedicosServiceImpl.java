@@ -18,7 +18,6 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-
 import com.upsaude.cache.CacheKeyUtil;
 import com.upsaude.api.request.profissional.MedicosRequest;
 import com.upsaude.api.response.profissional.EspecialidadeResponse;
@@ -127,25 +126,25 @@ public class MedicosServiceImpl implements MedicosService {
         Sort adjustedSort = pageable.getSort().stream()
                 .map(order -> {
                     String property = order.getProperty();
-                    // Mapear campos que estão dentro de dadosPessoaisBasicos
+
                     if ("nomeCompleto".equals(property) || "nomeSocial".equals(property) || 
                         "dataNascimento".equals(property) || "sexo".equals(property)) {
                         property = "dadosPessoaisBasicos." + property;
                     }
-                    // Mapear campos que estão dentro de documentosBasicos
+
                     else if ("cpf".equals(property) || "rg".equals(property)) {
                         property = "documentosBasicos." + property;
                     }
-                    // Mapear campos que estão dentro de registroProfissional
+
                     else if ("crm".equals(property) || "crmUf".equals(property)) {
                         property = "registroProfissional." + property;
                     }
-                    // Mapear campos que estão dentro de contato
+
                     else if ("telefone".equals(property) || "celular".equals(property) ||
                             "email".equals(property) || "site".equals(property)) {
                         property = "contato." + property;
                     }
-                    // Mapear campos que estão dentro de dadosDemograficos
+
                     else if ("estadoCivil".equals(property) || "escolaridade".equals(property) ||
                             "nacionalidade".equals(property) || "naturalidade".equals(property)) {
                         property = "dadosDemograficos." + property;
@@ -238,7 +237,7 @@ public class MedicosServiceImpl implements MedicosService {
         }
         UUID tenantId = tenantService.validarTenantAtual();
         Medicos medico = tenantEnforcer.validarAcessoCompleto(medicoId, tenantId);
-        
+
         return medico.getEspecialidades().stream()
                 .map(especialidadeMapper::toResponse)
                 .collect(Collectors.toList());
@@ -254,24 +253,23 @@ public class MedicosServiceImpl implements MedicosService {
         if (codigoCbo == null || codigoCbo.isBlank()) {
             throw new BadRequestException("Código CBO é obrigatório");
         }
-        
+
         UUID tenantId = tenantService.validarTenantAtual();
         Medicos medico = tenantEnforcer.validarAcessoCompleto(medicoId, tenantId);
-        
+
         SigtapOcupacao especialidade = cboRepository.findByCodigoOficial(codigoCbo.trim())
                 .orElseThrow(() -> new NotFoundException("CBO não encontrado: " + codigoCbo));
-        
-        // Verificar se já existe
+
         boolean jaExiste = medico.getEspecialidades().stream()
                 .anyMatch(esp -> esp.getCodigoOficial().equals(codigoCbo.trim()));
-        
+
         if (jaExiste) {
             throw new ConflictException("Especialidade já está associada ao médico");
         }
-        
+
         medico.addEspecialidade(especialidade);
         medicosRepository.save(medico);
-        
+
         log.info("Especialidade {} adicionada ao médico {}", codigoCbo, medicoId);
         return especialidadeMapper.toResponse(especialidade);
     }
@@ -286,18 +284,18 @@ public class MedicosServiceImpl implements MedicosService {
         if (codigoCbo == null || codigoCbo.isBlank()) {
             throw new BadRequestException("Código CBO é obrigatório");
         }
-        
+
         UUID tenantId = tenantService.validarTenantAtual();
         Medicos medico = tenantEnforcer.validarAcessoCompleto(medicoId, tenantId);
-        
+
         SigtapOcupacao especialidade = medico.getEspecialidades().stream()
                 .filter(esp -> esp.getCodigoOficial().equals(codigoCbo.trim()))
                 .findFirst()
                 .orElseThrow(() -> new NotFoundException("Especialidade não encontrada para o médico"));
-        
+
         medico.removeEspecialidade(especialidade);
         medicosRepository.save(medico);
-        
+
         log.info("Especialidade {} removida do médico {}", codigoCbo, medicoId);
     }
 }

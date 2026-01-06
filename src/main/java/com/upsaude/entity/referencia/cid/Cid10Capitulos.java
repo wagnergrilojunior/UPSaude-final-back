@@ -41,4 +41,3 @@ public class Cid10Capitulos extends BaseEntityWithoutTenant {
     @Column(name = "descricao_abreviada", columnDefinition = "TEXT")
     private String descricaoAbreviada;
 }
-

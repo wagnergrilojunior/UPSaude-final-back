@@ -46,8 +46,7 @@ public class SigtapConsultaServiceImpl implements SigtapConsultaService {
     private final SigtapTussRepository tussRepository;
     private final SigtapCboRepository cboRepository;
     private final SigtapModalidadeRepository modalidadeRepository;
-    
-    // Repositórios de relacionamento
+
     private final SigtapProcedimentoCidRepository procedimentoCidRepository;
     private final SigtapProcedimentoOcupacaoRepository procedimentoOcupacaoRepository;
     private final SigtapProcedimentoLeitoRepository procedimentoLeitoRepository;
@@ -75,8 +74,7 @@ public class SigtapConsultaServiceImpl implements SigtapConsultaService {
     private final SigtapTussMapper tussMapper;
     private final SigtapCboMapper cboMapper;
     private final SigtapModalidadeMapper modalidadeMapper;
-    
-    // Mappers de detalhe
+
     private final SigtapProcedimentoDetalheCidMapper procedimentoDetalheCidMapper;
     private final SigtapProcedimentoDetalheCboMapper procedimentoDetalheCboMapper;
     private final SigtapProcedimentoDetalheLeitoMapper procedimentoDetalheLeitoMapper;
@@ -106,28 +104,22 @@ public class SigtapConsultaServiceImpl implements SigtapConsultaService {
         }
         Specification<SigtapProcedimento> spec = Specification.where(null);
 
-        // Filtrar por hierarquia: grupo -> subgrupo -> forma de organização
-        // O código oficial do procedimento SIGTAP tem a estrutura:
-        // - Primeiros 2 dígitos: código do grupo
-        // - Próximos 2 dígitos: código do subgrupo
-        // - Próximos 2 dígitos: código da forma de organização
-        // - Resto: código específico do procedimento
         if (grupoCodigo != null && !grupoCodigo.isBlank()) {
             String grupoCod = grupoCodigo.trim();
-            // Garantir que o código do grupo tenha 2 dígitos
+
             if (grupoCod.length() == 1) {
                 grupoCod = "0" + grupoCod;
             }
-            
+
             if (subgrupoCodigo != null && !subgrupoCodigo.isBlank()) {
-                // Filtrar por grupo + subgrupo
+
                 String subgrupoCod = subgrupoCodigo.trim();
                 if (subgrupoCod.length() == 1) {
                     subgrupoCod = "0" + subgrupoCod;
                 }
-                
+
                 if (formaOrganizacaoCodigo != null && !formaOrganizacaoCodigo.isBlank()) {
-                    // Filtrar por grupo + subgrupo + forma de organização (primeiros 6 dígitos)
+
                     String formaOrgCod = formaOrganizacaoCodigo.trim();
                     if (formaOrgCod.length() == 1) {
                         formaOrgCod = "0" + formaOrgCod;
@@ -137,14 +129,14 @@ public class SigtapConsultaServiceImpl implements SigtapConsultaService {
                         cb.like(root.get("codigoOficial"), prefixo + "%")
                     );
                 } else {
-                    // Filtrar por grupo + subgrupo (primeiros 4 dígitos)
+
                     final String prefixo = grupoCod + subgrupoCod;
                     spec = spec.and((root, query, cb) -> 
                         cb.like(root.get("codigoOficial"), prefixo + "%")
                     );
                 }
             } else {
-                // Filtrar apenas por grupo (primeiros 2 dígitos)
+
                 final String prefixo = grupoCod;
                 spec = spec.and((root, query, cb) -> 
                     cb.like(root.get("codigoOficial"), prefixo + "%")
@@ -175,12 +167,11 @@ public class SigtapConsultaServiceImpl implements SigtapConsultaService {
 
         Page<SigtapProcedimento> page = procedimentoRepository.findAll(spec, pageable);
         Page<SigtapProcedimentoResponse> responsePage = page.map(procedimentoMapper::toResponse);
-        
-        // Enriquecer responses com dados faltantes a partir do código oficial
+
         responsePage.getContent().forEach(response -> {
             enrichResponseFromCodigoOficial(response);
         });
-        
+
         return responsePage;
     }
 
@@ -213,8 +204,7 @@ public class SigtapConsultaServiceImpl implements SigtapConsultaService {
         );
         SigtapProcedimento procedimento = page.getContent().stream().findFirst()
                 .orElseThrow(() -> new NotFoundException("Procedimento SIGTAP não encontrado: " + codigoProcedimento));
-        
-        // #region agent log
+
         try {
             String logEntry = String.format("{\"timestamp\":%d,\"location\":\"SigtapConsultaServiceImpl.java:207\",\"message\":\"Procedimento encontrado\",\"data\":{\"codigoProcedimento\":\"%s\",\"procedimentoId\":\"%s\",\"nome\":\"%s\",\"competenciaInicial\":\"%s\"},\"sessionId\":\"debug-session\",\"runId\":\"run1\",\"hypothesisId\":\"A\"}\n", 
                 System.currentTimeMillis(), codigoProcedimento, procedimento.getId(), 
@@ -225,30 +215,23 @@ public class SigtapConsultaServiceImpl implements SigtapConsultaService {
         } catch (Exception e) {
             log.error("Erro ao escrever log de debug", e);
         }
-        // #endregion
 
-        // Criar resposta
         SigtapProcedimentoDetalhadoResponse resp = new SigtapProcedimentoDetalhadoResponse();
-        
-        // Popular procedimento e campos de hierarquia
+
         SigtapProcedimentoResponse procedimentoResponse = procedimentoMapper.toResponse(procedimento);
         enrichResponseFromCodigoOficial(procedimentoResponse);
         resp.setProcedimento(procedimentoResponse);
-        
-        // #region agent log
+
         try {
             String logEntry = String.format("{\"timestamp\":%d,\"location\":\"SigtapConsultaServiceImpl.java:218\",\"message\":\"Buscando procedimento detalhado\",\"data\":{\"codigoProcedimento\":\"%s\",\"procedimentoId\":\"%s\",\"competencia\":\"%s\"},\"sessionId\":\"debug-session\",\"runId\":\"run1\",\"hypothesisId\":\"A\"}\n", 
                 System.currentTimeMillis(), codigoProcedimento, procedimento.getId(), competencia);
             Files.write(Paths.get("/Users/wagnergrilo/Desktop/WGB/sistemas/UPSaude/code/UPSaude-back/.cursor/debug.log"), 
                 logEntry.getBytes(), StandardOpenOption.CREATE, StandardOpenOption.APPEND);
         } catch (Exception e) {}
-        // #endregion
-        
-        // Buscar detalhes da tabela JSONB
+
         SigtapProcedimentoDetalhe detalheEntity = procedimentoDetalheRepository.findByProcedimentoId(procedimento.getId())
                 .orElse(null);
-        
-        // #region agent log
+
         try {
             String logEntry = String.format("{\"timestamp\":%d,\"location\":\"SigtapConsultaServiceImpl.java:225\",\"message\":\"DetalheEntity encontrado\",\"data\":{\"detalheEntity\":%s,\"descricaoCompleta\":\"%s\"},\"sessionId\":\"debug-session\",\"runId\":\"run1\",\"hypothesisId\":\"A\"}\n", 
                 System.currentTimeMillis(), detalheEntity != null ? "true" : "false", 
@@ -256,8 +239,7 @@ public class SigtapConsultaServiceImpl implements SigtapConsultaService {
             Files.write(Paths.get("/Users/wagnergrilo/Desktop/WGB/sistemas/UPSaude/code/UPSaude-back/.cursor/debug.log"), 
                 logEntry.getBytes(), StandardOpenOption.CREATE, StandardOpenOption.APPEND);
         } catch (Exception e) {}
-        // #endregion
-        
+
         SigtapProcedimentoDetalheResponse detalheResponse = null;
         if (detalheEntity != null) {
             detalheResponse = procedimentoDetalheMapper.toResponse(detalheEntity);
@@ -265,8 +247,7 @@ public class SigtapConsultaServiceImpl implements SigtapConsultaService {
             detalheResponse = new SigtapProcedimentoDetalheResponse();
             detalheResponse.setProcedimentoId(procedimento.getId());
         }
-        
-        // Filtrar por competência se informada
+
         final String compFiltro;
         if (competencia != null && !competencia.isBlank()) {
             String comp = competencia.replaceAll("[^0-9]", "");
@@ -278,14 +259,12 @@ public class SigtapConsultaServiceImpl implements SigtapConsultaService {
         } else {
             compFiltro = null;
         }
-        
-        // Buscar dados das tabelas de relacionamento
+
         UUID procedimentoId = procedimento.getId();
-        
-        // Buscar descrição da tabela SigtapDescricao se não estiver preenchida
+
         if (detalheResponse.getDescricaoCompleta() == null || detalheResponse.getDescricaoCompleta().isBlank()) {
             List<SigtapDescricao> descricoes = descricaoRepository.findByProcedimentoId(procedimento.getId());
-            // #region agent log
+
             try {
                 String logEntry = String.format("{\"timestamp\":%d,\"location\":\"SigtapConsultaServiceImpl.java:280\",\"message\":\"Descricoes encontradas\",\"data\":{\"count\":%d,\"temDescricao\":%s},\"sessionId\":\"debug-session\",\"runId\":\"run1\",\"hypothesisId\":\"B\"}\n", 
                     System.currentTimeMillis(), descricoes.size(), !descricoes.isEmpty() ? "true" : "false");
@@ -294,10 +273,9 @@ public class SigtapConsultaServiceImpl implements SigtapConsultaService {
             } catch (Exception e) {
                 log.error("Erro ao escrever log de debug - descricoes", e);
             }
-            // #endregion
-            
+
             if (!descricoes.isEmpty()) {
-                // Filtrar por competência se informada, senão pegar a mais recente
+
                 SigtapDescricao descricaoSelecionada;
                 if (compFiltro != null) {
                     final String comp = compFiltro;
@@ -311,7 +289,7 @@ public class SigtapConsultaServiceImpl implements SigtapConsultaService {
                         .findFirst()
                         .orElse(null);
                 } else {
-                    // Pegar a mais recente (maior competenciaInicial)
+
                     descricaoSelecionada = descricoes.stream()
                         .max((a, b) -> {
                             String compA = a.getCompetenciaInicial() != null ? a.getCompetenciaInicial() : "";
@@ -320,10 +298,10 @@ public class SigtapConsultaServiceImpl implements SigtapConsultaService {
                         })
                         .orElse(null);
                 }
-                
+
                 if (descricaoSelecionada != null && descricaoSelecionada.getDescricaoCompleta() != null) {
                     detalheResponse.setDescricaoCompleta(descricaoSelecionada.getDescricaoCompleta());
-                    // #region agent log
+
                     try {
                         String logEntry = String.format("{\"timestamp\":%d,\"location\":\"SigtapConsultaServiceImpl.java:305\",\"message\":\"Descricao preenchida\",\"data\":{\"descricaoLength\":%d},\"sessionId\":\"debug-session\",\"runId\":\"run1\",\"hypothesisId\":\"B\"}\n", 
                             System.currentTimeMillis(), descricaoSelecionada.getDescricaoCompleta().length());
@@ -332,14 +310,13 @@ public class SigtapConsultaServiceImpl implements SigtapConsultaService {
                     } catch (Exception e) {
                         log.error("Erro ao escrever log de debug - descricao preenchida", e);
                     }
-                    // #endregion
+
                 }
             }
         }
-        
-        // Modalidades
+
         List<SigtapProcedimentoModalidade> procedimentosModalidade = procedimentoModalidadeRepository.findByProcedimentoId(procedimentoId);
-        // #region agent log
+
         try {
             String logEntry = String.format("{\"timestamp\":%d,\"location\":\"SigtapConsultaServiceImpl.java:295\",\"message\":\"Modalidades encontradas\",\"data\":{\"count\":%d,\"modalidades\":%s},\"sessionId\":\"debug-session\",\"runId\":\"run1\",\"hypothesisId\":\"C\"}\n", 
                 System.currentTimeMillis(), procedimentosModalidade.size(), 
@@ -349,8 +326,7 @@ public class SigtapConsultaServiceImpl implements SigtapConsultaService {
         } catch (Exception e) {
             log.error("Erro ao escrever log de debug - modalidades", e);
         }
-        // #endregion
-        
+
         if (compFiltro != null) {
             final String comp = compFiltro;
             procedimentosModalidade = procedimentosModalidade.stream()
@@ -365,8 +341,7 @@ public class SigtapConsultaServiceImpl implements SigtapConsultaService {
         detalheResponse.setListaModalidades(procedimentosModalidade.stream()
                 .map(procedimentoDetalheModalidadeMapper::toResponse)
                 .toList());
-        
-        // CIDs
+
         List<SigtapProcedimentoCid> procedimentosCid = procedimentoCidRepository.findByProcedimentoId(procedimentoId);
         if (compFiltro != null) {
             final String comp = compFiltro;
@@ -382,8 +357,7 @@ public class SigtapConsultaServiceImpl implements SigtapConsultaService {
         detalheResponse.setListaCids(procedimentosCid.stream()
                 .map(procedimentoDetalheCidMapper::toResponse)
                 .toList());
-        
-        // CBOs
+
         List<SigtapProcedimentoOcupacao> procedimentosOcupacao = procedimentoOcupacaoRepository.findByProcedimentoId(procedimentoId);
         if (compFiltro != null) {
             final String comp = compFiltro;
@@ -399,8 +373,7 @@ public class SigtapConsultaServiceImpl implements SigtapConsultaService {
         detalheResponse.setListaCbos(procedimentosOcupacao.stream()
                 .map(procedimentoDetalheCboMapper::toResponse)
                 .toList());
-        
-        // Leitos
+
         List<SigtapProcedimentoLeito> procedimentosLeito = procedimentoLeitoRepository.findByProcedimentoId(procedimentoId);
         if (compFiltro != null) {
             final String comp = compFiltro;
@@ -416,8 +389,7 @@ public class SigtapConsultaServiceImpl implements SigtapConsultaService {
         detalheResponse.setListaLeitos(procedimentosLeito.stream()
                 .map(procedimentoDetalheLeitoMapper::toResponse)
                 .toList());
-        
-        // Serviços/Classificações
+
         List<SigtapProcedimentoServico> procedimentosServico = procedimentoServicoRepository.findByProcedimentoId(procedimentoId);
         if (compFiltro != null) {
             final String comp = compFiltro;
@@ -433,8 +405,7 @@ public class SigtapConsultaServiceImpl implements SigtapConsultaService {
         detalheResponse.setListaServicosClassificacoes(procedimentosServico.stream()
                 .map(procedimentoDetalheServicoMapper::toResponse)
                 .toList());
-        
-        // Habilitações
+
         List<SigtapProcedimentoHabilitacao> procedimentosHabilitacao = procedimentoHabilitacaoRepository.findByProcedimentoId(procedimentoId);
         if (compFiltro != null) {
             final String comp = compFiltro;
@@ -450,21 +421,19 @@ public class SigtapConsultaServiceImpl implements SigtapConsultaService {
         detalheResponse.setListaHabilitacoes(procedimentosHabilitacao.stream()
                 .map(procedimentoDetalheHabilitacaoMapper::toResponse)
                 .toList());
-        
-        // Componentes de Rede
+
         List<SigtapProcedimentoComponenteRede> procedimentosComponenteRede = procedimentoComponenteRedeRepository.findByProcedimentoId(procedimentoId);
         detalheResponse.setListaRedes(procedimentosComponenteRede.stream()
                 .map(procedimentoDetalheRedeMapper::toResponse)
                 .toList());
-        
-        // Origens SIGTAP
+
         List<SigtapProcedimentoOrigem> procedimentosOrigem = procedimentoOrigemRepository.findByProcedimentoId(procedimentoId);
         log.debug("Origens SIGTAP encontradas antes dos filtros: {}", procedimentosOrigem.size());
         if (compFiltro != null) {
             final String comp = compFiltro;
             procedimentosOrigem = procedimentosOrigem.stream()
                     .filter(po -> {
-                        // Considerar ativo se for null ou true
+
                         Boolean ativo = po.getActive();
                         if (ativo != null && !ativo) return false;
                         if (po.getCompetenciaInicial() == null) return false;
@@ -474,7 +443,7 @@ public class SigtapConsultaServiceImpl implements SigtapConsultaService {
                     })
                     .toList();
         } else {
-            // Sem filtro de competência, apenas filtrar por ativo
+
             procedimentosOrigem = procedimentosOrigem.stream()
                     .filter(po -> {
                         Boolean ativo = po.getActive();
@@ -486,15 +455,14 @@ public class SigtapConsultaServiceImpl implements SigtapConsultaService {
         List<SigtapProcedimentoDetalheOrigemResponse> origensSigtap = procedimentosOrigem.stream()
                 .map(procedimentoDetalheOrigemMapper::toResponse)
                 .toList();
-        
-        // Origens SIA/SIH
+
         List<SigtapProcedimentoSiaSih> procedimentosSiaSih = procedimentoSiaSihRepository.findByProcedimentoId(procedimentoId);
         log.debug("Origens SIA/SIH encontradas antes dos filtros: {}", procedimentosSiaSih.size());
         if (compFiltro != null) {
             final String comp = compFiltro;
             procedimentosSiaSih = procedimentosSiaSih.stream()
                     .filter(ps -> {
-                        // Considerar ativo se for null ou true
+
                         Boolean ativo = ps.getActive();
                         if (ativo != null && !ativo) return false;
                         if (ps.getCompetenciaInicial() == null) return false;
@@ -504,7 +472,7 @@ public class SigtapConsultaServiceImpl implements SigtapConsultaService {
                     })
                     .toList();
         } else {
-            // Sem filtro de competência, apenas filtrar por ativo
+
             procedimentosSiaSih = procedimentosSiaSih.stream()
                     .filter(ps -> {
                         Boolean ativo = ps.getActive();
@@ -516,40 +484,34 @@ public class SigtapConsultaServiceImpl implements SigtapConsultaService {
         List<SigtapProcedimentoDetalheOrigemResponse> origensSiaSih = procedimentosSiaSih.stream()
                 .map(procedimentoDetalheSiaSihMapper::toResponse)
                 .toList();
-        
-        // Combinar origens SIGTAP e SIA/SIH
+
         List<SigtapProcedimentoDetalheOrigemResponse> todasOrigens = new ArrayList<>();
         todasOrigens.addAll(origensSigtap);
         todasOrigens.addAll(origensSiaSih);
         detalheResponse.setListaOrigens(todasOrigens);
-        
-        // Regras Condicionadas
+
         List<SigtapProcedimentoRegraCondicionada> procedimentosRegraCondicionada = procedimentoRegraCondicionadaRepository.findByProcedimentoId(procedimentoId);
         detalheResponse.setListaRegrasCondicionadas(procedimentosRegraCondicionada.stream()
                 .map(procedimentoDetalheRegraCondicionadaMapper::toResponse)
                 .toList());
-        
-        // #region agent log
+
         try {
             String logEntry = String.format("{\"timestamp\":%d,\"location\":\"SigtapConsultaServiceImpl.java:410\",\"message\":\"Buscando RENASES\",\"data\":{\"procedimentoId\":\"%s\"},\"sessionId\":\"debug-session\",\"runId\":\"run1\",\"hypothesisId\":\"D\"}\n", 
                 System.currentTimeMillis(), procedimentoId);
             Files.write(Paths.get("/Users/wagnergrilo/Desktop/WGB/sistemas/UPSaude/code/UPSaude-back/.cursor/debug.log"), 
                 logEntry.getBytes(), StandardOpenOption.CREATE, StandardOpenOption.APPEND);
         } catch (Exception e) {}
-        // #endregion
-        
-        // RENASES
+
         List<SigtapProcedimentoRenases> procedimentosRenases = procedimentoRenasesRepository.findByProcedimentoId(procedimentoId);
         log.debug("RENASES encontrados antes dos filtros: {}", procedimentosRenases.size());
-        
-        // #region agent log
+
         try {
             String logEntry = String.format("{\"timestamp\":%d,\"location\":\"SigtapConsultaServiceImpl.java:417\",\"message\":\"RENASES encontrados\",\"data\":{\"count\":%d,\"renases\":%s},\"sessionId\":\"debug-session\",\"runId\":\"run1\",\"hypothesisId\":\"D\"}\n", 
                 System.currentTimeMillis(), procedimentosRenases.size(), procedimentosRenases.stream().map(r -> r.getRenases() != null ? r.getRenases().getCodigoOficial() : "null").toList());
             Files.write(Paths.get("/Users/wagnergrilo/Desktop/WGB/sistemas/UPSaude/code/UPSaude-back/.cursor/debug.log"), 
                 logEntry.getBytes(), StandardOpenOption.CREATE, StandardOpenOption.APPEND);
         } catch (Exception e) {}
-        // #endregion
+
         procedimentosRenases = procedimentosRenases.stream()
                 .filter(pr -> {
                     Boolean ativo = pr.getActive();
@@ -560,14 +522,12 @@ public class SigtapConsultaServiceImpl implements SigtapConsultaService {
         detalheResponse.setListaRenases(procedimentosRenases.stream()
                 .map(procedimentoDetalheRenasesMapper::toResponse)
                 .toList());
-        
-        // TUSS
+
         List<SigtapProcedimentoTuss> procedimentosTuss = procedimentoTussRepository.findByProcedimentoId(procedimentoId);
         detalheResponse.setListaTuss(procedimentosTuss.stream()
                 .map(procedimentoDetalheTussMapper::toResponse)
                 .toList());
-        
-        // Instrumentos de Registro
+
         List<SigtapProcedimentoRegistro> procedimentosRegistro = procedimentoRegistroRepository.findByProcedimentoId(procedimentoId);
         if (compFiltro != null) {
             final String comp = compFiltro;
@@ -583,7 +543,7 @@ public class SigtapConsultaServiceImpl implements SigtapConsultaService {
         detalheResponse.setListaRegistros(procedimentosRegistro.stream()
                 .map(procedimentoDetalheRegistroMapper::toResponse)
                 .toList());
-        
+
         resp.setDetalhe(detalheResponse);
         return resp;
     }
@@ -682,37 +642,34 @@ public class SigtapConsultaServiceImpl implements SigtapConsultaService {
         if (pageable == null) {
             pageable = PageRequest.of(0, 20);
         }
-        
-        // Se temos grupoCodigo, usar método customizado com JOIN FETCH para evitar LazyInitializationException
+
         if (grupoCodigo != null && !grupoCodigo.isBlank()) {
             List<SigtapSubgrupo> all;
-            
-            // Se temos subgrupoCodigo também, filtrar por grupo + subgrupo
+
             if (subgrupoCodigo != null && !subgrupoCodigo.isBlank()) {
                 if (q != null && !q.isBlank()) {
-                    // Buscar com filtro grupo + subgrupo + q
+
                     all = subgrupoRepository.findByGrupoCodigoOficialAndSubgrupoCodigoWithQ(
                             grupoCodigo.trim(), 
                             subgrupoCodigo.trim(), 
                             q.trim().toLowerCase(Locale.ROOT));
                 } else {
-                    // Buscar apenas por grupo + subgrupo
+
                     all = subgrupoRepository.findByGrupoCodigoOficialAndSubgrupoCodigoWithGrupo(
                             grupoCodigo.trim(), 
                             subgrupoCodigo.trim());
                 }
             } else {
-                // Apenas grupoCodigo - buscar todos os subgrupos do grupo
+
                 if (q != null && !q.isBlank()) {
-                    // Buscar com filtro q
+
                     all = subgrupoRepository.findByGrupoCodigoOficialWithQ(grupoCodigo.trim(), q.trim().toLowerCase(Locale.ROOT));
                 } else {
-                    // Buscar todos do grupo
+
                     all = subgrupoRepository.findByGrupoCodigoOficialWithGrupo(grupoCodigo.trim());
                 }
             }
-            
-            // Aplicar filtro de competência se necessário
+
             if (competencia != null && !competencia.isBlank()) {
                 String comp = competencia.replaceAll("[^0-9]", "");
                 if (comp.matches("\\d{6}")) {
@@ -726,16 +683,14 @@ public class SigtapConsultaServiceImpl implements SigtapConsultaService {
                             .toList();
                 }
             }
-            
-            // Aplicar paginação manualmente
+
             int start = (int) pageable.getOffset();
             int end = Math.min((start + pageable.getPageSize()), all.size());
             List<SigtapSubgrupo> pageContent = start < all.size() ? all.subList(start, end) : List.of();
             Page<SigtapSubgrupo> page = new PageImpl<>(pageContent, pageable, all.size());
             return page.map(subgrupoMapper::toResponse);
         }
-        
-        // Para outros casos, usar Specification normal (sem grupoCodigo)
+
         Specification<SigtapSubgrupo> spec = Specification.where(null);
 
         if (q != null && !q.isBlank()) {
@@ -788,15 +743,13 @@ public class SigtapConsultaServiceImpl implements SigtapConsultaService {
         if (pageable == null) {
             pageable = PageRequest.of(0, 20);
         }
-        
-        // Usar métodos com JOIN FETCH quando temos filtros de grupo/subgrupo para evitar LazyInitializationException
+
         if (grupoCodigo != null && !grupoCodigo.isBlank() && 
             subgrupoCodigo != null && !subgrupoCodigo.isBlank()) {
-            // Filtrar por grupo + subgrupo
+
             List<SigtapFormaOrganizacao> all = formaOrganizacaoRepository.findByGrupoCodigoAndSubgrupoCodigoWithRelationships(
                     grupoCodigo.trim(), subgrupoCodigo.trim());
-            
-            // Aplicar filtro de busca (q) se necessário
+
             if (q != null && !q.isBlank()) {
                 String searchTerm = q.trim().toLowerCase(Locale.ROOT);
                 all = all.stream()
@@ -804,8 +757,7 @@ public class SigtapConsultaServiceImpl implements SigtapConsultaService {
                                      (fo.getNome() != null && fo.getNome().toLowerCase(Locale.ROOT).contains(searchTerm)))
                         .toList();
             }
-            
-            // Aplicar filtro de competência se necessário
+
             if (competencia != null && !competencia.isBlank()) {
                 String comp = competencia.replaceAll("[^0-9]", "");
                 if (comp.matches("\\d{6}")) {
@@ -819,18 +771,16 @@ public class SigtapConsultaServiceImpl implements SigtapConsultaService {
                             .toList();
                 }
             }
-            
-            // Aplicar paginação manualmente
+
             int start = (int) pageable.getOffset();
             int end = Math.min((start + pageable.getPageSize()), all.size());
             List<SigtapFormaOrganizacao> pageContent = start < all.size() ? all.subList(start, end) : List.of();
             Page<SigtapFormaOrganizacao> page = new PageImpl<>(pageContent, pageable, all.size());
             return page.map(formaOrganizacaoMapper::toResponse);
         } else if (subgrupoCodigo != null && !subgrupoCodigo.isBlank()) {
-            // Filtrar apenas por subgrupo
+
             List<SigtapFormaOrganizacao> all = formaOrganizacaoRepository.findBySubgrupoCodigoWithRelationships(subgrupoCodigo.trim());
-            
-            // Aplicar filtro de busca (q) se necessário
+
             if (q != null && !q.isBlank()) {
                 String searchTerm = q.trim().toLowerCase(Locale.ROOT);
                 all = all.stream()
@@ -838,8 +788,7 @@ public class SigtapConsultaServiceImpl implements SigtapConsultaService {
                                      (fo.getNome() != null && fo.getNome().toLowerCase(Locale.ROOT).contains(searchTerm)))
                         .toList();
             }
-            
-            // Aplicar filtro de competência se necessário
+
             if (competencia != null && !competencia.isBlank()) {
                 String comp = competencia.replaceAll("[^0-9]", "");
                 if (comp.matches("\\d{6}")) {
@@ -853,18 +802,16 @@ public class SigtapConsultaServiceImpl implements SigtapConsultaService {
                             .toList();
                 }
             }
-            
-            // Aplicar paginação manualmente
+
             int start = (int) pageable.getOffset();
             int end = Math.min((start + pageable.getPageSize()), all.size());
             List<SigtapFormaOrganizacao> pageContent = start < all.size() ? all.subList(start, end) : List.of();
             Page<SigtapFormaOrganizacao> page = new PageImpl<>(pageContent, pageable, all.size());
             return page.map(formaOrganizacaoMapper::toResponse);
         } else if (grupoCodigo != null && !grupoCodigo.isBlank()) {
-            // Filtrar apenas por grupo
+
             List<SigtapFormaOrganizacao> all = formaOrganizacaoRepository.findByGrupoCodigoWithRelationships(grupoCodigo.trim());
-            
-            // Aplicar filtro de busca (q) se necessário
+
             if (q != null && !q.isBlank()) {
                 String searchTerm = q.trim().toLowerCase(Locale.ROOT);
                 all = all.stream()
@@ -872,8 +819,7 @@ public class SigtapConsultaServiceImpl implements SigtapConsultaService {
                                      (fo.getNome() != null && fo.getNome().toLowerCase(Locale.ROOT).contains(searchTerm)))
                         .toList();
             }
-            
-            // Aplicar filtro de competência se necessário
+
             if (competencia != null && !competencia.isBlank()) {
                 String comp = competencia.replaceAll("[^0-9]", "");
                 if (comp.matches("\\d{6}")) {
@@ -887,16 +833,14 @@ public class SigtapConsultaServiceImpl implements SigtapConsultaService {
                             .toList();
                 }
             }
-            
-            // Aplicar paginação manualmente
+
             int start = (int) pageable.getOffset();
             int end = Math.min((start + pageable.getPageSize()), all.size());
             List<SigtapFormaOrganizacao> pageContent = start < all.size() ? all.subList(start, end) : List.of();
             Page<SigtapFormaOrganizacao> page = new PageImpl<>(pageContent, pageable, all.size());
             return page.map(formaOrganizacaoMapper::toResponse);
         }
-        
-        // Para outros casos, usar Specification normal (sem filtros de grupo/subgrupo)
+
         Specification<SigtapFormaOrganizacao> spec = Specification.where(null);
 
         if (q != null && !q.isBlank()) {
@@ -921,8 +865,7 @@ public class SigtapConsultaServiceImpl implements SigtapConsultaService {
         }
 
         Page<SigtapFormaOrganizacao> page = formaOrganizacaoRepository.findAll(spec, pageable);
-        // Para casos sem filtros de relacionamento, precisamos carregar os relacionamentos manualmente
-        // ou usar EntityGraph. Por enquanto, vamos tentar mapear e ver se funciona.
+
         return page.map(formaOrganizacaoMapper::toResponse);
     }
 
@@ -1034,13 +977,11 @@ public class SigtapConsultaServiceImpl implements SigtapConsultaService {
         if (pageable == null) {
             pageable = PageRequest.of(0, 20);
         }
-        
-        // Valida e mapeia campos de ordenação
+
         pageable = validarEMapearPageable(pageable);
-        
+
         Specification<SigtapOcupacao> spec = Specification.where(null);
 
-        // Filtro por grupo
         if (grupo != null && !grupo.isBlank()) {
             GrupoCboEnum grupoEnum = GrupoCboEnum.fromCodigo(grupo).orElse(null);
             if (grupoEnum != null) {
@@ -1054,7 +995,6 @@ public class SigtapConsultaServiceImpl implements SigtapConsultaService {
             }
         }
 
-        // Filtro de busca livre
         if (q != null && !q.isBlank()) {
             String like = "%" + q.trim().toLowerCase(Locale.ROOT) + "%";
             spec = spec.and((root, query, cb) -> cb.or(
@@ -1066,40 +1006,39 @@ public class SigtapConsultaServiceImpl implements SigtapConsultaService {
         Page<SigtapOcupacao> page = cboRepository.findAll(spec, pageable);
         return page.map(cboMapper::toResponse);
     }
-    
+
     @SuppressWarnings("null")
     private Pageable validarEMapearPageable(Pageable pageable) {
         if (pageable == null || pageable.getSort().isUnsorted()) {
             return pageable;
         }
-        
+
         List<Sort.Order> orders = new ArrayList<>();
         for (Sort.Order order : pageable.getSort()) {
             String property = order.getProperty();
             String mappedProperty = mapearCampoOrdenacao(property);
-            
+
             if (mappedProperty != null) {
                 orders.add(new Sort.Order(order.getDirection(), mappedProperty));
             } else {
                 log.warn("Campo de ordenação inválido ignorado: {}", property);
             }
         }
-        
+
         if (orders.isEmpty()) {
             return PageRequest.of(pageable.getPageNumber(), pageable.getPageSize());
         }
-        
+
         return PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), Sort.by(orders));
     }
-    
+
     private String mapearCampoOrdenacao(String campo) {
         if (campo == null) {
             return null;
         }
-        
+
         String campoLower = campo.toLowerCase();
-        
-        // Mapeia campos comuns para os campos reais da entidade
+
         switch (campoLower) {
             case "codigo":
             case "codigoficial":
@@ -1109,7 +1048,7 @@ public class SigtapConsultaServiceImpl implements SigtapConsultaService {
             case "descricao":
                 return "nome";
             default:
-                // Se o campo já é válido (codigoOficial ou nome), retorna como está
+
                 if (campo.equals("codigoOficial") || campo.equals("nome")) {
                     return campo;
                 }
@@ -1134,7 +1073,7 @@ public class SigtapConsultaServiceImpl implements SigtapConsultaService {
                     Long totalCbo = grupo.getPrefixos().stream()
                             .mapToLong(prefixo -> cboRepository.countByPrefixo(prefixo))
                             .sum();
-                    
+
                     return SigtapGrupoCboResponse.builder()
                             .codigo(grupo.getCodigo())
                             .nome(grupo.getNome())
@@ -1150,11 +1089,11 @@ public class SigtapConsultaServiceImpl implements SigtapConsultaService {
     public SigtapGrupoCboResponse obterGrupoCboPorCodigo(String codigoGrupo) {
         GrupoCboEnum grupo = GrupoCboEnum.fromCodigo(codigoGrupo)
                 .orElseThrow(() -> new NotFoundException("Grupo CBO não encontrado: " + codigoGrupo));
-        
+
         Long totalCbo = grupo.getPrefixos().stream()
                 .mapToLong(prefixo -> cboRepository.countByPrefixo(prefixo))
                 .sum();
-        
+
         return SigtapGrupoCboResponse.builder()
                 .codigo(grupo.getCodigo())
                 .nome(grupo.getNome())
@@ -1168,17 +1107,15 @@ public class SigtapConsultaServiceImpl implements SigtapConsultaService {
     public Page<SigtapCboResponse> pesquisarCboPorGrupo(String codigoGrupo, String q, Pageable pageable) {
         GrupoCboEnum grupo = GrupoCboEnum.fromCodigo(codigoGrupo)
                 .orElseThrow(() -> new NotFoundException("Grupo CBO não encontrado: " + codigoGrupo));
-        
+
         if (pageable == null) {
             pageable = PageRequest.of(0, 20);
         }
-        
-        // Valida e mapeia campos de ordenação
+
         pageable = validarEMapearPageable(pageable);
-        
+
         Specification<SigtapOcupacao> spec = Specification.where(null);
-        
-        // Filtro por grupo (obrigatório neste endpoint)
+
         spec = spec.and((root, query, cb) -> {
             List<Predicate> predicates = new ArrayList<>();
             for (String prefixo : grupo.getPrefixos()) {
@@ -1186,8 +1123,7 @@ public class SigtapConsultaServiceImpl implements SigtapConsultaService {
             }
             return cb.or(predicates.toArray(new Predicate[0]));
         });
-        
-        // Filtro de busca livre (opcional)
+
         if (q != null && !q.isBlank()) {
             String like = "%" + q.trim().toLowerCase(Locale.ROOT) + "%";
             spec = spec.and((root, query, cb) -> cb.or(
@@ -1195,7 +1131,7 @@ public class SigtapConsultaServiceImpl implements SigtapConsultaService {
                     cb.like(cb.lower(root.get("nome")), like)
             ));
         }
-        
+
         Page<SigtapOcupacao> page = cboRepository.findAll(spec, pageable);
         return page.map(cboMapper::toResponse);
     }
@@ -1262,32 +1198,21 @@ public class SigtapConsultaServiceImpl implements SigtapConsultaService {
         return modalidadeMapper.toResponse(modalidade);
     }
 
-    /**
-     * Enriquece o response com dados faltantes extraídos do código oficial.
-     * O código oficial do procedimento SIGTAP tem a estrutura:
-     * - Primeiros 2 dígitos: código do grupo
-     * - Próximos 2 dígitos: código do subgrupo
-     * - Próximos 2 dígitos: código da forma de organização
-     * - Resto: código específico do procedimento
-     */
     private void enrichResponseFromCodigoOficial(SigtapProcedimentoResponse response) {
         if (response == null || response.getCodigoOficial() == null || response.getCodigoOficial().length() < 4) {
             return;
         }
 
         String codigoOficial = response.getCodigoOficial();
-        
-        // Se já tem os dados, não precisa buscar
+
         if (response.getGrupoCodigo() != null && response.getSubgrupoCodigo() != null) {
             return;
         }
 
-        // Extrair códigos do código oficial
         String grupoCodigo = codigoOficial.length() >= 2 ? codigoOficial.substring(0, 2) : null;
         String subgrupoCodigo = codigoOficial.length() >= 4 ? codigoOficial.substring(2, 4) : null;
         String formaOrganizacaoCodigo = codigoOficial.length() >= 6 ? codigoOficial.substring(4, 6) : null;
 
-        // Buscar e preencher grupo se faltar
         if (grupoCodigo != null && (response.getGrupoCodigo() == null || response.getGrupoNome() == null)) {
             grupoRepository.findByCodigoOficial(grupoCodigo)
                     .ifPresent(grupo -> {
@@ -1296,7 +1221,6 @@ public class SigtapConsultaServiceImpl implements SigtapConsultaService {
                     });
         }
 
-        // Buscar e preencher subgrupo se faltar (usando método com JOIN FETCH)
         if (grupoCodigo != null && subgrupoCodigo != null && 
             (response.getSubgrupoCodigo() == null || response.getSubgrupoNome() == null)) {
             List<SigtapSubgrupo> subgrupos = subgrupoRepository.findByGrupoCodigoOficialAndSubgrupoCodigoWithGrupo(grupoCodigo, subgrupoCodigo);
@@ -1304,7 +1228,7 @@ public class SigtapConsultaServiceImpl implements SigtapConsultaService {
                 SigtapSubgrupo subgrupo = subgrupos.get(0);
                 response.setSubgrupoCodigo(subgrupo.getCodigoOficial());
                 response.setSubgrupoNome(subgrupo.getNome());
-                // Garantir que grupo também está preenchido
+
                 if (subgrupo.getGrupo() != null) {
                     response.setGrupoCodigo(subgrupo.getGrupo().getCodigoOficial());
                     response.setGrupoNome(subgrupo.getGrupo().getNome());
@@ -1312,29 +1236,28 @@ public class SigtapConsultaServiceImpl implements SigtapConsultaService {
             }
         }
 
-        // Buscar e preencher forma de organização se faltar
         if (grupoCodigo != null && subgrupoCodigo != null && formaOrganizacaoCodigo != null &&
             (response.getFormaOrganizacaoCodigo() == null || response.getFormaOrganizacaoNome() == null)) {
-            // Usar lista porque pode haver múltiplas competências, pegar a mais recente
+
             List<SigtapFormaOrganizacao> formasOrg = formaOrganizacaoRepository.findBySubgrupoCodigoOficialAndCodigoOficialIn(subgrupoCodigo, List.of(formaOrganizacaoCodigo));
             if (!formasOrg.isEmpty()) {
-                // Ordenar por competência inicial (mais recente primeiro) e pegar a primeira
+
                 SigtapFormaOrganizacao formaOrg = formasOrg.stream()
                         .sorted((a, b) -> {
                             String compA = a.getCompetenciaInicial() != null ? a.getCompetenciaInicial() : "";
                             String compB = b.getCompetenciaInicial() != null ? b.getCompetenciaInicial() : "";
-                            return compB.compareTo(compA); // Ordem decrescente (mais recente primeiro)
+                            return compB.compareTo(compA); 
                         })
                         .findFirst()
                         .orElse(formasOrg.get(0));
-                
+
                 response.setFormaOrganizacaoCodigo(formaOrg.getCodigoOficial());
                 response.setFormaOrganizacaoNome(formaOrg.getNome());
-                // Se subgrupo ainda não foi preenchido, buscar agora
+
                 if (response.getSubgrupoCodigo() == null && formaOrg.getSubgrupo() != null) {
                     response.setSubgrupoCodigo(formaOrg.getSubgrupo().getCodigoOficial());
                     response.setSubgrupoNome(formaOrg.getSubgrupo().getNome());
-                    // Se grupo ainda não foi preenchido, buscar agora
+
                     if (response.getGrupoCodigo() == null && formaOrg.getSubgrupo().getGrupo() != null) {
                         response.setGrupoCodigo(formaOrg.getSubgrupo().getGrupo().getCodigoOficial());
                         response.setGrupoNome(formaOrg.getSubgrupo().getGrupo().getNome());
@@ -1344,4 +1267,3 @@ public class SigtapConsultaServiceImpl implements SigtapConsultaService {
         }
     }
 }
-

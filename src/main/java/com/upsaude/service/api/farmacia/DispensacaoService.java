@@ -16,4 +16,3 @@ public interface DispensacaoService {
 
     Page<DispensacaoResponse> listarDispensacoes(UUID farmaciaId, Pageable pageable);
 }
-

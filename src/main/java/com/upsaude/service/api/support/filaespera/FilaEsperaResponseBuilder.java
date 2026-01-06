@@ -24,4 +24,3 @@ public class FilaEsperaResponseBuilder {
         return mapper.toResponse(entity);
     }
 }
-

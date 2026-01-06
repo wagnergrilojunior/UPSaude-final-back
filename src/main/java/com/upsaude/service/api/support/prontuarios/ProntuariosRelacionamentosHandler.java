@@ -28,4 +28,3 @@ public class ProntuariosRelacionamentosHandler {
         entity.setTenant(Objects.requireNonNull(tenant, "tenant é obrigatório"));
     }
 }
-

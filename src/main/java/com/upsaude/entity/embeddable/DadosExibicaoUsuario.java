@@ -20,4 +20,3 @@ public class DadosExibicaoUsuario {
     @Column(name = "foto_url", columnDefinition = "TEXT")
     private String fotoUrl;
 }
-

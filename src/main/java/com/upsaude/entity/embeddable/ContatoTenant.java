@@ -23,4 +23,3 @@ public class ContatoTenant {
     @Column(name = "site", length = 255)
     private String site;
 }
-

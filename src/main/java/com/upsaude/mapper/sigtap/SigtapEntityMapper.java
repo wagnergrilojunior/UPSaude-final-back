@@ -143,8 +143,6 @@ public class SigtapEntityMapper {
         this.rubricaRepository = rubricaRepository;
     }
 
-    // ========== M?TODOS AUXILIARES ==========
-
     private Integer parseIdade(String valor) {
         Integer idade = parser.parseInteger(valor);
         if (idade != null && idade == IDADE_NAO_APLICA) {
@@ -153,11 +151,6 @@ public class SigtapEntityMapper {
         return idade;
     }
 
-    // ========== CACHES (reduz lookup por linha) ==========
-    /**
-     * IMPORTANTE: este mapper é singleton. Caches sem limite podem crescer indefinidamente em jobs grandes.
-     * Estratégia mínima: impor limite e limpar quando exceder (evita consumo de heap não controlado).
-     */
     @Value("${sigtap.import.mapper-cache-max-size:20000}")
     private int mapperCacheMaxSize;
 
@@ -230,8 +223,6 @@ public class SigtapEntityMapper {
         );
     }
 
-    // ========== MAPEAMENTOS DE TABELAS PRINCIPAIS ==========
-
     public SigtapGrupo mapToGrupo(Map<String, String> fields, String competencia) {
         SigtapGrupo grupo = new SigtapGrupo();
         grupo.setCodigoOficial(fields.get("CO_GRUPO"));
@@ -271,7 +262,6 @@ public class SigtapEntityMapper {
         procedimento.setNome(limparString(fields.get("NO_PROCEDIMENTO")));
         procedimento.setCompetenciaInicial(fields.getOrDefault("DT_COMPETENCIA", competencia));
 
-        // Campos de procedimento
         procedimento.setTipoComplexidade(fields.get("TP_COMPLEXIDADE"));
         procedimento.setSexoPermitido(fields.get("TP_SEXO"));
         procedimento.setIdadeMinima(parseIdade(fields.get("VL_IDADE_MINIMA")));
@@ -281,7 +271,6 @@ public class SigtapEntityMapper {
         procedimento.setLimiteMaximo(parser.parseInteger(fields.get("QT_MAXIMA_EXECUCAO")));
         procedimento.setPontos(parser.parseInteger(fields.get("QT_PONTOS")));
 
-        // Buscar e mapear financiamento
         String codigoFinanciamento = fields.get("CO_FINANCIAMENTO");
         if (codigoFinanciamento != null && !codigoFinanciamento.isBlank()) {
             financiamentoRepository.findByCodigoOficialAndCompetenciaInicial(
@@ -289,7 +278,6 @@ public class SigtapEntityMapper {
                     .ifPresent(procedimento::setFinanciamento);
         }
 
-        // Buscar e mapear rubrica
         String codigoRubrica = fields.get("CO_RUBRICA");
         if (codigoRubrica != null && !codigoRubrica.isBlank()) {
             rubricaRepository.findByCodigoOficialAndCompetenciaInicial(
@@ -297,20 +285,12 @@ public class SigtapEntityMapper {
                     .ifPresent(procedimento::setRubrica);
         }
 
-        // Valores monet?rios (assumindo que est?o em centavos, dividir por 100)
         procedimento.setValorServicoHospitalar(parser.parseBigDecimal(fields.get("VL_SH"), true));
         procedimento.setValorServicoAmbulatorial(parser.parseBigDecimal(fields.get("VL_SA"), true));
         procedimento.setValorServicoProfissional(parser.parseBigDecimal(fields.get("VL_SP"), true));
 
-        // Nota: O arquivo tb_procedimento.txt não contém CO_GRUPO, CO_SUB_GRUPO, CO_FORMA_ORGANIZACAO
-        // A relação com forma de organização é determinada pela estrutura hierárquica do código do procedimento
-        // A forma de organização é estabelecida através dos relacionamentos nas tabelas de subgrupo e forma_organizacao
-
         return procedimento;
     }
-
-    // ========== MAPEAMENTOS DE TABELAS DE REFER?NCIA ==========
-
 
     public SigtapOcupacao mapToOcupacao(Map<String, String> fields) {
         SigtapOcupacao ocupacao = new SigtapOcupacao();
@@ -419,8 +399,7 @@ public class SigtapEntityMapper {
         SigtapComponenteRede componente = new SigtapComponenteRede();
         componente.setCodigoOficial(fields.get("CO_COMPONENTE_REDE"));
         componente.setNome(limparString(fields.get("NO_COMPONENTE_REDE")));
-        // Nota: O campo CO_REDE_ATENCAO existe no arquivo mas não é armazenado diretamente na entidade
-        // O relacionamento entre componente e rede é feito através de outras tabelas relacionais
+
         return componente;
     }
 
@@ -471,8 +450,6 @@ public class SigtapEntityMapper {
         descricaoDetalhe.setCompetenciaInicial(fields.getOrDefault("DT_COMPETENCIA", competencia));
         return descricaoDetalhe;
     }
-
-    // ========== MAPEAMENTOS DE TABELAS RELACIONAIS ==========
 
     public SigtapProcedimentoCid mapToProcedimentoCid(Map<String, String> fields, String competencia) {
         String codigoProcedimento = fields.get("CO_PROCEDIMENTO");
@@ -592,13 +569,13 @@ public class SigtapEntityMapper {
     public SigtapProcedimentoOrigem mapToProcedimentoOrigem(Map<String, String> fields, String competencia) {
         String codigoProcedimento = fields.get("CO_PROCEDIMENTO");
         String codigoProcedimentoOrigem = fields.get("CO_PROCEDIMENTO_ORIGEM");
-        
+
         java.util.Optional<SigtapProcedimento> optProcedimento = procedimentoRepository.findByCodigoOficial(codigoProcedimento);
         if (optProcedimento.isEmpty()) {
             log.warn("Procedimento não encontrado ao mapear Origem: {} (Origem: {})", codigoProcedimento, codigoProcedimentoOrigem);
             return null;
         }
-        
+
         java.util.Optional<SigtapProcedimento> optProcedimentoOrigem = procedimentoRepository.findByCodigoOficial(codigoProcedimentoOrigem);
         if (optProcedimentoOrigem.isEmpty()) {
             log.warn("Procedimento origem não encontrado ao mapear relacionamento: {} (Procedimento: {})", codigoProcedimentoOrigem, codigoProcedimento);
@@ -615,13 +592,13 @@ public class SigtapEntityMapper {
     public SigtapProcedimentoSiaSih mapToProcedimentoSiaSih(Map<String, String> fields, String competencia) {
         String codigoProcedimento = fields.get("CO_PROCEDIMENTO");
         String codigoSiaSih = fields.get("CO_PROCEDIMENTO_SIA_SIH");
-        
+
         java.util.Optional<SigtapProcedimento> optProcedimento = procedimentoRepository.findByCodigoOficial(codigoProcedimento);
         if (optProcedimento.isEmpty()) {
             log.warn("Procedimento não encontrado ao mapear SIA/SIH: {} (SIA/SIH: {})", codigoProcedimento, codigoSiaSih);
             return null;
         }
-        
+
         java.util.Optional<SigtapSiaSih> optSiaSih = siaSihRepository.findByCodigoOficial(codigoSiaSih);
         if (optSiaSih.isEmpty()) {
             log.warn("SIA/SIH não encontrado ao mapear relacionamento: {} (Procedimento: {})", codigoSiaSih, codigoProcedimento);
@@ -639,13 +616,13 @@ public class SigtapEntityMapper {
     public SigtapProcedimentoRegraCondicionada mapToProcedimentoRegraCondicionada(Map<String, String> fields) {
         String codigoProcedimento = fields.get("CO_PROCEDIMENTO");
         String codigoRegra = fields.get("CO_REGRA_CONDICIONADA");
-        
+
         java.util.Optional<SigtapProcedimento> optProcedimento = procedimentoRepository.findByCodigoOficial(codigoProcedimento);
         if (optProcedimento.isEmpty()) {
             log.warn("Procedimento não encontrado ao mapear Regra Condicionada: {} (Regra: {})", codigoProcedimento, codigoRegra);
             return null;
         }
-        
+
         java.util.Optional<SigtapRegraCondicionada> optRegra = regraCondicionadaRepository.findByCodigoOficial(codigoRegra);
         if (optRegra.isEmpty()) {
             log.warn("Regra condicionada não encontrada ao mapear relacionamento: {} (Procedimento: {})", codigoRegra, codigoProcedimento);
@@ -661,13 +638,13 @@ public class SigtapEntityMapper {
     public SigtapProcedimentoRenases mapToProcedimentoRenases(Map<String, String> fields) {
         String codigoProcedimento = fields.get("CO_PROCEDIMENTO");
         String codigoRenases = fields.get("CO_RENASES");
-        
+
         java.util.Optional<SigtapProcedimento> optProcedimento = procedimentoRepository.findByCodigoOficial(codigoProcedimento);
         if (optProcedimento.isEmpty()) {
             log.warn("Procedimento não encontrado ao mapear RENASES: {} (RENASES: {})", codigoProcedimento, codigoRenases);
             return null;
         }
-        
+
         java.util.Optional<SigtapRenases> optRenases = renasesRepository.findByCodigoOficial(codigoRenases);
         if (optRenases.isEmpty()) {
             log.warn("RENASES não encontrado ao mapear relacionamento: {} (Procedimento: {})", codigoRenases, codigoProcedimento);
@@ -683,13 +660,13 @@ public class SigtapEntityMapper {
     public SigtapProcedimentoTuss mapToProcedimentoTuss(Map<String, String> fields) {
         String codigoProcedimento = fields.get("CO_PROCEDIMENTO");
         String codigoTuss = fields.get("CO_TUSS");
-        
+
         java.util.Optional<SigtapProcedimento> optProcedimento = procedimentoRepository.findByCodigoOficial(codigoProcedimento);
         if (optProcedimento.isEmpty()) {
             log.warn("Procedimento não encontrado ao mapear TUSS: {} (TUSS: {})", codigoProcedimento, codigoTuss);
             return null;
         }
-        
+
         java.util.Optional<SigtapTuss> optTuss = tussRepository.findByCodigoOficial(codigoTuss);
         if (optTuss.isEmpty()) {
             log.warn("TUSS não encontrado ao mapear relacionamento: {} (Procedimento: {})", codigoTuss, codigoProcedimento);
@@ -778,8 +755,6 @@ public class SigtapEntityMapper {
         excecao.setCompetenciaInicial(fields.getOrDefault("DT_COMPETENCIA", competencia));
         return excecao;
     }
-
-    // ========== M?TODOS AUXILIARES ==========
 
     private String limparString(String valor) {
         if (valor == null) {

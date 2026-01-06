@@ -24,4 +24,3 @@ public class CirurgiaResponseBuilder {
         return mapper.toResponse(entity);
     }
 }
-

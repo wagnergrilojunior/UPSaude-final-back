@@ -40,4 +40,3 @@ public class DepartamentosUpdater {
         return saved;
     }
 }
-

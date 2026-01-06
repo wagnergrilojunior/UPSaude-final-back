@@ -21,4 +21,3 @@ public class ConfiguracaoUsuarioRequest {
     @Size(max = 50, message = "Tipo vínculo deve ter no máximo 50 caracteres")
     private String tipoVinculo;
 }
-

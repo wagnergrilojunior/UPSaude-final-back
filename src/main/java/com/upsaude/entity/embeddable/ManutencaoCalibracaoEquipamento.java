@@ -29,4 +29,3 @@ public class ManutencaoCalibracaoEquipamento {
     @Column(name = "tipo_manutencao", length = 100)
     private String tipoManutencao;
 }
-

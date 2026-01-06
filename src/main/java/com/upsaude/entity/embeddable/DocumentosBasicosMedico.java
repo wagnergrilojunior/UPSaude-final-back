@@ -26,4 +26,3 @@ public class DocumentosBasicosMedico {
     @Column(name = "uf_emissor_rg", length = 2)
     private String ufEmissorRg;
 }
-

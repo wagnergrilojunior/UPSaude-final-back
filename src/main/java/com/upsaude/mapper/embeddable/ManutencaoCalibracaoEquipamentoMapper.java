@@ -13,4 +13,3 @@ public interface ManutencaoCalibracaoEquipamentoMapper {
     ManutencaoCalibracaoEquipamentoResponse toResponse(ManutencaoCalibracaoEquipamento entity);
     void updateFromRequest(ManutencaoCalibracaoEquipamentoRequest request, @MappingTarget ManutencaoCalibracaoEquipamento entity);
 }
-

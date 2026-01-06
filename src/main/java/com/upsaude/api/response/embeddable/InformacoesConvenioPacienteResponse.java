@@ -17,4 +17,3 @@ public class InformacoesConvenioPacienteResponse {
     private String numeroCarteirinha;
     private LocalDate dataValidadeCarteirinha;
 }
-

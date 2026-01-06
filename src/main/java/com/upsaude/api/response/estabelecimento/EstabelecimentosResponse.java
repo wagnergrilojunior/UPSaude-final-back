@@ -28,29 +28,29 @@ public class EstabelecimentosResponse {
     private OffsetDateTime createdAt;
     private OffsetDateTime updatedAt;
     private Boolean active;
-    
+
     private DadosIdentificacaoEstabelecimentoResponse dadosIdentificacao;
-    
+
     private String registroOficial;
-    
+
     private EnderecoResponse enderecoPrincipal;
-    
+
     private ContatoEstabelecimentoResponse contato;
-    
+
     private ResponsaveisEstabelecimentoResponse responsaveis;
-    
+
     private LicenciamentoEstabelecimentoResponse licenciamento;
-    
+
     private OffsetDateTime dataAbertura;
-    
+
     private OffsetDateTime dataLicenciamento;
-    
+
     private OffsetDateTime dataValidadeLicencaSanitaria;
-    
+
     private InfraestruturaFisicaEstabelecimentoResponse infraestruturaFisica;
-    
+
     private LocalizacaoEstabelecimentoResponse localizacao;
-    
+
     private String observacoes;
 
     @Builder.Default

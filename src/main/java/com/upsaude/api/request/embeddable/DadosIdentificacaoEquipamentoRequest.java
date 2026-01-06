@@ -50,4 +50,3 @@ public class DadosIdentificacaoEquipamentoRequest {
     @Size(max = 50, message = "Classe de risco deve ter no máximo 50 caracteres")
     private String classeRisco;
 }
-

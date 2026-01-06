@@ -13,4 +13,3 @@ public interface ContatoProfissionalMapper {
     ContatoProfissionalResponse toResponse(ContatoProfissional entity);
     void updateFromRequest(ContatoProfissionalRequest request, @MappingTarget ContatoProfissional entity);
 }
-

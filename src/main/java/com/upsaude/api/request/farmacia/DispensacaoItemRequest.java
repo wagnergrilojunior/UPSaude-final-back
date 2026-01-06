@@ -53,4 +53,3 @@ public class DispensacaoItemRequest {
     @Schema(description = "Observações do item")
     private String observacoes;
 }
-

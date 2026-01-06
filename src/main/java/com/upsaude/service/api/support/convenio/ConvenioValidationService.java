@@ -15,9 +15,6 @@ public class ConvenioValidationService {
 
     private final ConvenioRepository repository;
 
-    // Validações de obrigatoriedade removidas - agora são feitas exclusivamente na ConvenioRequest via Bean Validation
-    // Este método foi removido para garantir que todos os erros 400 venham da Request
-
     public void validarUnicidadeParaCriacao(ConvenioRequest request, UUID tenantId) {
         validarCnpjUnico(null, request, tenantId);
     }

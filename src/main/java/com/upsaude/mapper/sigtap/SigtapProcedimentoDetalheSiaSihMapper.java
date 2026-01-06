@@ -8,7 +8,7 @@ import com.upsaude.entity.referencia.sigtap.SigtapProcedimentoSiaSih;
 
 @Mapper(componentModel = "spring")
 public interface SigtapProcedimentoDetalheSiaSihMapper {
-    
+
     @Mapping(target = "tipo", constant = "SIA/SIH")
     @Mapping(target = "tipoProcedimento", source = "tipoProcedimento")
     @Mapping(target = "codigoProcedimentoOrigem", source = "siaSih.codigoOficial")

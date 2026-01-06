@@ -56,7 +56,7 @@ public class Cid10FileImportServiceImpl {
 
     private final Cid10CsvParser csvParser;
     private final Cid10EntityMapper entityMapper;
-    
+
     private final Cid10CapitulosRepository capitulosRepository;
     private final Cid10GruposRepository gruposRepository;
     private final Cid10CategoriasRepository categoriasRepository;
@@ -336,10 +336,10 @@ public class Cid10FileImportServiceImpl {
         try (BufferedReader reader = Files.newBufferedReader(context.arquivoPath, UTF_8)) {
             String linha;
             boolean primeiraLinha = true;
-            
+
             while ((linha = reader.readLine()) != null) {
                 linhasLidas++;
-                
+
                 if (primeiraLinha) {
                     headers = parseHeaders(linha);
                     primeiraLinha = false;
@@ -357,7 +357,7 @@ public class Cid10FileImportServiceImpl {
                     }
 
                     Map<String, String> fields = csvParser.parseLine(linha, headers);
-                    
+
                     if (!validarCamposBasicos(fields, linhasLidas, errosDetalhados)) {
                         linhasComErro++;
                         continue;
@@ -390,7 +390,7 @@ public class Cid10FileImportServiceImpl {
                                 linhasLidas, context.arquivoPath.getFileName(), e);
                         break;
                     }
-                    
+
                     if (entity == null) {
                         linhasComErro++;
                         errosDetalhados.add(String.format("Linha %d: Entidade nula após mapeamento", linhasLidas));
@@ -454,7 +454,7 @@ public class Cid10FileImportServiceImpl {
                     String erroMsg = String.format("Linha %d: %s", linhasLidas, e.getMessage());
                     errosDetalhados.add(erroMsg);
                     log.debug("Erro de validação na linha {}: {}", linhasLidas, e.getMessage());
-                    
+
                     if (errosDetalhados.size() > 100) {
                         errosDetalhados.remove(0);
                     }
@@ -478,17 +478,17 @@ public class Cid10FileImportServiceImpl {
                     errosDetalhados.add(erroMsg);
                     log.warn("Erro ao processar linha {} do arquivo {}: {} (tipo: {})", 
                             linhasLidas, context.arquivoPath.getFileName(), e.getMessage(), e.getClass().getName());
-                    
+
                     if (e instanceof IllegalStateException && e.getMessage() != null && e.getMessage().contains("closed")) {
                         log.error("ERRO CRÍTICO: Contexto Spring fechado detectado. Parando processamento deste arquivo.");
                         break;
                     }
-                    
+
                     if (linhasComErro % 100 == 0) {
                         log.warn("Total de {} erros até agora no arquivo {} (último erro: {})", 
                                 linhasComErro, context.arquivoPath.getFileName(), e.getMessage());
                     }
-                    
+
                     if (errosDetalhados.size() > 100) {
                         errosDetalhados.remove(0);
                     }
@@ -539,11 +539,11 @@ public class Cid10FileImportServiceImpl {
         }
 
         long tempoDecorrido = System.currentTimeMillis() - inicioTempo;
-        
+
         if (linhasComErro > 0) {
             log.warn("Arquivo {} concluído com {} erros: {} linhas processadas, {} erros, tempo: {}ms", 
                     context.arquivoPath.getFileName(), totalLinhas, linhasComErro, tempoDecorrido);
-            
+
             int errosParaLogar = Math.min(10, errosDetalhados.size());
             for (int i = 0; i < errosParaLogar; i++) {
                 log.warn("  Erro {}: {}", i + 1, errosDetalhados.get(i));
@@ -569,12 +569,12 @@ public class Cid10FileImportServiceImpl {
 
     private boolean validarCamposBasicos(Map<String, String> fields, int numeroLinha, List<String> errosDetalhados) {
         boolean temCampos = fields.values().stream().anyMatch(v -> v != null && !v.trim().isEmpty());
-        
+
         if (!temCampos) {
             errosDetalhados.add(String.format("Linha %d: Linha vazia ou sem campos válidos", numeroLinha));
             return false;
         }
-        
+
         return true;
     }
 

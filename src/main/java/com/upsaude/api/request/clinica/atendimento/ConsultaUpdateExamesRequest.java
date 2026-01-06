@@ -23,4 +23,3 @@ public class ConsultaUpdateExamesRequest {
     @Schema(description = "Dados de exames solicitados", required = true)
     private ExamesSolicitadosConsultaRequest exames;
 }
-

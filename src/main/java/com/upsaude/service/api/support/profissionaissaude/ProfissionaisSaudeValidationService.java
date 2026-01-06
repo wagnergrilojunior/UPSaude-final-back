@@ -30,7 +30,7 @@ public class ProfissionaisSaudeValidationService {
         String email = request.getContato() != null ? request.getContato().getEmail() : null;
         String rg = request.getDocumentosBasicos() != null ? request.getDocumentosBasicos().getRg() : null;
         String cns = request.getDocumentosBasicos() != null ? request.getDocumentosBasicos().getCns() : null;
-        
+
         validarCpfUnico(null, cpf, repository, tenantId);
         validarEmailUnico(null, email, repository, tenantId);
         validarRgUnico(null, rg, repository, tenantId);
@@ -42,7 +42,7 @@ public class ProfissionaisSaudeValidationService {
         String email = request.getContato() != null ? request.getContato().getEmail() : null;
         String rg = request.getDocumentosBasicos() != null ? request.getDocumentosBasicos().getRg() : null;
         String cns = request.getDocumentosBasicos() != null ? request.getDocumentosBasicos().getCns() : null;
-        
+
         validarCpfUnico(id, cpf, repository, tenantId);
         validarEmailUnico(id, email, repository, tenantId);
         validarRgUnico(id, rg, repository, tenantId);
@@ -133,5 +133,4 @@ public class ProfissionaisSaudeValidationService {
         }
     }
 
-    // Método validarRegistroProfissionalUnico removido - ConselhosProfissionais foi deletado
 }

@@ -4,7 +4,7 @@ import java.util.Arrays;
 import java.util.Locale;
 
 public enum SistemaIntegracaoEnum {
-    
+
     ESUS_PEC(1, "e-SUS APS PEC"),
     ESUS_HORUS(2, "Hórus"),
     RNDS(3, "RNDS"),
@@ -45,4 +45,3 @@ public enum SistemaIntegracaoEnum {
                 .orElse(null);
     }
 }
-

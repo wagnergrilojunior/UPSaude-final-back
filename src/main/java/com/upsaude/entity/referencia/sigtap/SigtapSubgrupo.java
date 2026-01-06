@@ -12,9 +12,6 @@ import jakarta.persistence.UniqueConstraint;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
-/**
- * Subgrupo SIGTAP (2? n?vel de agrega??o).
- */
 @Entity
 @Table(
         name = "sigtap_subgrupo",
@@ -47,4 +44,3 @@ public class SigtapSubgrupo extends BaseEntityWithoutTenant {
     @Column(name = "competencia_final", length = 6)
     private String competenciaFinal;
 }
-

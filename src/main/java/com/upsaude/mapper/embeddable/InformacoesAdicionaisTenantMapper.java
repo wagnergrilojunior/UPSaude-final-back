@@ -13,4 +13,3 @@ public interface InformacoesAdicionaisTenantMapper {
     InformacoesAdicionaisTenantResponse toResponse(InformacoesAdicionaisTenant entity);
     void updateFromRequest(InformacoesAdicionaisTenantRequest request, @MappingTarget InformacoesAdicionaisTenant entity);
 }
-

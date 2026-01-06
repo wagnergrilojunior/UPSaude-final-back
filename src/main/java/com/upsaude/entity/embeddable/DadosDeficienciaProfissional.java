@@ -25,4 +25,3 @@ public class DadosDeficienciaProfissional {
     @Column(name = "tipo_deficiencia")
     private TipoDeficienciaEnum tipoDeficiencia;
 }
-

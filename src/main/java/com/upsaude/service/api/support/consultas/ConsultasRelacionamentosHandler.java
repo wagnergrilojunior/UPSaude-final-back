@@ -58,9 +58,6 @@ public class ConsultasRelacionamentosHandler {
             entity.setConvenio(null);
         }
 
-
-        // CidPrincipal removido - CidDoencas foi deletado
-
         if (entity.getProfissionalSaude() != null && entity.getProfissionalSaude().getEstabelecimento() != null) {
             entity.setEstabelecimento(entity.getProfissionalSaude().getEstabelecimento());
         } else {

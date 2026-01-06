@@ -42,4 +42,3 @@ public enum TipoContatoEnum {
                 .orElse(null);
     }
 }
-

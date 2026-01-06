@@ -21,4 +21,3 @@ public interface FarmaciaService {
 
     void inativar(UUID id);
 }
-

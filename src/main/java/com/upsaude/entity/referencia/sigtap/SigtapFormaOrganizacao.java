@@ -12,9 +12,6 @@ import jakarta.persistence.UniqueConstraint;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
-/**
- * Forma de Organiza??o SIGTAP (3? n?vel de agrega??o).
- */
 @Entity
 @Table(
         name = "sigtap_forma_organizacao",
@@ -47,4 +44,3 @@ public class SigtapFormaOrganizacao extends BaseEntityWithoutTenant {
     @Column(name = "competencia_final", length = 6)
     private String competenciaFinal;
 }
-

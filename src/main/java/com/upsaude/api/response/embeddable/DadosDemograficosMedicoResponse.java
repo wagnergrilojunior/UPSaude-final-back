@@ -20,4 +20,3 @@ public class DadosDemograficosMedicoResponse {
     private NacionalidadeEnum nacionalidade;
     private String naturalidade;
 }
-

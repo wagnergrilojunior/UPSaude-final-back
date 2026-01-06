@@ -46,4 +46,3 @@ public class ResponsavelLegalCreator {
         return saved;
     }
 }
-

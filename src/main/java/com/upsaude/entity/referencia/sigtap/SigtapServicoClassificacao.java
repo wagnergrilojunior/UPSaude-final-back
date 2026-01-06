@@ -12,9 +12,6 @@ import jakarta.persistence.UniqueConstraint;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
-/**
- * Classifica??o de Servi?o do SIGTAP.
- */
 @Entity
 @Table(
         name = "sigtap_servico_classificacao",

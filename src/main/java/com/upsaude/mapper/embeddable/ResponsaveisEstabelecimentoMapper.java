@@ -19,4 +19,3 @@ public interface ResponsaveisEstabelecimentoMapper {
     @Mapping(target = "responsavelAdministrativo", ignore = true)
     void updateFromRequest(ResponsaveisEstabelecimentoRequest request, @MappingTarget ResponsaveisEstabelecimento entity);
 }
-

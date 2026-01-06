@@ -42,4 +42,3 @@ public enum TipoIdentificadorEnum {
                 .orElse(null);
     }
 }
-

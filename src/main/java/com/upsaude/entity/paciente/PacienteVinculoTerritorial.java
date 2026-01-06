@@ -56,4 +56,3 @@ public class PacienteVinculoTerritorial extends BaseEntity {
     @Column(name = "observacoes", columnDefinition = "TEXT")
     private String observacoes;
 }
-

@@ -22,4 +22,3 @@ public class InformacoesConvenioPacienteRequest {
 
     private LocalDate dataValidadeCarteirinha;
 }
-

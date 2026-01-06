@@ -27,8 +27,7 @@ public class PacienteVinculoTerritorialServiceImpl implements PacienteVinculoTer
     @Transactional
     public PacienteVinculoTerritorial criar(PacienteVinculoTerritorial vinculo) {
         tenantService.validarTenantAtual();
-        
-        // Desativar vínculo ativo anterior se existir
+
         Optional<PacienteVinculoTerritorial> vinculoAtivo = repository.findAtivoByPacienteId(vinculo.getPaciente().getId());
         if (vinculoAtivo.isPresent()) {
             PacienteVinculoTerritorial anterior = vinculoAtivo.get();
@@ -36,7 +35,7 @@ public class PacienteVinculoTerritorialServiceImpl implements PacienteVinculoTer
             anterior.setDataFim(LocalDate.now());
             repository.save(anterior);
         }
-        
+
         vinculo.setTenant(tenantService.obterTenantDoUsuarioAutenticado());
         vinculo.setActive(true);
         return repository.save(vinculo);
@@ -48,7 +47,7 @@ public class PacienteVinculoTerritorialServiceImpl implements PacienteVinculoTer
         tenantService.validarTenantAtual();
         PacienteVinculoTerritorial existente = repository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Vínculo territorial não encontrado"));
-        
+
         existente.setMunicipioIbge(vinculo.getMunicipioIbge());
         existente.setCnesEstabelecimento(vinculo.getCnesEstabelecimento());
         existente.setIneEquipe(vinculo.getIneEquipe());
@@ -58,7 +57,7 @@ public class PacienteVinculoTerritorialServiceImpl implements PacienteVinculoTer
         existente.setOrigem(vinculo.getOrigem());
         existente.setActive(vinculo.getActive());
         existente.setObservacoes(vinculo.getObservacoes());
-        
+
         return repository.save(existente);
     }
 
@@ -105,4 +104,3 @@ public class PacienteVinculoTerritorialServiceImpl implements PacienteVinculoTer
         }
     }
 }
-

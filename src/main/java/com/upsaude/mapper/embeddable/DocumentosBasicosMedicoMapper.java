@@ -13,4 +13,3 @@ public interface DocumentosBasicosMedicoMapper {
     DocumentosBasicosMedicoResponse toResponse(DocumentosBasicosMedico entity);
     void updateFromRequest(DocumentosBasicosMedicoRequest request, @MappingTarget DocumentosBasicosMedico entity);
 }
-

@@ -41,4 +41,3 @@ public class PacienteDadosPessoaisComplementaresRequest {
     @JsonDeserialize(using = OrientacaoSexualEnumDeserializer.class)
     private OrientacaoSexualEnum orientacaoSexual;
 }
-

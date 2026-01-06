@@ -26,9 +26,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-/**
- * Controller para consultas de jobs de importação (somente leitura).
- */
 @RestController
 @RequestMapping("/v1/import-jobs")
 @Tag(name = "Import Jobs - Consulta", description = "Endpoints para consultar status e detalhes de jobs de importação")
@@ -287,7 +284,6 @@ public class ImportJobQueryController {
             throw new BadRequestException("Tipo inválido: " + tipo);
         }
 
-        // Valida formato da competência
         if (!competenciaAno.matches("\\d{4}")) {
             throw new BadRequestException("Ano da competência deve ter 4 dígitos");
         }
@@ -347,9 +343,6 @@ public class ImportJobQueryController {
             throw new BadRequestException("Tenant não encontrado para o usuário autenticado");
         }
 
-        // IMPORTANTE: Este método enfileira os jobs no pool do JOB (importJobExecutor)
-        // e retorna imediatamente. O processamento acontece em background em threads dedicadas.
-        // A thread da API não fica bloqueada esperando o processamento.
         int jobsIniciados = importJobScheduler.iniciarProcessamentoManual();
 
         Map<String, Object> response = new HashMap<>();

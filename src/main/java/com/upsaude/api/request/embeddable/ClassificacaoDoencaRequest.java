@@ -13,13 +13,6 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import io.swagger.v3.oas.annotations.media.Schema;
 
-/**
- * Request para campos complementares de classificação da doença.
- * 
- * NOTA: Os campos categoria, subcategoria e codigoCidPrincipal foram removidos
- * pois agora vêm diretamente da tabela oficial CID-10 através do campo
- * cid10SubcategoriaId no DoencasRequest.
- */
 @Getter
 @Setter
 @Builder
@@ -27,7 +20,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 @AllArgsConstructor
 @Schema(description = "Dados complementares de classificação da doença (campos oficiais vêm do CID-10)")
 public class ClassificacaoDoencaRequest {
-    
+
     @Schema(description = "Tipo de doença (classificação interna)")
     @JsonDeserialize(using = TipoDoencaEnumDeserializer.class)
     private TipoDoencaEnum tipoDoenca;

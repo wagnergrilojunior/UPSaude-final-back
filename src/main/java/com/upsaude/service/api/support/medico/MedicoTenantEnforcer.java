@@ -19,7 +19,7 @@ public class MedicoTenantEnforcer {
 
     public Medicos validarAcesso(UUID id, UUID tenantId) {
         log.debug("Validando acesso ao médico ID: {} para tenant: {}", id, tenantId);
-        
+
         return medicosRepository.findByIdAndTenant(id, tenantId)
                 .orElseThrow(() -> {
                     log.warn("Médico não encontrado com ID: {} para tenant: {}", id, tenantId);
@@ -29,7 +29,7 @@ public class MedicoTenantEnforcer {
 
     public Medicos validarAcessoCompleto(UUID id, UUID tenantId) {
         log.debug("Validando acesso completo ao médico ID: {} para tenant: {}", id, tenantId);
-        
+
         return medicosRepository.findByIdCompletoAndTenant(id, tenantId)
                 .orElseThrow(() -> {
                     log.warn("Médico não encontrado com ID: {} para tenant: {}", id, tenantId);

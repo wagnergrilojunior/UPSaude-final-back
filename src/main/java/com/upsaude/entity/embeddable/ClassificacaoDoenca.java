@@ -11,13 +11,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 
-/**
- * Embeddable com campos complementares de classificação da doença.
- * 
- * NOTA: Os campos categoria, subcategoria e codigoCidPrincipal foram removidos
- * pois agora vêm diretamente da tabela oficial CID-10 (cid10_subcategorias)
- * através do relacionamento ManyToOne em Doencas.
- */
 @Embeddable
 @Data
 @Builder

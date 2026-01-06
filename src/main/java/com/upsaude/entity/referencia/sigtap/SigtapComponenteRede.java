@@ -9,9 +9,6 @@ import jakarta.persistence.UniqueConstraint;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
-/**
- * Componente de Rede do SIGTAP.
- */
 @Entity
 @Table(
         name = "sigtap_componente_rede",

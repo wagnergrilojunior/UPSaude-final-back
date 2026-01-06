@@ -39,4 +39,3 @@ public class DadosIdentificacaoEstabelecimento {
     private NaturezaJuridicaEnum naturezaJuridica;
 
 }
-

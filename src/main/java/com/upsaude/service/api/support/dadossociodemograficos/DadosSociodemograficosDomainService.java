@@ -18,7 +18,6 @@ public class DadosSociodemograficosDomainService {
 
     public void validarPodeDeletar(DadosSociodemograficos entity) {
         log.debug("Validando se dados sociodemográficos podem ser deletados. ID: {}", entity.getId());
-        // Adicione aqui qualquer lógica de validação antes de um hard delete.
+
     }
 }
-

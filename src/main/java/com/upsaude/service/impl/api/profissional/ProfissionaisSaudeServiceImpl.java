@@ -103,13 +103,13 @@ public class ProfissionaisSaudeServiceImpl implements ProfissionaisSaudeService 
         try {
             UUID tenantId = tenantService.validarTenantAtual();
             Pageable adjustedPageable = ajustarPageableParaCamposEmbeddados(pageable);
-            
+
             Specification<ProfissionaisSaude> spec = (root, query, cb) -> {
                 List<Predicate> predicates = new ArrayList<>();
                 predicates.add(cb.equal(root.get("tenant").get("id"), tenantId));
                 return cb.and(predicates.toArray(new Predicate[0]));
             };
-            
+
             Page<ProfissionaisSaude> profissionais = profissionaisSaudeRepository.findAll(spec, adjustedPageable);
             log.debug("Listagem de profissionais de saúde concluída. Total de elementos: {}", profissionais.getTotalElements());
             return profissionais.map(responseBuilder::build);
@@ -130,25 +130,25 @@ public class ProfissionaisSaudeServiceImpl implements ProfissionaisSaudeService 
         Sort adjustedSort = pageable.getSort().stream()
                 .map(order -> {
                     String property = order.getProperty();
-                    // Mapear campos que estão dentro de dadosPessoaisBasicos
+
                     if ("nomeCompleto".equals(property) || "dataNascimento".equals(property) || "sexo".equals(property)) {
                         property = "dadosPessoaisBasicos." + property;
                     }
-                    // Mapear campos que estão dentro de documentosBasicos
+
                     else if ("cpf".equals(property) || "rg".equals(property) || "cns".equals(property)) {
                         property = "documentosBasicos." + property;
                     }
-                    // Mapear campos que estão dentro de registroProfissional
+
                     else if ("registroProfissional".equals(property) || "conselho".equals(property) || "ufRegistro".equals(property)) {
                         property = "registroProfissional." + property;
                     }
-                    // Mapear campos que estão dentro de contato
+
                     else if ("telefone".equals(property) || "celular".equals(property) ||
                             "email".equals(property) || "telefoneInstitucional".equals(property) ||
                             "emailInstitucional".equals(property)) {
                         property = "contato." + property;
                     }
-                    // Mapear campos que estão dentro de dadosDemograficos
+
                     else if ("estadoCivil".equals(property) || "escolaridade".equals(property) ||
                             "nacionalidade".equals(property) || "naturalidade".equals(property) ||
                             "identidadeGenero".equals(property) || "racaCor".equals(property)) {

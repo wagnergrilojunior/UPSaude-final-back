@@ -56,4 +56,3 @@ public class PacienteObito extends BaseEntity {
         }
     }
 }
-

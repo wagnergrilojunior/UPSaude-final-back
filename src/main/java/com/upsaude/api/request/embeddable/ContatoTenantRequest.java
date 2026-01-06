@@ -30,4 +30,3 @@ public class ContatoTenantRequest {
     @SiteValido
     private String site;
 }
-

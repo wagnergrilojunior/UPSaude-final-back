@@ -18,7 +18,6 @@ public class EquipamentosEstabelecimentoDomainService {
 
     public void validarPodeDeletar(EquipamentosEstabelecimento entity) {
         log.debug("Validando se equipamento do estabelecimento pode ser deletado. ID: {}", entity.getId());
-        // Adicione aqui qualquer lógica de validação antes de um hard delete.
+
     }
 }
-

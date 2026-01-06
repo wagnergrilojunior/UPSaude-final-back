@@ -30,14 +30,14 @@ public interface DispensacaoItemMapper {
 
     default DispensacaoItemResponse toResponseCompleto(DispensacaoItem item) {
         if (item == null) return null;
-        
+
         DispensacaoItemResponse response = toResponse(item);
-        
+
         if (item.getSigtapProcedimento() != null) {
             response.setProcedimentoCodigo(item.getSigtapProcedimento().getCodigoOficial());
             response.setProcedimentoNome(item.getSigtapProcedimento().getNome());
         }
-        
+
         return response;
     }
 
@@ -48,4 +48,3 @@ public interface DispensacaoItemMapper {
                 .toList();
     }
 }
-

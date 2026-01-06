@@ -36,4 +36,3 @@ public class RegistroProfissionalRequest {
     @JsonDeserialize(using = StatusAtivoEnumDeserializer.class)
     private StatusAtivoEnum statusRegistro;
 }
-

@@ -13,4 +13,3 @@ public interface DadosIdentificacaoEquipamentoMapper {
     DadosIdentificacaoEquipamentoResponse toResponse(DadosIdentificacaoEquipamento entity);
     void updateFromRequest(DadosIdentificacaoEquipamentoRequest request, @MappingTarget DadosIdentificacaoEquipamento entity);
 }
-

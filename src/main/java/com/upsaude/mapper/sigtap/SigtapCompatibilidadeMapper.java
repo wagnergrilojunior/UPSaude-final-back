@@ -17,4 +17,3 @@ public interface SigtapCompatibilidadeMapper {
     @Mapping(target = "nomeProcedimentoSecundario", source = "procedimentoSecundario.nome")
     SigtapCompatibilidadeResponse toResponse(SigtapCompatibilidade entity);
 }
-

@@ -22,4 +22,3 @@ public class DadosExibicaoUsuarioRequest {
     @Size(max = 500, message = "URL da foto deve ter no máximo 500 caracteres")
     private String fotoUrl;
 }
-

@@ -8,7 +8,7 @@ import lombok.Data;
 public class SigtapProcedimentoDetalheTussResponse {
     @Schema(description = "Código do TUSS", example = "10101010")
     private String codigoTuss;
-    
+
     @Schema(description = "Nome do TUSS", example = "CONSULTA MÉDICA")
     private String nomeTuss;
 }

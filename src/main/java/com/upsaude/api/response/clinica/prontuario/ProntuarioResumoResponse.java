@@ -37,4 +37,3 @@ public class ProntuarioResumoResponse {
         private String resumo;
     }
 }
-

@@ -49,4 +49,3 @@ public class EspecificacoesTecnicasEquipamentoRequest {
     @Size(max = 100, message = "Tipo de alimentação deve ter no máximo 100 caracteres")
     private String tipoAlimentacao;
 }
-

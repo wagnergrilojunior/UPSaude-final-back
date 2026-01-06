@@ -9,9 +9,6 @@ import jakarta.persistence.UniqueConstraint;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
-/**
- * Compatibilidade Poss?vel (cat?logo) no SIGTAP.
- */
 @Entity
 @Table(
         name = "sigtap_compatibilidade_possivel",
@@ -48,4 +45,3 @@ public class SigtapCompatibilidadePossivel extends BaseEntityWithoutTenant {
     @Column(name = "instrumento_registro_secundario", columnDefinition = "jsonb")
     private String instrumentoRegistroSecundario;
 }
-

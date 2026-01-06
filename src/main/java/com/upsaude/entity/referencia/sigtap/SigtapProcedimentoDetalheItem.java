@@ -11,9 +11,6 @@ import jakarta.persistence.UniqueConstraint;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
-/**
- * Relacionamento entre Procedimento e Detalhe.
- */
 @Entity
 @Table(
         name = "sigtap_procedimento_detalhe_item",

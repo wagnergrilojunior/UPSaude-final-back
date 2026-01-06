@@ -27,4 +27,3 @@ public class EstabelecimentosResponseBuilder {
         return mapper.toResponse(entity);
     }
 }
-

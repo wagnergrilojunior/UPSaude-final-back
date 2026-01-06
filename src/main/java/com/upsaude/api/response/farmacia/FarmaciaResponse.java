@@ -19,7 +19,7 @@ public class FarmaciaResponse {
     private OffsetDateTime createdAt;
     private OffsetDateTime updatedAt;
     private Boolean active;
-    
+
     private String nome;
     private String codigoCnes;
     private String codigoFarmaciaInterno;
@@ -28,8 +28,7 @@ public class FarmaciaResponse {
     private String telefone;
     private String email;
     private String observacoes;
-    
+
     private UUID tenantId;
     private UUID estabelecimentoId;
 }
-

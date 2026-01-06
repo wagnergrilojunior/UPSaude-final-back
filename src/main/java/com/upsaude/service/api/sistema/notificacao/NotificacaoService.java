@@ -30,4 +30,3 @@ public interface NotificacaoService {
 
     void inativar(UUID id);
 }
-

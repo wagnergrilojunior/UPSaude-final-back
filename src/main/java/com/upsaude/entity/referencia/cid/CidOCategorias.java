@@ -24,7 +24,6 @@ import lombok.EqualsAndHashCode;
 @EqualsAndHashCode(callSuper = true)
 public class CidOCategorias extends BaseEntityWithoutTenant {
 
-    // CSV: CAT;DESCRICAO;REFER;
     @Column(name = "cat", nullable = false, length = 20)
     private String cat;
 
@@ -34,4 +33,3 @@ public class CidOCategorias extends BaseEntityWithoutTenant {
     @Column(name = "refer", columnDefinition = "TEXT")
     private String refer;
 }
-

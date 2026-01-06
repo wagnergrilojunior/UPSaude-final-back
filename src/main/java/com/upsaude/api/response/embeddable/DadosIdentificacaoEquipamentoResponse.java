@@ -32,4 +32,3 @@ public class DadosIdentificacaoEquipamentoResponse {
 
     private String classeRisco;
 }
-

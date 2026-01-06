@@ -10,4 +10,3 @@ import com.upsaude.mapper.config.MappingConfig;
 public interface EspecialidadeMapper {
     EspecialidadeResponse toResponse(SigtapOcupacao entity);
 }
-

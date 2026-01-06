@@ -9,4 +9,3 @@ import com.upsaude.entity.referencia.sigtap.SigtapOcupacao;
 public interface SigtapCboMapper {
     SigtapCboResponse toResponse(SigtapOcupacao entity);
 }
-

@@ -21,4 +21,3 @@ public class DadosSociodemograficosRelacionamentosHandler {
         return entity;
     }
 }
-

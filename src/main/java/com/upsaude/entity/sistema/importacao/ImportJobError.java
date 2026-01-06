@@ -5,10 +5,6 @@ import jakarta.persistence.*;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
-/**
- * Entidade para registrar erros detalhados de processamento de jobs de importação.
- * Permite consulta paginada de erros sem "inchar" a tabela principal.
- */
 @Entity
 @Table(
     name = "import_job_error",
@@ -37,9 +33,8 @@ public class ImportJobError extends BaseEntity {
     private String mensagem;
 
     @Column(name = "raw_line_hash", length = 64)
-    private String rawLineHash; // Hash da linha original para detectar duplicatas
+    private String rawLineHash; 
 
     @Column(name = "raw_line_preview", length = 500)
-    private String rawLinePreview; // Preview dos primeiros 500 caracteres da linha
+    private String rawLinePreview; 
 }
-

@@ -39,14 +39,6 @@ import java.util.HexFormat;
 import java.util.List;
 import java.util.Map;
 
-/**
- * Worker de importação SIA-PA: lê CSV do Supabase Storage via stream e persiste em batches.
- *
- * Regras:
- * - Nunca processar no ciclo HTTP.
- * - Transações curtas por batch.
- * - Checkpoint por linha (data lines, exclui header).
- */
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -54,7 +46,6 @@ public class SiaPaImportJobWorker implements ImportJobWorker {
 
     private static final int ERROR_SAMPLE_LIMIT = 200;
 
-    // USO EXCLUSIVO JOB - Worker usa pool JOB
     private final ImportJobJobRepository importJobJobRepository;
     private final ImportJobErrorRepository importJobErrorRepository;
 
@@ -63,11 +54,9 @@ public class SiaPaImportJobWorker implements ImportJobWorker {
     private final SiaPaEntityMapper entityMapper;
     private final JdbcEntityBatchWriter jdbcEntityBatchWriter;
 
-    // USO EXCLUSIVO JOB - TransactionManager do JOB
     @Qualifier("jobTransactionManager")
     private final PlatformTransactionManager jobTransactionManager;
 
-    // USO EXCLUSIVO JOB - EntityManager do JOB (persistence unit "job")
     @PersistenceContext(unitName = "job")
     private EntityManager entityManager;
 
@@ -105,8 +94,7 @@ public class SiaPaImportJobWorker implements ImportJobWorker {
 
         TransactionTemplate txBatchCommit = new TransactionTemplate(jobTransactionManager);
         txBatchCommit.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
-        // PostgreSQL usa READ_COMMITTED por padrão, que é o nível desejado
-        // Não configuramos isolamento customizado para evitar problemas com Hibernate 6.x
+
         txBatchCommit.setTimeout(Math.max(5, batchTxTimeoutSeconds));
 
         ImportJob jobSnapshot = txReadSnapshot.execute(status -> importJobJobRepository.findById(jobId).orElse(null));
@@ -124,8 +112,8 @@ public class SiaPaImportJobWorker implements ImportJobWorker {
 
         java.util.UUID tenantId = jobSnapshot.getTenant() != null ? jobSnapshot.getTenant().getId() : null;
 
-        long checkpoint = jobSnapshot.getCheckpointLinha() != null ? jobSnapshot.getCheckpointLinha() : 0L; // data lines (sem header)
-        long lastCommittedLineIndex = checkpoint; // última linha (data line) efetivamente commitada no banco
+        long checkpoint = jobSnapshot.getCheckpointLinha() != null ? jobSnapshot.getCheckpointLinha() : 0L; 
+        long lastCommittedLineIndex = checkpoint; 
         long linhasLidasTotal = jobSnapshot.getLinhasLidas() != null ? jobSnapshot.getLinhasLidas() : 0L;
         long linhasProcessadasTotal = jobSnapshot.getLinhasProcessadas() != null ? jobSnapshot.getLinhasProcessadas() : 0L;
         long linhasInseridasTotal = jobSnapshot.getLinhasInseridas() != null ? jobSnapshot.getLinhasInseridas() : 0L;
@@ -134,10 +122,9 @@ public class SiaPaImportJobWorker implements ImportJobWorker {
         long lastProgressLogAtMs = System.currentTimeMillis();
         long lastHeartbeatAtMs = System.currentTimeMillis();
         long inicio = System.currentTimeMillis();
-        // Atualiza heartbeat a cada 30 segundos (metade do timeout de 5 minutos) para evitar expiração
+
         long heartbeatIntervalMs = Math.min(30_000, (heartbeatTimeoutSeconds * 1000L) / 2);
 
-        // Atualiza heartbeat logo no início para evitar expiração durante download/inicialização
         atualizarHeartbeat(txBatchCommit, jobId);
         lastHeartbeatAtMs = System.currentTimeMillis();
 
@@ -146,7 +133,6 @@ public class SiaPaImportJobWorker implements ImportJobWorker {
         try (InputStream is = supabaseStorageService.downloadStream(jobSnapshot.getStorageBucket(), jobSnapshot.getStoragePath());
              BufferedReader reader = new BufferedReader(new InputStreamReader(is, charset))) {
 
-            // Atualiza heartbeat após download (pode ter demorado)
             long downloadEndMs = System.currentTimeMillis();
             if ((downloadEndMs - lastHeartbeatAtMs) >= heartbeatIntervalMs) {
                 atualizarHeartbeat(txBatchCommit, jobId);
@@ -160,13 +146,12 @@ public class SiaPaImportJobWorker implements ImportJobWorker {
 
             String[] headers = parseHeaders(headerLine);
 
-            // Skip até checkpoint (data lines) - atualiza heartbeat periodicamente durante skip se checkpoint for grande
             for (long i = 0; i < checkpoint; i++) {
                 String skipped = reader.readLine();
                 if (skipped == null) {
                     break;
                 }
-                // Atualiza heartbeat a cada 10000 linhas durante skip para evitar expiração em checkpoints grandes
+
                 if (i > 0 && i % 10000 == 0) {
                     long skipCheckMs = System.currentTimeMillis();
                     if ((skipCheckMs - lastHeartbeatAtMs) >= heartbeatIntervalMs) {
@@ -177,7 +162,7 @@ public class SiaPaImportJobWorker implements ImportJobWorker {
             }
 
             String linha;
-            long linhaDataIndex = checkpoint; // 0-based em data lines
+            long linhaDataIndex = checkpoint; 
 
             while ((linha = reader.readLine()) != null) {
                 linhaDataIndex++;
@@ -190,7 +175,6 @@ public class SiaPaImportJobWorker implements ImportJobWorker {
                 try {
                     Map<String, String> fields = csvParser.parseLine(linha, headers);
 
-                    // Validação mínima (mesma lógica do import antigo)
                     String procedimento = fields.get("PA_PROC_ID");
                     if (!StringUtils.hasText(procedimento)) {
                         linhasErroTotal++;
@@ -212,7 +196,6 @@ public class SiaPaImportJobWorker implements ImportJobWorker {
                     batch.add(entity);
                     linhasProcessadasTotal++;
 
-                    // Atualiza heartbeat periodicamente para evitar expiração durante processamento longo
                     long nowMs = System.currentTimeMillis();
                     if ((nowMs - lastHeartbeatAtMs) >= heartbeatIntervalMs) {
                         atualizarHeartbeat(txBatchCommit, jobId);
@@ -256,18 +239,16 @@ public class SiaPaImportJobWorker implements ImportJobWorker {
                 batch.clear();
             }
 
-            // Finaliza job
             long duracao = System.currentTimeMillis() - inicio;
             finalizar(txBatchCommit, jobId, linhasLidasTotal, linhasProcessadasTotal, linhasInseridasTotal, linhasErroTotal, lastCommittedLineIndex, duracao);
         } catch (ImportJobRecoverableException | ImportJobFatalException e) {
             throw e;
         } catch (IOException e) {
-            // Erros de IO durante leitura do stream (ConnectionClosedException, Broken pipe, etc) são recuperáveis
-            // ConnectionClosedException do Apache HttpClient 5.x é uma subclasse de IOException
+
             log.warn("Erro de IO durante leitura do stream no job {} (SIA_PA): {} - Tipo: {}", jobId, e.getMessage(), e.getClass().getSimpleName());
             throw new ImportJobRecoverableException("Falha de rede durante leitura do arquivo (pode ser temporário): " + e.getMessage(), e);
         } catch (Exception e) {
-            // Verifica se a causa é uma IOException (inclui ConnectionClosedException)
+
             Throwable cause = e.getCause();
             if (cause instanceof IOException) {
                 log.warn("Erro de rede (via causa) durante leitura do stream no job {} (SIA_PA): {} - Tipo: {}", jobId, e.getMessage(), cause.getClass().getSimpleName());
@@ -291,16 +272,10 @@ public class SiaPaImportJobWorker implements ImportJobWorker {
     }
 
     private String[] parseHeaders(String headerLine) {
-        // Reusa o parser CSV para respeitar aspas
-        // parseLine exige headers -> então aqui fazemos split simples com a mesma lógica do serviço antigo (vírgula/aspas)
-        // Como é apenas header, tratamento básico é suficiente.
+
         return headerLine.replace("\"", "").split(",", -1);
     }
 
-    /**
-     * Atualiza apenas o heartbeat do job (sem commit de batch).
-     * Usado para evitar expiração do heartbeat durante processamento longo entre batches.
-     */
     private void atualizarHeartbeat(TransactionTemplate txBatchCommit, java.util.UUID jobId) {
         txBatchCommit.executeWithoutResult(status -> {
             ImportJob j = importJobJobRepository.findById(jobId).orElse(null);
@@ -311,10 +286,6 @@ public class SiaPaImportJobWorker implements ImportJobWorker {
         });
     }
 
-    /**
-     * Commit atômico por batch: persiste o batch + atualiza checkpoint/heartbeat no MESMO commit.
-     * Isso garante que checkpoint nunca avance além do que foi efetivamente persistido.
-     */
     private void persistirBatchEAtualizarCheckpoint(TransactionTemplate txBatchCommit,
                                                    java.util.UUID jobId,
                                                    List<SiaPa> batch,
@@ -324,7 +295,7 @@ public class SiaPaImportJobWorker implements ImportJobWorker {
                                                    long erros,
                                                    long checkpointLinha) {
         txBatchCommit.executeWithoutResult(status -> {
-            // JDBC batch insert para alta escala (evita overhead do Hibernate)
+
             jdbcEntityBatchWriter.insertBatch(batch);
 
             ImportJob j = importJobJobRepository.findById(jobId).orElse(null);
@@ -413,5 +384,3 @@ public class SiaPaImportJobWorker implements ImportJobWorker {
         }
     }
 }
-
-

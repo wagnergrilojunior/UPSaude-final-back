@@ -11,10 +11,6 @@ import org.hibernate.type.SqlTypes;
 
 import java.time.OffsetDateTime;
 
-/**
- * Entidade para rastrear jobs de importação de arquivos grandes (SIA-SUS, SIGTAP, CID10).
- * Funciona como fila de processamento com controle de concorrência e checkpoint.
- */
 @Entity
 @Table(
     name = "import_job",
@@ -33,8 +29,6 @@ import java.time.OffsetDateTime;
 @EqualsAndHashCode(callSuper = true)
 public class ImportJob extends BaseEntity {
 
-    // ========== IDENTIFICAÇÃO ==========
-    
     @Column(name = "tipo", length = 20, nullable = false)
     @Enumerated(EnumType.STRING)
     private ImportJobTipoEnum tipo;
@@ -48,8 +42,6 @@ public class ImportJob extends BaseEntity {
     @Column(name = "uf", length = 2)
     private String uf;
 
-    // ========== ARQUIVO NO STORAGE ==========
-    
     @Column(name = "storage_bucket", length = 100, nullable = false)
     private String storageBucket;
 
@@ -68,21 +60,16 @@ public class ImportJob extends BaseEntity {
     @Column(name = "checksum", length = 64)
     private String checksum;
 
-    // ========== PAYLOAD (METADADOS DO JOB) ==========
-    // Usado para armazenar informações específicas do tipo do job sem criar novas colunas por tipo.
-    // Ex: SIGTAP pode armazenar {"layoutPath":"..."}.
     @Column(name = "payload_json", columnDefinition = "JSONB")
     @JdbcTypeCode(SqlTypes.JSON)
     private String payloadJson;
 
-    // ========== STATUS E EXECUÇÃO ==========
-    
     @Column(name = "status", length = 20, nullable = false)
     @Enumerated(EnumType.STRING)
     private ImportJobStatusEnum status;
 
     @Column(name = "priority")
-    private Integer priority = 0; // Maior número = maior prioridade
+    private Integer priority = 0; 
 
     @Column(name = "attempts")
     private Integer attempts = 0;
@@ -97,13 +84,11 @@ public class ImportJob extends BaseEntity {
     private OffsetDateTime lockedAt;
 
     @Column(name = "locked_by", length = 100)
-    private String lockedBy; // Identificador da instância/thread que está processando
+    private String lockedBy; 
 
     @Column(name = "heartbeat_at")
-    private OffsetDateTime heartbeatAt; // Última atualização de heartbeat (para detectar jobs travados)
+    private OffsetDateTime heartbeatAt; 
 
-    // ========== PROGRESSO ==========
-    
     @Column(name = "linhas_lidas")
     private Long linhasLidas = 0L;
 
@@ -128,8 +113,6 @@ public class ImportJob extends BaseEntity {
     @Column(name = "duration_ms")
     private Long durationMs;
 
-    // ========== CHECKPOINT ==========
-    
     @Column(name = "checkpoint_linha")
     private Long checkpointLinha = 0L;
 
@@ -137,20 +120,15 @@ public class ImportJob extends BaseEntity {
     private Long checkpointByteOffset;
 
     @Column(name = "storage_object_version", length = 100)
-    private String storageObjectVersion; // ETag/versão do objeto no storage
+    private String storageObjectVersion; 
 
-    // ========== ERROS ==========
-    
     @Column(name = "error_summary", columnDefinition = "TEXT")
     private String errorSummary;
 
     @Column(name = "error_sample_json", columnDefinition = "JSONB")
     @JdbcTypeCode(SqlTypes.JSON)
-    private String errorSampleJson; // Amostra limitada de erros em JSON
+    private String errorSampleJson; 
 
-    // ========== AUDITORIA ==========
-    
     @Column(name = "created_by_user_id")
     private java.util.UUID createdByUserId;
 }
-

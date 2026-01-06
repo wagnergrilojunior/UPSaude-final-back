@@ -23,4 +23,3 @@ public class ManutencaoCalibracaoEquipamentoResponse {
 
     private String tipoManutencao;
 }
-

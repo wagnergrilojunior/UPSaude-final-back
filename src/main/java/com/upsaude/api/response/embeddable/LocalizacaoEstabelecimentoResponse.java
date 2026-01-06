@@ -17,4 +17,3 @@ public class LocalizacaoEstabelecimentoResponse {
 
     private Double longitude;
 }
-

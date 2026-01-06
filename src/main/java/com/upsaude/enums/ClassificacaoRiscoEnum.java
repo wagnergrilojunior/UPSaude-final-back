@@ -3,10 +3,6 @@ package com.upsaude.enums;
 import java.util.Arrays;
 import java.util.Locale;
 
-/**
- * Enum para classificação de risco segundo protocolo Manchester.
- * Utilizado em atendimentos para padronização conforme e-SUS APS.
- */
 public enum ClassificacaoRiscoEnum {
     VERMELHO(1, "Vermelho"),
     LARANJA(2, "Laranja"),
@@ -48,4 +44,3 @@ public enum ClassificacaoRiscoEnum {
                 .orElse(null);
     }
 }
-

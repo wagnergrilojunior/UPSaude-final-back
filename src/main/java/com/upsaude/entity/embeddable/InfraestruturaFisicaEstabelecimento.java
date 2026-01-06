@@ -32,4 +32,3 @@ public class InfraestruturaFisicaEstabelecimento {
     @Column(name = "area_total_metros_quadrados")
     private Double areaTotalMetrosQuadrados;
 }
-

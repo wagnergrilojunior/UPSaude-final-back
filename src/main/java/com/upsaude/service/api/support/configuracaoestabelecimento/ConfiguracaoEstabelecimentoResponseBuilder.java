@@ -22,4 +22,3 @@ public class ConfiguracaoEstabelecimentoResponseBuilder {
         return mapper.toResponse(entity);
     }
 }
-

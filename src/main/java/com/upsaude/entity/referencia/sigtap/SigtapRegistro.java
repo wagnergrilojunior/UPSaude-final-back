@@ -9,9 +9,6 @@ import jakarta.persistence.UniqueConstraint;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
-/**
- * Registro do SIGTAP.
- */
 @Entity
 @Table(
         name = "sigtap_registro",

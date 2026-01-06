@@ -3,10 +3,6 @@ package com.upsaude.enums;
 import java.util.Arrays;
 import java.util.Locale;
 
-/**
- * Enum para prioridade de atendimento.
- * Utilizado em atendimentos para classificação de urgência.
- */
 public enum PrioridadeAtendimentoEnum {
     CRITICA(1, "Crítica"),
     ALTA(2, "Alta"),

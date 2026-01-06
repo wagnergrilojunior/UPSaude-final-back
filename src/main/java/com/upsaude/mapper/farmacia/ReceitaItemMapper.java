@@ -33,14 +33,14 @@ public interface ReceitaItemMapper {
 
     default ReceitaItemResponse toResponseCompleto(ReceitaItem item) {
         if (item == null) return null;
-        
+
         ReceitaItemResponse response = toResponse(item);
-        
+
         if (item.getSigtapProcedimento() != null) {
             response.setProcedimentoCodigo(item.getSigtapProcedimento().getCodigoOficial());
             response.setProcedimentoNome(item.getSigtapProcedimento().getNome());
         }
-        
+
         if (item.getDispensacoes() != null && !item.getDispensacoes().isEmpty()) {
             BigDecimal quantidadeJaDispensada = item.getDispensacoes().stream()
                     .map(di -> di.getQuantidadeDispensada() != null ? di.getQuantidadeDispensada() : BigDecimal.ZERO)
@@ -49,7 +49,7 @@ public interface ReceitaItemMapper {
         } else {
             response.setQuantidadeJaDispensada(BigDecimal.ZERO);
         }
-        
+
         return response;
     }
 
@@ -60,4 +60,3 @@ public interface ReceitaItemMapper {
                 .toList();
     }
 }
-

@@ -32,4 +32,3 @@ public class LicenciamentoEstabelecimento {
     @Column(name = "numero_licenca_sanitaria", length = 100)
     private String numeroLicencaSanitaria;
 }
-

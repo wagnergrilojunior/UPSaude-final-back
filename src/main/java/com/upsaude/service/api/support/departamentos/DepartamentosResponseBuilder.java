@@ -22,4 +22,3 @@ public class DepartamentosResponseBuilder {
         return mapper.toResponse(entity);
     }
 }
-

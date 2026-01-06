@@ -49,8 +49,6 @@ public class CirurgiaRelacionamentosHandler {
             entity.setConvenio(null);
         }
 
-
         return entity;
     }
 }
-

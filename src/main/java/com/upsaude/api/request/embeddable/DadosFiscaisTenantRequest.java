@@ -22,4 +22,3 @@ public class DadosFiscaisTenantRequest {
     @Size(max = 20, message = "Inscrição municipal deve ter no máximo 20 caracteres")
     private String inscricaoMunicipal;
 }
-

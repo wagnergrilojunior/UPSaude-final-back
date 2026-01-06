@@ -36,4 +36,3 @@ public class DadosPessoaisBasicosMedicoRequest {
     @JsonDeserialize(using = SexoEnumDeserializer.class)
     private SexoEnum sexo;
 }
-

@@ -19,4 +19,3 @@ public class LocalizacaoEstabelecimentoRequest {
 
     private Double longitude;
 }
-
