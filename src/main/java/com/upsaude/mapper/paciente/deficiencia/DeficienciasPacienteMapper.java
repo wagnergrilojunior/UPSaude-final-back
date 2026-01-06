@@ -10,7 +10,7 @@ import com.upsaude.entity.paciente.deficiencia.DeficienciasPaciente;
 import com.upsaude.mapper.config.MappingConfig;
 import com.upsaude.mapper.paciente.PacienteMapper;
 
-@Mapper(config = MappingConfig.class, uses = {com.upsaude.mapper.paciente.deficiencia.DeficienciasMapper.class, PacienteMapper.class})
+@Mapper(config = MappingConfig.class, uses = { com.upsaude.mapper.paciente.deficiencia.DeficienciasMapper.class })
 public interface DeficienciasPacienteMapper {
 
     @Mapping(target = "active", ignore = true)

@@ -25,6 +25,7 @@ import com.upsaude.repository.paciente.EnderecoRepository;
 import com.upsaude.repository.referencia.geografico.CidadesRepository;
 import com.upsaude.repository.referencia.geografico.EstadosRepository;
 import com.upsaude.service.api.geral.EnderecoService;
+import com.upsaude.service.api.sistema.multitenancy.TenantService;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -38,6 +39,7 @@ public class EnderecoServiceImpl implements EnderecoService {
     private final EnderecoMapper enderecoMapper;
     private final EstadosRepository estadosRepository;
     private final CidadesRepository cidadesRepository;
+    private final TenantService tenantService;
 
     @Override
     @Transactional
@@ -287,7 +289,8 @@ public class EnderecoServiceImpl implements EnderecoService {
                         cidadeIdStr,
                         estadoIdStr,
                         tipoEnderecoStr,
-                        zonaStr);
+                        zonaStr,
+                        tenantService.validarTenantAtual().toString());
 
                 if (!enderecosExistentes.isEmpty()) {
 
@@ -352,7 +355,8 @@ public class EnderecoServiceImpl implements EnderecoService {
                     cidadeIdStr,
                     estadoIdStr,
                     tipoEnderecoStr,
-                    zonaStr);
+                    zonaStr,
+                    tenantService.validarTenantAtual().toString());
 
             if (!enderecosExistentes.isEmpty()) {
                 Endereco encontrado = enderecosExistentes.get(0);

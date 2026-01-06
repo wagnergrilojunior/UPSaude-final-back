@@ -27,7 +27,6 @@ import java.util.UUID;
 @Schema(description = "Dados de contato do paciente")
 public class PacienteContatoRequest {
 
-    @NotNull(message = "Paciente é obrigatório")
     private UUID paciente;
 
     @NotNull(message = "Tipo de contato é obrigatório")
@@ -48,4 +47,3 @@ public class PacienteContatoRequest {
     @Size(max = 20, message = "Telefone deve ter no máximo 20 caracteres")
     private String telefone;
 }
-

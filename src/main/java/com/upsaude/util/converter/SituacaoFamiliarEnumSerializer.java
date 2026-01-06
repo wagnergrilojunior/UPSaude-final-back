@@ -3,13 +3,15 @@ package com.upsaude.util.converter;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.SerializerProvider;
-import com.upsaude.enums.SexoEnum;
+import com.upsaude.enums.SituacaoFamiliarEnum;
+
 import java.io.IOException;
 
-public class SexoEnumSerializer extends JsonSerializer<SexoEnum> {
+public class SituacaoFamiliarEnumSerializer extends JsonSerializer<SituacaoFamiliarEnum> {
 
     @Override
-    public void serialize(SexoEnum value, JsonGenerator gen, SerializerProvider serializers) throws IOException {
+    public void serialize(SituacaoFamiliarEnum value, JsonGenerator gen, SerializerProvider serializers)
+            throws IOException {
         if (value == null) {
             gen.writeNull();
         } else {

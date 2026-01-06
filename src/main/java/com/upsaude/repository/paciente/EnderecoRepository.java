@@ -58,6 +58,7 @@ public interface EnderecoRepository extends JpaRepository<Endereco, UUID> {
                         "(:estadoId IS NULL OR (e.estado_id IS NOT NULL AND e.estado_id::text = :estadoId)) AND " +
                         "(:tipoEndereco IS NULL OR e.tipo_endereco = CAST(:tipoEndereco AS integer)) AND " +
                         "(:zona IS NULL OR e.zona = CAST(:zona AS integer)) AND " +
+                        "(:tenantId IS NULL OR e.tenant_id::text = :tenantId) AND " +
                         "e.ativo = true", nativeQuery = true)
         List<Endereco> findByFieldsList(
                         @Param("tipoLogradouro") String tipoLogradouro,
@@ -68,7 +69,8 @@ public interface EnderecoRepository extends JpaRepository<Endereco, UUID> {
                         @Param("cidadeId") String cidadeId,
                         @Param("estadoId") String estadoId,
                         @Param("tipoEndereco") String tipoEndereco,
-                        @Param("zona") String zona);
+                        @Param("zona") String zona,
+                        @Param("tenantId") String tenantId);
 
         @Query(value = "SELECT COUNT(*) FROM pacientes_enderecos WHERE endereco_id = :enderecoId", nativeQuery = true)
         Long countAssociacoesPaciente(@Param("enderecoId") UUID enderecoId);

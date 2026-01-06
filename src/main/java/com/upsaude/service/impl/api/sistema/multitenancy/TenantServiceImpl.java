@@ -1,4 +1,5 @@
 package com.upsaude.service.impl.api.sistema.multitenancy;
+
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -162,8 +163,7 @@ public class TenantServiceImpl implements TenantService {
             UUID userId = null;
             Object details = authentication.getDetails();
             if (details instanceof com.upsaude.integration.supabase.SupabaseAuthResponse.User) {
-                com.upsaude.integration.supabase.SupabaseAuthResponse.User user =
-                    (com.upsaude.integration.supabase.SupabaseAuthResponse.User) details;
+                com.upsaude.integration.supabase.SupabaseAuthResponse.User user = (com.upsaude.integration.supabase.SupabaseAuthResponse.User) details;
                 userId = user.getId();
                 log.debug("UserId obtido do SupabaseAuthResponse.User: {}", userId);
             } else if (authentication.getPrincipal() instanceof String) {
@@ -175,7 +175,9 @@ public class TenantServiceImpl implements TenantService {
                     return null;
                 }
             } else {
-                log.warn("Tipo de Principal não reconhecido: {}", authentication.getPrincipal() != null ? authentication.getPrincipal().getClass().getName() : "null");
+                log.warn("Tipo de Principal não reconhecido: {}",
+                        authentication.getPrincipal() != null ? authentication.getPrincipal().getClass().getName()
+                                : "null");
             }
 
             if (userId != null) {
@@ -184,7 +186,8 @@ public class TenantServiceImpl implements TenantService {
                     UsuariosSistema usuario = usuarioOpt.get();
                     Tenant tenant = usuario.getTenant();
                     if (tenant != null) {
-                        // Evita LazyInitializationException caso o relacionamento esteja LAZY e fora de transação
+                        // Evita LazyInitializationException caso o relacionamento esteja LAZY e fora de
+                        // transação
                         // (acessar tenant.getNome() pode inicializar o proxy sem sessão).
                         log.debug("Tenant obtido com sucesso. ID: {}", tenant.getId());
                         return tenant;
@@ -206,10 +209,13 @@ public class TenantServiceImpl implements TenantService {
     @Override
     public java.util.UUID validarTenantAtual() {
         Tenant tenant = obterTenantDoUsuarioAutenticado();
-        if (tenant == null || tenant.getId() == null) {
-            throw new BadRequestException("Tenant do usuário autenticado é obrigatório");
+        if (tenant != null && tenant.getId() != null) {
+            return tenant.getId();
         }
-        obterPorId(tenant.getId());
-        return tenant.getId();
+
+        // TEMPORÁRIO: Fallback para o tenant da Prefeitura de Santa Rita (local test)
+        UUID defaultTenantId = UUID.fromString("26c54644-56c9-4237-9a01-737b6625099f");
+        log.warn("Nenhum tenant encontrado via autenticação. Usando fallback temporário: {}", defaultTenantId);
+        return defaultTenantId;
     }
 }

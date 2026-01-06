@@ -27,7 +27,6 @@ import java.util.UUID;
 @Schema(description = "Dados de identificador do paciente")
 public class PacienteIdentificadorRequest {
 
-    @NotNull(message = "Paciente é obrigatório")
     private UUID paciente;
 
     @NotNull(message = "Tipo de identificador é obrigatório")
@@ -47,4 +46,3 @@ public class PacienteIdentificadorRequest {
 
     private String observacoes;
 }
-

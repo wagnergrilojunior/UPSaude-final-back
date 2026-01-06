@@ -9,11 +9,12 @@ import java.io.IOException;
 public class TipoAtendimentoPreferencialEnumSerializer extends JsonSerializer<TipoAtendimentoPreferencialEnum> {
 
     @Override
-    public void serialize(TipoAtendimentoPreferencialEnum value, JsonGenerator gen, SerializerProvider serializers) throws IOException {
+    public void serialize(TipoAtendimentoPreferencialEnum value, JsonGenerator gen, SerializerProvider serializers)
+            throws IOException {
         if (value == null) {
             gen.writeNull();
         } else {
-            gen.writeString(value.getDescricao());
+            gen.writeNumber(value.getCodigo());
         }
     }
 }

@@ -1,12 +1,15 @@
 package com.upsaude.api.request.paciente;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.UUID;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.upsaude.api.request.deficiencia.DeficienciasPacienteRequest;
 import com.upsaude.api.request.embeddable.InformacoesConvenioPacienteRequest;
+import com.upsaude.api.request.sistema.lgpd.LGPDConsentimentoRequest;
 import com.upsaude.enums.SexoEnum;
 import com.upsaude.enums.StatusPacienteEnum;
 import com.upsaude.enums.TipoAtendimentoPreferencialEnum;
@@ -15,6 +18,7 @@ import com.upsaude.util.converter.StatusPacienteEnumDeserializer;
 import com.upsaude.util.converter.TipoAtendimentoPreferencialEnumDeserializer;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
@@ -59,4 +63,37 @@ public class PacienteRequest {
 
     @Size(max = 1000, message = "Observações deve ter no máximo 1000 caracteres")
     private String observacoes;
+
+    @Valid
+    private List<PacienteEnderecoRequest> enderecos;
+
+    @Valid
+    private List<PacienteIdentificadorRequest> identificadores;
+
+    @Valid
+    private List<PacienteContatoRequest> contatos;
+
+    @Valid
+    private DadosSociodemograficosRequest dadosSociodemograficos;
+
+    @Valid
+    private DadosClinicosBasicosRequest dadosClinicosBasicos;
+
+    @Valid
+    private ResponsavelLegalRequest responsavelLegal;
+
+    @Valid
+    private PacienteDadosPessoaisComplementaresRequest dadosPessoaisComplementares;
+
+    @Valid
+    private PacienteObitoRequest obito;
+
+    @Valid
+    private List<DeficienciasPacienteRequest> deficiencias;
+
+    @Valid
+    private List<PacienteVinculoTerritorialRequest> vinculosTerritoriais;
+
+    @Valid
+    private LGPDConsentimentoRequest lgpdConsentimento;
 }
