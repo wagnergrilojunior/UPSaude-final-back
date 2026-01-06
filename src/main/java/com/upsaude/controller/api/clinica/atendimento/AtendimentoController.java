@@ -162,6 +162,25 @@ public class AtendimentoController {
         }
     }
 
+    @GetMapping
+    @Operation(summary = "Listar atendimentos", description = "Retorna uma lista paginada de todos os atendimentos do tenant")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Lista de atendimentos retornada com sucesso"),
+            @ApiResponse(responseCode = "403", description = "Acesso negado")
+    })
+    public ResponseEntity<Page<AtendimentoResponse>> listar(
+            @Parameter(description = "Parâmetros de paginação (page, size, sort)")
+            Pageable pageable) {
+        log.debug("REQUEST GET /v1/atendimentos - pageable: {}", pageable);
+        try {
+            Page<AtendimentoResponse> response = atendimentoService.listar(pageable);
+            return ResponseEntity.ok(response);
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao listar atendimentos — pageable: {}", pageable, ex);
+            throw ex;
+        }
+    }
+
     @GetMapping("/pacientes/{pacienteId}/atendimentos")
     @Operation(summary = "Listar atendimentos do paciente", description = "Retorna uma lista paginada de atendimentos de um paciente específico")
     @ApiResponses(value = {

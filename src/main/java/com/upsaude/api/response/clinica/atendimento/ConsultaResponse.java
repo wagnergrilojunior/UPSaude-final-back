@@ -1,6 +1,5 @@
 package com.upsaude.api.response.clinica.atendimento;
 
-import com.upsaude.api.response.profissional.MedicosResponse;
 import com.upsaude.api.response.embeddable.AnamneseConsultaResponse;
 import com.upsaude.api.response.embeddable.AtestadoConsultaResponse;
 import com.upsaude.api.response.embeddable.DiagnosticoConsultaResponse;
@@ -26,7 +25,7 @@ public class ConsultaResponse {
     private OffsetDateTime createdAt;
     private OffsetDateTime updatedAt;
     private Boolean active;
-    private MedicosResponse medico;
+    private MedicoConsultaResponse medico;
     private InformacoesConsultaResponse informacoes;
     private AnamneseConsultaResponse anamnese;
     private DiagnosticoConsultaResponse diagnostico;

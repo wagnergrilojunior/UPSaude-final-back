@@ -155,9 +155,35 @@ public interface PacienteMapper {
                                 .collect(java.util.stream.Collectors.toList());
         }
 
+        @Named("mapEnderecosSimplificado")
+        default List<com.upsaude.api.response.geral.EnderecoResponse> mapEnderecosSimplificado(List<com.upsaude.entity.paciente.PacienteEndereco> enderecos) {
+                if (enderecos == null) {
+                        return new java.util.ArrayList<>();
+                }
+                com.upsaude.mapper.geral.EnderecoMapper enderecoMapper = Mappers.getMapper(com.upsaude.mapper.geral.EnderecoMapper.class);
+                return enderecos.stream()
+                                .map(pe -> pe.getEndereco() != null 
+                                        ? enderecoMapper.toResponseSimplificado(pe.getEndereco())
+                                        : null)
+                                .filter(e -> e != null)
+                                .collect(java.util.stream.Collectors.toList());
+        }
+
         @Named("toResponseCompleto")
         default PacienteResponse toResponseCompleto(Paciente paciente) {
                 return toResponse(paciente);
+        }
+
+        @Named("toResponseSimplificado")
+        default PacienteResponse toResponseSimplificado(Paciente paciente) {
+                if (paciente == null) {
+                        return null;
+                }
+                PacienteResponse response = toResponse(paciente);
+                if (response != null && paciente.getEnderecos() != null) {
+                        response.setEnderecos(mapEnderecosSimplificado(paciente.getEnderecos()));
+                }
+                return response;
         }
 
         default PacienteSimplificadoResponse toSimplified(Paciente paciente) {
