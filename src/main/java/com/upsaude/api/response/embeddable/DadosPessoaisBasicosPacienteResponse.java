@@ -1,5 +1,6 @@
 package com.upsaude.api.response.embeddable;
 
+import com.upsaude.enums.SexoEnum;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -13,7 +14,10 @@ import java.time.LocalDate;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class InformacoesConvenioPacienteResponse {
-    private String numeroCarteirinha;
-    private LocalDate dataValidadeCarteirinha;
+public class DadosPessoaisBasicosPacienteResponse {
+    private String nomeCompleto;
+    private String nomeSocial;
+    private LocalDate dataNascimento;
+    private SexoEnum sexo;
 }
+

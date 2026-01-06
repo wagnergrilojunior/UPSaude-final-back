@@ -14,7 +14,6 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDate;
-import java.util.UUID;
 
 @Getter
 @Setter
@@ -25,9 +24,6 @@ import java.util.UUID;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @Schema(description = "Dados de vínculo territorial do paciente")
 public class PacienteVinculoTerritorialRequest {
-
-    @NotNull(message = "Paciente é obrigatório")
-    private UUID paciente;
 
     @Size(max = 7, message = "Código IBGE do município deve ter no máximo 7 caracteres")
     private String municipioIbge;
@@ -51,4 +47,3 @@ public class PacienteVinculoTerritorialRequest {
 
     private String observacoes;
 }
-

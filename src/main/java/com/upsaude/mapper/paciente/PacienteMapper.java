@@ -12,15 +12,12 @@ import org.mapstruct.factory.Mappers;
 import com.upsaude.api.request.paciente.PacienteRequest;
 import com.upsaude.api.response.paciente.PacienteResponse;
 import com.upsaude.api.response.paciente.PacienteSimplificadoResponse;
-import com.upsaude.api.response.sistema.integracao.IntegracaoGovResponse;
 import com.upsaude.entity.paciente.Paciente;
-import com.upsaude.entity.sistema.integracao.IntegracaoGov;
 import com.upsaude.enums.TipoContatoEnum;
 import com.upsaude.enums.TipoIdentificadorEnum;
 import com.upsaude.mapper.config.MappingConfig;
 import com.upsaude.mapper.convenio.ConvenioMapper;
 import com.upsaude.mapper.embeddable.InformacoesConvenioPacienteMapper;
-import com.upsaude.mapper.geral.EnderecoMapper;
 import com.upsaude.mapper.paciente.deficiencia.DeficienciasPacienteMapper;
 import com.upsaude.mapper.sistema.integracao.IntegracaoGovMapper;
 import com.upsaude.mapper.sistema.lgpd.LGPDConsentimentoMapper;
@@ -40,7 +37,13 @@ import com.upsaude.repository.projection.PacienteSimplificadoProjection;
                 ResponsavelLegalMapper.class,
                 PacienteDadosPessoaisComplementaresMapper.class,
                 PacienteObitoMapper.class,
-                PacienteVinculoTerritorialMapper.class
+                PacienteVinculoTerritorialMapper.class,
+                com.upsaude.mapper.embeddable.DadosPessoaisBasicosPacienteMapper.class,
+                com.upsaude.mapper.embeddable.DocumentosBasicosPacienteMapper.class,
+                com.upsaude.mapper.embeddable.DadosDemograficosPacienteMapper.class,
+                com.upsaude.mapper.embeddable.ContatoPacienteMapper.class,
+                com.upsaude.mapper.embeddable.IntegracaoGovPacienteMapper.class,
+                com.upsaude.mapper.embeddable.ResponsavelLegalPacienteMapper.class
 })
 public interface PacienteMapper {
 
@@ -51,6 +54,10 @@ public interface PacienteMapper {
         @Mapping(target = "createdAt", ignore = true)
         @Mapping(target = "updatedAt", ignore = true)
         @Mapping(target = "active", ignore = true)
+        @Mapping(target = "nomeCompleto", source = "dadosPessoaisBasicos.nomeCompleto")
+        @Mapping(target = "nomeSocial", source = "dadosPessoaisBasicos.nomeSocial")
+        @Mapping(target = "dataNascimento", source = "dadosPessoaisBasicos.dataNascimento")
+        @Mapping(target = "sexo", source = "dadosPessoaisBasicos.sexo")
         @Mapping(target = "convenio", ignore = true)
         @Mapping(target = "integracoesGov", ignore = true)
         @Mapping(target = "enderecos", ignore = true)
@@ -70,6 +77,10 @@ public interface PacienteMapper {
         @Mapping(target = "createdAt", ignore = true)
         @Mapping(target = "updatedAt", ignore = true)
         @Mapping(target = "active", ignore = true)
+        @Mapping(target = "nomeCompleto", source = "dadosPessoaisBasicos.nomeCompleto")
+        @Mapping(target = "nomeSocial", source = "dadosPessoaisBasicos.nomeSocial")
+        @Mapping(target = "dataNascimento", source = "dadosPessoaisBasicos.dataNascimento")
+        @Mapping(target = "sexo", source = "dadosPessoaisBasicos.sexo")
         @Mapping(target = "convenio", ignore = true)
         @Mapping(target = "integracoesGov", ignore = true)
         @Mapping(target = "enderecos", ignore = true)
@@ -85,26 +96,63 @@ public interface PacienteMapper {
         @Mapping(target = "lgpdConsentimento", ignore = true)
         void updateFromRequest(PacienteRequest request, @MappingTarget Paciente entity);
 
-        @Mapping(target = "enderecos", source = "enderecos")
-        @Mapping(target = "identificadores", source = "identificadores")
-        @Mapping(target = "contatos", source = "contatos")
+        @Mapping(target = "enderecos", source = "enderecos", qualifiedByName = "mapEnderecos")
         @Mapping(target = "dadosPessoaisComplementares", source = "dadosPessoaisComplementares")
-        @Mapping(target = "dadosSociodemograficos", source = "dadosSociodemograficos")
         @Mapping(target = "dadosClinicosBasicos", source = "dadosClinicosBasicos")
-        @Mapping(target = "responsavelLegal", source = "responsavelLegal")
         @Mapping(target = "obito", source = "obito")
         @Mapping(target = "deficiencias", source = "deficiencias")
         @Mapping(target = "vinculosTerritoriais", source = "vinculosTerritoriais")
         @Mapping(target = "lgpdConsentimento", source = "lgpdConsentimento")
-        @Mapping(target = "integracaoGov", source = "integracoesGov", qualifiedByName = "mapFirstIntegracao")
+        @Mapping(target = "dadosPessoaisBasicos", source = ".", qualifiedByName = "mapDadosPessoaisBasicos")
+        @Mapping(target = "documentosBasicos", source = ".", qualifiedByName = "mapDocumentosBasicos")
+        @Mapping(target = "dadosDemograficos", source = ".", qualifiedByName = "mapDadosDemograficos")
+        @Mapping(target = "contato", source = ".", qualifiedByName = "mapContato")
+        @Mapping(target = "integracaoGov", source = ".", qualifiedByName = "mapIntegracaoGov")
+        @Mapping(target = "responsavelLegal", source = ".", qualifiedByName = "mapResponsavelLegal")
         PacienteResponse toResponse(Paciente entity);
 
-        @Named("mapFirstIntegracao")
-        default IntegracaoGovResponse mapFirstIntegracao(List<IntegracaoGov> list) {
-                if (list == null || list.isEmpty()) {
-                        return null;
+        @Named("mapDadosPessoaisBasicos")
+        default com.upsaude.api.response.embeddable.DadosPessoaisBasicosPacienteResponse mapDadosPessoaisBasicos(Paciente paciente) {
+                return com.upsaude.mapper.embeddable.DadosPessoaisBasicosPacienteMapper.INSTANCE.toResponse(paciente);
+        }
+
+        @Named("mapDocumentosBasicos")
+        default com.upsaude.api.response.embeddable.DocumentosBasicosPacienteResponse mapDocumentosBasicos(Paciente paciente) {
+                return com.upsaude.mapper.embeddable.DocumentosBasicosPacienteMapper.INSTANCE.toResponse(paciente);
+        }
+
+        @Named("mapDadosDemograficos")
+        default com.upsaude.api.response.embeddable.DadosDemograficosPacienteResponse mapDadosDemograficos(Paciente paciente) {
+                return com.upsaude.mapper.embeddable.DadosDemograficosPacienteMapper.INSTANCE.toResponse(paciente);
+        }
+
+        @Named("mapContato")
+        default com.upsaude.api.response.embeddable.ContatoPacienteResponse mapContato(Paciente paciente) {
+                return com.upsaude.mapper.embeddable.ContatoPacienteMapper.INSTANCE.toResponse(paciente);
+        }
+
+        @Named("mapIntegracaoGov")
+        default com.upsaude.api.response.embeddable.IntegracaoGovPacienteResponse mapIntegracaoGov(Paciente paciente) {
+                return com.upsaude.mapper.embeddable.IntegracaoGovPacienteMapper.INSTANCE.toResponse(paciente);
+        }
+
+        @Named("mapResponsavelLegal")
+        default com.upsaude.api.response.embeddable.ResponsavelLegalPacienteResponse mapResponsavelLegal(Paciente paciente) {
+                return com.upsaude.mapper.embeddable.ResponsavelLegalPacienteMapper.INSTANCE.toResponse(paciente);
+        }
+
+        @Named("mapEnderecos")
+        default List<com.upsaude.api.response.geral.EnderecoResponse> mapEnderecos(List<com.upsaude.entity.paciente.PacienteEndereco> enderecos) {
+                if (enderecos == null) {
+                        return new java.util.ArrayList<>();
                 }
-                return Mappers.getMapper(IntegracaoGovMapper.class).toResponseWithoutPatient(list.get(0));
+                com.upsaude.mapper.geral.EnderecoMapper enderecoMapper = Mappers.getMapper(com.upsaude.mapper.geral.EnderecoMapper.class);
+                return enderecos.stream()
+                                .map(pe -> pe.getEndereco() != null 
+                                        ? enderecoMapper.toResponse(pe.getEndereco())
+                                        : null)
+                                .filter(e -> e != null)
+                                .collect(java.util.stream.Collectors.toList());
         }
 
         @Named("toResponseCompleto")
@@ -116,7 +164,6 @@ public interface PacienteMapper {
                 if (paciente == null)
                         return null;
 
-                // Buscar identificadores principais
                 String cpf = paciente.getIdentificadores() != null ? paciente.getIdentificadores().stream()
                                 .filter(id -> id.getTipo() == TipoIdentificadorEnum.CPF
                                                 && Boolean.TRUE.equals(id.getPrincipal()))
@@ -135,7 +182,6 @@ public interface PacienteMapper {
                                 .map(id -> id.getValor())
                                 .findFirst().orElse(null) : null;
 
-                // Buscar contatos principais
                 String telefone = paciente.getContatos() != null ? paciente.getContatos().stream()
                                 .filter(c -> c.getTipo() == TipoContatoEnum.TELEFONE)
                                 .map(c -> c.getTelefone())
@@ -148,7 +194,6 @@ public interface PacienteMapper {
                                 .filter(e -> e != null && !e.trim().isEmpty())
                                 .findFirst().orElse(null) : null;
 
-                // Buscar dados pessoais complementares
                 String nomeMae = paciente.getDadosPessoaisComplementares() != null
                                 ? paciente.getDadosPessoaisComplementares().getNomeMae()
                                 : null;
@@ -164,7 +209,6 @@ public interface PacienteMapper {
                                                 ? paciente.getDadosPessoaisComplementares().getOrientacaoSexual()
                                                 : null;
 
-                // Buscar dados sociodemográficos
                 com.upsaude.enums.RacaCorEnum racaCor = paciente.getDadosSociodemograficos() != null
                                 ? paciente.getDadosSociodemograficos().getRacaCor()
                                 : null;
@@ -190,7 +234,6 @@ public interface PacienteMapper {
                                 ? paciente.getDadosSociodemograficos().getSituacaoRua()
                                 : null;
 
-                // Buscar responsável legal
                 String responsavelNome = paciente.getResponsavelLegal() != null
                                 ? paciente.getResponsavelLegal().getNome()
                                 : null;
@@ -200,11 +243,9 @@ public interface PacienteMapper {
                                 ? paciente.getResponsavelLegal().getTelefone()
                                 : null;
 
-                // Buscar óbito
                 LocalDate dataObito = paciente.getObito() != null ? paciente.getObito().getDataObito() : null;
                 String causaObitoCid10 = paciente.getObito() != null ? paciente.getObito().getCausaObitoCid10() : null;
 
-                // Buscar integração gov (primeira encontrada)
                 Boolean cartaoSusAtivo = paciente.getIntegracoesGov() != null && !paciente.getIntegracoesGov().isEmpty()
                                 ? paciente.getIntegracoesGov().get(0).getCartaoSusAtivo()
                                 : null;
@@ -223,13 +264,11 @@ public interface PacienteMapper {
                                                 ? paciente.getIntegracoesGov().get(0).getTipoCns()
                                                 : null;
 
-                // Buscar vínculo territorial ativo
                 Boolean acompanhadoPorEquipeEsf = paciente.getVinculosTerritoriais() != null
                                 ? paciente.getVinculosTerritoriais().stream()
                                                 .anyMatch(v -> Boolean.TRUE.equals(v.getActive()))
                                 : false;
 
-                // Buscar deficiências
                 Boolean possuiDeficiencia = paciente.getDeficiencias() != null && !paciente.getDeficiencias().isEmpty();
                 String tipoDeficiencia = paciente.getDeficiencias() != null && !paciente.getDeficiencias().isEmpty()
                                 ? paciente.getDeficiencias().stream()
@@ -250,7 +289,7 @@ public interface PacienteMapper {
                                 .cns(cns)
                                 .dataNascimento(paciente.getDataNascimento())
                                 .sexo(paciente.getSexo())
-                                .estadoCivil(null) // Removido do core, buscar de dados sociodemográficos se necessário
+                                .estadoCivil(null) 
                                 .telefone(telefone)
                                 .email(email)
                                 .nomeMae(nomeMae)

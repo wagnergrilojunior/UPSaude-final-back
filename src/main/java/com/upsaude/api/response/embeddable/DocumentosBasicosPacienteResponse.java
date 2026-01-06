@@ -6,14 +6,16 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.time.LocalDate;
-
 @Getter
 @Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class InformacoesConvenioPacienteResponse {
-    private String numeroCarteirinha;
-    private LocalDate dataValidadeCarteirinha;
+public class DocumentosBasicosPacienteResponse {
+    private String cpf;
+    private String rg;
+    private String cns;
+    private String orgaoEmissorRg;
+    private String ufEmissorRg;
 }
+

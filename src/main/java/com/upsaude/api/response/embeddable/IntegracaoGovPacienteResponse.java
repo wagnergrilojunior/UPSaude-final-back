@@ -1,5 +1,6 @@
 package com.upsaude.api.response.embeddable;
 
+import com.upsaude.enums.TipoCnsEnum;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -13,7 +14,11 @@ import java.time.LocalDate;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class InformacoesConvenioPacienteResponse {
-    private String numeroCarteirinha;
-    private LocalDate dataValidadeCarteirinha;
+public class IntegracaoGovPacienteResponse {
+    private Boolean cartaoSusAtivo;
+    private LocalDate dataAtualizacaoCns;
+    private String origemCadastro;
+    private Boolean cnsValidado;
+    private TipoCnsEnum tipoCns;
 }
+
