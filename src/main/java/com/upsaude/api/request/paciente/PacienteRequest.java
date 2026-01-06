@@ -84,7 +84,6 @@ public class PacienteRequest {
     @Valid
     private DadosClinicosBasicosRequest dadosClinicosBasicos;
 
-    @Valid
     private ResponsavelLegalPacienteRequest responsavelLegal;
 
     @Valid

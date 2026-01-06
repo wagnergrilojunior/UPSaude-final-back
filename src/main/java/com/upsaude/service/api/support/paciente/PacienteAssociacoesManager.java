@@ -185,6 +185,10 @@ public class PacienteAssociacoesManager {
         }
 
         if (request.getObito() != null) {
+            // Validar que a data do óbito é obrigatória quando o objeto óbito é fornecido
+            if (request.getObito().getDataObito() == null) {
+                throw new com.upsaude.exception.BadRequestException("Data de óbito é obrigatória quando os dados de óbito são fornecidos");
+            }
             var entity = pacienteObitoMapper.fromRequest(request.getObito());
             entity.setPaciente(paciente);
             entity.setTenant(tenant);

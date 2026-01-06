@@ -139,7 +139,7 @@ public class ProfissionaisSaudeServiceImpl implements ProfissionaisSaudeService 
                         property = "documentosBasicos." + property;
                     }
 
-                    else if ("registroProfissional".equals(property) || "conselho".equals(property) || "ufRegistro".equals(property)) {
+                    else if ("registroProfissional".equals(property) || "ufRegistro".equals(property)) {
                         property = "registroProfissional." + property;
                     }
 

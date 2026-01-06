@@ -31,6 +31,7 @@ public interface ProntuarioRepository extends JpaRepository<Prontuario, UUID> {
 
     Page<Prontuario> findByEstabelecimentoIdAndTenantId(UUID estabelecimentoId, UUID tenantId, Pageable pageable);
 
-    Page<Prontuario> findByCriadoPorAndTenantId(UUID criadoPor, UUID tenantId, Pageable pageable);
+    @Query("SELECT p FROM Prontuario p WHERE p.profissionalCriador.id = :criadoPor AND p.tenant.id = :tenantId")
+    Page<Prontuario> findByCriadoPorAndTenantId(@Param("criadoPor") UUID criadoPor, @Param("tenantId") UUID tenantId, Pageable pageable);
 }
 

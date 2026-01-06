@@ -18,7 +18,12 @@ import java.util.UUID;
 public class PacienteValidationService {
 
     public void validarObrigatorios(PacienteRequest request) {
-
+        // Validar data do óbito apenas se o objeto óbito for fornecido
+        if (request.getObito() != null) {
+            if (request.getObito().getDataObito() == null) {
+                throw new BadRequestException("Data de óbito é obrigatória quando os dados de óbito são fornecidos");
+            }
+        }
     }
 
     public void validarUnicidadeParaCriacao(PacienteRequest request, 
