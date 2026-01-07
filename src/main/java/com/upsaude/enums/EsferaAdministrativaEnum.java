@@ -3,17 +3,17 @@ package com.upsaude.enums;
 import java.util.Arrays;
 import java.util.Locale;
 
-public enum StatusSincronizacaoEnum {
-    PENDENTE(1, "PENDENTE", "Aguardando processamento"),
-    PROCESSANDO(2, "PROCESSANDO", "Em processamento"),
-    SUCESSO(3, "SUCESSO", "Sincronização concluída com sucesso"),
-    ERRO(4, "ERRO", "Erro na sincronização");
+public enum EsferaAdministrativaEnum {
+    FEDERAL(1, "FEDERAL", "Federal"),
+    ESTADUAL(2, "ESTADUAL", "Estadual"),
+    MUNICIPAL(3, "MUNICIPAL", "Municipal"),
+    PRIVADO(4, "PRIVADO", "Privado");
 
     private final Integer codigo;
     private final String nome;
     private final String descricao;
 
-    StatusSincronizacaoEnum(Integer codigo, String nome, String descricao) {
+    EsferaAdministrativaEnum(Integer codigo, String nome, String descricao) {
         this.codigo = codigo;
         this.nome = nome;
         this.descricao = descricao;
@@ -31,7 +31,7 @@ public enum StatusSincronizacaoEnum {
         return descricao;
     }
 
-    public static StatusSincronizacaoEnum fromCodigo(Integer codigo) {
+    public static EsferaAdministrativaEnum fromCodigo(Integer codigo) {
         if (codigo == null) return null;
         return Arrays.stream(values())
                 .filter(v -> v.codigo.equals(codigo))
@@ -39,7 +39,7 @@ public enum StatusSincronizacaoEnum {
                 .orElse(null);
     }
 
-    public static StatusSincronizacaoEnum fromNome(String nome) {
+    public static EsferaAdministrativaEnum fromNome(String nome) {
         if (nome == null) return null;
         String n = nome.trim().toUpperCase(Locale.ROOT);
         return Arrays.stream(values())
@@ -48,3 +48,4 @@ public enum StatusSincronizacaoEnum {
                 .orElse(null);
     }
 }
+

@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jaxws:bindings xmlns:jaxws="http://java.sun.com/xml/ns/jaxws"
+                xmlns:jaxb="http://java.sun.com/xml/ns/jaxb"
+                xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/"
+                xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+                version="2.0">
+    
+    <!-- Resolver conflitos de FiltroPesquisaEstabelecimentoSaudeType -->
+    <jaxws:bindings node="wsdl:definitions/wsdl:types/xsd:schema[@targetNamespace='http://servicos.saude.gov.br/wsdl/mensageria/v1r0/filtropesquisaestabelecimentosaude']">
+        <jaxb:bindings node="//xsd:complexType[@name='FiltroPesquisaEstabelecimentoSaudeType']">
+            <jaxb:class name="FiltroPesquisaEstabelecimentoSaudeV1r0Type"/>
+        </jaxb:bindings>
+    </jaxws:bindings>
+    
+    <jaxws:bindings node="wsdl:definitions/wsdl:types/xsd:schema[@targetNamespace='http://servicos.saude.gov.br/wsdl/mensageria/estabelecimentosaudeservice/v2r0/filtropesquisaestabelecimento.v1r0']">
+        <jaxb:bindings node="//xsd:complexType[@name='FiltroPesquisaEstabelecimentoSaudeType']">
+            <jaxb:class name="FiltroPesquisaEstabelecimentoV1r0Type"/>
+        </jaxb:bindings>
+    </jaxws:bindings>
+    
+    <!-- Resolver conflitos de PaginacaoType -->
+    <jaxws:bindings node="wsdl:definitions/wsdl:types/xsd:schema[@targetNamespace='http://servicos.saude.gov.br/wsdl/mensageria/v1/paginacao']">
+        <jaxb:bindings node="//xsd:complexType[@name='PaginacaoType']">
+            <jaxb:class name="PaginacaoV1Type"/>
+        </jaxb:bindings>
+    </jaxws:bindings>
+    
+    <jaxws:bindings node="wsdl:definitions/wsdl:types/xsd:schema[@targetNamespace='http://servicos.saude.gov.br/wsdl/mensageria/v1r0/paginacao']">
+        <jaxb:bindings node="//xsd:complexType[@name='PaginacaoType']">
+            <jaxb:class name="PaginacaoV1r0Type"/>
+        </jaxb:bindings>
+    </jaxws:bindings>
+    
+    <!-- Resolver conflitos de MunicipioType -->
+    <jaxws:bindings node="wsdl:definitions/wsdl:types/xsd:schema[@targetNamespace='http://servicos.saude.gov.br/schema/corporativo/v1r2/municipio']">
+        <jaxb:bindings node="//xsd:complexType[@name='MunicipioType']">
+            <jaxb:class name="MunicipioV1r2Type"/>
+        </jaxb:bindings>
+    </jaxws:bindings>
+    
+    <jaxws:bindings node="wsdl:definitions/wsdl:types/xsd:schema[@targetNamespace='http://servicos.saude.gov.br/schema/corporativo/v1r3/municipio']">
+        <jaxb:bindings node="//xsd:complexType[@name='MunicipioType']">
+            <jaxb:class name="MunicipioV1r3Type"/>
+        </jaxb:bindings>
+    </jaxws:bindings>
+    
+    <!-- Resolver conflitos de UFType -->
+    <jaxws:bindings node="wsdl:definitions/wsdl:types/xsd:schema[@targetNamespace='http://servicos.saude.gov.br/schema/corporativo/v1r1/uf']">
+        <jaxb:bindings node="//xsd:complexType[@name='UFType']">
+            <jaxb:class name="UFV1r1Type"/>
+        </jaxb:bindings>
+    </jaxws:bindings>
+    
+    <jaxws:bindings node="wsdl:definitions/wsdl:types/xsd:schema[@targetNamespace='http://servicos.saude.gov.br/schema/corporativo/v1r2/uf']">
+        <jaxb:bindings node="//xsd:complexType[@name='UFType']">
+            <jaxb:class name="UFV1r2Type"/>
+        </jaxb:bindings>
+    </jaxws:bindings>
+    
+</jaxws:bindings>
+
