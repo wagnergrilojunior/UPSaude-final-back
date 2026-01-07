@@ -36,5 +36,12 @@ public class ConsultasRelacionamentosHandler {
         UUID medicoId = Objects.requireNonNull(request.getMedico(), "médico é obrigatório");
         Medicos medico = medicoTenantEnforcer.validarAcesso(medicoId, tenantId);
         entity.setMedico(medico);
+
+        // Definir paciente a partir do atendimento
+        if (atendimento.getPaciente() != null) {
+            entity.setPaciente(atendimento.getPaciente());
+        } else {
+            throw new NotFoundException("Atendimento não possui paciente associado");
+        }
     }
 }

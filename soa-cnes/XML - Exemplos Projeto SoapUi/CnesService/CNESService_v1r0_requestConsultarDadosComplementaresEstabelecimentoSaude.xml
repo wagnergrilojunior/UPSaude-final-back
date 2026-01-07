@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<soap:Envelope xmlns:soap="http://www.w3.org/2003/05/soap-envelope" xmlns:cnes="http://servicos.saude.gov.br/cnes/v1r0/cnesservice" xmlns:mun="http://servicos.saude.gov.br/schema/corporativo/v1r2/municipio" xmlns:uf="http://servicos.saude.gov.br/schema/corporativo/v1r1/uf" xmlns:cmpt="http://servicos.saude.gov.br/schema/cnes/v1r0/cmpt">
+   <soap:Header>
+      <wsse:Security xmlns:wsse="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd" xmlns:wsu="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd">
+         <wsse:UsernameToken wsu:Id="UsernameToken-F31A3FB33EEECDF5B617325776425894">
+            <wsse:Username>CNES.PUBLICO</wsse:Username>
+            <wsse:Password Type="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-username-token-profile-1.0#PasswordText">cnes#2015public</wsse:Password>
+         </wsse:UsernameToken>
+      </wsse:Security>
+   </soap:Header>
+   <soap:Body>
+      <cnes:requestConsultarDadosComplementaresEstabelecimentoSaude>
+         <cnes:MunicipioCNES>
+            <mun:codigoMunicipio>530010</mun:codigoMunicipio>
+         </cnes:MunicipioCNES>
+         <cmpt:cmpt>
+            <cmpt:cmpt>202401</cmpt:cmpt>
+         </cmpt:cmpt>
+      </cnes:requestConsultarDadosComplementaresEstabelecimentoSaude>
+   </soap:Body>
+</soap:Envelope>

@@ -1,7 +1,5 @@
 package com.upsaude.api.request.clinica.cirurgia;
 
-import com.upsaude.entity.paciente.Paciente;
-
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.upsaude.enums.StatusCirurgiaEnum;
 import com.upsaude.util.converter.StatusCirurgiaEnumDeserializer;
@@ -10,6 +8,8 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -34,12 +34,10 @@ public class CirurgiaRequest {
     private UUID medicoCirurgiao;
     private UUID especialidade;
     private UUID convenio;
+    private UUID diagnosticoPrincipal;
 
     @NotBlank(message = "Descrição da cirurgia é obrigatória")
     private String descricao;
-
-    @Size(max = 50, message = "Código do procedimento deve ter no máximo 50 caracteres")
-    private String codigoProcedimento;
 
     @NotNull(message = "Data e hora prevista são obrigatórias")
     private OffsetDateTime dataHoraPrevista;
@@ -64,4 +62,12 @@ public class CirurgiaRequest {
     private String observacoesPosOperatorio;
     private String observacoes;
     private String observacoesInternas;
+
+    @Builder.Default
+    @Schema(description = "Lista de procedimentos SIGTAP associados à cirurgia")
+    private List<CirurgiaProcedimentoRequest> procedimentos = new ArrayList<>();
+
+    @Builder.Default
+    @Schema(description = "Lista de equipes cirúrgicas")
+    private List<EquipeCirurgicaRequest> equipe = new ArrayList<>();
 }

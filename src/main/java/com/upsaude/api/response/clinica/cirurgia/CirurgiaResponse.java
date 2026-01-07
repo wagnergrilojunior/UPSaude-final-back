@@ -1,10 +1,10 @@
 package com.upsaude.api.response.clinica.cirurgia;
 
-import com.upsaude.api.response.clinica.cirurgia.EquipeCirurgicaResponse;
 import com.upsaude.api.response.clinica.atendimento.PacienteAtendimentoResponse;
 import com.upsaude.api.response.clinica.atendimento.ProfissionalAtendimentoResponse;
 import com.upsaude.api.response.clinica.atendimento.MedicoConsultaResponse;
 import com.upsaude.api.response.agendamento.ConvenioAgendamentoResponse;
+import com.upsaude.api.response.referencia.cid.DiagnosticoPrincipalResponse;
 
 import com.upsaude.enums.StatusCirurgiaEnum;
 import java.math.BigDecimal;
@@ -28,12 +28,14 @@ public class CirurgiaResponse {
     private OffsetDateTime createdAt;
     private OffsetDateTime updatedAt;
     private Boolean active;
+    private UUID tenantId;
+    private UUID estabelecimentoId;
     private PacienteAtendimentoResponse paciente;
     private ProfissionalAtendimentoResponse cirurgiaoPrincipal;
     private MedicoConsultaResponse medicoCirurgiao;
     private ConvenioAgendamentoResponse convenio;
+    private DiagnosticoPrincipalResponse diagnosticoPrincipal;
     private String descricao;
-    private String codigoProcedimento;
     private OffsetDateTime dataHoraPrevista;
     private OffsetDateTime dataHoraInicio;
     private OffsetDateTime dataHoraFim;
@@ -52,4 +54,7 @@ public class CirurgiaResponse {
 
     @Builder.Default
     private List<EquipeCirurgicaResponse> equipe = new ArrayList<>();
+
+    @Builder.Default
+    private List<CirurgiaProcedimentoResponse> procedimentos = new ArrayList<>();
 }

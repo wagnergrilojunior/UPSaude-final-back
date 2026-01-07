@@ -63,6 +63,15 @@ public interface AtendimentoMapper {
 
     @Mapping(target = "paciente", source = "paciente", qualifiedByName = "mapPacienteSimplificado")
     @Mapping(target = "profissional", source = "profissional", qualifiedByName = "mapProfissionalSimplificado")
+    @Mapping(target = "equipeSaude", ignore = true)
+    @Mapping(target = "convenio", ignore = true)
+    @Mapping(target = "informacoes", ignore = true)
+    @Mapping(target = "anamnese", ignore = true)
+    @Mapping(target = "diagnostico", ignore = true)
+    @Mapping(target = "procedimentosRealizados", ignore = true)
+    @Mapping(target = "classificacaoRisco", ignore = true)
+    @Mapping(target = "anotacoes", ignore = true)
+    @Mapping(target = "observacoesInternas", ignore = true)
     AtendimentoResponse toResponse(Atendimento entity);
 
     @Named("mapPacienteSimplificado")

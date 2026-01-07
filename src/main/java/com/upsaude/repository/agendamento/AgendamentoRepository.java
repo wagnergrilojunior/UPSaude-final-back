@@ -58,7 +58,6 @@ public interface AgendamentoRepository extends JpaRepository<Agendamento, UUID> 
         "paciente",
         "profissional",
         "medico",
-        "especialidade",
         "convenio",
         "atendimento",
         "agendamentoOriginal",

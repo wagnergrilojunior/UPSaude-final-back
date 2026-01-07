@@ -1,7 +1,5 @@
 package com.upsaude.service.api.support.cirurgia;
 
-import com.upsaude.entity.paciente.Paciente;
-
 import com.upsaude.api.request.clinica.cirurgia.CirurgiaRequest;
 import com.upsaude.exception.BadRequestException;
 import org.springframework.stereotype.Service;

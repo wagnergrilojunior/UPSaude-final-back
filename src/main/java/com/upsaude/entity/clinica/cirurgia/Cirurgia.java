@@ -6,6 +6,7 @@ import com.upsaude.entity.profissional.ProfissionaisSaude;
 import com.upsaude.entity.convenio.Convenio;
 
 import com.upsaude.entity.paciente.Paciente;
+import com.upsaude.entity.referencia.cid.Cid10Subcategorias;
 
 import com.upsaude.enums.StatusCirurgiaEnum;
 import com.upsaude.util.converter.StatusCirurgiaEnumConverter;
@@ -37,7 +38,8 @@ import java.util.List;
            @Index(name = "idx_cirurgia_data_hora", columnList = "data_hora_prevista"),
            @Index(name = "idx_cirurgia_status", columnList = "status"),
            @Index(name = "idx_cirurgia_estabelecimento", columnList = "estabelecimento_id"),
-           @Index(name = "idx_cirurgia_sala", columnList = "sala_cirurgica")
+           @Index(name = "idx_cirurgia_sala", columnList = "sala_cirurgica"),
+           @Index(name = "idx_cirurgia_diagnostico_principal", columnList = "diagnostico_principal_id")
        })
 @Data
 @EqualsAndHashCode(callSuper = true)
@@ -45,6 +47,7 @@ public class Cirurgia extends BaseEntity {
 
     public Cirurgia() {
         this.equipe = new ArrayList<>();
+        this.procedimentos = new ArrayList<>();
     }
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -63,14 +66,18 @@ public class Cirurgia extends BaseEntity {
     @JoinColumn(name = "convenio_id")
     private Convenio convenio;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "diagnostico_principal_id")
+    private Cid10Subcategorias diagnosticoPrincipal;
+
     @OneToMany(mappedBy = "cirurgia", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     private List<EquipeCirurgica> equipe = new ArrayList<>();
 
+    @OneToMany(mappedBy = "cirurgia", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<CirurgiaProcedimento> procedimentos = new ArrayList<>();
+
     @Column(name = "descricao", nullable = false, columnDefinition = "TEXT")
     private String descricao;
-
-    @Column(name = "codigo_procedimento", length = 50)
-    private String codigoProcedimento;
 
     @Column(name = "data_hora_prevista", nullable = false)
     private OffsetDateTime dataHoraPrevista;
@@ -97,13 +104,13 @@ public class Cirurgia extends BaseEntity {
     @Column(name = "status", nullable = false)
     private StatusCirurgiaEnum status;
 
-    @Column(name = "valor_cirurgia", precision = 10, scale = 2)
+    @Column(name = "valor_cirurgia", precision = 14, scale = 2)
     private BigDecimal valorCirurgia;
 
-    @Column(name = "valor_material", precision = 10, scale = 2)
+    @Column(name = "valor_material", precision = 14, scale = 2)
     private BigDecimal valorMaterial;
 
-    @Column(name = "valor_total", precision = 10, scale = 2)
+    @Column(name = "valor_total", precision = 14, scale = 2)
     private BigDecimal valorTotal;
 
     @Column(name = "observacoes_pre_operatorio", columnDefinition = "TEXT")
@@ -123,6 +130,9 @@ public class Cirurgia extends BaseEntity {
     public void validateCollections() {
         if (equipe == null) {
             equipe = new ArrayList<>();
+        }
+        if (procedimentos == null) {
+            procedimentos = new ArrayList<>();
         }
     }
 
@@ -146,5 +156,43 @@ public class Cirurgia extends BaseEntity {
         if (equipe.remove(membroEquipe)) {
             membroEquipe.setCirurgia(null);
         }
+    }
+
+    public void addProcedimento(CirurgiaProcedimento procedimento) {
+        if (procedimento == null) {
+            return;
+        }
+        if (procedimentos == null) {
+            procedimentos = new ArrayList<>();
+        }
+        if (!procedimentos.contains(procedimento)) {
+            procedimentos.add(procedimento);
+            procedimento.setCirurgia(this);
+        }
+    }
+
+    public void removeProcedimento(CirurgiaProcedimento procedimento) {
+        if (procedimento == null || procedimentos == null) {
+            return;
+        }
+        if (procedimentos.remove(procedimento)) {
+            procedimento.setCirurgia(null);
+        }
+    }
+
+    /**
+     * Calcula o valor total da cirurgia baseado nos procedimentos SIGTAP.
+     * Considera os valores dos procedimentos oficiais do SIGTAP.
+     * 
+     * @return BigDecimal com o valor total calculado ou null se não houver procedimentos
+     */
+    public BigDecimal calcularValorTotalProcedimentos() {
+        if (procedimentos == null || procedimentos.isEmpty()) {
+            return null;
+        }
+        return procedimentos.stream()
+                .filter(p -> p.getValorTotal() != null)
+                .map(CirurgiaProcedimento::getValorTotal)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 }

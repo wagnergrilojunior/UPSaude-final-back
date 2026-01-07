@@ -29,7 +29,7 @@ public class CirurgiaCreator {
         entity.setActive(true);
         entity.setTenant(Objects.requireNonNull(tenant, "tenant é obrigatório para criar cirurgia"));
 
-        relacionamentosHandler.processarRelacionamentos(entity, request, tenantId);
+        relacionamentosHandler.processarRelacionamentos(entity, request, tenantId, tenant);
 
         Cirurgia saved = repository.save(Objects.requireNonNull(entity));
         log.info("Cirurgia criada com sucesso. ID: {}, tenant: {}", saved.getId(), tenantId);
