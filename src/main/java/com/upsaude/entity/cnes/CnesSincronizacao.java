@@ -10,20 +10,21 @@ import jakarta.persistence.*;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 import java.time.OffsetDateTime;
 import java.util.UUID;
 
 @Entity
-@Table(name = "cnes_sincronizacao", schema = "public",
-       indexes = {
-           @Index(name = "idx_cnes_sincronizacao_tipo_entidade", columnList = "tipo_entidade"),
-           @Index(name = "idx_cnes_sincronizacao_entidade_id", columnList = "entidade_id"),
-           @Index(name = "idx_cnes_sincronizacao_status", columnList = "status"),
-           @Index(name = "idx_cnes_sincronizacao_data_sincronizacao", columnList = "data_sincronizacao"),
-           @Index(name = "idx_cnes_sincronizacao_codigo_identificador", columnList = "codigo_identificador"),
-           @Index(name = "idx_cnes_sincronizacao_estabelecimento", columnList = "estabelecimento_id")
-       })
+@Table(name = "cnes_sincronizacao", schema = "public", indexes = {
+        @Index(name = "idx_cnes_sincronizacao_tipo_entidade", columnList = "tipo_entidade"),
+        @Index(name = "idx_cnes_sincronizacao_entidade_id", columnList = "entidade_id"),
+        @Index(name = "idx_cnes_sincronizacao_status", columnList = "status"),
+        @Index(name = "idx_cnes_sincronizacao_data_sincronizacao", columnList = "data_sincronizacao"),
+        @Index(name = "idx_cnes_sincronizacao_codigo_identificador", columnList = "codigo_identificador"),
+        @Index(name = "idx_cnes_sincronizacao_estabelecimento", columnList = "estabelecimento_id")
+})
 @Getter
 @Setter
 @EqualsAndHashCode(onlyExplicitlyIncluded = true, callSuper = true)
@@ -65,10 +66,11 @@ public class CnesSincronizacao extends BaseEntity {
     private String mensagemErro;
 
     @Column(name = "detalhes_erro", columnDefinition = "jsonb")
+    @JdbcTypeCode(SqlTypes.JSON)
     private String detalhesErro;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "estabelecimento_id")
-    private Estabelecimentos estabelecimento;
-}
+    @Column(name = "dados_recebidos", columnDefinition = "jsonb")
+    @JdbcTypeCode(SqlTypes.JSON)
+    private String dadosRecebidos;
 
+}

@@ -30,6 +30,7 @@ public class CnesProfissionalServiceImpl implements CnesProfissionalService {
     private final ProfissionaisSaudeRepository profissionaisRepository;
     private final TenantService tenantService;
     private final CnesProfissionalMapper cnesMapper;
+    private final com.upsaude.mapper.profissional.ProfissionalSaudeMapper profissionalResponseMapper;
 
     @Override
     @Transactional
@@ -60,9 +61,10 @@ public class CnesProfissionalServiceImpl implements CnesProfissionalService {
             com.upsaude.integration.cnes.wsdl.profissional.ProfissionalSaudeType dadosCnes = resposta
                     .getProfissionalSaude();
 
+            ProfissionaisSaude profissional = null;
             if (persistir) {
                 final boolean[] isNovo = { false };
-                ProfissionaisSaude profissional = profissionaisRepository.findByCnsAndTenant(numeroCns, tenant)
+                profissional = profissionaisRepository.findByCnsAndTenant(numeroCns, tenant)
                         .orElseGet(() -> {
                             isNovo[0] = true;
                             ProfissionaisSaude novo = new ProfissionaisSaude();
@@ -71,14 +73,18 @@ public class CnesProfissionalServiceImpl implements CnesProfissionalService {
                         });
 
                 cnesMapper.mapToProfissional(dadosCnes, profissional);
-                profissionaisRepository.save(Objects.requireNonNull(profissional));
+                profissional = profissionaisRepository.save(Objects.requireNonNull(profissional));
 
                 sincronizacaoService.finalizarComSucesso(registro.getId(), isNovo[0] ? 1 : 0, isNovo[0] ? 0 : 1);
             } else {
                 sincronizacaoService.finalizarComSucesso(registro.getId(), 0, 0);
             }
 
-            return sincronizacaoService.obterPorId(registro.getId());
+            CnesSincronizacaoResponse response = sincronizacaoService.obterPorId(registro.getId());
+            if (persistir && profissional != null) {
+                response.setEntidade(profissionalResponseMapper.toResponse(profissional));
+            }
+            return response;
 
         } catch (CnesSoapException e) {
             log.error("Erro SOAP ao sincronizar profissional CNS: {}", numeroCns, e);
@@ -120,9 +126,10 @@ public class CnesProfissionalServiceImpl implements CnesProfissionalService {
             com.upsaude.integration.cnes.wsdl.profissional.ProfissionalSaudeType dadosCnes = resposta
                     .getProfissionalSaude();
 
+            ProfissionaisSaude profissional = null;
             if (persistir) {
                 final boolean[] isNovo = { false };
-                ProfissionaisSaude profissional = profissionaisRepository.findByCpfAndTenant(numeroCpf, tenant)
+                profissional = profissionaisRepository.findByCpfAndTenant(numeroCpf, tenant)
                         .orElseGet(() -> {
                             isNovo[0] = true;
                             ProfissionaisSaude novo = new ProfissionaisSaude();
@@ -131,14 +138,18 @@ public class CnesProfissionalServiceImpl implements CnesProfissionalService {
                         });
 
                 cnesMapper.mapToProfissional(dadosCnes, profissional);
-                profissionaisRepository.save(Objects.requireNonNull(profissional));
+                profissional = profissionaisRepository.save(Objects.requireNonNull(profissional));
 
                 sincronizacaoService.finalizarComSucesso(registro.getId(), isNovo[0] ? 1 : 0, isNovo[0] ? 0 : 1);
             } else {
                 sincronizacaoService.finalizarComSucesso(registro.getId(), 0, 0);
             }
 
-            return sincronizacaoService.obterPorId(registro.getId());
+            CnesSincronizacaoResponse response = sincronizacaoService.obterPorId(registro.getId());
+            if (persistir && profissional != null) {
+                response.setEntidade(profissionalResponseMapper.toResponse(profissional));
+            }
+            return response;
 
         } catch (Exception e) {
             log.error("Erro ao sincronizar profissional CPF: {}", numeroCpf, e);
@@ -167,5 +178,45 @@ public class CnesProfissionalServiceImpl implements CnesProfissionalService {
         }
 
         return resposta.getProfissionalSaude();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Object buscarProfissionalPorCpf(String cpf) {
+        log.debug("Buscando profissional sincronizado por CPF: {}", cpf);
+
+        com.upsaude.entity.sistema.multitenancy.Tenant tenant = tenantService.obterTenantDoUsuarioAutenticado();
+
+        return profissionaisRepository.findByCpfAndTenant(cpf, tenant)
+                .map(profissionalResponseMapper::toResponse)
+                .orElseThrow(() -> new com.upsaude.exception.NotFoundException(
+                        "Profissional com CPF " + cpf + " não encontrado no banco local"));
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Object buscarProfissionalPorCns(String cns) {
+        log.debug("Buscando profissional sincronizado por CNS: {}", cns);
+
+        com.upsaude.entity.sistema.multitenancy.Tenant tenant = tenantService.obterTenantDoUsuarioAutenticado();
+
+        return profissionaisRepository.findByCnsAndTenant(cns, tenant)
+                .map(profissionalResponseMapper::toResponse)
+                .orElseThrow(() -> new com.upsaude.exception.NotFoundException(
+                        "Profissional com CNS " + cns + " não encontrado no banco local"));
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Object listarProfissionais(int page, int size) {
+        log.debug("Listando profissionais sincronizados - page: {}, size: {}", page, size);
+
+        com.upsaude.entity.sistema.multitenancy.Tenant tenant = tenantService.obterTenantDoUsuarioAutenticado();
+
+        org.springframework.data.domain.Pageable pageable = org.springframework.data.domain.PageRequest.of(page, size);
+
+        org.springframework.data.domain.Page<ProfissionaisSaude> profissionais = profissionaisRepository
+                .findAllByTenant(tenant.getId(), pageable);
+        return profissionalResponseMapper.toResponsePage(profissionais);
     }
 }

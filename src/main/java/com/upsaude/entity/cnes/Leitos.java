@@ -13,12 +13,11 @@ import lombok.Setter;
 import java.time.OffsetDateTime;
 
 @Entity
-@Table(name = "leitos", schema = "public",
-       indexes = {
-           @Index(name = "idx_leitos_codigo_cnes", columnList = "codigo_cnes_leito"),
-           @Index(name = "idx_leitos_estabelecimento", columnList = "estabelecimento_id"),
-           @Index(name = "idx_leitos_status", columnList = "status")
-       })
+@Table(name = "leitos", schema = "public", indexes = {
+        @Index(name = "idx_leitos_codigo_cnes", columnList = "codigo_cnes_leito"),
+        @Index(name = "idx_leitos_estabelecimento", columnList = "estabelecimento_id"),
+        @Index(name = "idx_leitos_status", columnList = "status")
+})
 @Getter
 @Setter
 @EqualsAndHashCode(onlyExplicitlyIncluded = true, callSuper = true)
@@ -59,5 +58,5 @@ public class Leitos extends BaseEntity {
 
     @Column(name = "observacoes", columnDefinition = "TEXT")
     private String observacoes;
-}
 
+}

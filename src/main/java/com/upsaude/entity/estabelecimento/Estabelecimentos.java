@@ -34,18 +34,16 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-@Table(name = "estabelecimentos", schema = "public",
-       uniqueConstraints = {
-           @UniqueConstraint(name = "uk_estabelecimentos_cnes_tenant", columnNames = {"codigo_cnes", "tenant_id"}),
-           @UniqueConstraint(name = "uk_estabelecimentos_cnpj_tenant", columnNames = {"cnpj", "tenant_id"})
-       },
-       indexes = {
-           @Index(name = "idx_estabelecimentos_cnes", columnList = "codigo_cnes"),
-           @Index(name = "idx_estabelecimentos_cnpj", columnList = "cnpj"),
-           @Index(name = "idx_estabelecimentos_nome", columnList = "nome"),
-           @Index(name = "idx_estabelecimentos_esfera_administrativa", columnList = "esfera_administrativa"),
-           @Index(name = "idx_estabelecimentos_codigo_ibge", columnList = "codigo_ibge_municipio")
-       })
+@Table(name = "estabelecimentos", schema = "public", uniqueConstraints = {
+        @UniqueConstraint(name = "uk_estabelecimentos_cnes_tenant", columnNames = { "cnes", "tenant_id" }),
+        @UniqueConstraint(name = "uk_estabelecimentos_cnpj_tenant", columnNames = { "cnpj", "tenant_id" })
+}, indexes = {
+        @Index(name = "idx_estabelecimentos_cnes", columnList = "cnes"),
+        @Index(name = "idx_estabelecimentos_cnpj", columnList = "cnpj"),
+        @Index(name = "idx_estabelecimentos_nome", columnList = "nome"),
+        @Index(name = "idx_estabelecimentos_esfera_administrativa", columnList = "esfera_administrativa"),
+        @Index(name = "idx_estabelecimentos_codigo_ibge", columnList = "codigo_ibge_municipio")
+})
 @Getter
 @Setter
 @EqualsAndHashCode(onlyExplicitlyIncluded = true, callSuper = true)
@@ -88,6 +86,13 @@ public class Estabelecimentos extends BaseEntityWithoutEstabelecimento {
 
     @Column(name = "versao_cnes", length = 6)
     private String versaoCnes;
+
+    @Column(name = "status_cnes", length = 50)
+    private String statusCnes;
+
+    @Column(name = "cnes_dados_json", columnDefinition = "jsonb")
+    @org.hibernate.annotations.JdbcTypeCode(org.hibernate.type.SqlTypes.JSON)
+    private String cnesDadosJson;
 
     @Column(name = "observacoes", columnDefinition = "TEXT")
     private String observacoes;

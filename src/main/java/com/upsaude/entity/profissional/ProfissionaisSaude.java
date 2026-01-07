@@ -24,48 +24,48 @@ import lombok.Setter;
 
 @Entity
 @Table(name = "profissionais_saude", schema = "public", uniqueConstraints = {
-        @UniqueConstraint(name = "uk_profissional_cpf", columnNames = { "cpf" })
+                @UniqueConstraint(name = "uk_profissional_cpf", columnNames = { "cpf" })
 }, indexes = {
-        @Index(name = "idx_profissional_cpf", columnList = "cpf"),
-        @Index(name = "idx_profissional_registro", columnList = "registro_profissional"),
-        @Index(name = "idx_profissional_status_registro", columnList = "status_registro"),
-        @Index(name = "idx_profissional_cbo", columnList = "codigo_cbo"),
-        @Index(name = "idx_profissional_cns", columnList = "cns")
+                @Index(name = "idx_profissional_cpf", columnList = "cpf"),
+                @Index(name = "idx_profissional_registro", columnList = "registro_profissional"),
+                @Index(name = "idx_profissional_status_registro", columnList = "status_registro"),
+                @Index(name = "idx_profissional_cbo", columnList = "codigo_cbo"),
+                @Index(name = "idx_profissional_cns", columnList = "cns")
 })
 @Getter
 @Setter
 @EqualsAndHashCode(onlyExplicitlyIncluded = true, callSuper = true)
 public class ProfissionaisSaude extends BaseEntity {
 
-    @Embedded
-    private DadosPessoaisBasicosProfissional dadosPessoaisBasicos;
+        @Embedded
+        private DadosPessoaisBasicosProfissional dadosPessoaisBasicos;
 
-    @Embedded
-    private DocumentosBasicosProfissional documentosBasicos;
+        @Embedded
+        private DocumentosBasicosProfissional documentosBasicos;
 
-    @Embedded
-    private DadosDemograficosProfissional dadosDemograficos;
+        @Embedded
+        private DadosDemograficosProfissional dadosDemograficos;
 
-    @Embedded
-    private DadosDeficienciaProfissional dadosDeficiencia;
+        @Embedded
+        private DadosDeficienciaProfissional dadosDeficiencia;
 
-    @Embedded
-    private RegistroProfissional registroProfissional;
+        @Embedded
+        private RegistroProfissional registroProfissional;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "sigtap_ocupacao_id")
-    private SigtapOcupacao sigtapOcupacao;
+        @ManyToOne(fetch = FetchType.LAZY)
+        @JoinColumn(name = "sigtap_ocupacao_id")
+        private SigtapOcupacao sigtapOcupacao;
 
-    @Embedded
-    private ContatoProfissional contato;
+        @Embedded
+        private ContatoProfissional contato;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "endereco_profissional_id")
-    private Endereco enderecoProfissional;
+        @ManyToOne(fetch = FetchType.LAZY)
+        @JoinColumn(name = "endereco_profissional_id")
+        private Endereco enderecoProfissional;
 
-    @Column(name = "data_ultima_sincronizacao_cnes")
-    private java.time.OffsetDateTime dataUltimaSincronizacaoCnes;
+        @Column(name = "data_ultima_sincronizacao_cnes")
+        private java.time.OffsetDateTime dataUltimaSincronizacaoCnes;
 
-    @Column(name = "observacoes", columnDefinition = "TEXT")
-    private String observacoes;
+        @Column(name = "observacoes", columnDefinition = "TEXT")
+        private String observacoes;
 }

@@ -103,10 +103,11 @@ public class CnesEstabelecimentoServiceImpl implements CnesEstabelecimentoServic
 
             if (persistir) {
                 cnesMapper.mapToEstabelecimento(dadosGerais, estabelecimento, competenciaNormalizada);
-                Estabelecimentos saved = estabelecimentosRepository.save(Objects.requireNonNull(estabelecimento));
-
-                // Serializar resposta completa para histórico
+                // Serializar resposta completa para histórico e para a entidade principal
                 String dadosJson = cnesMapper.serializeToJson(resultado);
+                estabelecimento.setCnesDadosJson(dadosJson);
+
+                Estabelecimentos saved = estabelecimentosRepository.save(Objects.requireNonNull(estabelecimento));
 
                 // Salvar histórico
                 salvarHistorico(saved, competenciaNormalizada, dadosJson);

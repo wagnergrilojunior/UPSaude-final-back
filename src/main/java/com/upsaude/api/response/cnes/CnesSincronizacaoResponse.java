@@ -31,7 +31,7 @@ public class CnesSincronizacaoResponse {
     private String mensagemErro;
     private String detalhesErro;
     private UUID estabelecimentoId;
+    private Object entidade;
     private OffsetDateTime createdAt;
     private OffsetDateTime updatedAt;
 }
-
