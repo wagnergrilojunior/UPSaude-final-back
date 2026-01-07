@@ -19,7 +19,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.PlatformTransactionManager;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import java.time.Duration;
@@ -50,9 +49,9 @@ public class IbgeServiceImpl implements IbgeService {
 
     @Autowired
     public IbgeServiceImpl(IbgeClient ibgeClient,
-                          EstadosRepository estadosRepository,
-                          CidadesRepository cidadesRepository,
-                          @Qualifier("apiTransactionManager") PlatformTransactionManager transactionManager) {
+            EstadosRepository estadosRepository,
+            CidadesRepository cidadesRepository,
+            @Qualifier("apiTransactionManager") PlatformTransactionManager transactionManager) {
         this.ibgeClient = ibgeClient;
         this.estadosRepository = estadosRepository;
         this.cidadesRepository = cidadesRepository;
@@ -66,10 +65,10 @@ public class IbgeServiceImpl implements IbgeService {
 
     // Cache interno de regiões (mapeia código IBGE da região para nome)
     private final Map<Integer, String> cacheRegioes = new HashMap<>();
-    
+
     // Tamanho do lote para processamento em batch
     private static final int BATCH_SIZE = 20;
-    
+
     // Inicialização do cacheRegioes no construtor para evitar problemas de ordem
     {
         // Inicialização do cache vazio - será preenchido durante sincronização
@@ -79,7 +78,7 @@ public class IbgeServiceImpl implements IbgeService {
     // NÃO usar @Transactional aqui - cada etapa tem sua própria transação
     // Uma transação única para toda a sincronização causaria timeout de conexão
     public IbgeSincronizacaoResponse sincronizarTudo(boolean sincronizarRegioes, boolean sincronizarEstados,
-                                                      boolean sincronizarMunicipios, boolean atualizarPopulacao) {
+            boolean sincronizarMunicipios, boolean atualizarPopulacao) {
         OffsetDateTime inicio = OffsetDateTime.now();
         IbgeSincronizacaoResponse response = IbgeSincronizacaoResponse.builder().build();
 
@@ -125,14 +124,16 @@ public class IbgeServiceImpl implements IbgeService {
             throw new IbgeIntegrationException("Erro durante sincronização completa", e);
         } finally {
             OffsetDateTime fim = OffsetDateTime.now();
-            response.setTempoExecucao(Duration.of(ChronoUnit.SECONDS.between(inicio, fim), java.time.temporal.ChronoUnit.SECONDS));
+            response.setTempoExecucao(
+                    Duration.of(ChronoUnit.SECONDS.between(inicio, fim), java.time.temporal.ChronoUnit.SECONDS));
         }
 
         return response;
     }
 
     @Override
-    // NÃO usar @Transactional aqui - apenas cache em memória, sem operações de banco
+    // NÃO usar @Transactional aqui - apenas cache em memória, sem operações de
+    // banco
     public IbgeSincronizacaoResponse sincronizarRegioes() {
         IbgeSincronizacaoResponse response = IbgeSincronizacaoResponse.builder().build();
         cacheRegioes.clear();
@@ -188,14 +189,15 @@ public class IbgeServiceImpl implements IbgeService {
             for (int i = 0; i < estadosIbge.size(); i++) {
                 IbgeEstadoDTO estadoIbge = estadosIbge.get(i);
                 try {
-                    Estados estado = prepararEstado(estadoIbge, estadosExistentesPorCodigoIbge, estadosExistentesPorSigla);
+                    Estados estado = prepararEstado(estadoIbge, estadosExistentesPorCodigoIbge,
+                            estadosExistentesPorSigla);
                     estadosParaSalvar.add(estado);
 
                     // Salva em lotes para evitar acúmulo de memória e timeout
                     if (estadosParaSalvar.size() >= BATCH_SIZE || i == estadosIbge.size() - 1) {
                         sincronizados += salvarLoteEstados(estadosParaSalvar, response);
                         estadosParaSalvar.clear();
-                        
+
                         // Pequena pausa entre lotes
                         if (i < estadosIbge.size() - 1) {
                             Thread.sleep(100);
@@ -225,42 +227,46 @@ public class IbgeServiceImpl implements IbgeService {
 
     /**
      * Busca todos os estados existentes no banco, indexados por código IBGE
+     * NOTA: Não usa @Transactional pois é método privado - usa TransactionTemplate
      */
-    @Transactional(readOnly = true)
     private Map<String, Estados> buscarEstadosExistentes() {
-        List<Estados> estados = estadosRepository.findAll();
-        Map<String, Estados> map = new HashMap<>();
-        for (Estados estado : estados) {
-            if (estado.getCodigoIbge() != null) {
-                map.put(estado.getCodigoIbge(), estado);
+        return transactionTemplate.execute(status -> {
+            List<Estados> estados = estadosRepository.findAll();
+            Map<String, Estados> map = new HashMap<>();
+            for (Estados estado : estados) {
+                if (estado.getCodigoIbge() != null) {
+                    map.put(estado.getCodigoIbge(), estado);
+                }
             }
-        }
-        return map;
+            return map;
+        });
     }
 
     /**
      * Busca todos os estados existentes no banco, indexados por sigla
+     * NOTA: Não usa @Transactional pois é método privado - usa TransactionTemplate
      */
-    @Transactional(readOnly = true)
     private Map<String, Estados> buscarEstadosExistentesPorSigla() {
-        List<Estados> estados = estadosRepository.findAll();
-        Map<String, Estados> map = new HashMap<>();
-        for (Estados estado : estados) {
-            if (estado.getSigla() != null) {
-                map.put(estado.getSigla(), estado);
+        return transactionTemplate.execute(status -> {
+            List<Estados> estados = estadosRepository.findAll();
+            Map<String, Estados> map = new HashMap<>();
+            for (Estados estado : estados) {
+                if (estado.getSigla() != null) {
+                    map.put(estado.getSigla(), estado);
+                }
             }
-        }
-        return map;
+            return map;
+        });
     }
 
     /**
      * Prepara um estado para salvar (sem salvar ainda)
      */
-    private Estados prepararEstado(IbgeEstadoDTO estadoIbge, 
-                                    Map<String, Estados> estadosPorCodigoIbge,
-                                    Map<String, Estados> estadosPorSigla) {
+    private Estados prepararEstado(IbgeEstadoDTO estadoIbge,
+            Map<String, Estados> estadosPorCodigoIbge,
+            Map<String, Estados> estadosPorSigla) {
         String codigoIbgeStr = String.valueOf(estadoIbge.getId());
-        
+
         Estados estado;
         if (estadosPorCodigoIbge.containsKey(codigoIbgeStr)) {
             estado = estadosPorCodigoIbge.get(codigoIbgeStr);
@@ -274,7 +280,7 @@ public class IbgeServiceImpl implements IbgeService {
         estado.setCodigoIbge(codigoIbgeStr);
         estado.setNomeOficialIbge(estadoIbge.getNome());
         estado.setSiglaIbge(estadoIbge.getSigla());
-        
+
         // Associa região se disponível
         if (estadoIbge.getRegiao() != null) {
             String nomeRegiao = cacheRegioes.get(estadoIbge.getRegiao().getId());
@@ -299,33 +305,41 @@ public class IbgeServiceImpl implements IbgeService {
     }
 
     /**
-     * Salva um lote de estados em transações individuais para evitar timeout
+     * Salva um lote de estados em uma única transação usando TransactionTemplate
+     * Evita criar múltiplas transações que causam problemas com DataSource
+     * NOTA: @Transactional não funciona em métodos privados - usa
+     * TransactionTemplate
      */
     private int salvarLoteEstados(List<Estados> estados, IbgeSincronizacaoResponse response) {
-        int salvos = 0;
-        for (Estados estado : estados) {
+        Integer result = transactionTemplate.execute(status -> {
+            int salvos = 0;
             try {
-                salvarEstadoIndividual(estado);
-                salvos++;
-            } catch (Exception e) {
-                log.error("Erro ao salvar estado {}: {}", estado.getNome(), e.getMessage());
-                response.getEstadosErros().add("Estado " + estado.getNome() + ": " + e.getMessage());
-            }
-        }
-        return salvos;
-    }
+                for (Estados estado : estados) {
+                    try {
+                        estadosRepository.save(estado);
+                        salvos++;
+                    } catch (Exception e) {
+                        log.error("Erro ao salvar estado {}: {}", estado.getNome(), e.getMessage());
+                        response.getEstadosErros().add("Estado " + estado.getNome() + ": " + e.getMessage());
+                    }
+                }
 
-    /**
-     * Salva um estado individual em uma transação separada com flush imediato
-     */
-    @Transactional
-    private void salvarEstadoIndividual(Estados estado) {
-        estadosRepository.save(estado);
-        entityManager.flush(); // Flush imediato para evitar batch
+                // Flush e clear após salvar o lote para liberar memória do EntityManager
+                entityManager.flush();
+                entityManager.clear();
+
+            } catch (Exception e) {
+                log.error("Erro ao salvar lote de estados: {}", e.getMessage());
+                status.setRollbackOnly(); // Marca para rollback em caso de erro
+            }
+            return salvos;
+        });
+        return result != null ? result : 0;
     }
 
     @Override
-    // OTIMIZAÇÃO: Busca TODOS os dados do IBGE primeiro, armazena em memória, depois grava em lotes
+    // OTIMIZAÇÃO: Busca TODOS os dados do IBGE primeiro, armazena em memória,
+    // depois grava em lotes
     public IbgeSincronizacaoResponse sincronizarMunicipios() {
         IbgeSincronizacaoResponse response = IbgeSincronizacaoResponse.builder().build();
 
@@ -345,7 +359,7 @@ public class IbgeServiceImpl implements IbgeService {
             log.info("Buscando todos os municípios do IBGE e armazenando em memória...");
             List<IbgeMunicipioDTO> todosMunicipiosIbge = new ArrayList<>();
             Map<String, String> ufPorMunicipio = new HashMap<>(); // Mapeia código IBGE do município para UF
-            
+
             for (Estados estado : estados) {
                 if (estado.getSigla() == null || estado.getSigla().isEmpty()) {
                     continue;
@@ -353,14 +367,14 @@ public class IbgeServiceImpl implements IbgeService {
                 try {
                     List<IbgeMunicipioDTO> municipios = ibgeClient.buscarMunicipiosPorUf(estado.getSigla());
                     todosMunicipiosIbge.addAll(municipios);
-                    
+
                     // Armazena a UF de cada município
                     for (IbgeMunicipioDTO municipio : municipios) {
                         ufPorMunicipio.put(String.valueOf(municipio.getId()), estado.getSigla());
                     }
-                    
+
                     log.debug("UF {}: {} municípios recuperados do IBGE", estado.getSigla(), municipios.size());
-                    
+
                     // Pequena pausa entre UFs para não sobrecarregar a API IBGE
                     Thread.sleep(50);
                 } catch (Exception e) {
@@ -378,18 +392,19 @@ public class IbgeServiceImpl implements IbgeService {
             // ETAPA 4: Preparar TODAS as cidades em memória
             log.info("Preparando todas as cidades em memória...");
             List<Cidades> todasCidadesParaSalvar = new ArrayList<>();
-            
+
             for (IbgeMunicipioDTO municipioIbge : todosMunicipiosIbge) {
                 try {
                     String codigoIbgeStr = String.valueOf(municipioIbge.getId());
                     String siglaUf = ufPorMunicipio.get(codigoIbgeStr);
                     Estados estado = siglaUf != null ? estadosPorSigla.get(siglaUf) : null;
-                    
+
                     if (estado == null) {
-                        log.warn("Estado não encontrado para município {} (código IBGE: {})", municipioIbge.getNome(), codigoIbgeStr);
+                        log.warn("Estado não encontrado para município {} (código IBGE: {})", municipioIbge.getNome(),
+                                codigoIbgeStr);
                         continue;
                     }
-                    
+
                     Cidades cidade = prepararCidade(municipioIbge, estado, cidadesExistentesPorCodigoIbge);
                     todasCidadesParaSalvar.add(cidade);
                 } catch (Exception e) {
@@ -402,19 +417,20 @@ public class IbgeServiceImpl implements IbgeService {
             // ETAPA 5: Salvar em lotes maiores (sem transações individuais)
             log.info("Salvando cidades em lotes de {}...", BATCH_SIZE);
             int totalSincronizados = 0;
-            
+
             for (int i = 0; i < todasCidadesParaSalvar.size(); i += BATCH_SIZE) {
                 int fim = Math.min(i + BATCH_SIZE, todasCidadesParaSalvar.size());
                 List<Cidades> lote = todasCidadesParaSalvar.subList(i, fim);
-                
+
                 try {
                     totalSincronizados += salvarLoteCidades(lote, response);
-                    
+
                     // Log de progresso
                     if ((i + BATCH_SIZE) % (BATCH_SIZE * 10) == 0 || fim == todasCidadesParaSalvar.size()) {
-                        log.info("Progresso: {}/{} municípios salvos", totalSincronizados, todasCidadesParaSalvar.size());
+                        log.info("Progresso: {}/{} municípios salvos", totalSincronizados,
+                                todasCidadesParaSalvar.size());
                     }
-                    
+
                     // Pequena pausa entre lotes
                     if (fim < todasCidadesParaSalvar.size()) {
                         Thread.sleep(50);
@@ -443,27 +459,29 @@ public class IbgeServiceImpl implements IbgeService {
 
     /**
      * Busca todas as cidades existentes no banco, indexadas por código IBGE
+     * NOTA: Não usa @Transactional pois é método privado - usa TransactionTemplate
      */
-    @Transactional(readOnly = true)
     private Map<String, Cidades> buscarCidadesExistentes() {
-        List<Cidades> cidades = cidadesRepository.findAll();
-        Map<String, Cidades> map = new HashMap<>();
-        for (Cidades cidade : cidades) {
-            if (cidade.getCodigoIbge() != null) {
-                map.put(cidade.getCodigoIbge(), cidade);
+        return transactionTemplate.execute(status -> {
+            List<Cidades> cidades = cidadesRepository.findAll();
+            Map<String, Cidades> map = new HashMap<>();
+            for (Cidades cidade : cidades) {
+                if (cidade.getCodigoIbge() != null) {
+                    map.put(cidade.getCodigoIbge(), cidade);
+                }
             }
-        }
-        return map;
+            return map;
+        });
     }
 
     /**
      * Prepara uma cidade para salvar (sem salvar ainda)
      */
-    private Cidades prepararCidade(IbgeMunicipioDTO municipioIbge, 
-                                   Estados estado,
-                                   Map<String, Cidades> cidadesPorCodigoIbge) {
+    private Cidades prepararCidade(IbgeMunicipioDTO municipioIbge,
+            Estados estado,
+            Map<String, Cidades> cidadesPorCodigoIbge) {
         String codigoIbgeStr = String.valueOf(municipioIbge.getId());
-        
+
         Cidades cidade;
         if (cidadesPorCodigoIbge.containsKey(codigoIbgeStr)) {
             cidade = cidadesPorCodigoIbge.get(codigoIbgeStr);
@@ -474,11 +492,11 @@ public class IbgeServiceImpl implements IbgeService {
         // Atualiza campos IBGE
         cidade.setCodigoIbge(codigoIbgeStr);
         cidade.setNomeOficialIbge(municipioIbge.getNome());
-        
+
         // Extrai UF do objeto aninhado
         if (municipioIbge.getMicrorregiao() != null &&
-            municipioIbge.getMicrorregiao().getMesorregiao() != null &&
-            municipioIbge.getMicrorregiao().getMesorregiao().getUf() != null) {
+                municipioIbge.getMicrorregiao().getMesorregiao() != null &&
+                municipioIbge.getMicrorregiao().getMesorregiao().getUf() != null) {
             cidade.setUfIbge(municipioIbge.getMicrorregiao().getMesorregiao().getUf().getSigla());
         }
 
@@ -516,11 +534,11 @@ public class IbgeServiceImpl implements IbgeService {
                         response.getMunicipiosErros().add("Município " + cidade.getNome() + ": " + e.getMessage());
                     }
                 }
-                
+
                 // Flush e clear após salvar o lote para liberar memória do EntityManager
                 entityManager.flush();
                 entityManager.clear();
-                
+
             } catch (Exception e) {
                 log.error("Erro ao salvar lote de cidades: {}", e.getMessage());
                 status.setRollbackOnly(); // Marca para rollback em caso de erro
@@ -530,13 +548,15 @@ public class IbgeServiceImpl implements IbgeService {
     }
 
     @Override
-    // NÃO usar @Transactional aqui - processa cidade por cidade com transações separadas
+    // NÃO usar @Transactional aqui - processa cidade por cidade com transações
+    // separadas
     // Uma transação única para todas as cidades causaria timeout de conexão
     public IbgeSincronizacaoResponse atualizarPopulacao() {
         IbgeSincronizacaoResponse response = IbgeSincronizacaoResponse.builder().build();
 
         try {
-            // Busca todas as cidades usando transação read-only para garantir que o EntityManager esteja disponível
+            // Busca todas as cidades usando transação read-only para garantir que o
+            // EntityManager esteja disponível
             List<Cidades> cidades = buscarCidadesComTransacao();
             int atualizadas = 0;
             int processadas = 0;
@@ -577,33 +597,41 @@ public class IbgeServiceImpl implements IbgeService {
     }
 
     /**
-     * Busca todos os estados usando transação read-only
+     * Busca todos os estados usando TransactionTemplate
+     * NOTA: Não usa @Transactional pois é método privado - usa TransactionTemplate
      */
-    @Transactional(readOnly = true)
     private List<Estados> buscarEstadosComTransacao() {
-        return estadosRepository.findAll();
+        return transactionTemplate.execute(status -> estadosRepository.findAll());
     }
 
     /**
-     * Busca todas as cidades usando transação read-only
+     * Busca todas as cidades usando TransactionTemplate
+     * NOTA: Não usa @Transactional pois é método privado - usa TransactionTemplate
      */
-    @Transactional(readOnly = true)
     private List<Cidades> buscarCidadesComTransacao() {
-        return cidadesRepository.findAll();
+        return transactionTemplate.execute(status -> cidadesRepository.findAll());
     }
 
     /**
      * Atualiza população de uma cidade em uma transação separada
+     * NOTA: Não usa @Transactional pois é método privado - usa TransactionTemplate
      */
-    @Transactional
     private boolean atualizarPopulacaoCidade(Cidades cidade, IbgeSincronizacaoResponse response) {
         try {
             IbgeProjecaoPopulacaoDTO projecao = ibgeClient.buscarProjecaoPopulacao(cidade.getCodigoIbge());
-            
+
             if (projecao != null && projecao.getPopulacao() != null) {
-                cidade.setPopulacaoEstimada(projecao.getPopulacao().intValue());
-                cidadesRepository.save(cidade);
-                return true;
+                Boolean resultado = transactionTemplate.execute(status -> {
+                    try {
+                        cidade.setPopulacaoEstimada(projecao.getPopulacao().intValue());
+                        cidadesRepository.save(cidade);
+                        return true;
+                    } catch (Exception e) {
+                        log.warn("Erro ao salvar população do município {}: {}", cidade.getNome(), e.getMessage());
+                        return false;
+                    }
+                });
+                return resultado != null && resultado;
             }
             return false;
 
@@ -624,4 +652,3 @@ public class IbgeServiceImpl implements IbgeService {
         }
     }
 }
-
