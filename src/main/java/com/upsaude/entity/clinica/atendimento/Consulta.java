@@ -7,10 +7,11 @@
     import com.upsaude.entity.embeddable.EncaminhamentoConsulta;
     import com.upsaude.entity.embeddable.ExamesSolicitadosConsulta;
     import com.upsaude.entity.embeddable.InformacoesConsulta;
-    import com.upsaude.entity.embeddable.PrescricaoConsulta;
-    import com.upsaude.entity.profissional.Medicos;
+import com.upsaude.entity.embeddable.PrescricaoConsulta;
+import com.upsaude.entity.paciente.Paciente;
+import com.upsaude.entity.profissional.Medicos;
 
-    import jakarta.persistence.Column;
+import jakarta.persistence.Column;
     import jakarta.persistence.Embedded;
     import jakarta.persistence.Entity;
     import jakarta.persistence.FetchType;
@@ -51,6 +52,10 @@
         @ManyToOne(fetch = FetchType.LAZY)
         @JoinColumn(name = "medico_id", nullable = false)
         private Medicos medico;
+
+        @ManyToOne(fetch = FetchType.LAZY)
+        @JoinColumn(name = "paciente_id", nullable = false)
+        private Paciente paciente;
 
         @Embedded
         private InformacoesConsulta informacoes;

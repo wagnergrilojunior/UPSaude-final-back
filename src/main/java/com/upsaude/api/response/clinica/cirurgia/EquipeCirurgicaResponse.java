@@ -1,10 +1,9 @@
 package com.upsaude.api.response.clinica.cirurgia;
-import com.upsaude.api.response.clinica.cirurgia.CirurgiaResponse;
-import com.upsaude.api.response.profissional.MedicosResponse;
-import com.upsaude.api.response.profissional.ProfissionaisSaudeResponse;
 
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -22,10 +21,15 @@ public class EquipeCirurgicaResponse {
     private OffsetDateTime createdAt;
     private OffsetDateTime updatedAt;
     private Boolean active;
-    private CirurgiaResponse cirurgia;
-    private ProfissionaisSaudeResponse profissional;
-    private MedicosResponse medico;
-    private String funcao;
+    private UUID tenantId;
+    private UUID estabelecimentoId;
+
+    @Builder.Default
+    private List<EquipeCirurgicaProfissionalResponse> profissionais = new ArrayList<>();
+
+    @Builder.Default
+    private List<EquipeCirurgicaMedicoResponse> medicos = new ArrayList<>();
+
     private Boolean ehPrincipal;
     private BigDecimal valorParticipacao;
     private BigDecimal percentualParticipacao;

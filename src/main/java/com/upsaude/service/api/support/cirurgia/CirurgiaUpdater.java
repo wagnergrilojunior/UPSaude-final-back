@@ -31,7 +31,7 @@ public class CirurgiaUpdater {
         mapper.updateFromRequest(request, entity);
         entity.setTenant(Objects.requireNonNull(tenant, "tenant é obrigatório para atualizar cirurgia"));
 
-        relacionamentosHandler.processarRelacionamentos(entity, request, tenantId);
+        relacionamentosHandler.processarRelacionamentos(entity, request, tenantId, tenant);
 
         Cirurgia updated = repository.save(Objects.requireNonNull(entity));
         log.info("Cirurgia atualizada com sucesso. ID: {}, tenant: {}", updated.getId(), tenantId);
