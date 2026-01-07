@@ -51,6 +51,9 @@ public class SecurityConfig {
                         // Endpoints de teste do Redis - públicos para diagnóstico
                         .requestMatchers("/v1/test/redis/**").permitAll()
 
+                        // Endpoints de integração IBGE - públicos para sincronização administrativa
+                        .requestMatchers("/v1/integracoes/ibge/**").permitAll()
+
                         // Endpoints do Actuator - públicos para monitoramento
                         // IMPORTANTE: Em produção, considere proteger estes endpoints com autenticação
                         // básica

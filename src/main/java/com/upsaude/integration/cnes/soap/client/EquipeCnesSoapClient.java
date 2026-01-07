@@ -4,6 +4,7 @@ import com.upsaude.config.CnesProperties;
 import com.upsaude.integration.cnes.wsdl.equipe.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 import org.springframework.ws.client.core.WebServiceTemplate;
 
@@ -13,6 +14,7 @@ import java.math.BigInteger;
  * Cliente SOAP para serviços de Equipe de Saúde do CNES.
  */
 @Component
+@Lazy
 @Slf4j
 public class EquipeCnesSoapClient extends AbstractCnesSoapClient {
 

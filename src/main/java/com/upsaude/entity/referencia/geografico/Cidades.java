@@ -32,4 +32,19 @@ public class Cidades extends BaseEntityWithoutTenant {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "estado_id", nullable = false)
     private Estados estado;
+
+    @Column(name = "nome_oficial_ibge", length = 200)
+    private String nomeOficialIbge;
+
+    @Column(name = "uf_ibge", length = 2)
+    private String ufIbge;
+
+    @Column(name = "populacao_estimada")
+    private Integer populacaoEstimada;
+
+    @Column(name = "ativo_ibge")
+    private Boolean ativoIbge;
+
+    @Column(name = "data_ultima_sincronizacao_ibge")
+    private java.time.OffsetDateTime dataUltimaSincronizacaoIbge;
 }

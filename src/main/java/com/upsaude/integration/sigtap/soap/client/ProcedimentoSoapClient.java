@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 import org.springframework.ws.client.core.WebServiceTemplate;
 
@@ -18,6 +19,7 @@ import com.upsaude.integration.sigtap.wsdl.ResponseDetalharProcedimento;
 import com.upsaude.integration.sigtap.wsdl.ResponsePesquisarProcedimentos;
 
 @Component
+@Lazy
 public class ProcedimentoSoapClient extends AbstractSigtapSoapClient {
 
     private final SigtapProperties properties;

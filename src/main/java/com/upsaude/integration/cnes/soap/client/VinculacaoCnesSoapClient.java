@@ -2,6 +2,7 @@ package com.upsaude.integration.cnes.soap.client;
 
 import com.upsaude.config.CnesProperties;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 import org.springframework.ws.client.core.WebServiceTemplate;
 
@@ -9,6 +10,7 @@ import org.springframework.ws.client.core.WebServiceTemplate;
  * Cliente SOAP para serviços de Vinculação Profissional do CNES.
  */
 @Component
+@Lazy
 public class VinculacaoCnesSoapClient extends AbstractCnesSoapClient {
 
     private final CnesProperties properties;

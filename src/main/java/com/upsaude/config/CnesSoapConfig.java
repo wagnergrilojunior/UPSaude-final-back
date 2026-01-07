@@ -41,6 +41,7 @@ public class CnesSoapConfig {
     private final CnesProperties properties;
 
     @Bean
+    @Lazy
     public SaajSoapMessageFactory cnesSoapMessageFactory() {
         SaajSoapMessageFactory factory = new SaajSoapMessageFactory();
         factory.setSoapVersion(SoapVersion.SOAP_12);
@@ -49,31 +50,37 @@ public class CnesSoapConfig {
     }
 
     @Bean
+    @Lazy
     public Jaxb2Marshaller cnesServiceMarshaller() {
         return createMarshaller("com.upsaude.integration.cnes.wsdl.cnesservice");
     }
 
     @Bean
+    @Lazy
     public Jaxb2Marshaller profissionalMarshaller() {
         return createMarshaller("com.upsaude.integration.cnes.wsdl.profissional");
     }
 
     @Bean
+    @Lazy
     public Jaxb2Marshaller equipeMarshaller() {
         return createMarshaller("com.upsaude.integration.cnes.wsdl.equipe");
     }
 
     @Bean
+    @Lazy
     public Jaxb2Marshaller equipamentoMarshaller() {
         return createMarshaller("com.upsaude.integration.cnes.wsdl.equipamento");
     }
 
     @Bean
+    @Lazy
     public Jaxb2Marshaller leitoMarshaller() {
         return createMarshaller("com.upsaude.integration.cnes.wsdl.leito");
     }
 
     @Bean
+    @Lazy
     public Jaxb2Marshaller estabelecimentoV1r0Marshaller() {
         return createMarshaller("com.upsaude.integration.cnes.wsdl.estabelecimento.v1r0");
     }
@@ -87,6 +94,7 @@ public class CnesSoapConfig {
     }
 
     @Bean
+    @Lazy
     public HttpUrlConnectionMessageSender cnesMessageSender() {
         HttpUrlConnectionMessageSender sender = new HttpUrlConnectionMessageSender();
         sender.setConnectionTimeout(Duration.ofMillis(properties.getSoap().getConnectTimeoutMs()));
@@ -95,6 +103,7 @@ public class CnesSoapConfig {
     }
 
     @Bean
+    @Lazy
     public Wss4jSecurityInterceptor cnesSecurityInterceptor() throws WSSecurityException {
         Wss4jSecurityInterceptor interceptor = new Wss4jSecurityInterceptor();
         interceptor.setSecurementActions(WSHandlerConstants.USERNAME_TOKEN);
@@ -108,11 +117,13 @@ public class CnesSoapConfig {
     }
 
     @Bean
+    @Lazy
     public ClientInterceptor cnesLoggingInterceptor() {
         return new CnesSoapLoggingInterceptor();
     }
 
     @Bean
+    @Lazy
     public WebServiceTemplate cnesServiceTemplate(
             SaajSoapMessageFactory cnesSoapMessageFactory,
             @Qualifier("cnesServiceMarshaller") Jaxb2Marshaller marshaller,
@@ -124,6 +135,7 @@ public class CnesSoapConfig {
     }
 
     @Bean
+    @Lazy
     public WebServiceTemplate profissionalTemplate(
             SaajSoapMessageFactory cnesSoapMessageFactory,
             @Qualifier("profissionalMarshaller") Jaxb2Marshaller marshaller,
@@ -135,6 +147,7 @@ public class CnesSoapConfig {
     }
 
     @Bean
+    @Lazy
     public WebServiceTemplate equipeTemplate(
             SaajSoapMessageFactory cnesSoapMessageFactory,
             @Qualifier("equipeMarshaller") Jaxb2Marshaller marshaller,
@@ -146,6 +159,7 @@ public class CnesSoapConfig {
     }
 
     @Bean
+    @Lazy
     public WebServiceTemplate equipamentoTemplate(
             SaajSoapMessageFactory cnesSoapMessageFactory,
             @Qualifier("equipamentoMarshaller") Jaxb2Marshaller marshaller,
@@ -157,6 +171,7 @@ public class CnesSoapConfig {
     }
 
     @Bean
+    @Lazy
     public WebServiceTemplate leitoTemplate(
             SaajSoapMessageFactory cnesSoapMessageFactory,
             @Qualifier("leitoMarshaller") Jaxb2Marshaller marshaller,
@@ -168,6 +183,7 @@ public class CnesSoapConfig {
     }
 
     @Bean
+    @Lazy
     public WebServiceTemplate estabelecimentoV1r0Template(
             SaajSoapMessageFactory cnesSoapMessageFactory,
             @Qualifier("estabelecimentoV1r0Marshaller") Jaxb2Marshaller marshaller,

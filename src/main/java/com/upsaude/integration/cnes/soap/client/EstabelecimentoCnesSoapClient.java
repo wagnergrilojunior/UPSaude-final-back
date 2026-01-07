@@ -3,6 +3,7 @@ package com.upsaude.integration.cnes.soap.client;
 import com.upsaude.config.CnesProperties;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 import org.springframework.ws.client.core.WebServiceTemplate;
 
@@ -17,6 +18,7 @@ import org.springframework.ws.client.core.WebServiceTemplate;
  * </ul>
  */
 @Component
+@Lazy
 @Slf4j
 public class EstabelecimentoCnesSoapClient extends AbstractCnesSoapClient {
 

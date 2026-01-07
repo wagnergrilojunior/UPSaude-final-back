@@ -1,5 +1,6 @@
 package com.upsaude.integration.sigtap.soap.client;
 
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 import org.springframework.ws.client.core.WebServiceTemplate;
 
@@ -8,6 +9,7 @@ import com.upsaude.integration.sigtap.wsdl.RequestListarCompatibilidadesPossivei
 import com.upsaude.integration.sigtap.wsdl.ResponseListarCompatibilidadesPossiveis;
 
 @Component
+@Lazy
 public class CompatibilidadePossivelSoapClient extends AbstractSigtapSoapClient {
 
     private final SigtapProperties properties;

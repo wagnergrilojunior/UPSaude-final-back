@@ -137,7 +137,7 @@ public class CnesLeitoServiceImpl implements CnesLeitoService {
             map.put("dataAtivacao", l.getDataAtivacao());
             map.put("setorUnidade", l.getSetorUnidade());
             map.put("sala", l.getSala());
-            map.put("tipoLeito", l.getTipoLeito() != null ? l.getTipoLeito().getDescricao() : null);
+            map.put("tipoLeito", l.getTipoLeito() != null ? l.getTipoLeito().getNome() : null);
             return map;
         }).collect(java.util.stream.Collectors.toList());
     }

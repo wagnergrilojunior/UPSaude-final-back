@@ -2,6 +2,7 @@ package com.upsaude.integration.sigtap.soap.client;
 
 import java.math.BigInteger;
 
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 import org.springframework.ws.client.core.WebServiceTemplate;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -12,6 +13,7 @@ import com.upsaude.integration.sigtap.wsdl.RequestPesquisarCompatibilidades;
 import com.upsaude.integration.sigtap.wsdl.ResponsePesquisarCompatibilidades;
 
 @Component
+@Lazy
 public class CompatibilidadeSoapClient extends AbstractSigtapSoapClient {
 
     private final SigtapProperties properties;
