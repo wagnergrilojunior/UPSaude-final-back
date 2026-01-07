@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="utf-8"?>
+<wsdl:definitions xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:WL5G3N0="http://schemas.xmlsoap.org/wsdl/" xmlns:WL5G3N1="http://servicos.saude.gov.br/cnes/v1r0/profissionalsaudeservice" xmlns:WL5G3N2="http://servicos.saude.gov.br/wsdl/mensageria/falha/v5r0/msfalha" xmlns:WL5G3N3="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:WL5G3N4="http://schemas.xmlsoap.org/wsdl/soap12/" name="ProfissionalSaudeService" targetNamespace="http://servicos.saude.gov.br/cnes/v1r0/profissionalsaudeservice">
+
+    <wsdl:types>
+        
+    <xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+      <xsd:import namespace="http://servicos.saude.gov.br/cnes/v1r0/profissionalsaudeservice" schemaLocation="https://servicos.saude.gov.br/cnes/ProfissionalSaudeService/v1r0?WSDL&amp;type=XSD&amp;file=schema%3A6919064e-e6fc-4d7b-9c28-5a808a21aeb6"/>
+    </xsd:schema>
+  </wsdl:types>
+    <wsdl:message name="requestConsultarProfissionaisSaude">
+        <wsdl:part element="WL5G3N1:requestConsultarProfissionaisSaude" name="requestConsultarProfissionaisSaude"/>
+    </wsdl:message>
+    <wsdl:message name="responseConsultarProfissionaisSaude">
+        <wsdl:part element="WL5G3N1:responseConsultarProfissionaisSaude" name="responseConsultarProfissionaisSaude"/>
+    </wsdl:message>
+    <wsdl:message name="ProfissionalSaudeFault">
+        <wsdl:part element="WL5G3N2:MSFalha" name="fault"/>
+    </wsdl:message>
+    <wsdl:message name="requestConsultarProfissionalSaude">
+        <wsdl:part element="WL5G3N1:requestConsultarProfissionalSaude" name="requestConsultarProfissionalSaude"/>
+    </wsdl:message>
+    <wsdl:message name="responseConsultarProfissionalSaude">
+        <wsdl:part element="WL5G3N1:responseConsultarProfissionalSaude" name="responseConsultarProfissionalSaude"/>
+    </wsdl:message>
+    <wsdl:portType name="ProfissionalSaudeServicePortType">
+        <wsdl:operation name="consultarProfissionaisSaude">
+            <WL5G3N0:documentation>Consultar os profissionais de saúde do Estabelecimento de Saude pelo código do CNES ou pelo CNPJ do CNES.</WL5G3N0:documentation>
+            <wsdl:input message="WL5G3N1:requestConsultarProfissionaisSaude" name="requestConsultarProfissionaisSaude"/>
+            <wsdl:output message="WL5G3N1:responseConsultarProfissionaisSaude" name="responseConsultarProfissionaisSaude"/>
+            <wsdl:fault message="WL5G3N1:ProfissionalSaudeFault" name="ProfissionalSaudeFault"/>
+        </wsdl:operation>
+        <wsdl:operation name="consultarProfissionalSaude">
+            <WL5G3N0:documentation>Consultar o profissional de saúde pelo Número do CNS ou CPF.</WL5G3N0:documentation>
+            <wsdl:input message="WL5G3N1:requestConsultarProfissionalSaude" name="requestConsultarProfissionalSaude"/>
+            <wsdl:output message="WL5G3N1:responseConsultarProfissionalSaude" name="responseConsultarProfissionalSaude"/>
+            <wsdl:fault message="WL5G3N1:ProfissionalSaudeFault" name="ProfissionalSaudeFault"/>
+        </wsdl:operation>
+    </wsdl:portType>
+    <wsdl:binding name="ProfissionalSaudeServiceSOAP11Binding" type="WL5G3N1:ProfissionalSaudeServicePortType">
+        <WL5G3N3:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
+        <wsdl:operation name="consultarProfissionaisSaude">
+            <WL5G3N0:documentation>Consultar os profissionais de saúde do Estabelecimento de Saude pelo código do CNES ou pelo CNPJ do CNES.</WL5G3N0:documentation>
+            <WL5G3N3:operation/>
+            <wsdl:input>
+                <WL5G3N3:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <WL5G3N3:body use="literal"/>
+            </wsdl:output>
+            <wsdl:fault name="ProfissionalSaudeFault">
+                <WL5G3N3:fault name="ProfissionalSaudeFault" use="literal"/>
+            </wsdl:fault>
+        </wsdl:operation>
+        <wsdl:operation name="consultarProfissionalSaude">
+            <WL5G3N0:documentation>Consultar o profissional de saúde pelo Número do CNS ou CPF.</WL5G3N0:documentation>
+            <WL5G3N3:operation/>
+            <wsdl:input>
+                <WL5G3N3:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <WL5G3N3:body use="literal"/>
+            </wsdl:output>
+            <wsdl:fault name="ProfissionalSaudeFault">
+                <WL5G3N3:fault name="ProfissionalSaudeFault" use="literal"/>
+            </wsdl:fault>
+        </wsdl:operation>
+    </wsdl:binding>
+    <wsdl:binding name="ProfissionalSaudeServiceSOAP12Binding" type="WL5G3N1:ProfissionalSaudeServicePortType">
+        <WL5G3N4:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
+      
+        <wsdl:operation name="consultarProfissionaisSaude">
+            <WL5G3N0:documentation>Consultar os profissionais de saúde do Estabelecimento de Saude pelo código do CNES ou pelo CNPJ do CNES.</WL5G3N0:documentation>
+            <WL5G3N4:operation soapActionRequired="false"/>
+            <wsdl:input>
+                <WL5G3N4:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <WL5G3N4:body use="literal"/>
+            </wsdl:output>
+            <wsdl:fault name="ProfissionalSaudeFault">
+                <WL5G3N4:fault name="ProfissionalSaudeFault" use="literal"/>
+            </wsdl:fault>
+        </wsdl:operation>
+        <wsdl:operation name="consultarProfissionalSaude">
+            <WL5G3N0:documentation>Consultar o profissional de saúde pelo Número do CNS ou CPF.</WL5G3N0:documentation>
+            <WL5G3N4:operation soapActionRequired="false"/>
+            <wsdl:input>
+                <WL5G3N4:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <WL5G3N4:body use="literal"/>
+            </wsdl:output>
+            <wsdl:fault name="ProfissionalSaudeFault">
+                <WL5G3N4:fault name="ProfissionalSaudeFault" use="literal"/>
+            </wsdl:fault>
+        </wsdl:operation>
+    </wsdl:binding>
+    <wsdl:service name="ProfissionalSaudeService">
+        <wsdl:port binding="WL5G3N1:ProfissionalSaudeServiceSOAP12Binding" name="ProfissionalSaudeServicePort">
+            <WL5G3N4:address location="https://servicos.saude.gov.br/cnes/ProfissionalSaudeService/v1r0"/>
+        </wsdl:port>
+    </wsdl:service>
+</wsdl:definitions>

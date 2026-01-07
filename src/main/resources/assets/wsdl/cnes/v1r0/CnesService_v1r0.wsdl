@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="utf-8"?>
+<wsdl:definitions xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:WL5G3N3="http://schemas.xmlsoap.org/wsdl/soap12/" xmlns:WL5G3N2="http://servicos.saude.gov.br/wsdl/mensageria/falha/v5r0/msfalha" xmlns:WL5G3N0="http://schemas.xmlsoap.org/wsdl/" xmlns:WL5G3N1="http://servicos.saude.gov.br/cnes/v1r0/cnesservice" name="CnesService" targetNamespace="http://servicos.saude.gov.br/cnes/v1r0/cnesservice">
+    <wsdl:types>
+        <xs:schema xmlns:WL5G3N4="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:cmpt="http://servicos.saude.gov.br/schema/cnes/v1r0/cmpt" xmlns:codigocnes="http://servicos.saude.gov.br/schema/cnes/v1r0/codigocnes" xmlns:msfalha="http://servicos.saude.gov.br/wsdl/mensageria/falha/v5r0/msfalha" xmlns:municipio="http://servicos.saude.gov.br/schema/corporativo/v1r2/municipio" xmlns:resdadoscomplementares="http://servicos.saude.gov.br/wsdl/mensageria/v1r0/resultadopesquisadadoscomplementarescnes" xmlns:respesquisaestabelecimentosaude="http://servicos.saude.gov.br/wsdl/mensageria/v1r0/resultadopesquisaestabelecimentosaude" xmlns:resultadoPesquisaCnesMunicipio="http://servicos.saude.gov.br/wsdl/mensageria/v1r0/resultadopesquisacnesmunicipio" xmlns:soap11="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:soap12="http://schemas.xmlsoap.org/wsdl/soap12/" xmlns:tns="http://servicos.saude.gov.br/cnes/v1r0/cnesservice" xmlns:wsp="http://schemas.xmlsoap.org/ws/2004/09/policy" xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified" targetNamespace="http://servicos.saude.gov.br/cnes/v1r0/cnesservice">
+            <xs:import id="resdadoscomplementares" namespace="http://servicos.saude.gov.br/wsdl/mensageria/v1r0/resultadopesquisadadoscomplementarescnes" schemaLocation="https://servicos.saude.gov.br/cnes/CnesService/v1r0?WSDL&amp;type=XSD&amp;file=http%3A%2F%2Fservicosinternos.saude.gov%3A80%2Fcnes%2FCnesService%2Fv1r0%3FSCHEMA%252FRESOURCES50%252Fxsd%252Fmensageria%252Fresultadopesquisadadoscomplementarescnes.v1r0"/>
+            <xs:import id="codigocnes" namespace="http://servicos.saude.gov.br/schema/cnes/v1r0/codigocnes" schemaLocation="https://servicos.saude.gov.br/cnes/CnesService/v1r0?WSDL&amp;type=XSD&amp;file=http%3A%2F%2Fservicosinternos.saude.gov%3A80%2Fcnes%2FCnesService%2Fv1r0%3FSCHEMA%252FRESOURCES50%252Fxsd%252Fcnes%252Fcodigocnes.v1r0"/>
+            <xs:import id="resultadoPesquisaCnesMunicipio" namespace="http://servicos.saude.gov.br/wsdl/mensageria/v1r0/resultadopesquisacnesmunicipio" schemaLocation="https://servicos.saude.gov.br/cnes/CnesService/v1r0?WSDL&amp;type=XSD&amp;file=http%3A%2F%2Fservicosinternos.saude.gov%3A80%2Fcnes%2FCnesService%2Fv1r0%3FSCHEMA%252FRESOURCES50%252Fxsd%252Fmensageria%252Fresultadopesquisacnesmunicipio.v1r0"/>
+            <xs:import id="respesquisaestabelecimentosaude" namespace="http://servicos.saude.gov.br/wsdl/mensageria/v1r0/resultadopesquisaestabelecimentosaude" schemaLocation="https://servicos.saude.gov.br/cnes/CnesService/v1r0?WSDL&amp;type=XSD&amp;file=http%3A%2F%2Fservicosinternos.saude.gov%3A80%2Fcnes%2FCnesService%2Fv1r0%3FSCHEMA%252FRESOURCES50%252Fxsd%252Fmensageria%252Fresultadopesquisaestabelecimentosaude.v1r0"/>
+            <xs:import id="municipio" namespace="http://servicos.saude.gov.br/schema/corporativo/v1r2/municipio" schemaLocation="https://servicos.saude.gov.br/cnes/CnesService/v1r0?WSDL&amp;type=XSD&amp;file=http%3A%2F%2Fservicosinternos.saude.gov%3A80%2Fcnes%2FCnesService%2Fv1r0%3FSCHEMA%252FRESOURCES50%252Fxsd%252Fcorporativo%252Fmunicipio.v1r2"/>
+            <xs:import id="cmpt" namespace="http://servicos.saude.gov.br/schema/cnes/v1r0/cmpt" schemaLocation="https://servicos.saude.gov.br/cnes/CnesService/v1r0?WSDL&amp;type=XSD&amp;file=http%3A%2F%2Fservicosinternos.saude.gov%3A80%2Fcnes%2FCnesService%2Fv1r0%3FSCHEMA%252FRESOURCES50%252Fxsd%252Fcnes%252Fcmpt.v1r0"/>
+            <xs:import id="msfalha" namespace="http://servicos.saude.gov.br/wsdl/mensageria/falha/v5r0/msfalha" schemaLocation="https://servicos.saude.gov.br/cnes/CnesService/v1r0?WSDL&amp;type=XSD&amp;file=http%3A%2F%2Fservicosinternos.saude.gov%3A80%2Fcnes%2FCnesService%2Fv1r0%3FSCHEMA%252FRESOURCES50%252Fxsd%252Fmensageria%252Ffalha%252Fmsfalha.v5r0"/>
+            <xs:element name="requestConsultarEstabelecimentoSaude">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element maxOccurs="1" minOccurs="1" ref="codigocnes:CodigoCNES"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="responseConsultarEstabelecimentoSaude">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element maxOccurs="1" minOccurs="0" ref="respesquisaestabelecimentosaude:ResultadoPesquisaEstabelecimentoSaude"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="requestConsultarEstabelecimentoSaudePorMunicipio">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element maxOccurs="1" minOccurs="1" ref="municipio:Municipio"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="responseConsultarEstabelecimentoSaudePorMunicipio">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element maxOccurs="unbounded" minOccurs="0" ref="resultadoPesquisaCnesMunicipio:ResultadoPesquisaCnesMunicipio"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="requestConsultarDadosComplementaresEstabelecimentoSaude">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element maxOccurs="1" minOccurs="1" name="MunicipioCNES" type="municipio:MunicipioType"/>
+                        <xs:element maxOccurs="1" minOccurs="1" ref="cmpt:cmpt"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="responseConsultarDadosComplementaresEstabelecimentoSaude">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element maxOccurs="1" minOccurs="0" ref="resdadoscomplementares:ResultadoPesquisaDadosComplementaresCnes"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+        </xs:schema>
+    </wsdl:types>
+    <wsdl:message name="requestConsultarEstabelecimentoSaude">
+        <wsdl:part name="requestConsultarEstabelecimentoSaude" element="WL5G3N1:requestConsultarEstabelecimentoSaude"/>
+    </wsdl:message>
+    <wsdl:message name="responseConsultarEstabelecimentoSaude">
+        <wsdl:part name="responseConsultarEstabelecimentoSaude" element="WL5G3N1:responseConsultarEstabelecimentoSaude"/>
+    </wsdl:message>
+    <wsdl:message name="CnesFault">
+        <wsdl:part name="fault" element="WL5G3N2:MSFalha"/>
+    </wsdl:message>
+    <wsdl:message name="requestConsultarEstabelecimentoSaudePorMunicipio">
+        <wsdl:part name="requestConsultarEstabelecimentoSaudePorMunicipio" element="WL5G3N1:requestConsultarEstabelecimentoSaudePorMunicipio"/>
+    </wsdl:message>
+    <wsdl:message name="responseConsultarEstabelecimentoSaudePorMunicipio">
+        <wsdl:part name="responseConsultarEstabelecimentoSaudePorMunicipio" element="WL5G3N1:responseConsultarEstabelecimentoSaudePorMunicipio"/>
+    </wsdl:message>
+    <wsdl:message name="requestConsultarDadosComplementaresEstabelecimentoSaude">
+        <wsdl:part name="requestConsultarDadosComplementaresEstabelecimentoSaude" element="WL5G3N1:requestConsultarDadosComplementaresEstabelecimentoSaude"/>
+    </wsdl:message>
+    <wsdl:message name="responseConsultarDadosComplementaresEstabelecimentoSaude">
+        <wsdl:part name="responseConsultarDadosComplementaresEstabelecimentoSaude" element="WL5G3N1:responseConsultarDadosComplementaresEstabelecimentoSaude"/>
+    </wsdl:message>
+    <wsdl:portType name="CnesServicePortType">
+        <wsdl:operation name="consultarEstabelecimentoSaude">
+            <WL5G3N0:documentation>Consultar o Estabelecimento de Saude pelo código do CNES.</WL5G3N0:documentation>
+            <wsdl:input name="requestConsultarEstabelecimentoSaude" message="WL5G3N1:requestConsultarEstabelecimentoSaude"/>
+            <wsdl:output name="responseConsultarEstabelecimentoSaude" message="WL5G3N1:responseConsultarEstabelecimentoSaude"/>
+            <wsdl:fault name="CnesFault" message="WL5G3N1:CnesFault"/>
+        </wsdl:operation>
+        <wsdl:operation name="consultarEstabelecimentoSaudePorMunicipio">
+            <WL5G3N0:documentation>Consultar o Estabelecimento de Saude pelo código IBGE do Município.</WL5G3N0:documentation>
+            <wsdl:input name="requestConsultarEstabelecimentoSaudePorMunicipio" message="WL5G3N1:requestConsultarEstabelecimentoSaudePorMunicipio"/>
+            <wsdl:output name="responseConsultarEstabelecimentoSaudePorMunicipio" message="WL5G3N1:responseConsultarEstabelecimentoSaudePorMunicipio"/>
+            <wsdl:fault name="CnesFault" message="WL5G3N1:CnesFault"/>
+        </wsdl:operation>
+        <wsdl:operation name="consultarDadosComplementaresEstabelecimentoSaude">
+            <WL5G3N0:documentation>Consultar os dados complementares do Estabelecimento de Saude.</WL5G3N0:documentation>
+            <wsdl:input name="requestConsultarDadosComplementaresEstabelecimentoSaude" message="WL5G3N1:requestConsultarDadosComplementaresEstabelecimentoSaude"/>
+            <wsdl:output name="responseConsultarDadosComplementaresEstabelecimentoSaude" message="WL5G3N1:responseConsultarDadosComplementaresEstabelecimentoSaude"/>
+            <wsdl:fault name="CnesFault" message="WL5G3N1:CnesFault"/>
+        </wsdl:operation>
+    </wsdl:portType>
+    <wsdl:binding name="CnesServiceSOAP12Binding" type="WL5G3N1:CnesServicePortType">
+        <WL5G3N3:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
+        <wsdl:operation name="consultarEstabelecimentoSaude">
+            <WL5G3N0:documentation>Consultar o Estabelecimento de Saude pelo código do CNES.</WL5G3N0:documentation>
+            <WL5G3N3:operation soapActionRequired="false"/>
+            <wsdl:input>
+                <WL5G3N3:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <WL5G3N3:body use="literal"/>
+            </wsdl:output>
+            <wsdl:fault name="CnesFault">
+                <WL5G3N3:fault name="CnesFault" use="literal"/>
+            </wsdl:fault>
+        </wsdl:operation>
+        <wsdl:operation name="consultarEstabelecimentoSaudePorMunicipio">
+            <WL5G3N0:documentation>Consultar o Estabelecimento de Saude pelo código IBGE do Município.</WL5G3N0:documentation>
+            <WL5G3N3:operation soapActionRequired="false"/>
+            <wsdl:input>
+                <WL5G3N3:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <WL5G3N3:body use="literal"/>
+            </wsdl:output>
+            <wsdl:fault name="CnesFault">
+                <WL5G3N3:fault name="CnesFault" use="literal"/>
+            </wsdl:fault>
+        </wsdl:operation>
+        <wsdl:operation name="consultarDadosComplementaresEstabelecimentoSaude">
+            <WL5G3N0:documentation>Consultar dados complementares do Estabelecimento de Saude.</WL5G3N0:documentation>
+            <WL5G3N3:operation soapActionRequired="false"/>
+            <wsdl:input>
+                <WL5G3N3:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <WL5G3N3:body use="literal"/>
+            </wsdl:output>
+            <wsdl:fault name="CnesFault">
+                <WL5G3N3:fault name="CnesFault" use="literal"/>
+            </wsdl:fault>
+        </wsdl:operation>
+    </wsdl:binding>
+    <wsdl:service name="CnesService">
+        <wsdl:port name="CnesServicePort" binding="WL5G3N1:CnesServiceSOAP12Binding">
+            <WL5G3N3:address location="https://servicos.saude.gov.br/cnes/CnesService/v1r0"/>
+        </wsdl:port>
+    </wsdl:service>
+</wsdl:definitions>

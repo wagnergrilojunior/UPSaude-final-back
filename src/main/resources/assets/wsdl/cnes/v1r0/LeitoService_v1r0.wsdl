@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<wsdl:definitions xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:WL5G3N0="http://schemas.xmlsoap.org/wsdl/" xmlns:WL5G3N1="http://servicos.saude.gov.br/cnes/v1r0/leitoservice" xmlns:WL5G3N2="http://servicos.saude.gov.br/wsdl/mensageria/falha/v5r0/msfalha" xmlns:WL5G3N3="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:WL5G3N4="http://schemas.xmlsoap.org/wsdl/soap12/" name="leito.v1r0" targetNamespace="http://servicos.saude.gov.br/cnes/v1r0/leitoservice">
+
+    <wsdl:types>
+        
+    <xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+      <xsd:import namespace="http://servicos.saude.gov.br/cnes/v1r0/leitoservice" schemaLocation="https://servicos.saude.gov.br/cnes/LeitoService/v1r0?WSDL&amp;type=XSD&amp;file=schema%3A1e5dd50b-0808-4d03-9b20-e4c2c7e436fa"/>
+    </xsd:schema>
+  </wsdl:types>
+    <wsdl:message name="requestConsultarLeitosCNES">
+        <wsdl:part element="WL5G3N1:requestConsultarLeitosCNES" name="requestConsultarLeitosCNES"/>
+    </wsdl:message>
+    <wsdl:message name="responseConsultarLeitosCNES">
+        <wsdl:part element="WL5G3N1:responseConsultarLeitosCNES" name="responseConsultarLeitosCNES"/>
+    </wsdl:message>
+    <wsdl:message name="LeitoFault">
+        <wsdl:part element="WL5G3N2:MSFalha" name="fault"/>
+    </wsdl:message>
+    <wsdl:portType name="LeitoServicePortType">
+        <wsdl:operation name="consultarLeitosCNES">
+            <WL5G3N0:documentation>Consultar os leitos do
+				Estabelecimento de Saude pelo código do CNES.</WL5G3N0:documentation>
+            <wsdl:input message="WL5G3N1:requestConsultarLeitosCNES" name="requestConsultarLeitosCNES"/>
+            <wsdl:output message="WL5G3N1:responseConsultarLeitosCNES" name="responseConsultarProfissionaisSaude"/>
+            <wsdl:fault message="WL5G3N1:LeitoFault" name="LeitoFault"/>
+        </wsdl:operation>
+    </wsdl:portType>
+    <wsdl:binding name="LeitoServiceSOAP11Binding" type="WL5G3N1:LeitoServicePortType">
+        <WL5G3N3:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
+        <wsdl:operation name="consultarLeitosCNES">
+            <WL5G3N0:documentation>Consultar os leitos do
+				Estabelecimento de Saude pelo código do CNES.</WL5G3N0:documentation>
+            <WL5G3N3:operation/>
+            <wsdl:input>
+                <WL5G3N3:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <WL5G3N3:body use="literal"/>
+            </wsdl:output>
+            <wsdl:fault name="LeitoFault">
+                <WL5G3N3:fault name="LeitoFault" use="literal"/>
+            </wsdl:fault>
+        </wsdl:operation>
+    </wsdl:binding>
+    <wsdl:binding name="LeitoServiceSOAP12Binding" type="WL5G3N1:LeitoServicePortType">
+        <WL5G3N4:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
+      
+        <wsdl:operation name="consultarLeitosCNES">
+            <WL5G3N0:documentation>Consultar os leitos do
+				Estabelecimento de Saude pelo código do CNES.</WL5G3N0:documentation>
+            <WL5G3N4:operation soapActionRequired="false"/>
+            <wsdl:input>
+                <WL5G3N4:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <WL5G3N4:body use="literal"/>
+            </wsdl:output>
+            <wsdl:fault name="LeitoFault">
+                <WL5G3N4:fault name="LeitoFault" use="literal"/>
+            </wsdl:fault>
+        </wsdl:operation>
+    </wsdl:binding>
+    <wsdl:service name="LeitoService">
+        <wsdl:port binding="WL5G3N1:LeitoServiceSOAP12Binding" name="LeitoServicePort">
+            <WL5G3N4:address location="https://servicos.saude.gov.br/cnes/LeitoService/v1r0"/>
+        </wsdl:port>
+    </wsdl:service>
+</wsdl:definitions>
