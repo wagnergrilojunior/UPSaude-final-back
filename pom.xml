@@ -218,6 +218,22 @@
               <keep>true</keep>
             </configuration>
           </execution>
+          <!-- 
+          ============================================================================
+          CNES WSDL IMPORTS - DESABILITADOS
+          
+          O código gerado pelos WSDLs do CNES foi commitado em:
+          src/main/java/com/upsaude/integration/cnes/wsdl/
+          
+          A geração via wsimport foi desabilitada porque os WSDLs do DATASUS contêm
+          referencias externas (schemaLocation) que tentam baixar XSDs remotamente,
+          causando falhas na esteira de CI/CD.
+          
+          Para regenerar o código (se necessário), execute localmente:
+          mvn generate-sources -Pcnes-generate
+          ============================================================================
+          -->
+          <!--
           <execution>
             <id>generate-cnes-cnes-service</id>
             <goals>
@@ -254,33 +270,6 @@
               <keep>true</keep>
             </configuration>
           </execution>
-          <!-- 
-          EstabelecimentoSaudeService v2r0 temporariamente desabilitado devido a conflitos de nomes internos no WSDL.
-          Os métodos listarHospitais, listarUBS, etc podem ser implementados usando o v1r0 ou uma abordagem alternativa.
-          -->
-          <!--
-          <execution>
-            <id>generate-cnes-estabelecimento-v2r0</id>
-            <goals>
-              <goal>wsimport</goal>
-            </goals>
-            <phase>generate-sources</phase>
-            <configuration>
-              <wsdlUrls>
-                <wsdlUrl>https://servicos.saude.gov.br/cnes/EstabelecimentoSaudeService/v2r0?wsdl</wsdlUrl>
-              </wsdlUrls>
-              <bindingFiles>
-                <bindingFile>${project.basedir}/src/main/resources/assets/wsdl/cnes/bindings-v2r0.xml</bindingFile>
-              </bindingFiles>
-              <packageName>com.upsaude.integration.cnes.wsdl.estabelecimento.v2r0</packageName>
-              <sourceDestDir>${project.build.directory}/generated-sources/wsimport</sourceDestDir>
-              <xnocompile>true</xnocompile>
-              <extension>true</extension>
-              <verbose>true</verbose>
-              <keep>true</keep>
-            </configuration>
-          </execution>
-          -->
           <execution>
             <id>generate-cnes-profissional</id>
             <goals>
@@ -317,33 +306,6 @@
               <keep>true</keep>
             </configuration>
           </execution>
-          <!-- 
-          VinculacaoProfissionalService v1r0 temporariamente desabilitado devido a conflitos de nomes internos no WSDL.
-          Pode ser implementado usando uma abordagem alternativa ou bindings mais específicos.
-          -->
-          <!--
-          <execution>
-            <id>generate-cnes-vinculacao</id>
-            <goals>
-              <goal>wsimport</goal>
-            </goals>
-            <phase>generate-sources</phase>
-            <configuration>
-              <wsdlUrls>
-                <wsdlUrl>https://servicos.saude.gov.br/cnes/VinculacaoProfissionalService/v1r0?wsdl</wsdlUrl>
-              </wsdlUrls>
-              <bindingFiles>
-                <bindingFile>${project.basedir}/src/main/resources/assets/wsdl/cnes/bindings-vinculacao.xml</bindingFile>
-              </bindingFiles>
-              <packageName>com.upsaude.integration.cnes.wsdl.vinculacao</packageName>
-              <sourceDestDir>${project.build.directory}/generated-sources/wsimport</sourceDestDir>
-              <xnocompile>true</xnocompile>
-              <extension>true</extension>
-              <verbose>true</verbose>
-              <keep>true</keep>
-            </configuration>
-          </execution>
-          -->
           <execution>
             <id>generate-cnes-equipamento</id>
             <goals>
@@ -380,6 +342,7 @@
               <keep>true</keep>
             </configuration>
           </execution>
+          -->
         </executions>
       </plugin>
       <plugin>
