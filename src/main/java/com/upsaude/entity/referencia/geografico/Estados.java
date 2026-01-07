@@ -21,4 +21,19 @@ public class Estados extends BaseEntityWithoutTenant {
 
     @Column(name = "codigo_ibge", length = 20)
     private String codigoIbge;
+
+    @Column(name = "nome_oficial_ibge", length = 200)
+    private String nomeOficialIbge;
+
+    @Column(name = "sigla_ibge", length = 2)
+    private String siglaIbge;
+
+    @Column(name = "regiao_ibge", length = 50)
+    private String regiaoIbge;
+
+    @Column(name = "ativo_ibge")
+    private Boolean ativoIbge;
+
+    @Column(name = "data_ultima_sincronizacao_ibge")
+    private java.time.OffsetDateTime dataUltimaSincronizacaoIbge;
 }

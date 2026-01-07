@@ -8,6 +8,7 @@ import org.apache.wss4j.dom.handler.WSHandlerConstants;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.oxm.jaxb.Jaxb2Marshaller;
 import org.springframework.ws.client.support.interceptor.ClientInterceptor;
 import org.springframework.ws.soap.SoapVersion;
@@ -32,11 +33,13 @@ import java.time.Duration;
 @Configuration
 @EnableConfigurationProperties(SigtapProperties.class)
 @RequiredArgsConstructor
+@Lazy
 public class SigtapSoapConfig {
 
     private final SigtapProperties properties;
 
     @Bean
+    @Lazy
     public SaajSoapMessageFactory sigtapSoapMessageFactory() {
         SaajSoapMessageFactory factory = new SaajSoapMessageFactory();
         factory.setSoapVersion(SoapVersion.SOAP_12);
@@ -45,6 +48,7 @@ public class SigtapSoapConfig {
     }
 
     @Bean
+    @Lazy
     public Jaxb2Marshaller sigtapMarshaller() {
         Jaxb2Marshaller marshaller = new Jaxb2Marshaller();
         // Classes geradas via wsimport (jaxws-maven-plugin)
@@ -98,6 +102,7 @@ public class SigtapSoapConfig {
     }
 
     @Bean
+    @Lazy
     public HttpUrlConnectionMessageSender sigtapMessageSender() {
         HttpUrlConnectionMessageSender sender = new HttpUrlConnectionMessageSender();
         sender.setConnectionTimeout(Duration.ofMillis(properties.getSoap().getConnectTimeoutMs()));
@@ -106,6 +111,7 @@ public class SigtapSoapConfig {
     }
 
     @Bean
+    @Lazy
     public Wss4jSecurityInterceptor sigtapSecurityInterceptor() throws WSSecurityException {
         Wss4jSecurityInterceptor interceptor = new Wss4jSecurityInterceptor();
         interceptor.setSecurementActions(WSHandlerConstants.USERNAME_TOKEN);
@@ -118,11 +124,13 @@ public class SigtapSoapConfig {
     }
 
     @Bean
+    @Lazy
     public ClientInterceptor sigtapLoggingInterceptor() {
         return new SigtapSoapLoggingInterceptor();
     }
 
     @Bean
+    @Lazy
     public WebServiceTemplate sigtapWebServiceTemplate(
             SaajSoapMessageFactory sigtapSoapMessageFactory,
             Jaxb2Marshaller sigtapMarshaller,

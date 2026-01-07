@@ -23,4 +23,3 @@ public class StatusSincronizacaoEnumConverter implements AttributeConverter<Stat
         return StatusSincronizacaoEnum.fromCodigo(dbData);
     }
 }
-

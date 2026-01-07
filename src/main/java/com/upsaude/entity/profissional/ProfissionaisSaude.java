@@ -23,16 +23,15 @@ import lombok.Getter;
 import lombok.Setter;
 
 @Entity
-@Table(name = "profissionais_saude", schema = "public",
-       uniqueConstraints = {
-           @UniqueConstraint(name = "uk_profissional_cpf", columnNames = {"cpf"})
-       },
-       indexes = {
-           @Index(name = "idx_profissional_cpf", columnList = "cpf"),
-           @Index(name = "idx_profissional_registro", columnList = "registro_profissional"),
-           @Index(name = "idx_profissional_status_registro", columnList = "status_registro"),
-           @Index(name = "idx_profissional_cbo", columnList = "codigo_cbo")
-       })
+@Table(name = "profissionais_saude", schema = "public", uniqueConstraints = {
+        @UniqueConstraint(name = "uk_profissional_cpf", columnNames = { "cpf" })
+}, indexes = {
+        @Index(name = "idx_profissional_cpf", columnList = "cpf"),
+        @Index(name = "idx_profissional_registro", columnList = "registro_profissional"),
+        @Index(name = "idx_profissional_status_registro", columnList = "status_registro"),
+        @Index(name = "idx_profissional_cbo", columnList = "codigo_cbo"),
+        @Index(name = "idx_profissional_cns", columnList = "cns")
+})
 @Getter
 @Setter
 @EqualsAndHashCode(onlyExplicitlyIncluded = true, callSuper = true)
@@ -63,6 +62,9 @@ public class ProfissionaisSaude extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "endereco_profissional_id")
     private Endereco enderecoProfissional;
+
+    @Column(name = "data_ultima_sincronizacao_cnes")
+    private java.time.OffsetDateTime dataUltimaSincronizacaoCnes;
 
     @Column(name = "observacoes", columnDefinition = "TEXT")
     private String observacoes;

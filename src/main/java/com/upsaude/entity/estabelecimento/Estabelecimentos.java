@@ -9,8 +9,12 @@ import com.upsaude.entity.embeddable.LocalizacaoEstabelecimento;
 import com.upsaude.entity.embeddable.ResponsaveisEstabelecimento;
 import com.upsaude.entity.estabelecimento.EquipamentosEstabelecimento;
 import com.upsaude.entity.paciente.Endereco;
+import com.upsaude.enums.EsferaAdministrativaEnum;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
+import jakarta.persistence.Convert;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.FetchType;
@@ -38,7 +42,9 @@ import java.util.List;
        indexes = {
            @Index(name = "idx_estabelecimentos_cnes", columnList = "codigo_cnes"),
            @Index(name = "idx_estabelecimentos_cnpj", columnList = "cnpj"),
-           @Index(name = "idx_estabelecimentos_nome", columnList = "nome")
+           @Index(name = "idx_estabelecimentos_nome", columnList = "nome"),
+           @Index(name = "idx_estabelecimentos_esfera_administrativa", columnList = "esfera_administrativa"),
+           @Index(name = "idx_estabelecimentos_codigo_ibge", columnList = "codigo_ibge_municipio")
        })
 @Getter
 @Setter
@@ -69,6 +75,19 @@ public class Estabelecimentos extends BaseEntityWithoutEstabelecimento {
 
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "estabelecimento", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<EquipamentosEstabelecimento> equipamentos = new ArrayList<>();
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "esfera_administrativa", length = 50)
+    private EsferaAdministrativaEnum esferaAdministrativa;
+
+    @Column(name = "codigo_ibge_municipio", length = 7)
+    private String codigoIbgeMunicipio;
+
+    @Column(name = "data_ultima_sincronizacao_cnes")
+    private java.time.OffsetDateTime dataUltimaSincronizacaoCnes;
+
+    @Column(name = "versao_cnes", length = 6)
+    private String versaoCnes;
 
     @Column(name = "observacoes", columnDefinition = "TEXT")
     private String observacoes;

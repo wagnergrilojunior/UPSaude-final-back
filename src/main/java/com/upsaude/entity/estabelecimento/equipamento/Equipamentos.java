@@ -64,6 +64,9 @@ public class Equipamentos extends BaseEntity {
     @Embedded
     private DescricoesEquipamento descricoes;
 
+    @Column(name = "data_ultima_sincronizacao_cnes")
+    private java.time.OffsetDateTime dataUltimaSincronizacaoCnes;
+
     @PrePersist
     @PreUpdate
     public void validateEmbeddables() {

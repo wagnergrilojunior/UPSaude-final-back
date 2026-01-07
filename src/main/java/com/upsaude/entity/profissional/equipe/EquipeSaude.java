@@ -71,6 +71,9 @@ public class EquipeSaude extends BaseEntity {
     @OneToMany(mappedBy = "equipe", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<VinculoProfissionalEquipe> vinculosProfissionais = new HashSet<>();
 
+    @Column(name = "data_ultima_sincronizacao_cnes")
+    private OffsetDateTime dataUltimaSincronizacaoCnes;
+
     @Column(name = "observacoes", columnDefinition = "TEXT")
     private String observacoes;
 

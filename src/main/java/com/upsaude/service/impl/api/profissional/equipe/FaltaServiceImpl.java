@@ -24,11 +24,10 @@ import com.upsaude.exception.InternalServerErrorException;
 import com.upsaude.repository.profissional.equipe.FaltaRepository;
 import com.upsaude.service.api.profissional.equipe.FaltaService;
 import com.upsaude.service.api.sistema.multitenancy.TenantService;
-import com.upsaude.service.api.support.falta.FaltaCreator;
-import com.upsaude.service.api.support.falta.FaltaDomainService;
-import com.upsaude.service.api.support.falta.FaltaResponseBuilder;
-import com.upsaude.service.api.support.falta.FaltaTenantEnforcer;
-import com.upsaude.service.api.support.falta.FaltaUpdater;
+import com.upsaude.mapper.profissional.equipe.FaltaMapper;
+import com.upsaude.repository.profissional.ProfissionaisSaudeRepository;
+import com.upsaude.repository.profissional.MedicosRepository;
+import com.upsaude.exception.NotFoundException;
 import org.springframework.dao.DataAccessException;
 
 import java.time.LocalDate;
@@ -43,30 +42,28 @@ public class FaltaServiceImpl implements FaltaService {
     private final FaltaRepository repository;
     private final CacheManager cacheManager;
     private final TenantService tenantService;
-
-    private final FaltaCreator creator;
-    private final FaltaUpdater updater;
-    private final FaltaResponseBuilder responseBuilder;
-    private final FaltaTenantEnforcer tenantEnforcer;
-    private final FaltaDomainService domainService;
+    private final FaltaMapper mapper;
+    private final ProfissionaisSaudeRepository profissionaisSaudeRepository;
+    private final MedicosRepository medicosRepository;
 
     @Override
     @Transactional
     public FaltaResponse criar(FaltaRequest request) {
-        log.debug("Criando nova falta");
-
         try {
             UUID tenantId = tenantService.validarTenantAtual();
             Tenant tenant = tenantService.obterTenantDoUsuarioAutenticado();
             validarTenantAutenticadoOrThrow(tenantId, tenant);
 
-            Falta saved = creator.criar(request, tenantId, tenant);
-            FaltaResponse response = responseBuilder.build(saved);
+            Falta entity = mapper.fromRequest(request);
+            entity.setActive(true);
+            resolverRelacionamentos(entity, request, tenantId, tenant);
+
+            Falta saved = repository.save(entity);
+            FaltaResponse response = mapper.toResponse(saved);
 
             Cache cache = cacheManager.getCache(CacheKeyUtil.CACHE_FALTAS);
             if (cache != null) {
-                Object key = Objects.requireNonNull((Object) CacheKeyUtil.falta(tenantId, saved.getId()));
-                cache.put(key, response);
+                cache.put(Objects.requireNonNull((Object) CacheKeyUtil.falta(tenantId, saved.getId())), response);
             }
 
             return response;
@@ -81,22 +78,18 @@ public class FaltaServiceImpl implements FaltaService {
     @Transactional(readOnly = true)
     @Cacheable(cacheNames = CacheKeyUtil.CACHE_FALTAS, keyGenerator = "faltasCacheKeyGenerator")
     public FaltaResponse obterPorId(UUID id) {
-        log.debug("Buscando falta por ID: {} (cache miss)", id);
         if (id == null) {
             throw new BadRequestException("ID da falta é obrigatório");
         }
-
         UUID tenantId = tenantService.validarTenantAtual();
-        Falta entity = tenantEnforcer.validarAcessoCompleto(id, tenantId);
-        return responseBuilder.build(entity);
+        Falta entity = validarAcesso(id, tenantId);
+        return mapper.toResponse(entity);
     }
 
     @Override
     @Transactional(readOnly = true)
-    public Page<FaltaResponse> listar(Pageable pageable, UUID profissionalId, UUID medicoId, UUID estabelecimentoId, TipoFaltaEnum tipoFalta, LocalDate dataInicio, LocalDate dataFim) {
-        log.debug("Listando faltas paginadas. Página: {}, Tamanho: {}",
-                pageable.getPageNumber(), pageable.getPageSize());
-
+    public Page<FaltaResponse> listar(Pageable pageable, UUID profissionalId, UUID medicoId, UUID estabelecimentoId,
+            TipoFaltaEnum tipoFalta, LocalDate dataInicio, LocalDate dataFim) {
         UUID tenantId = tenantService.validarTenantAtual();
         Page<Falta> page;
 
@@ -105,24 +98,24 @@ public class FaltaServiceImpl implements FaltaService {
         } else if (medicoId != null) {
             page = repository.findByMedicoIdAndTenantIdOrderByDataFaltaDesc(medicoId, tenantId, pageable);
         } else if (estabelecimentoId != null) {
-            page = repository.findByEstabelecimentoIdAndTenantIdOrderByDataFaltaDesc(estabelecimentoId, tenantId, pageable);
+            page = repository.findByEstabelecimentoIdAndTenantIdOrderByDataFaltaDesc(estabelecimentoId, tenantId,
+                    pageable);
         } else if (tipoFalta != null) {
             page = repository.findByTipoFaltaAndTenantIdOrderByDataFaltaDesc(tipoFalta, tenantId, pageable);
         } else if (dataInicio != null && dataFim != null) {
-            page = repository.findByDataFaltaBetweenAndTenantIdOrderByDataFaltaDesc(dataInicio, dataFim, tenantId, pageable);
+            page = repository.findByDataFaltaBetweenAndTenantIdOrderByDataFaltaDesc(dataInicio, dataFim, tenantId,
+                    pageable);
         } else {
             page = repository.findAllByTenant(tenantId, pageable);
         }
 
-        return page.map(responseBuilder::build);
+        return page.map(mapper::toResponse);
     }
 
     @Override
     @Transactional
     @CachePut(cacheNames = CacheKeyUtil.CACHE_FALTAS, keyGenerator = "faltasCacheKeyGenerator")
     public FaltaResponse atualizar(UUID id, FaltaRequest request) {
-        log.debug("Atualizando falta. ID: {}", id);
-
         if (id == null) {
             throw new BadRequestException("ID da falta é obrigatório");
         }
@@ -131,26 +124,26 @@ public class FaltaServiceImpl implements FaltaService {
         Tenant tenant = tenantService.obterTenantDoUsuarioAutenticado();
         validarTenantAutenticadoOrThrow(tenantId, tenant);
 
-        Falta updated = updater.atualizar(id, request, tenantId, tenant);
-        return responseBuilder.build(updated);
+        Falta entity = validarAcesso(id, tenantId);
+        mapper.updateFromRequest(request, entity);
+        resolverRelacionamentos(entity, request, tenantId, tenant);
+
+        Falta updated = repository.save(entity);
+        return mapper.toResponse(updated);
     }
 
     @Override
     @Transactional
     @CacheEvict(cacheNames = CacheKeyUtil.CACHE_FALTAS, keyGenerator = "faltasCacheKeyGenerator", beforeInvocation = false)
     public void excluir(UUID id) {
-        log.debug("Excluindo falta permanentemente. ID: {}", id);
         try {
             UUID tenantId = tenantService.validarTenantAtual();
-            Falta entity = tenantEnforcer.validarAcesso(id, tenantId);
-            domainService.validarPodeDeletar(entity);
+            Falta entity = validarAcesso(id, tenantId);
             repository.delete(Objects.requireNonNull(entity));
-            log.info("Falta excluída permanentemente com sucesso. ID: {}", id);
-        } catch (BadRequestException | com.upsaude.exception.NotFoundException e) {
-            log.warn("Erro de validação ao excluir Falta. Erro: {}", e.getMessage());
+        } catch (BadRequestException | NotFoundException e) {
             throw e;
         } catch (DataAccessException e) {
-            log.error("Erro de acesso a dados ao excluir Falta. Exception: {}", e.getClass().getSimpleName(), e);
+            log.error("Erro ao excluir Falta", e);
             throw new InternalServerErrorException("Erro ao excluir Falta", e);
         }
     }
@@ -159,15 +152,13 @@ public class FaltaServiceImpl implements FaltaService {
     @Transactional
     @CacheEvict(cacheNames = CacheKeyUtil.CACHE_FALTAS, keyGenerator = "faltasCacheKeyGenerator", beforeInvocation = false)
     public void inativar(UUID id) {
-        log.debug("Inativando falta. ID: {}", id);
         try {
             UUID tenantId = tenantService.validarTenantAtual();
             inativarInternal(id, tenantId);
-        } catch (BadRequestException | com.upsaude.exception.NotFoundException e) {
-            log.warn("Erro de validação ao inativar Falta. Erro: {}", e.getMessage());
+        } catch (BadRequestException | NotFoundException e) {
             throw e;
         } catch (DataAccessException e) {
-            log.error("Erro de acesso a dados ao inativar Falta. Exception: {}", e.getClass().getSimpleName(), e);
+            log.error("Erro ao inativar Falta", e);
             throw new InternalServerErrorException("Erro ao inativar Falta", e);
         }
     }
@@ -177,11 +168,35 @@ public class FaltaServiceImpl implements FaltaService {
             throw new BadRequestException("ID da falta é obrigatório");
         }
 
-        Falta entity = tenantEnforcer.validarAcesso(id, tenantId);
-        domainService.validarPodeInativar(entity);
+        Falta entity = validarAcesso(id, tenantId);
+        if (Boolean.FALSE.equals(entity.getActive())) {
+            throw new BadRequestException("Falta já está inativa");
+        }
         entity.setActive(false);
         repository.save(Objects.requireNonNull(entity));
-        log.info("Falta inativada com sucesso. ID: {}", id);
+    }
+
+    private Falta validarAcesso(UUID id, UUID tenantId) {
+        return repository.findByIdAndTenant(id, tenantId)
+                .orElseThrow(() -> new NotFoundException("Falta não encontrada com ID: " + id));
+    }
+
+    private void resolverRelacionamentos(Falta entity, FaltaRequest request, UUID tenantId, Tenant tenant) {
+        if (request == null)
+            return;
+        validarTenantAutenticadoOrThrow(tenantId, tenant);
+        entity.setTenant(tenant);
+
+        if (request.getProfissional() != null) {
+            entity.setProfissional(profissionaisSaudeRepository.findByIdAndTenant(request.getProfissional(), tenantId)
+                    .orElseThrow(() -> new NotFoundException(
+                            "Profissional não encontrado com ID: " + request.getProfissional())));
+        }
+
+        if (request.getMedico() != null) {
+            entity.setMedico(medicosRepository.findByIdAndTenant(request.getMedico(), tenantId)
+                    .orElseThrow(() -> new NotFoundException("Médico não encontrado com ID: " + request.getMedico())));
+        }
     }
 
     private void validarTenantAutenticadoOrThrow(UUID tenantId, Tenant tenant) {

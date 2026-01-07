@@ -26,8 +26,7 @@ import java.util.Map;
 @Slf4j
 @Configuration
 @EnableTransactionManagement
-@EnableJpaRepositories(
-    basePackages = {
+@EnableJpaRepositories(basePackages = {
         "com.upsaude.repository.agendamento",
         "com.upsaude.repository.alergia",
         "com.upsaude.repository.clinica",
@@ -46,12 +45,10 @@ import java.util.Map;
         "com.upsaude.repository.sistema.notificacao",
         "com.upsaude.repository.sistema.relatorios",
         "com.upsaude.repository.sistema.usuario",
-        "com.upsaude.repository.sistema.integracao"
-        // NÃO incluir sistema.importacao aqui - será configurado separadamente para JOB
-    },
-    entityManagerFactoryRef = "apiEntityManagerFactory",
-    transactionManagerRef = "apiTransactionManager"
-)
+        "com.upsaude.repository.sistema.integracao",
+        "com.upsaude.repository.cnes"
+// NÃO incluir sistema.importacao aqui - será configurado separadamente para JOB
+}, entityManagerFactoryRef = "apiEntityManagerFactory", transactionManagerRef = "apiTransactionManager")
 public class JpaConfig {
 
     /**
@@ -64,44 +61,45 @@ public class JpaConfig {
     public LocalContainerEntityManagerFactoryBean apiEntityManagerFactory(
             EntityManagerFactoryBuilder builder,
             @Qualifier("apiDataSource") DataSource apiDataSource) {
-        
+
         log.info("Configurando EntityManagerFactory API...");
-        
+
         Map<String, String> properties = new HashMap<>();
         properties.put("hibernate.hbm2ddl.auto", "none");
         properties.put("hibernate.dialect", "org.hibernate.dialect.PostgreSQLDialect");
         properties.put("hibernate.format_sql", "false");
         properties.put("hibernate.show_sql", "false");
         properties.put("hibernate.use_sql_comments", "false");
-        
+
         LocalContainerEntityManagerFactoryBean emf = builder
                 .dataSource(apiDataSource)
                 .packages(
-                    "com.upsaude.entity.agendamento",
-                    "com.upsaude.entity.alergia",
-                    "com.upsaude.entity.clinica",
-                    "com.upsaude.entity.convenio",
-                    "com.upsaude.entity.deficiencia",
-                    "com.upsaude.entity.estabelecimento",
-                    "com.upsaude.entity.farmacia",
-                    "com.upsaude.entity.geral",
-                    "com.upsaude.entity.paciente",
-                    "com.upsaude.entity.profissional",
-                    "com.upsaude.entity.referencia",
-                    "com.upsaude.entity.sistema.auditoria",
-                    "com.upsaude.entity.sistema.auth",
-                    "com.upsaude.entity.sistema.lgpd",
-                    "com.upsaude.entity.sistema.multitenancy",
-                    "com.upsaude.entity.sistema.notificacao",
-                    "com.upsaude.entity.sistema.relatorios",
-                    "com.upsaude.entity.sistema.usuario",
-                    "com.upsaude.entity.sistema.integracao"
-                    // NÃO incluir sistema.importacao aqui
+                        "com.upsaude.entity.agendamento",
+                        "com.upsaude.entity.alergia",
+                        "com.upsaude.entity.clinica",
+                        "com.upsaude.entity.convenio",
+                        "com.upsaude.entity.deficiencia",
+                        "com.upsaude.entity.estabelecimento",
+                        "com.upsaude.entity.farmacia",
+                        "com.upsaude.entity.geral",
+                        "com.upsaude.entity.paciente",
+                        "com.upsaude.entity.profissional",
+                        "com.upsaude.entity.referencia",
+                        "com.upsaude.entity.sistema.auditoria",
+                        "com.upsaude.entity.sistema.auth",
+                        "com.upsaude.entity.sistema.lgpd",
+                        "com.upsaude.entity.sistema.multitenancy",
+                        "com.upsaude.entity.sistema.notificacao",
+                        "com.upsaude.entity.sistema.relatorios",
+                        "com.upsaude.entity.sistema.usuario",
+                        "com.upsaude.entity.sistema.integracao",
+                        "com.upsaude.entity.cnes"
+                // NÃO incluir sistema.importacao aqui
                 )
                 .persistenceUnit("api")
                 .properties(properties)
                 .build();
-        
+
         log.info("EntityManagerFactory API configurado com sucesso");
         return emf;
     }
@@ -115,7 +113,7 @@ public class JpaConfig {
     @Qualifier("apiTransactionManager")
     public PlatformTransactionManager apiTransactionManager(
             @Qualifier("apiEntityManagerFactory") EntityManagerFactory apiEntityManagerFactory) {
-        
+
         log.info("Configurando TransactionManager API...");
         JpaTransactionManager txManager = new JpaTransactionManager();
         txManager.setEntityManagerFactory(apiEntityManagerFactory);
@@ -124,20 +122,24 @@ public class JpaConfig {
     }
 
     /**
-     * EntityManagerFactory do JOB - @Qualifier("jobEntityManagerFactory") - USO EXCLUSIVO JOB - NÃO USAR NA API
-     * Gerencia entidades de sistema.importacao e entidades de referência necessárias (Tenant, Estabelecimentos)
+     * EntityManagerFactory do JOB - @Qualifier("jobEntityManagerFactory") - USO
+     * EXCLUSIVO JOB - NÃO USAR NA API
+     * Gerencia entidades de sistema.importacao e entidades de referência
+     * necessárias (Tenant, Estabelecimentos)
      * 
-     * NOTA: Inclui Tenant e Estabelecimentos porque BaseEntity (usado por ImportJob/ImportJobError) 
-     * tem relações com essas entidades. O JOB apenas lê essas entidades, não as modifica.
+     * NOTA: Inclui Tenant e Estabelecimentos porque BaseEntity (usado por
+     * ImportJob/ImportJobError)
+     * tem relações com essas entidades. O JOB apenas lê essas entidades, não as
+     * modifica.
      */
     @Bean
     @Qualifier("jobEntityManagerFactory")
     public LocalContainerEntityManagerFactoryBean jobEntityManagerFactory(
             EntityManagerFactoryBuilder builder,
             @Qualifier("jobDataSource") DataSource jobDataSource) {
-        
+
         log.info("Configurando EntityManagerFactory JOB...");
-        
+
         Map<String, String> properties = new HashMap<>();
         properties.put("hibernate.hbm2ddl.auto", "none");
         properties.put("hibernate.dialect", "org.hibernate.dialect.PostgreSQLDialect");
@@ -150,47 +152,53 @@ public class JpaConfig {
         properties.put("hibernate.order_updates", "true");
         // Configurações necessárias para suportar níveis de isolamento customizados
         // No Hibernate 6.x com Spring Boot 3.x, o HibernateJpaDialect precisa que:
-        // 1. O provider não desabilite o autocommit (prepareConnection deve estar habilitado)
+        // 1. O provider não desabilite o autocommit (prepareConnection deve estar
+        // habilitado)
         // 2. O modo de release da conexão seja ON_CLOSE (padrão no Hibernate 6.x)
-        // A propriedade abaixo habilita o prepareConnection, permitindo que o HibernateJpaDialect
+        // A propriedade abaixo habilita o prepareConnection, permitindo que o
+        // HibernateJpaDialect
         // configure o nível de isolamento antes de iniciar a transação
         properties.put("hibernate.connection.provider_disables_autocommit", "false");
-        
+
         LocalContainerEntityManagerFactoryBean emf = builder
                 .dataSource(jobDataSource)
                 .packages(
-                    "com.upsaude.entity.sistema.importacao",
-                    // Entidades de referência necessárias para BaseEntity e suas dependências transitivas
-                    // NOTA: Incluímos todas as entidades que podem ser referenciadas transitivamente
-                    // para evitar erros de "does not belong to the same persistence unit"
-                    "com.upsaude.entity.sistema.multitenancy", // Tenant
-                    "com.upsaude.entity.sistema.usuario", // UsuariosSistema
-                    "com.upsaude.entity.sistema.auth", // User (referenciado por UsuariosSistema)
-                    "com.upsaude.entity.sistema.notificacao", // Notificacao
-                    "com.upsaude.entity.sistema.integracao", // IntegracaoGov
-                    "com.upsaude.entity.sistema.lgpd", // LGPDConsentimento
-                    "com.upsaude.entity.estabelecimento", // Estabelecimentos
-                    "com.upsaude.entity.farmacia", // Farmacia (referenciado por IntegracaoGov)
-                    "com.upsaude.entity.paciente", // Endereco, Paciente
-                    "com.upsaude.entity.profissional", // ProfissionaisSaude
-                    "com.upsaude.entity.referencia", // Cidades, Estados, CID, SIGTAP, SIA
-                    "com.upsaude.entity.convenio", // Convenio (referenciado por Paciente)
-                    "com.upsaude.entity.agendamento", // Pode ser referenciado
-                    "com.upsaude.entity.alergia", // Pode ser referenciado
-                    "com.upsaude.entity.clinica", // Pode ser referenciado
-                    "com.upsaude.entity.deficiencia", // Pode ser referenciado
-                    "com.upsaude.entity.geral" // Pode ser referenciado
+                        "com.upsaude.entity.sistema.importacao",
+                        // Entidades de referência necessárias para BaseEntity e suas dependências
+                        // transitivas
+                        // NOTA: Incluímos todas as entidades que podem ser referenciadas
+                        // transitivamente
+                        // para evitar erros de "does not belong to the same persistence unit"
+                        "com.upsaude.entity.sistema.multitenancy", // Tenant
+                        "com.upsaude.entity.sistema.usuario", // UsuariosSistema
+                        "com.upsaude.entity.sistema.auth", // User (referenciado por UsuariosSistema)
+                        "com.upsaude.entity.sistema.notificacao", // Notificacao
+                        "com.upsaude.entity.sistema.integracao", // IntegracaoGov
+                        "com.upsaude.entity.sistema.lgpd", // LGPDConsentimento
+                        "com.upsaude.entity.cnes", // CNES
+                        "com.upsaude.entity.estabelecimento", // Estabelecimentos
+                        "com.upsaude.entity.farmacia", // Farmacia (referenciado por IntegracaoGov)
+                        "com.upsaude.entity.paciente", // Endereco, Paciente
+                        "com.upsaude.entity.profissional", // ProfissionaisSaude
+                        "com.upsaude.entity.referencia", // Cidades, Estados, CID, SIGTAP, SIA
+                        "com.upsaude.entity.convenio", // Convenio (referenciado por Paciente)
+                        "com.upsaude.entity.agendamento", // Pode ser referenciado
+                        "com.upsaude.entity.alergia", // Pode ser referenciado
+                        "com.upsaude.entity.clinica", // Pode ser referenciado
+                        "com.upsaude.entity.deficiencia", // Pode ser referenciado
+                        "com.upsaude.entity.geral" // Pode ser referenciado
                 )
                 .persistenceUnit("job")
                 .properties(properties)
                 .build();
-        
+
         log.info("EntityManagerFactory JOB configurado com sucesso (persistence unit: job)");
         return emf;
     }
 
     /**
-     * TransactionManager do JOB - @Qualifier("jobTransactionManager") - USO EXCLUSIVO JOB - NÃO USAR NA API
+     * TransactionManager do JOB - @Qualifier("jobTransactionManager") - USO
+     * EXCLUSIVO JOB - NÃO USAR NA API
      * Deve ser injetado explicitamente nos workers e scheduler
      * 
      * IMPORTANTE: As conexões da API e JOB são completamente independentes:
@@ -198,14 +206,16 @@ public class JpaConfig {
      * - JOB usa jobDataSource e jobTransactionManager (pool separado)
      * - Cada um tem seu próprio EntityManagerFactory e não interfere no outro
      * 
-     * O PostgreSQL usa READ_COMMITTED por padrão, que é o nível desejado para os jobs.
-     * Não configuramos isolamento customizado para evitar problemas com Hibernate 6.x.
+     * O PostgreSQL usa READ_COMMITTED por padrão, que é o nível desejado para os
+     * jobs.
+     * Não configuramos isolamento customizado para evitar problemas com Hibernate
+     * 6.x.
      */
     @Bean
     @Qualifier("jobTransactionManager")
     public PlatformTransactionManager jobTransactionManager(
             @Qualifier("jobEntityManagerFactory") EntityManagerFactory jobEntityManagerFactory) {
-        
+
         log.info("Configurando TransactionManager JOB...");
         JpaTransactionManager txManager = new JpaTransactionManager();
         txManager.setEntityManagerFactory(jobEntityManagerFactory);
@@ -213,4 +223,3 @@ public class JpaConfig {
         return txManager;
     }
 }
-

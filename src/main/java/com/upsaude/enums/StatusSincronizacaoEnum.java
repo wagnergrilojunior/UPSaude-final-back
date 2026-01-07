@@ -4,20 +4,27 @@ import java.util.Arrays;
 import java.util.Locale;
 
 public enum StatusSincronizacaoEnum {
-    SUCESSO(1, "Sucesso"),
-    ERRO(2, "Erro"),
-    PENDENTE(3, "Pendente");
+    PENDENTE(1, "PENDENTE", "Aguardando processamento"),
+    PROCESSANDO(2, "PROCESSANDO", "Em processamento"),
+    SUCESSO(3, "SUCESSO", "Sincronização concluída com sucesso"),
+    ERRO(4, "ERRO", "Erro na sincronização");
 
     private final Integer codigo;
+    private final String nome;
     private final String descricao;
 
-    StatusSincronizacaoEnum(Integer codigo, String descricao) {
+    StatusSincronizacaoEnum(Integer codigo, String nome, String descricao) {
         this.codigo = codigo;
+        this.nome = nome;
         this.descricao = descricao;
     }
 
     public Integer getCodigo() {
         return codigo;
+    }
+
+    public String getNome() {
+        return nome;
     }
 
     public String getDescricao() {
@@ -32,11 +39,11 @@ public enum StatusSincronizacaoEnum {
                 .orElse(null);
     }
 
-    public static StatusSincronizacaoEnum fromDescricao(String descricao) {
-        if (descricao == null) return null;
-        String d = descricao.trim().toUpperCase(Locale.ROOT);
+    public static StatusSincronizacaoEnum fromNome(String nome) {
+        if (nome == null) return null;
+        String n = nome.trim().toUpperCase(Locale.ROOT);
         return Arrays.stream(values())
-                .filter(v -> v.descricao.toUpperCase(Locale.ROOT).equals(d))
+                .filter(v -> v.nome.equals(n))
                 .findFirst()
                 .orElse(null);
     }
