@@ -1,0 +1,194 @@
+<?xml version="1.0" encoding="utf-8"?>
+<wsdl:definitions xmlns:soap11="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:soap12="http://schemas.xmlsoap.org/wsdl/soap12/" xmlns:tns="http://servicos.saude.gov.br/cnes/v1r0/equipeservice" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:equipe="http://servicos.saude.gov.br/schema/cnes/v1r0/equipe" xmlns:cnes="http://servicos.saude.gov.br/schema/cnes/v1r0/codigocnes" xmlns:prof="http://servicos.saude.gov.br/schema/cnes/v1r0/dadosbasicosprofissional" xmlns:msfalha="http://servicos.saude.gov.br/wsdl/mensageria/falha/v5r0/msfalha" xmlns:pag="http://servicos.saude.gov.br/wsdl/mensageria/v1/paginacao" name="equipe.v1r0" targetNamespace="http://servicos.saude.gov.br/cnes/v1r0/equipeservice">
+
+	<wsdl:types>
+		<xs:schema elementFormDefault="qualified" targetNamespace="http://servicos.saude.gov.br/cnes/v1r0/equipeservice">
+
+			<xs:import id="cnes" namespace="http://servicos.saude.gov.br/schema/cnes/v1r0/codigocnes" schemaLocation="https://servicos.saude.gov.br/cnes/EquipeService/v1r0?WSDL&amp;type=XSD&amp;file=file%3A%2Fhome%2Fsebast%2FTemp%2FOAG_CNES%2FRESOURCES50%2Fxsd%2Fcnes%2Fcodigocnes.v1r0.xsd"/>
+
+			<xs:import id="msfalha" namespace="http://servicos.saude.gov.br/wsdl/mensageria/falha/v5r0/msfalha" schemaLocation="https://servicos.saude.gov.br/cnes/EquipeService/v1r0?WSDL&amp;type=XSD&amp;file=file%3A%2Fhome%2Fsebast%2FTemp%2FOAG_CNES%2FRESOURCES50%2Fxsd%2Fmensageria%2Ffalha%2Fmsfalha.v5r0.xsd"/>
+
+			<xs:import id="equipe" namespace="http://servicos.saude.gov.br/schema/cnes/v1r0/equipe" schemaLocation="https://servicos.saude.gov.br/cnes/EquipeService/v1r0?WSDL&amp;type=XSD&amp;file=file%3A%2Fhome%2Fsebast%2FTemp%2FOAG_CNES%2FRESOURCES50%2Fxsd%2Fcnes%2Fequipe%2Fequipe.v1r0.xsd"/>
+				
+			<xs:import id="pag" namespace="http://servicos.saude.gov.br/wsdl/mensageria/v1/paginacao" schemaLocation="https://servicos.saude.gov.br/cnes/EquipeService/v1r0?WSDL&amp;type=XSD&amp;file=file%3A%2Fhome%2Fsebast%2FTemp%2FOAG_CNES%2FRESOURCES50%2Fxsd%2Fmensageria%2Fpaginacao.v1.xsd"/>
+				
+			<xs:import id="prof" namespace="http://servicos.saude.gov.br/schema/cnes/v1r0/dadosbasicosprofissional" schemaLocation="https://servicos.saude.gov.br/cnes/EquipeService/v1r0?WSDL&amp;type=XSD&amp;file=file%3A%2Fhome%2Fsebast%2FTemp%2FOAG_CNES%2FRESOURCES50%2Fxsd%2Fcnes%2Fdadosbasicosprofissional%2Fdadosbasicosprofissional.v1r0.xsd"/>
+
+			<xs:element name="requestPesquisarEquipe">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element name="CodigoCNES" minOccurs="1" maxOccurs="1" type="cnes:CodigoCNESType">
+							<xs:annotation>
+								<xs:documentation><![CDATA[Código do CNES]]></xs:documentation>
+							</xs:annotation>
+						</xs:element>
+						<xs:element name="Paginacao" type="pag:PaginacaoType"/>
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+
+			<xs:element name="responsePesquisarEquipe">
+				<xs:complexType>
+					<xs:sequence>
+				<xs:element name="Equipes" type="equipe:EquipesType" minOccurs="0" maxOccurs="1"/>
+						
+							<xs:element name="Paginacao" type="pag:PaginacaoType"/>
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+			
+			
+			<xs:element name="requestDetalharEquipe">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element name="codigoEquipe" minOccurs="1" maxOccurs="1" type="equipe:CodigoEquipeType">
+							<xs:annotation>
+								<xs:documentation><![CDATA[Código do Equipe]]></xs:documentation>
+							</xs:annotation>
+						</xs:element>
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+
+			<xs:element name="responseDetalharEquipe">
+				<xs:complexType>
+					<xs:sequence>
+					    <xs:element name="codigoCNES" minOccurs="1" maxOccurs="1" type="xs:string"/>
+					    <xs:element name="codigoEquipe" minOccurs="1" maxOccurs="1" type="equipe:CodigoEquipeType"/>
+					    <xs:element name="DadosBasicosProfissionais" minOccurs="1" maxOccurs="1" type="prof:DadosBasicosProfissionaisType"/>
+					</xs:sequence>
+				</xs:complexType> 
+			</xs:element>
+
+		</xs:schema>
+	</wsdl:types>
+
+	<wsdl:message name="requestPesquisarEquipe">
+		<wsdl:part element="tns:requestPesquisarEquipe" name="requestPesquisarEquipe"/>
+	</wsdl:message>
+
+	<wsdl:message name="responsePesquisarEquipe">
+		<wsdl:part element="tns:responsePesquisarEquipe" name="responsePesquisarEquipe"/>
+	</wsdl:message>
+	
+	<wsdl:message name="requestDetalharEquipe">
+		<wsdl:part element="tns:requestDetalharEquipe" name="requestDetalharEquipe"/>
+	</wsdl:message>
+
+	<wsdl:message name="responseDetalharEquipe">
+		<wsdl:part element="tns:responseDetalharEquipe" name="responseDetalharEquipe"/>
+	</wsdl:message>	
+
+	<wsdl:message name="EquipeFault">
+		<wsdl:part name="fault" element="msfalha:MSFalha"/>
+	</wsdl:message>
+
+	<wsdl:portType name="EquipeServicePortType">
+
+		<wsdl:operation name="pesquisarEquipe">
+			<wsdl:documentation>
+				Consultar os equipes do
+				Estabelecimento de Saude pelo código do CNES.
+			</wsdl:documentation>
+			<wsdl:input name="requestPesquisarEquipe" message="tns:requestPesquisarEquipe"/>
+			<wsdl:output name="responsePesquisarEquipe" message="tns:responsePesquisarEquipe"/>
+			<wsdl:fault name="EquipeFault" message="tns:EquipeFault"/>
+		</wsdl:operation>
+		
+		<wsdl:operation name="detalharEquipe">
+			<wsdl:documentation>
+				Consultar o detalhe de um equipe para um Código de Identificação Nacional da Equipe.
+			</wsdl:documentation>
+			<wsdl:input name="requestDetalharEquipe" message="tns:requestDetalharEquipe"/>
+			<wsdl:output name="responseDetalharEquipe" message="tns:responseDetalharEquipe"/>
+			<wsdl:fault name="EquipeFault" message="tns:EquipeFault"/>
+		</wsdl:operation>
+
+
+	</wsdl:portType>
+
+	<wsdl:binding name="EquipeServiceSOAP12Binding" type="tns:EquipeServicePortType">
+		<soap12:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
+
+		<wsdl:operation name="pesquisarEquipe">
+			<wsdl:documentation>Consultar os equipes do
+				Estabelecimento de Saude pelo código do CNES.
+			</wsdl:documentation>
+			<soap12:operation soapAction=""/>
+			<wsdl:input>
+				<soap12:body use="literal"/>
+			</wsdl:input>
+			<wsdl:output>
+				<soap12:body use="literal"/>
+			</wsdl:output>
+			<wsdl:fault name="EquipeFault">
+				<soap12:fault name="EquipeFault" use="literal"/>
+			</wsdl:fault>
+		</wsdl:operation>
+		
+		<wsdl:operation name="detalharEquipe">
+			<wsdl:documentation>Consultar os equipes do
+				Estabelecimento de Saude pelo código do CNES.
+			</wsdl:documentation>
+			<soap12:operation soapAction=""/>
+			<wsdl:input>
+				<soap12:body use="literal"/>
+			</wsdl:input>
+			<wsdl:output>
+				<soap12:body use="literal"/>
+			</wsdl:output>
+			<wsdl:fault name="EquipeFault">
+				<soap12:fault name="EquipeFault" use="literal"/>
+			</wsdl:fault>
+		</wsdl:operation>
+
+	</wsdl:binding>
+	
+	<wsdl:binding name="EquipeServiceSOAP11Binding" type="tns:EquipeServicePortType">
+		<soap11:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
+
+		<wsdl:operation name="pesquisarEquipe">
+			<wsdl:documentation>Consultar os equipes do
+				Estabelecimento de Saude pelo código do CNES.
+			</wsdl:documentation>
+			<soap11:operation soapAction=""/>
+			<wsdl:input>
+				<soap11:body use="literal"/>
+			</wsdl:input>
+			<wsdl:output>
+				<soap11:body use="literal"/>
+			</wsdl:output>
+			<wsdl:fault name="EquipeFault">
+				<soap11:fault name="EquipeFault" use="literal"/>
+			</wsdl:fault>
+		</wsdl:operation>
+		
+		<wsdl:operation name="detalharEquipe">
+			<wsdl:documentation>Consultar os equipes do
+				Estabelecimento de Saude pelo código do CNES.
+			</wsdl:documentation>
+			<soap11:operation soapAction=""/>
+			<wsdl:input>
+				<soap11:body use="literal"/>
+			</wsdl:input>
+			<wsdl:output>
+				<soap11:body use="literal"/>
+			</wsdl:output>
+			<wsdl:fault name="EquipeFault">
+				<soap11:fault name="EquipeFault" use="literal"/>
+			</wsdl:fault>
+		</wsdl:operation>
+
+		
+	</wsdl:binding>
+
+	<wsdl:service name="EquipeService">
+		<wsdl:port binding="tns:EquipeServiceSOAP12Binding" name="EquipeServicePort">
+			<soap12:address location="https://servicos.saude.gov.br/cnes/EquipeService/v1r0"/>
+		</wsdl:port>
+		<wsdl:port binding="tns:EquipeServiceSOAP11Binding" name="EquipeServiceSOAP11Port">
+			<soap11:address location="https://servicos.saude.gov.br/cnes/EquipeService/v1r0"/>
+		</wsdl:port>
+	</wsdl:service>
+
+</wsdl:definitions>

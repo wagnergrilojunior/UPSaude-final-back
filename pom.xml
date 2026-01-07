@@ -225,9 +225,9 @@
             </goals>
             <phase>generate-sources</phase>
             <configuration>
-              <wsdlUrls>
-                <wsdlUrl>https://servicos.saude.gov.br/cnes/CnesService/v1r0?wsdl</wsdlUrl>
-              </wsdlUrls>
+              <wsdlFiles>
+                <wsdlFile>${project.basedir}/src/main/resources/assets/wsdl/cnes/v1r0/CnesService_v1r0.wsdl</wsdlFile>
+              </wsdlFiles>
               <packageName>com.upsaude.integration.cnes.wsdl.cnesservice</packageName>
               <sourceDestDir>${project.build.directory}/generated-sources/wsimport</sourceDestDir>
               <xnocompile>true</xnocompile>
@@ -243,9 +243,9 @@
             </goals>
             <phase>generate-sources</phase>
             <configuration>
-              <wsdlUrls>
-                <wsdlUrl>https://servicos.saude.gov.br/cnes/EstabelecimentoSaudeService/v1r0?wsdl</wsdlUrl>
-              </wsdlUrls>
+              <wsdlFiles>
+                <wsdlFile>${project.basedir}/src/main/resources/assets/wsdl/cnes/v1r0/EstabelecimentoSaudeService_v1r0.wsdl</wsdlFile>
+              </wsdlFiles>
               <packageName>com.upsaude.integration.cnes.wsdl.estabelecimento.v1r0</packageName>
               <sourceDestDir>${project.build.directory}/generated-sources/wsimport</sourceDestDir>
               <xnocompile>true</xnocompile>
@@ -288,9 +288,9 @@
             </goals>
             <phase>generate-sources</phase>
             <configuration>
-              <wsdlUrls>
-                <wsdlUrl>https://servicos.saude.gov.br/cnes/ProfissionalSaudeService/v1r0?wsdl</wsdlUrl>
-              </wsdlUrls>
+              <wsdlFiles>
+                <wsdlFile>${project.basedir}/src/main/resources/assets/wsdl/cnes/v1r0/ProfissionalSaudeService_v1r0.wsdl</wsdlFile>
+              </wsdlFiles>
               <packageName>com.upsaude.integration.cnes.wsdl.profissional</packageName>
               <sourceDestDir>${project.build.directory}/generated-sources/wsimport</sourceDestDir>
               <xnocompile>true</xnocompile>
@@ -306,9 +306,9 @@
             </goals>
             <phase>generate-sources</phase>
             <configuration>
-              <wsdlUrls>
-                <wsdlUrl>https://servicos.saude.gov.br/cnes/EquipeService/v1r0?wsdl</wsdlUrl>
-              </wsdlUrls>
+              <wsdlFiles>
+                <wsdlFile>${project.basedir}/src/main/resources/assets/wsdl/cnes/v1r0/EquipeService_v1r0.wsdl</wsdlFile>
+              </wsdlFiles>
               <packageName>com.upsaude.integration.cnes.wsdl.equipe</packageName>
               <sourceDestDir>${project.build.directory}/generated-sources/wsimport</sourceDestDir>
               <xnocompile>true</xnocompile>
@@ -351,9 +351,9 @@
             </goals>
             <phase>generate-sources</phase>
             <configuration>
-              <wsdlUrls>
-                <wsdlUrl>https://servicos.saude.gov.br/cnes/EquipamentoService/v1r0?wsdl</wsdlUrl>
-              </wsdlUrls>
+              <wsdlFiles>
+                <wsdlFile>${project.basedir}/src/main/resources/assets/wsdl/cnes/v1r0/EquipamentoService_v1r0.wsdl</wsdlFile>
+              </wsdlFiles>
               <packageName>com.upsaude.integration.cnes.wsdl.equipamento</packageName>
               <sourceDestDir>${project.build.directory}/generated-sources/wsimport</sourceDestDir>
               <xnocompile>true</xnocompile>
@@ -369,9 +369,9 @@
             </goals>
             <phase>generate-sources</phase>
             <configuration>
-              <wsdlUrls>
-                <wsdlUrl>https://servicos.saude.gov.br/cnes/LeitoService/v1r0?wsdl</wsdlUrl>
-              </wsdlUrls>
+              <wsdlFiles>
+                <wsdlFile>${project.basedir}/src/main/resources/assets/wsdl/cnes/v1r0/LeitoService_v1r0.wsdl</wsdlFile>
+              </wsdlFiles>
               <packageName>com.upsaude.integration.cnes.wsdl.leito</packageName>
               <sourceDestDir>${project.build.directory}/generated-sources/wsimport</sourceDestDir>
               <xnocompile>true</xnocompile>

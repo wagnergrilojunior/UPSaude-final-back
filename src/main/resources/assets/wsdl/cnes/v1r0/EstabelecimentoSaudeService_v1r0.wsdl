@@ -1,0 +1,168 @@
+<?xml version="1.0" encoding="utf-8"?>
+<wsdl:definitions xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:WL5G3N3="http://schemas.xmlsoap.org/wsdl/soap12/" xmlns:WL5G3N2="http://servicos.saude.gov.br/wsdl/mensageria/falha/v5r0/msfalha" xmlns:WL5G3N0="http://schemas.xmlsoap.org/wsdl/" xmlns:WL5G3N1="http://servicos.saude.gov.br/cnes/v1r0/estabelecimentosaudeservice" name="EstabelecimentoSaudeService" targetNamespace="http://servicos.saude.gov.br/cnes/v1r0/estabelecimentosaudeservice">
+    <wsdl:types>
+        <xs:schema xmlns:WL5G3N4="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:WL5G3N5="http://schemas.xmlsoap.org/wsdl/soap12/" xmlns:codigocnes="http://servicos.saude.gov.br/schema/cnes/v1r0/codigocnes" xmlns:dadosgerais="http://servicos.saude.gov.br/schema/cnes/v1r0/dadosgeraiscnes" xmlns:filtrolocalizacao="http://servicos.saude.gov.br/wsdl/mensageria/v1r0/filtrolocalizacaoestabelecimentosaude" xmlns:filtropesquisa="http://servicos.saude.gov.br/wsdl/mensageria/v1r0/filtropesquisaestabelecimentosaude" xmlns:filtropesquisaprecadastrocnes="http://servicos.saude.gov.br/wsdl/mensageria/v1r0/filtropesquisaprecadastrocnes" xmlns:msfalha="http://servicos.saude.gov.br/wsdl/mensageria/falha/v5r0/msfalha" xmlns:precadastro="http://servicos.saude.gov.br/schema/cnes/v1r0/dadosprecadastrocnes" xmlns:resultadoslocalizacao="http://servicos.saude.gov.br/wsdl/mensageria/v1r0/resultadoslocalizacaoestabelecimentosaude" xmlns:soap11="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:soap12="http://schemas.xmlsoap.org/wsdl/soap12/" xmlns:tns="http://servicos.saude.gov.br/cnes/v1r0/estabelecimentosaudeservice" xmlns:wsp="http://schemas.xmlsoap.org/ws/2004/09/policy" xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified" targetNamespace="http://servicos.saude.gov.br/cnes/v1r0/estabelecimentosaudeservice">
+            <xs:import id="filtropesquisa" namespace="http://servicos.saude.gov.br/wsdl/mensageria/v1r0/filtropesquisaestabelecimentosaude" schemaLocation="https://servicos.saude.gov.br/cnes/EstabelecimentoSaudeService/v1r0?WSDL&amp;type=XSD&amp;file=http%3A%2F%2Fservicosinternos.saude.gov%3A80%2Fcnes%2FEstabelecimentoSaudeService%2Fv1r0%3FSCHEMA%252FRESOURCES50%252Fxsd%252Fmensageria%252Ffiltropesquisaestabelecimentosaude.v1r0"/>
+            <xs:import id="filtropesquisaprecadastrocnes" namespace="http://servicos.saude.gov.br/wsdl/mensageria/v1r0/filtropesquisaprecadastrocnes" schemaLocation="https://servicos.saude.gov.br/cnes/EstabelecimentoSaudeService/v1r0?WSDL&amp;type=XSD&amp;file=http%3A%2F%2Fservicosinternos.saude.gov%3A80%2Fcnes%2FEstabelecimentoSaudeService%2Fv1r0%3FSCHEMA%252FRESOURCES50%252Fxsd%252Fmensageria%252Ffiltropesquisaprecadastrocnes.v1r0"/>
+            <xs:import id="filtrolocalizacao" namespace="http://servicos.saude.gov.br/wsdl/mensageria/v1r0/filtrolocalizacaoestabelecimentosaude" schemaLocation="https://servicos.saude.gov.br/cnes/EstabelecimentoSaudeService/v1r0?WSDL&amp;type=XSD&amp;file=http%3A%2F%2Fservicosinternos.saude.gov%3A80%2Fcnes%2FEstabelecimentoSaudeService%2Fv1r0%3FSCHEMA%252FRESOURCES50%252Fxsd%252Fmensageria%252Ffiltrolocalizacaoestabelecimentosaude.v1r0"/>
+            <xs:import id="dadosgerais" namespace="http://servicos.saude.gov.br/schema/cnes/v1r0/dadosgeraiscnes" schemaLocation="https://servicos.saude.gov.br/cnes/EstabelecimentoSaudeService/v1r0?WSDL&amp;type=XSD&amp;file=http%3A%2F%2Fservicosinternos.saude.gov%3A80%2Fcnes%2FEstabelecimentoSaudeService%2Fv1r0%3FSCHEMA%252FRESOURCES50%252Fxsd%252Fcnes%252Fdadosgeraisestabelecimento%252Fdadosgeraiscnes.v1r0"/>
+            <xs:import id="msfalha" namespace="http://servicos.saude.gov.br/wsdl/mensageria/falha/v5r0/msfalha" schemaLocation="https://servicos.saude.gov.br/cnes/EstabelecimentoSaudeService/v1r0?WSDL&amp;type=XSD&amp;file=http%3A%2F%2Fservicosinternos.saude.gov%3A80%2Fcnes%2FEstabelecimentoSaudeService%2Fv1r0%3FSCHEMA%252FRESOURCES50%252Fxsd%252Fmensageria%252Ffalha%252Fmsfalha.v5r0"/>
+            <xs:import id="resultadoslocalizacao" namespace="http://servicos.saude.gov.br/wsdl/mensageria/v1r0/resultadoslocalizacaoestabelecimentosaude" schemaLocation="https://servicos.saude.gov.br/cnes/EstabelecimentoSaudeService/v1r0?WSDL&amp;type=XSD&amp;file=http%3A%2F%2Fservicosinternos.saude.gov%3A80%2Fcnes%2FEstabelecimentoSaudeService%2Fv1r0%3FSCHEMA%252FRESOURCES50%252Fxsd%252Fmensageria%252Fresultadoslocalizacaoestabelecimentosaude.v1r0"/>
+            <xs:import id="codigocnes" namespace="http://servicos.saude.gov.br/schema/cnes/v1r0/codigocnes" schemaLocation="https://servicos.saude.gov.br/cnes/EstabelecimentoSaudeService/v1r0?WSDL&amp;type=XSD&amp;file=http%3A%2F%2Fservicosinternos.saude.gov%3A80%2Fcnes%2FEstabelecimentoSaudeService%2Fv1r0%3FSCHEMA%252FRESOURCES50%252Fxsd%252Fcnes%252Fcodigocnes.v1r0"/>
+            <xs:import id="precadastro" namespace="http://servicos.saude.gov.br/schema/cnes/v1r0/dadosprecadastrocnes" schemaLocation="https://servicos.saude.gov.br/cnes/EstabelecimentoSaudeService/v1r0?WSDL&amp;type=XSD&amp;file=http%3A%2F%2Fservicosinternos.saude.gov%3A80%2Fcnes%2FEstabelecimentoSaudeService%2Fv1r0%3FSCHEMA%252FRESOURCES50%252Fxsd%252Fcnes%252Fprecadastro%252Fdadosprecadastrocnes.v1r0"/>
+            <xs:element name="requestConsultarEstabelecimentoSaude">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element maxOccurs="1" minOccurs="1" ref="filtropesquisa:FiltroPesquisaEstabelecimentoSaude">
+                            <xs:annotation>
+                                <xs:documentation>Filtro de Pesquisa.</xs:documentation>
+                            </xs:annotation>
+                        </xs:element>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="responseConsultarEstabelecimentoSaude">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element maxOccurs="1" minOccurs="0" ref="dadosgerais:DadosGeraisEstabelecimentoSaude"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="requestLocalizarEstabelecimentoSaude">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element maxOccurs="1" minOccurs="1" ref="filtrolocalizacao:FiltroLocalizacaoEstabelecimentoSaude">
+                            <xs:annotation>
+                                <xs:documentation>Filtro de Localização.</xs:documentation>
+                            </xs:annotation>
+                        </xs:element>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="responseLocalizarEstabelecimentoSaude">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element maxOccurs="1" minOccurs="0" ref="resultadoslocalizacao:ResultadosLocalizacaoEstabelecimentoSaude">
+                            <xs:annotation>
+                                <xs:documentation>Resultado localização de estabelecimentos.</xs:documentation>
+                            </xs:annotation>
+                        </xs:element>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="requestConsultarPrecadastroCNES">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element maxOccurs="1" minOccurs="1" ref="filtropesquisaprecadastrocnes:FiltroPesquisaPrecadastroCnes">
+                            <xs:annotation>
+                                <xs:documentation>Filtro Pesquisa Precadastro CNES.</xs:documentation>
+                            </xs:annotation>
+                        </xs:element>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="responseConsultarPrecadastroCNES">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element maxOccurs="1" minOccurs="0" ref="precadastro:DadosPreCadastroCNES">
+                            <xs:annotation>
+                                <xs:documentation>Resultado com os dados de precadastro do Estabelecimento de Saúde.</xs:documentation>
+                            </xs:annotation>
+                        </xs:element>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+        </xs:schema>
+        <xsd:schema xmlns:WL5G3N4="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:WL5G3N5="http://schemas.xmlsoap.org/wsdl/soap12/" xmlns:codigocnes="http://servicos.saude.gov.br/schema/cnes/v1r0/codigocnes" xmlns:dadosgerais="http://servicos.saude.gov.br/schema/cnes/v1r0/dadosgeraiscnes" xmlns:filtrolocalizacao="http://servicos.saude.gov.br/wsdl/mensageria/v1r0/filtrolocalizacaoestabelecimentosaude" xmlns:filtropesquisa="http://servicos.saude.gov.br/wsdl/mensageria/v1r0/filtropesquisaestabelecimentosaude" xmlns:filtropesquisaprecadastrocnes="http://servicos.saude.gov.br/wsdl/mensageria/v1r0/filtropesquisaprecadastrocnes" xmlns:msfalha="http://servicos.saude.gov.br/wsdl/mensageria/falha/v5r0/msfalha" xmlns:precadastro="http://servicos.saude.gov.br/schema/cnes/v1r0/dadosprecadastrocnes" xmlns:resultadoslocalizacao="http://servicos.saude.gov.br/wsdl/mensageria/v1r0/resultadoslocalizacaoestabelecimentosaude" xmlns:soap11="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:soap12="http://schemas.xmlsoap.org/wsdl/soap12/" xmlns:tns="http://servicos.saude.gov.br/cnes/v1r0/estabelecimentosaudeservice" xmlns:wsp="http://schemas.xmlsoap.org/ws/2004/09/policy" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+            <xsd:import namespace="http://servicos.saude.gov.br/wsdl/mensageria/falha/v5r0/msfalha" schemaLocation="https://servicos.saude.gov.br/cnes/EstabelecimentoSaudeService/v1r0?WSDL&amp;type=XSD&amp;file=http%3A%2F%2Fservicosinternos.saude.gov%3A80%2Fcnes%2FEstabelecimentoSaudeService%2Fv1r0%3FSCHEMA%252FRESOURCES50%252Fxsd%252Fmensageria%252Ffalha%252Fmsfalha.v5r0"/>
+        </xsd:schema>
+    </wsdl:types>
+    <wsdl:message name="requestConsultarEstabelecimentoSaude">
+        <wsdl:part name="requestConsultarEstabelecimentoSaude" element="WL5G3N1:requestConsultarEstabelecimentoSaude"/>
+    </wsdl:message>
+    <wsdl:message name="responseConsultarEstabelecimentoSaude">
+        <wsdl:part name="responseConsultarEstabelecimentoSaude" element="WL5G3N1:responseConsultarEstabelecimentoSaude"/>
+    </wsdl:message>
+    <wsdl:message name="EstabelecimentoSaudeFault">
+        <wsdl:part name="fault" element="WL5G3N2:MSFalha"/>
+    </wsdl:message>
+    <wsdl:message name="requestLocalizarEstabelecimentoSaude">
+        <wsdl:part name="requestLocalizarEstabelecimentoSaude" element="WL5G3N1:requestLocalizarEstabelecimentoSaude"/>
+    </wsdl:message>
+    <wsdl:message name="responseLocalizarEstabelecimentoSaude">
+        <wsdl:part name="responseLocalizarEstabelecimentoSaude" element="WL5G3N1:responseLocalizarEstabelecimentoSaude"/>
+    </wsdl:message>
+    <wsdl:message name="requestConsultarPrecadastroCNES">
+        <wsdl:part name="requestConsultarPrecadastroCNES" element="WL5G3N1:requestConsultarPrecadastroCNES"/>
+    </wsdl:message>
+    <wsdl:message name="responseConsultarPrecadastroCNES">
+        <wsdl:part name="responseConsultarPrecadastroCNES" element="WL5G3N1:responseConsultarPrecadastroCNES"/>
+    </wsdl:message>
+    <wsdl:portType name="EstabelecimentoSaudeServicePortType">
+        <wsdl:operation name="consultarEstabelecimentoSaude">
+            <WL5G3N0:documentation>Consultar os dados básicos do Estabelecimento de Saude pelo código do CNES.</WL5G3N0:documentation>
+            <wsdl:input name="requestConsultarEstabelecimentoSaude" message="WL5G3N1:requestConsultarEstabelecimentoSaude"/>
+            <wsdl:output name="responseConsultarEstabelecimentoSaude" message="WL5G3N1:responseConsultarEstabelecimentoSaude"/>
+            <wsdl:fault name="EstabelecimentoSaudeFault" message="WL5G3N1:EstabelecimentoSaudeFault"/>
+        </wsdl:operation>
+        <wsdl:operation name="localizarEstabelecimentoSaude">
+            <WL5G3N0:documentation>Localiza os Estabelecimentos de Saude pelas coordenadas.</WL5G3N0:documentation>
+            <wsdl:input name="requestLocalizarEstabelecimentoSaude" message="WL5G3N1:requestLocalizarEstabelecimentoSaude"/>
+            <wsdl:output name="responseLocalizarEstabelecimentoSaude" message="WL5G3N1:responseLocalizarEstabelecimentoSaude"/>
+            <wsdl:fault name="EstabelecimentoSaudeFault" message="WL5G3N1:EstabelecimentoSaudeFault"/>
+        </wsdl:operation>
+        <wsdl:operation name="consultarPrecadastroCNES">
+            <WL5G3N0:documentation>Consultar os dados básicos do precadastro do Estabelecimento de Saude pelo código do CNES.</WL5G3N0:documentation>
+            <wsdl:input name="requestConsultarPrecadastroCNES" message="WL5G3N1:requestConsultarPrecadastroCNES"/>
+            <wsdl:output name="responseConsultarPrecadastroCNES" message="WL5G3N1:responseConsultarPrecadastroCNES"/>
+            <wsdl:fault name="EstabelecimentoSaudeFault" message="WL5G3N1:EstabelecimentoSaudeFault"/>
+        </wsdl:operation>
+    </wsdl:portType>
+    <wsdl:binding name="EstabelecimentoSaudeServiceSOAP12Binding" type="WL5G3N1:EstabelecimentoSaudeServicePortType">
+        <WL5G3N3:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
+        <wsdl:operation name="consultarEstabelecimentoSaude">
+            <WL5G3N0:documentation>Consultar os dados básicos do Estabelecimento de Saude pelo código do CNES.</WL5G3N0:documentation>
+            <WL5G3N3:operation soapActionRequired="false"/>
+            <wsdl:input>
+                <WL5G3N3:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <WL5G3N3:body use="literal"/>
+            </wsdl:output>
+            <wsdl:fault name="EstabelecimentoSaudeFault">
+                <WL5G3N3:fault name="EstabelecimentoSaudeFault" use="literal"/>
+            </wsdl:fault>
+        </wsdl:operation>
+        <wsdl:operation name="localizarEstabelecimentoSaude">
+            <WL5G3N0:documentation>Consultar os estabelecimentos de saúde proximo a localização informada</WL5G3N0:documentation>
+            <WL5G3N3:operation soapActionRequired="false"/>
+            <wsdl:input>
+                <WL5G3N3:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <WL5G3N3:body use="literal"/>
+            </wsdl:output>
+            <wsdl:fault name="EstabelecimentoSaudeFault">
+                <WL5G3N3:fault name="EstabelecimentoSaudeFault" use="literal"/>
+            </wsdl:fault>
+        </wsdl:operation>
+        <wsdl:operation name="consultarPrecadastroCNES">
+            <WL5G3N0:documentation>Consultar os dados do precadastro do Estabelecimento de Saude pelo código do CNES.</WL5G3N0:documentation>
+            <WL5G3N3:operation soapActionRequired="false"/>
+            <wsdl:input>
+                <WL5G3N3:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <WL5G3N3:body use="literal"/>
+            </wsdl:output>
+            <wsdl:fault name="EstabelecimentoSaudeFault">
+                <WL5G3N3:fault name="EstabelecimentoSaudeFault" use="literal"/>
+            </wsdl:fault>
+        </wsdl:operation>
+    </wsdl:binding>
+    <wsdl:service name="EstabelecimentoSaudeService">
+        <wsdl:port name="EstabelecimentoSaudeServicePort" binding="WL5G3N1:EstabelecimentoSaudeServiceSOAP12Binding">
+            <WL5G3N3:address location="https://servicos.saude.gov.br/cnes/EstabelecimentoSaudeService/v1r0"/>
+        </wsdl:port>
+    </wsdl:service>
+</wsdl:definitions>
