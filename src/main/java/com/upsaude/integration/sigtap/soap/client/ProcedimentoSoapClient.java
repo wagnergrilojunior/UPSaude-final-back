@@ -4,6 +4,7 @@ import java.math.BigInteger;
 import java.util.Arrays;
 import java.util.List;
 
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 import org.springframework.ws.client.core.WebServiceTemplate;
 
@@ -21,7 +22,8 @@ public class ProcedimentoSoapClient extends AbstractSigtapSoapClient {
 
     private final SigtapProperties properties;
 
-    public ProcedimentoSoapClient(WebServiceTemplate webServiceTemplate, SigtapProperties properties) {
+    public ProcedimentoSoapClient(@Qualifier("sigtapWebServiceTemplate") WebServiceTemplate webServiceTemplate,
+            SigtapProperties properties) {
         super(webServiceTemplate);
         this.properties = properties;
     }
@@ -31,8 +33,7 @@ public class ProcedimentoSoapClient extends AbstractSigtapSoapClient {
             String codigoSubgrupo,
             String competencia,
             int registroInicial,
-            int quantidadeRegistros
-    ) {
+            int quantidadeRegistros) {
         RequestPesquisarProcedimentos request = new RequestPesquisarProcedimentos();
         request.setCodigoGrupo(codigoGrupo);
         request.setCodigoSubgrupo(codigoSubgrupo);
@@ -43,7 +44,8 @@ public class ProcedimentoSoapClient extends AbstractSigtapSoapClient {
         paginacao.setQuantidadeRegistros(quantidadeRegistros);
         request.setPaginacao(paginacao);
 
-        return call(properties.getSoap().procedimentoEndpoint(), request, ResponsePesquisarProcedimentos.class, "pesquisarProcedimentos");
+        return call(properties.getSoap().procedimentoEndpoint(), request, ResponsePesquisarProcedimentos.class,
+                "pesquisarProcedimentos");
     }
 
     public ResponseDetalharProcedimento detalharProcedimento(String codigoProcedimento, String competencia) {
@@ -55,8 +57,7 @@ public class ProcedimentoSoapClient extends AbstractSigtapSoapClient {
             String competencia,
             List<CategoriaDetalheAdicionalType> categorias,
             int registroInicial,
-            int quantidadeRegistros
-    ) {
+            int quantidadeRegistros) {
         RequestDetalharProcedimento request = new RequestDetalharProcedimento();
         request.setCodigoProcedimento(codigoProcedimento);
         request.setCompetencia(competencia);
@@ -75,11 +76,11 @@ public class ProcedimentoSoapClient extends AbstractSigtapSoapClient {
         }
         request.setDetalhesAdicionais(detalhes);
 
-        return call(properties.getSoap().procedimentoEndpoint(), request, ResponseDetalharProcedimento.class, "detalharProcedimento");
+        return call(properties.getSoap().procedimentoEndpoint(), request, ResponseDetalharProcedimento.class,
+                "detalharProcedimento");
     }
 
     private List<CategoriaDetalheAdicionalType> categoriasPadraoDetalhe() {
         return Arrays.asList(CategoriaDetalheAdicionalType.values());
     }
 }
-

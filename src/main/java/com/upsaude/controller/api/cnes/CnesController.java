@@ -12,12 +12,10 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.UUID;
 
 @RestController
 @RequestMapping("/v1/cnes")
@@ -36,26 +34,23 @@ public class CnesController {
     // ========== ESTABELECIMENTOS ==========
 
     @PostMapping("/estabelecimentos/{codigoCnes}/sincronizar")
-    @Operation(
-            summary = "Sincronizar estabelecimento por CNES",
-            description = "Sincroniza um estabelecimento específico do CNES pelo código CNES (7 dígitos). " +
-                    "Busca dados no serviço SOA-CNES e atualiza/cria o estabelecimento local."
-    )
+    @Operation(summary = "Sincronizar estabelecimento por CNES", description = "Sincroniza um estabelecimento específico do CNES pelo código CNES (7 dígitos). "
+            +
+            "Busca dados no serviço SOA-CNES e atualiza/cria o estabelecimento local.")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Sincronização iniciada com sucesso",
-                    content = @Content(schema = @Schema(implementation = CnesSincronizacaoResponse.class))),
+            @ApiResponse(responseCode = "200", description = "Sincronização iniciada com sucesso", content = @Content(schema = @Schema(implementation = CnesSincronizacaoResponse.class))),
             @ApiResponse(responseCode = "400", description = "Código CNES inválido"),
             @ApiResponse(responseCode = "403", description = "Acesso negado"),
             @ApiResponse(responseCode = "500", description = "Erro ao sincronizar")
     })
     public ResponseEntity<CnesSincronizacaoResponse> sincronizarEstabelecimento(
-            @Parameter(description = "Código CNES (7 dígitos)", required = true, example = "2530031")
-            @PathVariable String codigoCnes,
-            @Parameter(description = "Competência no formato AAAAMM (opcional)", example = "202501")
-            @RequestParam(required = false) String competencia) {
+            @Parameter(description = "Código CNES (7 dígitos)", required = true, example = "2530031") @PathVariable String codigoCnes,
+            @Parameter(description = "Competência no formato AAAAMM (opcional)", example = "202501") @RequestParam(required = false) String competencia,
+            @Parameter(description = "Se true, persiste os dados no banco local", example = "false") @RequestParam(defaultValue = "false") boolean persistir) {
         log.debug("REQUEST POST /v1/cnes/estabelecimentos/{}/sincronizar - competencia: {}", codigoCnes, competencia);
         try {
-            CnesSincronizacaoResponse response = estabelecimentoService.sincronizarEstabelecimentoPorCnes(codigoCnes, competencia);
+            CnesSincronizacaoResponse response = estabelecimentoService.sincronizarEstabelecimentoPorCnes(codigoCnes,
+                    competencia, persistir);
             return ResponseEntity.ok(response);
         } catch (Exception ex) {
             log.error("Erro ao sincronizar estabelecimento CNES: {}", codigoCnes, ex);
@@ -64,23 +59,21 @@ public class CnesController {
     }
 
     @PostMapping("/estabelecimentos/municipio/{codigoMunicipio}/sincronizar")
-    @Operation(
-            summary = "Sincronizar estabelecimentos por município",
-            description = "Sincroniza todos os estabelecimentos de um município do CNES pelo código IBGE."
-    )
+    @Operation(summary = "Sincronizar estabelecimentos por município", description = "Sincroniza todos os estabelecimentos de um município do CNES pelo código IBGE.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Sincronização iniciada com sucesso"),
             @ApiResponse(responseCode = "400", description = "Código do município inválido"),
             @ApiResponse(responseCode = "403", description = "Acesso negado")
     })
     public ResponseEntity<List<CnesSincronizacaoResponse>> sincronizarEstabelecimentosPorMunicipio(
-            @Parameter(description = "Código IBGE do município", required = true, example = "530010")
-            @PathVariable String codigoMunicipio,
-            @Parameter(description = "Competência no formato AAAAMM (opcional)", example = "202501")
-            @RequestParam(required = false) String competencia) {
-        log.debug("REQUEST POST /v1/cnes/estabelecimentos/municipio/{}/sincronizar - competencia: {}", codigoMunicipio, competencia);
+            @Parameter(description = "Código IBGE do município", required = true, example = "530010") @PathVariable String codigoMunicipio,
+            @Parameter(description = "Competência no formato AAAAMM (opcional)", example = "202501") @RequestParam(required = false) String competencia,
+            @Parameter(description = "Se true, persiste os dados no banco local", example = "false") @RequestParam(defaultValue = "false") boolean persistir) {
+        log.debug("REQUEST POST /v1/cnes/estabelecimentos/municipio/{}/sincronizar - competencia: {}", codigoMunicipio,
+                competencia);
         try {
-            List<CnesSincronizacaoResponse> response = estabelecimentoService.sincronizarEstabelecimentosPorMunicipio(codigoMunicipio, competencia);
+            List<CnesSincronizacaoResponse> response = estabelecimentoService
+                    .sincronizarEstabelecimentosPorMunicipio(codigoMunicipio, competencia, persistir);
             return ResponseEntity.ok(response);
         } catch (Exception ex) {
             log.error("Erro ao sincronizar estabelecimentos do município: {}", codigoMunicipio, ex);
@@ -89,23 +82,21 @@ public class CnesController {
     }
 
     @PostMapping("/estabelecimentos/{codigoCnes}/dados-complementares")
-    @Operation(
-            summary = "Atualizar dados complementares de estabelecimento",
-            description = "Atualiza dados complementares de um estabelecimento do CNES."
-    )
+    @Operation(summary = "Atualizar dados complementares de estabelecimento", description = "Atualiza dados complementares de um estabelecimento do CNES.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Dados complementares atualizados com sucesso"),
             @ApiResponse(responseCode = "400", description = "Código CNES inválido"),
             @ApiResponse(responseCode = "403", description = "Acesso negado")
     })
     public ResponseEntity<CnesSincronizacaoResponse> atualizarDadosComplementares(
-            @Parameter(description = "Código CNES (7 dígitos)", required = true, example = "2530031")
-            @PathVariable String codigoCnes,
-            @Parameter(description = "Competência no formato AAAAMM (opcional)", example = "202501")
-            @RequestParam(required = false) String competencia) {
-        log.debug("REQUEST POST /v1/cnes/estabelecimentos/{}/dados-complementares - competencia: {}", codigoCnes, competencia);
+            @Parameter(description = "Código CNES (7 dígitos)", required = true, example = "2530031") @PathVariable String codigoCnes,
+            @Parameter(description = "Competência no formato AAAAMM (opcional)", example = "202501") @RequestParam(required = false) String competencia,
+            @Parameter(description = "Se true, persiste os dados no banco local", example = "false") @RequestParam(defaultValue = "false") boolean persistir) {
+        log.debug("REQUEST POST /v1/cnes/estabelecimentos/{}/dados-complementares - competencia: {}", codigoCnes,
+                competencia);
         try {
-            CnesSincronizacaoResponse response = estabelecimentoService.atualizarDadosComplementares(codigoCnes, competencia);
+            CnesSincronizacaoResponse response = estabelecimentoService.atualizarDadosComplementares(codigoCnes,
+                    competencia, persistir);
             return ResponseEntity.ok(response);
         } catch (Exception ex) {
             log.error("Erro ao atualizar dados complementares: {}", codigoCnes, ex);
@@ -114,18 +105,14 @@ public class CnesController {
     }
 
     @GetMapping("/estabelecimentos/{codigoCnes}/buscar")
-    @Operation(
-            summary = "Buscar estabelecimento no CNES",
-            description = "Busca um estabelecimento no CNES sem sincronizar (apenas consulta)."
-    )
+    @Operation(summary = "Buscar estabelecimento no CNES", description = "Busca um estabelecimento no CNES sem sincronizar (apenas consulta).")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Estabelecimento encontrado"),
             @ApiResponse(responseCode = "404", description = "Estabelecimento não encontrado no CNES"),
             @ApiResponse(responseCode = "400", description = "Código CNES inválido")
     })
     public ResponseEntity<EstabelecimentosResponse> buscarEstabelecimentoNoCnes(
-            @Parameter(description = "Código CNES (7 dígitos)", required = true, example = "2530031")
-            @PathVariable String codigoCnes) {
+            @Parameter(description = "Código CNES (7 dígitos)", required = true, example = "2530031") @PathVariable String codigoCnes) {
         log.debug("REQUEST GET /v1/cnes/estabelecimentos/{}/buscar", codigoCnes);
         try {
             EstabelecimentosResponse response = estabelecimentoService.buscarEstabelecimentoNoCnes(codigoCnes);
@@ -146,11 +133,12 @@ public class CnesController {
             @ApiResponse(responseCode = "403", description = "Acesso negado")
     })
     public ResponseEntity<CnesSincronizacaoResponse> sincronizarProfissionalPorCns(
-            @Parameter(description = "Número do CNS (15 dígitos)", required = true, example = "701009864978597")
-            @PathVariable String numeroCns) {
+            @Parameter(description = "Número do CNS (15 dígitos)", required = true, example = "701009864978597") @PathVariable String numeroCns,
+            @Parameter(description = "Se true, persiste os dados no banco local", example = "false") @RequestParam(defaultValue = "false") boolean persistir) {
         log.debug("REQUEST POST /v1/cnes/profissionais/cns/{}/sincronizar", numeroCns);
         try {
-            CnesSincronizacaoResponse response = profissionalService.sincronizarProfissionalPorCns(numeroCns);
+            CnesSincronizacaoResponse response = profissionalService.sincronizarProfissionalPorCns(numeroCns,
+                    persistir);
             return ResponseEntity.ok(response);
         } catch (Exception ex) {
             log.error("Erro ao sincronizar profissional CNS: {}", numeroCns, ex);
@@ -166,11 +154,12 @@ public class CnesController {
             @ApiResponse(responseCode = "403", description = "Acesso negado")
     })
     public ResponseEntity<CnesSincronizacaoResponse> sincronizarProfissionalPorCpf(
-            @Parameter(description = "Número do CPF", required = true, example = "12345678901")
-            @PathVariable String numeroCpf) {
+            @Parameter(description = "Número do CPF", required = true, example = "12345678901") @PathVariable String numeroCpf,
+            @Parameter(description = "Se true, persiste os dados no banco local", example = "false") @RequestParam(defaultValue = "false") boolean persistir) {
         log.debug("REQUEST POST /v1/cnes/profissionais/cpf/{}/sincronizar", numeroCpf);
         try {
-            CnesSincronizacaoResponse response = profissionalService.sincronizarProfissionalPorCpf(numeroCpf);
+            CnesSincronizacaoResponse response = profissionalService.sincronizarProfissionalPorCpf(numeroCpf,
+                    persistir);
             return ResponseEntity.ok(response);
         } catch (Exception ex) {
             log.error("Erro ao sincronizar profissional CPF: {}", numeroCpf, ex);
@@ -185,8 +174,7 @@ public class CnesController {
             @ApiResponse(responseCode = "404", description = "Profissional não encontrado no CNES")
     })
     public ResponseEntity<Object> buscarProfissionalPorCns(
-            @Parameter(description = "Número do CNS (15 dígitos)", required = true)
-            @PathVariable String numeroCns) {
+            @Parameter(description = "Número do CNS (15 dígitos)", required = true) @PathVariable String numeroCns) {
         log.debug("REQUEST GET /v1/cnes/profissionais/cns/{}", numeroCns);
         try {
             Object response = profissionalService.buscarProfissionalNoCnes(numeroCns);
@@ -207,11 +195,12 @@ public class CnesController {
             @ApiResponse(responseCode = "403", description = "Acesso negado")
     })
     public ResponseEntity<CnesSincronizacaoResponse> sincronizarEquipesPorEstabelecimento(
-            @Parameter(description = "Código CNES (7 dígitos)", required = true, example = "2530031")
-            @PathVariable String codigoCnes) {
+            @Parameter(description = "Código CNES (7 dígitos)", required = true, example = "2530031") @PathVariable String codigoCnes,
+            @Parameter(description = "Se true, persiste os dados no banco local", example = "false") @RequestParam(defaultValue = "false") boolean persistir) {
         log.debug("REQUEST POST /v1/cnes/equipes/estabelecimento/{}/sincronizar", codigoCnes);
         try {
-            CnesSincronizacaoResponse response = equipeService.sincronizarEquipesPorEstabelecimento(codigoCnes);
+            CnesSincronizacaoResponse response = equipeService.sincronizarEquipesPorEstabelecimento(codigoCnes,
+                    persistir);
             return ResponseEntity.ok(response);
         } catch (Exception ex) {
             log.error("Erro ao sincronizar equipes: {}", codigoCnes, ex);
@@ -226,13 +215,12 @@ public class CnesController {
             @ApiResponse(responseCode = "400", description = "CNES ou INE inválido")
     })
     public ResponseEntity<CnesSincronizacaoResponse> sincronizarEquipe(
-            @Parameter(description = "Código CNES (7 dígitos)", required = true)
-            @PathVariable String codigoCnes,
-            @Parameter(description = "INE (15 caracteres)", required = true)
-            @PathVariable String ine) {
+            @Parameter(description = "Código CNES (7 dígitos)", required = true) @PathVariable String codigoCnes,
+            @Parameter(description = "INE (15 caracteres)", required = true) @PathVariable String ine,
+            @Parameter(description = "Se true, persiste os dados no banco local", example = "false") @RequestParam(defaultValue = "false") boolean persistir) {
         log.debug("REQUEST POST /v1/cnes/equipes/estabelecimento/{}/equipe/{}/sincronizar", codigoCnes, ine);
         try {
-            CnesSincronizacaoResponse response = equipeService.sincronizarEquipe(codigoCnes, ine);
+            CnesSincronizacaoResponse response = equipeService.sincronizarEquipe(codigoCnes, ine, persistir);
             return ResponseEntity.ok(response);
         } catch (Exception ex) {
             log.error("Erro ao sincronizar equipe: {} / {}", codigoCnes, ine, ex);
@@ -249,11 +237,12 @@ public class CnesController {
             @ApiResponse(responseCode = "400", description = "CPF ou CNS inválido")
     })
     public ResponseEntity<CnesSincronizacaoResponse> sincronizarVinculacoesPorProfissional(
-            @Parameter(description = "CPF ou CNS do profissional", required = true)
-            @PathVariable String cpfOuCns) {
+            @Parameter(description = "CPF ou CNS do profissional", required = true) @PathVariable String cpfOuCns,
+            @Parameter(description = "Se true, persiste os dados no banco local", example = "false") @RequestParam(defaultValue = "false") boolean persistir) {
         log.debug("REQUEST POST /v1/cnes/vinculacoes/profissional/{}/sincronizar", cpfOuCns);
         try {
-            CnesSincronizacaoResponse response = vinculacaoService.sincronizarVinculacoesPorProfissional(cpfOuCns);
+            CnesSincronizacaoResponse response = vinculacaoService.sincronizarVinculacoesPorProfissional(cpfOuCns,
+                    persistir);
             return ResponseEntity.ok(response);
         } catch (Exception ex) {
             log.error("Erro ao sincronizar vinculações de profissional: {}", cpfOuCns, ex);
@@ -268,11 +257,12 @@ public class CnesController {
             @ApiResponse(responseCode = "400", description = "Código CNES inválido")
     })
     public ResponseEntity<CnesSincronizacaoResponse> sincronizarVinculacoesPorEstabelecimento(
-            @Parameter(description = "Código CNES (7 dígitos)", required = true, example = "2530031")
-            @PathVariable String codigoCnes) {
+            @Parameter(description = "Código CNES (7 dígitos)", required = true, example = "2530031") @PathVariable String codigoCnes,
+            @Parameter(description = "Se true, persiste os dados no banco local", example = "false") @RequestParam(defaultValue = "false") boolean persistir) {
         log.debug("REQUEST POST /v1/cnes/vinculacoes/estabelecimento/{}/sincronizar", codigoCnes);
         try {
-            CnesSincronizacaoResponse response = vinculacaoService.sincronizarVinculacoesPorEstabelecimento(codigoCnes);
+            CnesSincronizacaoResponse response = vinculacaoService.sincronizarVinculacoesPorEstabelecimento(codigoCnes,
+                    persistir);
             return ResponseEntity.ok(response);
         } catch (Exception ex) {
             log.error("Erro ao sincronizar vinculações de estabelecimento: {}", codigoCnes, ex);
@@ -289,11 +279,12 @@ public class CnesController {
             @ApiResponse(responseCode = "400", description = "Código CNES inválido")
     })
     public ResponseEntity<CnesSincronizacaoResponse> sincronizarEquipamentosPorEstabelecimento(
-            @Parameter(description = "Código CNES (7 dígitos)", required = true, example = "2530031")
-            @PathVariable String codigoCnes) {
+            @Parameter(description = "Código CNES (7 dígitos)", required = true, example = "2530031") @PathVariable String codigoCnes,
+            @Parameter(description = "Se true, persiste os dados no banco local", example = "false") @RequestParam(defaultValue = "false") boolean persistir) {
         log.debug("REQUEST POST /v1/cnes/equipamentos/estabelecimento/{}/sincronizar", codigoCnes);
         try {
-            CnesSincronizacaoResponse response = equipamentoService.sincronizarEquipamentosPorEstabelecimento(codigoCnes);
+            CnesSincronizacaoResponse response = equipamentoService
+                    .sincronizarEquipamentosPorEstabelecimento(codigoCnes, persistir);
             return ResponseEntity.ok(response);
         } catch (Exception ex) {
             log.error("Erro ao sincronizar equipamentos: {}", codigoCnes, ex);
@@ -311,11 +302,12 @@ public class CnesController {
             @ApiResponse(responseCode = "404", description = "Estabelecimento não encontrado")
     })
     public ResponseEntity<CnesSincronizacaoResponse> sincronizarLeitosPorEstabelecimento(
-            @Parameter(description = "Código CNES (7 dígitos)", required = true, example = "2530031")
-            @PathVariable String codigoCnes) {
+            @Parameter(description = "Código CNES (7 dígitos)", required = true, example = "2530031") @PathVariable String codigoCnes,
+            @Parameter(description = "Se true, persiste os dados no banco local", example = "false") @RequestParam(defaultValue = "false") boolean persistir) {
         log.debug("REQUEST POST /v1/cnes/leitos/estabelecimento/{}/sincronizar", codigoCnes);
         try {
-            CnesSincronizacaoResponse response = leitoService.sincronizarLeitosPorEstabelecimento(codigoCnes);
+            CnesSincronizacaoResponse response = leitoService.sincronizarLeitosPorEstabelecimento(codigoCnes,
+                    persistir);
             return ResponseEntity.ok(response);
         } catch (Exception ex) {
             log.error("Erro ao sincronizar leitos: {}", codigoCnes, ex);
@@ -330,16 +322,14 @@ public class CnesController {
             @ApiResponse(responseCode = "404", description = "Estabelecimento não encontrado")
     })
     public ResponseEntity<List<Object>> listarLeitosPorEstabelecimento(
-            @Parameter(description = "Código CNES (7 dígitos)", required = true, example = "2530031")
-            @PathVariable String codigoCnes) {
+            @Parameter(description = "Código CNES (7 dígitos)", required = true, example = "2530031") @PathVariable String codigoCnes) {
         log.debug("REQUEST GET /v1/cnes/leitos/estabelecimento/{}", codigoCnes);
         try {
-            // TODO: Implementar listagem quando repositories estiverem prontos
-            return ResponseEntity.ok(List.of());
+            List<Object> leitos = leitoService.listarLeitosPorCnes(codigoCnes);
+            return ResponseEntity.ok(leitos);
         } catch (Exception ex) {
             log.error("Erro ao listar leitos: {}", codigoCnes, ex);
             throw ex;
         }
     }
 }
-

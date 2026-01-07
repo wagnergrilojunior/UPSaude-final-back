@@ -14,29 +14,32 @@ public interface CnesEstabelecimentoService {
     /**
      * Sincroniza um estabelecimento específico por código CNES.
      * 
-     * @param codigoCnes Código CNES (7 dígitos)
+     * @param codigoCnes  Código CNES (7 dígitos)
      * @param competencia Competência no formato AAAAMM (opcional)
      * @return Resposta com detalhes da sincronização
      */
-    CnesSincronizacaoResponse sincronizarEstabelecimentoPorCnes(String codigoCnes, String competencia);
+    CnesSincronizacaoResponse sincronizarEstabelecimentoPorCnes(String codigoCnes, String competencia,
+            boolean persistir);
 
     /**
      * Sincroniza estabelecimentos de um município.
      * 
      * @param codigoMunicipio Código do município (IBGE)
-     * @param competencia Competência no formato AAAAMM (opcional)
+     * @param competencia     Competência no formato AAAAMM (opcional)
      * @return Lista de respostas de sincronização
      */
-    List<CnesSincronizacaoResponse> sincronizarEstabelecimentosPorMunicipio(String codigoMunicipio, String competencia);
+    List<CnesSincronizacaoResponse> sincronizarEstabelecimentosPorMunicipio(String codigoMunicipio, String competencia,
+            boolean persistir);
 
     /**
      * Atualiza dados complementares de estabelecimento.
      * 
      * @param codigoMunicipio Código do município (IBGE)
-     * @param competencia Competência no formato AAAAMM (opcional)
+     * @param competencia     Competência no formato AAAAMM (opcional)
      * @return Resposta com detalhes da sincronização
      */
-    CnesSincronizacaoResponse atualizarDadosComplementares(String codigoMunicipio, String competencia);
+    CnesSincronizacaoResponse atualizarDadosComplementares(String codigoMunicipio, String competencia,
+            boolean persistir);
 
     /**
      * Busca estabelecimento no CNES (apenas busca, não sincroniza).
@@ -46,4 +49,3 @@ public interface CnesEstabelecimentoService {
      */
     EstabelecimentosResponse buscarEstabelecimentoNoCnes(String codigoCnes);
 }
-

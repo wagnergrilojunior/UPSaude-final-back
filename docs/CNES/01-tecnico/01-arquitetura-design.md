@@ -27,7 +27,7 @@ graph TB
     end
     
     subgraph "Camada de Mapeamento"
-        Mapper[CnesEstabelecimentoMapper<br/>MapStruct]
+        Mapper[Mappers CNES<br/>Estabelecimento, Profissional,<br/>Equipe, Leito, etc.]
     end
     
     subgraph "Camada de Persistência"
@@ -147,6 +147,11 @@ sequenceDiagram
 **Localização**: `com.upsaude.mapper.cnes`
 
 - **CnesEstabelecimentoMapper**: Conversão WSDL → JPA Entity (MapStruct)
+- **CnesProfissionalMapper**: Conversão WSDL → JPA Entity
+- **CnesEquipeMapper**: Conversão WSDL → JPA Entity
+- **CnesEquipamentoMapper**: Conversão WSDL → JPA Entity
+- **CnesLeitoMapper**: Conversão WSDL → JPA Entity
+- **CnesVinculacaoMapper**: Conversão WSDL → JPA Entity
 
 ### 6. Repositories (Camada de Persistência)
 

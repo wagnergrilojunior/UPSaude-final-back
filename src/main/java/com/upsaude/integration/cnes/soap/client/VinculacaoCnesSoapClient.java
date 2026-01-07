@@ -1,6 +1,7 @@
 package com.upsaude.integration.cnes.soap.client;
 
 import com.upsaude.config.CnesProperties;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 import org.springframework.ws.client.core.WebServiceTemplate;
 
@@ -12,7 +13,8 @@ public class VinculacaoCnesSoapClient extends AbstractCnesSoapClient {
 
     private final CnesProperties properties;
 
-    public VinculacaoCnesSoapClient(WebServiceTemplate webServiceTemplate, CnesProperties properties) {
+    public VinculacaoCnesSoapClient(@Qualifier("cnesServiceTemplate") WebServiceTemplate webServiceTemplate,
+            CnesProperties properties) {
         super(webServiceTemplate);
         this.properties = properties;
     }
@@ -20,7 +22,7 @@ public class VinculacaoCnesSoapClient extends AbstractCnesSoapClient {
     /**
      * Pesquisa vinculações profissionais usando filtro.
      * 
-     * @param filtro Filtro de pesquisa (profissional, estabelecimento, etc)
+     * @param filtro    Filtro de pesquisa (profissional, estabelecimento, etc)
      * @param paginacao Parâmetros de paginação
      * @return Resposta com lista de vinculações
      */
@@ -40,4 +42,3 @@ public class VinculacaoCnesSoapClient extends AbstractCnesSoapClient {
         throw new UnsupportedOperationException("Método será implementado após geração das classes WSDL");
     }
 }
-

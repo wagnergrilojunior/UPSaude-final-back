@@ -10,16 +10,15 @@ public interface CnesProfissionalService {
     /**
      * Sincroniza profissional por CNS.
      */
-    CnesSincronizacaoResponse sincronizarProfissionalPorCns(String numeroCns);
+    CnesSincronizacaoResponse sincronizarProfissionalPorCns(String numeroCns, boolean persistir);
 
     /**
      * Sincroniza profissional por CPF.
      */
-    CnesSincronizacaoResponse sincronizarProfissionalPorCpf(String numeroCpf);
+    CnesSincronizacaoResponse sincronizarProfissionalPorCpf(String numeroCpf, boolean persistir);
 
     /**
      * Busca profissional no CNES (apenas busca, não sincroniza).
      */
     Object buscarProfissionalNoCnes(String cnsOuCpf);
 }
-

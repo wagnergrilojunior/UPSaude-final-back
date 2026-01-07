@@ -10,11 +10,10 @@ public interface CnesVinculacaoService {
     /**
      * Sincroniza vinculações de um profissional.
      */
-    CnesSincronizacaoResponse sincronizarVinculacoesPorProfissional(String cpfOuCns);
+    CnesSincronizacaoResponse sincronizarVinculacoesPorProfissional(String cpfOuCns, boolean persistir);
 
     /**
      * Sincroniza vinculações de um estabelecimento.
      */
-    CnesSincronizacaoResponse sincronizarVinculacoesPorEstabelecimento(String codigoCnes);
+    CnesSincronizacaoResponse sincronizarVinculacoesPorEstabelecimento(String codigoCnes, boolean persistir);
 }
-

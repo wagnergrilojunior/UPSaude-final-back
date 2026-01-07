@@ -78,6 +78,9 @@ graph LR
 
 **Package gerado**: `com.upsaude.integration.cnes.wsdl.leito`
 
+> [!IMPORTANT]
+> **VinculacaoProfissionalService**: Este serviço está temporariamente desabilitado no sistema devido a instabilidades no WSDL oficial do DATASUS. A lógica de vinculação foi migrada para utilizar os dados já presentes nos retornos de `ProfissionalSaudeService` e `CnesService`.
+
 ## ⚙️ Configuração Maven
 
 ### Plugin Configuration

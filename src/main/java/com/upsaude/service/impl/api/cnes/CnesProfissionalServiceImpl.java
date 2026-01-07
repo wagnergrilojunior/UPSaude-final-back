@@ -16,9 +16,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import java.util.Objects;
 
-import java.time.OffsetDateTime;
-import java.util.UUID;
+import com.upsaude.mapper.cnes.CnesProfissionalMapper;
 
 @Slf4j
 @Service
@@ -29,45 +29,65 @@ public class CnesProfissionalServiceImpl implements CnesProfissionalService {
     private final CnesSincronizacaoService sincronizacaoService;
     private final ProfissionaisSaudeRepository profissionaisRepository;
     private final TenantService tenantService;
+    private final CnesProfissionalMapper cnesMapper;
 
     @Override
     @Transactional
-    public CnesSincronizacaoResponse sincronizarProfissionalPorCns(String numeroCns) {
+    public CnesSincronizacaoResponse sincronizarProfissionalPorCns(String numeroCns, boolean persistir) {
         log.info("Iniciando sincronização de profissional por CNS: {}", numeroCns);
-        
+
         CnesValidator.validarCns(numeroCns);
-        
-        UUID tenantId = tenantService.validarTenantAtual();
-        
+
+        com.upsaude.entity.sistema.multitenancy.Tenant tenant = tenantService.obterTenantDoUsuarioAutenticado();
+
         CnesSincronizacao registro = sincronizacaoService.criarRegistroSincronizacao(
                 TipoEntidadeCnesEnum.PROFISSIONAL,
                 null,
                 numeroCns,
                 null,
-                null
-        );
-        
+                null);
+
         try {
             sincronizacaoService.marcarComoProcessando(registro.getId());
-            
-            // TODO: Chamar SOAP Client quando classes WSDL forem geradas
-            // Object resposta = soapClient.consultarProfissionalPorCns(numeroCns);
-            
-            // Buscar ou criar profissional local
-            // TODO: Mapear dados do CNES para entidade local quando classes WSDL forem geradas
-            
-            sincronizacaoService.finalizarComSucesso(registro.getId(), 0, 0);
-            
+
+            com.upsaude.integration.cnes.wsdl.profissional.ResponseConsultarProfissionalSaude resposta = soapClient
+                    .consultarProfissionalPorCns(numeroCns);
+
+            if (resposta == null || resposta.getProfissionalSaude() == null) {
+                throw new CnesSincronizacaoException("Profissional não encontrado no CNES");
+            }
+
+            com.upsaude.integration.cnes.wsdl.profissional.ProfissionalSaudeType dadosCnes = resposta
+                    .getProfissionalSaude();
+
+            if (persistir) {
+                final boolean[] isNovo = { false };
+                ProfissionaisSaude profissional = profissionaisRepository.findByCnsAndTenant(numeroCns, tenant)
+                        .orElseGet(() -> {
+                            isNovo[0] = true;
+                            ProfissionaisSaude novo = new ProfissionaisSaude();
+                            novo.setTenant(tenant);
+                            return novo;
+                        });
+
+                cnesMapper.mapToProfissional(dadosCnes, profissional);
+                profissionaisRepository.save(Objects.requireNonNull(profissional));
+
+                sincronizacaoService.finalizarComSucesso(registro.getId(), isNovo[0] ? 1 : 0, isNovo[0] ? 0 : 1);
+            } else {
+                sincronizacaoService.finalizarComSucesso(registro.getId(), 0, 0);
+            }
+
             return sincronizacaoService.obterPorId(registro.getId());
-            
+
         } catch (CnesSoapException e) {
             log.error("Erro SOAP ao sincronizar profissional CNS: {}", numeroCns, e);
-            sincronizacaoService.finalizarComErro(registro.getId(), 
+            sincronizacaoService.finalizarComErro(registro.getId(),
                     "Erro SOAP: " + e.getMessage(), e.toString(), 1);
             throw new CnesSincronizacaoException("Falha ao sincronizar profissional: " + e.getMessage(), e);
         } catch (Exception e) {
             log.error("Erro inesperado ao sincronizar profissional CNS: {}", numeroCns, e);
-            sincronizacaoService.finalizarComErro(registro.getId(), 
+            sincronizacaoService.finalizarComErro(registro.getId(),
                     "Erro: " + e.getMessage(), e.toString(), 1);
             throw new CnesSincronizacaoException("Falha ao sincronizar profissional: " + e.getMessage(), e);
         }
@@ -75,30 +95,54 @@ public class CnesProfissionalServiceImpl implements CnesProfissionalService {
 
     @Override
     @Transactional
-    public CnesSincronizacaoResponse sincronizarProfissionalPorCpf(String numeroCpf) {
+    public CnesSincronizacaoResponse sincronizarProfissionalPorCpf(String numeroCpf, boolean persistir) {
         log.info("Iniciando sincronização de profissional por CPF: {}", numeroCpf);
-        
-        UUID tenantId = tenantService.validarTenantAtual();
-        
+
+        com.upsaude.entity.sistema.multitenancy.Tenant tenant = tenantService.obterTenantDoUsuarioAutenticado();
+
         CnesSincronizacao registro = sincronizacaoService.criarRegistroSincronizacao(
                 TipoEntidadeCnesEnum.PROFISSIONAL,
                 null,
                 numeroCpf,
                 null,
-                null
-        );
-        
+                null);
+
         try {
             sincronizacaoService.marcarComoProcessando(registro.getId());
-            
-            // TODO: Implementar quando classes WSDL forem geradas
-            sincronizacaoService.finalizarComSucesso(registro.getId(), 0, 0);
-            
+
+            com.upsaude.integration.cnes.wsdl.profissional.ResponseConsultarProfissionalSaude resposta = soapClient
+                    .consultarProfissionalPorCpf(numeroCpf);
+
+            if (resposta == null || resposta.getProfissionalSaude() == null) {
+                throw new CnesSincronizacaoException("Profissional não encontrado no CNES");
+            }
+
+            com.upsaude.integration.cnes.wsdl.profissional.ProfissionalSaudeType dadosCnes = resposta
+                    .getProfissionalSaude();
+
+            if (persistir) {
+                final boolean[] isNovo = { false };
+                ProfissionaisSaude profissional = profissionaisRepository.findByCpfAndTenant(numeroCpf, tenant)
+                        .orElseGet(() -> {
+                            isNovo[0] = true;
+                            ProfissionaisSaude novo = new ProfissionaisSaude();
+                            novo.setTenant(tenant);
+                            return novo;
+                        });
+
+                cnesMapper.mapToProfissional(dadosCnes, profissional);
+                profissionaisRepository.save(Objects.requireNonNull(profissional));
+
+                sincronizacaoService.finalizarComSucesso(registro.getId(), isNovo[0] ? 1 : 0, isNovo[0] ? 0 : 1);
+            } else {
+                sincronizacaoService.finalizarComSucesso(registro.getId(), 0, 0);
+            }
+
             return sincronizacaoService.obterPorId(registro.getId());
-            
+
         } catch (Exception e) {
             log.error("Erro ao sincronizar profissional CPF: {}", numeroCpf, e);
-            sincronizacaoService.finalizarComErro(registro.getId(), 
+            sincronizacaoService.finalizarComErro(registro.getId(),
                     "Erro: " + e.getMessage(), e.toString(), 1);
             throw new CnesSincronizacaoException("Falha ao sincronizar profissional: " + e.getMessage(), e);
         }
@@ -108,9 +152,20 @@ public class CnesProfissionalServiceImpl implements CnesProfissionalService {
     @Transactional(readOnly = true)
     public Object buscarProfissionalNoCnes(String cnsOuCpf) {
         log.debug("Buscando profissional no CNES: {}", cnsOuCpf);
-        
-        // TODO: Implementar quando classes WSDL forem geradas
-        throw new UnsupportedOperationException("Busca no CNES será implementada após geração de classes WSDL");
+
+        boolean isCns = cnsOuCpf.length() == 15;
+
+        com.upsaude.integration.cnes.wsdl.profissional.ResponseConsultarProfissionalSaude resposta;
+        if (isCns) {
+            resposta = soapClient.consultarProfissionalPorCns(cnsOuCpf);
+        } else {
+            resposta = soapClient.consultarProfissionalPorCpf(cnsOuCpf);
+        }
+
+        if (resposta == null || resposta.getProfissionalSaude() == null) {
+            return null;
+        }
+
+        return resposta.getProfissionalSaude();
     }
 }
-

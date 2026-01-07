@@ -24,11 +24,10 @@ import com.upsaude.exception.InternalServerErrorException;
 import com.upsaude.repository.profissional.equipe.PlantaoRepository;
 import com.upsaude.service.api.profissional.equipe.PlantaoService;
 import com.upsaude.service.api.sistema.multitenancy.TenantService;
-import com.upsaude.service.api.support.plantao.PlantaoCreator;
-import com.upsaude.service.api.support.plantao.PlantaoDomainService;
-import com.upsaude.service.api.support.plantao.PlantaoResponseBuilder;
-import com.upsaude.service.api.support.plantao.PlantaoTenantEnforcer;
-import com.upsaude.service.api.support.plantao.PlantaoUpdater;
+import com.upsaude.mapper.profissional.equipe.PlantaoMapper;
+import com.upsaude.repository.profissional.ProfissionaisSaudeRepository;
+import com.upsaude.repository.profissional.MedicosRepository;
+import com.upsaude.exception.NotFoundException;
 import org.springframework.dao.DataAccessException;
 
 import java.time.OffsetDateTime;
@@ -43,30 +42,28 @@ public class PlantaoServiceImpl implements PlantaoService {
     private final PlantaoRepository repository;
     private final CacheManager cacheManager;
     private final TenantService tenantService;
-
-    private final PlantaoCreator creator;
-    private final PlantaoUpdater updater;
-    private final PlantaoResponseBuilder responseBuilder;
-    private final PlantaoTenantEnforcer tenantEnforcer;
-    private final PlantaoDomainService domainService;
+    private final PlantaoMapper mapper;
+    private final ProfissionaisSaudeRepository profissionaisSaudeRepository;
+    private final MedicosRepository medicosRepository;
 
     @Override
     @Transactional
     public PlantaoResponse criar(PlantaoRequest request) {
-        log.debug("Criando novo plantão");
-
         try {
             UUID tenantId = tenantService.validarTenantAtual();
             Tenant tenant = tenantService.obterTenantDoUsuarioAutenticado();
             validarTenantAutenticadoOrThrow(tenantId, tenant);
 
-            Plantao saved = creator.criar(request, tenantId, tenant);
-            PlantaoResponse response = responseBuilder.build(saved);
+            Plantao entity = mapper.fromRequest(request);
+            entity.setActive(true);
+            resolverRelacionamentos(entity, request, tenantId, tenant);
+
+            Plantao saved = repository.save(entity);
+            PlantaoResponse response = mapper.toResponse(saved);
 
             Cache cache = cacheManager.getCache(CacheKeyUtil.CACHE_PLANTOES);
             if (cache != null) {
-                Object key = Objects.requireNonNull((Object) CacheKeyUtil.plantao(tenantId, saved.getId()));
-                cache.put(key, response);
+                cache.put(Objects.requireNonNull((Object) CacheKeyUtil.plantao(tenantId, saved.getId())), response);
             }
 
             return response;
@@ -81,35 +78,34 @@ public class PlantaoServiceImpl implements PlantaoService {
     @Transactional(readOnly = true)
     @Cacheable(cacheNames = CacheKeyUtil.CACHE_PLANTOES, keyGenerator = "plantoesCacheKeyGenerator")
     public PlantaoResponse obterPorId(UUID id) {
-        log.debug("Buscando plantão por ID: {} (cache miss)", id);
         if (id == null) {
             throw new BadRequestException("ID do plantão é obrigatório");
         }
-
         UUID tenantId = tenantService.validarTenantAtual();
-        Plantao entity = tenantEnforcer.validarAcessoCompleto(id, tenantId);
-        return responseBuilder.build(entity);
+        Plantao entity = validarAcesso(id, tenantId);
+        return mapper.toResponse(entity);
     }
 
     @Override
     @Transactional(readOnly = true)
-    public Page<PlantaoResponse> listar(Pageable pageable, UUID profissionalId, UUID medicoId, UUID estabelecimentoId, TipoPlantaoEnum tipoPlantao, OffsetDateTime dataInicio, OffsetDateTime dataFim, Boolean emAndamento) {
-        log.debug("Listando plantões paginados. Página: {}, Tamanho: {}",
-                pageable.getPageNumber(), pageable.getPageSize());
-
+    public Page<PlantaoResponse> listar(Pageable pageable, UUID profissionalId, UUID medicoId, UUID estabelecimentoId,
+            TipoPlantaoEnum tipoPlantao, OffsetDateTime dataInicio, OffsetDateTime dataFim, Boolean emAndamento) {
         UUID tenantId = tenantService.validarTenantAtual();
         Page<Plantao> page;
 
         if (profissionalId != null) {
-            page = repository.findByProfissionalIdAndTenantIdOrderByDataHoraInicioDesc(profissionalId, tenantId, pageable);
+            page = repository.findByProfissionalIdAndTenantIdOrderByDataHoraInicioDesc(profissionalId, tenantId,
+                    pageable);
         } else if (medicoId != null) {
             page = repository.findByMedicoIdAndTenantIdOrderByDataHoraInicioDesc(medicoId, tenantId, pageable);
         } else if (estabelecimentoId != null) {
-            page = repository.findByEstabelecimentoIdAndTenantIdOrderByDataHoraInicioDesc(estabelecimentoId, tenantId, pageable);
+            page = repository.findByEstabelecimentoIdAndTenantIdOrderByDataHoraInicioDesc(estabelecimentoId, tenantId,
+                    pageable);
         } else if (tipoPlantao != null) {
             page = repository.findByTipoPlantaoAndTenantIdOrderByDataHoraInicioDesc(tipoPlantao, tenantId, pageable);
         } else if (dataInicio != null && dataFim != null) {
-            page = repository.findByDataHoraInicioBetweenAndTenantIdOrderByDataHoraInicioDesc(dataInicio, dataFim, tenantId, pageable);
+            page = repository.findByDataHoraInicioBetweenAndTenantIdOrderByDataHoraInicioDesc(dataInicio, dataFim,
+                    tenantId, pageable);
         } else if (Boolean.TRUE.equals(emAndamento)) {
             OffsetDateTime agora = OffsetDateTime.now();
             page = repository.findEmAndamentoAndTenantIdOrderByDataHoraInicioDesc(agora, tenantId, pageable);
@@ -117,15 +113,13 @@ public class PlantaoServiceImpl implements PlantaoService {
             page = repository.findAllByTenant(tenantId, pageable);
         }
 
-        return page.map(responseBuilder::build);
+        return page.map(mapper::toResponse);
     }
 
     @Override
     @Transactional
     @CachePut(cacheNames = CacheKeyUtil.CACHE_PLANTOES, keyGenerator = "plantoesCacheKeyGenerator")
     public PlantaoResponse atualizar(UUID id, PlantaoRequest request) {
-        log.debug("Atualizando plantão. ID: {}", id);
-
         if (id == null) {
             throw new BadRequestException("ID do plantão é obrigatório");
         }
@@ -134,26 +128,26 @@ public class PlantaoServiceImpl implements PlantaoService {
         Tenant tenant = tenantService.obterTenantDoUsuarioAutenticado();
         validarTenantAutenticadoOrThrow(tenantId, tenant);
 
-        Plantao updated = updater.atualizar(id, request, tenantId, tenant);
-        return responseBuilder.build(updated);
+        Plantao entity = validarAcesso(id, tenantId);
+        mapper.updateFromRequest(request, entity);
+        resolverRelacionamentos(entity, request, tenantId, tenant);
+
+        Plantao updated = repository.save(entity);
+        return mapper.toResponse(updated);
     }
 
     @Override
     @Transactional
     @CacheEvict(cacheNames = CacheKeyUtil.CACHE_PLANTOES, keyGenerator = "plantoesCacheKeyGenerator", beforeInvocation = false)
     public void excluir(UUID id) {
-        log.debug("Excluindo plantão permanentemente. ID: {}", id);
         try {
             UUID tenantId = tenantService.validarTenantAtual();
-            Plantao entity = tenantEnforcer.validarAcesso(id, tenantId);
-            domainService.validarPodeDeletar(entity);
+            Plantao entity = validarAcesso(id, tenantId);
             repository.delete(Objects.requireNonNull(entity));
-            log.info("Plantão excluído permanentemente com sucesso. ID: {}", id);
-        } catch (BadRequestException | com.upsaude.exception.NotFoundException e) {
-            log.warn("Erro de validação ao excluir Plantao. Erro: {}", e.getMessage());
+        } catch (BadRequestException | NotFoundException e) {
             throw e;
         } catch (DataAccessException e) {
-            log.error("Erro de acesso a dados ao excluir Plantao. Exception: {}", e.getClass().getSimpleName(), e);
+            log.error("Erro ao excluir Plantao", e);
             throw new InternalServerErrorException("Erro ao excluir Plantao", e);
         }
     }
@@ -162,15 +156,13 @@ public class PlantaoServiceImpl implements PlantaoService {
     @Transactional
     @CacheEvict(cacheNames = CacheKeyUtil.CACHE_PLANTOES, keyGenerator = "plantoesCacheKeyGenerator", beforeInvocation = false)
     public void inativar(UUID id) {
-        log.debug("Inativando plantão. ID: {}", id);
         try {
             UUID tenantId = tenantService.validarTenantAtual();
             inativarInternal(id, tenantId);
-        } catch (BadRequestException | com.upsaude.exception.NotFoundException e) {
-            log.warn("Erro de validação ao inativar Plantao. Erro: {}", e.getMessage());
+        } catch (BadRequestException | NotFoundException e) {
             throw e;
         } catch (DataAccessException e) {
-            log.error("Erro de acesso a dados ao inativar Plantao. Exception: {}", e.getClass().getSimpleName(), e);
+            log.error("Erro ao inativar Plantao", e);
             throw new InternalServerErrorException("Erro ao inativar Plantao", e);
         }
     }
@@ -180,11 +172,35 @@ public class PlantaoServiceImpl implements PlantaoService {
             throw new BadRequestException("ID do plantão é obrigatório");
         }
 
-        Plantao entity = tenantEnforcer.validarAcesso(id, tenantId);
-        domainService.validarPodeInativar(entity);
+        Plantao entity = validarAcesso(id, tenantId);
+        if (Boolean.FALSE.equals(entity.getActive())) {
+            throw new BadRequestException("Plantão já está inativo");
+        }
         entity.setActive(false);
         repository.save(Objects.requireNonNull(entity));
-        log.info("Plantão inativado com sucesso. ID: {}", id);
+    }
+
+    private Plantao validarAcesso(UUID id, UUID tenantId) {
+        return repository.findByIdAndTenant(id, tenantId)
+                .orElseThrow(() -> new NotFoundException("Plantão não encontrado com ID: " + id));
+    }
+
+    private void resolverRelacionamentos(Plantao entity, PlantaoRequest request, UUID tenantId, Tenant tenant) {
+        if (request == null)
+            return;
+        validarTenantAutenticadoOrThrow(tenantId, tenant);
+        entity.setTenant(tenant);
+
+        if (request.getProfissional() != null) {
+            entity.setProfissional(profissionaisSaudeRepository.findByIdAndTenant(request.getProfissional(), tenantId)
+                    .orElseThrow(() -> new NotFoundException(
+                            "Profissional não encontrado com ID: " + request.getProfissional())));
+        }
+
+        if (request.getMedico() != null) {
+            entity.setMedico(medicosRepository.findByIdAndTenant(request.getMedico(), tenantId)
+                    .orElseThrow(() -> new NotFoundException("Médico não encontrado com ID: " + request.getMedico())));
+        }
     }
 
     private void validarTenantAutenticadoOrThrow(UUID tenantId, Tenant tenant) {

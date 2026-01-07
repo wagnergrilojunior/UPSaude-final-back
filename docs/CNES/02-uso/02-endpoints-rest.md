@@ -57,10 +57,11 @@ Sincroniza um estabelecimento específico do CNES.
 
 **Query Parameters**:
 - `competencia` (string, optional): Competência no formato AAAAMM
+- `persistir` (boolean, optional): Se `true`, salva os dados no banco local (padrão: `false`)
 
 **Request**:
 ```http
-POST /api/v1/cnes/estabelecimentos/2530031/sincronizar?competencia=202501
+POST /api/v1/cnes/estabelecimentos/2530031/sincronizar?competencia=202501&persistir=true
 Authorization: Bearer <token>
 ```
 
@@ -90,6 +91,7 @@ Sincroniza todos os estabelecimentos de um município.
 
 **Query Parameters**:
 - `competencia` (string, optional): Competência no formato AAAAMM
+- `persistir` (boolean, optional): Se `true`, salva os dados no banco local (padrão: `false`)
 
 **Response 200**:
 ```json
@@ -139,6 +141,9 @@ Sincroniza um profissional por CNS.
 **Path Parameters**:
 - `numeroCns` (string, required): Número do CNS (15 dígitos)
 
+**Query Parameters**:
+- `persistir` (boolean, optional): Se `true`, salva os dados no banco local (padrão: `false`)
+
 **Response 200**:
 ```json
 {
@@ -157,6 +162,9 @@ Sincroniza um profissional por CPF.
 **Path Parameters**:
 - `numeroCpf` (string, required): Número do CPF
 
+**Query Parameters**:
+- `persistir` (boolean, optional): Se `true`, salva os dados no banco local (padrão: `false`)
+
 ### GET /v1/cnes/profissionais/cns/{numeroCns}
 
 Busca um profissional no CNES por CNS.
@@ -170,6 +178,9 @@ Sincroniza todas as equipes de um estabelecimento.
 **Path Parameters**:
 - `codigoCnes` (string, required): Código CNES
 
+**Query Parameters**:
+- `persistir` (boolean, optional): Se `true`, salva os dados no banco local (padrão: `false`)
+
 ### POST /v1/cnes/equipes/estabelecimento/{codigoCnes}/equipe/{ine}/sincronizar
 
 Sincroniza uma equipe específica.
@@ -177,6 +188,9 @@ Sincroniza uma equipe específica.
 **Path Parameters**:
 - `codigoCnes` (string, required): Código CNES
 - `ine` (string, required): INE da equipe (15 caracteres)
+
+**Query Parameters**:
+- `persistir` (boolean, optional): Se `true`, salva os dados no banco local (padrão: `false`)
 
 ## 🔗 Vinculações
 
@@ -187,9 +201,18 @@ Sincroniza vinculações de um profissional.
 **Path Parameters**:
 - `cpfOuCns` (string, required): CPF ou CNS do profissional
 
+**Query Parameters**:
+- `persistir` (boolean, optional): Se `true`, salva os dados no banco local (padrão: `false`)
+
 ### POST /v1/cnes/vinculacoes/estabelecimento/{codigoCnes}/sincronizar
 
 Sincroniza vinculações de um estabelecimento.
+
+**Path Parameters**:
+- `codigoCnes` (string, required): Código CNES
+
+**Query Parameters**:
+- `persistir` (boolean, optional): Se `true`, salva os dados no banco local (padrão: `false`)
 
 ## 🏥 Equipamentos
 
@@ -197,11 +220,23 @@ Sincroniza vinculações de um estabelecimento.
 
 Sincroniza equipamentos de um estabelecimento.
 
+**Path Parameters**:
+- `codigoCnes` (string, required): Código CNES (7 dígitos)
+
+**Query Parameters**:
+- `persistir` (boolean, optional): Se `true`, salva os dados no banco local (padrão: `false`)
+
 ## 🛏️ Leitos
 
 ### POST /v1/cnes/leitos/estabelecimento/{codigoCnes}/sincronizar
 
 Sincroniza leitos de um estabelecimento.
+
+**Path Parameters**:
+- `codigoCnes` (string, required): Código CNES (7 dígitos)
+
+**Query Parameters**:
+- `persistir` (boolean, optional): Se `true`, salva os dados no banco local (padrão: `false`)
 
 ### GET /v1/cnes/leitos/estabelecimento/{codigoCnes}
 

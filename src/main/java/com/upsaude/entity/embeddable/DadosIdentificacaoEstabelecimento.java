@@ -38,4 +38,10 @@ public class DadosIdentificacaoEstabelecimento {
     @Column(name = "natureza_juridica", length = 50)
     private NaturezaJuridicaEnum naturezaJuridica;
 
+    @Column(name = "cnae_principal", length = 7)
+    private String cnaePrincipal;
+
+    @Column(name = "cnae_secundario", length = 7)
+    private String cnaeSecundario;
+
 }

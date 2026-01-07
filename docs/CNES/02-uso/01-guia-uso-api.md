@@ -58,7 +58,7 @@ Sincroniza um estabelecimento específico do CNES.
 
 **Exemplo**:
 ```bash
-curl -X POST "http://localhost:8080/api/v1/cnes/estabelecimentos/2530031/sincronizar?competencia=202501" \
+curl -X POST "http://localhost:8080/api/v1/cnes/estabelecimentos/2530031/sincronizar?competencia=202501&persistir=true" \
   -H "Authorization: Bearer <token>"
 ```
 
@@ -88,7 +88,7 @@ Sincroniza todos os estabelecimentos de um município.
 
 **Exemplo**:
 ```bash
-curl -X POST "http://localhost:8080/api/v1/cnes/estabelecimentos/municipio/530010/sincronizar" \
+curl -X POST "http://localhost:8080/api/v1/cnes/estabelecimentos/municipio/530010/sincronizar?persistir=true" \
   -H "Authorization: Bearer <token>"
 ```
 
@@ -112,7 +112,7 @@ curl -X GET "http://localhost:8080/api/v1/cnes/estabelecimentos/2530031/buscar" 
 
 **Exemplo**:
 ```bash
-curl -X POST "http://localhost:8080/api/v1/cnes/profissionais/cns/701009864978597/sincronizar" \
+curl -X POST "http://localhost:8080/api/v1/cnes/profissionais/cns/701009864978597/sincronizar?persistir=true" \
   -H "Authorization: Bearer <token>"
 ```
 
@@ -122,7 +122,7 @@ curl -X POST "http://localhost:8080/api/v1/cnes/profissionais/cns/70100986497859
 
 **Exemplo**:
 ```bash
-curl -X POST "http://localhost:8080/api/v1/cnes/profissionais/cpf/12345678901/sincronizar" \
+curl -X POST "http://localhost:8080/api/v1/cnes/profissionais/cpf/12345678901/sincronizar?persistir=true" \
   -H "Authorization: Bearer <token>"
 ```
 
@@ -134,7 +134,7 @@ curl -X POST "http://localhost:8080/api/v1/cnes/profissionais/cpf/12345678901/si
 
 **Exemplo**:
 ```bash
-curl -X POST "http://localhost:8080/api/v1/cnes/equipes/estabelecimento/2530031/sincronizar" \
+curl -X POST "http://localhost:8080/api/v1/cnes/equipes/estabelecimento/2530031/sincronizar?persistir=true" \
   -H "Authorization: Bearer <token>"
 ```
 
@@ -221,12 +221,12 @@ flowchart TD
 
 | Código | Significado | Quando Ocorre |
 |--------|------------|---------------|
-| 200 | OK | Operação bem-sucedida |
-| 400 | Bad Request | Parâmetros inválidos |
-| 401 | Unauthorized | Token ausente ou inválido |
-| 403 | Forbidden | Acesso negado |
-| 404 | Not Found | Recurso não encontrado |
-| 500 | Internal Server Error | Erro no servidor |
+| 200 | OK | Operação realizada com sucesso |
+| 400 | Requisição Inválida | Parâmetros inválidos ou mal formados |
+| 401 | Não Autorizado | Token ausente, inválido ou expirado |
+| 403 | Proibido | O usuário não tem permissão para este recurso |
+| 404 | Não Encontrado | O recurso solicitado não existe no CNES ou sistema |
+| 500 | Erro Interno | Falha inesperada no servidor ou integração DATASUS |
 
 ## ⚠️ Validações
 

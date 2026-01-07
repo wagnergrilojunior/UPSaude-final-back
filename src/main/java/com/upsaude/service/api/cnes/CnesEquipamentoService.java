@@ -10,6 +10,5 @@ public interface CnesEquipamentoService {
     /**
      * Sincroniza equipamentos de um estabelecimento.
      */
-    CnesSincronizacaoResponse sincronizarEquipamentosPorEstabelecimento(String codigoCnes);
+    CnesSincronizacaoResponse sincronizarEquipamentosPorEstabelecimento(String codigoCnes, boolean persistir);
 }
-

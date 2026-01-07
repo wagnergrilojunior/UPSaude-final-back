@@ -12,14 +12,16 @@ public class CompatibilidadePossivelSoapClient extends AbstractSigtapSoapClient 
 
     private final SigtapProperties properties;
 
-    public CompatibilidadePossivelSoapClient(WebServiceTemplate webServiceTemplate, SigtapProperties properties) {
+    public CompatibilidadePossivelSoapClient(
+            @org.springframework.beans.factory.annotation.Qualifier("sigtapWebServiceTemplate") WebServiceTemplate webServiceTemplate,
+            SigtapProperties properties) {
         super(webServiceTemplate);
         this.properties = properties;
     }
 
     public ResponseListarCompatibilidadesPossiveis listarCompatibilidadesPossiveis() {
         RequestListarCompatibilidadesPossiveis request = new RequestListarCompatibilidadesPossiveis();
-        return call(properties.getSoap().compatibilidadePossivelEndpoint(), request, ResponseListarCompatibilidadesPossiveis.class, "listarCompatibilidadesPossiveis");
+        return call(properties.getSoap().compatibilidadePossivelEndpoint(), request,
+                ResponseListarCompatibilidadesPossiveis.class, "listarCompatibilidadesPossiveis");
     }
 }
-

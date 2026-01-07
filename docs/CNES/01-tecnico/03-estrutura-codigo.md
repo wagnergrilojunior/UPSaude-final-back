@@ -37,7 +37,12 @@ src/main/java/com/upsaude/
 │   └── properties/
 │       └── CnesProperties.java
 ├── mapper/cnes/
-│   └── CnesEstabelecimentoMapper.java
+│   ├── CnesEstabelecimentoMapper.java
+│   ├── CnesProfissionalMapper.java
+│   ├── CnesEquipeMapper.java
+│   ├── CnesEquipamentoMapper.java
+│   ├── CnesLeitoMapper.java
+│   └── CnesVinculacaoMapper.java
 ├── repository/cnes/
 │   ├── CnesSincronizacaoRepository.java
 │   └── CnesHistoricoEstabelecimentoRepository.java
@@ -190,7 +195,12 @@ flowchart TD
 **Responsabilidade**: Conversão entre objetos WSDL e entidades JPA.
 
 **Classes**:
-- `CnesEstabelecimentoMapper`: Mapeamento usando MapStruct
+- `CnesEstabelecimentoMapper`: Mapeamento de estabelecimentos
+- `CnesProfissionalMapper`: Mapeamento de profissionais
+- `CnesEquipeMapper`: Mapeamento de equipes
+- `CnesEquipamentoMapper`: Mapeamento de equipamentos
+- `CnesLeitoMapper`: Mapeamento de leitos
+- `CnesVinculacaoMapper`: Mapeamento de vínculos (vinculações)
 
 ### `repository.cnes`
 
@@ -265,14 +275,14 @@ public class CnesSincronizacaoResponse {
 @Override
 @Transactional
 public CnesSincronizacaoResponse sincronizarEstabelecimentoPorCnes(
-        String codigoCnes, String competencia) {
+        String codigoCnes, String competencia, boolean persistir) {
     // 1. Validação
     // 2. Criar registro de sincronização
-    // 3. Marcar como processando
+    // 3. Marcar como processando (Se persistir=true)
     // 4. Chamar SOAP client
     // 5. Mapear dados
-    // 6. Persistir
-    // 7. Atualizar status
+    // 6. Persistir (Se persistir=true)
+    // 7. Atualizar status e contador de registros
     // 8. Retornar resposta
 }
 ```

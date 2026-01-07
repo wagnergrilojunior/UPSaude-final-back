@@ -3,6 +3,7 @@ package com.upsaude.integration.cnes.soap.client;
 import com.upsaude.config.CnesProperties;
 import com.upsaude.integration.cnes.wsdl.profissional.*;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 import org.springframework.ws.client.core.WebServiceTemplate;
 
@@ -15,7 +16,8 @@ public class ProfissionalCnesSoapClient extends AbstractCnesSoapClient {
 
     private final CnesProperties properties;
 
-    public ProfissionalCnesSoapClient(WebServiceTemplate webServiceTemplate, CnesProperties properties) {
+    public ProfissionalCnesSoapClient(@Qualifier("profissionalTemplate") WebServiceTemplate webServiceTemplate,
+            CnesProperties properties) {
         super(webServiceTemplate);
         this.properties = properties;
     }
@@ -28,17 +30,17 @@ public class ProfissionalCnesSoapClient extends AbstractCnesSoapClient {
      */
     public ResponseConsultarProfissionalSaude consultarProfissionalPorCns(String numeroCns) {
         log.debug("Consultando profissional por CNS: {}", numeroCns);
-        
+
         ObjectFactory objectFactory = new ObjectFactory();
         RequestConsultarProfissionalSaude request = objectFactory.createRequestConsultarProfissionalSaude();
-        
+
         FiltroPesquisaProfissionalSaudeType filtro = new FiltroPesquisaProfissionalSaudeType();
         CNSType cns = new CNSType();
         cns.setNumeroCNS(numeroCns);
         filtro.setCNS(cns);
         request.setFiltroPesquisaProfissionalSaude(filtro);
-        
-        return call(properties.getSoap().profissionalServiceEndpoint(), request, 
+
+        return call(properties.getSoap().profissionalServiceEndpoint(), request,
                 ResponseConsultarProfissionalSaude.class, "consultarProfissionalPorCns");
     }
 
@@ -50,17 +52,17 @@ public class ProfissionalCnesSoapClient extends AbstractCnesSoapClient {
      */
     public ResponseConsultarProfissionalSaude consultarProfissionalPorCpf(String numeroCpf) {
         log.debug("Consultando profissional por CPF: {}", numeroCpf);
-        
+
         ObjectFactory objectFactory = new ObjectFactory();
         RequestConsultarProfissionalSaude request = objectFactory.createRequestConsultarProfissionalSaude();
-        
+
         FiltroPesquisaProfissionalSaudeType filtro = new FiltroPesquisaProfissionalSaudeType();
         CPFType cpf = new CPFType();
         cpf.setNumeroCPF(numeroCpf);
         filtro.setCPF(cpf);
         request.setFiltroPesquisaProfissionalSaude(filtro);
-        
-        return call(properties.getSoap().profissionalServiceEndpoint(), request, 
+
+        return call(properties.getSoap().profissionalServiceEndpoint(), request,
                 ResponseConsultarProfissionalSaude.class, "consultarProfissionalPorCpf");
     }
 
@@ -72,18 +74,17 @@ public class ProfissionalCnesSoapClient extends AbstractCnesSoapClient {
      */
     public ResponseConsultarProfissionaisSaude consultarProfissionais(String codigoCnes) {
         log.debug("Consultando profissionais do estabelecimento CNES: {}", codigoCnes);
-        
+
         ObjectFactory objectFactory = new ObjectFactory();
         RequestConsultarProfissionaisSaude request = objectFactory.createRequestConsultarProfissionaisSaude();
-        
+
         FiltroPesquisaEstabelecimentoSaudeType filtro = new FiltroPesquisaEstabelecimentoSaudeType();
         CodigoCNESType codigoCNESType = new CodigoCNESType();
         codigoCNESType.setCodigo(codigoCnes);
         filtro.setCodigoCNES(codigoCNESType);
         request.setFiltroPesquisaEstabelecimentoSaude(filtro);
-        
-        return call(properties.getSoap().profissionalServiceEndpoint(), request, 
+
+        return call(properties.getSoap().profissionalServiceEndpoint(), request,
                 ResponseConsultarProfissionaisSaude.class, "consultarProfissionais");
     }
 }
-

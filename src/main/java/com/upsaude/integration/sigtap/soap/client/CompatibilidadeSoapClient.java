@@ -4,6 +4,7 @@ import java.math.BigInteger;
 
 import org.springframework.stereotype.Component;
 import org.springframework.ws.client.core.WebServiceTemplate;
+import org.springframework.beans.factory.annotation.Qualifier;
 
 import com.upsaude.config.SigtapProperties;
 import com.upsaude.integration.sigtap.wsdl.PaginacaoType;
@@ -15,7 +16,8 @@ public class CompatibilidadeSoapClient extends AbstractSigtapSoapClient {
 
     private final SigtapProperties properties;
 
-    public CompatibilidadeSoapClient(WebServiceTemplate webServiceTemplate, SigtapProperties properties) {
+    public CompatibilidadeSoapClient(@Qualifier("sigtapWebServiceTemplate") WebServiceTemplate webServiceTemplate,
+            SigtapProperties properties) {
         super(webServiceTemplate);
         this.properties = properties;
     }
@@ -27,8 +29,7 @@ public class CompatibilidadeSoapClient extends AbstractSigtapSoapClient {
             String codigoSubgrupo,
             String codigoProcedimento,
             int registroInicial,
-            int quantidadeRegistros
-    ) {
+            int quantidadeRegistros) {
         RequestPesquisarCompatibilidades request = new RequestPesquisarCompatibilidades();
         request.setCodigoCompatibilidadePossivel(codigoCompatibilidadePossivel);
         request.setCompetencia(competencia);
@@ -41,7 +42,7 @@ public class CompatibilidadeSoapClient extends AbstractSigtapSoapClient {
         pag.setQuantidadeRegistros(quantidadeRegistros);
         request.setPaginacao(pag);
 
-        return call(properties.getSoap().compatibilidadeEndpoint(), request, ResponsePesquisarCompatibilidades.class, "pesquisarCompatibilidades");
+        return call(properties.getSoap().compatibilidadeEndpoint(), request, ResponsePesquisarCompatibilidades.class,
+                "pesquisarCompatibilidades");
     }
 }
-

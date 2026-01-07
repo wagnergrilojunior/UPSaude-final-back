@@ -21,6 +21,7 @@ Guias práticos de como usar a API, exemplos de chamadas e casos de uso.
 
 - [Guia de Uso da API](./02-uso/01-guia-uso-api.md)
 - [Endpoints REST](./02-uso/02-endpoints-rest.md)
+- [Visualização do Processo (Fluxogramas e Mockups)](./02-uso/04-visualizacao-processo.md)
 - [Exemplos de Requisições](./02-uso/03-exemplos-requisicoes.md)
 - [Casos de Uso](./02-uso/04-casos-uso.md)
 - [Troubleshooting](./02-uso/05-troubleshooting.md)
@@ -70,7 +71,7 @@ A integração CNES permite:
 
 ## 📝 Última Atualização
 
-**Data**: Janeiro 2025  
-**Versão**: 1.0.0  
-**Status**: ✅ Implementado e Funcional
+**Data**: Janeiro 2026  
+**Versão**: 1.1.0  
+**Status**: ✅ Implementado, Refatorado e Funcional (Completo)
 

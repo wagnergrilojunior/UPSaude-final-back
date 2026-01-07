@@ -10,11 +10,10 @@ public interface CnesEquipeService {
     /**
      * Sincroniza equipes de um estabelecimento.
      */
-    CnesSincronizacaoResponse sincronizarEquipesPorEstabelecimento(String codigoCnes);
+    CnesSincronizacaoResponse sincronizarEquipesPorEstabelecimento(String codigoCnes, boolean persistir);
 
     /**
      * Sincroniza uma equipe específica.
      */
-    CnesSincronizacaoResponse sincronizarEquipe(String codigoCnes, String ine);
+    CnesSincronizacaoResponse sincronizarEquipe(String codigoCnes, String ine, boolean persistir);
 }
-
