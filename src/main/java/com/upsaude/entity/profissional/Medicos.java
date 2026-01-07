@@ -32,15 +32,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-@Table(name = "medicos", schema = "public",
-       uniqueConstraints = {
-           @UniqueConstraint(name = "uk_medicos_crm_uf_tenant", columnNames = {"crm", "crm_uf", "tenant_id"})
-       },
-       indexes = {
-           @Index(name = "idx_medicos_crm", columnList = "crm"),
-           @Index(name = "idx_medicos_crm_uf", columnList = "crm_uf"),
-           @Index(name = "idx_medicos_nome", columnList = "nome_completo")
-       })
+@Table(name = "medicos", schema = "public", uniqueConstraints = {
+        @UniqueConstraint(name = "uk_medicos_crm_uf_tenant", columnNames = { "crm", "crm_uf", "tenant_id" })
+}, indexes = {
+        @Index(name = "idx_medicos_crm", columnList = "crm"),
+        @Index(name = "idx_medicos_crm_uf", columnList = "crm_uf"),
+        @Index(name = "idx_medicos_nome", columnList = "nome_completo")
+})
 @Getter
 @Setter
 @EqualsAndHashCode(onlyExplicitlyIncluded = true, callSuper = true)
@@ -68,24 +66,23 @@ public class Medicos extends BaseEntityWithoutEstabelecimento {
     @OneToMany(mappedBy = "medico", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
     private List<MedicoEstabelecimento> estabelecimentos = new ArrayList<>();
 
-    @ManyToMany(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
-    @JoinTable(
-        name = "medicos_especialidades",
-        schema = "public",
-        joinColumns = @JoinColumn(name = "medico_id"),
-        inverseJoinColumns = @JoinColumn(name = "especialidade_id"),
-        uniqueConstraints = {
-            @UniqueConstraint(name = "uk_medico_especialidade", columnNames = {"medico_id", "especialidade_id"})
-        },
-        indexes = {
+    @ManyToMany(fetch = FetchType.LAZY, cascade = { CascadeType.PERSIST, CascadeType.MERGE })
+    @JoinTable(name = "medicos_especialidades", schema = "public", joinColumns = @JoinColumn(name = "medico_id"), inverseJoinColumns = @JoinColumn(name = "especialidade_id"), uniqueConstraints = {
+            @UniqueConstraint(name = "uk_medico_especialidade", columnNames = { "medico_id", "especialidade_id" })
+    }, indexes = {
             @Index(name = "idx_medico_especialidade_medico", columnList = "medico_id"),
             @Index(name = "idx_medico_especialidade_ocupacao", columnList = "especialidade_id")
-        }
-    )
+    })
     private List<SigtapOcupacao> especialidades = new ArrayList<>();
 
     @Column(name = "observacoes", columnDefinition = "TEXT")
     private String observacoes;
+
+    @Column(name = "cns", length = 15)
+    private String cns;
+
+    @Column(name = "data_ultima_sincronizacao_cnes")
+    private java.time.OffsetDateTime dataUltimaSincronizacaoCnes;
 
     @PrePersist
     @PreUpdate

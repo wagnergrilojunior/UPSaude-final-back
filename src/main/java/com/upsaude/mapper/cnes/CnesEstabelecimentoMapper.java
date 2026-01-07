@@ -69,6 +69,14 @@ public class CnesEstabelecimentoMapper {
             dadosIdentificacao.setCnpj(dadosGerais.getCNPJ().getNumeroCNPJ());
         }
 
+        // Tipo de Estabelecimento (obrigatório)
+        if (dadosGerais.getTipoUnidade() != null && dadosGerais.getTipoUnidade().getCodigo() != null) {
+            dadosIdentificacao.setTipo(mapTipoEstabelecimento(dadosGerais.getTipoUnidade().getCodigo()));
+        } else {
+            // Fallback para OUTRO se não vier do CNES
+            dadosIdentificacao.setTipo(com.upsaude.enums.TipoEstabelecimentoEnum.OUTRO);
+        }
+
         // Esfera Administrativa
         if (dadosGerais.getEsferaAdministrativa() != null
                 && dadosGerais.getEsferaAdministrativa().getCodigo() != null) {
@@ -169,6 +177,81 @@ public class CnesEstabelecimentoMapper {
                 // Para simplificar agora, vamos apenas focar no número se houver outro campo
             }
         }
+    }
+
+    /**
+     * Converte código de tipo de estabelecimento do CNES para enum.
+     * Códigos comuns do CNES:
+     * - 01-07: Hospitais
+     * - 15: Unidade Mista
+     * - 20: Posto de Saúde
+     * - 22: Consultório Isolado
+     * - 32: Unidade Móvel Fluvial
+     * - 36: Clínica/Centro de Especialidade
+     * - 39: Unidade de Apoio Diagnose e Terapia (SADT Isolado)
+     * - 40: Unidade Móvel Terrestre
+     * - 42: Unidade Móvel de Nível Pré-Hospitalar na Área de Urgência
+     * - 50: Cooperativa
+     * - 60: Farmácia
+     * - 61: Unidade de Vigilância em Saúde
+     * - 62: Laboratório Central de Saúde Pública - LACEN
+     * - 67: Secretaria de Saúde
+     * - 68: Central de Gestão em Saúde
+     * - 69: Centro de Atenção Hemoterapia e ou Hematológica
+     * - 70: Centro de Atenção Psicossocial
+     * - 71: Centro de Apoio a Saúde da Família
+     * - 72: Unidade de Atenção à Saúde Indígena
+     * - 73: Pronto Socorro Geral
+     * - 74: Pronto Socorro Especializado
+     * - 75: Polo Academia da Saúde
+     * - 76: Telessaúde
+     * - 77: Central de Regulação de Serviços de Saúde
+     * - 78: Central de Notificação, Captação e Distribuição de Órgãos Estadual
+     * - 79: Central de Regulação Médica das Urgências
+     * - 80: Polo de Prevenção de Doenças e Agravos e Promoção da Saúde
+     * - 81: Central de Abastecimento
+     * - 82: Unidade de Atenção em Regime Residencial
+     * - 83: Polo de Prevenção de Doenças e Agravos e Promoção da Saúde
+     */
+    private com.upsaude.enums.TipoEstabelecimentoEnum mapTipoEstabelecimento(String codigo) {
+        if (codigo == null) {
+            return com.upsaude.enums.TipoEstabelecimentoEnum.OUTRO;
+        }
+
+        String codigoTrimmed = codigo.trim();
+
+        // Hospitais (códigos 01-07, 15)
+        if (codigoTrimmed.matches("0[1-7]") || codigoTrimmed.equals("15")) {
+            return com.upsaude.enums.TipoEstabelecimentoEnum.HOSPITAL;
+        }
+
+        // Postos de Saúde e UBS (códigos 20, 71, 72)
+        if (codigoTrimmed.equals("20") || codigoTrimmed.equals("71") || codigoTrimmed.equals("72")) {
+            return com.upsaude.enums.TipoEstabelecimentoEnum.POSTO_SAUDE;
+        }
+
+        // UPA e Pronto Socorro (códigos 42, 73, 74)
+        if (codigoTrimmed.equals("42") || codigoTrimmed.equals("73") || codigoTrimmed.equals("74")) {
+            return com.upsaude.enums.TipoEstabelecimentoEnum.UPA;
+        }
+
+        // Clínicas e Consultórios (códigos 22, 36)
+        if (codigoTrimmed.equals("22") || codigoTrimmed.equals("36")) {
+            return com.upsaude.enums.TipoEstabelecimentoEnum.CLINICA;
+        }
+
+        // Laboratórios (códigos 39, 62)
+        if (codigoTrimmed.equals("39") || codigoTrimmed.equals("62")) {
+            return com.upsaude.enums.TipoEstabelecimentoEnum.LABORATORIO;
+        }
+
+        // Farmácia (código 60)
+        if (codigoTrimmed.equals("60")) {
+            return com.upsaude.enums.TipoEstabelecimentoEnum.FARMACIA;
+        }
+
+        // Outros tipos não mapeados
+        return com.upsaude.enums.TipoEstabelecimentoEnum.OUTRO;
     }
 
     /**
