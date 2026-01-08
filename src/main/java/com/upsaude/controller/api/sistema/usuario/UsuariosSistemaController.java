@@ -1,5 +1,6 @@
 package com.upsaude.controller.api.sistema.usuario;
 
+import com.upsaude.api.request.sistema.usuario.TrocaSenhaRequest;
 import com.upsaude.api.request.sistema.usuario.UsuariosSistemaRequest;
 import com.upsaude.api.response.sistema.usuario.UsuariosSistemaResponse;
 import com.upsaude.exception.BadRequestException;
@@ -248,6 +249,37 @@ public class UsuariosSistemaController {
             throw ex;
         } catch (Exception ex) {
             log.error("Erro inesperado ao deletar foto do usuário — Path: /v1/usuarios-sistema/{}/foto, Method: DELETE, ID: {}, Exception: {}",
+                id, id, ex.getClass().getName(), ex);
+            throw ex;
+        }
+    }
+
+    @PutMapping("/{id}/trocar-senha")
+    @Operation(
+            summary = "Trocar senha do usuário",
+            description = "Atualiza a senha do usuário no Supabase Auth",
+            security = @SecurityRequirement(name = "bearerAuth")
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "204", description = "Senha alterada com sucesso"),
+            @ApiResponse(responseCode = "400", description = "Dados inválidos fornecidos"),
+            @ApiResponse(responseCode = "404", description = "Usuário não encontrado"),
+            @ApiResponse(responseCode = "403", description = "Acesso negado")
+    })
+    public ResponseEntity<Void> trocarSenha(
+            @Parameter(description = "ID do usuário do sistema", required = true)
+            @PathVariable UUID id,
+            @Valid @RequestBody TrocaSenhaRequest request) {
+        log.debug("REQUEST PUT /v1/usuarios-sistema/{}/trocar-senha", id);
+        try {
+            usuariosSistemaService.trocarSenha(id, request.getNovaSenha());
+            log.info("Senha do usuário alterada com sucesso. ID: {}", id);
+            return ResponseEntity.noContent().build();
+        } catch (BadRequestException | NotFoundException ex) {
+            log.warn("Falha ao trocar senha do usuário — ID: {}, mensagem: {}", id, ex.getMessage());
+            throw ex;
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao trocar senha do usuário — Path: /v1/usuarios-sistema/{}/trocar-senha, Method: PUT, ID: {}, Exception: {}",
                 id, id, ex.getClass().getName(), ex);
             throw ex;
         }

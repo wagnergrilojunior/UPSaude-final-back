@@ -6,9 +6,11 @@ import com.upsaude.api.request.embeddable.DadosExibicaoUsuarioRequest;
 import com.upsaude.api.request.embeddable.DadosIdentificacaoUsuarioRequest;
 import com.upsaude.enums.TipoUsuarioSistemaEnum;
 import com.upsaude.util.converter.TipoUsuarioSistemaEnumDeserializer;
+import com.upsaude.validation.annotation.EmailValido;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -27,8 +29,14 @@ import java.util.UUID;
 @Schema(description = "Dados de usuários sistema")
 public class UsuariosSistemaRequest {
 
-    @NotNull(message = "User ID é obrigatório")
     private UUID userId;
+
+    @EmailValido
+    @Size(max = 255, message = "Email deve ter no máximo 255 caracteres")
+    private String email;
+
+    @Size(max = 255, message = "Senha deve ter no máximo 255 caracteres")
+    private String senha;
 
     private UUID profissionalSaude;
     private UUID medico;
