@@ -1,4 +1,5 @@
 package com.upsaude.api.response.estabelecimento;
+
 import com.upsaude.api.response.estabelecimento.EstabelecimentosResponse;
 import com.upsaude.api.response.profissional.MedicosResponse;
 
@@ -23,7 +24,7 @@ public class MedicoEstabelecimentoResponse {
     private OffsetDateTime updatedAt;
     private Boolean active;
     private MedicosResponse medico;
-    private EstabelecimentosResponse estabelecimento;
+    private EstabelecimentoSimplificadoResponse estabelecimento;
     private OffsetDateTime dataInicio;
     private OffsetDateTime dataFim;
     private TipoVinculoProfissionalEnum tipoVinculo;

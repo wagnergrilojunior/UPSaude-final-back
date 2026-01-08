@@ -18,7 +18,7 @@ public class EquipamentosEstabelecimentoResponse {
     private OffsetDateTime createdAt;
     private OffsetDateTime updatedAt;
     private Boolean active;
-    private EstabelecimentosResponse estabelecimento;
+
     private EquipamentosResponse equipamento;
     private String codigoInterno;
     private String numeroSerie;

@@ -9,8 +9,8 @@ import com.upsaude.api.response.estabelecimento.UsuarioEstabelecimentoResponse;
 import com.upsaude.entity.estabelecimento.UsuarioEstabelecimento;
 import com.upsaude.mapper.config.MappingConfig;
 
-@Mapper(config = MappingConfig.class)
-public interface UsuarioEstabelecimentoMapper  {
+@Mapper(config = MappingConfig.class, uses = { EstabelecimentosMapper.class })
+public interface UsuarioEstabelecimentoMapper {
 
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "createdAt", ignore = true)

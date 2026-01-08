@@ -1,4 +1,5 @@
 package com.upsaude.entity.paciente;
+
 import com.upsaude.entity.BaseEntity;
 
 import com.upsaude.enums.CondicaoMoradiaEnum;
@@ -14,10 +15,9 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
-@Table(name = "paciente_dados_sociodemograficos", schema = "public",
-       indexes = {
-           @Index(name = "idx_paciente_dados_sociodemograficos_paciente", columnList = "paciente_id")
-       })
+@Table(name = "paciente_dados_sociodemograficos", schema = "public", indexes = {
+        @Index(name = "idx_paciente_dados_sociodemograficos_paciente", columnList = "paciente_id")
+})
 @Getter
 @Setter
 @EqualsAndHashCode(onlyExplicitlyIncluded = true, callSuper = true)
@@ -53,7 +53,7 @@ public class DadosSociodemograficos extends BaseEntity {
     @Column(name = "ocupacao_profissao", length = 150)
     private String ocupacaoProfissao;
 
-    @Column(name = "situacao_rua", nullable = false)
+    @Column(name = "situacao_rua")
     private Boolean situacaoRua = false;
 
     @Column(name = "tempo_situacao_rua")

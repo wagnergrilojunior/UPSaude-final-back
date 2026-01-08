@@ -23,7 +23,7 @@ public class UsuarioEstabelecimentoResponse {
     private OffsetDateTime updatedAt;
     private Boolean active;
     private UsuariosSistemaResponse usuario;
-    private EstabelecimentosResponse estabelecimento;
+    private EstabelecimentoSimplificadoResponse estabelecimento;
 
     private UUID estabelecimentoId;
     private String estabelecimentoNome;

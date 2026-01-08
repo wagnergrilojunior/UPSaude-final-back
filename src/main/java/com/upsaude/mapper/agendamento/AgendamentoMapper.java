@@ -1,4 +1,5 @@
 package com.upsaude.mapper.agendamento;
+
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
@@ -23,7 +24,8 @@ import com.upsaude.mapper.paciente.PacienteMapper;
 import com.upsaude.mapper.profissional.MedicosMapper;
 import com.upsaude.mapper.profissional.ProfissionaisSaudeMapper;
 
-@Mapper(config = MappingConfig.class, uses = {AtendimentoMapper.class, ConvenioMapper.class, MedicosMapper.class, PacienteMapper.class, ProfissionaisSaudeMapper.class, ConsultaMapper.class})
+@Mapper(config = MappingConfig.class, uses = { AtendimentoMapper.class, ConvenioMapper.class, MedicosMapper.class,
+        PacienteMapper.class, ProfissionaisSaudeMapper.class, ConsultaMapper.class })
 public interface AgendamentoMapper {
 
     @Mapping(target = "id", ignore = true)
@@ -39,6 +41,7 @@ public interface AgendamentoMapper {
     @Mapping(target = "reagendamentos", ignore = true)
     @Mapping(target = "notificacoes", ignore = true)
     @Mapping(target = "checkIns", ignore = true)
+    @Mapping(target = "especialidade", ignore = true)
     Agendamento fromRequest(AgendamentoRequest request);
 
     @Mapping(target = "id", ignore = true)
@@ -54,6 +57,7 @@ public interface AgendamentoMapper {
     @Mapping(target = "reagendamentos", ignore = true)
     @Mapping(target = "notificacoes", ignore = true)
     @Mapping(target = "checkIns", ignore = true)
+    @Mapping(target = "especialidade", ignore = true)
     void updateFromRequest(AgendamentoRequest request, @MappingTarget Agendamento entity);
 
     @Mapping(target = "agendamentoOriginal", ignore = true)
@@ -65,14 +69,29 @@ public interface AgendamentoMapper {
     @Mapping(target = "medico", source = "medico", qualifiedByName = "mapMedicoSimplificadoAgendamento")
     @Mapping(target = "convenio", source = "convenio", qualifiedByName = "mapConvenioSimplificado")
     @Mapping(target = "atendimento", source = "atendimento", qualifiedByName = "mapAtendimentoAgendamento")
+    @Mapping(target = "especialidade", source = "especialidade", qualifiedByName = "mapEspecialidadeAgendamento")
     AgendamentoResponse toResponse(Agendamento entity);
+
+    @Named("mapEspecialidadeAgendamento")
+    default com.upsaude.api.response.referencia.sigtap.SigtapCboResponse mapEspecialidadeAgendamento(
+            com.upsaude.entity.referencia.sigtap.SigtapOcupacao especialidade) {
+        if (especialidade == null) {
+            return null;
+        }
+        com.upsaude.api.response.referencia.sigtap.SigtapCboResponse response = new com.upsaude.api.response.referencia.sigtap.SigtapCboResponse();
+        response.setId(especialidade.getId());
+        response.setCodigoOficial(especialidade.getCodigoOficial());
+        response.setNome(especialidade.getNome());
+        return response;
+    }
 
     @Named("mapPacienteSimplificadoAgendamento")
     default PacienteAtendimentoResponse mapPacienteSimplificadoAgendamento(Paciente paciente) {
         if (paciente == null) {
             return null;
         }
-        com.upsaude.mapper.clinica.atendimento.AtendimentoMapper mapper = org.mapstruct.factory.Mappers.getMapper(com.upsaude.mapper.clinica.atendimento.AtendimentoMapper.class);
+        com.upsaude.mapper.clinica.atendimento.AtendimentoMapper mapper = org.mapstruct.factory.Mappers
+                .getMapper(com.upsaude.mapper.clinica.atendimento.AtendimentoMapper.class);
         return mapper.mapPacienteSimplificado(paciente);
     }
 
@@ -81,7 +100,8 @@ public interface AgendamentoMapper {
         if (profissional == null) {
             return null;
         }
-        com.upsaude.mapper.clinica.atendimento.AtendimentoMapper mapper = org.mapstruct.factory.Mappers.getMapper(com.upsaude.mapper.clinica.atendimento.AtendimentoMapper.class);
+        com.upsaude.mapper.clinica.atendimento.AtendimentoMapper mapper = org.mapstruct.factory.Mappers
+                .getMapper(com.upsaude.mapper.clinica.atendimento.AtendimentoMapper.class);
         return mapper.mapProfissionalSimplificado(profissional);
     }
 
@@ -90,7 +110,8 @@ public interface AgendamentoMapper {
         if (medico == null) {
             return null;
         }
-        com.upsaude.mapper.clinica.atendimento.ConsultaMapper mapper = org.mapstruct.factory.Mappers.getMapper(com.upsaude.mapper.clinica.atendimento.ConsultaMapper.class);
+        com.upsaude.mapper.clinica.atendimento.ConsultaMapper mapper = org.mapstruct.factory.Mappers
+                .getMapper(com.upsaude.mapper.clinica.atendimento.ConsultaMapper.class);
         return mapper.mapMedicoSimplificado(medico);
     }
 
@@ -100,17 +121,19 @@ public interface AgendamentoMapper {
             return null;
         }
         return ConvenioAgendamentoResponse.builder()
-            .id(convenio.getId())
-            .nome(convenio.getNome())
-            .build();
+                .id(convenio.getId())
+                .nome(convenio.getNome())
+                .build();
     }
 
     @org.mapstruct.Named("mapAtendimentoAgendamento")
-    default com.upsaude.api.response.clinica.atendimento.AtendimentoResponse mapAtendimentoAgendamento(com.upsaude.entity.clinica.atendimento.Atendimento atendimento) {
+    default com.upsaude.api.response.clinica.atendimento.AtendimentoResponse mapAtendimentoAgendamento(
+            com.upsaude.entity.clinica.atendimento.Atendimento atendimento) {
         if (atendimento == null) {
             return null;
         }
-        com.upsaude.mapper.clinica.atendimento.AtendimentoMapper mapper = org.mapstruct.factory.Mappers.getMapper(com.upsaude.mapper.clinica.atendimento.AtendimentoMapper.class);
+        com.upsaude.mapper.clinica.atendimento.AtendimentoMapper mapper = org.mapstruct.factory.Mappers
+                .getMapper(com.upsaude.mapper.clinica.atendimento.AtendimentoMapper.class);
         return mapper.toResponse(atendimento);
     }
 }

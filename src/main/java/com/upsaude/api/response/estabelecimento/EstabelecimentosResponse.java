@@ -7,6 +7,7 @@ import com.upsaude.api.response.embeddable.LicenciamentoEstabelecimentoResponse;
 import com.upsaude.api.response.embeddable.LocalizacaoEstabelecimentoResponse;
 import com.upsaude.api.response.embeddable.ResponsaveisEstabelecimentoResponse;
 import com.upsaude.api.response.geral.EnderecoResponse;
+import com.upsaude.api.response.sistema.multitenancy.TenantResponse;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -28,6 +29,8 @@ public class EstabelecimentosResponse {
     private OffsetDateTime createdAt;
     private OffsetDateTime updatedAt;
     private Boolean active;
+
+    private TenantResponse tenant;
 
     private DadosIdentificacaoEstabelecimentoResponse dadosIdentificacao;
 

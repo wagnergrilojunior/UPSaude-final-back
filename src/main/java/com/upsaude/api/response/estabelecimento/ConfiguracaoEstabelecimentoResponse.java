@@ -1,4 +1,5 @@
 package com.upsaude.api.response.estabelecimento;
+
 import com.upsaude.api.response.estabelecimento.EstabelecimentosResponse;
 
 import java.time.LocalTime;
@@ -15,7 +16,7 @@ public class ConfiguracaoEstabelecimentoResponse {
     private OffsetDateTime createdAt;
     private OffsetDateTime updatedAt;
     private Boolean active;
-    private EstabelecimentosResponse estabelecimento;
+    private EstabelecimentoSimplificadoResponse estabelecimento;
     private Integer duracaoPadraoAtendimentoMinutos;
     private Integer intervaloMinimoEntreAtendimentosMinutos;
     private Boolean permiteAgendamentoOnline;

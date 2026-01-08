@@ -11,18 +11,22 @@ import com.upsaude.mapper.embeddable.LicenciamentoEstabelecimentoMapper;
 import com.upsaude.mapper.embeddable.LocalizacaoEstabelecimentoMapper;
 import com.upsaude.mapper.embeddable.ResponsaveisEstabelecimentoMapper;
 import com.upsaude.mapper.geral.EnderecoMapper;
+import com.upsaude.mapper.sistema.multitenancy.TenantMapper;
+import com.upsaude.api.response.estabelecimento.EstabelecimentoSimplificadoResponse;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 
 @Mapper(config = MappingConfig.class, uses = {
-    DadosIdentificacaoEstabelecimentoMapper.class,
-    ContatoEstabelecimentoMapper.class,
-    ResponsaveisEstabelecimentoMapper.class,
-    LicenciamentoEstabelecimentoMapper.class,
-    InfraestruturaFisicaEstabelecimentoMapper.class,
-    LocalizacaoEstabelecimentoMapper.class,
-    EnderecoMapper.class
+        DadosIdentificacaoEstabelecimentoMapper.class,
+        ContatoEstabelecimentoMapper.class,
+        ResponsaveisEstabelecimentoMapper.class,
+        LicenciamentoEstabelecimentoMapper.class,
+        InfraestruturaFisicaEstabelecimentoMapper.class,
+        InfraestruturaFisicaEstabelecimentoMapper.class,
+        LocalizacaoEstabelecimentoMapper.class,
+        EnderecoMapper.class,
+        TenantMapper.class
 })
 public interface EstabelecimentosMapper {
 
@@ -50,5 +54,9 @@ public interface EstabelecimentosMapper {
     void updateFromRequest(EstabelecimentosRequest request, @MappingTarget Estabelecimentos entity);
 
     @Mapping(target = "equipamentos", ignore = true)
+    @Mapping(target = "enderecoPrincipal", source = "endereco")
     EstabelecimentosResponse toResponse(Estabelecimentos entity);
+
+    @Mapping(target = "enderecoPrincipal", source = "endereco")
+    EstabelecimentoSimplificadoResponse toSimplifiedResponse(Estabelecimentos entity);
 }
