@@ -32,7 +32,7 @@ public class ProfissionaisSaudeResponse {
     private DadosDemograficosProfissionalResponse dadosDemograficos;
     private DadosDeficienciaProfissionalResponse dadosDeficiencia;
     private RegistroProfissionalResponse registroProfissional;
-    private UUID sigtapOcupacao;
+    private SigtapOcupacaoSimplificadaResponse sigtapOcupacao;
     private ContatoProfissionalResponse contato;
     private EnderecoResponse enderecoProfissional;
     private String observacoes;
