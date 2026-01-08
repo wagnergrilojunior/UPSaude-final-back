@@ -46,6 +46,7 @@ public interface UsuariosSistemaMapper {
     @Mapping(target = "medico", ignore = true)
     @Mapping(target = "paciente", ignore = true)
     @Mapping(target = "profissionalSaude", ignore = true)
+    @Mapping(target = "usuario", ignore = true)
     @Mapping(target = "tenantId", ignore = true)
     @Mapping(target = "tenantNome", ignore = true)
     @Mapping(target = "tenantSlug", ignore = true)
