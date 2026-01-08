@@ -17,6 +17,8 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.criteria.Predicate;
 import java.util.ArrayList;
 import java.util.List;
@@ -55,6 +57,9 @@ public class ProfissionaisSaudeServiceImpl implements ProfissionaisSaudeService 
     private final ProfissionaisSaudeTenantEnforcer tenantEnforcer;
     private final ProfissionaisSaudeResponseBuilder responseBuilder;
     private final ProfissionaisSaudeDomainService domainService;
+    
+    @PersistenceContext
+    private EntityManager entityManager;
 
     @Override
     @Transactional
@@ -192,6 +197,10 @@ public class ProfissionaisSaudeServiceImpl implements ProfissionaisSaudeService 
             UUID tenantId = tenantService.validarTenantAtual();
             ProfissionaisSaude profissional = tenantEnforcer.validarAcesso(id, tenantId);
             domainService.validarPodeDeletar(profissional);
+            
+            // Deletar especialidades relacionadas primeiro para evitar violação de chave estrangeira
+            deletarEspecialidadesProfissional(id);
+            
             profissionaisSaudeRepository.delete(Objects.requireNonNull(profissional));
         } catch (BadRequestException | NotFoundException e) {
             log.warn("Erro de validação ao excluir ProfissionalSaude. Erro: {}", e.getMessage());
@@ -199,6 +208,58 @@ public class ProfissionaisSaudeServiceImpl implements ProfissionaisSaudeService 
         } catch (DataAccessException e) {
             log.error("Erro de acesso a dados ao excluir ProfissionalSaude. Exception: {}", e.getClass().getSimpleName(), e);
             throw new InternalServerErrorException("Erro ao excluir ProfissionalSaude", e);
+        }
+    }
+    
+    private void deletarEspecialidadesProfissional(UUID profissionalId) {
+        try {
+            // Descobrir o nome da coluna FK consultando o schema do PostgreSQL
+            String columnQuery = 
+                "SELECT kcu.column_name " +
+                "FROM information_schema.table_constraints tc " +
+                "JOIN information_schema.key_column_usage kcu " +
+                "  ON tc.constraint_name = kcu.constraint_name " +
+                "WHERE tc.constraint_name = 'fkjxnkylak2d5lybq4re63y1ecw' " +
+                "  AND tc.table_name = 'profissionais_saude_especialidades'";
+            
+            Object result = entityManager.createNativeQuery(columnQuery).getSingleResult();
+            String columnName = result != null ? result.toString() : "id";
+            
+            String sql = String.format("DELETE FROM public.profissionais_saude_especialidades WHERE %s = :profissionalId", columnName);
+            int deleted = entityManager.createNativeQuery(sql)
+                    .setParameter("profissionalId", profissionalId)
+                    .executeUpdate();
+            
+            if (deleted > 0) {
+                log.debug("Deletadas {} especialidades do profissional de saúde ID: {}", deleted, profissionalId);
+            } else {
+                log.debug("Nenhuma especialidade encontrada para deletar do profissional de saúde ID: {}", profissionalId);
+            }
+        } catch (Exception e) {
+            // Se não conseguir descobrir automaticamente, tentar nomes comuns
+            log.trace("Não foi possível descobrir o nome da coluna automaticamente. Tentando nomes padrão. Erro: {}", e.getMessage());
+            String[] columnNames = {"profissional_id", "id", "profissionais_saude_id"};
+            boolean deleted = false;
+            
+            for (String columnName : columnNames) {
+                try {
+                    String sql = String.format("DELETE FROM public.profissionais_saude_especialidades WHERE %s = :profissionalId", columnName);
+                    int count = entityManager.createNativeQuery(sql)
+                            .setParameter("profissionalId", profissionalId)
+                            .executeUpdate();
+                    if (count > 0) {
+                        log.debug("Deletadas {} especialidades do profissional de saúde ID: {} (usando coluna: {})", count, profissionalId, columnName);
+                        deleted = true;
+                        break;
+                    }
+                } catch (Exception e2) {
+                    // Continuar tentando outros nomes
+                }
+            }
+            
+            if (!deleted) {
+                log.warn("Não foi possível deletar especialidades do profissional de saúde ID: {}. Continuando exclusão...", profissionalId);
+            }
         }
     }
 
