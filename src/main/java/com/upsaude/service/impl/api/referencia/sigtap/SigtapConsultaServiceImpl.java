@@ -1007,6 +1007,35 @@ public class SigtapConsultaServiceImpl implements SigtapConsultaService {
         return page.map(cboMapper::toResponse);
     }
 
+    @Override
+    public List<SigtapCboResponse> listarCbo(String q, String grupo) {
+        Specification<SigtapOcupacao> spec = Specification.where(null);
+
+        if (grupo != null && !grupo.isBlank()) {
+            GrupoCboEnum grupoEnum = GrupoCboEnum.fromCodigo(grupo).orElse(null);
+            if (grupoEnum != null) {
+                spec = spec.and((root, query, cb) -> {
+                    List<Predicate> predicates = new ArrayList<>();
+                    for (String prefixo : grupoEnum.getPrefixos()) {
+                        predicates.add(cb.like(root.get("codigoOficial"), prefixo + "%"));
+                    }
+                    return cb.or(predicates.toArray(new Predicate[0]));
+                });
+            }
+        }
+
+        if (q != null && !q.isBlank()) {
+            String like = "%" + q.trim().toLowerCase(Locale.ROOT) + "%";
+            spec = spec.and((root, query, cb) -> cb.or(
+                    cb.like(cb.lower(root.get("codigoOficial")), like),
+                    cb.like(cb.lower(root.get("nome")), like)
+            ));
+        }
+
+        List<SigtapOcupacao> cbos = cboRepository.findAll(spec);
+        return cbos.stream().map(cboMapper::toResponse).toList();
+    }
+
     @SuppressWarnings("null")
     private Pageable validarEMapearPageable(Pageable pageable) {
         if (pageable == null || pageable.getSort().isUnsorted()) {

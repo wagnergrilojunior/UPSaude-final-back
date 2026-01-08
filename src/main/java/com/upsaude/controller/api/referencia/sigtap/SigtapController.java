@@ -838,6 +838,51 @@ public class SigtapController {
         }
     }
 
+    @GetMapping("/cbo/todos")
+    @Operation(
+            summary = "Listar todos os CBOs sem paginação",
+            description = "Retorna uma lista completa de todos os CBOs SIGTAP sem paginação. " +
+                    "Permite filtrar por termo de busca (código ou nome) e por grupo CBO. " +
+                    "\n\n" +
+                    "**Nota:** Este endpoint retorna todos os resultados de uma vez, sem paginação. " +
+                    "Use com cuidado para grupos grandes, pois pode retornar uma grande quantidade de dados. " +
+                    "Para listagens paginadas, use o endpoint GET /v1/sigtap/cbo."
+    )
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Lista de CBOs retornada com sucesso.",
+                    content = @Content(schema = @Schema(implementation = SigtapCboResponse.class))
+            ),
+            @ApiResponse(responseCode = "400", description = "Parâmetros inválidos."),
+            @ApiResponse(responseCode = "403", description = "Acesso negado. Token de autenticação inválido ou ausente."),
+            @ApiResponse(responseCode = "500", description = "Erro interno do servidor.")
+    })
+    public ResponseEntity<List<SigtapCboResponse>> listarCbo(
+            @Parameter(
+                    description = "Termo de busca livre (código CBO ou nome da ocupação). " +
+                            "Busca parcial e case-insensitive. Exemplo: '225110' (código CBO) ou 'médico' (nome). " +
+                            "Se não informado, retorna todos os CBOs (ou todos do grupo especificado).",
+                    example = "médico"
+            )
+            @RequestParam(name = "q", required = false) String q,
+            @Parameter(
+                    description = "Código do grupo CBO para filtrar. Exemplos: 'MEDICOS', 'ENFERMAGEM', 'ODONTOLOGIA'. " +
+                            "Use o endpoint /cbo/grupos para listar todos os grupos disponíveis. " +
+                            "Se não informado, retorna CBOs de todos os grupos.",
+                    example = "MEDICOS"
+            )
+            @RequestParam(name = "grupo", required = false) String grupo) {
+        log.debug("REQUEST GET /v1/sigtap/cbo/todos - q: {}, grupo: {}", q, grupo);
+        try {
+            List<SigtapCboResponse> response = sigtapConsultaService.listarCbo(q, grupo);
+            return ResponseEntity.ok(response);
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao listar todos os CBOs SIGTAP - q: {}, grupo: {}", q, grupo, ex);
+            throw ex;
+        }
+    }
+
     @GetMapping("/cbo/{codigo}")
     @Operation(
             summary = "Obter CBO por código",

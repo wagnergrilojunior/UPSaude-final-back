@@ -47,6 +47,7 @@ public interface SigtapConsultaService {
 
     Page<SigtapCboResponse> pesquisarCbo(String q, String grupo, Pageable pageable);
     SigtapCboResponse obterCboPorCodigo(String codigoOficial);
+    List<SigtapCboResponse> listarCbo(String q, String grupo);
 
     List<SigtapGrupoCboResponse> listarGruposCbo();
     SigtapGrupoCboResponse obterGrupoCboPorCodigo(String codigoGrupo);
