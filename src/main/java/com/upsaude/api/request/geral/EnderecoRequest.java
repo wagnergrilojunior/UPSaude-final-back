@@ -87,6 +87,8 @@ public class EnderecoRequest {
     @NotNull(message = "Sem número é obrigatório")
     @Builder.Default
     private Boolean semNumero = false;
+
     private UUID estado;
+    
     private UUID cidade;
 }

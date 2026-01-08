@@ -10,6 +10,7 @@ import com.upsaude.api.request.embeddable.DadosDemograficosProfissionalRequest;
 import com.upsaude.api.request.embeddable.DadosPessoaisBasicosProfissionalRequest;
 import com.upsaude.api.request.embeddable.DocumentosBasicosProfissionalRequest;
 import com.upsaude.api.request.embeddable.RegistroProfissionalRequest;
+import com.upsaude.api.request.geral.EnderecoRequest;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.Valid;
@@ -49,7 +50,8 @@ public class ProfissionaisSaudeRequest {
     @Valid
     private ContatoProfissionalRequest contato;
 
-    private UUID enderecoProfissional;
+    @Valid
+    private EnderecoRequest enderecoProfissional;
 
     private String observacoes;
 }
