@@ -32,6 +32,7 @@ public class AgendamentoResponse {
     private PacienteAtendimentoResponse paciente;
     private ProfissionalAtendimentoResponse profissional;
     private MedicoConsultaResponse medico;
+    private com.upsaude.api.response.referencia.sigtap.SigtapCboResponse especialidade;
     private ConvenioAgendamentoResponse convenio;
     private AtendimentoResponse atendimento;
     private AgendamentoResponse agendamentoOriginal;

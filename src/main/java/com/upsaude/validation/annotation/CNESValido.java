@@ -15,7 +15,7 @@ import java.lang.annotation.Target;
 @Target({ElementType.FIELD, ElementType.PARAMETER, ElementType.TYPE_USE})
 @Retention(RetentionPolicy.RUNTIME)
 public @interface CNESValido {
-    String message() default "CNES inválido";
+    String message() default "{validation.cnes.invalido}";
     Class<?>[] groups() default {};
     Class<? extends Payload>[] payload() default {};
 }

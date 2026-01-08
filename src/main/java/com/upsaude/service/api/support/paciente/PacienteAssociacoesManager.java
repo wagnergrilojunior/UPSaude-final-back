@@ -68,7 +68,7 @@ public class PacienteAssociacoesManager {
 
         processarDocumentosBasicos(paciente, request, tenant);
         processarContatoBasico(paciente, request, tenant);
-        processarDadosDemograficosBasicos(paciente, request);
+        processarDadosDemograficosBasicos(paciente, request, tenant);
         processarResponsavelLegalBasico(paciente, request, tenant);
         processarIntegracaoGovBasica(paciente, request, tenant);
         processarEnderecoPrincipal(paciente, request, tenant);
@@ -184,26 +184,34 @@ public class PacienteAssociacoesManager {
             paciente.setDadosPessoaisComplementares(entity);
         }
 
-        // Processar óbito apenas se o objeto obito for fornecido com dados válidos (obito = true)
-        // Quando obito não é fornecido (null) ou está vazio, significa obito = false e deve remover o óbito existente
+        // Processar óbito apenas se o objeto obito for fornecido com dados válidos
+        // (obito = true)
+        // Quando obito não é fornecido (null) ou está vazio, significa obito = false e
+        // deve remover o óbito existente
         if (request.getObito() != null) {
             // Verificar se o objeto obito tem pelo menos a data do óbito preenchida
-            // Se todos os campos estiverem vazios/null, trata como se não tivesse sido enviado
+            // Se todos os campos estiverem vazios/null, trata como se não tivesse sido
+            // enviado
             boolean obitoVazio = request.getObito().getDataObito() == null
-                    && (request.getObito().getCausaObitoCid10() == null || request.getObito().getCausaObitoCid10().trim().isEmpty())
+                    && (request.getObito().getCausaObitoCid10() == null
+                            || request.getObito().getCausaObitoCid10().trim().isEmpty())
                     && request.getObito().getOrigem() == null
-                    && (request.getObito().getObservacoes() == null || request.getObito().getObservacoes().trim().isEmpty());
+                    && (request.getObito().getObservacoes() == null
+                            || request.getObito().getObservacoes().trim().isEmpty());
 
             if (obitoVazio) {
-                // Se obito foi enviado vazio, remove o óbito existente se houver (obito = false)
+                // Se obito foi enviado vazio, remove o óbito existente se houver (obito =
+                // false)
                 if (paciente.getObito() != null) {
                     paciente.setObito(null);
                 }
             } else {
                 // Se obito foi fornecido com dados (obito = true), valida e processa
-                // Validar que a data do óbito é obrigatória quando informações de óbito são fornecidas
+                // Validar que a data do óbito é obrigatória quando informações de óbito são
+                // fornecidas
                 if (request.getObito().getDataObito() == null) {
-                    throw new com.upsaude.exception.BadRequestException("Data de óbito é obrigatória quando informações de óbito são fornecidas");
+                    throw new com.upsaude.exception.BadRequestException(
+                            "Data de óbito é obrigatória quando informações de óbito são fornecidas");
                 }
                 var entity = pacienteObitoMapper.fromRequest(request.getObito());
                 entity.setPaciente(paciente);
@@ -211,7 +219,8 @@ public class PacienteAssociacoesManager {
                 paciente.setObito(entity);
             }
         } else {
-            // Se obito não foi fornecido (obito = false), remove o óbito existente se houver
+            // Se obito não foi fornecido (obito = false), remove o óbito existente se
+            // houver
             if (paciente.getObito() != null) {
                 paciente.setObito(null);
             }
@@ -370,7 +379,7 @@ public class PacienteAssociacoesManager {
         }
     }
 
-    private void processarDadosDemograficosBasicos(Paciente paciente, PacienteRequest request) {
+    private void processarDadosDemograficosBasicos(Paciente paciente, PacienteRequest request, Tenant tenant) {
         if (request.getDadosDemograficos() == null) {
             return;
         }
@@ -380,6 +389,8 @@ public class PacienteAssociacoesManager {
         if (paciente.getDadosSociodemograficos() == null) {
             var entity = new com.upsaude.entity.paciente.DadosSociodemograficos();
             entity.setPaciente(paciente);
+            entity.setTenant(tenant);
+            entity.setSituacaoRua(false);
             paciente.setDadosSociodemograficos(entity);
         }
 
@@ -396,6 +407,7 @@ public class PacienteAssociacoesManager {
         if (paciente.getDadosPessoaisComplementares() == null) {
             var entity = new com.upsaude.entity.paciente.PacienteDadosPessoaisComplementares();
             entity.setPaciente(paciente);
+            entity.setTenant(tenant);
             paciente.setDadosPessoaisComplementares(entity);
         }
 
@@ -411,7 +423,8 @@ public class PacienteAssociacoesManager {
 
         var responsavel = request.getResponsavelLegal();
 
-        // Se todos os campos do responsável estão vazios/null, trata como se não tivesse sido enviado
+        // Se todos os campos do responsável estão vazios/null, trata como se não
+        // tivesse sido enviado
         boolean todosCamposVazios = (responsavel.getNome() == null || responsavel.getNome().trim().isEmpty())
                 && (responsavel.getCpf() == null || responsavel.getCpf().trim().isEmpty())
                 && (responsavel.getTelefone() == null || responsavel.getTelefone().trim().isEmpty());

@@ -10,8 +10,8 @@ import com.upsaude.entity.estabelecimento.EquipamentosEstabelecimento;
 import com.upsaude.mapper.config.MappingConfig;
 import com.upsaude.mapper.estabelecimento.equipamento.EquipamentosMapper;
 
-@Mapper(config = MappingConfig.class, uses = {EquipamentosMapper.class})
-public interface EquipamentosEstabelecimentoMapper  {
+@Mapper(config = MappingConfig.class, uses = { EquipamentosMapper.class, EstabelecimentosMapper.class })
+public interface EquipamentosEstabelecimentoMapper {
 
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
@@ -27,8 +27,8 @@ public interface EquipamentosEstabelecimentoMapper  {
     @Mapping(target = "active", ignore = true)
     @Mapping(target = "equipamento", ignore = true)
     @Mapping(target = "estabelecimento", ignore = true)
-    void updateFromRequest(EquipamentosEstabelecimentoRequest request, @MappingTarget EquipamentosEstabelecimento entity);
+    void updateFromRequest(EquipamentosEstabelecimentoRequest request,
+            @MappingTarget EquipamentosEstabelecimento entity);
 
-    @Mapping(target = "estabelecimento", ignore = true)
     EquipamentosEstabelecimentoResponse toResponse(EquipamentosEstabelecimento entity);
 }

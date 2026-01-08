@@ -12,9 +12,11 @@ import com.upsaude.entity.convenio.Convenio;
 import com.upsaude.entity.paciente.Paciente;
 import com.upsaude.entity.profissional.Medicos;
 import com.upsaude.entity.profissional.ProfissionaisSaude;
+import com.upsaude.entity.referencia.sigtap.SigtapOcupacao;
 import com.upsaude.entity.sistema.multitenancy.Tenant;
 import com.upsaude.exception.NotFoundException;
 import com.upsaude.repository.agendamento.AgendamentoRepository;
+import com.upsaude.repository.referencia.sigtap.SigtapCboRepository;
 import com.upsaude.repository.clinica.atendimento.AtendimentoRepository;
 import com.upsaude.repository.convenio.ConvenioRepository;
 import com.upsaude.service.api.support.medico.MedicoTenantEnforcer;
@@ -33,9 +35,11 @@ public class AgendamentoRelacionamentosHandler {
     private final ConvenioRepository convenioRepository;
     private final AtendimentoRepository atendimentoRepository;
     private final AgendamentoRepository agendamentoRepository;
+    private final SigtapCboRepository sigtapCboRepository;
 
     public void resolver(Agendamento entity, AgendamentoRequest request, UUID tenantId, Tenant tenant) {
-        if (request == null) return;
+        if (request == null)
+            return;
 
         entity.setTenant(Objects.requireNonNull(tenant, "tenant é obrigatório"));
 
@@ -45,7 +49,8 @@ public class AgendamentoRelacionamentosHandler {
         }
 
         if (request.getProfissional() != null) {
-            ProfissionaisSaude profissional = profissionaisSaudeTenantEnforcer.validarAcesso(request.getProfissional(), tenantId);
+            ProfissionaisSaude profissional = profissionaisSaudeTenantEnforcer.validarAcesso(request.getProfissional(),
+                    tenantId);
             entity.setProfissional(profissional);
             if (profissional.getEstabelecimento() != null) {
                 entity.setEstabelecimento(profissional.getEstabelecimento());
@@ -57,23 +62,33 @@ public class AgendamentoRelacionamentosHandler {
             entity.setMedico(medico);
         }
 
+        if (request.getEspecialidade() != null) {
+            SigtapOcupacao especialidade = sigtapCboRepository.findById(request.getEspecialidade())
+                    .orElseThrow(() -> new NotFoundException(
+                            "Especialidade não encontrada com ID: " + request.getEspecialidade()));
+            entity.setEspecialidade(especialidade);
+        }
+
         if (request.getConvenio() != null) {
             Convenio convenio = convenioRepository.findByIdAndTenant(request.getConvenio(), tenantId)
-                    .orElseThrow(() -> new NotFoundException("Convênio não encontrado com ID: " + request.getConvenio()));
+                    .orElseThrow(
+                            () -> new NotFoundException("Convênio não encontrado com ID: " + request.getConvenio()));
             entity.setConvenio(convenio);
         }
 
         if (request.getAtendimento() != null) {
             Atendimento atendimento = atendimentoRepository.findByIdAndTenant(request.getAtendimento(), tenantId)
-                    .orElseThrow(() -> new NotFoundException("Atendimento não encontrado com ID: " + request.getAtendimento()));
+                    .orElseThrow(() -> new NotFoundException(
+                            "Atendimento não encontrado com ID: " + request.getAtendimento()));
             entity.setAtendimento(atendimento);
         }
 
         if (request.getAgendamentoOriginal() != null) {
-            Agendamento agendamentoOriginal = agendamentoRepository.findByIdAndTenant(request.getAgendamentoOriginal(), tenantId)
-                    .orElseThrow(() -> new NotFoundException("Agendamento original não encontrado com ID: " + request.getAgendamentoOriginal()));
+            Agendamento agendamentoOriginal = agendamentoRepository
+                    .findByIdAndTenant(request.getAgendamentoOriginal(), tenantId)
+                    .orElseThrow(() -> new NotFoundException(
+                            "Agendamento original não encontrado com ID: " + request.getAgendamentoOriginal()));
             entity.setAgendamentoOriginal(agendamentoOriginal);
         }
     }
 }
-

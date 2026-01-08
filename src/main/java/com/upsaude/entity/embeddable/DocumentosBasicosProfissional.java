@@ -1,7 +1,9 @@
 package com.upsaude.entity.embeddable;
 
+import com.upsaude.validation.annotation.CPFValido;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -16,7 +18,9 @@ import java.time.LocalDate;
 @AllArgsConstructor
 public class DocumentosBasicosProfissional {
 
-    @Column(name = "cpf", length = 11, unique = true)
+    @NotNull(message = "{validation.cpf.obrigatorio}")
+    @CPFValido
+    @Column(name = "cpf", length = 11, unique = true, nullable = false)
     private String cpf;
 
     @Column(name = "rg", length = 20)

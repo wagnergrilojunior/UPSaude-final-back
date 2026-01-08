@@ -1,4 +1,5 @@
 package com.upsaude.entity.agendamento;
+
 import com.upsaude.entity.sistema.notificacao.Notificacao;
 import com.upsaude.entity.profissional.Medicos;
 import com.upsaude.entity.clinica.atendimento.CheckInAtendimento;
@@ -10,6 +11,7 @@ import com.upsaude.entity.convenio.Convenio;
 import com.upsaude.entity.clinica.atendimento.Atendimento;
 
 import com.upsaude.entity.paciente.Paciente;
+import com.upsaude.entity.referencia.sigtap.SigtapOcupacao;
 
 import com.upsaude.enums.PrioridadeAtendimentoEnum;
 import com.upsaude.enums.StatusAgendamentoEnum;
@@ -34,17 +36,16 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-@Table(name = "agendamentos", schema = "public",
-       indexes = {
-           @Index(name = "idx_agendamento_paciente", columnList = "paciente_id"),
-           @Index(name = "idx_agendamento_profissional", columnList = "profissional_id"),
-           @Index(name = "idx_agendamento_data_hora", columnList = "data_hora"),
-           @Index(name = "idx_agendamento_status", columnList = "status"),
-           @Index(name = "idx_agendamento_estabelecimento", columnList = "estabelecimento_id"),
-           @Index(name = "idx_agendamento_prioridade", columnList = "prioridade"),
-           @Index(name = "idx_agendamento_periodo", columnList = "data_hora,data_hora_fim"),
-           @Index(name = "idx_agendamento_agendado_por", columnList = "agendado_por")
-       })
+@Table(name = "agendamentos", schema = "public", indexes = {
+        @Index(name = "idx_agendamento_paciente", columnList = "paciente_id"),
+        @Index(name = "idx_agendamento_profissional", columnList = "profissional_id"),
+        @Index(name = "idx_agendamento_data_hora", columnList = "data_hora"),
+        @Index(name = "idx_agendamento_status", columnList = "status"),
+        @Index(name = "idx_agendamento_estabelecimento", columnList = "estabelecimento_id"),
+        @Index(name = "idx_agendamento_prioridade", columnList = "prioridade"),
+        @Index(name = "idx_agendamento_periodo", columnList = "data_hora,data_hora_fim"),
+        @Index(name = "idx_agendamento_agendado_por", columnList = "agendado_por")
+})
 @Data
 @EqualsAndHashCode(callSuper = true)
 public class Agendamento extends BaseEntity {
@@ -74,6 +75,10 @@ public class Agendamento extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "atendimento_id")
     private Atendimento atendimento;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "especialidade_id")
+    private SigtapOcupacao especialidade;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "agendamento_original_id")

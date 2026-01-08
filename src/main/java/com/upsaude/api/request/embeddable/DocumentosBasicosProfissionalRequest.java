@@ -3,6 +3,7 @@ package com.upsaude.api.request.embeddable;
 import com.upsaude.validation.annotation.CNSValido;
 import com.upsaude.validation.annotation.CPFValido;
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -20,6 +21,7 @@ import java.time.LocalDate;
 @Schema(description = "Documentos básicos do profissional")
 public class DocumentosBasicosProfissionalRequest {
 
+    @NotNull(message = "{validation.cpf.obrigatorio}")
     @CPFValido
     private String cpf;
 

@@ -30,10 +30,10 @@ public class CnesValidator {
      */
     public static void validarCnes(String cnes) {
         if (cnes == null || cnes.isBlank()) {
-            throw new BadRequestException("CNES não pode ser vazio");
+            throw new BadRequestException(ValidationMessages.get("validation.cnes.vazio"));
         }
         if (!CNES_PATTERN.matcher(cnes.trim()).matches()) {
-            throw new BadRequestException("CNES deve conter exatamente 7 dígitos numéricos. Valor recebido: " + cnes);
+            throw new BadRequestException(ValidationMessages.get("validation.cnes.formato", cnes));
         }
     }
 
@@ -45,10 +45,10 @@ public class CnesValidator {
      */
     public static void validarCns(String cns) {
         if (cns == null || cns.isBlank()) {
-            throw new BadRequestException("CNS não pode ser vazio");
+            throw new BadRequestException(ValidationMessages.get("validation.cns.vazio"));
         }
         if (!CNS_PATTERN.matcher(cns.trim()).matches()) {
-            throw new BadRequestException("CNS deve conter exatamente 15 dígitos numéricos. Valor recebido: " + cns);
+            throw new BadRequestException(ValidationMessages.get("validation.cns.formato", cns));
         }
     }
 
@@ -60,10 +60,10 @@ public class CnesValidator {
      */
     public static void validarIne(String ine) {
         if (ine == null || ine.isBlank()) {
-            throw new BadRequestException("INE não pode ser vazio");
+            throw new BadRequestException(ValidationMessages.get("validation.ine.vazio"));
         }
         if (!INE_PATTERN.matcher(ine.trim()).matches()) {
-            throw new BadRequestException("INE deve conter exatamente 15 caracteres alfanuméricos. Valor recebido: " + ine);
+            throw new BadRequestException(ValidationMessages.get("validation.ine.formato", ine));
         }
     }
 
@@ -75,10 +75,10 @@ public class CnesValidator {
      */
     public static void validarCompetencia(String competencia) {
         if (competencia == null || competencia.isBlank()) {
-            throw new BadRequestException("Competência não pode ser vazia");
+            throw new BadRequestException(ValidationMessages.get("validation.competencia.vazia"));
         }
         if (!COMPETENCIA_PATTERN.matcher(competencia.trim()).matches()) {
-            throw new BadRequestException("Competência deve estar no formato AAAAMM (ano + mês). Exemplo: 202501. Valor recebido: " + competencia);
+            throw new BadRequestException(ValidationMessages.get("validation.competencia.formato", competencia));
         }
     }
 
