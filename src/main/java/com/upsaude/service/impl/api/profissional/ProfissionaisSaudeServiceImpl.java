@@ -198,8 +198,7 @@ public class ProfissionaisSaudeServiceImpl implements ProfissionaisSaudeService 
             ProfissionaisSaude profissional = tenantEnforcer.validarAcesso(id, tenantId);
             domainService.validarPodeDeletar(profissional);
             
-            // Deletar especialidades relacionadas primeiro para evitar violação de chave estrangeira
-            deletarEspecialidadesProfissional(id);
+            deletarReferenciasRelacionadas(id);
             
             profissionaisSaudeRepository.delete(Objects.requireNonNull(profissional));
         } catch (BadRequestException | NotFoundException e) {
@@ -211,54 +210,131 @@ public class ProfissionaisSaudeServiceImpl implements ProfissionaisSaudeService 
         }
     }
     
-    private void deletarEspecialidadesProfissional(UUID profissionalId) {
+    private void deletarReferenciasRelacionadas(UUID profissionalId) {
         try {
-            // Descobrir o nome da coluna FK consultando o schema do PostgreSQL
-            String columnQuery = 
-                "SELECT kcu.column_name " +
+            String discoverQuery = 
+                "SELECT tc.table_name, kcu.column_name " +
                 "FROM information_schema.table_constraints tc " +
                 "JOIN information_schema.key_column_usage kcu " +
                 "  ON tc.constraint_name = kcu.constraint_name " +
-                "WHERE tc.constraint_name = 'fkjxnkylak2d5lybq4re63y1ecw' " +
-                "  AND tc.table_name = 'profissionais_saude_especialidades'";
+                "WHERE tc.constraint_type = 'FOREIGN KEY' " +
+                "  AND tc.table_schema = 'public' " +
+                "  AND kcu.table_schema = 'public' " +
+                "  AND EXISTS ( " +
+                "    SELECT 1 FROM information_schema.constraint_column_usage ccu " +
+                "    WHERE ccu.constraint_name = tc.constraint_name " +
+                "      AND ccu.table_name = 'profissionais_saude' " +
+                "      AND ccu.table_schema = 'public' " +
+                "  ) " +
+                "ORDER BY tc.table_name";
             
-            Object result = entityManager.createNativeQuery(columnQuery).getSingleResult();
-            String columnName = result != null ? result.toString() : "id";
+            @SuppressWarnings("unchecked")
+            List<Object[]> results = entityManager.createNativeQuery(discoverQuery).getResultList();
             
-            String sql = String.format("DELETE FROM public.profissionais_saude_especialidades WHERE %s = :profissionalId", columnName);
-            int deleted = entityManager.createNativeQuery(sql)
+            deletarConsultasRelacionadasAosAtendimentos(profissionalId);
+            
+            for (Object[] row : results) {
+                String tableName = (String) row[0];
+                String columnName = (String) row[1];
+                
+                if ("profissionais_saude".equals(tableName)) {
+                    continue;
+                }
+                
+                deletarTabelaComDependencias(tableName, columnName, profissionalId);
+            }
+            
+            log.debug("Concluída a exclusão de referências relacionadas ao profissional de saúde ID: {}", profissionalId);
+        } catch (Exception e) {
+            log.warn("Erro ao descobrir referências relacionadas ao profissional de saúde ID: {}. Tentando deletar tabelas conhecidas... Erro: {}", 
+                    profissionalId, e.getMessage());
+            
+            deletarTabelasConhecidas(profissionalId);
+        }
+    }
+    
+    private void deletarTabelaComDependencias(String tableName, String columnName, UUID profissionalId) {
+        try {
+            if ("atendimentos".equals(tableName)) {
+                deletarConsultasRelacionadasAosAtendimentos(profissionalId);
+            }
+            
+            String deleteSql = String.format("DELETE FROM public.%s WHERE %s = :profissionalId", tableName, columnName);
+            int deleted = entityManager.createNativeQuery(deleteSql)
                     .setParameter("profissionalId", profissionalId)
                     .executeUpdate();
             
             if (deleted > 0) {
-                log.debug("Deletadas {} especialidades do profissional de saúde ID: {}", deleted, profissionalId);
-            } else {
-                log.debug("Nenhuma especialidade encontrada para deletar do profissional de saúde ID: {}", profissionalId);
+                log.debug("Deletados {} registros da tabela '{}' referenciando profissional de saúde ID: {}", deleted, tableName, profissionalId);
             }
         } catch (Exception e) {
-            // Se não conseguir descobrir automaticamente, tentar nomes comuns
-            log.trace("Não foi possível descobrir o nome da coluna automaticamente. Tentando nomes padrão. Erro: {}", e.getMessage());
-            String[] columnNames = {"profissional_id", "id", "profissionais_saude_id"};
-            boolean deleted = false;
-            
-            for (String columnName : columnNames) {
+            String errorMsg = e.getMessage();
+            if (errorMsg != null && errorMsg.contains("violates foreign key constraint") && errorMsg.contains("consultas")) {
                 try {
-                    String sql = String.format("DELETE FROM public.profissionais_saude_especialidades WHERE %s = :profissionalId", columnName);
-                    int count = entityManager.createNativeQuery(sql)
+                    deletarConsultasRelacionadasAosAtendimentos(profissionalId);
+                    
+                    String deleteSql = String.format("DELETE FROM public.%s WHERE %s = :profissionalId", tableName, columnName);
+                    int deleted = entityManager.createNativeQuery(deleteSql)
                             .setParameter("profissionalId", profissionalId)
                             .executeUpdate();
-                    if (count > 0) {
-                        log.debug("Deletadas {} especialidades do profissional de saúde ID: {} (usando coluna: {})", count, profissionalId, columnName);
-                        deleted = true;
-                        break;
+                    
+                    if (deleted > 0) {
+                        log.debug("Deletados {} registros da tabela '{}' após remover consultas. Profissional ID: {}", deleted, tableName, profissionalId);
                     }
                 } catch (Exception e2) {
-                    // Continuar tentando outros nomes
+                    log.warn("Erro ao deletar atendimentos após remover consultas. Profissional ID: {}. Erro: {}", profissionalId, e2.getMessage());
                 }
+            } else {
+                log.warn("Erro ao deletar registros da tabela '{}' referenciando profissional de saúde ID: {}. Continuando... Erro: {}", 
+                        tableName, profissionalId, errorMsg != null ? errorMsg.substring(0, Math.min(200, errorMsg.length())) : "Erro desconhecido");
             }
+        }
+    }
+    
+    private void deletarConsultasRelacionadasAosAtendimentos(UUID profissionalId) {
+        try {
+            String deleteConsultasSql = 
+                "DELETE FROM public.consultas " +
+                "WHERE atendimento_id IN ( " +
+                "    SELECT id FROM public.atendimentos WHERE profissional_id = :profissionalId " +
+                ")";
             
-            if (!deleted) {
-                log.warn("Não foi possível deletar especialidades do profissional de saúde ID: {}. Continuando exclusão...", profissionalId);
+            int deletedConsultas = entityManager.createNativeQuery(deleteConsultasSql)
+                    .setParameter("profissionalId", profissionalId)
+                    .executeUpdate();
+            
+            if (deletedConsultas > 0) {
+                log.debug("Deletadas {} consultas relacionadas aos atendimentos do profissional de saúde ID: {}", deletedConsultas, profissionalId);
+            }
+        } catch (Exception e) {
+            log.trace("Erro ao deletar consultas relacionadas aos atendimentos. Profissional ID: {}. Erro: {}", profissionalId, e.getMessage());
+        }
+    }
+    
+    private void deletarTabelasConhecidas(UUID profissionalId) {
+        String[][] tabelasConhecidas = {
+            {"profissionais_saude_especialidades", "profissional_saude_id"},
+            {"profissionais_saude_especialidades", "profissional_id"},
+            {"profissionais_saude_especialidades", "id"},
+            {"agendamentos", "profissional_id"},
+            {"atendimentos", "profissional_id"}
+        };
+        
+        for (String[] tabelaInfo : tabelasConhecidas) {
+            String tableName = tabelaInfo[0];
+            String columnName = tabelaInfo[1];
+            
+            try {
+                String sql = String.format("DELETE FROM public.%s WHERE %s = :profissionalId", tableName, columnName);
+                int deleted = entityManager.createNativeQuery(sql)
+                        .setParameter("profissionalId", profissionalId)
+                        .executeUpdate();
+                
+                if (deleted > 0) {
+                    log.debug("Deletados {} registros da tabela '{}' referenciando profissional de saúde ID: {}", deleted, tableName, profissionalId);
+                }
+            } catch (Exception e) {
+                log.trace("Não foi possível deletar da tabela '{}' com coluna '{}': {}", tableName, columnName, e.getMessage());
             }
         }
     }
