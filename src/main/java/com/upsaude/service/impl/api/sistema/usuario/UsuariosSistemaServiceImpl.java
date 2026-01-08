@@ -30,6 +30,7 @@ import com.upsaude.entity.profissional.ProfissionaisSaude;
 import com.upsaude.entity.sistema.multitenancy.Tenant;
 import com.upsaude.entity.sistema.auth.User;
 import com.upsaude.entity.sistema.usuario.UsuariosSistema;
+import com.upsaude.enums.TipoContatoEnum;
 import com.upsaude.exception.BadRequestException;
 import com.upsaude.exception.InternalServerErrorException;
 import com.upsaude.exception.NotFoundException;
@@ -691,21 +692,70 @@ public class UsuariosSistemaServiceImpl implements UsuariosSistemaService {
             response.setTenantSlug(null);
         }
 
-        if (usuario.getUser() != null && usuario.getUser().getId() != null) {
-            UUID userId = usuario.getUser().getId();
-            try {
-                com.upsaude.integration.supabase.SupabaseAuthResponse.User supabaseUser =
-                        supabaseAuthService.getUserById(userId);
-                if (supabaseUser != null && supabaseUser.getEmail() != null) {
-                    log.debug("Email do Supabase recuperado: {}", supabaseUser.getEmail());
-                } else {
-                    log.warn("Email não encontrado no Supabase para userId: {}", userId);
-                }
-            } catch (RuntimeException e) {
-                log.error("Erro ao buscar email do Supabase para userId: {}, Exception: {}",
-                    userId, e.getClass().getSimpleName(), e);
-
+        if (usuario.getProfissionalSaude() != null) {
+            var profissional = usuario.getProfissionalSaude();
+            org.hibernate.Hibernate.initialize(profissional);
+            if (profissional.getDadosPessoaisBasicos() != null) {
+                org.hibernate.Hibernate.initialize(profissional.getDadosPessoaisBasicos());
             }
+            if (profissional.getContato() != null) {
+                org.hibernate.Hibernate.initialize(profissional.getContato());
+            }
+            response.setProfissionalSaude(com.upsaude.api.response.sistema.usuario.ProfissionalSaudeSimplificadoResponse.builder()
+                    .id(profissional.getId())
+                    .nome(profissional.getDadosPessoaisBasicos() != null ? profissional.getDadosPessoaisBasicos().getNomeCompleto() : null)
+                    .email(profissional.getContato() != null ? profissional.getContato().getEmail() : null)
+                    .build());
+        }
+
+        if (usuario.getMedico() != null) {
+            var medico = usuario.getMedico();
+            org.hibernate.Hibernate.initialize(medico);
+            if (medico.getDadosPessoaisBasicos() != null) {
+                org.hibernate.Hibernate.initialize(medico.getDadosPessoaisBasicos());
+            }
+            if (medico.getContato() != null) {
+                org.hibernate.Hibernate.initialize(medico.getContato());
+            }
+            response.setMedico(com.upsaude.api.response.sistema.usuario.MedicoSimplificadoResponse.builder()
+                    .id(medico.getId())
+                    .nome(medico.getDadosPessoaisBasicos() != null ? medico.getDadosPessoaisBasicos().getNomeCompleto() : null)
+                    .email(medico.getContato() != null ? medico.getContato().getEmail() : null)
+                    .build());
+        }
+
+        if (usuario.getPaciente() != null) {
+            var paciente = usuario.getPaciente();
+            org.hibernate.Hibernate.initialize(paciente);
+            if (paciente.getContatos() != null) {
+                org.hibernate.Hibernate.initialize(paciente.getContatos());
+            }
+            String emailPaciente = paciente.getContatos() != null ?
+                    paciente.getContatos().stream()
+                            .filter(c -> c.getTipo() == TipoContatoEnum.EMAIL)
+                            .map(c -> c.getEmail())
+                            .filter(e -> e != null && !e.trim().isEmpty())
+                            .findFirst().orElse(null) : null;
+            response.setPaciente(com.upsaude.api.response.sistema.usuario.PacienteSimplificadoResponse.builder()
+                    .id(paciente.getId())
+                    .nome(paciente.getNomeCompleto())
+                    .email(emailPaciente)
+                    .build());
+        }
+
+        if (usuario.getUser() != null) {
+            var user = usuario.getUser();
+            org.hibernate.Hibernate.initialize(user);
+            String nomeUsuario = usuario.getDadosExibicao() != null ?
+                    usuario.getDadosExibicao().getNomeExibicao() : null;
+            if (nomeUsuario == null && usuario.getDadosIdentificacao() != null) {
+                nomeUsuario = usuario.getDadosIdentificacao().getUsername();
+            }
+            response.setUsuario(com.upsaude.api.response.sistema.usuario.UsuarioSimplificadoResponse.builder()
+                    .id(user.getId())
+                    .nome(nomeUsuario)
+                    .email(user.getEmail())
+                    .build());
         }
 
         List<UsuarioEstabelecimento> vinculos = usuarioEstabelecimentoRepository.findByUsuarioUserId(usuario.getUser() != null ? usuario.getUser().getId() : null);

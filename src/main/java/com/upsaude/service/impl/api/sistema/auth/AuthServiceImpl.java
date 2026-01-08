@@ -4,14 +4,20 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import org.hibernate.Hibernate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.upsaude.api.request.sistema.auth.LoginRequest;
 import com.upsaude.api.response.sistema.auth.LoginResponse;
+import com.upsaude.api.response.sistema.usuario.MedicoSimplificadoResponse;
+import com.upsaude.api.response.sistema.usuario.PacienteSimplificadoResponse;
+import com.upsaude.api.response.sistema.usuario.ProfissionalSaudeSimplificadoResponse;
+import com.upsaude.api.response.sistema.usuario.UsuarioSimplificadoResponse;
 import com.upsaude.api.response.sistema.usuario.UsuarioSistemaInfoResponse;
 import com.upsaude.entity.estabelecimento.UsuarioEstabelecimento;
 import com.upsaude.entity.sistema.usuario.UsuariosSistema;
+import com.upsaude.enums.TipoContatoEnum;
 import com.upsaude.integration.supabase.SupabaseAuthResponse;
 import com.upsaude.integration.supabase.SupabaseAuthService;
 import com.upsaude.repository.estabelecimento.UsuarioEstabelecimentoRepository;
@@ -135,6 +141,76 @@ public class AuthServiceImpl implements AuthService {
                     .build();
         }
 
+        ProfissionalSaudeSimplificadoResponse profissionalSaudeResponse = null;
+        if (usuarioSistema.getProfissionalSaude() != null) {
+            var profissional = usuarioSistema.getProfissionalSaude();
+            Hibernate.initialize(profissional);
+            if (profissional.getDadosPessoaisBasicos() != null) {
+                Hibernate.initialize(profissional.getDadosPessoaisBasicos());
+            }
+            if (profissional.getContato() != null) {
+                Hibernate.initialize(profissional.getContato());
+            }
+            profissionalSaudeResponse = ProfissionalSaudeSimplificadoResponse.builder()
+                    .id(profissional.getId())
+                    .nome(profissional.getDadosPessoaisBasicos() != null ? profissional.getDadosPessoaisBasicos().getNomeCompleto() : null)
+                    .email(profissional.getContato() != null ? profissional.getContato().getEmail() : null)
+                    .build();
+        }
+
+        MedicoSimplificadoResponse medicoResponse = null;
+        if (usuarioSistema.getMedico() != null) {
+            var medico = usuarioSistema.getMedico();
+            Hibernate.initialize(medico);
+            if (medico.getDadosPessoaisBasicos() != null) {
+                Hibernate.initialize(medico.getDadosPessoaisBasicos());
+            }
+            if (medico.getContato() != null) {
+                Hibernate.initialize(medico.getContato());
+            }
+            medicoResponse = MedicoSimplificadoResponse.builder()
+                    .id(medico.getId())
+                    .nome(medico.getDadosPessoaisBasicos() != null ? medico.getDadosPessoaisBasicos().getNomeCompleto() : null)
+                    .email(medico.getContato() != null ? medico.getContato().getEmail() : null)
+                    .build();
+        }
+
+        PacienteSimplificadoResponse pacienteResponse = null;
+        if (usuarioSistema.getPaciente() != null) {
+            var paciente = usuarioSistema.getPaciente();
+            Hibernate.initialize(paciente);
+            if (paciente.getContatos() != null) {
+                Hibernate.initialize(paciente.getContatos());
+            }
+            String emailPaciente = paciente.getContatos() != null ?
+                    paciente.getContatos().stream()
+                            .filter(c -> c.getTipo() == TipoContatoEnum.EMAIL)
+                            .map(c -> c.getEmail())
+                            .filter(e -> e != null && !e.trim().isEmpty())
+                            .findFirst().orElse(null) : null;
+            pacienteResponse = PacienteSimplificadoResponse.builder()
+                    .id(paciente.getId())
+                    .nome(paciente.getNomeCompleto())
+                    .email(emailPaciente)
+                    .build();
+        }
+
+        UsuarioSimplificadoResponse usuarioResponse = null;
+        if (usuarioSistema.getUser() != null) {
+            var user = usuarioSistema.getUser();
+            Hibernate.initialize(user);
+            String nomeUsuario = usuarioSistema.getDadosExibicao() != null ?
+                    usuarioSistema.getDadosExibicao().getNomeExibicao() : null;
+            if (nomeUsuario == null && usuarioSistema.getDadosIdentificacao() != null) {
+                nomeUsuario = usuarioSistema.getDadosIdentificacao().getUsername();
+            }
+            usuarioResponse = UsuarioSimplificadoResponse.builder()
+                    .id(user.getId())
+                    .nome(nomeUsuario)
+                    .email(user.getEmail())
+                    .build();
+        }
+
         UsuarioSistemaInfoResponse response = UsuarioSistemaInfoResponse.builder()
                 .id(usuarioSistema.getId())
                 .userId(usuarioSistema.getUser() != null ? usuarioSistema.getUser().getId() : null)
@@ -142,9 +218,10 @@ public class AuthServiceImpl implements AuthService {
                 .username(usuarioSistema.getDadosIdentificacao() != null ? usuarioSistema.getDadosIdentificacao().getUsername() : null)
                 .fotoUrl(usuarioSistema.getDadosExibicao() != null ? usuarioSistema.getDadosExibicao().getFotoUrl() : null)
                 .adminTenant(usuarioSistema.getConfiguracao() != null ? usuarioSistema.getConfiguracao().getAdminTenant() : null)
-                .profissionalSaudeId(usuarioSistema.getProfissionalSaude() != null ? usuarioSistema.getProfissionalSaude().getId() : null)
-                .medicoId(usuarioSistema.getMedico() != null ? usuarioSistema.getMedico().getId() : null)
-                .pacienteId(usuarioSistema.getPaciente() != null ? usuarioSistema.getPaciente().getId() : null)
+                .profissionalSaude(profissionalSaudeResponse)
+                .medico(medicoResponse)
+                .paciente(pacienteResponse)
+                .usuario(usuarioResponse)
                 .tenant(tenantResponse)
                 .estabelecimentos(estabelecimentosResponse)
                 .build();

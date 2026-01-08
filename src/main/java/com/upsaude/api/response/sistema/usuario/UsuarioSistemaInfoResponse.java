@@ -24,9 +24,10 @@ public class UsuarioSistemaInfoResponse {
 
     private Boolean adminTenant;
 
-    private UUID profissionalSaudeId;
-    private UUID medicoId;
-    private UUID pacienteId;
+    private ProfissionalSaudeSimplificadoResponse profissionalSaude;
+    private MedicoSimplificadoResponse medico;
+    private PacienteSimplificadoResponse paciente;
+    private UsuarioSimplificadoResponse usuario;
 
     private TenantSimplificadoResponse tenant;
 

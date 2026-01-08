@@ -33,6 +33,8 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import jakarta.persistence.PersistenceContext;
+import jakarta.persistence.EntityManager;
 import jakarta.persistence.criteria.Predicate;
 import java.util.ArrayList;
 import java.util.List;
@@ -44,6 +46,9 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 public class EstabelecimentosServiceImpl implements EstabelecimentosService {
+
+    @PersistenceContext
+    private EntityManager entityManager;
 
     private final EstabelecimentosRepository estabelecimentosRepository;
     private final CacheManager cacheManager;
@@ -217,6 +222,9 @@ public class EstabelecimentosServiceImpl implements EstabelecimentosService {
             UUID tenantId = tenantService.validarTenantAtual();
             Estabelecimentos entity = tenantEnforcer.validarAcesso(id, tenantId);
             domainService.validarPodeDeletar(entity);
+
+            deletarReferenciasRelacionadas(id);
+
             estabelecimentosRepository.delete(Objects.requireNonNull(entity));
             log.info("Estabelecimento excluído permanentemente com sucesso. ID: {}", id);
         } catch (NotFoundException e) {
@@ -231,6 +239,108 @@ public class EstabelecimentosServiceImpl implements EstabelecimentosService {
         } catch (RuntimeException e) {
             log.error("Erro inesperado ao excluir estabelecimento. ID: {}", id, e);
             throw e;
+        }
+    }
+
+    private void deletarReferenciasRelacionadas(UUID estabelecimentoId) {
+        try {
+            deletarConsultasRelacionadasAosAtendimentos(estabelecimentoId);
+
+            String discoverQuery =
+                "SELECT tc.table_name, kcu.column_name " +
+                "FROM information_schema.table_constraints tc " +
+                "JOIN information_schema.key_column_usage kcu " +
+                "  ON tc.constraint_name = kcu.constraint_name " +
+                "WHERE tc.constraint_type = 'FOREIGN KEY' " +
+                "  AND tc.table_schema = 'public' " +
+                "  AND kcu.table_schema = 'public' " +
+                "  AND EXISTS ( " +
+                "    SELECT 1 FROM information_schema.constraint_column_usage ccu " +
+                "    WHERE ccu.constraint_name = tc.constraint_name " +
+                "      AND ccu.table_name = 'estabelecimentos' " +
+                "      AND ccu.table_schema = 'public' " +
+                "  ) " +
+                "ORDER BY tc.table_name";
+
+            @SuppressWarnings("unchecked")
+            List<Object[]> results = entityManager.createNativeQuery(discoverQuery).getResultList();
+
+            for (Object[] row : results) {
+                String tableName = (String) row[0];
+                String columnName = (String) row[1];
+
+                try {
+                    if ("estabelecimentos".equals(tableName)) {
+                        continue;
+                    }
+
+                    String deleteSql = String.format("DELETE FROM public.%s WHERE %s = :estabelecimentoId", tableName, columnName);
+                    int deleted = entityManager.createNativeQuery(deleteSql)
+                            .setParameter("estabelecimentoId", estabelecimentoId)
+                            .executeUpdate();
+
+                    if (deleted > 0) {
+                        log.debug("Deletados {} registros da tabela '{}' referenciando estabelecimento ID: {}", deleted, tableName, estabelecimentoId);
+                    }
+                } catch (Exception e) {
+                    log.warn("Erro ao deletar registros da tabela '{}' referenciando estabelecimento ID: {}. Continuando... Erro: {}",
+                            tableName, estabelecimentoId, e.getMessage());
+                }
+            }
+
+            log.debug("Concluída a exclusão de referências relacionadas ao estabelecimento ID: {}", estabelecimentoId);
+        } catch (Exception e) {
+            log.warn("Erro ao descobrir referências relacionadas ao estabelecimento ID: {}. Tentando deletar tabelas conhecidas... Erro: {}",
+                    estabelecimentoId, e.getMessage());
+
+            deletarTabelasConhecidas(estabelecimentoId);
+        }
+    }
+
+    private void deletarConsultasRelacionadasAosAtendimentos(UUID estabelecimentoId) {
+        try {
+            String deleteConsultasSql =
+                "DELETE FROM public.consultas c " +
+                "WHERE c.atendimento_id IN ( " +
+                "    SELECT a.id FROM public.atendimentos a " +
+                "    WHERE a.estabelecimento_id = :estabelecimentoId " +
+                ")";
+            int deletedConsultas = entityManager.createNativeQuery(deleteConsultasSql)
+                    .setParameter("estabelecimentoId", estabelecimentoId)
+                    .executeUpdate();
+            if (deletedConsultas > 0) {
+                log.debug("Deletadas {} consultas relacionadas a atendimentos do estabelecimento ID: {}", deletedConsultas, estabelecimentoId);
+            }
+        } catch (Exception e) {
+            log.warn("Erro ao deletar consultas relacionadas a atendimentos do estabelecimento ID: {}. Erro: {}", estabelecimentoId, e.getMessage());
+        }
+    }
+
+    private void deletarTabelasConhecidas(UUID estabelecimentoId) {
+        String[][] tabelasConhecidas = {
+            {"enderecos", "estabelecimento_id"},
+            {"equipamentos_estabelecimento", "estabelecimento_id"},
+            {"agendamentos", "estabelecimento_id"},
+            {"atendimentos", "estabelecimento_id"},
+            {"usuarios_estabelecimentos", "estabelecimento_id"}
+        };
+
+        for (String[] tabelaInfo : tabelasConhecidas) {
+            String tableName = tabelaInfo[0];
+            String columnName = tabelaInfo[1];
+
+            try {
+                String sql = String.format("DELETE FROM public.%s WHERE %s = :estabelecimentoId", tableName, columnName);
+                int deleted = entityManager.createNativeQuery(sql)
+                        .setParameter("estabelecimentoId", estabelecimentoId)
+                        .executeUpdate();
+
+                if (deleted > 0) {
+                    log.debug("Deletados {} registros da tabela '{}' referenciando estabelecimento ID: {}", deleted, tableName, estabelecimentoId);
+                }
+            } catch (Exception e) {
+                log.trace("Não foi possível deletar da tabela '{}' com coluna '{}': {}", tableName, columnName, e.getMessage());
+            }
         }
     }
 
