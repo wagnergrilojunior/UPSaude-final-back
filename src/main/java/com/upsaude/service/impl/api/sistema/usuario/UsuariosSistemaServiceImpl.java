@@ -17,8 +17,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import jakarta.persistence.criteria.Predicate;
 import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Collectors;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -46,6 +44,8 @@ import com.upsaude.repository.sistema.multitenancy.TenantRepository;
 import com.upsaude.repository.sistema.auth.UserRepository;
 import com.upsaude.repository.sistema.usuario.UsuariosSistemaRepository;
 import com.upsaude.service.api.sistema.usuario.UsuariosSistemaService;
+import com.upsaude.service.api.sistema.usuario.UserService;
+import com.upsaude.api.request.sistema.usuario.UserRequest;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -66,6 +66,7 @@ public class UsuariosSistemaServiceImpl implements UsuariosSistemaService {
     private final UserRepository userRepository;
     private final SupabaseStorageService supabaseStorageService;
     private final com.upsaude.integration.supabase.SupabaseAuthService supabaseAuthService;
+    private final UserService userService;
 
     @Override
     @Transactional
@@ -73,22 +74,47 @@ public class UsuariosSistemaServiceImpl implements UsuariosSistemaService {
         log.debug("Criando novo usuariossistema");
 
         try {
-
             User user = null;
-            if (request.getUserId() != null) {
-                user = userRepository.findById(request.getUserId())
-                        .orElseThrow(() -> new NotFoundException("User não encontrado com ID: " + request.getUserId()));
+            UUID userIdFinal;
+            
+            UUID requestUserId = request.getUserId();
+
+            if (requestUserId == null) {
+                if (request.getEmail() == null || request.getEmail().trim().isEmpty()) {
+                    throw new BadRequestException("Email é obrigatório quando userId não é fornecido");
+                }
+
+                log.debug("Criando User no Supabase Auth primeiro");
+                UserRequest userRequestCriar = UserRequest.builder()
+                        .email(request.getEmail())
+                        .build();
+                
+                com.upsaude.api.response.sistema.usuario.UserResponse userResponse = userService.criar(userRequestCriar);
+                userIdFinal = userResponse.getId();
+                log.info("User criado com sucesso no Supabase Auth. ID: {}", userIdFinal);
+                
+                if (request.getSenha() != null && !request.getSenha().trim().isEmpty()) {
+                    log.debug("Atualizando senha do User recém-criado");
+                    UserRequest userRequestAtualizar = UserRequest.builder()
+                            .email(request.getEmail())
+                            .senha(request.getSenha())
+                            .build();
+                    userService.atualizar(userIdFinal, userRequestAtualizar);
+                    log.info("Senha do User atualizada com sucesso");
+                }
+            } else {
+                userIdFinal = requestUserId;
             }
 
-            validarEmailUnico(null, user != null ? user.getEmail() : null, request.getUserId());
+            user = userRepository.findById(userIdFinal)
+                    .orElseThrow(() -> new NotFoundException("User não encontrado com ID: " + userIdFinal));
+
+            validarEmailUnico(null, user != null ? user.getEmail() : null, userIdFinal);
             validarUsernameUnico(null, request.getDadosIdentificacao() != null ? request.getDadosIdentificacao().getUsername() : null);
 
             UsuariosSistema usuariosSistema = usuariosSistemaMapper.fromRequest(request);
             usuariosSistema.setAtivo(true);
-
-            if (user != null) {
-                usuariosSistema.setUser(user);
-            }
+            usuariosSistema.setUser(user);
 
             if (request.getTenantId() != null) {
                 Tenant tenant = tenantRepository.findById(request.getTenantId())
@@ -227,15 +253,50 @@ public class UsuariosSistemaServiceImpl implements UsuariosSistemaService {
         UsuariosSistema usuariosSistemaExistente = usuariosSistemaRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("UsuariosSistema não encontrado com ID: " + id));
 
-        User userAtualizado = null;
-        if (request.getUserId() != null) {
-            userAtualizado = userRepository.findById(request.getUserId())
-                    .orElseThrow(() -> new NotFoundException("User não encontrado com ID: " + request.getUserId()));
+        User userAtualizado = usuariosSistemaExistente.getUser();
+        UUID userIdParaAtualizar = request.getUserId() != null ? request.getUserId() : (userAtualizado != null ? userAtualizado.getId() : null);
+
+        if (userIdParaAtualizar == null) {
+            throw new BadRequestException("Não é possível atualizar: usuário não possui User vinculado e nenhum userId foi fornecido");
         }
-        validarEmailUnico(id, userAtualizado != null ? userAtualizado.getEmail() : null, request.getUserId());
+
+        boolean precisaAtualizarUser = false;
+        if (request.getEmail() != null && !request.getEmail().trim().isEmpty()) {
+            if (userAtualizado == null || !request.getEmail().equals(userAtualizado.getEmail())) {
+                precisaAtualizarUser = true;
+            }
+        }
+        if (request.getSenha() != null && !request.getSenha().trim().isEmpty()) {
+            precisaAtualizarUser = true;
+        }
+
+        if (precisaAtualizarUser) {
+            log.debug("Atualizando User no Supabase Auth primeiro");
+            UserRequest userRequest = UserRequest.builder()
+                    .email(request.getEmail())
+                    .senha(request.getSenha())
+                    .build();
+            
+            com.upsaude.api.response.sistema.usuario.UserResponse userResponse = userService.atualizar(userIdParaAtualizar, userRequest);
+            log.info("User atualizado com sucesso no Supabase Auth. ID: {}", userResponse.getId());
+            
+            userAtualizado = userRepository.findById(userIdParaAtualizar)
+                    .orElseThrow(() -> new NotFoundException("User não encontrado com ID: " + userIdParaAtualizar));
+        } else {
+            if (userAtualizado == null && userIdParaAtualizar != null) {
+                userAtualizado = userRepository.findById(userIdParaAtualizar)
+                        .orElseThrow(() -> new NotFoundException("User não encontrado com ID: " + userIdParaAtualizar));
+            }
+        }
+
+        validarEmailUnico(id, userAtualizado != null ? userAtualizado.getEmail() : null, userIdParaAtualizar);
         validarUsernameUnico(id, request.getDadosIdentificacao() != null ? request.getDadosIdentificacao().getUsername() : null);
 
         atualizarDadosUsuariosSistema(usuariosSistemaExistente, request);
+        
+        if (userAtualizado != null) {
+            usuariosSistemaExistente.setUser(userAtualizado);
+        }
 
         UsuariosSistema usuariosSistemaAtualizado = usuariosSistemaRepository.save(usuariosSistemaExistente);
         log.info("UsuariosSistema atualizado com sucesso. ID: {}", usuariosSistemaAtualizado.getId());
@@ -344,12 +405,6 @@ public class UsuariosSistemaServiceImpl implements UsuariosSistemaService {
     private void atualizarDadosUsuariosSistema(UsuariosSistema usuariosSistema, UsuariosSistemaRequest request) {
 
         usuariosSistemaMapper.updateFromRequest(request, usuariosSistema);
-
-        if (request.getUserId() != null) {
-            User user = userRepository.findById(request.getUserId())
-                    .orElseThrow(() -> new NotFoundException("User não encontrado com ID: " + request.getUserId()));
-            usuariosSistema.setUser(user);
-        }
 
         if (request.getTenantId() != null) {
             Tenant tenant = tenantRepository.findById(request.getTenantId())
@@ -531,11 +586,15 @@ public class UsuariosSistemaServiceImpl implements UsuariosSistemaService {
         UsuariosSistema usuario = usuariosSistemaRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Usuário não encontrado com ID: " + id));
 
+        if (usuario.getUser() == null || usuario.getUser().getId() == null) {
+            throw new BadRequestException("Usuário não possui User vinculado. É necessário criar/atualizar o usuário com email antes de fazer upload de foto.");
+        }
+
         if (usuario.getDadosExibicao() != null && usuario.getDadosExibicao().getFotoUrl() != null && !usuario.getDadosExibicao().getFotoUrl().isEmpty()) {
             supabaseStorageService.deletarFotoUsuario(usuario.getDadosExibicao().getFotoUrl());
         }
 
-        String fotoUrl = supabaseStorageService.uploadFotoUsuario(file, usuario.getUser() != null ? usuario.getUser().getId() : null);
+        String fotoUrl = supabaseStorageService.uploadFotoUsuario(file, usuario.getUser().getId());
 
         if (usuario.getDadosExibicao() == null) {
             usuario.setDadosExibicao(new com.upsaude.entity.embeddable.DadosExibicaoUsuario());
@@ -573,6 +632,54 @@ public class UsuariosSistemaServiceImpl implements UsuariosSistemaService {
         } else {
             log.debug("Usuário {} não possui foto para deletar", id);
         }
+    }
+
+    @Override
+    @Transactional
+    public void trocarSenha(UUID id, String novaSenha) {
+        log.debug("Trocando senha do usuário: {}", id);
+
+        if (id == null) {
+            throw new BadRequestException("ID do usuário do sistema é obrigatório");
+        }
+
+        if (novaSenha == null || novaSenha.trim().isEmpty()) {
+            throw new BadRequestException("Nova senha é obrigatória");
+        }
+
+        UsuariosSistema usuario = usuariosSistemaRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Usuário não encontrado com ID: " + id));
+
+        if (usuario.getUser() == null || usuario.getUser().getId() == null) {
+            throw new BadRequestException("Usuário não possui User vinculado. Não é possível trocar a senha.");
+        }
+
+        UUID userId = usuario.getUser().getId();
+        String email = usuario.getUser().getEmail();
+
+        if (email == null || email.trim().isEmpty()) {
+            log.warn("Email do User não encontrado. Tentando buscar do Supabase Auth");
+            try {
+                com.upsaude.integration.supabase.SupabaseAuthResponse.User supabaseUser = supabaseAuthService.getUserById(userId);
+                if (supabaseUser != null && supabaseUser.getEmail() != null) {
+                    email = supabaseUser.getEmail();
+                } else {
+                    throw new BadRequestException("Não foi possível obter o email do usuário no Supabase Auth");
+                }
+            } catch (Exception e) {
+                log.error("Erro ao buscar email do Supabase Auth para userId: {}", userId, e);
+                throw new BadRequestException("Não foi possível obter o email do usuário");
+            }
+        }
+
+        log.debug("Atualizando senha do User no Supabase Auth. UserID: {}", userId);
+        UserRequest userRequest = UserRequest.builder()
+                .email(email)
+                .senha(novaSenha)
+                .build();
+
+        userService.atualizar(userId, userRequest);
+        log.info("Senha trocada com sucesso para o usuário do sistema ID: {}, UserID: {}", id, userId);
     }
 
     private UsuariosSistemaResponse enrichResponseWithEntity(UsuariosSistema usuario) {

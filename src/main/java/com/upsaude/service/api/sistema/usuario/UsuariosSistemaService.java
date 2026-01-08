@@ -25,4 +25,6 @@ public interface UsuariosSistemaService {
     String obterFotoUrl(UUID id);
 
     void deletarFoto(UUID id);
+
+    void trocarSenha(UUID id, String novaSenha);
 }
