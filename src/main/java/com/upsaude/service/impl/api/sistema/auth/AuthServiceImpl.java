@@ -106,47 +106,51 @@ public class AuthServiceImpl implements AuthService {
         List<UsuarioEstabelecimento> estabelecimentosVinculados =
                 usuarioEstabelecimentoRepository.findByUsuarioUserId(userId);
 
-        List<UsuarioSistemaInfoResponse.EstabelecimentoVinculoResponse> estabelecimentosResponse =
+        List<com.upsaude.api.response.sistema.usuario.EstabelecimentoVinculoSimplificadoResponse> estabelecimentosResponse =
                 estabelecimentosVinculados.stream()
-                        .map(ue -> UsuarioSistemaInfoResponse.EstabelecimentoVinculoResponse.builder()
-                                .id(ue.getId())
-                                .estabelecimentoId(ue.getEstabelecimento().getId())
-                                .estabelecimentoNome(ue.getEstabelecimento().getDadosIdentificacao() != null ? ue.getEstabelecimento().getDadosIdentificacao().getNome() : null)
-                                .estabelecimentoCnes(ue.getEstabelecimento().getDadosIdentificacao() != null ? ue.getEstabelecimento().getDadosIdentificacao().getCnes() : null)
-                                .estabelecimentoAtivo(ue.getEstabelecimento().getActive())
-                                .tipoUsuario(ue.getTipoUsuario())
-                                .build())
+                        .map(ue -> {
+                            com.upsaude.entity.paciente.Endereco estabelecimentoEndereco = ue.getEstabelecimento().getEndereco();
+                            return com.upsaude.api.response.sistema.usuario.EstabelecimentoVinculoSimplificadoResponse.builder()
+                                    .id(ue.getId())
+                                    .tenantId(ue.getTenant() != null ? ue.getTenant().getId() : null)
+                                    .estabelecimentoId(ue.getEstabelecimento().getId())
+                                    .estabelecimentoTenantId(ue.getEstabelecimento().getTenant() != null ? ue.getEstabelecimento().getTenant().getId() : null)
+                                    .estabelecimentoEnderecoId(estabelecimentoEndereco != null ? estabelecimentoEndereco.getId() : null)
+                                    .estabelecimentoEnderecoEstadoId(estabelecimentoEndereco != null && estabelecimentoEndereco.getEstado() != null ? estabelecimentoEndereco.getEstado().getId() : null)
+                                    .estabelecimentoEnderecoCidadeId(estabelecimentoEndereco != null && estabelecimentoEndereco.getCidade() != null ? estabelecimentoEndereco.getCidade().getId() : null)
+                                    .tipoUsuario(ue.getTipoUsuario())
+                                    .build();
+                        })
                         .collect(Collectors.toList());
+
+        com.upsaude.api.response.sistema.usuario.TenantSimplificadoResponse tenantResponse = null;
+        if (usuarioSistema.getTenant() != null) {
+            com.upsaude.entity.paciente.Endereco tenantEndereco = usuarioSistema.getTenant().getEndereco();
+            tenantResponse = com.upsaude.api.response.sistema.usuario.TenantSimplificadoResponse.builder()
+                    .id(usuarioSistema.getTenant().getId())
+                    .nome(usuarioSistema.getTenant().getDadosIdentificacao() != null ? usuarioSistema.getTenant().getDadosIdentificacao().getNome() : null)
+                    .enderecoId(tenantEndereco != null ? tenantEndereco.getId() : null)
+                    .enderecoEstadoId(tenantEndereco != null && tenantEndereco.getEstado() != null ? tenantEndereco.getEstado().getId() : null)
+                    .enderecoCidadeId(tenantEndereco != null && tenantEndereco.getCidade() != null ? tenantEndereco.getCidade().getId() : null)
+                    .build();
+        }
 
         UsuarioSistemaInfoResponse response = UsuarioSistemaInfoResponse.builder()
                 .id(usuarioSistema.getId())
-                .createdAt(usuarioSistema.getCreatedAt())
-                .updatedAt(usuarioSistema.getUpdatedAt())
-                .active(usuarioSistema.getAtivo())
                 .userId(usuarioSistema.getUser() != null ? usuarioSistema.getUser().getId() : null)
-
-                .profissionalSaudeId(usuarioSistema.getProfissionalSaude() != null ? usuarioSistema.getProfissionalSaude().getId() : null)
-                .medicoId(usuarioSistema.getMedico() != null ? usuarioSistema.getMedico().getId() : null)
-                .pacienteId(usuarioSistema.getPaciente() != null ? usuarioSistema.getPaciente().getId() : null)
-                .tipoVinculo(usuarioSistema.getConfiguracao() != null ? usuarioSistema.getConfiguracao().getTipoVinculo() : null)
-
                 .nomeExibicao(usuarioSistema.getDadosExibicao() != null ? usuarioSistema.getDadosExibicao().getNomeExibicao() : null)
                 .username(usuarioSistema.getDadosIdentificacao() != null ? usuarioSistema.getDadosIdentificacao().getUsername() : null)
                 .fotoUrl(usuarioSistema.getDadosExibicao() != null ? usuarioSistema.getDadosExibicao().getFotoUrl() : null)
-
                 .adminTenant(usuarioSistema.getConfiguracao() != null ? usuarioSistema.getConfiguracao().getAdminTenant() : null)
-
-                .tenantId(usuarioSistema.getTenant() != null ? usuarioSistema.getTenant().getId() : null)
-                .tenantNome(usuarioSistema.getTenant() != null && usuarioSistema.getTenant().getDadosIdentificacao() != null ? usuarioSistema.getTenant().getDadosIdentificacao().getNome() : null)
-                .tenantSlug(null)
-                .tenantAtivo(usuarioSistema.getTenant() != null ? usuarioSistema.getTenant().getAtivo() : null)
-                .tenantCnes(null)
-
+                .profissionalSaudeId(usuarioSistema.getProfissionalSaude() != null ? usuarioSistema.getProfissionalSaude().getId() : null)
+                .medicoId(usuarioSistema.getMedico() != null ? usuarioSistema.getMedico().getId() : null)
+                .pacienteId(usuarioSistema.getPaciente() != null ? usuarioSistema.getPaciente().getId() : null)
+                .tenant(tenantResponse)
                 .estabelecimentos(estabelecimentosResponse)
                 .build();
 
         log.debug("Informações do usuário sistema carregadas: {} estabelecimentos, tenant: {}",
-                estabelecimentosResponse.size(), response.getTenantNome());
+                estabelecimentosResponse.size(), tenantResponse != null ? tenantResponse.getNome() : null);
 
         return response;
     }

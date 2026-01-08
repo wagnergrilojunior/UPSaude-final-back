@@ -5,7 +5,6 @@ import java.util.UUID;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
@@ -21,12 +20,12 @@ public interface ProfissionaisSaudeRepository extends JpaRepository<Profissionai
     @Query("SELECT p FROM ProfissionaisSaude p WHERE p.id = :id AND p.tenant.id = :tenantId")
     Optional<ProfissionaisSaude> findByIdAndTenant(@Param("id") UUID id, @Param("tenantId") UUID tenantId);
 
-    @EntityGraph(attributePaths = {
-        "enderecoProfissional",
-        "enderecoProfissional.estado",
-        "enderecoProfissional.cidade"
-    })
-    @Query("SELECT p FROM ProfissionaisSaude p WHERE p.id = :id AND p.tenant.id = :tenantId")
+    @Query("SELECT DISTINCT p FROM ProfissionaisSaude p " +
+           "LEFT JOIN FETCH p.enderecoProfissional e " +
+           "LEFT JOIN FETCH e.estado " +
+           "LEFT JOIN FETCH e.cidade " +
+           "LEFT JOIN FETCH p.sigtapOcupacao " +
+           "WHERE p.id = :id AND p.tenant.id = :tenantId")
     Optional<ProfissionaisSaude> findByIdCompletoAndTenant(@Param("id") UUID id, @Param("tenantId") UUID tenantId);
 
     @Query("SELECT p FROM ProfissionaisSaude p WHERE p.tenant.id = :tenantId")

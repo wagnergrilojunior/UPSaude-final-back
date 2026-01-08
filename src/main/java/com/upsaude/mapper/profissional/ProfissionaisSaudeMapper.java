@@ -7,6 +7,7 @@ import org.mapstruct.MappingTarget;
 
 import com.upsaude.api.request.profissional.ProfissionaisSaudeRequest;
 import com.upsaude.api.response.profissional.ProfissionaisSaudeResponse;
+import com.upsaude.api.response.profissional.SigtapOcupacaoSimplificadaResponse;
 import com.upsaude.entity.profissional.ProfissionaisSaude;
 import com.upsaude.entity.embeddable.RegistroProfissional;
 import com.upsaude.mapper.config.MappingConfig;
@@ -57,6 +58,23 @@ public interface ProfissionaisSaudeMapper  {
         }
     }
 
-    @Mapping(target = "sigtapOcupacao", source = "sigtapOcupacao.id")
+    @Mapping(target = "sigtapOcupacao", source = "sigtapOcupacao", qualifiedByName = "mapSigtapOcupacaoSimplificada")
     ProfissionaisSaudeResponse toResponse(ProfissionaisSaude entity);
+
+    @org.mapstruct.Named("mapSigtapOcupacaoSimplificada")
+    default SigtapOcupacaoSimplificadaResponse mapSigtapOcupacaoSimplificada(com.upsaude.entity.referencia.sigtap.SigtapOcupacao sigtapOcupacao) {
+        if (sigtapOcupacao == null) {
+            return null;
+        }
+        try {
+            return SigtapOcupacaoSimplificadaResponse.builder()
+                    .id(sigtapOcupacao.getId())
+                    .nome(sigtapOcupacao.getNome())
+                    .build();
+        } catch (Exception e) {
+            System.err.println("Erro ao mapear sigtapOcupacao: " + e.getMessage());
+            e.printStackTrace();
+            return null;
+        }
+    }
 }

@@ -69,7 +69,8 @@ public class ProfissionaisSaudeServiceImpl implements ProfissionaisSaudeService 
             Tenant tenant = obterTenantAutenticadoOrThrow(tenantId);
 
             ProfissionaisSaude profissional = profissionalCreator.criar(request, tenantId, tenant);
-            ProfissionaisSaudeResponse response = responseBuilder.build(profissional);
+            ProfissionaisSaude profissionalRecarregado = tenantEnforcer.validarAcessoCompleto(profissional.getId(), tenantId);
+            ProfissionaisSaudeResponse response = responseBuilder.build(profissionalRecarregado);
 
             Cache cache = cacheManager.getCache(CacheKeyUtil.CACHE_PROFISSIONAIS_SAUDE);
             if (cache != null) {
@@ -96,6 +97,14 @@ public class ProfissionaisSaudeServiceImpl implements ProfissionaisSaudeService 
         }
         UUID tenantId = tenantService.validarTenantAtual();
         ProfissionaisSaude profissional = tenantEnforcer.validarAcessoCompleto(id, tenantId);
+        
+        if (profissional.getSigtapOcupacao() != null) {
+            log.debug("Profissional ID: {} possui sigtapOcupacao ID: {} antes do build", 
+                profissional.getId(), profissional.getSigtapOcupacao().getId());
+        } else {
+            log.debug("Profissional ID: {} não possui sigtapOcupacao (null) antes do build", profissional.getId());
+        }
+        
         return responseBuilder.build(profissional);
     }
 
@@ -179,7 +188,8 @@ public class ProfissionaisSaudeServiceImpl implements ProfissionaisSaudeService 
             UUID tenantId = tenantService.validarTenantAtual();
             Tenant tenant = obterTenantAutenticadoOrThrow(tenantId);
             ProfissionaisSaude profissional = profissionalUpdater.atualizar(id, request, tenantId, tenant);
-            return responseBuilder.build(profissional);
+            ProfissionaisSaude profissionalRecarregado = tenantEnforcer.validarAcessoCompleto(profissional.getId(), tenantId);
+            return responseBuilder.build(profissionalRecarregado);
         } catch (BadRequestException | NotFoundException e) {
             log.warn("Erro de validação ao atualizar ProfissionalSaude. Erro: {}", e.getMessage());
             throw e;
