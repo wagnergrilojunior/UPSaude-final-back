@@ -22,6 +22,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -96,6 +97,36 @@ public class CidadesController {
             throw ex;
         } catch (Exception ex) {
             log.error("Erro inesperado ao listar cidades por estado — estadoId: {}, pageable: {}", estadoId, pageable, ex);
+            throw ex;
+        }
+    }
+
+    @GetMapping("/por-estado/{estadoId}/todas")
+    @Operation(
+            summary = "Listar todas as cidades de um estado sem paginação",
+            description = "Retorna uma lista completa de todas as cidades de um estado específico sem paginação. " +
+                    "\n\n" +
+                    "**Nota:** Este endpoint retorna todos os resultados de uma vez, sem paginação. " +
+                    "Use com cuidado para estados com muitas cidades, pois pode retornar uma grande quantidade de dados. " +
+                    "Para listagens paginadas, utilize o endpoint `/v1/cidades/por-estado/{estadoId}`."
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Lista de cidades retornada com sucesso"),
+            @ApiResponse(responseCode = "400", description = "ID do estado inválido"),
+            @ApiResponse(responseCode = "403", description = "Acesso negado")
+    })
+    public ResponseEntity<List<CidadesResponse>> listarTodasPorEstado(
+            @Parameter(description = "ID do estado", required = true)
+            @PathVariable UUID estadoId) {
+        log.debug("REQUEST GET /v1/cidades/por-estado/{}/todas", estadoId);
+        try {
+            List<CidadesResponse> response = cidadesService.listarTodasPorEstado(estadoId);
+            return ResponseEntity.ok(response);
+        } catch (BadRequestException ex) {
+            log.warn("Falha ao listar todas as cidades por estado — estadoId: {}, mensagem: {}", estadoId, ex.getMessage());
+            throw ex;
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao listar todas as cidades por estado — estadoId: {}", estadoId, ex);
             throw ex;
         }
     }

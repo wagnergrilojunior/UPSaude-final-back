@@ -26,8 +26,10 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -138,6 +140,32 @@ public class CidadesServiceImpl implements CidadesService {
             throw new InternalServerErrorException("Erro ao listar cidades por estado", e);
         } catch (RuntimeException e) {
             log.error("Erro inesperado ao listar cidades por estado. Estado ID: {}, Pageable: {}", estadoId, pageable, e);
+            throw e;
+        }
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<CidadesResponse> listarTodasPorEstado(UUID estadoId) {
+        log.debug("Listando todas as cidades por estado sem paginação. Estado ID: {}", estadoId);
+
+        if (estadoId == null) {
+            log.warn("ID de estado nulo recebido para listagem de cidades");
+            throw new BadRequestException("ID do estado é obrigatório");
+        }
+
+        try {
+            List<Cidades> cidades = cidadesRepository.findAllByEstadoId(estadoId);
+
+            log.debug("Listagem de todas as cidades por estado concluída. Estado ID: {}, Total: {}", estadoId, cidades.size());
+            return cidades.stream()
+                    .map(responseBuilder::build)
+                    .collect(Collectors.toList());
+        } catch (DataAccessException e) {
+            log.error("Erro de acesso a dados ao listar todas as cidades por estado. Estado ID: {}", estadoId, e);
+            throw new InternalServerErrorException("Erro ao listar cidades por estado", e);
+        } catch (RuntimeException e) {
+            log.error("Erro inesperado ao listar todas as cidades por estado. Estado ID: {}", estadoId, e);
             throw e;
         }
     }
