@@ -78,11 +78,17 @@ public interface AgendamentoMapper {
         if (especialidade == null) {
             return null;
         }
-        com.upsaude.api.response.referencia.sigtap.SigtapCboResponse response = new com.upsaude.api.response.referencia.sigtap.SigtapCboResponse();
-        response.setId(especialidade.getId());
-        response.setCodigoOficial(especialidade.getCodigoOficial());
-        response.setNome(especialidade.getNome());
-        return response;
+        try {
+            com.upsaude.api.response.referencia.sigtap.SigtapCboResponse response = new com.upsaude.api.response.referencia.sigtap.SigtapCboResponse();
+            response.setId(especialidade.getId());
+            response.setCodigoOficial(especialidade.getCodigoOficial());
+            response.setNome(especialidade.getNome());
+            return response;
+        } catch (jakarta.persistence.EntityNotFoundException e) {
+            // Entidade foi deletada ou não existe mais no banco de dados
+            // Retorna null para evitar erro na serialização
+            return null;
+        }
     }
 
     @Named("mapPacienteSimplificadoAgendamento")
