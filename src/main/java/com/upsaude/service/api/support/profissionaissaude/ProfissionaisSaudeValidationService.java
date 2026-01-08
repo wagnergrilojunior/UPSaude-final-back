@@ -4,6 +4,7 @@ import com.upsaude.api.request.profissional.ProfissionaisSaudeRequest;
 import com.upsaude.entity.profissional.ProfissionaisSaude;
 import com.upsaude.exception.BadRequestException;
 import com.upsaude.repository.profissional.ProfissionaisSaudeRepository;
+import com.upsaude.util.ValidationMessages;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
@@ -17,11 +18,11 @@ public class ProfissionaisSaudeValidationService {
         if (request == null || 
             request.getDadosPessoaisBasicos() == null || 
             !StringUtils.hasText(request.getDadosPessoaisBasicos().getNomeCompleto())) {
-            throw new BadRequestException("Nome completo é obrigatório");
+            throw new BadRequestException(ValidationMessages.get("validation.nome.completo.obrigatorio"));
         }
         if (request.getRegistroProfissional() == null || 
             !StringUtils.hasText(request.getRegistroProfissional().getRegistroProfissional())) {
-            throw new BadRequestException("Registro profissional é obrigatório");
+            throw new BadRequestException(ValidationMessages.get("validation.registro.profissional.obrigatorio"));
         }
     }
 
@@ -64,11 +65,11 @@ public class ProfissionaisSaudeValidationService {
             ProfissionaisSaude profissionalEncontrado = profissionalExistente.get();
 
             if (profissionalId != null && !profissionalEncontrado.getId().equals(profissionalId)) {
-                throw new BadRequestException("Já existe um profissional cadastrado com o CPF: " + cpf);
+                throw new BadRequestException(ValidationMessages.get("validation.cpf.duplicado", cpf));
             }
 
             if (profissionalId == null) {
-                throw new BadRequestException("Já existe um profissional cadastrado com o CPF: " + cpf);
+                throw new BadRequestException(ValidationMessages.get("validation.cpf.duplicado", cpf));
             }
         }
     }
@@ -84,11 +85,11 @@ public class ProfissionaisSaudeValidationService {
             ProfissionaisSaude profissionalEncontrado = profissionalExistente.get();
 
             if (profissionalId != null && !profissionalEncontrado.getId().equals(profissionalId)) {
-                throw new BadRequestException("Já existe um profissional cadastrado com o email: " + email);
+                throw new BadRequestException(ValidationMessages.get("validation.email.duplicado", email));
             }
 
             if (profissionalId == null) {
-                throw new BadRequestException("Já existe um profissional cadastrado com o email: " + email);
+                throw new BadRequestException(ValidationMessages.get("validation.email.duplicado", email));
             }
         }
     }
@@ -104,11 +105,11 @@ public class ProfissionaisSaudeValidationService {
             ProfissionaisSaude profissionalEncontrado = profissionalExistente.get();
 
             if (profissionalId != null && !profissionalEncontrado.getId().equals(profissionalId)) {
-                throw new BadRequestException("Já existe um profissional cadastrado com o RG: " + rg);
+                throw new BadRequestException(ValidationMessages.get("validation.rg.duplicado", rg));
             }
 
             if (profissionalId == null) {
-                throw new BadRequestException("Já existe um profissional cadastrado com o RG: " + rg);
+                throw new BadRequestException(ValidationMessages.get("validation.rg.duplicado", rg));
             }
         }
     }
@@ -124,11 +125,11 @@ public class ProfissionaisSaudeValidationService {
             ProfissionaisSaude profissionalEncontrado = profissionalExistente.get();
 
             if (profissionalId != null && !profissionalEncontrado.getId().equals(profissionalId)) {
-                throw new BadRequestException("Já existe um profissional cadastrado com o CNS: " + cns);
+                throw new BadRequestException(ValidationMessages.get("validation.cns.duplicado", cns));
             }
 
             if (profissionalId == null) {
-                throw new BadRequestException("Já existe um profissional cadastrado com o CNS: " + cns);
+                throw new BadRequestException(ValidationMessages.get("validation.cns.duplicado", cns));
             }
         }
     }

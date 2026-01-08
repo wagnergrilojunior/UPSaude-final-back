@@ -21,7 +21,7 @@ import java.time.LocalDate;
 @Schema(description = "Documentos básicos do profissional")
 public class DocumentosBasicosProfissionalRequest {
 
-    @NotNull
+    @NotNull(message = "{validation.cpf.obrigatorio}")
     @CPFValido
     private String cpf;
 

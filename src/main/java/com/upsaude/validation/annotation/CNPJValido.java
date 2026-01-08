@@ -15,7 +15,7 @@ import java.lang.annotation.Target;
 @Target({ElementType.FIELD, ElementType.PARAMETER, ElementType.TYPE_USE})
 @Retention(RetentionPolicy.RUNTIME)
 public @interface CNPJValido {
-    String message() default "CNPJ inválido";
+    String message() default "{validation.cnpj.invalido}";
     Class<?>[] groups() default {};
     Class<? extends Payload>[] payload() default {};
 }

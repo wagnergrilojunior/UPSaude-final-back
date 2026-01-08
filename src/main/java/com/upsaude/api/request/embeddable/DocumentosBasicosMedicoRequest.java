@@ -2,6 +2,7 @@ package com.upsaude.api.request.embeddable;
 
 import com.upsaude.validation.annotation.CPFValido;
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -17,6 +18,7 @@ import lombok.Setter;
 @Schema(description = "Documentos básicos do médico")
 public class DocumentosBasicosMedicoRequest {
 
+    @NotNull(message = "{validation.cpf.obrigatorio}")
     @CPFValido
     private String cpf;
 
