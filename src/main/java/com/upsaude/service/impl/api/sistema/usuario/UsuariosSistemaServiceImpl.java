@@ -115,7 +115,7 @@ public class UsuariosSistemaServiceImpl implements UsuariosSistemaService {
 
             UsuariosSistema usuariosSistema = usuariosSistemaMapper.fromRequest(request);
             usuariosSistema.setAtivo(true);
-            usuariosSistema.setUser(user);
+                usuariosSistema.setUser(user);
 
             if (request.getTenantId() != null) {
                 Tenant tenant = tenantRepository.findById(request.getTenantId())
@@ -287,7 +287,7 @@ public class UsuariosSistemaServiceImpl implements UsuariosSistemaService {
             if (userAtualizado == null && userIdParaAtualizar != null) {
                 userAtualizado = userRepository.findById(userIdParaAtualizar)
                         .orElseThrow(() -> new NotFoundException("User não encontrado com ID: " + userIdParaAtualizar));
-            }
+        }
         }
 
         validarEmailUnico(id, userAtualizado != null ? userAtualizado.getEmail() : null, userIdParaAtualizar);
