@@ -1,0 +1,232 @@
+<?xml version="1.0" encoding="utf-8"?>
+<wsdl:definitions xmlns:tns="http://servicos.saude.gov.br/sigtap/v1/nivelagregacaoservice" xmlns:soap11="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:soap12="http://schemas.xmlsoap.org/wsdl/soap12/" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:msfalha="http://servicos.saude.gov.br/wsdl/mensageria/falha/v5r0/msfalha" name="NivelAgregacaoService" targetNamespace="http://servicos.saude.gov.br/sigtap/v1/nivelagregacaoservice">
+
+	<wsdl:types>
+		<xs:schema xmlns:grupo="http://servicos.saude.gov.br/schema/sigtap/procedimento/nivelagregacao/v1/grupo" xmlns:subgrupo="http://servicos.saude.gov.br/schema/sigtap/procedimento/nivelagregacao/v1/subgrupo" xmlns:formaorg="http://servicos.saude.gov.br/schema/sigtap/procedimento/nivelagregacao/v1/formaorganizacao" elementFormDefault="qualified" targetNamespace="http://servicos.saude.gov.br/sigtap/v1/nivelagregacaoservice">
+
+			<xs:import id="grupo" namespace="http://servicos.saude.gov.br/schema/sigtap/procedimento/nivelagregacao/v1/grupo" schemaLocation="xsd/grupo.v1.xsd"/>
+
+			<xs:import id="subgrupo" namespace="http://servicos.saude.gov.br/schema/sigtap/procedimento/nivelagregacao/v1/subgrupo" schemaLocation="xsd/subgrupo.v1.xsd"/>
+			
+			<xs:import id="formaorg" namespace="http://servicos.saude.gov.br/schema/sigtap/procedimento/nivelagregacao/v1/formaorganizacao" schemaLocation="xsd/formaorganizacao.v1.xsd"/>
+
+			<xs:import id="msfalha" namespace="http://servicos.saude.gov.br/wsdl/mensageria/falha/v5r0/msfalha" schemaLocation="xsd/msfalha.v5r0.xsd"/>
+
+			<xs:element name="requestListarGrupos">
+				<xs:complexType>
+					<xs:sequence/>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="responseListarGrupos">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element minOccurs="1" maxOccurs="unbounded" ref="grupo:Grupo"/>
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+
+			<xs:element name="requestListarSubgrupos">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element minOccurs="0" maxOccurs="1" ref="grupo:codigoGrupo"/>
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="responseListarSubgrupos">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element minOccurs="1" maxOccurs="unbounded" ref="subgrupo:Subgrupo"/>
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+			
+			<xs:element name="requestListarFormaOrganizacao">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element minOccurs="0" maxOccurs="1" ref="subgrupo:codigoSubgrupo"/>
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="responseListarFormaOrganizacao">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element minOccurs="1" maxOccurs="unbounded" ref="formaorg:FormaOrganizacao"/>
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+
+		</xs:schema>
+	</wsdl:types>
+
+	<wsdl:message name="requestListarGrupos">
+		<wsdl:part element="tns:requestListarGrupos" name="requestListarGrupos"/>
+	</wsdl:message>
+	<wsdl:message name="responseListarGrupos">
+		<wsdl:part element="tns:responseListarGrupos" name="responseListarGrupos"/>
+	</wsdl:message>
+
+	<wsdl:message name="requestListarSubgrupos">
+		<wsdl:part element="tns:requestListarSubgrupos" name="requestListarSubgrupos"/>
+	</wsdl:message>
+	<wsdl:message name="responseListarSubgrupos">
+		<wsdl:part element="tns:responseListarSubgrupos" name="responseListarSubgrupos"/>
+	</wsdl:message>
+
+	<wsdl:message name="requestListarFormaOrganizacao">
+		<wsdl:part element="tns:requestListarFormaOrganizacao" name="requestListarFormaOrganizacao"/>
+	</wsdl:message>
+	<wsdl:message name="responseListarFormaOrganizacao">
+		<wsdl:part element="tns:responseListarFormaOrganizacao" name="responseListarFormaOrganizacao"/>
+	</wsdl:message>
+
+	<wsdl:message name="SIGTAPFault">
+		<wsdl:part name="fault" element="msfalha:MSFalha"/>
+	</wsdl:message>
+
+	<wsdl:portType name="NivelAgregacaoServicePortType">
+
+		<wsdl:operation name="listarGrupos">
+			<wsdl:documentation>
+				<![CDATA[ Listar Grupos existentes na base do SIGTAP. ]]>
+			</wsdl:documentation>
+			<wsdl:input name="requestListarGrupos" message="tns:requestListarGrupos"/>
+			<wsdl:output name="responseListarGrupos" message="tns:responseListarGrupos"/>
+			<wsdl:fault name="SIGTAPFault" message="tns:SIGTAPFault"/>
+		</wsdl:operation>
+		
+		<wsdl:operation name="listarSubgrupos">
+			<wsdl:documentation>
+				<![CDATA[ Listar Subgrupos existentes na base do SIGTAP. ]]>
+			</wsdl:documentation>
+			<wsdl:input name="requestListarSubgrupos" message="tns:requestListarSubgrupos"/>
+			<wsdl:output name="responseListarSubgrupos" message="tns:responseListarSubgrupos"/>
+			<wsdl:fault name="SIGTAPFault" message="tns:SIGTAPFault"/>
+		</wsdl:operation>
+		
+		<wsdl:operation name="listarFormaOrganizacao">
+			<wsdl:documentation>
+				<![CDATA[ Listar Formas de Organização existentes na base do SIGTAP. ]]>
+			</wsdl:documentation>
+			<wsdl:input name="requestListarFormaOrganizacao" message="tns:requestListarFormaOrganizacao"/>
+			<wsdl:output name="responseListarFormaOrganizacao" message="tns:responseListarFormaOrganizacao"/>
+			<wsdl:fault name="SIGTAPFault" message="tns:SIGTAPFault"/>
+		</wsdl:operation>
+
+	</wsdl:portType>
+
+	<wsdl:binding name="NivelAgregacaoServiceSOAP12Binding" type="tns:NivelAgregacaoServicePortType">
+		<soap12:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
+
+		<wsdl:operation name="listarGrupos">
+			<wsdl:documentation>
+				<![CDATA[ Listar Grupos existentes na base do SIGTAP. ]]>
+			</wsdl:documentation>
+			<soap12:operation soapAction=""/>
+			<wsdl:input>
+				<soap12:body use="literal"/>
+			</wsdl:input>
+			<wsdl:output>
+				<soap12:body use="literal"/>
+			</wsdl:output>
+			<wsdl:fault name="SIGTAPFault">
+				<soap12:fault name="SIGTAPFault" use="literal"/>
+			</wsdl:fault>
+		</wsdl:operation>
+		
+		<wsdl:operation name="listarSubgrupos">
+			<wsdl:documentation>
+				<![CDATA[ Listar Subgrupos existentes na base do SIGTAP. ]]>
+			</wsdl:documentation>
+			<soap12:operation soapAction=""/>
+			<wsdl:input>
+				<soap12:body use="literal"/>
+			</wsdl:input>
+			<wsdl:output>
+				<soap12:body use="literal"/>
+			</wsdl:output>
+			<wsdl:fault name="SIGTAPFault">
+				<soap12:fault name="SIGTAPFault" use="literal"/>
+			</wsdl:fault>
+		</wsdl:operation>
+		
+		<wsdl:operation name="listarFormaOrganizacao">
+			<wsdl:documentation>
+				<![CDATA[ Listar Formas de Organização existentes na base do SIGTAP. ]]>
+			</wsdl:documentation>
+			<soap12:operation soapAction=""/>
+			<wsdl:input>
+				<soap12:body use="literal"/>
+			</wsdl:input>
+			<wsdl:output>
+				<soap12:body use="literal"/>
+			</wsdl:output>
+			<wsdl:fault name="SIGTAPFault">
+				<soap12:fault name="SIGTAPFault" use="literal"/>
+			</wsdl:fault>
+		</wsdl:operation>
+
+	</wsdl:binding>
+	
+	<wsdl:binding name="NivelAgregacaoServiceSOAP11Binding" type="tns:NivelAgregacaoServicePortType">
+		<soap11:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
+
+		<wsdl:operation name="listarGrupos">
+			<wsdl:documentation>
+				<![CDATA[ Listar Grupos existentes na base do SIGTAP. ]]>
+			</wsdl:documentation>
+			<soap11:operation soapAction=""/>
+			<wsdl:input>
+				<soap11:body use="literal"/>
+			</wsdl:input>
+			<wsdl:output>
+				<soap11:body use="literal"/>
+			</wsdl:output>
+			<wsdl:fault name="SIGTAPFault">
+				<soap11:fault name="SIGTAPFault" use="literal"/>
+			</wsdl:fault>
+		</wsdl:operation>
+		
+		<wsdl:operation name="listarSubgrupos">
+			<wsdl:documentation>
+				<![CDATA[ Listar Subgrupos existentes na base do SIGTAP. ]]>
+			</wsdl:documentation>
+			<soap11:operation soapAction=""/>
+			<wsdl:input>
+				<soap11:body use="literal"/>
+			</wsdl:input>
+			<wsdl:output>
+				<soap11:body use="literal"/>
+			</wsdl:output>
+			<wsdl:fault name="SIGTAPFault">
+				<soap11:fault name="SIGTAPFault" use="literal"/>
+			</wsdl:fault>
+		</wsdl:operation>
+		
+		<wsdl:operation name="listarFormaOrganizacao">
+			<wsdl:documentation>
+				<![CDATA[ Listar Formas de Organização existentes na base do SIGTAP. ]]>
+			</wsdl:documentation>
+			<soap11:operation soapAction=""/>
+			<wsdl:input>
+				<soap11:body use="literal"/>
+			</wsdl:input>
+			<wsdl:output>
+				<soap11:body use="literal"/>
+			</wsdl:output>
+			<wsdl:fault name="SIGTAPFault">
+				<soap11:fault name="SIGTAPFault" use="literal"/>
+			</wsdl:fault>
+		</wsdl:operation>
+
+	</wsdl:binding>
+
+	<wsdl:service name="NivelAgregacaoService">
+		<wsdl:port binding="tns:NivelAgregacaoServiceSOAP12Binding" name="NivelAgregacaoServicePort">
+			<soap12:address location="https://servicos.saude.gov.br/sigtap/NivelAgregacaoService/v1"/>
+		</wsdl:port>
+		<wsdl:port binding="tns:NivelAgregacaoServiceSOAP11Binding" name="NivelAgregacaoServiceSOAP11Port">
+			<soap11:address location="https://servicos.saude.gov.br/sigtap/NivelAgregacaoService/v1"/>
+		</wsdl:port>
+	</wsdl:service>
+
+</wsdl:definitions>

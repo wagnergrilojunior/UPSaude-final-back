@@ -7,7 +7,6 @@ import com.upsaude.util.converter.TipoAtendimentoEnumConverter;
 import jakarta.persistence.Column;
 import jakarta.persistence.Convert;
 import jakarta.persistence.Embeddable;
-import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -27,7 +26,6 @@ public class InformacoesAtendimento {
     }
 
     @Column(name = "data_hora", nullable = false)
-    @NotNull(message = "Data e hora do atendimento são obrigatórias")
     private OffsetDateTime dataHora;
 
     @Column(name = "data_agendamento")

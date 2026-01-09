@@ -2,6 +2,7 @@ package com.upsaude.api.response.embeddable;
 
 import com.upsaude.enums.GravidadeDoencaEnum;
 import com.upsaude.enums.TipoDoencaEnum;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -13,12 +14,18 @@ import lombok.Setter;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@Schema(description = "Dados complementares de classificação da doença")
 public class ClassificacaoDoencaResponse {
+
+    @Schema(description = "Tipo de doença (classificação interna)")
     private TipoDoencaEnum tipoDoenca;
+
+    @Schema(description = "Gravidade da doença (classificação interna)")
     private GravidadeDoencaEnum gravidade;
-    private String categoria;
-    private String subcategoria;
-    private String codigoCidPrincipal;
+
+    @Schema(description = "Indica se a doença é de notificação compulsória")
     private Boolean doencaNotificavel;
+
+    @Schema(description = "Indica se a doença é transmissível")
     private Boolean doencaTransmissivel;
 }

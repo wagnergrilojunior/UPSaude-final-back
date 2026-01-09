@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns="http://servicos.saude.gov.br/wsdl/mensageria/v1r0/resultadospesquisaprocedimentos" xmlns:baseprocedimento="http://servicos.saude.gov.br/schema/sigtap/procedimento/v1/procedimento" xmlns:paginacao="http://servicos.saude.gov.br/wsdl/mensageria/v1/paginacao" elementFormDefault="qualified" targetNamespace="http://servicos.saude.gov.br/wsdl/mensageria/v1r0/resultadospesquisaprocedimentos">
+
+	<xs:import id="paginacao" namespace="http://servicos.saude.gov.br/wsdl/mensageria/v1/paginacao" schemaLocation="paginacao.v1.xsd"/>
+
+	<xs:import id="baseprocedimento" namespace="http://servicos.saude.gov.br/schema/sigtap/procedimento/v1/procedimento" schemaLocation="procedimento.v1.xsd"/>
+
+	<xs:annotation>
+		<xs:documentation>
+			Representa uma lista de resultado de Procedimentos base.
+		</xs:documentation>
+	</xs:annotation>
+
+	<xs:element name="ResultadosPesquisaProcedimentos" type="ResultadosPesquisaProcedimentosType"/>
+
+	<xs:complexType name="ResultadosPesquisaProcedimentosType">
+		<xs:sequence>
+			<xs:element minOccurs="0" maxOccurs="unbounded" ref="baseprocedimento:BaseProcedimento">
+				<xs:annotation>
+					<xs:documentation>Lista de Procedimento base</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element minOccurs="0" maxOccurs="1" ref="paginacao:Paginacao">
+				<xs:annotation>
+					<xs:documentation>Resposta da paginação
+					</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+
+		</xs:sequence>
+	</xs:complexType>
+</xs:schema>

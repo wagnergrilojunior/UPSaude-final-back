@@ -1,5 +1,7 @@
 package com.upsaude.cache;
 
+import com.upsaude.entity.clinica.atendimento.Atendimento;
+
 import java.util.UUID;
 
 public final class CacheKeyUtil {
@@ -7,10 +9,8 @@ public final class CacheKeyUtil {
     public static final String CACHE_MEDICOS = "medicos";
     public static final String CACHE_PACIENTES = "pacientes";
     public static final String CACHE_PROFISSIONAIS_SAUDE = "profissionaisSaude";
-    public static final String CACHE_ACOES_PROMOCAO_PREVENCAO = "acoesPromocaoPrevencao";
     public static final String CACHE_AGENDAMENTOS = "agendamentos";
     public static final String CACHE_ALERGIAS = "alergias";
-    public static final String CACHE_CATALOGO_EXAMES = "catalogoExames";
     public static final String CACHE_EQUIPES_SAUDE = "equipesSaude";
     public static final String CACHE_VACINAS = "vacinas";
     public static final String CACHE_ATENDIMENTOS = "atendimentos";
@@ -18,64 +18,44 @@ public final class CacheKeyUtil {
     public static final String CACHE_ATENDIMENTO = "atendimento";
     public static final String CACHE_CONSULTAS = "consultas";
     public static final String CACHE_PRONTUARIOS = "prontuarios";
-    public static final String CACHE_PRE_NATAL = "preNatal";
-    public static final String CACHE_PUERICULTURA = "puericultura";
-    public static final String CACHE_VACINACOES = "vacinacoes";
     public static final String CACHE_EXAMES = "exames";
-    public static final String CACHE_ESTOQUES_VACINA = "estoquesVacina";
-    public static final String CACHE_MEDICACAO = "medicacao";
-    public static final String CACHE_MEDICACAO_PACIENTE = "medicacaoPaciente";
-    public static final String CACHE_CATALOGO_PROCEDIMENTOS = "catalogoProcedimentos";
-    public static final String CACHE_DOENCAS = "doencas";
     public static final String CACHE_CONVENIOS = "convenio";
     public static final String CACHE_DADOS_CLINICOS_BASICOS = "dadosClinicosBasicos";
     public static final String CACHE_DADOS_SOCIODEMOGRAFICOS = "dadosSociodemograficos";
     public static final String CACHE_CID_DOENCAS = "ciddoencas";
     public static final String CACHE_CIDADES = "cidades";
     public static final String CACHE_CIRURGIAS = "cirurgias";
-    public static final String CACHE_ESPECIALIDADES_MEDICAS = "especialidadesmedicas";
     public static final String CACHE_ESTABELECIMENTOS = "estabelecimentos";
     public static final String CACHE_ESTADOS = "estados";
     public static final String CACHE_FABRICANTES_EQUIPAMENTO = "fabricantesequipamento";
-    public static final String CACHE_FABRICANTES_MEDICAMENTO = "fabricantesmedicamento";
-    public static final String CACHE_FABRICANTES_VACINA = "fabricantesvacina";
     public static final String CACHE_DEFICIENCIAS = "deficiencias";
     public static final String CACHE_DEPARTAMENTOS = "departamentos";
-    public static final String CACHE_ATIVIDADES_PROFISSIONAIS = "atividadesprofissionais";
     public static final String CACHE_FALTAS = "faltas";
     public static final String CACHE_FILA_ESPERA = "filaEspera";
     public static final String CACHE_PERFIS_USUARIOS = "perfisusuarios";
     public static final String CACHE_PERMISSOES = "permissoes";
-    public static final String CACHE_PLANEJAMENTO_FAMILIAR = "planejamentofamiliar";
     public static final String CACHE_PLANTOES = "plantoes";
     public static final String CACHE_PROCEDIMENTOS_CIRURGICOS = "procedimentosCirurgicos";
-    public static final String CACHE_CONSULTAS_PRE_NATAL = "consultasPreNatal";
     public static final String CACHE_PROCEDIMENTOS_ODONTOLOGICOS = "procedimentosOdontologicos";
-    public static final String CACHE_CONSULTAS_PUERICULTURA = "consultasPuericultura";
     public static final String CACHE_RECEITAS_MEDICAS = "receitasmedicas";
     public static final String CACHE_RESPONSAVEIS_LEGAIS = "responsavellegal";
     public static final String CACHE_SERVICOS_ESTABELECIMENTO = "servicosEstabelecimento";
     public static final String CACHE_TEMPLATES_NOTIFICACAO = "templatesNotificacao";
     public static final String CACHE_NOTIFICACOES = "notificacoes";
     public static final String CACHE_CONFIGURACOES_ESTABELECIMENTO = "configuracoesEstabelecimento";
-    public static final String CACHE_TRATAMENTOS_ODONTOLOGICOS = "tratamentosodontologicos";
-    public static final String CACHE_VISITAS_DOMICILIARES = "visitasdomiciliares";
     public static final String CACHE_CONSELHOS_PROFISSIONAIS = "conselhosprofissionais";
     public static final String CACHE_CONTROLE_PONTO = "controleponto";
     public static final String CACHE_CUIDADOS_ENFERMAGEM = "cuidadosenfermagem";
     public static final String CACHE_DISPENSACOES_MEDICAMENTOS = "dispensacoesmedicamentos";
-    public static final String CACHE_EDUCACAO_SAUDE = "educacaosaude";
     public static final String CACHE_EQUIPAMENTOS = "equipamentos";
     public static final String CACHE_EQUIPAMENTOS_ESTABELECIMENTO = "equipamentosestabelecimento";
     public static final String CACHE_ESCALA_TRABALHO = "escalatrabalho";
     public static final String CACHE_CHECKIN_ATENDIMENTO = "checkinatendimento";
     public static final String CACHE_HISTORICO_CLINICO = "historicoclinico";
-    public static final String CACHE_HISTORICO_HABILITACAO_PROFISSIONAL = "historicohabilitacaoprofissional";
     public static final String CACHE_INFRAESTRUTURA_ESTABELECIMENTO = "infraestruturaestabelecimento";
     public static final String CACHE_INTEGRACAO_GOV = "integracaogov";
     public static final String CACHE_LGPD_CONSENTIMENTO = "lgpdconsentimento";
     public static final String CACHE_MEDICAO_CLINICA = "medicaoclinica";
-    public static final String CACHE_MOVIMENTACOES_ESTOQUE = "movimentacoesestoque";
     public static final String CACHE_LOGS_AUDITORIA = "logsauditoria";
 
     private CacheKeyUtil() {
@@ -109,16 +89,6 @@ public final class CacheKeyUtil {
             throw new IllegalArgumentException("profissionalSaudeId é obrigatório");
         }
         return String.format("profissionalSaude_%s_%s", tenantId, profissionalSaudeId);
-    }
-
-    public static String acaoPromocaoPrevencao(UUID tenantId, UUID acaoId) {
-        if (tenantId == null) {
-            throw new IllegalArgumentException("tenantId é obrigatório");
-        }
-        if (acaoId == null) {
-            throw new IllegalArgumentException("acaoId é obrigatório");
-        }
-        return String.format("acaoPromocaoPrevencao_%s_%s", tenantId, acaoId);
     }
 
     public static String agendamento(UUID tenantId, UUID agendamentoId) {
@@ -195,15 +165,7 @@ public final class CacheKeyUtil {
         return String.format("historicoClinico_%s_%s", tenantId, historicoClinicoId);
     }
 
-    public static String historicoHabilitacaoProfissional(UUID tenantId, UUID historicoId) {
-        if (tenantId == null) {
-            throw new IllegalArgumentException("tenantId é obrigatório");
-        }
-        if (historicoId == null) {
-            throw new IllegalArgumentException("historicoHabilitacaoProfissionalId é obrigatório");
-        }
-        return String.format("historicoHabilitacaoProfissional_%s_%s", tenantId, historicoId);
-    }
+
 
     public static String infraestruturaEstabelecimento(UUID tenantId, UUID infraestruturaId) {
         if (tenantId == null) {
@@ -245,15 +207,6 @@ public final class CacheKeyUtil {
         return String.format("medicaoClinica_%s_%s", tenantId, medicaoClinicaId);
     }
 
-    public static String movimentacaoEstoque(UUID tenantId, UUID movimentacaoEstoqueId) {
-        if (tenantId == null) {
-            throw new IllegalArgumentException("tenantId é obrigatório");
-        }
-        if (movimentacaoEstoqueId == null) {
-            throw new IllegalArgumentException("movimentacaoEstoqueId é obrigatório");
-        }
-        return String.format("movimentacaoEstoque_%s_%s", tenantId, movimentacaoEstoqueId);
-    }
 
     public static String logAuditoria(UUID tenantId, UUID logAuditoriaId) {
         if (tenantId == null) {
@@ -285,35 +238,6 @@ public final class CacheKeyUtil {
         return String.format("prontuario_%s_%s", tenantId, prontuarioId);
     }
 
-    public static String preNatal(UUID tenantId, UUID preNatalId) {
-        if (tenantId == null) {
-            throw new IllegalArgumentException("tenantId é obrigatório");
-        }
-        if (preNatalId == null) {
-            throw new IllegalArgumentException("preNatalId é obrigatório");
-        }
-        return String.format("preNatal_%s_%s", tenantId, preNatalId);
-    }
-
-    public static String puericultura(UUID tenantId, UUID puericulturaId) {
-        if (tenantId == null) {
-            throw new IllegalArgumentException("tenantId é obrigatório");
-        }
-        if (puericulturaId == null) {
-            throw new IllegalArgumentException("puericulturaId é obrigatório");
-        }
-        return String.format("puericultura_%s_%s", tenantId, puericulturaId);
-    }
-
-    public static String vacinacao(UUID tenantId, UUID vacinacaoId) {
-        if (tenantId == null) {
-            throw new IllegalArgumentException("tenantId é obrigatório");
-        }
-        if (vacinacaoId == null) {
-            throw new IllegalArgumentException("vacinacaoId é obrigatório");
-        }
-        return String.format("vacinacao_%s_%s", tenantId, vacinacaoId);
-    }
 
     public static String exame(UUID tenantId, UUID exameId) {
         if (tenantId == null) {
@@ -365,16 +289,6 @@ public final class CacheKeyUtil {
         return String.format("permissao_%s_%s", tenantId, permissaoId);
     }
 
-    public static String planejamentoFamiliar(UUID tenantId, UUID planejamentoFamiliarId) {
-        if (tenantId == null) {
-            throw new IllegalArgumentException("tenantId é obrigatório");
-        }
-        if (planejamentoFamiliarId == null) {
-            throw new IllegalArgumentException("planejamentoFamiliarId é obrigatório");
-        }
-        return String.format("planejamentoFamiliar_%s_%s", tenantId, planejamentoFamiliarId);
-    }
-
     public static String plantao(UUID tenantId, UUID plantaoId) {
         if (tenantId == null) {
             throw new IllegalArgumentException("tenantId é obrigatório");
@@ -395,16 +309,6 @@ public final class CacheKeyUtil {
         return String.format("procedimentoCirurgico_%s_%s", tenantId, procedimentoCirurgicoId);
     }
 
-    public static String consultaPreNatal(UUID tenantId, UUID consultaPreNatalId) {
-        if (tenantId == null) {
-            throw new IllegalArgumentException("tenantId é obrigatório");
-        }
-        if (consultaPreNatalId == null) {
-            throw new IllegalArgumentException("consultaPreNatalId é obrigatório");
-        }
-        return String.format("consultaPreNatal_%s_%s", tenantId, consultaPreNatalId);
-    }
-
     public static String procedimentoOdontologico(UUID tenantId, UUID procedimentoOdontologicoId) {
         if (tenantId == null) {
             throw new IllegalArgumentException("tenantId é obrigatório");
@@ -413,16 +317,6 @@ public final class CacheKeyUtil {
             throw new IllegalArgumentException("procedimentoOdontologicoId é obrigatório");
         }
         return String.format("procedimentoOdontologico_%s_%s", tenantId, procedimentoOdontologicoId);
-    }
-
-    public static String consultaPuericultura(UUID tenantId, UUID consultaPuericulturaId) {
-        if (tenantId == null) {
-            throw new IllegalArgumentException("tenantId é obrigatório");
-        }
-        if (consultaPuericulturaId == null) {
-            throw new IllegalArgumentException("consultaPuericulturaId é obrigatório");
-        }
-        return String.format("consultaPuericultura_%s_%s", tenantId, consultaPuericulturaId);
     }
 
     public static String receitaMedica(UUID tenantId, UUID receitaMedicaId) {
@@ -495,15 +389,6 @@ public final class CacheKeyUtil {
         return String.format("tratamentoOdontologico_%s_%s", tenantId, tratamentoOdontologicoId);
     }
 
-    public static String visitaDomiciliar(UUID tenantId, UUID visitaDomiciliarId) {
-        if (tenantId == null) {
-            throw new IllegalArgumentException("tenantId é obrigatório");
-        }
-        if (visitaDomiciliarId == null) {
-            throw new IllegalArgumentException("visitaDomiciliarId é obrigatório");
-        }
-        return String.format("visitaDomiciliar_%s_%s", tenantId, visitaDomiciliarId);
-    }
 
     public static String conselhoProfissional(UUID conselhoProfissionalId) {
         if (conselhoProfissionalId == null) {
@@ -542,16 +427,6 @@ public final class CacheKeyUtil {
         return String.format("dispensacaoMedicamento_%s_%s", tenantId, dispensacaoMedicamentoId);
     }
 
-    public static String educacaoSaude(UUID tenantId, UUID educacaoSaudeId) {
-        if (tenantId == null) {
-            throw new IllegalArgumentException("tenantId é obrigatório");
-        }
-        if (educacaoSaudeId == null) {
-            throw new IllegalArgumentException("educacaoSaudeId é obrigatório");
-        }
-        return String.format("educacaoSaude_%s_%s", tenantId, educacaoSaudeId);
-    }
-
     public static String equipamento(UUID tenantId, UUID equipamentoId) {
         if (tenantId == null) {
             throw new IllegalArgumentException("tenantId é obrigatório");
@@ -582,46 +457,6 @@ public final class CacheKeyUtil {
         return String.format("escalaTrabalho_%s_%s", tenantId, escalaTrabalhoId);
     }
 
-    public static String estoqueVacina(UUID tenantId, UUID estoqueVacinaId) {
-        if (tenantId == null) {
-            throw new IllegalArgumentException("tenantId é obrigatório");
-        }
-        if (estoqueVacinaId == null) {
-            throw new IllegalArgumentException("estoqueVacinaId é obrigatório");
-        }
-        return String.format("estoqueVacina_%s_%s", tenantId, estoqueVacinaId);
-    }
-
-    public static String medicacao(UUID medicacaoId) {
-        if (medicacaoId == null) {
-            throw new IllegalArgumentException("medicacaoId é obrigatório");
-        }
-        return String.format("medicacao_%s", medicacaoId);
-    }
-
-    public static String catalogoProcedimento(UUID tenantId, UUID catalogoProcedimentoId) {
-        if (tenantId == null) {
-            throw new IllegalArgumentException("tenantId é obrigatório");
-        }
-        if (catalogoProcedimentoId == null) {
-            throw new IllegalArgumentException("catalogoProcedimentoId é obrigatório");
-        }
-        return String.format("catalogoProcedimento_%s_%s", tenantId, catalogoProcedimentoId);
-    }
-
-    public static String doenca(UUID doencaId) {
-        if (doencaId == null) {
-            throw new IllegalArgumentException("doencaId é obrigatório");
-        }
-        return String.format("doenca_%s", doencaId);
-    }
-
-    public static String cidDoenca(UUID cidDoencaId) {
-        if (cidDoencaId == null) {
-            throw new IllegalArgumentException("cidDoencaId é obrigatório");
-        }
-        return String.format("cidDoenca_%s", cidDoencaId);
-    }
 
     public static String cidade(UUID cidadeId) {
         if (cidadeId == null) {
@@ -640,12 +475,6 @@ public final class CacheKeyUtil {
         return String.format("cirurgia_%s_%s", tenantId, cirurgiaId);
     }
 
-    public static String especialidadeMedica(UUID especialidadeMedicaId) {
-        if (especialidadeMedicaId == null) {
-            throw new IllegalArgumentException("especialidadeMedicaId é obrigatório");
-        }
-        return String.format("especialidadeMedica_%s", especialidadeMedicaId);
-    }
 
     public static String estado(UUID estadoId) {
         if (estadoId == null) {
@@ -678,12 +507,6 @@ public final class CacheKeyUtil {
         return String.format("fabricanteMedicamento_%s", fabricanteMedicamentoId);
     }
 
-    public static String fabricanteVacina(UUID fabricanteVacinaId) {
-        if (fabricanteVacinaId == null) {
-            throw new IllegalArgumentException("fabricanteVacinaId é obrigatório");
-        }
-        return String.format("fabricanteVacina_%s", fabricanteVacinaId);
-    }
 
     public static String deficiencia(UUID deficienciaId) {
         if (deficienciaId == null) {
@@ -702,15 +525,6 @@ public final class CacheKeyUtil {
         return String.format("departamento_%s_%s", tenantId, departamentoId);
     }
 
-    public static String atividadeProfissional(UUID tenantId, UUID atividadeProfissionalId) {
-        if (tenantId == null) {
-            throw new IllegalArgumentException("tenantId é obrigatório");
-        }
-        if (atividadeProfissionalId == null) {
-            throw new IllegalArgumentException("atividadeProfissionalId é obrigatório");
-        }
-        return String.format("atividadeProfissional_%s_%s", tenantId, atividadeProfissionalId);
-    }
 
     public static String convenio(UUID tenantId, UUID convenioId) {
         if (tenantId == null) {
@@ -742,13 +556,4 @@ public final class CacheKeyUtil {
         return String.format("dadosSociodemograficos_%s_%s", tenantId, dadosSociodemograficosId);
     }
 
-    public static String medicacaoPaciente(UUID tenantId, UUID medicacaoPacienteId) {
-        if (tenantId == null) {
-            throw new IllegalArgumentException("tenantId é obrigatório");
-        }
-        if (medicacaoPacienteId == null) {
-            throw new IllegalArgumentException("medicacaoPacienteId é obrigatório");
-        }
-        return String.format("medicacaoPaciente_%s_%s", tenantId, medicacaoPacienteId);
-    }
 }

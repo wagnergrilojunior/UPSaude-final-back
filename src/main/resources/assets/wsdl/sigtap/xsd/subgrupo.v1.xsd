@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns="http://servicos.saude.gov.br/schema/sigtap/procedimento/nivelagregacao/v1/subgrupo" xmlns:gp="http://servicos.saude.gov.br/schema/sigtap/procedimento/nivelagregacao/v1/grupo" elementFormDefault="qualified" targetNamespace="http://servicos.saude.gov.br/schema/sigtap/procedimento/nivelagregacao/v1/subgrupo">
+    
+    <xs:import id="gp" namespace="http://servicos.saude.gov.br/schema/sigtap/procedimento/nivelagregacao/v1/grupo" schemaLocation="grupo.v1.xsd"/>
+    
+    <xs:annotation>
+        <xs:documentation>
+            <![CDATA[
+            Este esquema representa um Subgrupo, o segundo nível de agregação da tabela de procedimentos. 
+            Neles estão agregados os procedimentos por tipo e/ou área de atuação.
+            ]]>
+        </xs:documentation>
+    </xs:annotation>
+    
+    <xs:element name="Subgrupo" type="SubgrupoType"/>
+    <xs:element name="codigoSubgrupo" type="CodigoSubgrupoType"/>
+    
+    <xs:simpleType name="CodigoSubgrupoType">
+        <xs:restriction base="xs:string">
+            <xs:length value="2"/>
+            <xs:pattern value="[0-9]{2}"/>
+        </xs:restriction>
+    </xs:simpleType>
+    
+    <xs:complexType name="SubgrupoType">
+        <xs:sequence>
+            
+            <xs:element name="codigo" minOccurs="1" maxOccurs="1" nillable="true" type="CodigoSubgrupoType">
+                <xs:annotation>
+                    <xs:documentation>
+                        <![CDATA[ Código identificador do Subgrupo. ]]>
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            
+            <xs:element name="nome" minOccurs="0" maxOccurs="1">
+                <xs:annotation>
+                    <xs:documentation>
+                        <![CDATA[ Nome descritivo do Subgrupo. ]]>
+                    </xs:documentation>
+                </xs:annotation>
+                <xs:simpleType>
+                    <xs:restriction base="xs:string">
+                        <xs:minLength value="1"/>
+                        <xs:maxLength value="100"/>
+                    </xs:restriction>
+                </xs:simpleType>
+            </xs:element>
+            
+            <xs:element name="Grupo" minOccurs="0" maxOccurs="1" type="gp:GrupoType">
+                <xs:annotation>
+                    <xs:documentation>
+                        <![CDATA[ Grupo ao qual esse Subgrupo está associado. ]]>
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            
+        </xs:sequence>
+    </xs:complexType>
+    
+</xs:schema>

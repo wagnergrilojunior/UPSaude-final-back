@@ -1,5 +1,9 @@
 package com.upsaude.entity;
 
+import com.upsaude.entity.sistema.multitenancy.Tenant;
+
+import com.upsaude.entity.estabelecimento.Estabelecimentos;
+
 import java.time.OffsetDateTime;
 import java.util.UUID;
 
@@ -16,13 +20,17 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.MappedSuperclass;
-import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
 
 @MappedSuperclass
-@Data
+@Getter
+@Setter
+@ToString
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
-@EntityListeners({AuditingEntityListener.class})
+@EntityListeners({ AuditingEntityListener.class })
 public abstract class BaseEntity {
 
     @Id

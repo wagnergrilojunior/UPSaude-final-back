@@ -7,28 +7,25 @@ import com.upsaude.enums.TipoAlergiaEnum;
 import com.upsaude.exception.InvalidArgumentException;
 import java.io.IOException;
 
+/**
+ * Deserializer para TipoAlergiaEnum.
+ * Aceita apenas valores do enum como string (MEDICAMENTO, ALIMENTO, etc).
+ */
 public class TipoAlergiaEnumDeserializer extends JsonDeserializer<TipoAlergiaEnum> {
     @Override
     public TipoAlergiaEnum deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
-        if (p.getCurrentToken().isNumeric()) {
-            Integer codigo = p.getIntValue();
-            TipoAlergiaEnum result = TipoAlergiaEnum.fromCodigo(codigo);
-            if (result != null) return result;
-        }
         String value = p.getValueAsString();
-        if (value == null || value.trim().isEmpty()) return null;
-        String strValue = value.trim();
+        if (value == null || value.trim().isEmpty()) {
+            return null;
+        }
+        String strValue = value.trim().toUpperCase();
         try {
-            Integer codigo = Integer.parseInt(strValue);
-            TipoAlergiaEnum result = TipoAlergiaEnum.fromCodigo(codigo);
-            if (result != null) return result;
-        } catch (NumberFormatException e) {}
-        TipoAlergiaEnum result = TipoAlergiaEnum.fromDescricao(strValue);
-        if (result != null) return result;
-        try {
-            return TipoAlergiaEnum.valueOf(strValue.toUpperCase());
+            return TipoAlergiaEnum.valueOf(strValue);
         } catch (IllegalArgumentException e) {
-            throw new InvalidArgumentException("Valor inválido para TipoAlergiaEnum: '" + strValue + "'");
+            throw new InvalidArgumentException(
+                String.format("Valor inválido para TipoAlergiaEnum: '%s'. Valores válidos: %s", 
+                    value, java.util.Arrays.toString(TipoAlergiaEnum.values()))
+            );
         }
     }
 }

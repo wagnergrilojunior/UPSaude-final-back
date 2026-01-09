@@ -4,14 +4,11 @@ import java.util.Arrays;
 import java.util.Locale;
 
 public enum PrioridadeAtendimentoEnum {
-    NORMAL(1, "Normal"),
-    PRIORITARIO(2, "Prioritário"),
-    URGENTE(3, "Urgente"),
-    EMERGENCIA(4, "Emergência"),
-    CONVENIO(5, "Convênio"),
-    RETORNO(6, "Retorno"),
-    ENCAIXE(7, "Encaixe"),
-    OUTRO(99, "Outro");
+    CRITICA(1, "Crítica"),
+    ALTA(2, "Alta"),
+    MEDIA(3, "Média"),
+    BAIXA(4, "Baixa"),
+    ROTINA(5, "Rotina");
 
     private final Integer codigo;
     private final String descricao;

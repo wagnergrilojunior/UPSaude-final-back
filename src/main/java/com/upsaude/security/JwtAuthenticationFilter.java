@@ -1,8 +1,9 @@
 package com.upsaude.security;
+import com.upsaude.entity.sistema.auth.User;
 
 import com.upsaude.integration.supabase.SupabaseAuthService;
 import com.upsaude.integration.supabase.SupabaseAuthResponse;
-import com.upsaude.repository.UsuariosSistemaRepository;
+import com.upsaude.repository.sistema.usuario.UsuariosSistemaRepository;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -95,9 +96,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 // 6. Valida se o usuário tem acesso ao sistema (UsuariosSistema criado)
                 // Exceto para o endpoint de verificar acesso, que precisa ser acessível mesmo sem UsuariosSistema
                 if (!isVerificarAcessoEndpoint(path)) {
-                    boolean temAcesso = usuariosSistemaRepository.findByUserId(user.getId())
-                            .map(usuario -> usuario.getActive() != null && usuario.getActive())
-                            .orElse(false);
+                boolean temAcesso = usuariosSistemaRepository.findByUserId(user.getId())
+                        .map(usuario -> usuario.getAtivo() != null && usuario.getAtivo())
+                        .orElse(false);
                     
                     if (!temAcesso) {
                         response.setStatus(HttpStatus.FORBIDDEN.value());

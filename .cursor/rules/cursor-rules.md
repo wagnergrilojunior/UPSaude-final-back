@@ -36,7 +36,7 @@ rules:
   - id: dto-request-response-padronizacao
     pattern: "src/main/java/**/api/{request,response}/**/*.java"
     description: >
-      Regras de padronização para DTOs, Requests e Responses.
+      Regras de padronização para Requests e Responses.
     enforce:
       - "Request deve conter validações @NotNull @NotBlank @Size exatas."
       - "Response nunca expõe entidades diretamente."
@@ -51,7 +51,7 @@ rules:
     enforce:
       - "Mapper deve ser interface com @Mapper(componentModel = 'spring')."
       - "Nunca escrever conversão manual se puder ser gerada."
-      - "Criar método: toEntity(), toResponse(), toDTO(), toListResponse()."
+      - "Criar método: toResponse(), fromRequest(), updateFromRequest()."
       - "Mapear enums explicitamente quando necessário."
       - "Não pode ter lógica de negócio dentro do mapper."
 

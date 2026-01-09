@@ -2,7 +2,6 @@ package com.upsaude.entity.embeddable;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
-import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -70,15 +69,12 @@ public class InformacoesFinanceirasConvenio {
     @Column(name = "limite_anual_internacoes")
     private Integer limiteAnualInternacoes;
 
-    @Size(max = 50, message = "Forma de pagamento deve ter no máximo 50 caracteres")
     @Column(name = "forma_pagamento", length = 50)
     private String formaPagamento;
 
-    @Size(max = 50, message = "Dia de vencimento deve ter no máximo 50 caracteres")
     @Column(name = "dia_vencimento", length = 50)
     private String diaVencimento;
 
-    @Size(max = 255, message = "Observações financeiras deve ter no máximo 255 caracteres")
     @Column(name = "observacoes_financeiras", length = 255)
     private String observacoesFinanceiras;
 }

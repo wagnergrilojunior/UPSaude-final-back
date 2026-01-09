@@ -1,0 +1,34 @@
+package com.upsaude.mapper.estabelecimento;
+
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
+import org.mapstruct.MappingTarget;
+
+import com.upsaude.api.request.estabelecimento.EquipamentosEstabelecimentoRequest;
+import com.upsaude.api.response.estabelecimento.EquipamentosEstabelecimentoResponse;
+import com.upsaude.entity.estabelecimento.EquipamentosEstabelecimento;
+import com.upsaude.mapper.config.MappingConfig;
+import com.upsaude.mapper.estabelecimento.equipamento.EquipamentosMapper;
+
+@Mapper(config = MappingConfig.class, uses = { EquipamentosMapper.class, EstabelecimentosMapper.class })
+public interface EquipamentosEstabelecimentoMapper {
+
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "createdAt", ignore = true)
+    @Mapping(target = "updatedAt", ignore = true)
+    @Mapping(target = "active", ignore = true)
+    @Mapping(target = "equipamento", ignore = true)
+    @Mapping(target = "estabelecimento", ignore = true)
+    EquipamentosEstabelecimento fromRequest(EquipamentosEstabelecimentoRequest request);
+
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "createdAt", ignore = true)
+    @Mapping(target = "updatedAt", ignore = true)
+    @Mapping(target = "active", ignore = true)
+    @Mapping(target = "equipamento", ignore = true)
+    @Mapping(target = "estabelecimento", ignore = true)
+    void updateFromRequest(EquipamentosEstabelecimentoRequest request,
+            @MappingTarget EquipamentosEstabelecimento entity);
+
+    EquipamentosEstabelecimentoResponse toResponse(EquipamentosEstabelecimento entity);
+}

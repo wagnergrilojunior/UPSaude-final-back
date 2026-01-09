@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns="http://servicos.saude.gov.br/wsdl/mensageria/sigtap/v1/detalheadicional" xmlns:pag="http://servicos.saude.gov.br/wsdl/mensageria/v1/paginacao" elementFormDefault="qualified" targetNamespace="http://servicos.saude.gov.br/wsdl/mensageria/sigtap/v1/detalheadicional">
+
+	<xs:import id="pag" namespace="http://servicos.saude.gov.br/wsdl/mensageria/v1/paginacao" schemaLocation="paginacao.v1.xsd"/>
+
+	<xs:annotation>
+		<xs:documentation>
+
+			Estrutura destinada à representar um detalhe adicional à ser incluído no
+			detalhamento do procedimento.
+
+		</xs:documentation>
+	</xs:annotation>
+
+	<xs:element name="DetalheAdicional" type="DetalheAdicionalType"/>
+
+	<xs:complexType name="DetalheAdicionalType">
+		<xs:sequence>
+
+			<xs:element name="categoriaDetalheAdicional" minOccurs="1" maxOccurs="1" nillable="false" type="CategoriaDetalheAdicionalType">
+				<xs:annotation>
+					<xs:documentation>
+						Categoria definidora do detalhe adicional.
+					</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+
+			<xs:element name="Paginacao" minOccurs="0" maxOccurs="1" nillable="false" type="pag:PaginacaoType">
+				<xs:annotation>
+					<xs:documentation>
+						Estrutura de paginação.
+					</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+
+		</xs:sequence>
+	</xs:complexType>
+
+	<xs:simpleType name="CategoriaDetalheAdicionalType">
+		<xs:annotation>
+			<xs:documentation>
+				Categorias para detalhe adicional de procedimento.
+			</xs:documentation>
+		</xs:annotation>
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="DESCRICAO"/>
+			<xs:enumeration value="CIDS"/>
+			<xs:enumeration value="CBOS"/>
+			<xs:enumeration value="CATEGORIAS_CBO"/>
+			<xs:enumeration value="TIPOS_LEITO"/>
+			<xs:enumeration value="SERVICOS_CLASSIFICACOES"/>
+			<xs:enumeration value="HABILITACOES"/>
+			<xs:enumeration value="GRUPOS_HABILITACAO"/>
+			<xs:enumeration value="INCREMENTOS"/>
+			<xs:enumeration value="COMPONENTES_REDE"/>
+			<xs:enumeration value="ORIGENS_SIGTAP"/>
+			<xs:enumeration value="ORIGENS_SIA_SIH"/>
+			<xs:enumeration value="REGRAS_CONDICIONADA"/>
+			<xs:enumeration value="RENASES"/>
+			<xs:enumeration value="TUSS"/>
+		</xs:restriction>
+	</xs:simpleType>
+
+</xs:schema>

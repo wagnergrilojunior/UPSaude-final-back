@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<wsdl:definitions xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:WL5G3N0="http://schemas.xmlsoap.org/wsdl/" xmlns:WL5G3N1="http://servicos.saude.gov.br/cnes/v1r0/equipamentoservice" xmlns:WL5G3N2="http://servicos.saude.gov.br/wsdl/mensageria/falha/v5r0/msfalha" xmlns:WL5G3N3="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:WL5G3N4="http://schemas.xmlsoap.org/wsdl/soap12/" name="equipamento.v1r0" targetNamespace="http://servicos.saude.gov.br/cnes/v1r0/equipamentoservice">
+
+    <wsdl:types>
+        
+    <xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+      <xsd:import namespace="http://servicos.saude.gov.br/cnes/v1r0/equipamentoservice" schemaLocation="https://servicos.saude.gov.br/cnes/EquipamentoService/v1r0?WSDL&amp;type=XSD&amp;file=schema%3A7dc93233-b40f-4fbe-9c87-b3aac6b1e936"/>
+    </xsd:schema>
+  </wsdl:types>
+    <wsdl:message name="requestConsultarEquipamentos">
+        <wsdl:part element="WL5G3N1:requestConsultarEquipamentos" name="requestConsultarEquipamentos"/>
+    </wsdl:message>
+    <wsdl:message name="responseConsultarEquipamentos">
+        <wsdl:part element="WL5G3N1:responseConsultarEquipamentos" name="responseConsultarEquipamentos"/>
+    </wsdl:message>
+    <wsdl:message name="CnesFault">
+        <wsdl:part element="WL5G3N2:MSFalha" name="fault"/>
+    </wsdl:message>
+    <wsdl:portType name="EquipamentoServicePortType">
+        <wsdl:operation name="consultarEquipamentos">
+            <wsdl:input message="WL5G3N1:requestConsultarEquipamentos" name="requestConsultarEquipamentos"/>
+            <wsdl:output message="WL5G3N1:responseConsultarEquipamentos" name="responseConsultarEquipamentos"/>
+            <wsdl:fault message="WL5G3N1:CnesFault" name="CnesFault"/>
+        </wsdl:operation>
+    </wsdl:portType>
+    <wsdl:binding name="EquipamentoServiceSOAP12Binding" type="WL5G3N1:EquipamentoServicePortType">
+        <WL5G3N4:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
+      
+        <wsdl:operation name="consultarEquipamentos">
+            <WL5G3N4:operation soapActionRequired="false"/>
+            <wsdl:input>
+                <WL5G3N4:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <WL5G3N4:body use="literal"/>
+            </wsdl:output>
+            <wsdl:fault name="CnesFault">
+                <WL5G3N4:fault name="CnesFault" use="literal"/>
+            </wsdl:fault>
+        </wsdl:operation>
+    </wsdl:binding>
+    <wsdl:binding name="EquipamentoServiceSOAP11Binding" type="WL5G3N1:EquipamentoServicePortType">
+        <WL5G3N3:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
+        <wsdl:operation name="consultarEquipamentos">
+            <WL5G3N3:operation/>
+            <wsdl:input>
+                <WL5G3N3:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <WL5G3N3:body use="literal"/>
+            </wsdl:output>
+            <wsdl:fault name="CnesFault">
+                <WL5G3N3:fault name="CnesFault" use="literal"/>
+            </wsdl:fault>
+        </wsdl:operation>
+    </wsdl:binding>
+    <wsdl:service name="EquipamentoService">
+        <wsdl:port binding="WL5G3N1:EquipamentoServiceSOAP12Binding" name="EquipamentoServicePort">
+            <WL5G3N4:address location="https://servicos.saude.gov.br/cnes/EquipamentoService/v1r0"/>
+        </wsdl:port>
+    </wsdl:service>
+</wsdl:definitions>

@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns="http://servicos.saude.gov.br/schema/sigtap/procedimento/origem/v1/origemsiasih" elementFormDefault="qualified" targetNamespace="http://servicos.saude.gov.br/schema/sigtap/procedimento/origem/v1/origemsiasih">
+    
+    <xs:annotation>
+        <xs:documentation>
+            <![CDATA[
+            Este esquema representa uma Origem SIA/SIH. 
+            Representa um Procedimento SIA/SIH que deu origem à outro Procedimento.
+            ]]>
+        </xs:documentation>
+    </xs:annotation>
+    
+    <xs:simpleType name="CodigoProcedimentoSIASIH">
+        <xs:restriction base="xs:string">
+            <xs:minLength value="1"/>
+            <xs:maxLength value="10"/>
+        </xs:restriction>
+    </xs:simpleType>
+
+    <xs:complexType name="OrigemSIASIHType">
+        <xs:sequence>
+
+            <xs:element name="codigoProcedimentoSIASIH" minOccurs="1" maxOccurs="1" nillable="true" type="CodigoProcedimentoSIASIH">
+                <xs:annotation>
+                    <xs:documentation>
+                        <![CDATA[ Código identificador do Procedimento de Origem SIA/SIH. ]]>
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:element>
+
+            <xs:element name="nomeProcedimentoSIASIH" minOccurs="0" maxOccurs="1">
+                <xs:annotation>
+                    <xs:documentation>
+                        <![CDATA[ Nome descritivo do Procedimento de Origem SIA/SIH. ]]>
+                    </xs:documentation>
+                </xs:annotation>
+                <xs:simpleType>
+                    <xs:restriction base="xs:string">
+                        <xs:minLength value="1"/>
+                        <xs:maxLength value="100"/>
+                    </xs:restriction>
+                </xs:simpleType>
+            </xs:element>
+
+            <xs:element name="tipoOrigemSIASIHType" minOccurs="0" maxOccurs="1" type="TipoOrigemSIASIHType">
+                <xs:annotation>
+                    <xs:documentation>
+                        <![CDATA[ Tipo do Procedimento de Origem SIA/SIH. ]]>
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:element>
+
+        </xs:sequence>
+    </xs:complexType>
+    
+    <xs:simpleType name="TipoOrigemSIASIHType">
+        <xs:restriction base="xs:string">
+            <xs:enumeration value="AMBULATORIAL"/>
+            <xs:enumeration value="HOSPITALAR"/>
+        </xs:restriction>
+    </xs:simpleType>
+
+</xs:schema>

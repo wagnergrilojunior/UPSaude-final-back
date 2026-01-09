@@ -1,31 +1,20 @@
-# Dockerfile para deploy no Render
-FROM maven:3.9-eclipse-temurin-17 AS build
+FROM eclipse-temurin:17-jre
 
 WORKDIR /app
 
-# Copia o arquivo de configuração do Maven
-COPY pom.xml .
+COPY target/*.jar app.jar
 
-# Baixa as dependências (cache layer)
-RUN mvn dependency:go-offline -B
-
-# Copia o código fonte
-COPY src ./src
-
-# Compila a aplicação
-RUN mvn clean package -DskipTests
-
-# Imagem final
-FROM eclipse-temurin:17-jre-alpine
-
-WORKDIR /app
-
-# Copia o JAR da aplicação
-COPY --from=build /app/target/upsaude-back-1.0.0.jar app.jar
-
-# Expõe a porta (Render usa a variável PORT)
 EXPOSE 8080
 
-# Comando para iniciar a aplicação
-ENTRYPOINT ["java", "-jar", "app.jar", "--spring.profiles.active=prod"]
-
+# =========================================
+# JVM tuning para Spring Boot em produção
+# =========================================
+# -Xms1g                     : heap inicial
+# -Xmx4g                     : heap máximo (host 16GB)
+# -XX:+UseG1GC               : GC recomendado para apps server
+# -XX:MaxGCPauseMillis=200   : alvo de pausa de GC
+# -XX:+UseContainerSupport   : respeita limites do container
+# -Djava.security.egd=...    : startup mais rápido
+# -Djava.net.preferIPv4Stack=true        : FORÇA IPv4
+# -Djava.net.preferIPv4Addresses=true    : prioridade IPv4
+ENTRYPOINT ["java","-Xms1g","-Xmx4g","-XX:+UseG1GC","-XX:MaxGCPauseMillis=200","-XX:+UseContainerSupport","-Djava.security.egd=file:/dev/./urandom","-Djava.net.preferIPv4Stack=true","-Djava.net.preferIPv4Addresses=true","-jar","app.jar"]

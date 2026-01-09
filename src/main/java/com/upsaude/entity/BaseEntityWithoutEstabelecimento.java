@@ -1,4 +1,5 @@
 package com.upsaude.entity;
+import com.upsaude.entity.sistema.multitenancy.Tenant;
 
 import java.time.OffsetDateTime;
 import java.util.UUID;

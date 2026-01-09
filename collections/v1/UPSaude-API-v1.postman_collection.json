@@ -1,0 +1,3526 @@
+{
+	"info": {
+		"_postman_id": "upsaude-api-v1",
+		"name": "UPSaude API v1",
+		"description": "Collection completa da API UPSaude versão 1.0",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"auth": {
+		"type": "bearer",
+		"bearer": [
+			{
+				"key": "token",
+				"value": "{{auth_token}}",
+				"type": "string"
+			}
+		]
+	},
+	"item": [
+		{
+			"name": "01 - Autenticação",
+			"item": [
+				{
+					"name": "Login",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"usuario@example.com\",\n  \"password\": \"senha123\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/v1/auth/login",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"v1",
+								"auth",
+								"login"
+							]
+						},
+						"description": "Realizar login e obter token de autenticação"
+					},
+					"response": [],
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 200) {",
+									"    const response = pm.response.json();",
+									"    if (response.token) {",
+									"        pm.environment.set(\"auth_token\", response.token);",
+									"    } else if (response.access_token) {",
+									"        pm.environment.set(\"auth_token\", response.access_token);",
+									"    } else if (response.data && response.data.token) {",
+									"        pm.environment.set(\"auth_token\", response.data.token);",
+									"    }",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					]
+				},
+				{
+					"name": "Verificar Acesso",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/v1/auth/verificar-acesso",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"v1",
+								"auth",
+								"verificar-acesso"
+							]
+						},
+						"description": "Verifica se o usuário autenticado tem acesso ao sistema"
+					},
+					"response": []
+				},
+				{
+					"name": "Obter Usuário Atual",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/v1/auth/me",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"v1",
+								"auth",
+								"me"
+							]
+						},
+						"description": "Retorna informações do usuário autenticado"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "02 - Sistema - Usuários",
+			"item": [
+				{
+					"name": "Criar Usuário",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"username\": \"usuario\",\n  \"email\": \"usuario@example.com\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/v1/users",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"v1",
+								"users"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Listar Usuários",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/v1/users?page=0&size=20&sort=createdAt,desc",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"v1",
+								"users"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "0"
+								},
+								{
+									"key": "size",
+									"value": "20"
+								},
+								{
+									"key": "sort",
+									"value": "createdAt,desc"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Obter Usuário por ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/v1/users/:id",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"v1",
+								"users",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": ""
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Atualizar Usuário",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"username\": \"usuario_atualizado\",\n  \"email\": \"usuario@example.com\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/v1/users/:id",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"v1",
+								"users",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": ""
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Excluir Usuário",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/v1/users/:id",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"v1",
+								"users",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": ""
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Listar Usuários do Sistema",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/v1/usuarios-sistema?page=0&size=20",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"v1",
+								"usuarios-sistema"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "0"
+								},
+								{
+									"key": "size",
+									"value": "20"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "03 - Sistema - Multitenancy",
+			"item": [
+				{
+					"name": "Criar Tenant",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"nome\": \"Tenant Exemplo\",\n  \"ativo\": true\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/v1/tenants",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"v1",
+								"tenants"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Listar Tenants",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/v1/tenants?page=0&size=20",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"v1",
+								"tenants"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "0"
+								},
+								{
+									"key": "size",
+									"value": "20"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Obter Tenant por ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/v1/tenants/:id",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"v1",
+								"tenants",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": ""
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "04 - Pacientes",
+			"item": [
+				{
+					"name": "Criar Paciente",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"nome\": \"João Silva\",\n  \"cpf\": \"12345678900\",\n  \"dataNascimento\": \"1990-01-01\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/v1/pacientes",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"v1",
+								"pacientes"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Listar Pacientes",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/v1/pacientes?page=0&size=20&sort=nome,asc",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"v1",
+								"pacientes"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "0"
+								},
+								{
+									"key": "size",
+									"value": "20"
+								},
+								{
+									"key": "sort",
+									"value": "nome,asc"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Obter Paciente por ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/v1/pacientes/:id",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"v1",
+								"pacientes",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": ""
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Atualizar Paciente",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"nome\": \"João Silva Atualizado\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/v1/pacientes/:id",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"v1",
+								"pacientes",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": ""
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Excluir Paciente",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/v1/pacientes/:id",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"v1",
+								"pacientes",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": ""
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "05 - Estabelecimentos",
+			"item": [
+				{
+					"name": "Criar Estabelecimento",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"nome\": \"Hospital Exemplo\",\n  \"cnpj\": \"12345678000190\",\n  \"codigoCnes\": \"1234567\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/v1/estabelecimentos",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"v1",
+								"estabelecimentos"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Listar Estabelecimentos",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/v1/estabelecimentos?page=0&size=20",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"v1",
+								"estabelecimentos"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "0"
+								},
+								{
+									"key": "size",
+									"value": "20"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Obter Estabelecimento por ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/v1/estabelecimentos/:id",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"v1",
+								"estabelecimentos",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": ""
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Atualizar Estabelecimento",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"nome\": \"Hospital Exemplo Atualizado\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/v1/estabelecimentos/:id",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"v1",
+								"estabelecimentos",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": ""
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Excluir Estabelecimento",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/v1/estabelecimentos/:id",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"v1",
+								"estabelecimentos",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": ""
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "06 - Profissionais",
+			"item": [
+				{
+					"name": "Criar Profissional",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"nome\": \"Dr. João Silva\",\n  \"crm\": \"123456\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/v1/profissionais-saude",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"v1",
+								"profissionais-saude"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Listar Profissionais",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/v1/profissionais-saude?page=0&size=20",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"v1",
+								"profissionais-saude"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "0"
+								},
+								{
+									"key": "size",
+									"value": "20"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Obter Profissional por ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/v1/profissionais-saude/:id",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"v1",
+								"profissionais-saude",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": ""
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Listar Médicos",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/v1/medicos?page=0&size=20",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"v1",
+								"medicos"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "0"
+								},
+								{
+									"key": "size",
+									"value": "20"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "07 - Referências",
+			"item": [
+				{
+					"name": "Listar Estados",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/v1/estados",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"v1",
+								"estados"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Listar Cidades",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/v1/cidades?estadoId=:estadoId",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"v1",
+								"cidades"
+							],
+							"query": [
+								{
+									"key": "estadoId",
+									"value": ":estadoId"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Buscar CID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/v1/cid?search=:search",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"v1",
+								"cid"
+							],
+							"query": [
+								{
+									"key": "search",
+									"value": ":search"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Buscar SIGTAP",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/v1/sigtap?search=:search",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"v1",
+								"sigtap"
+							],
+							"query": [
+								{
+									"key": "search",
+									"value": ":search"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "08 - Import Jobs",
+			"item": [
+				{
+					"name": "Obter Job por ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/v1/import-jobs/:jobId",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"v1",
+								"import-jobs",
+								":jobId"
+							],
+							"variable": [
+								{
+									"key": "jobId",
+									"value": ""
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Listar Jobs",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/v1/import-jobs?page=0&size=20&status=:status",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"v1",
+								"import-jobs"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "0"
+								},
+								{
+									"key": "size",
+									"value": "20"
+								},
+								{
+									"key": "status",
+									"value": ":status"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Obter Status do Job",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/v1/import-jobs/:jobId/status",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"v1",
+								"import-jobs",
+								":jobId",
+								"status"
+							],
+							"variable": [
+								{
+									"key": "jobId",
+									"value": ""
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Listar Erros do Job",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/v1/import-jobs/:jobId/erros?page=0&size=20",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"v1",
+								"import-jobs",
+								":jobId",
+								"erros"
+							],
+							"variable": [
+								{
+									"key": "jobId",
+									"value": ""
+								}
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "0"
+								},
+								{
+									"key": "size",
+									"value": "20"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "09 - Sistema - Enums",
+			"item": [
+				{
+					"name": "Listar Enums",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/v1/enums",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"v1",
+								"enums"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Obter Enum por Nome",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/v1/enums/:nome",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"v1",
+								"enums",
+								":nome"
+							],
+							"variable": [
+								{
+									"key": "nome",
+									"value": ""
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "10 - Sistema - Relatórios",
+			"item": [
+				{
+					"name": "Estatísticas",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"dataInicio\": \"2024-01-01\",\n  \"dataFim\": \"2024-12-31\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/v1/relatorios/estatisticas",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"v1",
+								"relatorios",
+								"estatisticas"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "11 - Sistema - Auditoria",
+			"item": [
+				{
+					"name": "Listar Logs de Auditoria",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/v1/logs-auditoria?page=0&size=20",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"v1",
+								"logs-auditoria"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "0"
+								},
+								{
+									"key": "size",
+									"value": "20"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "12 - Sistema - LGPD",
+			"item": [
+				{
+					"name": "Criar Consentimento",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"pacienteId\": \"\",\n  \"tipoConsentimento\": \"\",\n  \"consentido\": true\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/v1/lgpd-consentimentos",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"v1",
+								"lgpd-consentimentos"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Listar Consentimentos",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/v1/lgpd-consentimentos?page=0&size=20",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"v1",
+								"lgpd-consentimentos"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "0"
+								},
+								{
+									"key": "size",
+									"value": "20"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "13 - Importação de Arquivos",
+			"item": [
+				{
+					"name": "Upload SIA-PA",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "file",
+									"type": "file",
+									"src": []
+								},
+								{
+									"key": "competenciaAno",
+									"value": "2025",
+									"type": "text"
+								},
+								{
+									"key": "competenciaMes",
+									"value": "01",
+									"type": "text"
+								},
+								{
+									"key": "uf",
+									"value": "MG",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{base_url}}/v1/sia/import/upload",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"v1",
+								"sia",
+								"import",
+								"upload"
+							]
+						},
+						"description": "Upload de arquivo CSV do SIA-PA para Supabase Storage e criação de job assíncrono"
+					}
+				},
+				{
+					"name": "Listar Arquivos SIA",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/v1/sia/import/arquivos/:ano/:uf/:mes",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"v1",
+								"sia",
+								"import",
+								"arquivos",
+								":ano",
+								":uf",
+								":mes"
+							],
+							"variable": [
+								{
+									"key": "ano",
+									"value": "2025"
+								},
+								{
+									"key": "uf",
+									"value": "MG"
+								},
+								{
+									"key": "mes",
+									"value": "01"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Listar Meses SIA",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/v1/sia/import/meses/:ano/:uf",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"v1",
+								"sia",
+								"import",
+								"meses",
+								":ano",
+								":uf"
+							],
+							"variable": [
+								{
+									"key": "ano",
+									"value": "2025"
+								},
+								{
+									"key": "uf",
+									"value": "MG"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Upload SIGTAP",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "file",
+									"type": "file",
+									"src": []
+								},
+								{
+									"key": "layoutFile",
+									"type": "file",
+									"src": []
+								},
+								{
+									"key": "competencia",
+									"value": "202512",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{base_url}}/v1/sigtap/import/upload",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"v1",
+								"sigtap",
+								"import",
+								"upload"
+							]
+						},
+						"description": "Upload de arquivo TXT do SIGTAP + layout para Supabase Storage e criação de job assíncrono"
+					}
+				},
+				{
+					"name": "Listar Arquivos SIGTAP",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/v1/sigtap/import/arquivos/:competencia",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"v1",
+								"sigtap",
+								"import",
+								"arquivos",
+								":competencia"
+							],
+							"variable": [
+								{
+									"key": "competencia",
+									"value": "202512"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Upload CID10",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "file",
+									"type": "file",
+									"src": []
+								},
+								{
+									"key": "competencia",
+									"value": "202512",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{base_url}}/v1/cid10/import/upload",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"v1",
+								"cid10",
+								"import",
+								"upload"
+							]
+						},
+						"description": "Upload de arquivo CSV do CID10 para Supabase Storage e criação de job assíncrono"
+					}
+				},
+				{
+					"name": "Listar Arquivos CID10",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/v1/cid10/import/arquivos/:competencia",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"v1",
+								"cid10",
+								"import",
+								"arquivos",
+								":competencia"
+							],
+							"variable": [
+								{
+									"key": "competencia",
+									"value": "202512"
+								}
+							]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "14 - Prontuários",
+			"item": [
+				{
+					"name": "Criar Prontuário",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{}"
+						},
+						"url": {
+							"raw": "{{base_url}}/v1/prontuarios",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"v1",
+								"prontuarios"
+							]
+						}
+					}
+				},
+				{
+					"name": "Listar Prontuários",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/v1/prontuarios?page=0&size=20",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"v1",
+								"prontuarios"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "0"
+								},
+								{
+									"key": "size",
+									"value": "20"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Obter Prontuário por ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/v1/prontuarios/:id",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"v1",
+								"prontuarios",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": ""
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Atualizar Prontuário",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{}"
+						},
+						"url": {
+							"raw": "{{base_url}}/v1/prontuarios/:id",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"v1",
+								"prontuarios",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": ""
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Excluir Prontuário",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/v1/prontuarios/:id",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"v1",
+								"prontuarios",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": ""
+								}
+							]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "15 - Cirurgias",
+			"item": [
+				{
+					"name": "Criar Cirurgia",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{}"
+						},
+						"url": {
+							"raw": "{{base_url}}/v1/cirurgias",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"v1",
+								"cirurgias"
+							]
+						}
+					}
+				},
+				{
+					"name": "Listar Cirurgias",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/v1/cirurgias?page=0&size=20",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"v1",
+								"cirurgias"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "0"
+								},
+								{
+									"key": "size",
+									"value": "20"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Obter Cirurgia por ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/v1/cirurgias/:id",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"v1",
+								"cirurgias",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": ""
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Listar por Paciente",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/v1/cirurgias/por-paciente/:pacienteId?page=0&size=20",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"v1",
+								"cirurgias",
+								"por-paciente",
+								":pacienteId"
+							],
+							"variable": [
+								{
+									"key": "pacienteId",
+									"value": ""
+								}
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "0"
+								},
+								{
+									"key": "size",
+									"value": "20"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Listar por Status",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/v1/cirurgias/por-status/:status?page=0&size=20",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"v1",
+								"cirurgias",
+								"por-status",
+								":status"
+							],
+							"variable": [
+								{
+									"key": "status",
+									"value": ""
+								}
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "0"
+								},
+								{
+									"key": "size",
+									"value": "20"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Listar por Período",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/v1/cirurgias/por-periodo?inicio=2024-01-01T00:00:00Z&fim=2024-12-31T23:59:59Z&page=0&size=20",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"v1",
+								"cirurgias",
+								"por-periodo"
+							],
+							"query": [
+								{
+									"key": "inicio",
+									"value": "2024-01-01T00:00:00Z"
+								},
+								{
+									"key": "fim",
+									"value": "2024-12-31T23:59:59Z"
+								},
+								{
+									"key": "page",
+									"value": "0"
+								},
+								{
+									"key": "size",
+									"value": "20"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Atualizar Cirurgia",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{}"
+						},
+						"url": {
+							"raw": "{{base_url}}/v1/cirurgias/:id",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"v1",
+								"cirurgias",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": ""
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Excluir Cirurgia",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/v1/cirurgias/:id",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"v1",
+								"cirurgias",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": ""
+								}
+							]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "16 - Convênios",
+			"item": [
+				{
+					"name": "Criar Convênio",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{}"
+						},
+						"url": {
+							"raw": "{{base_url}}/v1/convenios",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"v1",
+								"convenios"
+							]
+						}
+					}
+				},
+				{
+					"name": "Listar Convênios",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/v1/convenios?page=0&size=20",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"v1",
+								"convenios"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "0"
+								},
+								{
+									"key": "size",
+									"value": "20"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Obter Convênio por ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/v1/convenios/:id",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"v1",
+								"convenios",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": ""
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Atualizar Convênio",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{}"
+						},
+						"url": {
+							"raw": "{{base_url}}/v1/convenios/:id",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"v1",
+								"convenios",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": ""
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Excluir Convênio",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/v1/convenios/:id",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"v1",
+								"convenios",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": ""
+								}
+							]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "17 - Deficiências",
+			"item": [
+				{
+					"name": "Criar Deficiência",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{}"
+						},
+						"url": {
+							"raw": "{{base_url}}/v1/deficiencias",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"v1",
+								"deficiencias"
+							]
+						}
+					}
+				},
+				{
+					"name": "Listar Deficiências",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/v1/deficiencias?page=0&size=20",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"v1",
+								"deficiencias"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "0"
+								},
+								{
+									"key": "size",
+									"value": "20"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Obter Deficiência por ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/v1/deficiencias/:id",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"v1",
+								"deficiencias",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": ""
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Atualizar Deficiência",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{}"
+						},
+						"url": {
+							"raw": "{{base_url}}/v1/deficiencias/:id",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"v1",
+								"deficiencias",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": ""
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Excluir Deficiência",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/v1/deficiencias/:id",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"v1",
+								"deficiencias",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": ""
+								}
+							]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "18 - Notificações",
+			"item": [
+				{
+					"name": "Criar Notificação",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{}"
+						},
+						"url": {
+							"raw": "{{base_url}}/v1/notificacoes",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"v1",
+								"notificacoes"
+							]
+						}
+					}
+				},
+				{
+					"name": "Listar Notificações",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/v1/notificacoes?page=0&size=20",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"v1",
+								"notificacoes"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "0"
+								},
+								{
+									"key": "size",
+									"value": "20"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Obter Notificação por ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/v1/notificacoes/:id",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"v1",
+								"notificacoes",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": ""
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Atualizar Notificação",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{}"
+						},
+						"url": {
+							"raw": "{{base_url}}/v1/notificacoes/:id",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"v1",
+								"notificacoes",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": ""
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Excluir Notificação",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/v1/notificacoes/:id",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"v1",
+								"notificacoes",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": ""
+								}
+							]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "19 - Templates de Notificação",
+			"item": [
+				{
+					"name": "Criar Template",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{}"
+						},
+						"url": {
+							"raw": "{{base_url}}/v1/templates-notificacao",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"v1",
+								"templates-notificacao"
+							]
+						}
+					}
+				},
+				{
+					"name": "Listar Templates",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/v1/templates-notificacao?page=0&size=20",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"v1",
+								"templates-notificacao"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "0"
+								},
+								{
+									"key": "size",
+									"value": "20"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Obter Template por ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/v1/templates-notificacao/:id",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"v1",
+								"templates-notificacao",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": ""
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Atualizar Template",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{}"
+						},
+						"url": {
+							"raw": "{{base_url}}/v1/templates-notificacao/:id",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"v1",
+								"templates-notificacao",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": ""
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Excluir Template",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/v1/templates-notificacao/:id",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"v1",
+								"templates-notificacao",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": ""
+								}
+							]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "20 - Permissões",
+			"item": [
+				{
+					"name": "Criar Permissão",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{}"
+						},
+						"url": {
+							"raw": "{{base_url}}/v1/permissoes",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"v1",
+								"permissoes"
+							]
+						}
+					}
+				},
+				{
+					"name": "Listar Permissões",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/v1/permissoes?page=0&size=20",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"v1",
+								"permissoes"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "0"
+								},
+								{
+									"key": "size",
+									"value": "20"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Obter Permissão por ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/v1/permissoes/:id",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"v1",
+								"permissoes",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": ""
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Atualizar Permissão",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{}"
+						},
+						"url": {
+							"raw": "{{base_url}}/v1/permissoes/:id",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"v1",
+								"permissoes",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": ""
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Excluir Permissão",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/v1/permissoes/:id",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"v1",
+								"permissoes",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": ""
+								}
+							]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "21 - Perfis de Usuários",
+			"item": [
+				{
+					"name": "Criar Perfil",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{}"
+						},
+						"url": {
+							"raw": "{{base_url}}/v1/perfis-usuarios",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"v1",
+								"perfis-usuarios"
+							]
+						}
+					}
+				},
+				{
+					"name": "Listar Perfis",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/v1/perfis-usuarios?page=0&size=20",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"v1",
+								"perfis-usuarios"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "0"
+								},
+								{
+									"key": "size",
+									"value": "20"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Obter Perfil por ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/v1/perfis-usuarios/:id",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"v1",
+								"perfis-usuarios",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": ""
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Atualizar Perfil",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{}"
+						},
+						"url": {
+							"raw": "{{base_url}}/v1/perfis-usuarios/:id",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"v1",
+								"perfis-usuarios",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": ""
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Excluir Perfil",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/v1/perfis-usuarios/:id",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"v1",
+								"perfis-usuarios",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": ""
+								}
+							]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "22 - Integração Governamental",
+			"item": [
+				{
+					"name": "Criar Integração",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{}"
+						},
+						"url": {
+							"raw": "{{base_url}}/v1/integracao-gov",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"v1",
+								"integracao-gov"
+							]
+						}
+					}
+				},
+				{
+					"name": "Listar Integrações",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/v1/integracao-gov?page=0&size=20",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"v1",
+								"integracao-gov"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "0"
+								},
+								{
+									"key": "size",
+									"value": "20"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Obter Integração por ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/v1/integracao-gov/:id",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"v1",
+								"integracao-gov",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": ""
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Obter por Paciente",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/v1/integracao-gov/paciente/:pacienteId",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"v1",
+								"integracao-gov",
+								"paciente",
+								":pacienteId"
+							],
+							"variable": [
+								{
+									"key": "pacienteId",
+									"value": ""
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Atualizar Integração",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{}"
+						},
+						"url": {
+							"raw": "{{base_url}}/v1/integracao-gov/:id",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"v1",
+								"integracao-gov",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": ""
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Excluir Integração",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/v1/integracao-gov/:id",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"v1",
+								"integracao-gov",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": ""
+								}
+							]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "23 - Endereços",
+			"item": [
+				{
+					"name": "Criar Endereço",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{}"
+						},
+						"url": {
+							"raw": "{{base_url}}/v1/enderecos",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"v1",
+								"enderecos"
+							]
+						}
+					}
+				},
+				{
+					"name": "Listar Endereços",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/v1/enderecos?page=0&size=20",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"v1",
+								"enderecos"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "0"
+								},
+								{
+									"key": "size",
+									"value": "20"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Obter Endereço por ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/v1/enderecos/:id",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"v1",
+								"enderecos",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": ""
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Atualizar Endereço",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{}"
+						},
+						"url": {
+							"raw": "{{base_url}}/v1/enderecos/:id",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"v1",
+								"enderecos",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": ""
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Excluir Endereço",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/v1/enderecos/:id",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"v1",
+								"enderecos",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": ""
+								}
+							]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "24 - Responsáveis Legais",
+			"item": [
+				{
+					"name": "Criar Responsável",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{}"
+						},
+						"url": {
+							"raw": "{{base_url}}/v1/responsaveis-legais",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"v1",
+								"responsaveis-legais"
+							]
+						}
+					}
+				},
+				{
+					"name": "Listar Responsáveis",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/v1/responsaveis-legais?page=0&size=20",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"v1",
+								"responsaveis-legais"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "0"
+								},
+								{
+									"key": "size",
+									"value": "20"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Obter Responsável por ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/v1/responsaveis-legais/:id",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"v1",
+								"responsaveis-legais",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": ""
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Obter por Paciente",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/v1/responsaveis-legais/paciente/:pacienteId",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"v1",
+								"responsaveis-legais",
+								"paciente",
+								":pacienteId"
+							],
+							"variable": [
+								{
+									"key": "pacienteId",
+									"value": ""
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Atualizar Responsável",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{}"
+						},
+						"url": {
+							"raw": "{{base_url}}/v1/responsaveis-legais/:id",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"v1",
+								"responsaveis-legais",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": ""
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Excluir Responsável",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/v1/responsaveis-legais/:id",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"v1",
+								"responsaveis-legais",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": ""
+								}
+							]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "25 - Dados Clínicos Básicos",
+			"item": [
+				{
+					"name": "Criar Dados Clínicos",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{}"
+						},
+						"url": {
+							"raw": "{{base_url}}/v1/dados-clinicos-basicos",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"v1",
+								"dados-clinicos-basicos"
+							]
+						}
+					}
+				},
+				{
+					"name": "Listar Dados Clínicos",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/v1/dados-clinicos-basicos?page=0&size=20",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"v1",
+								"dados-clinicos-basicos"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "0"
+								},
+								{
+									"key": "size",
+									"value": "20"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Obter por ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/v1/dados-clinicos-basicos/:id",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"v1",
+								"dados-clinicos-basicos",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": ""
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Obter por Paciente",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/v1/dados-clinicos-basicos/paciente/:pacienteId",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"v1",
+								"dados-clinicos-basicos",
+								"paciente",
+								":pacienteId"
+							],
+							"variable": [
+								{
+									"key": "pacienteId",
+									"value": ""
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Atualizar Dados Clínicos",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{}"
+						},
+						"url": {
+							"raw": "{{base_url}}/v1/dados-clinicos-basicos/:id",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"v1",
+								"dados-clinicos-basicos",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": ""
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Excluir Dados Clínicos",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/v1/dados-clinicos-basicos/:id",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"v1",
+								"dados-clinicos-basicos",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": ""
+								}
+							]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "26 - Dados Sociodemográficos",
+			"item": [
+				{
+					"name": "Criar Dados Sociodemográficos",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{}"
+						},
+						"url": {
+							"raw": "{{base_url}}/v1/dados-sociodemograficos",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"v1",
+								"dados-sociodemograficos"
+							]
+						}
+					}
+				},
+				{
+					"name": "Listar Dados Sociodemográficos",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/v1/dados-sociodemograficos?page=0&size=20",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"v1",
+								"dados-sociodemograficos"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "0"
+								},
+								{
+									"key": "size",
+									"value": "20"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Obter por ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/v1/dados-sociodemograficos/:id",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"v1",
+								"dados-sociodemograficos",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": ""
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Obter por Paciente",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/v1/dados-sociodemograficos/paciente/:pacienteId",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"v1",
+								"dados-sociodemograficos",
+								"paciente",
+								":pacienteId"
+							],
+							"variable": [
+								{
+									"key": "pacienteId",
+									"value": ""
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Atualizar Dados Sociodemográficos",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{}"
+						},
+						"url": {
+							"raw": "{{base_url}}/v1/dados-sociodemograficos/:id",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"v1",
+								"dados-sociodemograficos",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": ""
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Excluir Dados Sociodemográficos",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/v1/dados-sociodemograficos/:id",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"v1",
+								"dados-sociodemograficos",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": ""
+								}
+							]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "27 - Teste Redis",
+			"item": [
+				{
+					"name": "Health Check",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/v1/test/redis/health",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"v1",
+								"test",
+								"redis",
+								"health"
+							]
+						}
+					}
+				},
+				{
+					"name": "Testar Cache",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/v1/test/redis/test-cache",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"v1",
+								"test",
+								"redis",
+								"test-cache"
+							]
+						}
+					}
+				},
+				{
+					"name": "Informações",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/v1/test/redis/info",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"v1",
+								"test",
+								"redis",
+								"info"
+							]
+						}
+					}
+				},
+				{
+					"name": "Estatísticas",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/v1/test/redis/stats",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"v1",
+								"test",
+								"redis",
+								"stats"
+							]
+						}
+					}
+				}
+			]
+		}
+	],
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "http://localhost:8080/api",
+			"type": "string"
+		},
+		{
+			"key": "auth_token",
+			"value": "",
+			"type": "string"
+		}
+	]
+}

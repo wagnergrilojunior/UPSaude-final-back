@@ -20,9 +20,11 @@ public class DiagnosticoConsulta {
         this.conduta = "";
     }
 
+    @Deprecated
     @Column(name = "diagnostico", columnDefinition = "TEXT")
     private String diagnostico;
 
+    @Deprecated
     @Column(name = "diagnosticos_secundarios", columnDefinition = "TEXT")
     private String diagnosticosSecundarios;
 

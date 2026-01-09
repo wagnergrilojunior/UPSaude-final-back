@@ -44,7 +44,6 @@ naming:
   packages: lower_snake_case
   table_names: snake_case
   entity_classes: singular
-  dto_names: PascalCase + "DTO"
   request_names: PascalCase + "Request"
   response_names: PascalCase + "Response"
 
@@ -166,7 +165,7 @@ spring_rules:
   - @Transactional ONLY no ServiceImpl.
   - Mapper nunca injeta Repository.
   - ServiceImpl nunca expõe entidade.
-  - Controller nunca recebe DTO, apenas Request.
+  - Controller nunca recebe Entity, apenas Request.
 
 # ==========================================================
 #   LIMPEZA E QUALIDADE

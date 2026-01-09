@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="utf-8"?>
+<wsdl:definitions xmlns:tns="http://servicos.saude.gov.br/sigtap/v1/compatibilidadeservice" xmlns:soap11="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:soap12="http://schemas.xmlsoap.org/wsdl/soap12/" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:msfalha="http://servicos.saude.gov.br/wsdl/mensageria/falha/v5r0/msfalha" name="CompatibilidadeService" targetNamespace="http://servicos.saude.gov.br/sigtap/v1/compatibilidadeservice">
+
+	<wsdl:types>
+		<xs:schema xmlns:comppos="http://servicos.saude.gov.br/schema/sigtap/compatibilidade/v1r1/compatibilidadepossivel" xmlns:comp="http://servicos.saude.gov.br/schema/corporativo/v1/competencia" xmlns:grupo="http://servicos.saude.gov.br/schema/sigtap/procedimento/nivelagregacao/v1/grupo" xmlns:subgrupo="http://servicos.saude.gov.br/schema/sigtap/procedimento/nivelagregacao/v1/subgrupo" xmlns:proced="http://servicos.saude.gov.br/schema/sigtap/procedimento/v1/procedimento" xmlns:pag="http://servicos.saude.gov.br/wsdl/mensageria/v1/paginacao" xmlns:compat="http://servicos.saude.gov.br/schema/sigtap/compatibilidade/v1r1/compatibilidade" xmlns:respc="http://servicos.saude.gov.br/wsdl/mensageria/v1r1/resultadospesquisacompatibilidades" elementFormDefault="qualified" targetNamespace="http://servicos.saude.gov.br/sigtap/v1/compatibilidadeservice">
+
+			<xs:import id="comppos" namespace="http://servicos.saude.gov.br/schema/sigtap/compatibilidade/v1r1/compatibilidadepossivel" schemaLocation="xsd/compatibilidadepossivel.v1r1.xsd"/>
+
+			<xs:import id="comp" namespace="http://servicos.saude.gov.br/schema/corporativo/v1/competencia" schemaLocation="xsd/competencia.v1.xsd"/>
+
+			<xs:import id="grupo" namespace="http://servicos.saude.gov.br/schema/sigtap/procedimento/nivelagregacao/v1/grupo" schemaLocation="xsd/grupo.v1.xsd"/>
+
+			<xs:import id="subgrupo" namespace="http://servicos.saude.gov.br/schema/sigtap/procedimento/nivelagregacao/v1/subgrupo" schemaLocation="xsd/subgrupo.v1.xsd"/>
+
+			<xs:import id="proced" namespace="http://servicos.saude.gov.br/schema/sigtap/procedimento/v1/procedimento" schemaLocation="xsd/procedimento.v1.xsd"/>
+
+			<xs:import id="pag" namespace="http://servicos.saude.gov.br/wsdl/mensageria/v1/paginacao" schemaLocation="xsd/paginacao.v1.xsd"/>
+
+			<xs:import id="compat" namespace="http://servicos.saude.gov.br/schema/sigtap/compatibilidade/v1r1/compatibilidade" schemaLocation="xsd/compatibilidade.v1r1.xsd"/>
+
+			<xs:import id="msfalha" namespace="http://servicos.saude.gov.br/wsdl/mensageria/falha/v5r0/msfalha" schemaLocation="xsd/msfalha.v5r0.xsd"/>
+
+			<xs:import id="respc" namespace="http://servicos.saude.gov.br/wsdl/mensageria/v1r1/resultadospesquisacompatibilidades" schemaLocation="xsd/resultadospesquisacompatibilidades.v1r1.xsd"/>
+
+			<xs:element name="requestPesquisarCompatibilidades">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element minOccurs="0" maxOccurs="1" ref="comppos:codigoCompatibilidadePossivel"/>
+						<xs:element minOccurs="0" maxOccurs="1" ref="comp:competencia"/>
+						<xs:element minOccurs="0" maxOccurs="1" ref="grupo:codigoGrupo"/>
+						<xs:element minOccurs="0" maxOccurs="1" ref="subgrupo:codigoSubgrupo"/>
+						<xs:element minOccurs="0" maxOccurs="1" ref="proced:codigoProcedimento"/>
+						<xs:element minOccurs="1" maxOccurs="1" ref="pag:Paginacao"/>
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="responsePesquisarCompatibilidades">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element minOccurs="1" maxOccurs="1" ref="respc:ResultadosPesquisaCompatibilidades">
+							<xs:annotation>
+								<xs:documentation><![CDATA[Resultado pesquisa de compatibilidades.]]></xs:documentation>
+							</xs:annotation>
+						</xs:element>
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+
+		</xs:schema>
+	</wsdl:types>
+
+	<wsdl:message name="requestPesquisarCompatibilidades">
+		<wsdl:part element="tns:requestPesquisarCompatibilidades" name="requestPesquisarCompatibilidades"/>
+	</wsdl:message>
+	<wsdl:message name="responsePesquisarCompatibilidades">
+		<wsdl:part element="tns:responsePesquisarCompatibilidades" name="responsePesquisarCompatibilidades"/>
+	</wsdl:message>
+
+	<wsdl:message name="SIGTAPFault">
+		<wsdl:part name="fault" element="msfalha:MSFalha"/>
+	</wsdl:message>
+
+	<wsdl:portType name="CompatibilidadeServicePortType">
+
+		<wsdl:operation name="pesquisarCompatibilidades">
+			<wsdl:documentation>
+				<![CDATA[ Listar as Compatibilidades existentes na base do SIGTAP de acordo com os filtros informados. ]]>
+			</wsdl:documentation>
+			<wsdl:input name="requestPesquisarCompatibilidades" message="tns:requestPesquisarCompatibilidades"/>
+			<wsdl:output name="responsePesquisarCompatibilidades" message="tns:responsePesquisarCompatibilidades"/>
+			<wsdl:fault name="SIGTAPFault" message="tns:SIGTAPFault"/>
+		</wsdl:operation>
+
+	</wsdl:portType>
+
+	<wsdl:binding name="CompatibilidadeServiceSOAP12Binding" type="tns:CompatibilidadeServicePortType">
+		<soap12:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
+
+		<wsdl:operation name="pesquisarCompatibilidades">
+			<wsdl:documentation>
+				<![CDATA[ Listar as Compatibilidades existentes na base do SIGTAP de acordo com os filtros informados. ]]>
+			</wsdl:documentation>
+			<soap12:operation soapAction=""/>
+			<wsdl:input>
+				<soap12:body use="literal"/>
+			</wsdl:input>
+			<wsdl:output>
+				<soap12:body use="literal"/>
+			</wsdl:output>
+			<wsdl:fault name="SIGTAPFault">
+				<soap12:fault name="SIGTAPFault" use="literal"/>
+			</wsdl:fault>
+		</wsdl:operation>
+
+	</wsdl:binding>
+
+	<wsdl:binding name="CompatibilidadeServiceSOAP11Binding" type="tns:CompatibilidadeServicePortType">
+		<soap11:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
+
+		<wsdl:operation name="pesquisarCompatibilidades">
+			<wsdl:documentation>
+				<![CDATA[ Listar as Compatibilidades existentes na base do SIGTAP de acordo com os filtros informados. ]]>
+			</wsdl:documentation>
+			<soap11:operation soapAction=""/>
+			<wsdl:input>
+				<soap11:body use="literal"/>
+			</wsdl:input>
+			<wsdl:output>
+				<soap11:body use="literal"/>
+			</wsdl:output>
+			<wsdl:fault name="SIGTAPFault">
+				<soap11:fault name="SIGTAPFault" use="literal"/>
+			</wsdl:fault>
+		</wsdl:operation>
+
+	</wsdl:binding>
+
+	<wsdl:service name="CompatibilidadeService">
+		<wsdl:port binding="tns:CompatibilidadeServiceSOAP12Binding" name="CompatibilidadeServicePort">
+			<soap12:address location="https://servicos.saude.gov.br/sigtap/CompatibilidadeService/v1"/>
+		</wsdl:port>
+		<wsdl:port binding="tns:CompatibilidadeServiceSOAP11Binding" name="CompatibilidadeServiceSOAP11Port">
+			<soap11:address location="https://servicos.saude.gov.br/sigtap/CompatibilidadeService/v1"/>
+		</wsdl:port>
+	</wsdl:service>
+
+</wsdl:definitions>

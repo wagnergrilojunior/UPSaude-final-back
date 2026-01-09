@@ -13,7 +13,7 @@ public class TipoCnsEnumSerializer extends JsonSerializer<TipoCnsEnum> {
         if (value == null) {
             gen.writeNull();
         } else {
-            gen.writeString(value.getDescricao());
+            gen.writeNumber(value.getCodigo());
         }
     }
 }

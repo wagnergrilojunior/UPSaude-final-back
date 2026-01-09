@@ -3,7 +3,8 @@ package com.upsaude.config;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -15,29 +16,32 @@ import javax.sql.DataSource;
 @Configuration
 public class DataSourceConfig {
 
+    /**
+     * HikariConfig para API - USO EXCLUSIVO API
+     * Pool menor, estável, baixa latência para requisições HTTP
+     */
     @Bean
     @Primary
-    @ConfigurationProperties("spring.datasource.hikari")
-    public HikariConfig hikariConfig(DataSourceProperties dataSourceProperties) {
+    @ConfigurationProperties("spring.datasource.api.hikari")
+    public HikariConfig apiHikariConfig(
+            @Value("${spring.datasource.api.url:${spring.datasource.url:}}") String jdbcUrl,
+            @Value("${spring.datasource.api.username:${spring.datasource.username:}}") String username,
+            @Value("${spring.datasource.api.password:${spring.datasource.password:}}") String password,
+            @Value("${spring.datasource.api.driver-class-name:${spring.datasource.driver-class-name:org.postgresql.Driver}}") String driverClassName) {
         HikariConfig config = new HikariConfig();
 
-        String jdbcUrl = dataSourceProperties.getUrl();
-        String username = dataSourceProperties.getUsername();
-        String password = dataSourceProperties.getPassword();
-        String driverClassName = dataSourceProperties.getDriverClassName();
-
         if (jdbcUrl == null || jdbcUrl.isEmpty()) {
-            log.error("ERRO CRÍTICO: spring.datasource.url não está configurado!");
-            throw new IllegalStateException("spring.datasource.url é obrigatório. Verifique as variáveis de ambiente ou application.properties");
+            log.error("ERRO CRÍTICO: spring.datasource.api.url não está configurado!");
+            throw new IllegalStateException("spring.datasource.api.url é obrigatório. Verifique as variáveis de ambiente ou application.properties");
         }
 
         if (username == null || username.isEmpty()) {
-            log.error("ERRO CRÍTICO: spring.datasource.username não está configurado!");
-            throw new IllegalStateException("spring.datasource.username é obrigatório. Verifique as variáveis de ambiente ou application.properties");
+            log.error("ERRO CRÍTICO: spring.datasource.api.username não está configurado!");
+            throw new IllegalStateException("spring.datasource.api.username é obrigatório. Verifique as variáveis de ambiente ou application.properties");
         }
 
         String urlForLog = jdbcUrl.replaceAll("password=[^&;]*", "password=***");
-        log.info("Configurando DataSource HikariCP - URL: {}, Username: {}, Driver: {}",
+        log.info("Configurando DataSource API HikariCP - URL: {}, Username: {}, Driver: {}",
                 urlForLog, username, driverClassName);
 
         config.setJdbcUrl(jdbcUrl);
@@ -45,80 +49,130 @@ public class DataSourceConfig {
         config.setPassword(password != null ? password : "");
         config.setDriverClassName(driverClassName != null ? driverClassName : "org.postgresql.Driver");
 
+        // Configurações específicas do PostgreSQL
         config.addDataSourceProperty("prepareThreshold", "0");
         config.addDataSourceProperty("preparedStatementCacheQueries", "0");
         config.addDataSourceProperty("preparedStatementCacheSizeMiB", "0");
-
         config.addDataSourceProperty("tcpKeepAlive", "true");
-
         config.addDataSourceProperty("socketTimeout", "30");
-
         config.addDataSourceProperty("loginTimeout", "10");
-
         config.addDataSourceProperty("cancelSignalTimeout", "30");
 
         config.setConnectionTestQuery("SELECT 1");
-
-        config.setInitializationFailTimeout(30000);
+        config.setInitializationFailTimeout(-1); // -1 = nunca falhar no startup, conexão lazy
         config.setRegisterMbeans(false);
 
-        log.info("DataSource HikariCP configurado com prepared statement cache desabilitado");
-        log.debug("Configurações do pool: maxPoolSize={}, minIdle={}, connectionTimeout={}ms",
+        // Define valores padrão ANTES do @ConfigurationProperties aplicar
+        // Isso garante que sempre teremos valores válidos, mesmo se @ConfigurationProperties falhar
+        config.setMaximumPoolSize(7); // Valor padrão para produção (será sobrescrito se configurado)
+        config.setMinimumIdle(2); // Valor padrão para produção (será sobrescrito se configurado)
+
+        log.info("DataSource API HikariCP configurado com prepared statement cache desabilitado");
+        log.info("Configurações do pool API: maxPoolSize={}, minIdle={}, connectionTimeout={}ms",
                 config.getMaximumPoolSize(), config.getMinimumIdle(), config.getConnectionTimeout());
 
         return config;
     }
 
+    /**
+     * HikariConfig para JOB - USO EXCLUSIVO JOB - NÃO USAR NA API
+     * Pool dedicado, tolera conexões longas para processamento pesado
+     */
+    @Bean
+    @Qualifier("jobHikariConfig")
+    @ConfigurationProperties("spring.datasource.job.hikari")
+    public HikariConfig jobHikariConfig(
+            @Value("${spring.datasource.job.url:${spring.datasource.url:}}") String jdbcUrl,
+            @Value("${spring.datasource.job.username:${spring.datasource.username:}}") String username,
+            @Value("${spring.datasource.job.password:${spring.datasource.password:}}") String password,
+            @Value("${spring.datasource.job.driver-class-name:${spring.datasource.driver-class-name:org.postgresql.Driver}}") String driverClassName) {
+        HikariConfig config = new HikariConfig();
+
+        if (jdbcUrl == null || jdbcUrl.isEmpty()) {
+            log.error("ERRO CRÍTICO: spring.datasource.job.url não está configurado!");
+            throw new IllegalStateException("spring.datasource.job.url é obrigatório. Verifique as variáveis de ambiente ou application.properties");
+        }
+
+        if (username == null || username.isEmpty()) {
+            log.error("ERRO CRÍTICO: spring.datasource.job.username não está configurado!");
+            throw new IllegalStateException("spring.datasource.job.username é obrigatório. Verifique as variáveis de ambiente ou application.properties");
+        }
+
+        String urlForLog = jdbcUrl.replaceAll("password=[^&;]*", "password=***");
+        log.info("Configurando DataSource JOB HikariCP - URL: {}, Username: {}, Driver: {}",
+                urlForLog, username, driverClassName);
+
+        config.setJdbcUrl(jdbcUrl);
+        config.setUsername(username);
+        config.setPassword(password != null ? password : "");
+        config.setDriverClassName(driverClassName != null ? driverClassName : "org.postgresql.Driver");
+
+        // Configurações específicas do PostgreSQL
+        config.addDataSourceProperty("prepareThreshold", "0");
+        config.addDataSourceProperty("preparedStatementCacheQueries", "0");
+        config.addDataSourceProperty("preparedStatementCacheSizeMiB", "0");
+        config.addDataSourceProperty("tcpKeepAlive", "true");
+        config.addDataSourceProperty("socketTimeout", "30");
+        config.addDataSourceProperty("loginTimeout", "10");
+        config.addDataSourceProperty("cancelSignalTimeout", "30");
+
+        config.setConnectionTestQuery("SELECT 1");
+        config.setInitializationFailTimeout(-1); // -1 = nunca falhar no startup, conexão lazy
+        config.setRegisterMbeans(false);
+
+        // Define valores padrão ANTES do @ConfigurationProperties aplicar
+        // Isso garante que sempre teremos valores válidos, mesmo se @ConfigurationProperties falhar
+        config.setMaximumPoolSize(4); // Valor padrão para produção (será sobrescrito se configurado)
+        config.setMinimumIdle(1); // Valor padrão para produção (será sobrescrito se configurado)
+
+        log.info("DataSource JOB HikariCP configurado com prepared statement cache desabilitado");
+        log.info("Configurações do pool JOB: maxPoolSize={}, minIdle={}, connectionTimeout={}ms",
+                config.getMaximumPoolSize(), config.getMinimumIdle(), config.getConnectionTimeout());
+
+        return config;
+    }
+
+    /**
+     * DataSource da API - @Primary - USO EXCLUSIVO API
+     * Usado por controllers, services e repositories da API HTTP
+     */
     @Bean
     @Primary
-    public DataSource dataSource(HikariConfig hikariConfig) {
-        try {
-            log.info("Inicializando pool de conexões HikariCP...");
-            HikariDataSource dataSource = new HikariDataSource(hikariConfig);
-
-            try (java.sql.Connection connection = dataSource.getConnection()) {
-                log.info("Conexão com banco de dados estabelecida com sucesso!");
-            } catch (Exception e) {
-                log.error("ERRO ao validar conexão inicial com banco de dados: {}", e.getMessage(), e);
-                log.error("Verifique se:");
-                log.error("1. O host do banco está acessível do ambiente de produção");
-                log.error("2. As credenciais estão corretas");
-                log.error("3. Não há firewall bloqueando a conexão");
-                log.error("4. A URL do banco está correta: {}", hikariConfig.getJdbcUrl().replaceAll("password=[^&;]*", "password=***"));
-                throw new RuntimeException("Falha ao conectar ao banco de dados. Verifique os logs acima para detalhes.", e);
-            }
-
-            return dataSource;
-        } catch (Exception e) {
-            log.error("ERRO CRÍTICO ao criar DataSource: {}", e.getMessage(), e);
-            if (e.getCause() instanceof java.net.SocketException) {
-                log.error("PROBLEMA DE REDE DETECTADO:");
-                log.error("- Verifique se o ambiente tem acesso à internet");
-                log.error("- Verifique se há firewall bloqueando conexões");
-                log.error("- Verifique se o host do banco está correto e acessível");
-                log.error("- Host tentado: {}", extractHostFromUrl(hikariConfig.getJdbcUrl()));
-            }
-            throw e;
-        }
+    @Qualifier("apiDataSource")
+    public DataSource apiDataSource(@Qualifier("apiHikariConfig") HikariConfig apiHikariConfig) {
+        log.info("Criando DataSource API HikariCP (lazy initialization - conexão será estabelecida sob demanda)...");
+        HikariDataSource dataSource = new HikariDataSource(apiHikariConfig);
+        
+        // NÃO validamos conexão no startup para evitar fail-fast
+        // O pool será inicializado de forma lazy quando a primeira conexão for solicitada
+        // O health check do Actuator será responsável por verificar a disponibilidade do banco
+        
+        log.info("DataSource API HikariCP criado com sucesso. Pool: maxPoolSize={}, minIdle={}", 
+                apiHikariConfig.getMaximumPoolSize(), apiHikariConfig.getMinimumIdle());
+        log.info("Nota: Conexão com o banco será estabelecida sob demanda. Use /api/actuator/health para verificar disponibilidade.");
+        
+        return dataSource;
     }
 
-    private String extractHostFromUrl(String jdbcUrl) {
-        if (jdbcUrl == null) {
-            return "null";
-        }
-        try {
-
-            int start = jdbcUrl.indexOf("://") + 3;
-            int end = jdbcUrl.indexOf("/", start);
-            if (end == -1) {
-                end = jdbcUrl.indexOf("?", start);
-            }
-            if (end == -1) {
-                end = jdbcUrl.length();
-            }
-            return jdbcUrl.substring(start, end);
-        } catch (Exception e) {
-            return jdbcUrl;
-        }
+    /**
+     * DataSource do JOB - @Qualifier("jobDataSource") - USO EXCLUSIVO JOB - NÃO USAR NA API
+     * Usado por scheduler, processor, workers e writers de importação
+     */
+    @Bean
+    @Qualifier("jobDataSource")
+    public DataSource jobDataSource(@Qualifier("jobHikariConfig") HikariConfig jobHikariConfig) {
+        log.info("Criando DataSource JOB HikariCP (lazy initialization - conexão será estabelecida sob demanda)...");
+        HikariDataSource dataSource = new HikariDataSource(jobHikariConfig);
+        
+        // NÃO validamos conexão no startup para evitar fail-fast
+        // O pool será inicializado de forma lazy quando a primeira conexão for solicitada
+        // O health check do Actuator será responsável por verificar a disponibilidade do banco
+        
+        log.info("DataSource JOB HikariCP criado com sucesso. Pool: maxPoolSize={}, minIdle={}", 
+                jobHikariConfig.getMaximumPoolSize(), jobHikariConfig.getMinimumIdle());
+        log.info("Nota: Conexão com o banco será estabelecida sob demanda. Use /api/actuator/health para verificar disponibilidade.");
+        
+        return dataSource;
     }
+
 }

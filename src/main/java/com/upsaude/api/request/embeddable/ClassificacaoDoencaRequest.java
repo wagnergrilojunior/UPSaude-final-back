@@ -6,7 +6,6 @@ import com.upsaude.enums.TipoDoencaEnum;
 import com.upsaude.util.converter.GravidadeDoencaEnumDeserializer;
 import com.upsaude.util.converter.TipoDoencaEnumDeserializer;
 import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -19,27 +18,23 @@ import io.swagger.v3.oas.annotations.media.Schema;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Schema(description = "Dados de classificacao doenca")
+@Schema(description = "Dados complementares de classificação da doença (campos oficiais vêm do CID-10)")
 public class ClassificacaoDoencaRequest {
+
+    @Schema(description = "Tipo de doença (classificação interna)")
     @JsonDeserialize(using = TipoDoencaEnumDeserializer.class)
     private TipoDoencaEnum tipoDoenca;
 
+    @Schema(description = "Gravidade da doença (classificação interna)")
     @JsonDeserialize(using = GravidadeDoencaEnumDeserializer.class)
     private GravidadeDoencaEnum gravidade;
 
-    @Size(max = 100, message = "Categoria deve ter no máximo 100 caracteres")
-    private String categoria;
-
-    @Size(max = 100, message = "Subcategoria deve ter no máximo 100 caracteres")
-    private String subcategoria;
-
-    @Size(max = 50, message = "Código CID principal deve ter no máximo 50 caracteres")
-    private String codigoCidPrincipal;
-
+    @Schema(description = "Indica se a doença é de notificação compulsória")
     @NotNull(message = "Doença notificável é obrigatória")
     @Builder.Default
     private Boolean doencaNotificavel = false;
 
+    @Schema(description = "Indica se a doença é transmissível")
     @NotNull(message = "Doença transmissível é obrigatória")
     @Builder.Default
     private Boolean doencaTransmissivel = false;

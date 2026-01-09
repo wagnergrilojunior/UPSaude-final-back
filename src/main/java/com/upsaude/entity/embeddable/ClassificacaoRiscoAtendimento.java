@@ -1,8 +1,12 @@
 package com.upsaude.entity.embeddable;
 
+import com.upsaude.enums.ClassificacaoRiscoEnum;
+import com.upsaude.enums.PrioridadeAtendimentoEnum;
+import com.upsaude.util.converter.ClassificacaoRiscoEnumConverter;
+import com.upsaude.util.converter.PrioridadeAtendimentoEnumConverter;
 import jakarta.persistence.Column;
+import jakarta.persistence.Convert;
 import jakarta.persistence.Embeddable;
-import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -14,20 +18,18 @@ import lombok.Data;
 public class ClassificacaoRiscoAtendimento {
 
     public ClassificacaoRiscoAtendimento() {
-        this.classificacaoRisco = "";
-        this.prioridade = "";
         this.gravidade = "";
         this.necessitaObservacao = false;
         this.necessitaInternacao = false;
     }
 
-    @Size(max = 50, message = "Classificação de risco deve ter no máximo 50 caracteres")
-    @Column(name = "classificacao_risco", length = 50)
-    private String classificacaoRisco;
+    @Convert(converter = ClassificacaoRiscoEnumConverter.class)
+    @Column(name = "classificacao_risco")
+    private ClassificacaoRiscoEnum classificacaoRisco;
 
-    @Size(max = 50, message = "Prioridade deve ter no máximo 50 caracteres")
-    @Column(name = "prioridade", length = 50)
-    private String prioridade;
+    @Convert(converter = PrioridadeAtendimentoEnumConverter.class)
+    @Column(name = "prioridade")
+    private PrioridadeAtendimentoEnum prioridade;
 
     @Column(name = "gravidade", length = 50)
     private String gravidade;

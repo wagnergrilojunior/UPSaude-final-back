@@ -12,7 +12,7 @@
 
   <groupId>com.upsaude</groupId>
   <artifactId>upsaude-back</artifactId>
-  <version>1.0.0</version>
+  <version>1.0.0.11</version>
   <name>UPSaude-back</name>
   <description>UP Saude Backend</description>
   <properties>
@@ -22,6 +22,10 @@
     <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-web</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-web-services</artifactId>
     </dependency>
     <dependency>
       <groupId>org.springframework.boot</groupId>
@@ -35,6 +39,28 @@
     <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-validation</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.ws</groupId>
+      <artifactId>spring-ws-security</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.sun.xml.messaging.saaj</groupId>
+      <artifactId>saaj-impl</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.glassfish.jaxb</groupId>
+      <artifactId>jaxb-runtime</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>jakarta.xml.ws</groupId>
+      <artifactId>jakarta.xml.ws-api</artifactId>
+      <version>4.0.2</version>
+    </dependency>
+    <dependency>
+      <groupId>jakarta.jws</groupId>
+      <artifactId>jakarta.jws-api</artifactId>
+      <version>3.0.0</version>
     </dependency>
     <dependency>
       <groupId>org.springframework.boot</groupId>
@@ -71,6 +97,11 @@
       <groupId>org.apache.httpcomponents.client5</groupId>
       <artifactId>httpclient5</artifactId>
       <version>5.2.1</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.commons</groupId>
+      <artifactId>commons-compress</artifactId>
+      <version>1.26.2</version>
     </dependency>
     <dependency>
       <groupId>org.springdoc</groupId>
@@ -125,13 +156,13 @@
         <artifactId>spring-boot-maven-plugin</artifactId>
         <configuration>
           <mainClass>com.upsaude.UpSaudeApplication</mainClass>
-          <!-- Exclui DevTools em builds de produção -->
           <excludeDevtools>true</excludeDevtools>
         </configuration>
         <executions>
           <execution>
             <goals>
               <goal>repackage</goal>
+              <goal>build-info</goal>
             </goals>
           </execution>
         </executions>
@@ -160,6 +191,190 @@
             <arg>-parameters</arg>
           </compilerArgs>
         </configuration>
+      </plugin>
+      <plugin>
+        <groupId>com.sun.xml.ws</groupId>
+        <artifactId>jaxws-maven-plugin</artifactId>
+        <version>4.0.2</version>
+        <executions>
+          <execution>
+            <id>generate-sigtap-wsimport</id>
+            <goals>
+              <goal>wsimport</goal>
+            </goals>
+            <phase>generate-sources</phase>
+            <configuration>
+              <wsdlFiles>
+                <wsdlFile>${project.basedir}/src/main/resources/assets/wsdl/sigtap/ProcedimentoService_v1.wsdl</wsdlFile>
+                <wsdlFile>${project.basedir}/src/main/resources/assets/wsdl/sigtap/NivelAgregacaoService_v1.wsdl</wsdlFile>
+                <wsdlFile>${project.basedir}/src/main/resources/assets/wsdl/sigtap/CompatibilidadeService_v1.wsdl</wsdlFile>
+                <wsdlFile>${project.basedir}/src/main/resources/assets/wsdl/sigtap/CompatibilidadePossivelService_v1.wsdl</wsdlFile>
+              </wsdlFiles>
+              <packageName>com.upsaude.integration.sigtap.wsdl</packageName>
+              <sourceDestDir>${project.build.directory}/generated-sources/wsimport</sourceDestDir>
+              <xnocompile>true</xnocompile>
+              <extension>true</extension>
+              <verbose>true</verbose>
+              <keep>true</keep>
+            </configuration>
+          </execution>
+          <!-- 
+          ============================================================================
+          CNES WSDL IMPORTS - DESABILITADOS
+          
+          O código gerado pelos WSDLs do CNES foi commitado em:
+          src/main/java/com/upsaude/integration/cnes/wsdl/
+          
+          A geração via wsimport foi desabilitada porque os WSDLs do DATASUS contêm
+          referencias externas (schemaLocation) que tentam baixar XSDs remotamente,
+          causando falhas na esteira de CI/CD.
+          
+          Para regenerar o código (se necessário), execute localmente:
+          mvn generate-sources -Pcnes-generate
+          ============================================================================
+          -->
+          <!--
+          <execution>
+            <id>generate-cnes-cnes-service</id>
+            <goals>
+              <goal>wsimport</goal>
+            </goals>
+            <phase>generate-sources</phase>
+            <configuration>
+              <wsdlFiles>
+                <wsdlFile>${project.basedir}/src/main/resources/assets/wsdl/cnes/v1r0/CnesService_v1r0.wsdl</wsdlFile>
+              </wsdlFiles>
+              <packageName>com.upsaude.integration.cnes.wsdl.cnesservice</packageName>
+              <sourceDestDir>${project.build.directory}/generated-sources/wsimport</sourceDestDir>
+              <xnocompile>true</xnocompile>
+              <extension>true</extension>
+              <verbose>true</verbose>
+              <keep>true</keep>
+            </configuration>
+          </execution>
+          <execution>
+            <id>generate-cnes-estabelecimento-v1r0</id>
+            <goals>
+              <goal>wsimport</goal>
+            </goals>
+            <phase>generate-sources</phase>
+            <configuration>
+              <wsdlFiles>
+                <wsdlFile>${project.basedir}/src/main/resources/assets/wsdl/cnes/v1r0/EstabelecimentoSaudeService_v1r0.wsdl</wsdlFile>
+              </wsdlFiles>
+              <packageName>com.upsaude.integration.cnes.wsdl.estabelecimento.v1r0</packageName>
+              <sourceDestDir>${project.build.directory}/generated-sources/wsimport</sourceDestDir>
+              <xnocompile>true</xnocompile>
+              <extension>true</extension>
+              <verbose>true</verbose>
+              <keep>true</keep>
+            </configuration>
+          </execution>
+          <execution>
+            <id>generate-cnes-profissional</id>
+            <goals>
+              <goal>wsimport</goal>
+            </goals>
+            <phase>generate-sources</phase>
+            <configuration>
+              <wsdlFiles>
+                <wsdlFile>${project.basedir}/src/main/resources/assets/wsdl/cnes/v1r0/ProfissionalSaudeService_v1r0.wsdl</wsdlFile>
+              </wsdlFiles>
+              <packageName>com.upsaude.integration.cnes.wsdl.profissional</packageName>
+              <sourceDestDir>${project.build.directory}/generated-sources/wsimport</sourceDestDir>
+              <xnocompile>true</xnocompile>
+              <extension>true</extension>
+              <verbose>true</verbose>
+              <keep>true</keep>
+            </configuration>
+          </execution>
+          <execution>
+            <id>generate-cnes-equipe</id>
+            <goals>
+              <goal>wsimport</goal>
+            </goals>
+            <phase>generate-sources</phase>
+            <configuration>
+              <wsdlFiles>
+                <wsdlFile>${project.basedir}/src/main/resources/assets/wsdl/cnes/v1r0/EquipeService_v1r0.wsdl</wsdlFile>
+              </wsdlFiles>
+              <packageName>com.upsaude.integration.cnes.wsdl.equipe</packageName>
+              <sourceDestDir>${project.build.directory}/generated-sources/wsimport</sourceDestDir>
+              <xnocompile>true</xnocompile>
+              <extension>true</extension>
+              <verbose>true</verbose>
+              <keep>true</keep>
+            </configuration>
+          </execution>
+          <execution>
+            <id>generate-cnes-equipamento</id>
+            <goals>
+              <goal>wsimport</goal>
+            </goals>
+            <phase>generate-sources</phase>
+            <configuration>
+              <wsdlFiles>
+                <wsdlFile>${project.basedir}/src/main/resources/assets/wsdl/cnes/v1r0/EquipamentoService_v1r0.wsdl</wsdlFile>
+              </wsdlFiles>
+              <packageName>com.upsaude.integration.cnes.wsdl.equipamento</packageName>
+              <sourceDestDir>${project.build.directory}/generated-sources/wsimport</sourceDestDir>
+              <xnocompile>true</xnocompile>
+              <extension>true</extension>
+              <verbose>true</verbose>
+              <keep>true</keep>
+            </configuration>
+          </execution>
+          <execution>
+            <id>generate-cnes-leito</id>
+            <goals>
+              <goal>wsimport</goal>
+            </goals>
+            <phase>generate-sources</phase>
+            <configuration>
+              <wsdlFiles>
+                <wsdlFile>${project.basedir}/src/main/resources/assets/wsdl/cnes/v1r0/LeitoService_v1r0.wsdl</wsdlFile>
+              </wsdlFiles>
+              <packageName>com.upsaude.integration.cnes.wsdl.leito</packageName>
+              <sourceDestDir>${project.build.directory}/generated-sources/wsimport</sourceDestDir>
+              <xnocompile>true</xnocompile>
+              <extension>true</extension>
+              <verbose>true</verbose>
+              <keep>true</keep>
+            </configuration>
+          </execution>
+          -->
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>build-helper-maven-plugin</artifactId>
+        <version>3.5.0</version>
+        <executions>
+          <execution>
+            <id>add-wsimport-sources</id>
+            <phase>generate-sources</phase>
+            <goals>
+              <goal>add-source</goal>
+            </goals>
+            <configuration>
+              <sources>
+                <source>${project.build.directory}/generated-sources/wsimport</source>
+              </sources>
+            </configuration>
+          </execution>
+          <execution>
+            <id>add-annotations-sources</id>
+            <phase>generate-sources</phase>
+            <goals>
+              <goal>add-source</goal>
+            </goals>
+            <configuration>
+              <sources>
+                <source>${project.build.directory}/generated-sources/annotations</source>
+              </sources>
+            </configuration>
+          </execution>
+        </executions>
       </plugin>
     </plugins>
   </build>

@@ -21,6 +21,7 @@ public class PrescricaoConsulta {
         this.outrasOrientacoes = "";
     }
 
+    @Deprecated
     @Column(name = "medicamentos_prescritos", columnDefinition = "TEXT")
     private String medicamentosPrescritos;
 

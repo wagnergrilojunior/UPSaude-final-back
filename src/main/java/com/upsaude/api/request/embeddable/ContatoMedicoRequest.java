@@ -1,5 +1,6 @@
 package com.upsaude.api.request.embeddable;
 
+import com.upsaude.validation.annotation.CelularValido;
 import com.upsaude.validation.annotation.EmailValido;
 import com.upsaude.validation.annotation.SiteValido;
 import com.upsaude.validation.annotation.TelefoneValido;
@@ -21,19 +22,12 @@ public class ContatoMedicoRequest {
     @TelefoneValido
     private String telefone;
 
-    @TelefoneValido
-    private String telefoneCelular;
-
-    @TelefoneValido
-    private String whatsapp;
+    @CelularValido
+    private String celular;
 
     @EmailValido
     @Size(max = 255, message = "Email deve ter no máximo 255 caracteres")
     private String email;
-
-    @EmailValido
-    @Size(max = 255, message = "Email institucional deve ter no máximo 255 caracteres")
-    private String emailInstitucional;
 
     @Size(max = 255, message = "Site deve ter no máximo 255 caracteres")
     @SiteValido

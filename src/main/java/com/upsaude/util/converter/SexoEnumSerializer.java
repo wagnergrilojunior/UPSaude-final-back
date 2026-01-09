@@ -13,7 +13,7 @@ public class SexoEnumSerializer extends JsonSerializer<SexoEnum> {
         if (value == null) {
             gen.writeNull();
         } else {
-            gen.writeString(value.getDescricao());
+            gen.writeNumber(value.getCodigo());
         }
     }
 }

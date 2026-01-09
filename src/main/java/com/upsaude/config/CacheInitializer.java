@@ -29,29 +29,26 @@ public class CacheInitializer implements ApplicationListener<ContextRefreshedEve
 
     private static final List<String> KNOWN_CACHES = Arrays.asList(
         "cidades", "estados", "medicos", "pacientes", "especialidades",
-        "profissionaisSaude", "vacinas", "medicacoes", "exames",
+        "profissionaisSaude", "vacinas", "medicacoes",
         "acoesPromocaoPrevencao", "agendamentos", "alergias",
-        "catalogoExames", "equipesSaude",
-        "atendimentos", "consultas", "prontuarios", "preNatal", "puericultura",
-        "vacinacoes", "exames", "estoquesVacina", "medicacao", "medicacaoPaciente",
-        "catalogoProcedimentos", "doencas",
+        "equipesSaude",
+        "atendimentos", "consultas", "prontuarios",
         "convenio", "dadosClinicosBasicos", "dadosSociodemograficos",
         "ciddoencas", "cirurgias",
-        "especialidadesmedicas", "estabelecimentos",
-        "fabricantesequipamento", "fabricantesmedicamento", "fabricantesvacina",
-        "deficiencias", "departamentos", "atividadesprofissionais",
+        "estabelecimentos",
+        "fabricantesequipamento", "fabricantesmedicamento",
+        "deficiencias", "departamentos",
         "faltas", "filaEspera",
         "perfisusuarios", "permissoes", "planejamentofamiliar",
-        "plantoes", "procedimentosCirurgicos", "consultasPreNatal",
-        "procedimentosOdontologicos", "consultasPuericultura",
-        "receitasmedicas", "responsavellegal", "servicosEstabelecimento",
+        "plantoes", "procedimentosCirurgicos",
+        "procedimentosOdontologicos",
+        "responsavellegal", "servicosEstabelecimento",
         "templatesNotificacao", "notificacoes", "configuracoesEstabelecimento",
-        "tratamentosodontologicos", "visitasdomiciliares", "conselhosprofissionais",
-        "controleponto", "cuidadosenfermagem", "dispensacoesmedicamentos", "educacaosaude",
+        "controleponto", "dispensacoesmedicamentos", "educacaosaude",
         "equipamentos", "equipamentosestabelecimento", "escalatrabalho",
         "atendimento",
-        "checkinatendimento", "historicoclinico", "historicohabilitacaoprofissional", "infraestruturaestabelecimento",
-        "integracaogov", "lgpdconsentimento", "medicaoclinica", "movimentacoesestoque", "logsauditoria"
+        "checkinatendimento", "historicoclinico", "infraestruturaestabelecimento",
+        "integracaogov", "lgpdconsentimento", "logsauditoria"
     );
 
     @Override
@@ -160,3 +157,4 @@ public class CacheInitializer implements ApplicationListener<ContextRefreshedEve
         }
     }
 }
+

@@ -1,0 +1,190 @@
+package com.upsaude.service.impl.api.sistema.notificacao;
+
+import java.util.Objects;
+import java.util.UUID;
+
+import org.springframework.cache.Cache;
+import org.springframework.cache.CacheManager;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import com.upsaude.api.request.sistema.notificacao.TemplateNotificacaoRequest;
+import com.upsaude.api.response.sistema.notificacao.TemplateNotificacaoResponse;
+import com.upsaude.cache.CacheKeyUtil;
+import com.upsaude.entity.sistema.notificacao.TemplateNotificacao;
+import com.upsaude.entity.sistema.multitenancy.Tenant;
+import com.upsaude.enums.CanalNotificacaoEnum;
+import com.upsaude.enums.TipoNotificacaoEnum;
+import com.upsaude.exception.BadRequestException;
+import com.upsaude.exception.InternalServerErrorException;
+import com.upsaude.repository.sistema.notificacao.TemplateNotificacaoRepository;
+import com.upsaude.service.api.sistema.notificacao.TemplateNotificacaoService;
+import com.upsaude.service.api.sistema.multitenancy.TenantService;
+import com.upsaude.service.api.support.templatenotificacao.TemplateNotificacaoCreator;
+import com.upsaude.service.api.support.templatenotificacao.TemplateNotificacaoDomainService;
+import com.upsaude.service.api.support.templatenotificacao.TemplateNotificacaoResponseBuilder;
+import com.upsaude.service.api.support.templatenotificacao.TemplateNotificacaoTenantEnforcer;
+import com.upsaude.service.api.support.templatenotificacao.TemplateNotificacaoUpdater;
+import org.springframework.dao.DataAccessException;
+
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
+@Service
+@RequiredArgsConstructor
+public class TemplateNotificacaoServiceImpl implements TemplateNotificacaoService {
+
+    private final TemplateNotificacaoRepository repository;
+    private final CacheManager cacheManager;
+    private final TenantService tenantService;
+
+    private final TemplateNotificacaoCreator creator;
+    private final TemplateNotificacaoUpdater updater;
+    private final TemplateNotificacaoResponseBuilder responseBuilder;
+    private final TemplateNotificacaoTenantEnforcer tenantEnforcer;
+    private final TemplateNotificacaoDomainService domainService;
+
+    @Override
+    @Transactional
+    public TemplateNotificacaoResponse criar(TemplateNotificacaoRequest request) {
+        log.debug("Criando novo template de notificação");
+
+        try {
+            UUID tenantId = tenantService.validarTenantAtual();
+            Tenant tenant = tenantService.obterTenantDoUsuarioAutenticado();
+            validarTenantAutenticadoOrThrow(tenantId, tenant);
+
+            TemplateNotificacao saved = creator.criar(request, tenantId, tenant);
+            TemplateNotificacaoResponse response = responseBuilder.build(saved);
+
+            Cache cache = cacheManager.getCache(CacheKeyUtil.CACHE_TEMPLATES_NOTIFICACAO);
+            if (cache != null) {
+                Object key = Objects.requireNonNull((Object) CacheKeyUtil.templateNotificacao(tenantId, saved.getId()));
+                cache.put(key, response);
+            }
+
+            return response;
+        } catch (BadRequestException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new InternalServerErrorException("Erro ao criar template de notificação", e);
+        }
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    @Cacheable(cacheNames = CacheKeyUtil.CACHE_TEMPLATES_NOTIFICACAO, keyGenerator = "templateNotificacaoCacheKeyGenerator")
+    public TemplateNotificacaoResponse obterPorId(UUID id) {
+        log.debug("Buscando template de notificação por ID: {} (cache miss)", id);
+        if (id == null) {
+            throw new BadRequestException("ID do template de notificação é obrigatório");
+        }
+
+        UUID tenantId = tenantService.validarTenantAtual();
+        TemplateNotificacao entity = tenantEnforcer.validarAcessoCompleto(id, tenantId);
+        return responseBuilder.build(entity);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Page<TemplateNotificacaoResponse> listar(Pageable pageable, UUID estabelecimentoId, TipoNotificacaoEnum tipoNotificacao, CanalNotificacaoEnum canal, String nome) {
+        log.debug("Listando templates de notificação paginados. Página: {}, Tamanho: {}",
+                pageable.getPageNumber(), pageable.getPageSize());
+
+        UUID tenantId = tenantService.validarTenantAtual();
+        Page<TemplateNotificacao> page;
+
+        if (estabelecimentoId != null) {
+            page = repository.findByEstabelecimentoIdAndTenantIdOrderByNomeAsc(estabelecimentoId, tenantId, pageable);
+        } else if (tipoNotificacao != null) {
+            page = repository.findByTipoNotificacaoAndTenantId(tipoNotificacao, tenantId, pageable);
+        } else if (canal != null) {
+            page = repository.findByCanalAndTenantId(canal, tenantId, pageable);
+        } else if (nome != null && !nome.isBlank()) {
+            page = repository.findByNomeContainingIgnoreCaseAndTenantId(nome, tenantId, pageable);
+        } else {
+            page = repository.findAllByTenant(tenantId, pageable);
+        }
+
+        return page.map(responseBuilder::build);
+    }
+
+    @Override
+    @Transactional
+    @CachePut(cacheNames = CacheKeyUtil.CACHE_TEMPLATES_NOTIFICACAO, keyGenerator = "templateNotificacaoCacheKeyGenerator")
+    public TemplateNotificacaoResponse atualizar(UUID id, TemplateNotificacaoRequest request) {
+        log.debug("Atualizando template de notificação. ID: {}", id);
+
+        if (id == null) {
+            throw new BadRequestException("ID do template de notificação é obrigatório");
+        }
+
+        UUID tenantId = tenantService.validarTenantAtual();
+        Tenant tenant = tenantService.obterTenantDoUsuarioAutenticado();
+        validarTenantAutenticadoOrThrow(tenantId, tenant);
+
+        TemplateNotificacao updated = updater.atualizar(id, request, tenantId, tenant);
+        return responseBuilder.build(updated);
+    }
+
+    @Override
+    @Transactional
+    @CacheEvict(cacheNames = CacheKeyUtil.CACHE_TEMPLATES_NOTIFICACAO, keyGenerator = "templateNotificacaoCacheKeyGenerator", beforeInvocation = false)
+    public void excluir(UUID id) {
+        log.debug("Excluindo template de notificação permanentemente. ID: {}", id);
+        try {
+            UUID tenantId = tenantService.validarTenantAtual();
+            TemplateNotificacao entity = tenantEnforcer.validarAcesso(id, tenantId);
+            domainService.validarPodeDeletar(entity);
+            repository.delete(Objects.requireNonNull(entity));
+            log.info("Template de notificação excluído permanentemente com sucesso. ID: {}", id);
+        } catch (BadRequestException | com.upsaude.exception.NotFoundException e) {
+            log.warn("Erro de validação ao excluir TemplateNotificacao. Erro: {}", e.getMessage());
+            throw e;
+        } catch (DataAccessException e) {
+            log.error("Erro de acesso a dados ao excluir TemplateNotificacao. Exception: {}", e.getClass().getSimpleName(), e);
+            throw new InternalServerErrorException("Erro ao excluir TemplateNotificacao", e);
+        }
+    }
+
+    @Override
+    @Transactional
+    @CacheEvict(cacheNames = CacheKeyUtil.CACHE_TEMPLATES_NOTIFICACAO, keyGenerator = "templateNotificacaoCacheKeyGenerator", beforeInvocation = false)
+    public void inativar(UUID id) {
+        log.debug("Inativando template de notificação. ID: {}", id);
+        try {
+            UUID tenantId = tenantService.validarTenantAtual();
+            inativarInternal(id, tenantId);
+        } catch (BadRequestException | com.upsaude.exception.NotFoundException e) {
+            log.warn("Erro de validação ao inativar TemplateNotificacao. Erro: {}", e.getMessage());
+            throw e;
+        } catch (DataAccessException e) {
+            log.error("Erro de acesso a dados ao inativar TemplateNotificacao. Exception: {}", e.getClass().getSimpleName(), e);
+            throw new InternalServerErrorException("Erro ao inativar TemplateNotificacao", e);
+        }
+    }
+
+    private void inativarInternal(UUID id, UUID tenantId) {
+        if (id == null) {
+            throw new BadRequestException("ID do template de notificação é obrigatório");
+        }
+
+        TemplateNotificacao entity = tenantEnforcer.validarAcesso(id, tenantId);
+        domainService.validarPodeInativar(entity);
+        entity.setActive(false);
+        repository.save(Objects.requireNonNull(entity));
+        log.info("Template de notificação inativado com sucesso. ID: {}", id);
+    }
+
+    private void validarTenantAutenticadoOrThrow(UUID tenantId, Tenant tenant) {
+        if (tenantId == null || tenant == null || tenant.getId() == null || !tenantId.equals(tenant.getId())) {
+            throw new BadRequestException("Não foi possível obter tenant do usuário autenticado");
+        }
+    }
+}

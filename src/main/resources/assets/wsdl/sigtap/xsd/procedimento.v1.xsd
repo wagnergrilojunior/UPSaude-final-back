@@ -1,0 +1,485 @@
+<?xml version="1.0" encoding="utf-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns="http://servicos.saude.gov.br/schema/sigtap/procedimento/v1/procedimento" xmlns:cp="http://servicos.saude.gov.br/schema/corporativo/v1/competencia" xmlns:fo="http://servicos.saude.gov.br/schema/sigtap/procedimento/nivelagregacao/v1/formaorganizacao" xmlns:do="http://servicos.saude.gov.br/schema/sigtap/publicacao/v1/documento" xmlns:fp="http://servicos.saude.gov.br/schema/sigtap/publicacao/v1/finalidadepublicacao" xmlns:ma="http://servicos.saude.gov.br/schema/sigtap/procedimento/v1/modalidadeatendimento" xmlns:co="http://servicos.saude.gov.br/schema/sigtap/procedimento/v1/complexidade" xmlns:tf="http://servicos.saude.gov.br/schema/sigtap/procedimento/financiamento/v1/tipofinanciamento" xmlns:ru="http://servicos.saude.gov.br/schema/sigtap/procedimento/financiamento/v1/rubrica" xmlns:ir="http://servicos.saude.gov.br/schema/sigtap/procedimento/v1/instrumentoregistro" xmlns:se="http://servicos.saude.gov.br/schema/sigtap/procedimento/v1/sexopermitido" xmlns:il="http://servicos.saude.gov.br/schema/sigtap/v1/idadelimite" xmlns:ac="http://servicos.saude.gov.br/schema/sigtap/procedimento/v1/atributocomplementar" xmlns:ci="http://servicos.saude.gov.br/schema/sigtap/procedimento/cid/v1/cid" xmlns:vc="http://servicos.saude.gov.br/schema/sigtap/procedimento/cid/v1/vinculocid" xmlns:cb="http://servicos.saude.gov.br/schema/cbo/v1/cbo" xmlns:cc="http://servicos.saude.gov.br/schema/cbo/v1/categoriacbo" xmlns:tl="http://servicos.saude.gov.br/schema/sigtap/procedimento/tipoleito/v1/tipoleito" xmlns:sc="http://servicos.saude.gov.br/schema/sigtap/procedimento/servicoclassificacao/v1/servicoclassificacao" xmlns:ha="http://servicos.saude.gov.br/schema/sigtap/procedimento/habilitacao/v1/habilitacao" xmlns:gh="http://servicos.saude.gov.br/schema/sigtap/procedimento/habilitacao/v1/grupohabilitacao" xmlns:in="http://servicos.saude.gov.br/schema/sigtap/procedimento/habilitacao/v1/incremento" xmlns:cr="http://servicos.saude.gov.br/schema/sigtap/procedimento/redeatencao/v1/componenteredeatencao" xmlns:or="http://servicos.saude.gov.br/schema/sigtap/procedimento/origem/v1/origemsiasih" xmlns:rc="http://servicos.saude.gov.br/schema/sigtap/procedimento/regracondicionada/v1/regracondicionada" xmlns:re="http://servicos.saude.gov.br/schema/sigtap/procedimento/renases/v1/renases" xmlns:tu="http://servicos.saude.gov.br/schema/sigtap/procedimento/tuss/v1/tuss" elementFormDefault="qualified" targetNamespace="http://servicos.saude.gov.br/schema/sigtap/procedimento/v1/procedimento">
+    
+    <xs:include schemaLocation="baseprocedimento.v1.xsd"/>
+    <xs:import id="fo" namespace="http://servicos.saude.gov.br/schema/sigtap/procedimento/nivelagregacao/v1/formaorganizacao" schemaLocation="formaorganizacao.v1.xsd"/>
+    <xs:import id="cp" namespace="http://servicos.saude.gov.br/schema/corporativo/v1/competencia" schemaLocation="competencia.v1.xsd"/>
+    <xs:import id="do" namespace="http://servicos.saude.gov.br/schema/sigtap/publicacao/v1/documento" schemaLocation="documento.v1.xsd"/>
+    <xs:import id="fp" namespace="http://servicos.saude.gov.br/schema/sigtap/publicacao/v1/finalidadepublicacao" schemaLocation="finalidadepublicacao.v1.xsd"/>
+    <xs:import id="ma" namespace="http://servicos.saude.gov.br/schema/sigtap/procedimento/v1/modalidadeatendimento" schemaLocation="modalidadeatendimento.v1.xsd"/>
+    <xs:import id="co" namespace="http://servicos.saude.gov.br/schema/sigtap/procedimento/v1/complexidade" schemaLocation="complexidade.v1.xsd"/>
+    <xs:import id="tf" namespace="http://servicos.saude.gov.br/schema/sigtap/procedimento/financiamento/v1/tipofinanciamento" schemaLocation="tipofinanciamento.v1.xsd"/>
+    <xs:import id="ru" namespace="http://servicos.saude.gov.br/schema/sigtap/procedimento/financiamento/v1/rubrica" schemaLocation="rubrica.v1.xsd"/>
+    <xs:import id="ir" namespace="http://servicos.saude.gov.br/schema/sigtap/procedimento/v1/instrumentoregistro" schemaLocation="instrumentoregistro.v1.xsd"/>
+    <xs:import id="se" namespace="http://servicos.saude.gov.br/schema/sigtap/procedimento/v1/sexopermitido" schemaLocation="sexopermitido.v1.xsd"/>
+    <xs:import id="il" namespace="http://servicos.saude.gov.br/schema/sigtap/v1/idadelimite" schemaLocation="idadelimite.v1.xsd"/>
+    <xs:import id="ac" namespace="http://servicos.saude.gov.br/schema/sigtap/procedimento/v1/atributocomplementar" schemaLocation="atributocomplementar.v1.xsd"/>
+    <xs:import id="ci" namespace="http://servicos.saude.gov.br/schema/sigtap/procedimento/cid/v1/cid" schemaLocation="cid.v1.xsd"/>
+    <xs:import id="vc" namespace="http://servicos.saude.gov.br/schema/sigtap/procedimento/cid/v1/vinculocid" schemaLocation="vinculocid.v1.xsd"/>
+    <xs:import id="cb" namespace="http://servicos.saude.gov.br/schema/cbo/v1/cbo" schemaLocation="cbo.v1.xsd"/>
+    <xs:import id="cc" namespace="http://servicos.saude.gov.br/schema/cbo/v1/categoriacbo" schemaLocation="categoriacbo.v1.xsd"/>
+    <xs:import id="tl" namespace="http://servicos.saude.gov.br/schema/sigtap/procedimento/tipoleito/v1/tipoleito" schemaLocation="tipoleito.v1.xsd"/>
+    <xs:import id="sc" namespace="http://servicos.saude.gov.br/schema/sigtap/procedimento/servicoclassificacao/v1/servicoclassificacao" schemaLocation="servicoclassificacao.v1.xsd"/>
+    <xs:import id="ha" namespace="http://servicos.saude.gov.br/schema/sigtap/procedimento/habilitacao/v1/habilitacao" schemaLocation="habilitacao.v1.xsd"/>
+    <xs:import id="gh" namespace="http://servicos.saude.gov.br/schema/sigtap/procedimento/habilitacao/v1/grupohabilitacao" schemaLocation="grupohabilitacao.v1.xsd"/>
+    <xs:import id="in" namespace="http://servicos.saude.gov.br/schema/sigtap/procedimento/habilitacao/v1/incremento" schemaLocation="incremento.v1.xsd"/>
+    <xs:import id="cr" namespace="http://servicos.saude.gov.br/schema/sigtap/procedimento/redeatencao/v1/componenteredeatencao" schemaLocation="componenteredeatencao.v1.xsd"/>
+    <xs:import id="or" namespace="http://servicos.saude.gov.br/schema/sigtap/procedimento/origem/v1/origemsiasih" schemaLocation="origemsiasih.v1.xsd"/>
+    <xs:import id="rc" namespace="http://servicos.saude.gov.br/schema/sigtap/procedimento/regracondicionada/v1/regracondicionada" schemaLocation="regracondicionada.v1.xsd"/>
+    <xs:import id="re" namespace="http://servicos.saude.gov.br/schema/sigtap/procedimento/renases/v1/renases" schemaLocation="renases.v1.xsd"/>
+    <xs:import id="tu" namespace="http://servicos.saude.gov.br/schema/sigtap/procedimento/tuss/v1/tuss" schemaLocation="tuss.v1.xsd"/>
+    
+    <xs:element name="Procedimento" type="ProcedimentoType"/>
+    
+    <xs:complexType name="ProcedimentoType">
+        <xs:annotation>
+            <xs:documentation>
+                <![CDATA[
+                Este tipo representa um Procedimento completo.
+                ]]>
+            </xs:documentation>
+        </xs:annotation>
+        <xs:complexContent>
+            <xs:extension base="BaseProcedimentoType">
+               <xs:sequence>
+                   
+                   <xs:element name="FormaOrganizacao" minOccurs="0" maxOccurs="1" type="fo:FormaOrganizacaoType">
+                       <xs:annotation>
+                           <xs:documentation>
+                               <![CDATA[ Forma de Organização do Procedimento. ]]>
+                           </xs:documentation>
+                       </xs:annotation>
+                   </xs:element>
+                   
+                   <xs:element name="competenciaInicial" minOccurs="0" maxOccurs="1" type="cp:CompetenciaType">
+                       <xs:annotation>
+                           <xs:documentation>
+                               <![CDATA[ Competência inicial do Procedimento. ]]>
+                           </xs:documentation>
+                       </xs:annotation>
+                   </xs:element>
+                   
+                   <xs:element name="competenciaFinal" minOccurs="0" maxOccurs="1" type="cp:CompetenciaType">
+                       <xs:annotation>
+                           <xs:documentation>
+                               <![CDATA[ Competência final do Procedimento. ]]>
+                           </xs:documentation>
+                       </xs:annotation>
+                   </xs:element>
+                   
+                   <xs:element name="finalidadePublicacao" minOccurs="0" maxOccurs="1" type="fp:FinalidadePublicacaoType">
+                       <xs:annotation>
+                           <xs:documentation>
+                               <![CDATA[ Efeito da Publicação do Documento sobre o Procedimento. ]]>
+                           </xs:documentation>
+                       </xs:annotation>
+                   </xs:element>
+                   
+                   <xs:element name="DocumentoPublicacao" minOccurs="0" maxOccurs="1" type="do:DocumentoType">
+                       <xs:annotation>
+                           <xs:documentation>
+                               <![CDATA[ Documento de publicação do Procedimento. ]]>
+                           </xs:documentation>
+                       </xs:annotation>
+                   </xs:element>
+
+                   <xs:element name="ModalidadesAtendimento" minOccurs="0" maxOccurs="1">
+                       <xs:annotation>
+                           <xs:documentation>
+                               <![CDATA[ Modalidades de Atendimento vinculadas ao Procedimento. ]]>
+                           </xs:documentation>
+                       </xs:annotation>
+                       <xs:complexType>
+                           <xs:sequence>
+                               <xs:element name="ModalidadeAtendimento" minOccurs="0" maxOccurs="unbounded" type="ma:ModalidadeAtendimentoType"/>
+                           </xs:sequence>
+                       </xs:complexType>
+                   </xs:element>
+                   
+                   <xs:element name="complexidade" minOccurs="0" maxOccurs="1" type="co:ComplexidadeType">
+                       <xs:annotation>
+                           <xs:documentation>
+                               <![CDATA[ Complexidade do Procedimento. ]]>
+                           </xs:documentation>
+                       </xs:annotation>
+                   </xs:element>
+                   
+                   <xs:element name="TipoFinanciamento" minOccurs="0" maxOccurs="1" type="tf:TipoFinanciamentoType">
+                       <xs:annotation>
+                           <xs:documentation>
+                               <![CDATA[ Tipo de Financiamento do Procedimento. ]]>
+                           </xs:documentation>
+                       </xs:annotation>
+                   </xs:element>
+                   
+                   <xs:element name="Rubrica" minOccurs="0" maxOccurs="1" type="ru:RubricaType">
+                       <xs:annotation>
+                           <xs:documentation>
+                               <![CDATA[ Rubrica/Subtipo de Financiamento do Procedimento. ]]>
+                           </xs:documentation>
+                       </xs:annotation>
+                   </xs:element>
+                   
+                   <xs:element name="InstrumentosRegistro" minOccurs="0" maxOccurs="1">
+                       <xs:annotation>
+                           <xs:documentation>
+                               <![CDATA[ Instrumentos de Registro vinculados ao Procedimento. ]]>
+                           </xs:documentation>
+                       </xs:annotation>
+                       <xs:complexType>
+                           <xs:sequence>
+                               <xs:element name="InstrumentoRegistro" minOccurs="0" maxOccurs="unbounded" type="ir:InstrumentoRegistroType"/>
+                           </xs:sequence>
+                       </xs:complexType>
+                   </xs:element>
+                   
+                   <xs:element name="mediaPermanencia" minOccurs="0" maxOccurs="1">
+                       <xs:annotation>
+                           <xs:documentation>
+                               <![CDATA[ Média de dias de internação prevista para o Procedimento. ]]>
+                           </xs:documentation>
+                       </xs:annotation>
+                       <xs:simpleType>
+                           <xs:restriction base="xs:integer">
+                               <xs:minInclusive value="0"/>
+                               <xs:maxInclusive value="9999"/>
+                           </xs:restriction>
+                       </xs:simpleType>
+                   </xs:element>
+                   
+                   <xs:element name="tempoPermanencia" minOccurs="0" maxOccurs="1">
+                       <xs:annotation>
+                           <xs:documentation>
+                               <![CDATA[ Quantidade máxima de dias permitido por Procedimento. ]]>
+                           </xs:documentation>
+                       </xs:annotation>
+                       <xs:simpleType>
+                           <xs:restriction base="xs:integer">
+                               <xs:minInclusive value="0"/>
+                               <xs:maxInclusive value="9999"/>
+                           </xs:restriction>
+                       </xs:simpleType>
+                   </xs:element>
+                   
+                   <xs:element name="quantidadeMaxima" minOccurs="0" maxOccurs="1">
+                       <xs:annotation>
+                           <xs:documentation>
+                               <![CDATA[ Limite máximo permitido por Procedimento para realização do tratamento/atendimento. ]]>
+                           </xs:documentation>
+                       </xs:annotation>
+                       <xs:simpleType>
+                           <xs:restriction base="xs:integer">
+                               <xs:minInclusive value="0"/>
+                               <xs:maxInclusive value="9999"/>
+                           </xs:restriction>
+                       </xs:simpleType>
+                   </xs:element>
+                   
+                   <xs:element name="sexoPermitido" minOccurs="0" maxOccurs="1" type="se:SexoPermitidoType">
+                       <xs:annotation>
+                           <xs:documentation>
+                               <![CDATA[ Sexo permitido para um paciente do Procedimento. ]]>
+                           </xs:documentation>
+                       </xs:annotation>
+                   </xs:element>
+                   
+                   <xs:element name="idadeMinimaPermitida" minOccurs="0" maxOccurs="1" type="il:IdadeLimiteType">
+                       <xs:annotation>
+                           <xs:documentation>
+                               <![CDATA[ Idade mínima permitida para um paciente do Procedimento. ]]>
+                           </xs:documentation>
+                       </xs:annotation>
+                   </xs:element>
+                   
+                   <xs:element name="idadeMaximaPermitida" minOccurs="0" maxOccurs="1" type="il:IdadeLimiteType">
+                       <xs:annotation>
+                           <xs:documentation>
+                               <![CDATA[ Idade máxima permitida para um paciente do Procedimento. ]]>
+                           </xs:documentation>
+                       </xs:annotation>
+                   </xs:element>
+                   
+                   <xs:element name="pontos" minOccurs="0" maxOccurs="1">
+                       <xs:annotation>
+                           <xs:documentation>
+                               <![CDATA[ Pontuação definida para o componente “Serviços Profissionais” (SP) que compõe o valor de Procedimentos principais e especiais realizados na assistência hospitalar. ]]>
+                           </xs:documentation>
+                       </xs:annotation>
+                       <xs:simpleType>
+                           <xs:restriction base="xs:integer">
+                               <xs:minInclusive value="0"/>
+                               <xs:maxInclusive value="9999"/>
+                           </xs:restriction>
+                       </xs:simpleType>
+                   </xs:element>
+                   
+                   <xs:element name="valorSH" minOccurs="0" maxOccurs="1">
+                       <xs:annotation>
+                           <xs:documentation>
+                               <![CDATA[ Valor para o Serviço Hospitalar do Procedimento. ]]>
+                           </xs:documentation>
+                       </xs:annotation>
+                       <xs:simpleType>
+                           <xs:restriction base="xs:decimal">
+                               <xs:minInclusive value="0"/>
+                               <xs:maxInclusive value="99999999.99"/>
+                               <xs:fractionDigits value="2"/>
+                           </xs:restriction>
+                       </xs:simpleType>
+                   </xs:element>
+                   
+                   <xs:element name="valorSA" minOccurs="0" maxOccurs="1">
+                       <xs:annotation>
+                           <xs:documentation>
+                               <![CDATA[ Valor para o Serviço Ambulatorial do Procedimento. ]]>
+                           </xs:documentation>
+                       </xs:annotation>
+                       <xs:simpleType>
+                           <xs:restriction base="xs:decimal">
+                               <xs:minInclusive value="0"/>
+                               <xs:maxInclusive value="99999999.99"/>
+                               <xs:fractionDigits value="2"/>
+                           </xs:restriction>
+                       </xs:simpleType>
+                   </xs:element>
+                   
+                   <xs:element name="valorSP" minOccurs="0" maxOccurs="1">
+                       <xs:annotation>
+                           <xs:documentation>
+                               <![CDATA[ Valor para o Serviço Profissional do Procedimento. ]]>
+                           </xs:documentation>
+                       </xs:annotation>
+                       <xs:simpleType>
+                           <xs:restriction base="xs:decimal">
+                               <xs:minInclusive value="0"/>
+                               <xs:maxInclusive value="99999999.99"/>
+                               <xs:fractionDigits value="2"/>
+                           </xs:restriction>
+                       </xs:simpleType>
+                   </xs:element>
+                   
+                   <xs:element name="AtributosComplementares" minOccurs="0" maxOccurs="1">
+                       <xs:annotation>
+                           <xs:documentation>
+                               <![CDATA[ Atributos Complementares do Procedimento. ]]>
+                           </xs:documentation>
+                       </xs:annotation>
+                       <xs:complexType>
+                           <xs:sequence>
+                               <xs:element name="AtributoComplementar" minOccurs="0" maxOccurs="unbounded" type="ac:AtributoComplementarType"/>
+                           </xs:sequence>
+                       </xs:complexType>
+                   </xs:element>
+                   
+                   <!-- 
+                        Atributos que podem ser preenchidos de acordo com a necessidade
+                   -->
+                   <xs:element name="descricao" minOccurs="0" maxOccurs="1">
+                       <xs:annotation>
+                           <xs:documentation>
+                               <![CDATA[ Descrição completa do Procedimento. ]]>
+                           </xs:documentation>
+                       </xs:annotation>
+                       <xs:simpleType>
+                           <xs:restriction base="xs:string">
+                               <xs:minLength value="1"/>
+                               <xs:maxLength value="4000"/>
+                           </xs:restriction>
+                       </xs:simpleType>
+                   </xs:element>
+                   
+                   <xs:element name="CIDsVinculados" minOccurs="0" maxOccurs="1">
+                       <xs:annotation>
+                           <xs:documentation>
+                               <![CDATA[ CIDs relacionados ao Procedimento. ]]>
+                           </xs:documentation>
+                       </xs:annotation>
+                       <xs:complexType>
+                           <xs:sequence>
+                               <xs:element name="CIDVinculado" minOccurs="0" maxOccurs="unbounded">
+                                   <xs:complexType>
+                                       <xs:sequence>
+                                           <xs:element name="CID" minOccurs="0" maxOccurs="1" type="ci:CIDType"/>
+                                           <xs:element name="vinculo" minOccurs="0" maxOccurs="1" type="vc:VinculoCIDType"/>
+                                       </xs:sequence>
+                                   </xs:complexType>
+                               </xs:element>
+                           </xs:sequence>
+                       </xs:complexType>
+                   </xs:element>
+                   
+                   <xs:element name="CBOsVinculados" minOccurs="0" maxOccurs="1">
+                       <xs:annotation>
+                           <xs:documentation>
+                               <![CDATA[ CBOs relacionados ao Procedimento. ]]>
+                           </xs:documentation>
+                       </xs:annotation>
+                       <xs:complexType>
+                           <xs:sequence>
+                               <xs:element name="CBO" minOccurs="0" maxOccurs="unbounded" type="cb:CBOType"/>
+                           </xs:sequence>
+                       </xs:complexType>
+                   </xs:element>
+                   
+                   <xs:element name="CategoriasCBOVinculadas" minOccurs="0" maxOccurs="1">
+                       <xs:annotation>
+                           <xs:documentation>
+                               <![CDATA[ Categorias CBO relacionadas ao Procedimento. ]]>
+                           </xs:documentation>
+                       </xs:annotation>
+                       <xs:complexType>
+                           <xs:sequence>
+                               <xs:element name="CategoriaCBO" minOccurs="0" maxOccurs="unbounded" type="cc:CategoriaCBOType"/>
+                           </xs:sequence>
+                       </xs:complexType>
+                   </xs:element>
+                   
+                   <xs:element name="TiposLeitoVinculados" minOccurs="0" maxOccurs="1">
+                       <xs:annotation>
+                           <xs:documentation>
+                               <![CDATA[ Tipos de Leito relacionados ao Procedimento. ]]>
+                           </xs:documentation>
+                       </xs:annotation>
+                       <xs:complexType>
+                           <xs:sequence>
+                               <xs:element name="TipoLeito" minOccurs="0" maxOccurs="unbounded" type="tl:TipoLeitoType"/>
+                           </xs:sequence>
+                       </xs:complexType>
+                   </xs:element>
+                   
+                   <xs:element name="ServicosClassificacoesVinculados" minOccurs="0" maxOccurs="1">
+                       <xs:annotation>
+                           <xs:documentation>
+                               <![CDATA[ Serviços/Classificações relacionados ao Procedimento. ]]>
+                           </xs:documentation>
+                       </xs:annotation>
+                       <xs:complexType>
+                           <xs:sequence>
+                               <xs:element name="ServicoClassificacao" minOccurs="0" maxOccurs="unbounded" type="sc:ServicoClassificacaoType"/>
+                           </xs:sequence>
+                       </xs:complexType>
+                   </xs:element>
+                   
+                   <xs:element name="HabilitacoesVinculadas" minOccurs="0" maxOccurs="1">
+                       <xs:annotation>
+                           <xs:documentation>
+                               <![CDATA[ Habilitações relacionadas ao Procedimento. ]]>
+                           </xs:documentation>
+                       </xs:annotation>
+                       <xs:complexType>
+                           <xs:sequence>
+                               <xs:element name="Habilitacao" minOccurs="0" maxOccurs="unbounded" type="ha:HabilitacaoType"/>
+                           </xs:sequence>
+                       </xs:complexType>
+                   </xs:element>
+                   
+                   <xs:element name="GruposHabilitacaoVinculados" minOccurs="0" maxOccurs="1">
+                       <xs:annotation>
+                           <xs:documentation>
+                               <![CDATA[ Grupos de Habilitação relacionados ao Procedimento. ]]>
+                           </xs:documentation>
+                       </xs:annotation>
+                       <xs:complexType>
+                           <xs:sequence>
+                               <xs:element name="GrupoHabilitacao" minOccurs="0" maxOccurs="unbounded" type="gh:GrupoHabilitacaoType"/>
+                           </xs:sequence>
+                       </xs:complexType>
+                   </xs:element>
+                   
+                   <xs:element name="IncrementosVinculados" minOccurs="0" maxOccurs="1">
+                       <xs:annotation>
+                           <xs:documentation>
+                               <![CDATA[ Incrementos de Habilitação relacionados ao Procedimento. ]]>
+                           </xs:documentation>
+                       </xs:annotation>
+                       <xs:complexType>
+                           <xs:sequence>
+                               <xs:element name="Incremento" minOccurs="0" maxOccurs="unbounded" type="in:IncrementoType"/>
+                           </xs:sequence>
+                       </xs:complexType>
+                   </xs:element>
+                   
+                   <xs:element name="ComponentesRedesVinculados" minOccurs="0" maxOccurs="1">
+                       <xs:annotation>
+                           <xs:documentation>
+                               <![CDATA[ Componentes de Redes de Atenção relacionados ao Procedimento. ]]>
+                           </xs:documentation>
+                       </xs:annotation>
+                       <xs:complexType>
+                           <xs:sequence>
+                               <xs:element name="ComponenteRedeAtencao" minOccurs="0" maxOccurs="unbounded" type="cr:ComponenteRedeAtencaoType"/>
+                           </xs:sequence>
+                       </xs:complexType>
+                   </xs:element>
+                   
+                   <xs:element name="OrigensSIGTAP" minOccurs="0" maxOccurs="1">
+                       <xs:annotation>
+                           <xs:documentation>
+                               <![CDATA[ Procedimentos SIGTAP que deram origem à este Procedimento. ]]>
+                           </xs:documentation>
+                       </xs:annotation>
+                       <xs:complexType>
+                           <xs:sequence>
+                               <xs:element name="OrigemSIGTAP" minOccurs="0" maxOccurs="unbounded" type="BaseProcedimentoType"/>
+                           </xs:sequence>
+                       </xs:complexType>
+                   </xs:element>
+                   
+                   <xs:element name="OrigensSIASIH" minOccurs="0" maxOccurs="1">
+                       <xs:annotation>
+                           <xs:documentation>
+                               <![CDATA[ Procedimentos SIA/SIH que deram origem à este Procedimento. ]]>
+                           </xs:documentation>
+                       </xs:annotation>
+                       <xs:complexType>
+                           <xs:sequence>
+                               <xs:element name="OrigemSIASIH" minOccurs="0" maxOccurs="unbounded" type="or:OrigemSIASIHType"/>
+                           </xs:sequence>
+                       </xs:complexType>
+                   </xs:element>
+                   
+                   <xs:element name="RegrasCondicionadasVinculadas" minOccurs="0" maxOccurs="1">
+                       <xs:annotation>
+                           <xs:documentation>
+                               <![CDATA[ Regras Condicionadas relacionados ao Procedimento. ]]>
+                           </xs:documentation>
+                       </xs:annotation>
+                       <xs:complexType>
+                           <xs:sequence>
+                               <xs:element name="RegraCondicionada" minOccurs="0" maxOccurs="unbounded" type="rc:RegraCondicionadaType"/>
+                           </xs:sequence>
+                       </xs:complexType>
+                   </xs:element>
+                   
+                   <xs:element name="RENASESVinculadas" minOccurs="0" maxOccurs="1">
+                       <xs:annotation>
+                           <xs:documentation>
+                               <![CDATA[ RENASES relacionados ao Procedimento. ]]>
+                           </xs:documentation>
+                       </xs:annotation>
+                       <xs:complexType>
+                           <xs:sequence>
+                               <xs:element name="RENASES" minOccurs="0" maxOccurs="unbounded" type="re:RENASESType"/>
+                           </xs:sequence>
+                       </xs:complexType>
+                   </xs:element>
+                   
+                   <xs:element name="TUSSVinculadas" minOccurs="0" maxOccurs="1">
+                       <xs:annotation>
+                           <xs:documentation>
+                               <![CDATA[ TUSS relacionados ao Procedimento. ]]>
+                           </xs:documentation>
+                       </xs:annotation>
+                       <xs:complexType>
+                           <xs:sequence>
+                               <xs:element name="TUSS" minOccurs="0" maxOccurs="unbounded" type="tu:TUSSType"/>
+                           </xs:sequence>
+                       </xs:complexType>
+                   </xs:element>
+                   
+               </xs:sequence>
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
+    
+</xs:schema>

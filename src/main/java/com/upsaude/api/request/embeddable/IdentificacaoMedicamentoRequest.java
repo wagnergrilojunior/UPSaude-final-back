@@ -38,7 +38,4 @@ public class IdentificacaoMedicamentoRequest {
 
     @Size(max = 50, message = "Código TUSS deve ter no máximo 50 caracteres")
     private String codigoTuss;
-
-    @Size(max = 50, message = "Código SIGTAP deve ter no máximo 50 caracteres")
-    private String codigoSigtap;
 }

@@ -21,7 +21,7 @@ import java.lang.annotation.Target;
 @Target({ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)
 public @interface IntervaloDataValido {
-    String message() default "Intervalo de datas inválido";
+    String message() default "{validation.intervalo.data.invalido}";
     Class<?>[] groups() default {};
     Class<? extends Payload>[] payload() default {};
 

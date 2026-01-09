@@ -3,6 +3,7 @@ package com.upsaude.validation.web;
 import com.upsaude.exception.InvalidArgumentException;
 import org.springframework.core.MethodParameter;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableHandlerMethodArgumentResolver;
 import org.springframework.data.web.SortHandlerMethodArgumentResolver;
 import org.springframework.lang.NonNull;
@@ -11,9 +12,13 @@ import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.method.support.ModelAndViewContainer;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 /**
  * Resolver global para Pageable com validação de paginação e sort.
  * Evita page/size inválidos e padroniza erro via InvalidArgumentException (HTTP 400).
+ * Também mapeia aliases comuns como "codigo" para "codigoOficial".
  */
 public class ValidatedPageableResolver implements HandlerMethodArgumentResolver {
 
@@ -22,7 +27,33 @@ public class ValidatedPageableResolver implements HandlerMethodArgumentResolver 
 
     public ValidatedPageableResolver(int maxSize) {
         this.maxSize = maxSize;
-        this.delegate = new PageableHandlerMethodArgumentResolver(new SortHandlerMethodArgumentResolver());
+        // Criar SortResolver customizado que mapeia "codigo" para "codigoOficial"
+        SortHandlerMethodArgumentResolver sortResolver = new SortHandlerMethodArgumentResolver() {
+            @Override
+            public Sort resolveArgument(
+                    @NonNull MethodParameter parameter,
+                    ModelAndViewContainer mavContainer,
+                    @NonNull NativeWebRequest webRequest,
+                    WebDataBinderFactory binderFactory) {
+                Sort sort = super.resolveArgument(parameter, mavContainer, webRequest, binderFactory);
+                // Mapeia aliases para propriedades reais
+                if (sort != null && sort.isSorted()) {
+                    List<Sort.Order> mappedOrders = sort.stream()
+                            .map(order -> {
+                                String property = order.getProperty();
+                                // Mapeia "codigo" para "codigoOficial" (comum em entidades SIGTAP)
+                                if ("codigo".equals(property)) {
+                                    return new Sort.Order(order.getDirection(), "codigoOficial");
+                                }
+                                return order;
+                            })
+                            .collect(Collectors.toList());
+                    return Sort.by(mappedOrders);
+                }
+                return sort;
+            }
+        };
+        this.delegate = new PageableHandlerMethodArgumentResolver(sortResolver);
     }
 
     @Override
@@ -52,7 +83,7 @@ public class ValidatedPageableResolver implements HandlerMethodArgumentResolver 
             throw new InvalidArgumentException(String.format("Paginação inválida: 'size' não pode ser maior que %d.", maxSize));
         }
 
-        // valida sort básico
+        // valida sort básico (o mapeamento de "codigo" para "codigoOficial" já foi feito no SortResolver)
         pageable.getSort().forEach(order -> {
             String prop = order.getProperty();
             if (prop == null || prop.isBlank()) {

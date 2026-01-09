@@ -3,7 +3,6 @@ package com.upsaude.mapper.embeddable;
 import com.upsaude.api.request.embeddable.ComposicaoVacinaRequest;
 import com.upsaude.api.response.embeddable.ComposicaoVacinaResponse;
 import com.upsaude.entity.embeddable.ComposicaoVacina;
-import com.upsaude.dto.embeddable.ComposicaoVacinaDTO;
 import com.upsaude.mapper.config.MappingConfig;
 import org.mapstruct.Mapper;
 import org.mapstruct.MappingTarget;
@@ -14,7 +13,4 @@ public interface ComposicaoVacinaMapper {
     ComposicaoVacinaResponse toResponse(ComposicaoVacina entity);
     void updateFromRequest(ComposicaoVacinaRequest request, @MappingTarget ComposicaoVacina entity);
 
-    ComposicaoVacina toEntity(com.upsaude.dto.embeddable.ComposicaoVacinaDTO dto);
-    com.upsaude.dto.embeddable.ComposicaoVacinaDTO toDTO(ComposicaoVacina entity);
-    void updateFromDTO(com.upsaude.dto.embeddable.ComposicaoVacinaDTO dto, @MappingTarget ComposicaoVacina entity);
 }
