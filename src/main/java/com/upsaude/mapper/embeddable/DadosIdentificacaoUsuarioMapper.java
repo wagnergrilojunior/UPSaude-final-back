@@ -4,13 +4,32 @@ import com.upsaude.api.request.embeddable.DadosIdentificacaoUsuarioRequest;
 import com.upsaude.api.response.embeddable.DadosIdentificacaoUsuarioResponse;
 import com.upsaude.entity.embeddable.DadosIdentificacaoUsuario;
 import com.upsaude.mapper.config.MappingConfig;
+import com.upsaude.validation.util.DocumentoUtil;
 import org.mapstruct.Mapper;
 import org.mapstruct.MappingTarget;
 
 @Mapper(config = MappingConfig.class)
 public interface DadosIdentificacaoUsuarioMapper {
 
-    DadosIdentificacaoUsuario fromRequest(DadosIdentificacaoUsuarioRequest request);
+    /**
+     * Converte request para entidade, normalizando o CPF removendo formatação
+     */
+    default DadosIdentificacaoUsuario fromRequest(DadosIdentificacaoUsuarioRequest request) {
+        if (request == null) {
+            return null;
+        }
+        
+        DadosIdentificacaoUsuario entity = new DadosIdentificacaoUsuario();
+        entity.setUsername(request.getUsername());
+        
+        // Normaliza CPF removendo formatação (pontos e hífen)
+        if (request.getCpf() != null && !request.getCpf().trim().isEmpty()) {
+            String cpfNormalizado = DocumentoUtil.somenteDigitos(request.getCpf());
+            entity.setCpf(cpfNormalizado);
+        }
+        
+        return entity;
+    }
 
     DadosIdentificacaoUsuarioResponse toResponse(DadosIdentificacaoUsuario entity);
 
@@ -28,7 +47,9 @@ public interface DadosIdentificacaoUsuarioMapper {
         }
         
         if (request.getCpf() != null && !request.getCpf().trim().isEmpty()) {
-            entity.setCpf(request.getCpf());
+            // Normaliza CPF removendo formatação (pontos e hífen)
+            String cpfNormalizado = DocumentoUtil.somenteDigitos(request.getCpf());
+            entity.setCpf(cpfNormalizado);
         }
     }
 }

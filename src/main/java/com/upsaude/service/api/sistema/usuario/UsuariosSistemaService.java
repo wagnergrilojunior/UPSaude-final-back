@@ -27,4 +27,6 @@ public interface UsuariosSistemaService {
     void deletarFoto(UUID id);
 
     void trocarSenha(UUID id, String novaSenha);
+
+    int sincronizarUsers();
 }
