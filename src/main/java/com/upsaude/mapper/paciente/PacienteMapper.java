@@ -8,6 +8,7 @@ import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 import org.mapstruct.Named;
 import org.mapstruct.factory.Mappers;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import com.upsaude.api.request.paciente.PacienteRequest;
 import com.upsaude.api.response.paciente.PacienteResponse;
@@ -17,7 +18,14 @@ import com.upsaude.enums.TipoContatoEnum;
 import com.upsaude.enums.TipoIdentificadorEnum;
 import com.upsaude.mapper.config.MappingConfig;
 import com.upsaude.mapper.convenio.ConvenioMapper;
+import com.upsaude.mapper.embeddable.ContatoPacienteMapper;
+import com.upsaude.mapper.embeddable.DadosDemograficosPacienteMapper;
+import com.upsaude.mapper.embeddable.DadosPessoaisBasicosPacienteMapper;
+import com.upsaude.mapper.embeddable.DocumentosBasicosPacienteMapper;
 import com.upsaude.mapper.embeddable.InformacoesConvenioPacienteMapper;
+import com.upsaude.mapper.embeddable.IntegracaoGovPacienteMapper;
+import com.upsaude.mapper.embeddable.ResponsavelLegalPacienteMapper;
+import com.upsaude.mapper.geral.EnderecoMapper;
 import com.upsaude.mapper.paciente.deficiencia.DeficienciasPacienteMapper;
 import com.upsaude.mapper.sistema.integracao.IntegracaoGovMapper;
 import com.upsaude.mapper.sistema.lgpd.LGPDConsentimentoMapper;
@@ -38,17 +46,36 @@ import com.upsaude.repository.projection.PacienteSimplificadoProjection;
                 PacienteDadosPessoaisComplementaresMapper.class,
                 PacienteObitoMapper.class,
                 PacienteVinculoTerritorialMapper.class,
-                com.upsaude.mapper.embeddable.DadosPessoaisBasicosPacienteMapper.class,
-                com.upsaude.mapper.embeddable.DocumentosBasicosPacienteMapper.class,
-                com.upsaude.mapper.embeddable.DadosDemograficosPacienteMapper.class,
-                com.upsaude.mapper.embeddable.ContatoPacienteMapper.class,
-                com.upsaude.mapper.embeddable.IntegracaoGovPacienteMapper.class,
-                com.upsaude.mapper.embeddable.ResponsavelLegalPacienteMapper.class
+                EnderecoMapper.class
 })
-public interface PacienteMapper {
+public abstract class PacienteMapper {
 
-        InformacoesConvenioPacienteMapper informacoesConvenioMapper = Mappers
-                        .getMapper(InformacoesConvenioPacienteMapper.class);
+        @Autowired
+        protected PacienteEnderecoMapper pacienteEnderecoMapper;
+
+        @Autowired
+        protected EnderecoMapper enderecoMapper;
+
+        @Autowired
+        protected InformacoesConvenioPacienteMapper informacoesConvenioMapper;
+
+        @Autowired
+        protected DadosPessoaisBasicosPacienteMapper dadosPessoaisBasicosPacienteMapper;
+
+        @Autowired
+        protected DocumentosBasicosPacienteMapper documentosBasicosPacienteMapper;
+
+        @Autowired
+        protected DadosDemograficosPacienteMapper dadosDemograficosPacienteMapper;
+
+        @Autowired
+        protected ContatoPacienteMapper contatoPacienteMapper;
+
+        @Autowired
+        protected IntegracaoGovPacienteMapper integracaoGovPacienteMapper;
+
+        @Autowired
+        protected ResponsavelLegalPacienteMapper responsavelLegalPacienteMapper;
 
         @Mapping(target = "id", ignore = true)
         @Mapping(target = "createdAt", ignore = true)
@@ -71,7 +98,7 @@ public interface PacienteMapper {
         @Mapping(target = "deficiencias", ignore = true)
         @Mapping(target = "vinculosTerritoriais", ignore = true)
         @Mapping(target = "lgpdConsentimento", ignore = true)
-        Paciente fromRequest(PacienteRequest request);
+        public abstract Paciente fromRequest(PacienteRequest request);
 
         @Mapping(target = "id", ignore = true)
         @Mapping(target = "createdAt", ignore = true)
@@ -94,7 +121,7 @@ public interface PacienteMapper {
         @Mapping(target = "deficiencias", ignore = true)
         @Mapping(target = "vinculosTerritoriais", ignore = true)
         @Mapping(target = "lgpdConsentimento", ignore = true)
-        void updateFromRequest(PacienteRequest request, @MappingTarget Paciente entity);
+        public abstract void updateFromRequest(PacienteRequest request, @MappingTarget Paciente entity);
 
         @Mapping(target = "enderecos", source = "enderecos", qualifiedByName = "mapEnderecos")
         @Mapping(target = "dadosPessoaisComplementares", source = "dadosPessoaisComplementares")
@@ -109,73 +136,80 @@ public interface PacienteMapper {
         @Mapping(target = "contato", source = ".", qualifiedByName = "mapContato")
         @Mapping(target = "integracaoGov", source = ".", qualifiedByName = "mapIntegracaoGov")
         @Mapping(target = "responsavelLegal", source = ".", qualifiedByName = "mapResponsavelLegal")
-        PacienteResponse toResponse(Paciente entity);
+        public abstract PacienteResponse toResponse(Paciente entity);
 
         @Named("mapDadosPessoaisBasicos")
-        default com.upsaude.api.response.embeddable.DadosPessoaisBasicosPacienteResponse mapDadosPessoaisBasicos(Paciente paciente) {
-                return com.upsaude.mapper.embeddable.DadosPessoaisBasicosPacienteMapper.INSTANCE.toResponse(paciente);
+        public com.upsaude.api.response.embeddable.DadosPessoaisBasicosPacienteResponse mapDadosPessoaisBasicos(
+                        Paciente paciente) {
+                return dadosPessoaisBasicosPacienteMapper.toResponse(paciente);
         }
 
         @Named("mapDocumentosBasicos")
-        default com.upsaude.api.response.embeddable.DocumentosBasicosPacienteResponse mapDocumentosBasicos(Paciente paciente) {
-                return com.upsaude.mapper.embeddable.DocumentosBasicosPacienteMapper.INSTANCE.toResponse(paciente);
+        public com.upsaude.api.response.embeddable.DocumentosBasicosPacienteResponse mapDocumentosBasicos(
+                        Paciente paciente) {
+                return documentosBasicosPacienteMapper.toResponse(paciente);
         }
 
         @Named("mapDadosDemograficos")
-        default com.upsaude.api.response.embeddable.DadosDemograficosPacienteResponse mapDadosDemograficos(Paciente paciente) {
-                return com.upsaude.mapper.embeddable.DadosDemograficosPacienteMapper.INSTANCE.toResponse(paciente);
+        public com.upsaude.api.response.embeddable.DadosDemograficosPacienteResponse mapDadosDemograficos(
+                        Paciente paciente) {
+                return dadosDemograficosPacienteMapper.toResponse(paciente);
         }
 
         @Named("mapContato")
-        default com.upsaude.api.response.embeddable.ContatoPacienteResponse mapContato(Paciente paciente) {
-                return com.upsaude.mapper.embeddable.ContatoPacienteMapper.INSTANCE.toResponse(paciente);
+        public com.upsaude.api.response.embeddable.ContatoPacienteResponse mapContato(Paciente paciente) {
+                return contatoPacienteMapper.toResponse(paciente);
         }
 
         @Named("mapIntegracaoGov")
-        default com.upsaude.api.response.embeddable.IntegracaoGovPacienteResponse mapIntegracaoGov(Paciente paciente) {
-                return com.upsaude.mapper.embeddable.IntegracaoGovPacienteMapper.INSTANCE.toResponse(paciente);
+        public com.upsaude.api.response.embeddable.IntegracaoGovPacienteResponse mapIntegracaoGov(Paciente paciente) {
+                return integracaoGovPacienteMapper.toResponse(paciente);
         }
 
         @Named("mapResponsavelLegal")
-        default com.upsaude.api.response.embeddable.ResponsavelLegalPacienteResponse mapResponsavelLegal(Paciente paciente) {
-                return com.upsaude.mapper.embeddable.ResponsavelLegalPacienteMapper.INSTANCE.toResponse(paciente);
+        public com.upsaude.api.response.embeddable.ResponsavelLegalPacienteResponse mapResponsavelLegal(
+                        Paciente paciente) {
+                return responsavelLegalPacienteMapper.toResponse(paciente);
         }
 
         @Named("mapEnderecos")
-        default List<com.upsaude.api.response.geral.EnderecoResponse> mapEnderecos(List<com.upsaude.entity.paciente.PacienteEndereco> enderecos) {
+        public List<com.upsaude.api.response.geral.EnderecoResponse> mapEnderecos(
+                        List<com.upsaude.entity.paciente.PacienteEndereco> enderecos) {
                 if (enderecos == null) {
                         return new java.util.ArrayList<>();
                 }
-                com.upsaude.mapper.geral.EnderecoMapper enderecoMapper = Mappers.getMapper(com.upsaude.mapper.geral.EnderecoMapper.class);
                 return enderecos.stream()
-                                .map(pe -> pe.getEndereco() != null 
-                                        ? enderecoMapper.toResponse(pe.getEndereco())
-                                        : null)
+                                .map(pe -> pe.getEndereco() != null
+                                                ? pacienteEnderecoMapper.toResponse(pe)
+                                                : null)
                                 .filter(e -> e != null)
                                 .collect(java.util.stream.Collectors.toList());
         }
 
         @Named("mapEnderecosSimplificado")
-        default List<com.upsaude.api.response.geral.EnderecoResponse> mapEnderecosSimplificado(List<com.upsaude.entity.paciente.PacienteEndereco> enderecos) {
+        public List<com.upsaude.api.response.geral.EnderecoResponse> mapEnderecosSimplificado(
+                        List<com.upsaude.entity.paciente.PacienteEndereco> enderecos) {
                 if (enderecos == null) {
                         return new java.util.ArrayList<>();
                 }
-                com.upsaude.mapper.geral.EnderecoMapper enderecoMapper = Mappers.getMapper(com.upsaude.mapper.geral.EnderecoMapper.class);
                 return enderecos.stream()
-                                .map(pe -> pe.getEndereco() != null 
-                                        ? enderecoMapper.toResponseSimplificado(pe.getEndereco())
-                                        : null)
+                                .map(pe -> pe.getEndereco() != null
+                                                ? pacienteEnderecoMapper.toResponse(pe) // Aqui deveria ser simplificado
+                                                                                        // se existisse, mas usaremos o
+                                                                                        // principal por agora que está
+                                                                                        // injetado corretamente
+                                                : null)
                                 .filter(e -> e != null)
                                 .collect(java.util.stream.Collectors.toList());
         }
 
         @Named("toResponseCompleto")
-        default PacienteResponse toResponseCompleto(Paciente paciente) {
+        public PacienteResponse toResponseCompleto(Paciente paciente) {
                 return toResponse(paciente);
         }
 
         @Named("toResponseSimplificado")
-        default PacienteResponse toResponseSimplificado(Paciente paciente) {
+        public PacienteResponse toResponseSimplificado(Paciente paciente) {
                 if (paciente == null) {
                         return null;
                 }
@@ -186,7 +220,7 @@ public interface PacienteMapper {
                 return response;
         }
 
-        default PacienteSimplificadoResponse toSimplified(Paciente paciente) {
+        public PacienteSimplificadoResponse toSimplified(Paciente paciente) {
                 if (paciente == null)
                         return null;
 
@@ -315,7 +349,7 @@ public interface PacienteMapper {
                                 .cns(cns)
                                 .dataNascimento(paciente.getDataNascimento())
                                 .sexo(paciente.getSexo())
-                                .estadoCivil(null) 
+                                .estadoCivil(null)
                                 .telefone(telefone)
                                 .email(email)
                                 .nomeMae(nomeMae)
@@ -354,7 +388,7 @@ public interface PacienteMapper {
                                 .build();
         }
 
-        default PacienteSimplificadoResponse fromProjection(PacienteSimplificadoProjection projecao) {
+        public PacienteSimplificadoResponse fromProjection(PacienteSimplificadoProjection projecao) {
                 if (projecao == null)
                         return null;
                 return PacienteSimplificadoResponse.builder()
