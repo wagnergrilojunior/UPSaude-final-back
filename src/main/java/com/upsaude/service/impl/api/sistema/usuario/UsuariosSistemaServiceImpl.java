@@ -75,69 +75,65 @@ public class UsuariosSistemaServiceImpl implements UsuariosSistemaService {
         log.debug("Criando novo usuariossistema");
 
         try {
-            User user = null;
-            UUID userIdFinal;
-            
-            UUID requestUserId = request.getUserId();
-
-            if (requestUserId == null) {
-                if (request.getEmail() == null || request.getEmail().trim().isEmpty()) {
-                    throw new BadRequestException("Email é obrigatório quando userId não é fornecido");
-                }
-
-                log.debug("Criando User no Supabase Auth primeiro");
-                UserRequest userRequestCriar = UserRequest.builder()
-                        .email(request.getEmail())
-                        .build();
-                
-                com.upsaude.api.response.sistema.usuario.UserResponse userResponse = userService.criar(userRequestCriar);
-                userIdFinal = userResponse.getId();
-                log.info("User criado com sucesso no Supabase Auth. ID: {}", userIdFinal);
-                
-                if (request.getSenha() != null && !request.getSenha().trim().isEmpty()) {
-                    log.debug("Atualizando senha do User recém-criado");
-                    UserRequest userRequestAtualizar = UserRequest.builder()
-                            .email(request.getEmail())
-                            .senha(request.getSenha())
-                            .build();
-                    userService.atualizar(userIdFinal, userRequestAtualizar);
-                    log.info("Senha do User atualizada com sucesso");
-                }
-            } else {
-                userIdFinal = requestUserId;
+            if (request.getEmail() == null || request.getEmail().trim().isEmpty()) {
+                throw new BadRequestException("Email é obrigatório para criar usuário");
             }
 
-            user = userRepository.findById(userIdFinal)
+            log.debug("Criando User no Supabase Auth primeiro");
+            UserRequest userRequestCriar = UserRequest.builder()
+                    .email(request.getEmail())
+                    .build();
+
+            com.upsaude.api.response.sistema.usuario.UserResponse userResponse = userService.criar(userRequestCriar);
+            UUID userIdFinal = userResponse.getId();
+            log.info("User criado com sucesso no Supabase Auth. ID: {}", userIdFinal);
+
+            if (request.getSenha() != null && !request.getSenha().trim().isEmpty()) {
+                log.debug("Atualizando senha do User recém-criado");
+                UserRequest userRequestAtualizar = UserRequest.builder()
+                        .email(request.getEmail())
+                        .senha(request.getSenha())
+                        .build();
+                userService.atualizar(userIdFinal, userRequestAtualizar);
+                log.info("Senha do User atualizada com sucesso");
+            }
+
+            User user = userRepository.findById(userIdFinal)
                     .orElseThrow(() -> new NotFoundException("User não encontrado com ID: " + userIdFinal));
 
             validarEmailUnico(null, user != null ? user.getEmail() : null, userIdFinal);
-            validarUsernameUnico(null, request.getDadosIdentificacao() != null ? request.getDadosIdentificacao().getUsername() : null);
+            validarUsernameUnico(null,
+                    request.getDadosIdentificacao() != null ? request.getDadosIdentificacao().getUsername() : null);
 
             UsuariosSistema usuariosSistema = usuariosSistemaMapper.fromRequest(request);
             usuariosSistema.setAtivo(true);
-                usuariosSistema.setUser(user);
+            usuariosSistema.setUser(user);
 
             if (request.getTenantId() != null) {
                 Tenant tenant = tenantRepository.findById(request.getTenantId())
-                        .orElseThrow(() -> new NotFoundException("Tenant não encontrado com ID: " + request.getTenantId()));
+                        .orElseThrow(
+                                () -> new NotFoundException("Tenant não encontrado com ID: " + request.getTenantId()));
                 usuariosSistema.setTenant(tenant);
             }
 
             if (request.getMedico() != null) {
                 Medicos medico = medicosRepository.findById(request.getMedico())
-                        .orElseThrow(() -> new NotFoundException("Médico não encontrado com ID: " + request.getMedico()));
+                        .orElseThrow(
+                                () -> new NotFoundException("Médico não encontrado com ID: " + request.getMedico()));
                 usuariosSistema.setMedico(medico);
             }
 
             if (request.getProfissionalSaude() != null) {
                 ProfissionaisSaude profissional = profissionaisSaudeRepository.findById(request.getProfissionalSaude())
-                        .orElseThrow(() -> new NotFoundException("Profissional de saúde não encontrado com ID: " + request.getProfissionalSaude()));
+                        .orElseThrow(() -> new NotFoundException(
+                                "Profissional de saúde não encontrado com ID: " + request.getProfissionalSaude()));
                 usuariosSistema.setProfissionalSaude(profissional);
             }
 
             if (request.getPaciente() != null) {
                 Paciente paciente = pacienteRepository.findById(request.getPaciente())
-                        .orElseThrow(() -> new NotFoundException("Paciente não encontrado com ID: " + request.getPaciente()));
+                        .orElseThrow(() -> new NotFoundException(
+                                "Paciente não encontrado com ID: " + request.getPaciente()));
                 usuariosSistema.setPaciente(paciente);
             }
 
@@ -156,7 +152,8 @@ public class UsuariosSistemaServiceImpl implements UsuariosSistemaService {
             log.warn("Erro de validação ao criar UsuariosSistema. Erro: {}", e.getMessage());
             throw e;
         } catch (DataAccessException e) {
-            log.error("Erro de acesso a dados ao criar UsuariosSistema. Exception: {}", e.getClass().getSimpleName(), e);
+            log.error("Erro de acesso a dados ao criar UsuariosSistema. Exception: {}", e.getClass().getSimpleName(),
+                    e);
             throw new InternalServerErrorException("Erro ao persistir UsuariosSistema", e);
         } catch (RuntimeException e) {
             log.error("Erro inesperado ao criar UsuariosSistema. Exception: {}", e.getClass().getSimpleName(), e);
@@ -199,10 +196,12 @@ public class UsuariosSistemaServiceImpl implements UsuariosSistemaService {
                 Hibernate.initialize(us.getEstabelecimentosVinculados());
             });
 
-            log.debug("Listagem de usuários do sistema concluída. Total de elementos: {}", usuariosSistemas.getTotalElements());
+            log.debug("Listagem de usuários do sistema concluída. Total de elementos: {}",
+                    usuariosSistemas.getTotalElements());
             return usuariosSistemas.map(us -> enrichResponse(usuariosSistemaMapper.toResponse(us)));
         } catch (DataAccessException e) {
-            log.error("Erro de acesso a dados ao listar UsuariosSistema. Exception: {}", e.getClass().getSimpleName(), e);
+            log.error("Erro de acesso a dados ao listar UsuariosSistema. Exception: {}", e.getClass().getSimpleName(),
+                    e);
             throw new InternalServerErrorException("Erro ao listar UsuariosSistema", e);
         } catch (RuntimeException e) {
             log.error("Erro inesperado ao listar UsuariosSistema. Exception: {}", e.getClass().getSimpleName(), e);
@@ -223,11 +222,11 @@ public class UsuariosSistemaServiceImpl implements UsuariosSistemaService {
                         property = "dadosIdentificacao." + property;
                     }
 
-                    else if ("nomeExibicao".equals(property) || "fotoUrl".equals(property)) {
+                else if ("nomeExibicao".equals(property) || "fotoUrl".equals(property)) {
                         property = "dadosExibicao." + property;
                     }
 
-                    else if ("adminTenant".equals(property) || "adminSistema".equals(property)) {
+                else if ("adminTenant".equals(property) || "adminSistema".equals(property)) {
                         property = "configuracao." + property;
                     }
                     return new Sort.Order(order.getDirection(), property);
@@ -255,15 +254,16 @@ public class UsuariosSistemaServiceImpl implements UsuariosSistemaService {
                 .orElseThrow(() -> new NotFoundException("UsuariosSistema não encontrado com ID: " + id));
 
         User userAtualizado = usuariosSistemaExistente.getUser();
-        UUID userIdParaAtualizar = request.getUserId() != null ? request.getUserId() : (userAtualizado != null ? userAtualizado.getId() : null);
 
-        if (userIdParaAtualizar == null) {
-            throw new BadRequestException("Não é possível atualizar: usuário não possui User vinculado e nenhum userId foi fornecido");
+        if (userAtualizado == null) {
+            throw new BadRequestException("Não é possível atualizar: usuário não possui User vinculado");
         }
+
+        UUID userIdParaAtualizar = userAtualizado.getId();
 
         boolean precisaAtualizarUser = false;
         if (request.getEmail() != null && !request.getEmail().trim().isEmpty()) {
-            if (userAtualizado == null || !request.getEmail().equals(userAtualizado.getEmail())) {
+            if (!request.getEmail().equals(userAtualizado.getEmail())) {
                 precisaAtualizarUser = true;
             }
         }
@@ -277,24 +277,21 @@ public class UsuariosSistemaServiceImpl implements UsuariosSistemaService {
                     .email(request.getEmail())
                     .senha(request.getSenha())
                     .build();
-            
-            com.upsaude.api.response.sistema.usuario.UserResponse userResponse = userService.atualizar(userIdParaAtualizar, userRequest);
+
+            com.upsaude.api.response.sistema.usuario.UserResponse userResponse = userService
+                    .atualizar(userIdParaAtualizar, userRequest);
             log.info("User atualizado com sucesso no Supabase Auth. ID: {}", userResponse.getId());
-            
+
             userAtualizado = userRepository.findById(userIdParaAtualizar)
                     .orElseThrow(() -> new NotFoundException("User não encontrado com ID: " + userIdParaAtualizar));
-        } else {
-            if (userAtualizado == null && userIdParaAtualizar != null) {
-                userAtualizado = userRepository.findById(userIdParaAtualizar)
-                        .orElseThrow(() -> new NotFoundException("User não encontrado com ID: " + userIdParaAtualizar));
-        }
         }
 
         validarEmailUnico(id, userAtualizado != null ? userAtualizado.getEmail() : null, userIdParaAtualizar);
-        validarUsernameUnico(id, request.getDadosIdentificacao() != null ? request.getDadosIdentificacao().getUsername() : null);
+        validarUsernameUnico(id,
+                request.getDadosIdentificacao() != null ? request.getDadosIdentificacao().getUsername() : null);
 
         atualizarDadosUsuariosSistema(usuariosSistemaExistente, request);
-        
+
         if (userAtualizado != null) {
             usuariosSistemaExistente.setUser(userAtualizado);
         }
@@ -333,7 +330,8 @@ public class UsuariosSistemaServiceImpl implements UsuariosSistemaService {
             supabaseAuthService.deleteUser(userId);
             log.info("ETAPA 2: User deletado PERMANENTEMENTE do Supabase Auth. UserID: {}", userId);
         } catch (Exception e) {
-            log.error("Erro ao deletar User do Supabase Auth. UserID: {}, Exception: {}", userId, e.getClass().getName(), e);
+            log.error("Erro ao deletar User do Supabase Auth. UserID: {}, Exception: {}", userId,
+                    e.getClass().getName(), e);
 
             log.warn("UsuariosSistema foi deletado mas User não foi removido do Supabase (pode não existir)");
         }
@@ -351,9 +349,11 @@ public class UsuariosSistemaServiceImpl implements UsuariosSistemaService {
 
             if (usuariosSistemaId != null) {
                 UsuariosSistema usuariosSistemaExistente = usuariosSistemaRepository.findById(usuariosSistemaId)
-                        .orElseThrow(() -> new NotFoundException("UsuariosSistema não encontrado com ID: " + usuariosSistemaId));
+                        .orElseThrow(() -> new NotFoundException(
+                                "UsuariosSistema não encontrado com ID: " + usuariosSistemaId));
 
-                if (usuariosSistemaExistente.getUser() == null || !userEncontrado.getId().equals(usuariosSistemaExistente.getUser().getId())) {
+                if (usuariosSistemaExistente.getUser() == null
+                        || !userEncontrado.getId().equals(usuariosSistemaExistente.getUser().getId())) {
                     throw new BadRequestException("Já existe um usuário cadastrado com o email: " + email);
                 }
             } else {
@@ -362,22 +362,27 @@ public class UsuariosSistemaServiceImpl implements UsuariosSistemaService {
 
                     Optional<UsuariosSistema> usuariosSistemaExistente = usuariosSistemaRepository.findByUserId(userId);
                     if (usuariosSistemaExistente.isPresent()) {
-                        throw new BadRequestException("Já existe um usuário do sistema cadastrado com este userId: " + userId);
+                        throw new BadRequestException(
+                                "Já existe um usuário do sistema cadastrado com este userId: " + userId);
                     }
 
                     if (!userEncontrado.getId().equals(userId)) {
                         throw new BadRequestException("O email informado pertence a outro usuário. Email: " + email);
                     }
 
-                    log.debug("Email {} existe em auth.users e corresponde ao userId {}, mas ainda não existe em usuarios_sistema. Permitindo cadastro.", email, userId);
+                    log.debug(
+                            "Email {} existe em auth.users e corresponde ao userId {}, mas ainda não existe em usuarios_sistema. Permitindo cadastro.",
+                            email, userId);
                 } else {
 
-                    Optional<UsuariosSistema> usuariosSistemaExistente = usuariosSistemaRepository.findByUserId(userEncontrado.getId());
+                    Optional<UsuariosSistema> usuariosSistemaExistente = usuariosSistemaRepository
+                            .findByUserId(userEncontrado.getId());
                     if (usuariosSistemaExistente.isPresent()) {
                         throw new BadRequestException("Já existe um usuário cadastrado com o email: " + email);
                     }
 
-                    log.debug("Email {} existe em auth.users mas não existe em usuarios_sistema. Permitindo cadastro.", email);
+                    log.debug("Email {} existe em auth.users mas não existe em usuarios_sistema. Permitindo cadastro.",
+                            email);
                 }
             }
         }
@@ -423,23 +428,28 @@ public class UsuariosSistemaServiceImpl implements UsuariosSistemaService {
 
         if (request.getProfissionalSaude() != null) {
             ProfissionaisSaude profissional = profissionaisSaudeRepository.findById(request.getProfissionalSaude())
-                    .orElseThrow(() -> new NotFoundException("Profissional de saúde não encontrado com ID: " + request.getProfissionalSaude()));
+                    .orElseThrow(() -> new NotFoundException(
+                            "Profissional de saúde não encontrado com ID: " + request.getProfissionalSaude()));
             usuariosSistema.setProfissionalSaude(profissional);
         }
 
         if (request.getPaciente() != null) {
             Paciente paciente = pacienteRepository.findById(request.getPaciente())
-                    .orElseThrow(() -> new NotFoundException("Paciente não encontrado com ID: " + request.getPaciente()));
+                    .orElseThrow(
+                            () -> new NotFoundException("Paciente não encontrado com ID: " + request.getPaciente()));
             usuariosSistema.setPaciente(paciente);
         }
 
     }
 
-    private void criarVinculosComPapel(UsuariosSistema usuario, List<UsuariosSistemaRequest.EstabelecimentoVinculoRequest> vinculos) {
+    private void criarVinculosComPapel(UsuariosSistema usuario,
+            List<UsuariosSistemaRequest.EstabelecimentoVinculoRequest> vinculos) {
         for (UsuariosSistemaRequest.EstabelecimentoVinculoRequest vinculoRequest : vinculos) {
 
             usuarioEstabelecimentoRepository
-                    .findByUsuarioUserIdAndEstabelecimentoId(usuario.getUser() != null ? usuario.getUser().getId() : null, vinculoRequest.getEstabelecimentoId())
+                    .findByUsuarioUserIdAndEstabelecimentoId(
+                            usuario.getUser() != null ? usuario.getUser().getId() : null,
+                            vinculoRequest.getEstabelecimentoId())
                     .ifPresentOrElse(
                             vinculoExistente -> {
                                 if (Boolean.FALSE.equals(vinculoExistente.getActive())) {
@@ -448,13 +458,17 @@ public class UsuariosSistemaServiceImpl implements UsuariosSistemaService {
                                     vinculoExistente.setTipoUsuario(vinculoRequest.getTipoUsuario());
                                     usuarioEstabelecimentoRepository.save(vinculoExistente);
                                     log.debug("Vínculo reativado com papel {} para usuário {} e estabelecimento {}",
-                                            vinculoRequest.getTipoUsuario(), usuario.getId(), vinculoRequest.getEstabelecimentoId());
+                                            vinculoRequest.getTipoUsuario(), usuario.getId(),
+                                            vinculoRequest.getEstabelecimentoId());
                                 }
                             },
                             () -> {
 
-                                Estabelecimentos estabelecimento = estabelecimentosRepository.findById(vinculoRequest.getEstabelecimentoId())
-                                        .orElseThrow(() -> new NotFoundException("Estabelecimento não encontrado com ID: " + vinculoRequest.getEstabelecimentoId()));
+                                Estabelecimentos estabelecimento = estabelecimentosRepository
+                                        .findById(vinculoRequest.getEstabelecimentoId())
+                                        .orElseThrow(
+                                                () -> new NotFoundException("Estabelecimento não encontrado com ID: "
+                                                        + vinculoRequest.getEstabelecimentoId()));
 
                                 UsuarioEstabelecimento vinculo = new UsuarioEstabelecimento();
                                 vinculo.setUsuario(usuario);
@@ -465,9 +479,9 @@ public class UsuariosSistemaServiceImpl implements UsuariosSistemaService {
 
                                 usuarioEstabelecimentoRepository.save(vinculo);
                                 log.debug("Vínculo criado com papel {} para usuário {} e estabelecimento {}",
-                                        vinculoRequest.getTipoUsuario(), usuario.getId(), vinculoRequest.getEstabelecimentoId());
-                            }
-                    );
+                                        vinculoRequest.getTipoUsuario(), usuario.getId(),
+                                        vinculoRequest.getEstabelecimentoId());
+                            });
         }
     }
 
@@ -476,20 +490,24 @@ public class UsuariosSistemaServiceImpl implements UsuariosSistemaService {
         for (UUID estabelecimentoId : estabelecimentosIds) {
 
             usuarioEstabelecimentoRepository
-                    .findByUsuarioUserIdAndEstabelecimentoId(usuario.getUser() != null ? usuario.getUser().getId() : null, estabelecimentoId)
+                    .findByUsuarioUserIdAndEstabelecimentoId(
+                            usuario.getUser() != null ? usuario.getUser().getId() : null, estabelecimentoId)
                     .ifPresentOrElse(
                             vinculoExistente -> {
                                 if (Boolean.FALSE.equals(vinculoExistente.getActive())) {
 
                                     vinculoExistente.setActive(true);
                                     usuarioEstabelecimentoRepository.save(vinculoExistente);
-                                    log.debug("Vínculo reativado para usuário {} e estabelecimento {}", usuario.getId(), estabelecimentoId);
+                                    log.debug("Vínculo reativado para usuário {} e estabelecimento {}", usuario.getId(),
+                                            estabelecimentoId);
                                 }
                             },
                             () -> {
 
-                                Estabelecimentos estabelecimento = estabelecimentosRepository.findById(estabelecimentoId)
-                                        .orElseThrow(() -> new NotFoundException("Estabelecimento não encontrado com ID: " + estabelecimentoId));
+                                Estabelecimentos estabelecimento = estabelecimentosRepository
+                                        .findById(estabelecimentoId)
+                                        .orElseThrow(() -> new NotFoundException(
+                                                "Estabelecimento não encontrado com ID: " + estabelecimentoId));
 
                                 UsuarioEstabelecimento vinculo = new UsuarioEstabelecimento();
                                 vinculo.setUsuario(usuario);
@@ -498,13 +516,14 @@ public class UsuariosSistemaServiceImpl implements UsuariosSistemaService {
                                 vinculo.setActive(true);
 
                                 usuarioEstabelecimentoRepository.save(vinculo);
-                                log.debug("Vínculo criado para usuário {} e estabelecimento {}", usuario.getId(), estabelecimentoId);
-                            }
-                    );
+                                log.debug("Vínculo criado para usuário {} e estabelecimento {}", usuario.getId(),
+                                        estabelecimentoId);
+                            });
         }
     }
 
-    private void atualizarVinculosComPapel(UsuariosSistema usuario, List<UsuariosSistemaRequest.EstabelecimentoVinculoRequest> vinculos) {
+    private void atualizarVinculosComPapel(UsuariosSistema usuario,
+            List<UsuariosSistemaRequest.EstabelecimentoVinculoRequest> vinculos) {
 
         List<UsuarioEstabelecimento> vinculosExistentes = usuarioEstabelecimentoRepository
                 .findByUsuarioUserId(usuario.getUser() != null ? usuario.getUser().getId() : null);
@@ -515,7 +534,7 @@ public class UsuariosSistemaServiceImpl implements UsuariosSistemaService {
 
         for (UsuarioEstabelecimento vinculo : vinculosExistentes) {
             if (Boolean.TRUE.equals(vinculo.getActive()) &&
-                !novosIds.contains(vinculo.getEstabelecimento().getId())) {
+                    !novosIds.contains(vinculo.getEstabelecimento().getId())) {
                 vinculo.setActive(false);
                 usuarioEstabelecimentoRepository.save(vinculo);
                 log.debug("Vínculo desativado para estabelecimento {}", vinculo.getEstabelecimento().getId());
@@ -524,7 +543,9 @@ public class UsuariosSistemaServiceImpl implements UsuariosSistemaService {
 
         for (UsuariosSistemaRequest.EstabelecimentoVinculoRequest vinculoRequest : vinculos) {
             usuarioEstabelecimentoRepository
-                    .findByUsuarioUserIdAndEstabelecimentoId(usuario.getUser() != null ? usuario.getUser().getId() : null, vinculoRequest.getEstabelecimentoId())
+                    .findByUsuarioUserIdAndEstabelecimentoId(
+                            usuario.getUser() != null ? usuario.getUser().getId() : null,
+                            vinculoRequest.getEstabelecimentoId())
                     .ifPresentOrElse(
                             vinculoExistente -> {
 
@@ -536,7 +557,8 @@ public class UsuariosSistemaServiceImpl implements UsuariosSistemaService {
                             },
                             () -> {
 
-                                Estabelecimentos estabelecimento = estabelecimentosRepository.findById(vinculoRequest.getEstabelecimentoId())
+                                Estabelecimentos estabelecimento = estabelecimentosRepository
+                                        .findById(vinculoRequest.getEstabelecimentoId())
                                         .orElseThrow(() -> new NotFoundException("Estabelecimento não encontrado"));
 
                                 UsuarioEstabelecimento vinculo = new UsuarioEstabelecimento();
@@ -549,8 +571,7 @@ public class UsuariosSistemaServiceImpl implements UsuariosSistemaService {
                                 usuarioEstabelecimentoRepository.save(vinculo);
                                 log.debug("Novo vínculo criado com papel {} para estabelecimento {}",
                                         vinculoRequest.getTipoUsuario(), vinculoRequest.getEstabelecimentoId());
-                            }
-                    );
+                            });
         }
     }
 
@@ -567,10 +588,11 @@ public class UsuariosSistemaServiceImpl implements UsuariosSistemaService {
 
         for (UsuarioEstabelecimento vinculo : vinculosExistentes) {
             if (Boolean.TRUE.equals(vinculo.getActive()) &&
-                !estabelecimentosIds.contains(vinculo.getEstabelecimento().getId())) {
+                    !estabelecimentosIds.contains(vinculo.getEstabelecimento().getId())) {
                 vinculo.setActive(false);
                 usuarioEstabelecimentoRepository.save(vinculo);
-                log.debug("Vínculo desativado para usuário {} e estabelecimento {}", usuario.getId(), vinculo.getEstabelecimento().getId());
+                log.debug("Vínculo desativado para usuário {} e estabelecimento {}", usuario.getId(),
+                        vinculo.getEstabelecimento().getId());
             }
         }
 
@@ -590,10 +612,12 @@ public class UsuariosSistemaServiceImpl implements UsuariosSistemaService {
                 .orElseThrow(() -> new NotFoundException("Usuário não encontrado com ID: " + id));
 
         if (usuario.getUser() == null || usuario.getUser().getId() == null) {
-            throw new BadRequestException("Usuário não possui User vinculado. É necessário criar/atualizar o usuário com email antes de fazer upload de foto.");
+            throw new BadRequestException(
+                    "Usuário não possui User vinculado. É necessário criar/atualizar o usuário com email antes de fazer upload de foto.");
         }
 
-        if (usuario.getDadosExibicao() != null && usuario.getDadosExibicao().getFotoUrl() != null && !usuario.getDadosExibicao().getFotoUrl().isEmpty()) {
+        if (usuario.getDadosExibicao() != null && usuario.getDadosExibicao().getFotoUrl() != null
+                && !usuario.getDadosExibicao().getFotoUrl().isEmpty()) {
             supabaseStorageService.deletarFotoUsuario(usuario.getDadosExibicao().getFotoUrl());
         }
 
@@ -627,7 +651,8 @@ public class UsuariosSistemaServiceImpl implements UsuariosSistemaService {
         UsuariosSistema usuario = usuariosSistemaRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Usuário não encontrado com ID: " + id));
 
-        if (usuario.getDadosExibicao() != null && usuario.getDadosExibicao().getFotoUrl() != null && !usuario.getDadosExibicao().getFotoUrl().isEmpty()) {
+        if (usuario.getDadosExibicao() != null && usuario.getDadosExibicao().getFotoUrl() != null
+                && !usuario.getDadosExibicao().getFotoUrl().isEmpty()) {
             supabaseStorageService.deletarFotoUsuario(usuario.getDadosExibicao().getFotoUrl());
             usuario.getDadosExibicao().setFotoUrl(null);
             usuariosSistemaRepository.save(usuario);
@@ -663,7 +688,8 @@ public class UsuariosSistemaServiceImpl implements UsuariosSistemaService {
         if (email == null || email.trim().isEmpty()) {
             log.warn("Email do User não encontrado. Tentando buscar do Supabase Auth");
             try {
-                com.upsaude.integration.supabase.SupabaseAuthResponse.User supabaseUser = supabaseAuthService.getUserById(userId);
+                com.upsaude.integration.supabase.SupabaseAuthResponse.User supabaseUser = supabaseAuthService
+                        .getUserById(userId);
                 if (supabaseUser != null && supabaseUser.getEmail() != null) {
                     email = supabaseUser.getEmail();
                 } else {
@@ -696,28 +722,32 @@ public class UsuariosSistemaServiceImpl implements UsuariosSistemaService {
         if (usuario.getConfiguracao() != null) {
             org.hibernate.Hibernate.initialize(usuario.getConfiguracao());
         }
-        
+
         UsuariosSistemaResponse response = usuariosSistemaMapper.toResponse(usuario);
-        
+
         // Garantir que os dados de identificação sejam incluídos na resposta
         if (response.getDadosIdentificacao() == null && usuario.getDadosIdentificacao() != null) {
-            response.setDadosIdentificacao(com.upsaude.api.response.embeddable.DadosIdentificacaoUsuarioResponse.builder()
-                    .username(usuario.getDadosIdentificacao().getUsername())
-                    .cpf(usuario.getDadosIdentificacao().getCpf())
-                    .build());
+            response.setDadosIdentificacao(
+                    com.upsaude.api.response.embeddable.DadosIdentificacaoUsuarioResponse.builder()
+                            .username(usuario.getDadosIdentificacao().getUsername())
+                            .cpf(usuario.getDadosIdentificacao().getCpf())
+                            .build());
         } else if (response.getDadosIdentificacao() != null && usuario.getDadosIdentificacao() != null) {
             // Garantir que o CPF seja incluído mesmo se o mapper não incluiu
             if (response.getDadosIdentificacao().getCpf() == null && usuario.getDadosIdentificacao().getCpf() != null) {
                 response.getDadosIdentificacao().setCpf(usuario.getDadosIdentificacao().getCpf());
             }
-            if (response.getDadosIdentificacao().getUsername() == null && usuario.getDadosIdentificacao().getUsername() != null) {
+            if (response.getDadosIdentificacao().getUsername() == null
+                    && usuario.getDadosIdentificacao().getUsername() != null) {
                 response.getDadosIdentificacao().setUsername(usuario.getDadosIdentificacao().getUsername());
             }
         }
 
         if (usuario.getTenant() != null) {
             response.setTenantId(usuario.getTenant().getId());
-            response.setTenantNome(usuario.getTenant().getDadosIdentificacao() != null ? usuario.getTenant().getDadosIdentificacao().getNome() : null);
+            response.setTenantNome(usuario.getTenant().getDadosIdentificacao() != null
+                    ? usuario.getTenant().getDadosIdentificacao().getNome()
+                    : null);
             response.setTenantSlug(null);
         }
 
@@ -730,11 +760,14 @@ public class UsuariosSistemaServiceImpl implements UsuariosSistemaService {
             if (profissional.getContato() != null) {
                 org.hibernate.Hibernate.initialize(profissional.getContato());
             }
-            response.setProfissionalSaude(com.upsaude.api.response.sistema.usuario.ProfissionalSaudeSimplificadoResponse.builder()
-                    .id(profissional.getId())
-                    .nome(profissional.getDadosPessoaisBasicos() != null ? profissional.getDadosPessoaisBasicos().getNomeCompleto() : null)
-                    .email(profissional.getContato() != null ? profissional.getContato().getEmail() : null)
-                    .build());
+            response.setProfissionalSaude(
+                    com.upsaude.api.response.sistema.usuario.ProfissionalSaudeSimplificadoResponse.builder()
+                            .id(profissional.getId())
+                            .nome(profissional.getDadosPessoaisBasicos() != null
+                                    ? profissional.getDadosPessoaisBasicos().getNomeCompleto()
+                                    : null)
+                            .email(profissional.getContato() != null ? profissional.getContato().getEmail() : null)
+                            .build());
         }
 
         if (usuario.getMedico() != null) {
@@ -748,7 +781,8 @@ public class UsuariosSistemaServiceImpl implements UsuariosSistemaService {
             }
             response.setMedico(com.upsaude.api.response.sistema.usuario.MedicoSimplificadoResponse.builder()
                     .id(medico.getId())
-                    .nome(medico.getDadosPessoaisBasicos() != null ? medico.getDadosPessoaisBasicos().getNomeCompleto() : null)
+                    .nome(medico.getDadosPessoaisBasicos() != null ? medico.getDadosPessoaisBasicos().getNomeCompleto()
+                            : null)
                     .email(medico.getContato() != null ? medico.getContato().getEmail() : null)
                     .build());
         }
@@ -759,12 +793,11 @@ public class UsuariosSistemaServiceImpl implements UsuariosSistemaService {
             if (paciente.getContatos() != null) {
                 org.hibernate.Hibernate.initialize(paciente.getContatos());
             }
-            String emailPaciente = paciente.getContatos() != null ?
-                    paciente.getContatos().stream()
-                            .filter(c -> c.getTipo() == TipoContatoEnum.EMAIL)
-                            .map(c -> c.getEmail())
-                            .filter(e -> e != null && !e.trim().isEmpty())
-                            .findFirst().orElse(null) : null;
+            String emailPaciente = paciente.getContatos() != null ? paciente.getContatos().stream()
+                    .filter(c -> c.getTipo() == TipoContatoEnum.EMAIL)
+                    .map(c -> c.getEmail())
+                    .filter(e -> e != null && !e.trim().isEmpty())
+                    .findFirst().orElse(null) : null;
             response.setPaciente(com.upsaude.api.response.sistema.usuario.PacienteSimplificadoResponse.builder()
                     .id(paciente.getId())
                     .nome(paciente.getNomeCompleto())
@@ -775,8 +808,8 @@ public class UsuariosSistemaServiceImpl implements UsuariosSistemaService {
         if (usuario.getUser() != null) {
             var user = usuario.getUser();
             org.hibernate.Hibernate.initialize(user);
-            String nomeUsuario = usuario.getDadosExibicao() != null ?
-                    usuario.getDadosExibicao().getNomeExibicao() : null;
+            String nomeUsuario = usuario.getDadosExibicao() != null ? usuario.getDadosExibicao().getNomeExibicao()
+                    : null;
             if (nomeUsuario == null && usuario.getDadosIdentificacao() != null) {
                 nomeUsuario = usuario.getDadosIdentificacao().getUsername();
             }
@@ -787,14 +820,17 @@ public class UsuariosSistemaServiceImpl implements UsuariosSistemaService {
                     .build());
         }
 
-        List<UsuarioEstabelecimento> vinculos = usuarioEstabelecimentoRepository.findByUsuarioUserId(usuario.getUser() != null ? usuario.getUser().getId() : null);
+        List<UsuarioEstabelecimento> vinculos = usuarioEstabelecimentoRepository
+                .findByUsuarioUserId(usuario.getUser() != null ? usuario.getUser().getId() : null);
         if (vinculos != null && !vinculos.isEmpty()) {
             List<UsuariosSistemaResponse.EstabelecimentoVinculoSimples> vinculosResponse = vinculos.stream()
                     .filter(v -> Boolean.TRUE.equals(v.getActive()))
                     .map(v -> UsuariosSistemaResponse.EstabelecimentoVinculoSimples.builder()
                             .id(v.getId())
                             .estabelecimentoId(v.getEstabelecimento().getId())
-                            .estabelecimentoNome(v.getEstabelecimento().getDadosIdentificacao() != null ? v.getEstabelecimento().getDadosIdentificacao().getNome() : null)
+                            .estabelecimentoNome(v.getEstabelecimento().getDadosIdentificacao() != null
+                                    ? v.getEstabelecimento().getDadosIdentificacao().getNome()
+                                    : null)
                             .tipoUsuario(v.getTipoUsuario())
                             .active(v.getActive())
                             .build())

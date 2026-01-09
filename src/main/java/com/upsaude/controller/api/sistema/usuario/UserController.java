@@ -26,9 +26,10 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping("/v1/users")
-@Tag(name = "Users", description = "API para gerenciamento de Users")
+@Tag(name = "Users (Deprecated)", description = "API para gerenciamento de Users. DEPRECATED: Use /v1/usuarios-sistema para todas as operações de usuário.")
 @RequiredArgsConstructor
 @Slf4j
+@Deprecated(since = "2.0", forRemoval = false)
 public class UserController {
 
     private final UserService userService;
@@ -36,8 +37,7 @@ public class UserController {
     @PostMapping
     @Operation(summary = "Criar novo user", description = "Cria um novo user no sistema")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "201", description = "User criado com sucesso",
-                    content = @Content(schema = @Schema(implementation = UserResponse.class))),
+            @ApiResponse(responseCode = "201", description = "User criado com sucesso", content = @Content(schema = @Schema(implementation = UserResponse.class))),
             @ApiResponse(responseCode = "400", description = "Dados inválidos fornecidos"),
             @ApiResponse(responseCode = "403", description = "Acesso negado")
     })
@@ -63,8 +63,7 @@ public class UserController {
             @ApiResponse(responseCode = "403", description = "Acesso negado")
     })
     public ResponseEntity<Page<UserResponse>> listar(
-            @Parameter(description = "Parâmetros de paginação (page, size, sort)")
-            Pageable pageable) {
+            @Parameter(description = "Parâmetros de paginação (page, size, sort)") Pageable pageable) {
         log.debug("REQUEST GET /v1/users - pageable: {}", pageable);
         try {
             Page<UserResponse> response = userService.listar(pageable);
@@ -78,14 +77,12 @@ public class UserController {
     @GetMapping("/{id}")
     @Operation(summary = "Obter user por ID", description = "Retorna um user específico pelo seu ID")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "User encontrado",
-                    content = @Content(schema = @Schema(implementation = UserResponse.class))),
+            @ApiResponse(responseCode = "200", description = "User encontrado", content = @Content(schema = @Schema(implementation = UserResponse.class))),
             @ApiResponse(responseCode = "404", description = "User não encontrado"),
             @ApiResponse(responseCode = "403", description = "Acesso negado")
     })
     public ResponseEntity<UserResponse> obterPorId(
-            @Parameter(description = "ID do user", required = true)
-            @PathVariable UUID id) {
+            @Parameter(description = "ID do user", required = true) @PathVariable UUID id) {
         log.debug("REQUEST GET /v1/users/{}", id);
         try {
             UserResponse response = userService.obterPorId(id);
@@ -102,15 +99,13 @@ public class UserController {
     @PutMapping("/{id}")
     @Operation(summary = "Atualizar user", description = "Atualiza um user existente")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "User atualizado com sucesso",
-                    content = @Content(schema = @Schema(implementation = UserResponse.class))),
+            @ApiResponse(responseCode = "200", description = "User atualizado com sucesso", content = @Content(schema = @Schema(implementation = UserResponse.class))),
             @ApiResponse(responseCode = "400", description = "Dados inválidos fornecidos"),
             @ApiResponse(responseCode = "404", description = "User não encontrado"),
             @ApiResponse(responseCode = "403", description = "Acesso negado")
     })
     public ResponseEntity<UserResponse> atualizar(
-            @Parameter(description = "ID do user", required = true)
-            @PathVariable UUID id,
+            @Parameter(description = "ID do user", required = true) @PathVariable UUID id,
             @Valid @RequestBody UserRequest request) {
         log.debug("REQUEST PUT /v1/users/{} - payload: {}", id, request);
         try {
@@ -134,8 +129,7 @@ public class UserController {
             @ApiResponse(responseCode = "403", description = "Acesso negado")
     })
     public ResponseEntity<Void> excluir(
-            @Parameter(description = "ID do user", required = true)
-            @PathVariable UUID id) {
+            @Parameter(description = "ID do user", required = true) @PathVariable UUID id) {
         log.debug("REQUEST DELETE /v1/users/{}", id);
         try {
             userService.excluir(id);

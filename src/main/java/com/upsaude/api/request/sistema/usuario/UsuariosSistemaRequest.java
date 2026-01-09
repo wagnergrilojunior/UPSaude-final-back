@@ -29,8 +29,6 @@ import java.util.UUID;
 @Schema(description = "Dados de usuários sistema")
 public class UsuariosSistemaRequest {
 
-    private UUID userId;
-
     @EmailValido
     @Size(max = 255, message = "Email deve ter no máximo 255 caracteres")
     private String email;
