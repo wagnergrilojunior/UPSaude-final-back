@@ -9,6 +9,7 @@ import com.upsaude.validation.annotation.CNESValido;
 import com.upsaude.validation.annotation.CNPJValido;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
@@ -34,7 +35,7 @@ public class DadosIdentificacaoEstabelecimentoRequest {
     @Size(max = 255, message = "Nome fantasia deve ter no máximo 255 caracteres")
     private String nomeFantasia;
 
-    @NotBlank(message = "Tipo de estabelecimento é obrigatório")
+    @NotNull(message = "Tipo de estabelecimento é obrigatório")
     @JsonDeserialize(using = TipoEstabelecimentoEnumDeserializer.class)
     private TipoEstabelecimentoEnum tipo;
 

@@ -36,8 +36,7 @@ public class ProfissionaisSaudeController {
     @PostMapping
     @Operation(summary = "Criar novo profissional de saúde", description = "Cria um novo profissional de saúde no sistema")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "201", description = "Profissional de saúde criado com sucesso",
-                    content = @Content(schema = @Schema(implementation = ProfissionaisSaudeResponse.class))),
+            @ApiResponse(responseCode = "201", description = "Profissional de saúde criado com sucesso", content = @Content(schema = @Schema(implementation = ProfissionaisSaudeResponse.class))),
             @ApiResponse(responseCode = "400", description = "Dados inválidos fornecidos"),
             @ApiResponse(responseCode = "403", description = "Acesso negado")
     })
@@ -63,8 +62,7 @@ public class ProfissionaisSaudeController {
             @ApiResponse(responseCode = "403", description = "Acesso negado")
     })
     public ResponseEntity<Page<ProfissionaisSaudeResponse>> listar(
-            @Parameter(description = "Parâmetros de paginação (page, size, sort)")
-            Pageable pageable) {
+            @Parameter(description = "Parâmetros de paginação (page, size, sort)") Pageable pageable) {
         log.debug("REQUEST GET /v1/profissionais-saude - pageable: {}", pageable);
         try {
             Page<ProfissionaisSaudeResponse> response = profissionaisSaudeService.listar(pageable);
@@ -78,14 +76,12 @@ public class ProfissionaisSaudeController {
     @GetMapping("/{id}")
     @Operation(summary = "Obter profissional de saúde por ID", description = "Retorna um profissional de saúde específico pelo seu ID")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Profissional de saúde encontrado",
-                    content = @Content(schema = @Schema(implementation = ProfissionaisSaudeResponse.class))),
+            @ApiResponse(responseCode = "200", description = "Profissional de saúde encontrado", content = @Content(schema = @Schema(implementation = ProfissionaisSaudeResponse.class))),
             @ApiResponse(responseCode = "404", description = "Profissional de saúde não encontrado"),
             @ApiResponse(responseCode = "403", description = "Acesso negado")
     })
     public ResponseEntity<ProfissionaisSaudeResponse> obterPorId(
-            @Parameter(description = "ID do profissional de saúde", required = true)
-            @PathVariable UUID id) {
+            @Parameter(description = "ID do profissional de saúde", required = true) @PathVariable UUID id) {
         log.debug("REQUEST GET /v1/profissionais-saude/{}", id);
         try {
             ProfissionaisSaudeResponse response = profissionaisSaudeService.obterPorId(id);
@@ -99,18 +95,60 @@ public class ProfissionaisSaudeController {
         }
     }
 
+    @GetMapping("/cpf/{cpf}")
+    @Operation(summary = "Obter profissional de saúde por CPF", description = "Retorna um profissional de saúde específico pelo seu CPF")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Profissional de saúde encontrado", content = @Content(schema = @Schema(implementation = ProfissionaisSaudeResponse.class))),
+            @ApiResponse(responseCode = "404", description = "Profissional de saúde não encontrado"),
+            @ApiResponse(responseCode = "403", description = "Acesso negado")
+    })
+    public ResponseEntity<ProfissionaisSaudeResponse> obterPorCpf(
+            @Parameter(description = "CPF do profissional de saúde", required = true) @PathVariable String cpf) {
+        log.debug("REQUEST GET /v1/profissionais-saude/cpf/{}", cpf);
+        try {
+            ProfissionaisSaudeResponse response = profissionaisSaudeService.obterPorCpf(cpf);
+            return ResponseEntity.ok(response);
+        } catch (NotFoundException ex) {
+            log.warn("Profissional de saúde não encontrado — CPF: {}, mensagem: {}", cpf, ex.getMessage());
+            throw ex;
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao obter profissional de saúde por CPF — CPF: {}", cpf, ex);
+            throw ex;
+        }
+    }
+
+    @GetMapping("/cns/{cns}")
+    @Operation(summary = "Obter profissional de saúde por CNS", description = "Retorna um profissional de saúde específico pelo seu CNS")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Profissional de saúde encontrado", content = @Content(schema = @Schema(implementation = ProfissionaisSaudeResponse.class))),
+            @ApiResponse(responseCode = "404", description = "Profissional de saúde não encontrado"),
+            @ApiResponse(responseCode = "403", description = "Acesso negado")
+    })
+    public ResponseEntity<ProfissionaisSaudeResponse> obterPorCns(
+            @Parameter(description = "CNS do profissional de saúde", required = true) @PathVariable String cns) {
+        log.debug("REQUEST GET /v1/profissionais-saude/cns/{}", cns);
+        try {
+            ProfissionaisSaudeResponse response = profissionaisSaudeService.obterPorCns(cns);
+            return ResponseEntity.ok(response);
+        } catch (NotFoundException ex) {
+            log.warn("Profissional de saúde não encontrado — CNS: {}, mensagem: {}", cns, ex.getMessage());
+            throw ex;
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao obter profissional de saúde por CNS — CNS: {}", cns, ex);
+            throw ex;
+        }
+    }
+
     @PutMapping("/{id}")
     @Operation(summary = "Atualizar profissional de saúde", description = "Atualiza um profissional de saúde existente")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Profissional de saúde atualizado com sucesso",
-                    content = @Content(schema = @Schema(implementation = ProfissionaisSaudeResponse.class))),
+            @ApiResponse(responseCode = "200", description = "Profissional de saúde atualizado com sucesso", content = @Content(schema = @Schema(implementation = ProfissionaisSaudeResponse.class))),
             @ApiResponse(responseCode = "400", description = "Dados inválidos fornecidos"),
             @ApiResponse(responseCode = "404", description = "Profissional de saúde não encontrado"),
             @ApiResponse(responseCode = "403", description = "Acesso negado")
     })
     public ResponseEntity<ProfissionaisSaudeResponse> atualizar(
-            @Parameter(description = "ID do profissional de saúde", required = true)
-            @PathVariable UUID id,
+            @Parameter(description = "ID do profissional de saúde", required = true) @PathVariable UUID id,
             @Valid @RequestBody ProfissionaisSaudeRequest request) {
         log.debug("REQUEST PUT /v1/profissionais-saude/{} - payload: {}", id, request);
         try {
@@ -118,7 +156,8 @@ public class ProfissionaisSaudeController {
             log.info("Profissional de saúde atualizado com sucesso. ID: {}", response.getId());
             return ResponseEntity.ok(response);
         } catch (BadRequestException | NotFoundException | ConflictException ex) {
-            log.warn("Falha ao atualizar profissional de saúde — ID: {}, mensagem: {}, payload: {}", id, ex.getMessage(), request);
+            log.warn("Falha ao atualizar profissional de saúde — ID: {}, mensagem: {}, payload: {}", id,
+                    ex.getMessage(), request);
             throw ex;
         } catch (Exception ex) {
             log.error("Erro inesperado ao atualizar profissional de saúde — ID: {}, payload: {}", id, request, ex);
@@ -134,8 +173,7 @@ public class ProfissionaisSaudeController {
             @ApiResponse(responseCode = "403", description = "Acesso negado")
     })
     public ResponseEntity<Void> excluir(
-            @Parameter(description = "ID do profissional de saúde", required = true)
-            @PathVariable UUID id) {
+            @Parameter(description = "ID do profissional de saúde", required = true) @PathVariable UUID id) {
         log.debug("REQUEST DELETE /v1/profissionais-saude/{}", id);
         try {
             profissionaisSaudeService.excluir(id);
@@ -158,8 +196,7 @@ public class ProfissionaisSaudeController {
             @ApiResponse(responseCode = "403", description = "Acesso negado")
     })
     public ResponseEntity<Void> excluirPermanente(
-            @Parameter(description = "ID do profissional de saúde", required = true)
-            @PathVariable UUID id) {
+            @Parameter(description = "ID do profissional de saúde", required = true) @PathVariable UUID id) {
         log.debug("REQUEST DELETE /v1/profissionais-saude/{}/permanente", id);
         try {
             profissionaisSaudeService.excluir(id);
@@ -183,15 +220,15 @@ public class ProfissionaisSaudeController {
             @ApiResponse(responseCode = "403", description = "Acesso negado")
     })
     public ResponseEntity<Void> inativar(
-            @Parameter(description = "ID do profissional de saúde", required = true)
-            @PathVariable UUID id) {
+            @Parameter(description = "ID do profissional de saúde", required = true) @PathVariable UUID id) {
         log.debug("REQUEST PATCH /v1/profissionais-saude/{}/inativar", id);
         try {
             profissionaisSaudeService.inativar(id);
             log.info("Profissional de saúde inativado com sucesso. ID: {}", id);
             return ResponseEntity.noContent().build();
         } catch (NotFoundException ex) {
-            log.warn("Profissional de saúde não encontrado para inativação — ID: {}, mensagem: {}", id, ex.getMessage());
+            log.warn("Profissional de saúde não encontrado para inativação — ID: {}, mensagem: {}", id,
+                    ex.getMessage());
             throw ex;
         } catch (Exception ex) {
             log.error("Erro inesperado ao inativar profissional de saúde — ID: {}", id, ex);
