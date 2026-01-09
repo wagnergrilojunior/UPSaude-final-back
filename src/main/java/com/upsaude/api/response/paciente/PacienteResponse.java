@@ -41,12 +41,12 @@ public class PacienteResponse {
     private OffsetDateTime createdAt;
     private OffsetDateTime updatedAt;
     private Boolean active;
-    
+
     private DadosPessoaisBasicosPacienteResponse dadosPessoaisBasicos;
     private DocumentosBasicosPacienteResponse documentosBasicos;
     private DadosDemograficosPacienteResponse dadosDemograficos;
     private ContatoPacienteResponse contato;
-    
+
     @JsonSerialize(using = StatusPacienteEnumSerializer.class)
     @JsonDeserialize(using = StatusPacienteEnumDeserializer.class)
     private StatusPacienteEnum statusPaciente;
@@ -69,10 +69,13 @@ public class PacienteResponse {
     private IntegracaoGovPacienteResponse integracaoGov;
 
     @Builder.Default
+    private List<PacienteIdentificadorResponse> identificadores = new ArrayList<>();
+
+    @Builder.Default
     private List<DeficienciasPacienteResponse> deficiencias = new ArrayList<>();
 
     @Builder.Default
     private List<PacienteVinculoTerritorialResponse> vinculosTerritoriais = new ArrayList<>();
-    
+
     private String observacoes;
 }

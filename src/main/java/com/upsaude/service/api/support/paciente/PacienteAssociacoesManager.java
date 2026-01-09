@@ -66,13 +66,6 @@ public class PacienteAssociacoesManager {
                     .ifPresent(paciente::setConvenio);
         }
 
-        processarDocumentosBasicos(paciente, request, tenant);
-        processarContatoBasico(paciente, request, tenant);
-        processarDadosDemograficosBasicos(paciente, request, tenant);
-        processarResponsavelLegalBasico(paciente, request, tenant);
-        processarIntegracaoGovBasica(paciente, request, tenant);
-        processarEnderecoPrincipal(paciente, request, tenant);
-
         if (request.getEnderecos() != null) {
             paciente.getEnderecos().clear();
             request.getEnderecos().forEach(req -> {
@@ -88,14 +81,38 @@ public class PacienteAssociacoesManager {
             });
         }
 
+        // 1. Processar primeiro o que vem de campos básicos (Documentos e Contatos)
+        // Isso garante que eles existam na entidade antes do processamento das listas
+        // detalhadas
+        processarDocumentosBasicos(paciente, request, tenant);
+        processarContatoBasico(paciente, request, tenant);
+        processarDadosDemograficosBasicos(paciente, request, tenant);
+        processarResponsavelLegalBasico(paciente, request, tenant);
+        processarIntegracaoGovBasica(paciente, request, tenant);
+        processarEnderecoPrincipal(paciente, request, tenant);
+
+        // 2. Processar Listas Detalhadas (Identificadores)
         if (request.getIdentificadores() != null) {
+            // Coletar chaves de documentos básicos para proteção contra remoção
+            java.util.Set<String> basicKeys = new java.util.HashSet<>();
+            if (request.getDocumentosBasicos() != null) {
+                var d = request.getDocumentosBasicos();
+                if (d.getCpf() != null && !d.getCpf().trim().isEmpty())
+                    basicKeys.add(TipoIdentificadorEnum.CPF + "|" + d.getCpf());
+                if (d.getRg() != null && !d.getRg().trim().isEmpty())
+                    basicKeys.add(TipoIdentificadorEnum.RG + "|" + d.getRg());
+                if (d.getCns() != null && !d.getCns().trim().isEmpty())
+                    basicKeys.add(TipoIdentificadorEnum.CNS + "|" + d.getCns());
+            }
 
             java.util.Set<String> keysToKeep = request.getIdentificadores().stream()
                     .map(req -> req.getTipo() + "|" + req.getValor())
                     .collect(java.util.stream.Collectors.toSet());
 
+            // Remove se não estiver na lista E não for um documento básico enviado
             paciente.getIdentificadores()
-                    .removeIf(existing -> !keysToKeep.contains(existing.getTipo() + "|" + existing.getValor()));
+                    .removeIf(existing -> !keysToKeep.contains(existing.getTipo() + "|" + existing.getValor())
+                            && !basicKeys.contains(existing.getTipo() + "|" + existing.getValor()));
 
             request.getIdentificadores().forEach(req -> {
                 java.util.Optional<com.upsaude.entity.paciente.PacienteIdentificador> existingOpt = paciente
@@ -104,7 +121,6 @@ public class PacienteAssociacoesManager {
                         .findFirst();
 
                 if (existingOpt.isPresent()) {
-
                     var existing = existingOpt.get();
                     existing.setOrigem(req.getOrigem());
                     existing.setPrincipal(req.getPrincipal() != null ? req.getPrincipal() : false);
@@ -112,7 +128,6 @@ public class PacienteAssociacoesManager {
                     existing.setDataValidacao(req.getDataValidacao());
                     existing.setObservacoes(req.getObservacoes());
                 } else {
-
                     var entity = pacienteIdentificadorMapper.fromRequest(req);
                     entity.setPaciente(paciente);
                     entity.setTenant(tenant);
@@ -121,7 +136,19 @@ public class PacienteAssociacoesManager {
             });
         }
 
+        // 3. Processar Listas Detalhadas (Contatos)
         if (request.getContatos() != null) {
+            // Coletar chaves de contatos básicos para proteção
+            java.util.Set<String> basicKeys = new java.util.HashSet<>();
+            if (request.getContato() != null) {
+                var c = request.getContato();
+                if (c.getTelefone() != null && !c.getTelefone().trim().isEmpty())
+                    basicKeys.add(TipoContatoEnum.TELEFONE + "|" + c.getTelefone());
+                if (c.getCelular() != null && !c.getCelular().trim().isEmpty())
+                    basicKeys.add(TipoContatoEnum.WHATSAPP + "|" + c.getCelular());
+                if (c.getEmail() != null && !c.getEmail().trim().isEmpty())
+                    basicKeys.add(TipoContatoEnum.EMAIL + "|" + c.getEmail());
+            }
 
             java.util.Set<String> keysToKeep = request.getContatos().stream()
                     .map(req -> {
@@ -134,7 +161,8 @@ public class PacienteAssociacoesManager {
             paciente.getContatos().removeIf(existing -> {
                 String val = existing.getTelefone() != null ? existing.getTelefone()
                         : (existing.getCelular() != null ? existing.getCelular() : existing.getEmail());
-                return !keysToKeep.contains(existing.getTipo() + "|" + val);
+                return !keysToKeep.contains(existing.getTipo() + "|" + val)
+                        && !basicKeys.contains(existing.getTipo() + "|" + val);
             });
 
             request.getContatos().forEach(req -> {
@@ -153,7 +181,6 @@ public class PacienteAssociacoesManager {
                 if (existingOpt.isPresent()) {
                     var existing = existingOpt.get();
                     existing.setNome(req.getNome());
-
                 } else {
                     var entity = pacienteContatoMapper.fromRequest(req);
                     entity.setPaciente(paciente);
@@ -184,14 +211,7 @@ public class PacienteAssociacoesManager {
             paciente.setDadosPessoaisComplementares(entity);
         }
 
-        // Processar óbito apenas se o objeto obito for fornecido com dados válidos
-        // (obito = true)
-        // Quando obito não é fornecido (null) ou está vazio, significa obito = false e
-        // deve remover o óbito existente
         if (request.getObito() != null) {
-            // Verificar se o objeto obito tem pelo menos a data do óbito preenchida
-            // Se todos os campos estiverem vazios/null, trata como se não tivesse sido
-            // enviado
             boolean obitoVazio = request.getObito().getDataObito() == null
                     && (request.getObito().getCausaObitoCid10() == null
                             || request.getObito().getCausaObitoCid10().trim().isEmpty())
@@ -200,15 +220,10 @@ public class PacienteAssociacoesManager {
                             || request.getObito().getObservacoes().trim().isEmpty());
 
             if (obitoVazio) {
-                // Se obito foi enviado vazio, remove o óbito existente se houver (obito =
-                // false)
                 if (paciente.getObito() != null) {
                     paciente.setObito(null);
                 }
             } else {
-                // Se obito foi fornecido com dados (obito = true), valida e processa
-                // Validar que a data do óbito é obrigatória quando informações de óbito são
-                // fornecidas
                 if (request.getObito().getDataObito() == null) {
                     throw new com.upsaude.exception.BadRequestException(
                             "Data de óbito é obrigatória quando informações de óbito são fornecidas");
@@ -219,8 +234,6 @@ public class PacienteAssociacoesManager {
                 paciente.setObito(entity);
             }
         } else {
-            // Se obito não foi fornecido (obito = false), remove o óbito existente se
-            // houver
             if (paciente.getObito() != null) {
                 paciente.setObito(null);
             }
@@ -299,31 +312,51 @@ public class PacienteAssociacoesManager {
         }
 
         if (docs.getRg() != null && !docs.getRg().trim().isEmpty()) {
-            adicionarOuAtualizarIdentificador(paciente, TipoIdentificadorEnum.RG, docs.getRg(), false, tenant);
+            adicionarOuAtualizarIdentificador(paciente, TipoIdentificadorEnum.RG, docs.getRg(), true, tenant);
         }
 
         if (docs.getCns() != null && !docs.getCns().trim().isEmpty()) {
-            adicionarOuAtualizarIdentificador(paciente, TipoIdentificadorEnum.CNS, docs.getCns(), false, tenant);
+            adicionarOuAtualizarIdentificador(paciente, TipoIdentificadorEnum.CNS, docs.getCns(), true, tenant);
         }
     }
 
     private void adicionarOuAtualizarIdentificador(Paciente paciente, TipoIdentificadorEnum tipo, String valor,
             boolean principal, Tenant tenant) {
+        // Busca primeiro por um identificador do mesmo tipo que seja principal
         var existingOpt = paciente.getIdentificadores().stream()
-                .filter(id -> id.getTipo() == tipo && id.getValor().equals(valor))
+                .filter(id -> id.getTipo() == tipo && Boolean.TRUE.equals(id.getPrincipal()))
                 .findFirst();
 
         if (existingOpt.isPresent()) {
             var existing = existingOpt.get();
+            existing.setValor(valor);
             existing.setPrincipal(principal);
         } else {
-            var entity = new com.upsaude.entity.paciente.PacienteIdentificador();
-            entity.setPaciente(paciente);
-            entity.setTenant(tenant);
-            entity.setTipo(tipo);
-            entity.setValor(valor);
-            entity.setPrincipal(principal);
-            paciente.addIdentificador(entity);
+            // Se não encontrou principal, busca por valor exato do mesmo tipo
+            var byValueOpt = paciente.getIdentificadores().stream()
+                    .filter(id -> id.getTipo() == tipo && id.getValor().equals(valor))
+                    .findFirst();
+
+            if (byValueOpt.isPresent()) {
+                var existing = byValueOpt.get();
+                existing.setPrincipal(principal);
+            } else {
+                var entity = new com.upsaude.entity.paciente.PacienteIdentificador();
+                entity.setPaciente(paciente);
+                entity.setTenant(tenant);
+                entity.setTipo(tipo);
+                entity.setValor(valor);
+                entity.setPrincipal(principal);
+                paciente.addIdentificador(entity);
+            }
+        }
+
+        // Se este identificador foi definido como principal, garante que nenhum outro
+        // do mesmo tipo seja principal
+        if (principal) {
+            paciente.getIdentificadores().stream()
+                    .filter(id -> id.getTipo() == tipo && !id.getValor().equals(valor))
+                    .forEach(id -> id.setPrincipal(false));
         }
     }
 
@@ -353,9 +386,9 @@ public class PacienteAssociacoesManager {
 
         var existingOpt = paciente.getContatos().stream()
                 .filter(c -> {
-                    String cVal = c.getTelefone() != null ? c.getTelefone()
+                    String eVal = c.getTelefone() != null ? c.getTelefone()
                             : (c.getCelular() != null ? c.getCelular() : c.getEmail());
-                    return c.getTipo() == tipo && java.util.Objects.equals(cVal, valor);
+                    return c.getTipo() == tipo && java.util.Objects.equals(eVal, valor);
                 })
                 .findFirst();
 
