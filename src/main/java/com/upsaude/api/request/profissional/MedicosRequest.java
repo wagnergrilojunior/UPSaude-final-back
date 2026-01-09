@@ -1,5 +1,9 @@
 package com.upsaude.api.request.profissional;
 
+import java.util.HashSet;
+import java.util.Set;
+import java.util.UUID;
+
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.upsaude.api.request.embeddable.ContatoMedicoRequest;
@@ -8,16 +12,14 @@ import com.upsaude.api.request.embeddable.DadosPessoaisBasicosMedicoRequest;
 import com.upsaude.api.request.embeddable.DocumentosBasicosMedicoRequest;
 import com.upsaude.api.request.embeddable.RegistroProfissionalMedicoRequest;
 import com.upsaude.api.request.geral.EnderecoRequest;
+
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.Valid;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import io.swagger.v3.oas.annotations.media.Schema;
 
 @Getter
 @Setter
