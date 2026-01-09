@@ -362,6 +362,18 @@
               </sources>
             </configuration>
           </execution>
+          <execution>
+            <id>add-annotations-sources</id>
+            <phase>generate-sources</phase>
+            <goals>
+              <goal>add-source</goal>
+            </goals>
+            <configuration>
+              <sources>
+                <source>${project.build.directory}/generated-sources/annotations</source>
+              </sources>
+            </configuration>
+          </execution>
         </executions>
       </plugin>
     </plugins>
