@@ -57,7 +57,7 @@ public class ProfissionaisSaudeServiceImpl implements ProfissionaisSaudeService 
     private final ProfissionaisSaudeTenantEnforcer tenantEnforcer;
     private final ProfissionaisSaudeResponseBuilder responseBuilder;
     private final ProfissionaisSaudeDomainService domainService;
-    
+
     @PersistenceContext
     private EntityManager entityManager;
 
@@ -69,12 +69,14 @@ public class ProfissionaisSaudeServiceImpl implements ProfissionaisSaudeService 
             Tenant tenant = obterTenantAutenticadoOrThrow(tenantId);
 
             ProfissionaisSaude profissional = profissionalCreator.criar(request, tenantId, tenant);
-            ProfissionaisSaude profissionalRecarregado = tenantEnforcer.validarAcessoCompleto(profissional.getId(), tenantId);
+            ProfissionaisSaude profissionalRecarregado = tenantEnforcer.validarAcessoCompleto(profissional.getId(),
+                    tenantId);
             ProfissionaisSaudeResponse response = responseBuilder.build(profissionalRecarregado);
 
             Cache cache = cacheManager.getCache(CacheKeyUtil.CACHE_PROFISSIONAIS_SAUDE);
             if (cache != null) {
-                Object key = Objects.requireNonNull((Object) CacheKeyUtil.profissionalSaude(tenantId, profissional.getId()));
+                Object key = Objects
+                        .requireNonNull((Object) CacheKeyUtil.profissionalSaude(tenantId, profissional.getId()));
                 cache.put(key, response);
             }
 
@@ -83,7 +85,8 @@ public class ProfissionaisSaudeServiceImpl implements ProfissionaisSaudeService 
             log.warn("Erro de validação ao criar ProfissionalSaude. Erro: {}", e.getMessage());
             throw e;
         } catch (DataAccessException e) {
-            log.error("Erro de acesso a dados ao criar ProfissionalSaude. Exception: {}", e.getClass().getSimpleName(), e);
+            log.error("Erro de acesso a dados ao criar ProfissionalSaude. Exception: {}", e.getClass().getSimpleName(),
+                    e);
             throw new InternalServerErrorException("Erro ao persistir ProfissionalSaude", e);
         }
     }
@@ -97,14 +100,40 @@ public class ProfissionaisSaudeServiceImpl implements ProfissionaisSaudeService 
         }
         UUID tenantId = tenantService.validarTenantAtual();
         ProfissionaisSaude profissional = tenantEnforcer.validarAcessoCompleto(id, tenantId);
-        
+
         if (profissional.getSigtapOcupacao() != null) {
-            log.debug("Profissional ID: {} possui sigtapOcupacao ID: {} antes do build", 
-                profissional.getId(), profissional.getSigtapOcupacao().getId());
+            log.debug("Profissional ID: {} possui sigtapOcupacao ID: {} antes do build",
+                    profissional.getId(), profissional.getSigtapOcupacao().getId());
         } else {
             log.debug("Profissional ID: {} não possui sigtapOcupacao (null) antes do build", profissional.getId());
         }
-        
+
+        return responseBuilder.build(profissional);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public ProfissionaisSaudeResponse obterPorCpf(String cpf) {
+        if (cpf == null || cpf.isBlank()) {
+            throw new BadRequestException("CPF do profissional de saúde é obrigatório");
+        }
+        UUID tenantId = tenantService.validarTenantAtual();
+        ProfissionaisSaude profissional = profissionaisSaudeRepository.findByCpfAndTenantId(cpf, tenantId)
+                .orElseThrow(() -> new NotFoundException("Profissional de saúde não encontrado com CPF: " + cpf));
+
+        return responseBuilder.build(profissional);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public ProfissionaisSaudeResponse obterPorCns(String cns) {
+        if (cns == null || cns.isBlank()) {
+            throw new BadRequestException("CNS do profissional de saúde é obrigatório");
+        }
+        UUID tenantId = tenantService.validarTenantAtual();
+        ProfissionaisSaude profissional = profissionaisSaudeRepository.findByCnsAndTenantId(cns, tenantId)
+                .orElseThrow(() -> new NotFoundException("Profissional de saúde não encontrado com CNS: " + cns));
+
         return responseBuilder.build(profissional);
     }
 
@@ -125,7 +154,8 @@ public class ProfissionaisSaudeServiceImpl implements ProfissionaisSaudeService 
             };
 
             Page<ProfissionaisSaude> profissionais = profissionaisSaudeRepository.findAll(spec, adjustedPageable);
-            log.debug("Listagem de profissionais de saúde concluída. Total de elementos: {}", profissionais.getTotalElements());
+            log.debug("Listagem de profissionais de saúde concluída. Total de elementos: {}",
+                    profissionais.getTotalElements());
             return profissionais.map(responseBuilder::build);
         } catch (DataAccessException e) {
             log.error("Erro de acesso a dados ao listar profissionais de saúde. Pageable: {}", pageable, e);
@@ -145,27 +175,28 @@ public class ProfissionaisSaudeServiceImpl implements ProfissionaisSaudeService 
                 .map(order -> {
                     String property = order.getProperty();
 
-                    if ("nomeCompleto".equals(property) || "dataNascimento".equals(property) || "sexo".equals(property)) {
+                    if ("nomeCompleto".equals(property) || "dataNascimento".equals(property)
+                            || "sexo".equals(property)) {
                         property = "dadosPessoaisBasicos." + property;
                     }
 
-                    else if ("cpf".equals(property) || "rg".equals(property) || "cns".equals(property)) {
+                else if ("cpf".equals(property) || "rg".equals(property) || "cns".equals(property)) {
                         property = "documentosBasicos." + property;
                     }
 
-                    else if ("registroProfissional".equals(property) || "ufRegistro".equals(property)) {
+                else if ("registroProfissional".equals(property) || "ufRegistro".equals(property)) {
                         property = "registroProfissional." + property;
                     }
 
-                    else if ("telefone".equals(property) || "celular".equals(property) ||
-                            "email".equals(property) || "telefoneInstitucional".equals(property) ||
-                            "emailInstitucional".equals(property)) {
+                else if ("telefone".equals(property) || "celular".equals(property) ||
+                        "email".equals(property) || "telefoneInstitucional".equals(property) ||
+                        "emailInstitucional".equals(property)) {
                         property = "contato." + property;
                     }
 
-                    else if ("estadoCivil".equals(property) || "escolaridade".equals(property) ||
-                            "nacionalidade".equals(property) || "naturalidade".equals(property) ||
-                            "identidadeGenero".equals(property) || "racaCor".equals(property)) {
+                else if ("estadoCivil".equals(property) || "escolaridade".equals(property) ||
+                        "nacionalidade".equals(property) || "naturalidade".equals(property) ||
+                        "identidadeGenero".equals(property) || "racaCor".equals(property)) {
                         property = "dadosDemograficos." + property;
                     }
                     return new Sort.Order(order.getDirection(), property);
@@ -188,13 +219,15 @@ public class ProfissionaisSaudeServiceImpl implements ProfissionaisSaudeService 
             UUID tenantId = tenantService.validarTenantAtual();
             Tenant tenant = obterTenantAutenticadoOrThrow(tenantId);
             ProfissionaisSaude profissional = profissionalUpdater.atualizar(id, request, tenantId, tenant);
-            ProfissionaisSaude profissionalRecarregado = tenantEnforcer.validarAcessoCompleto(profissional.getId(), tenantId);
+            ProfissionaisSaude profissionalRecarregado = tenantEnforcer.validarAcessoCompleto(profissional.getId(),
+                    tenantId);
             return responseBuilder.build(profissionalRecarregado);
         } catch (BadRequestException | NotFoundException e) {
             log.warn("Erro de validação ao atualizar ProfissionalSaude. Erro: {}", e.getMessage());
             throw e;
         } catch (DataAccessException e) {
-            log.error("Erro de acesso a dados ao atualizar ProfissionalSaude. Exception: {}", e.getClass().getSimpleName(), e);
+            log.error("Erro de acesso a dados ao atualizar ProfissionalSaude. Exception: {}",
+                    e.getClass().getSimpleName(), e);
             throw new InternalServerErrorException("Erro ao atualizar ProfissionalSaude", e);
         }
     }
@@ -207,144 +240,157 @@ public class ProfissionaisSaudeServiceImpl implements ProfissionaisSaudeService 
             UUID tenantId = tenantService.validarTenantAtual();
             ProfissionaisSaude profissional = tenantEnforcer.validarAcesso(id, tenantId);
             domainService.validarPodeDeletar(profissional);
-            
+
             deletarReferenciasRelacionadas(id);
-            
+
             profissionaisSaudeRepository.delete(Objects.requireNonNull(profissional));
         } catch (BadRequestException | NotFoundException e) {
             log.warn("Erro de validação ao excluir ProfissionalSaude. Erro: {}", e.getMessage());
             throw e;
         } catch (DataAccessException e) {
-            log.error("Erro de acesso a dados ao excluir ProfissionalSaude. Exception: {}", e.getClass().getSimpleName(), e);
+            log.error("Erro de acesso a dados ao excluir ProfissionalSaude. Exception: {}",
+                    e.getClass().getSimpleName(), e);
             throw new InternalServerErrorException("Erro ao excluir ProfissionalSaude", e);
         }
     }
-    
+
     private void deletarReferenciasRelacionadas(UUID profissionalId) {
         try {
-            String discoverQuery = 
-                "SELECT tc.table_name, kcu.column_name " +
-                "FROM information_schema.table_constraints tc " +
-                "JOIN information_schema.key_column_usage kcu " +
-                "  ON tc.constraint_name = kcu.constraint_name " +
-                "WHERE tc.constraint_type = 'FOREIGN KEY' " +
-                "  AND tc.table_schema = 'public' " +
-                "  AND kcu.table_schema = 'public' " +
-                "  AND EXISTS ( " +
-                "    SELECT 1 FROM information_schema.constraint_column_usage ccu " +
-                "    WHERE ccu.constraint_name = tc.constraint_name " +
-                "      AND ccu.table_name = 'profissionais_saude' " +
-                "      AND ccu.table_schema = 'public' " +
-                "  ) " +
-                "ORDER BY tc.table_name";
-            
+            String discoverQuery = "SELECT tc.table_name, kcu.column_name " +
+                    "FROM information_schema.table_constraints tc " +
+                    "JOIN information_schema.key_column_usage kcu " +
+                    "  ON tc.constraint_name = kcu.constraint_name " +
+                    "WHERE tc.constraint_type = 'FOREIGN KEY' " +
+                    "  AND tc.table_schema = 'public' " +
+                    "  AND kcu.table_schema = 'public' " +
+                    "  AND EXISTS ( " +
+                    "    SELECT 1 FROM information_schema.constraint_column_usage ccu " +
+                    "    WHERE ccu.constraint_name = tc.constraint_name " +
+                    "      AND ccu.table_name = 'profissionais_saude' " +
+                    "      AND ccu.table_schema = 'public' " +
+                    "  ) " +
+                    "ORDER BY tc.table_name";
+
             @SuppressWarnings("unchecked")
             List<Object[]> results = entityManager.createNativeQuery(discoverQuery).getResultList();
-            
+
             deletarConsultasRelacionadasAosAtendimentos(profissionalId);
-            
+
             for (Object[] row : results) {
                 String tableName = (String) row[0];
                 String columnName = (String) row[1];
-                
+
                 if ("profissionais_saude".equals(tableName)) {
                     continue;
                 }
-                
+
                 deletarTabelaComDependencias(tableName, columnName, profissionalId);
             }
-            
-            log.debug("Concluída a exclusão de referências relacionadas ao profissional de saúde ID: {}", profissionalId);
+
+            log.debug("Concluída a exclusão de referências relacionadas ao profissional de saúde ID: {}",
+                    profissionalId);
         } catch (Exception e) {
-            log.warn("Erro ao descobrir referências relacionadas ao profissional de saúde ID: {}. Tentando deletar tabelas conhecidas... Erro: {}", 
+            log.warn(
+                    "Erro ao descobrir referências relacionadas ao profissional de saúde ID: {}. Tentando deletar tabelas conhecidas... Erro: {}",
                     profissionalId, e.getMessage());
-            
+
             deletarTabelasConhecidas(profissionalId);
         }
     }
-    
+
     private void deletarTabelaComDependencias(String tableName, String columnName, UUID profissionalId) {
         try {
             if ("atendimentos".equals(tableName)) {
                 deletarConsultasRelacionadasAosAtendimentos(profissionalId);
             }
-            
+
             String deleteSql = String.format("DELETE FROM public.%s WHERE %s = :profissionalId", tableName, columnName);
             int deleted = entityManager.createNativeQuery(deleteSql)
                     .setParameter("profissionalId", profissionalId)
                     .executeUpdate();
-            
+
             if (deleted > 0) {
-                log.debug("Deletados {} registros da tabela '{}' referenciando profissional de saúde ID: {}", deleted, tableName, profissionalId);
+                log.debug("Deletados {} registros da tabela '{}' referenciando profissional de saúde ID: {}", deleted,
+                        tableName, profissionalId);
             }
         } catch (Exception e) {
             String errorMsg = e.getMessage();
-            if (errorMsg != null && errorMsg.contains("violates foreign key constraint") && errorMsg.contains("consultas")) {
+            if (errorMsg != null && errorMsg.contains("violates foreign key constraint")
+                    && errorMsg.contains("consultas")) {
                 try {
                     deletarConsultasRelacionadasAosAtendimentos(profissionalId);
-                    
-                    String deleteSql = String.format("DELETE FROM public.%s WHERE %s = :profissionalId", tableName, columnName);
+
+                    String deleteSql = String.format("DELETE FROM public.%s WHERE %s = :profissionalId", tableName,
+                            columnName);
                     int deleted = entityManager.createNativeQuery(deleteSql)
                             .setParameter("profissionalId", profissionalId)
                             .executeUpdate();
-                    
+
                     if (deleted > 0) {
-                        log.debug("Deletados {} registros da tabela '{}' após remover consultas. Profissional ID: {}", deleted, tableName, profissionalId);
+                        log.debug("Deletados {} registros da tabela '{}' após remover consultas. Profissional ID: {}",
+                                deleted, tableName, profissionalId);
                     }
                 } catch (Exception e2) {
-                    log.warn("Erro ao deletar atendimentos após remover consultas. Profissional ID: {}. Erro: {}", profissionalId, e2.getMessage());
+                    log.warn("Erro ao deletar atendimentos após remover consultas. Profissional ID: {}. Erro: {}",
+                            profissionalId, e2.getMessage());
                 }
             } else {
-                log.warn("Erro ao deletar registros da tabela '{}' referenciando profissional de saúde ID: {}. Continuando... Erro: {}", 
-                        tableName, profissionalId, errorMsg != null ? errorMsg.substring(0, Math.min(200, errorMsg.length())) : "Erro desconhecido");
+                log.warn(
+                        "Erro ao deletar registros da tabela '{}' referenciando profissional de saúde ID: {}. Continuando... Erro: {}",
+                        tableName, profissionalId,
+                        errorMsg != null ? errorMsg.substring(0, Math.min(200, errorMsg.length()))
+                                : "Erro desconhecido");
             }
         }
     }
-    
+
     private void deletarConsultasRelacionadasAosAtendimentos(UUID profissionalId) {
         try {
-            String deleteConsultasSql = 
-                "DELETE FROM public.consultas " +
-                "WHERE atendimento_id IN ( " +
-                "    SELECT id FROM public.atendimentos WHERE profissional_id = :profissionalId " +
-                ")";
-            
+            String deleteConsultasSql = "DELETE FROM public.consultas " +
+                    "WHERE atendimento_id IN ( " +
+                    "    SELECT id FROM public.atendimentos WHERE profissional_id = :profissionalId " +
+                    ")";
+
             int deletedConsultas = entityManager.createNativeQuery(deleteConsultasSql)
                     .setParameter("profissionalId", profissionalId)
                     .executeUpdate();
-            
+
             if (deletedConsultas > 0) {
-                log.debug("Deletadas {} consultas relacionadas aos atendimentos do profissional de saúde ID: {}", deletedConsultas, profissionalId);
+                log.debug("Deletadas {} consultas relacionadas aos atendimentos do profissional de saúde ID: {}",
+                        deletedConsultas, profissionalId);
             }
         } catch (Exception e) {
-            log.trace("Erro ao deletar consultas relacionadas aos atendimentos. Profissional ID: {}. Erro: {}", profissionalId, e.getMessage());
+            log.trace("Erro ao deletar consultas relacionadas aos atendimentos. Profissional ID: {}. Erro: {}",
+                    profissionalId, e.getMessage());
         }
     }
-    
+
     private void deletarTabelasConhecidas(UUID profissionalId) {
         String[][] tabelasConhecidas = {
-            {"profissionais_saude_especialidades", "profissional_saude_id"},
-            {"profissionais_saude_especialidades", "profissional_id"},
-            {"profissionais_saude_especialidades", "id"},
-            {"agendamentos", "profissional_id"},
-            {"atendimentos", "profissional_id"}
+                { "profissionais_saude_especialidades", "profissional_saude_id" },
+                { "profissionais_saude_especialidades", "profissional_id" },
+                { "profissionais_saude_especialidades", "id" },
+                { "agendamentos", "profissional_id" },
+                { "atendimentos", "profissional_id" }
         };
-        
+
         for (String[] tabelaInfo : tabelasConhecidas) {
             String tableName = tabelaInfo[0];
             String columnName = tabelaInfo[1];
-            
+
             try {
                 String sql = String.format("DELETE FROM public.%s WHERE %s = :profissionalId", tableName, columnName);
                 int deleted = entityManager.createNativeQuery(sql)
                         .setParameter("profissionalId", profissionalId)
                         .executeUpdate();
-                
+
                 if (deleted > 0) {
-                    log.debug("Deletados {} registros da tabela '{}' referenciando profissional de saúde ID: {}", deleted, tableName, profissionalId);
+                    log.debug("Deletados {} registros da tabela '{}' referenciando profissional de saúde ID: {}",
+                            deleted, tableName, profissionalId);
                 }
             } catch (Exception e) {
-                log.trace("Não foi possível deletar da tabela '{}' com coluna '{}': {}", tableName, columnName, e.getMessage());
+                log.trace("Não foi possível deletar da tabela '{}' com coluna '{}': {}", tableName, columnName,
+                        e.getMessage());
             }
         }
     }
@@ -360,7 +406,8 @@ public class ProfissionaisSaudeServiceImpl implements ProfissionaisSaudeService 
             log.warn("Erro de validação ao inativar ProfissionalSaude. Erro: {}", e.getMessage());
             throw e;
         } catch (DataAccessException e) {
-            log.error("Erro de acesso a dados ao inativar ProfissionalSaude. Exception: {}", e.getClass().getSimpleName(), e);
+            log.error("Erro de acesso a dados ao inativar ProfissionalSaude. Exception: {}",
+                    e.getClass().getSimpleName(), e);
             throw new InternalServerErrorException("Erro ao inativar ProfissionalSaude", e);
         }
     }

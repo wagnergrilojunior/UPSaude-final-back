@@ -13,6 +13,10 @@ public interface ProfissionaisSaudeService {
 
     ProfissionaisSaudeResponse obterPorId(UUID id);
 
+    ProfissionaisSaudeResponse obterPorCpf(String cpf);
+
+    ProfissionaisSaudeResponse obterPorCns(String cns);
+
     Page<ProfissionaisSaudeResponse> listar(Pageable pageable);
 
     ProfissionaisSaudeResponse atualizar(UUID id, ProfissionaisSaudeRequest request);

@@ -64,10 +64,10 @@ public class CirurgiaRequest {
     private String observacoesInternas;
 
     @Builder.Default
-    @Schema(description = "Lista de procedimentos SIGTAP associados à cirurgia")
-    private List<CirurgiaProcedimentoRequest> procedimentos = new ArrayList<>();
+    @Schema(description = "Lista de IDs dos procedimentos SIGTAP associados à cirurgia")
+    private List<UUID> procedimentos = new ArrayList<>();
 
     @Builder.Default
-    @Schema(description = "Lista de equipes cirúrgicas")
-    private List<EquipeCirurgicaRequest> equipe = new ArrayList<>();
+    @Schema(description = "Lista de IDs dos profissionais de saúde da equipe cirúrgica")
+    private List<UUID> equipe = new ArrayList<>();
 }
