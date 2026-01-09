@@ -23,6 +23,8 @@ public class InformacoesAtendimento {
         this.motivo = "";
         this.localAtendimento = "";
         this.numeroAtendimento = "";
+        this.statusAtendimento = StatusAtendimentoEnum.AGENDADO;
+        this.dataHora = java.time.OffsetDateTime.now();
     }
 
     @Column(name = "data_hora", nullable = false)

@@ -27,6 +27,7 @@ import com.upsaude.mapper.embeddable.AnamneseAtendimentoMapper;
 import com.upsaude.mapper.embeddable.ClassificacaoRiscoAtendimentoMapper;
 import com.upsaude.exception.BadRequestException;
 import com.upsaude.repository.clinica.atendimento.AtendimentoRepository;
+import com.upsaude.repository.sistema.multitenancy.TenantRepository;
 import com.upsaude.service.api.clinica.atendimento.AtendimentoService;
 import com.upsaude.service.api.sistema.multitenancy.TenantService;
 import com.upsaude.service.api.support.atendimento.AtendimentoCreator;
@@ -49,6 +50,7 @@ public class AtendimentoServiceImpl implements AtendimentoService {
 
     private final AtendimentoRepository atendimentoRepository;
     private final TenantService tenantService;
+    private final TenantRepository tenantRepository;
     private final CacheManager cacheManager;
     private final AnamneseAtendimentoMapper anamneseAtendimentoMapper;
     private final ClassificacaoRiscoAtendimentoMapper classificacaoRiscoAtendimentoMapper;
@@ -70,6 +72,10 @@ public class AtendimentoServiceImpl implements AtendimentoService {
 
         UUID tenantId = tenantService.validarTenantAtual();
         Tenant tenant = tenantService.obterTenantDoUsuarioAutenticado();
+        if (tenant == null) {
+            // Fallback para testes: buscar tenant do banco quando não houver autenticação
+            tenant = tenantRepository.findById(tenantId).orElse(null);
+        }
 
         AtendimentoRequest atendimentoRequest = new AtendimentoRequest();
         atendimentoRequest.setPaciente(request.getPacienteId());
