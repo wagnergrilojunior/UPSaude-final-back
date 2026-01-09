@@ -15,6 +15,7 @@ import org.springframework.web.client.RestTemplate;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.upsaude.config.SupabaseConfig;
+import com.upsaude.exception.BadRequestException;
 import com.upsaude.exception.UnauthorizedException;
 
 import lombok.RequiredArgsConstructor;
@@ -236,14 +237,17 @@ public class SupabaseAuthService {
             log.error("Erro HTTP ao criar usuário - Status: {}, Body: {}", 
                     e.getStatusCode(), e.getResponseBodyAsString());
             
-            String errorMessage = "Erro ao criar usuário: ";
-            if (e.getResponseBodyAsString().contains("already registered")) {
-                errorMessage = "Email já cadastrado";
-            } else if (e.getResponseBodyAsString().contains("password")) {
-                errorMessage = "Senha inválida (mínimo 6 caracteres)";
+            String responseBody = e.getResponseBodyAsString();
+            if (responseBody != null && (responseBody.contains("already registered") || 
+                                         responseBody.contains("email_exists") ||
+                                         responseBody.contains("A user with this email address has already been registered"))) {
+                log.warn("Tentativa de criar usuário com email já cadastrado: {}", email);
+                throw new BadRequestException("Já existe um usuário cadastrado com este email: " + email);
+            } else if (responseBody != null && responseBody.contains("password")) {
+                throw new BadRequestException("Senha inválida (mínimo 6 caracteres)");
             }
             
-            throw new RuntimeException(errorMessage + e.getMessage());
+            throw new BadRequestException("Erro ao criar usuário: " + e.getMessage());
         } catch (Exception e) {
             log.error("Erro inesperado ao criar usuário no Supabase Auth", e);
             throw new RuntimeException("Erro ao criar usuário: " + e.getMessage(), e);
@@ -311,14 +315,17 @@ public class SupabaseAuthService {
             log.error("Erro HTTP ao atualizar usuário - Status: {}, Body: {}", 
                     e.getStatusCode(), e.getResponseBodyAsString());
             
-            String errorMessage = "Erro ao atualizar usuário: ";
-            if (e.getResponseBodyAsString().contains("already registered")) {
-                errorMessage = "Email já está em uso por outro usuário";
-            } else if (e.getResponseBodyAsString().contains("password")) {
-                errorMessage = "Senha inválida (mínimo 6 caracteres)";
+            String responseBody = e.getResponseBodyAsString();
+            if (responseBody != null && (responseBody.contains("already registered") || 
+                                         responseBody.contains("email_exists") ||
+                                         responseBody.contains("A user with this email address has already been registered"))) {
+                log.warn("Tentativa de atualizar usuário com email já cadastrado: {}", email);
+                throw new BadRequestException("Já existe um usuário cadastrado com este email: " + email);
+            } else if (responseBody != null && responseBody.contains("password")) {
+                throw new BadRequestException("Senha inválida (mínimo 6 caracteres)");
             }
             
-            throw new RuntimeException(errorMessage + e.getMessage());
+            throw new BadRequestException("Erro ao atualizar usuário: " + e.getMessage());
         } catch (Exception e) {
             log.error("Erro inesperado ao atualizar usuário no Supabase Auth", e);
             throw new RuntimeException("Erro ao atualizar usuário: " + e.getMessage(), e);

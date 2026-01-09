@@ -6,7 +6,10 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 import org.hibernate.Hibernate;
+import org.hibernate.StaleStateException;
 import org.springframework.dao.DataAccessException;
+import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -15,6 +18,8 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.criteria.Predicate;
 import java.util.ArrayList;
 import org.springframework.util.StringUtils;
@@ -68,6 +73,9 @@ public class UsuariosSistemaServiceImpl implements UsuariosSistemaService {
     private final SupabaseStorageService supabaseStorageService;
     private final com.upsaude.integration.supabase.SupabaseAuthService supabaseAuthService;
     private final UserService userService;
+
+    @PersistenceContext
+    private EntityManager entityManager;
 
     @Override
     @Transactional
@@ -852,6 +860,94 @@ public class UsuariosSistemaServiceImpl implements UsuariosSistemaService {
         }
 
         return response;
+    }
+
+    @Override
+    @Transactional
+    public int sincronizarUsers() {
+        log.info("Iniciando sincronização de users - deletando users órfãos que não estão em usuarios_sistema");
+        
+        List<User> usersOrfaos = userRepository.findUsersNotInUsuariosSistema();
+        int totalDeletados = 0;
+        
+        if (usersOrfaos.isEmpty()) {
+            log.info("Nenhum user órfão encontrado. Sincronização concluída.");
+            return 0;
+        }
+        
+        log.info("Encontrados {} users órfãos para deletar", usersOrfaos.size());
+        
+        for (User user : usersOrfaos) {
+            try {
+                UUID userId = user.getId();
+                if (userId == null) {
+                    log.warn("User com ID nulo encontrado, pulando. Email: {}", user.getEmail());
+                    continue;
+                }
+                
+                log.debug("Deletando user órfão - ID: {}, Email: {}", userId, user.getEmail());
+                
+                // Verifica se o user ainda existe no banco antes de tentar deletar
+                if (!userRepository.existsById(userId)) {
+                    log.debug("User já não existe no banco de dados, pulando - ID: {}", userId);
+                    continue;
+                }
+                
+                // Deleta do Supabase Auth primeiro
+                try {
+                    supabaseAuthService.deleteUser(userId);
+                    log.debug("User deletado do Supabase Auth - ID: {}", userId);
+                } catch (Exception e) {
+                    log.warn("Erro ao deletar user do Supabase Auth (pode não existir) - ID: {}, Erro: {}", 
+                            userId, e.getMessage());
+                    // Continua mesmo se falhar no Supabase Auth, pois pode não existir mais lá
+                }
+                
+                // Deleta do banco de dados local usando deleteById e flush imediato para evitar problemas de batch
+                try {
+                    userRepository.deleteById(userId);
+                    try {
+                        entityManager.flush(); // Força execução imediata do delete, evitando problemas de batch
+                    } catch (StaleStateException | ObjectOptimisticLockingFailureException e) {
+                        // User já foi deletado - flush detectou que não existe mais
+                        log.debug("User já foi deletado (detectado no flush), continuando - ID: {}", userId);
+                        totalDeletados++; // Conta como deletado mesmo que já tenha sido
+                        continue; // Pula para o próximo user
+                    }
+                    totalDeletados++;
+                    log.debug("User deletado do banco de dados local - ID: {}", userId);
+                } catch (EmptyResultDataAccessException e) {
+                    // User já foi deletado por outro processo
+                    log.debug("User já foi deletado (EmptyResultDataAccessException), continuando - ID: {}", userId);
+                    totalDeletados++; // Conta como deletado mesmo que já tenha sido
+                } catch (StaleStateException e) {
+                    // User já foi deletado (StaleStateException do Hibernate)
+                    log.debug("User já foi deletado (StaleStateException), continuando - ID: {}", userId);
+                    totalDeletados++; // Conta como deletado mesmo que já tenha sido
+                } catch (ObjectOptimisticLockingFailureException e) {
+                    // User já foi deletado (ObjectOptimisticLockingFailureException)
+                    log.debug("User já foi deletado (ObjectOptimisticLockingFailureException), continuando - ID: {}", userId);
+                    totalDeletados++; // Conta como deletado mesmo que já tenha sido
+                } catch (Exception e) {
+                    // Se falhar por outro motivo, verifica se foi porque o user já não existe
+                    if (!userRepository.existsById(userId)) {
+                        log.debug("User já foi deletado (verificação pós-exceção), continuando - ID: {}", userId);
+                        totalDeletados++; // Conta como deletado mesmo que já tenha sido
+                    } else {
+                        log.warn("Erro inesperado ao deletar user do banco - ID: {}, Erro: {}", userId, e.getMessage());
+                        // Não re-lança, apenas registra o erro e continua
+                    }
+                }
+                
+            } catch (Exception e) {
+                log.error("Erro ao deletar user órfão - ID: {}, Email: {}, Erro: {}", 
+                        user.getId(), user.getEmail(), e.getMessage(), e);
+                // Continua com os próximos users mesmo se um falhar
+            }
+        }
+        
+        log.info("Sincronização concluída. Total de users deletados: {}", totalDeletados);
+        return totalDeletados;
     }
 
     private UsuariosSistemaResponse enrichResponse(UsuariosSistemaResponse response) {

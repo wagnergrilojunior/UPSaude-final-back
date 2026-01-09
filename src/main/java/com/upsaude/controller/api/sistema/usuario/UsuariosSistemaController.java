@@ -284,4 +284,30 @@ public class UsuariosSistemaController {
             throw ex;
         }
     }
+
+    @PostMapping("/sincronizar-users")
+    @Operation(
+            summary = "Sincronizar users",
+            description = "Remove users órfãos da tabela users que não possuem correspondência em usuarios_sistema. A fonte de verdade é a tabela usuarios_sistema.",
+            security = @SecurityRequirement(name = "bearerAuth")
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Sincronização concluída com sucesso"),
+            @ApiResponse(responseCode = "403", description = "Acesso negado")
+    })
+    public ResponseEntity<Map<String, Object>> sincronizarUsers() {
+        log.debug("REQUEST POST /v1/usuarios-sistema/sincronizar-users");
+        try {
+            int totalDeletados = usuariosSistemaService.sincronizarUsers();
+            Map<String, Object> response = new HashMap<>();
+            response.put("mensagem", "Sincronização concluída com sucesso");
+            response.put("totalDeletados", totalDeletados);
+            log.info("Sincronização de users concluída. Total deletado: {}", totalDeletados);
+            return ResponseEntity.ok(response);
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao sincronizar users — Path: /v1/usuarios-sistema/sincronizar-users, Method: POST, Exception: {}",
+                ex.getClass().getName(), ex);
+            throw ex;
+        }
+    }
 }
