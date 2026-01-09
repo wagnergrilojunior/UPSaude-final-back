@@ -406,6 +406,8 @@ public class UsuariosSistemaServiceImpl implements UsuariosSistemaService {
     private void atualizarDadosUsuariosSistema(UsuariosSistema usuariosSistema, UsuariosSistemaRequest request) {
 
         usuariosSistemaMapper.updateFromRequest(request, usuariosSistema);
+        // Atualizar objetos embeddados preservando valores existentes
+        usuariosSistemaMapper.updateEmbeddablesFromRequest(request, usuariosSistema);
 
         if (request.getTenantId() != null) {
             Tenant tenant = tenantRepository.findById(request.getTenantId())
@@ -684,7 +686,34 @@ public class UsuariosSistemaServiceImpl implements UsuariosSistemaService {
     }
 
     private UsuariosSistemaResponse enrichResponseWithEntity(UsuariosSistema usuario) {
+        // Garantir que os objetos embeddados sejam inicializados
+        if (usuario.getDadosIdentificacao() != null) {
+            org.hibernate.Hibernate.initialize(usuario.getDadosIdentificacao());
+        }
+        if (usuario.getDadosExibicao() != null) {
+            org.hibernate.Hibernate.initialize(usuario.getDadosExibicao());
+        }
+        if (usuario.getConfiguracao() != null) {
+            org.hibernate.Hibernate.initialize(usuario.getConfiguracao());
+        }
+        
         UsuariosSistemaResponse response = usuariosSistemaMapper.toResponse(usuario);
+        
+        // Garantir que os dados de identificação sejam incluídos na resposta
+        if (response.getDadosIdentificacao() == null && usuario.getDadosIdentificacao() != null) {
+            response.setDadosIdentificacao(com.upsaude.api.response.embeddable.DadosIdentificacaoUsuarioResponse.builder()
+                    .username(usuario.getDadosIdentificacao().getUsername())
+                    .cpf(usuario.getDadosIdentificacao().getCpf())
+                    .build());
+        } else if (response.getDadosIdentificacao() != null && usuario.getDadosIdentificacao() != null) {
+            // Garantir que o CPF seja incluído mesmo se o mapper não incluiu
+            if (response.getDadosIdentificacao().getCpf() == null && usuario.getDadosIdentificacao().getCpf() != null) {
+                response.getDadosIdentificacao().setCpf(usuario.getDadosIdentificacao().getCpf());
+            }
+            if (response.getDadosIdentificacao().getUsername() == null && usuario.getDadosIdentificacao().getUsername() != null) {
+                response.getDadosIdentificacao().setUsername(usuario.getDadosIdentificacao().getUsername());
+            }
+        }
 
         if (usuario.getTenant() != null) {
             response.setTenantId(usuario.getTenant().getId());
