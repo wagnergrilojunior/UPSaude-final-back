@@ -77,6 +77,8 @@ import com.upsaude.enums.ViaAdministracaoEnum;
 import com.upsaude.enums.ViaAdministracaoMedicamentoEnum;
 import com.upsaude.enums.ViaAdministracaoVacinaEnum;
 import com.upsaude.enums.ZonaDomicilioEnum;
+import com.upsaude.enums.TipoIdentificadorEnum;
+import com.upsaude.enums.ModalidadeFinanceiraEnum;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -85,11 +87,13 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.web.bind.annotation.RestController;
 
 @Slf4j
+@RestController
 @RequestMapping("/v1/enums")
-@Tag(name = "Enums", description = "API para listagem de todos os enums do sistema. " +
-        "Cada endpoint retorna os valores de um enum específico com seus códigos e descrições.")
+@Tag(name = "Enums", description = "API para listagem de todos os enums do sistema com suporte FHIR. " +
+        "Cada endpoint retorna os valores de um enum específico com seus códigos, descrições em português e códigos FHIR.")
 public class EnumsController {
 
     private <T extends Enum<T>> EnumInfoResponse converterEnum(Class<T> enumClass, T[] values) {
@@ -99,6 +103,8 @@ public class EnumsController {
                         String nome = valor.name();
                         Integer codigo = null;
                         String descricao = null;
+                        String codigoFhir = null;
+                        String systemFhir = null;
 
                         try {
                             Method getCodigo = enumClass.getMethod("getCodigo");
@@ -107,7 +113,6 @@ public class EnumsController {
                                 codigo = (Integer) codigoObj;
                             }
                         } catch (Exception e) {
-
                         }
 
                         try {
@@ -117,13 +122,32 @@ public class EnumsController {
                                 descricao = (String) descricaoObj;
                             }
                         } catch (Exception e) {
+                        }
 
+                        try {
+                            Method getCodigoFhir = enumClass.getMethod("getCodigoFhir");
+                            Object codigoFhirObj = getCodigoFhir.invoke(valor);
+                            if (codigoFhirObj instanceof String) {
+                                codigoFhir = (String) codigoFhirObj;
+                            }
+                        } catch (Exception e) {
+                        }
+
+                        try {
+                            Method getSystemFhir = enumClass.getMethod("getSystemFhir");
+                            Object systemFhirObj = getSystemFhir.invoke(valor);
+                            if (systemFhirObj instanceof String) {
+                                systemFhir = (String) systemFhirObj;
+                            }
+                        } catch (Exception e) {
                         }
 
                         return EnumItemResponse.builder()
                                 .nome(nome)
                                 .codigo(codigo)
                                 .descricao(descricao)
+                                .codigoFhir(codigoFhir)
+                                .systemFhir(systemFhir)
                                 .build();
                     } catch (Exception e) {
                         return EnumItemResponse.builder()
@@ -162,8 +186,7 @@ public class EnumsController {
     @GetMapping("/canal-notificacao")
     @Operation(summary = "Listar valores de CanalNotificacaoEnum")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Valores do enum retornados com sucesso",
-                    content = @Content(schema = @Schema(implementation = EnumInfoResponse.class)))
+            @ApiResponse(responseCode = "200", description = "Valores do enum retornados com sucesso", content = @Content(schema = @Schema(implementation = EnumInfoResponse.class)))
     })
     public ResponseEntity<EnumInfoResponse> listarCanalNotificacao() {
         log.debug("REQUEST GET /v1/enums/canal-notificacao");
@@ -178,8 +201,7 @@ public class EnumsController {
     @GetMapping("/classe-terapeutica")
     @Operation(summary = "Listar valores de ClasseTerapeuticaEnum")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Valores do enum retornados com sucesso",
-                    content = @Content(schema = @Schema(implementation = EnumInfoResponse.class)))
+            @ApiResponse(responseCode = "200", description = "Valores do enum retornados com sucesso", content = @Content(schema = @Schema(implementation = EnumInfoResponse.class)))
     })
     public ResponseEntity<EnumInfoResponse> listarClasseTerapeutica() {
         log.debug("REQUEST GET /v1/enums/classe-terapeutica");
@@ -194,13 +216,13 @@ public class EnumsController {
     @GetMapping("/classificacao-risco-gestacional")
     @Operation(summary = "Listar valores de ClassificacaoRiscoGestacionalEnum")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Valores do enum retornados com sucesso",
-                    content = @Content(schema = @Schema(implementation = EnumInfoResponse.class)))
+            @ApiResponse(responseCode = "200", description = "Valores do enum retornados com sucesso", content = @Content(schema = @Schema(implementation = EnumInfoResponse.class)))
     })
     public ResponseEntity<EnumInfoResponse> listarClassificacaoRiscoGestacional() {
         log.debug("REQUEST GET /v1/enums/classificacao-risco-gestacional");
         try {
-            return ResponseEntity.ok(converterEnum(ClassificacaoRiscoGestacionalEnum.class, ClassificacaoRiscoGestacionalEnum.values()));
+            return ResponseEntity.ok(
+                    converterEnum(ClassificacaoRiscoGestacionalEnum.class, ClassificacaoRiscoGestacionalEnum.values()));
         } catch (Exception ex) {
             log.error("Erro inesperado ao listar ClassificacaoRiscoGestacionalEnum", ex);
             throw ex;
@@ -210,8 +232,7 @@ public class EnumsController {
     @GetMapping("/condicao-moradia")
     @Operation(summary = "Listar valores de CondicaoMoradiaEnum")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Valores do enum retornados com sucesso",
-                    content = @Content(schema = @Schema(implementation = EnumInfoResponse.class)))
+            @ApiResponse(responseCode = "200", description = "Valores do enum retornados com sucesso", content = @Content(schema = @Schema(implementation = EnumInfoResponse.class)))
     })
     public ResponseEntity<EnumInfoResponse> listarCondicaoMoradia() {
         log.debug("REQUEST GET /v1/enums/condicao-moradia");
@@ -226,8 +247,7 @@ public class EnumsController {
     @GetMapping("/escolaridade")
     @Operation(summary = "Listar valores de EscolaridadeEnum")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Valores do enum retornados com sucesso",
-                    content = @Content(schema = @Schema(implementation = EnumInfoResponse.class)))
+            @ApiResponse(responseCode = "200", description = "Valores do enum retornados com sucesso", content = @Content(schema = @Schema(implementation = EnumInfoResponse.class)))
     })
     public ResponseEntity<EnumInfoResponse> listarEscolaridade() {
         log.debug("REQUEST GET /v1/enums/escolaridade");
@@ -242,8 +262,7 @@ public class EnumsController {
     @GetMapping("/estado-civil")
     @Operation(summary = "Listar valores de EstadoCivilEnum")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Valores do enum retornados com sucesso",
-                    content = @Content(schema = @Schema(implementation = EnumInfoResponse.class)))
+            @ApiResponse(responseCode = "200", description = "Valores do enum retornados com sucesso", content = @Content(schema = @Schema(implementation = EnumInfoResponse.class)))
     })
     public ResponseEntity<EnumInfoResponse> listarEstadoCivil() {
         log.debug("REQUEST GET /v1/enums/estado-civil");
@@ -258,8 +277,7 @@ public class EnumsController {
     @GetMapping("/forma-farmaceutica")
     @Operation(summary = "Listar valores de FormaFarmaceuticaEnum")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Valores do enum retornados com sucesso",
-                    content = @Content(schema = @Schema(implementation = EnumInfoResponse.class)))
+            @ApiResponse(responseCode = "200", description = "Valores do enum retornados com sucesso", content = @Content(schema = @Schema(implementation = EnumInfoResponse.class)))
     })
     public ResponseEntity<EnumInfoResponse> listarFormaFarmaceutica() {
         log.debug("REQUEST GET /v1/enums/forma-farmaceutica");
@@ -274,8 +292,7 @@ public class EnumsController {
     @GetMapping("/gravidade-doenca")
     @Operation(summary = "Listar valores de GravidadeDoencaEnum")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Valores do enum retornados com sucesso",
-                    content = @Content(schema = @Schema(implementation = EnumInfoResponse.class)))
+            @ApiResponse(responseCode = "200", description = "Valores do enum retornados com sucesso", content = @Content(schema = @Schema(implementation = EnumInfoResponse.class)))
     })
     public ResponseEntity<EnumInfoResponse> listarGravidadeDoenca() {
         log.debug("REQUEST GET /v1/enums/gravidade-doenca");
@@ -290,8 +307,7 @@ public class EnumsController {
     @GetMapping("/identidade-genero")
     @Operation(summary = "Listar valores de IdentidadeGeneroEnum")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Valores do enum retornados com sucesso",
-                    content = @Content(schema = @Schema(implementation = EnumInfoResponse.class)))
+            @ApiResponse(responseCode = "200", description = "Valores do enum retornados com sucesso", content = @Content(schema = @Schema(implementation = EnumInfoResponse.class)))
     })
     public ResponseEntity<EnumInfoResponse> listarIdentidadeGenero() {
         log.debug("REQUEST GET /v1/enums/identidade-genero");
@@ -306,8 +322,7 @@ public class EnumsController {
     @GetMapping("/modalidade-convenio")
     @Operation(summary = "Listar valores de ModalidadeConvenioEnum")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Valores do enum retornados com sucesso",
-                    content = @Content(schema = @Schema(implementation = EnumInfoResponse.class)))
+            @ApiResponse(responseCode = "200", description = "Valores do enum retornados com sucesso", content = @Content(schema = @Schema(implementation = EnumInfoResponse.class)))
     })
     public ResponseEntity<EnumInfoResponse> listarModalidadeConvenio() {
         log.debug("REQUEST GET /v1/enums/modalidade-convenio");
@@ -322,8 +337,7 @@ public class EnumsController {
     @GetMapping("/nacionalidade")
     @Operation(summary = "Listar valores de NacionalidadeEnum")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Valores do enum retornados com sucesso",
-                    content = @Content(schema = @Schema(implementation = EnumInfoResponse.class)))
+            @ApiResponse(responseCode = "200", description = "Valores do enum retornados com sucesso", content = @Content(schema = @Schema(implementation = EnumInfoResponse.class)))
     })
     public ResponseEntity<EnumInfoResponse> listarNacionalidade() {
         log.debug("REQUEST GET /v1/enums/nacionalidade");
@@ -338,8 +352,7 @@ public class EnumsController {
     @GetMapping("/natureza-juridica")
     @Operation(summary = "Listar valores de NaturezaJuridicaEnum")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Valores do enum retornados com sucesso",
-                    content = @Content(schema = @Schema(implementation = EnumInfoResponse.class)))
+            @ApiResponse(responseCode = "200", description = "Valores do enum retornados com sucesso", content = @Content(schema = @Schema(implementation = EnumInfoResponse.class)))
     })
     public ResponseEntity<EnumInfoResponse> listarNaturezaJuridica() {
         log.debug("REQUEST GET /v1/enums/natureza-juridica");
@@ -354,8 +367,7 @@ public class EnumsController {
     @GetMapping("/orientacao-sexual")
     @Operation(summary = "Listar valores de OrientacaoSexualEnum")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Valores do enum retornados com sucesso",
-                    content = @Content(schema = @Schema(implementation = EnumInfoResponse.class)))
+            @ApiResponse(responseCode = "200", description = "Valores do enum retornados com sucesso", content = @Content(schema = @Schema(implementation = EnumInfoResponse.class)))
     })
     public ResponseEntity<EnumInfoResponse> listarOrientacaoSexual() {
         log.debug("REQUEST GET /v1/enums/orientacao-sexual");
@@ -370,13 +382,13 @@ public class EnumsController {
     @GetMapping("/prioridade-atendimento")
     @Operation(summary = "Listar valores de PrioridadeAtendimentoEnum")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Valores do enum retornados com sucesso",
-                    content = @Content(schema = @Schema(implementation = EnumInfoResponse.class)))
+            @ApiResponse(responseCode = "200", description = "Valores do enum retornados com sucesso", content = @Content(schema = @Schema(implementation = EnumInfoResponse.class)))
     })
     public ResponseEntity<EnumInfoResponse> listarPrioridadeAtendimento() {
         log.debug("REQUEST GET /v1/enums/prioridade-atendimento");
         try {
-            return ResponseEntity.ok(converterEnum(PrioridadeAtendimentoEnum.class, PrioridadeAtendimentoEnum.values()));
+            return ResponseEntity
+                    .ok(converterEnum(PrioridadeAtendimentoEnum.class, PrioridadeAtendimentoEnum.values()));
         } catch (Exception ex) {
             log.error("Erro inesperado ao listar PrioridadeAtendimentoEnum", ex);
             throw ex;
@@ -386,8 +398,7 @@ public class EnumsController {
     @GetMapping("/raca-cor")
     @Operation(summary = "Listar valores de RacaCorEnum")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Valores do enum retornados com sucesso",
-                    content = @Content(schema = @Schema(implementation = EnumInfoResponse.class)))
+            @ApiResponse(responseCode = "200", description = "Valores do enum retornados com sucesso", content = @Content(schema = @Schema(implementation = EnumInfoResponse.class)))
     })
     public ResponseEntity<EnumInfoResponse> listarRacaCor() {
         log.debug("REQUEST GET /v1/enums/raca-cor");
@@ -402,8 +413,7 @@ public class EnumsController {
     @GetMapping("/severidade-alergia")
     @Operation(summary = "Listar valores de SeveridadeAlergiaEnum")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Valores do enum retornados com sucesso",
-                    content = @Content(schema = @Schema(implementation = EnumInfoResponse.class)))
+            @ApiResponse(responseCode = "200", description = "Valores do enum retornados com sucesso", content = @Content(schema = @Schema(implementation = EnumInfoResponse.class)))
     })
     public ResponseEntity<EnumInfoResponse> listarSeveridadeAlergia() {
         log.debug("REQUEST GET /v1/enums/severidade-alergia");
@@ -418,8 +428,7 @@ public class EnumsController {
     @GetMapping("/sexo")
     @Operation(summary = "Listar valores de SexoEnum")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Valores do enum retornados com sucesso",
-                    content = @Content(schema = @Schema(implementation = EnumInfoResponse.class)))
+            @ApiResponse(responseCode = "200", description = "Valores do enum retornados com sucesso", content = @Content(schema = @Schema(implementation = EnumInfoResponse.class)))
     })
     public ResponseEntity<EnumInfoResponse> listarSexo() {
         log.debug("REQUEST GET /v1/enums/sexo");
@@ -434,8 +443,7 @@ public class EnumsController {
     @GetMapping("/situacao-familiar")
     @Operation(summary = "Listar valores de SituacaoFamiliarEnum")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Valores do enum retornados com sucesso",
-                    content = @Content(schema = @Schema(implementation = EnumInfoResponse.class)))
+            @ApiResponse(responseCode = "200", description = "Valores do enum retornados com sucesso", content = @Content(schema = @Schema(implementation = EnumInfoResponse.class)))
     })
     public ResponseEntity<EnumInfoResponse> listarSituacaoFamiliar() {
         log.debug("REQUEST GET /v1/enums/situacao-familiar");
@@ -450,8 +458,7 @@ public class EnumsController {
     @GetMapping("/status-agendamento")
     @Operation(summary = "Listar valores de StatusAgendamentoEnum")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Valores do enum retornados com sucesso",
-                    content = @Content(schema = @Schema(implementation = EnumInfoResponse.class)))
+            @ApiResponse(responseCode = "200", description = "Valores do enum retornados com sucesso", content = @Content(schema = @Schema(implementation = EnumInfoResponse.class)))
     })
     public ResponseEntity<EnumInfoResponse> listarStatusAgendamento() {
         log.debug("REQUEST GET /v1/enums/status-agendamento");
@@ -466,8 +473,7 @@ public class EnumsController {
     @GetMapping("/status-atendimento")
     @Operation(summary = "Listar valores de StatusAtendimentoEnum")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Valores do enum retornados com sucesso",
-                    content = @Content(schema = @Schema(implementation = EnumInfoResponse.class)))
+            @ApiResponse(responseCode = "200", description = "Valores do enum retornados com sucesso", content = @Content(schema = @Schema(implementation = EnumInfoResponse.class)))
     })
     public ResponseEntity<EnumInfoResponse> listarStatusAtendimento() {
         log.debug("REQUEST GET /v1/enums/status-atendimento");
@@ -482,8 +488,7 @@ public class EnumsController {
     @GetMapping("/status-ativo")
     @Operation(summary = "Listar valores de StatusAtivoEnum")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Valores do enum retornados com sucesso",
-                    content = @Content(schema = @Schema(implementation = EnumInfoResponse.class)))
+            @ApiResponse(responseCode = "200", description = "Valores do enum retornados com sucesso", content = @Content(schema = @Schema(implementation = EnumInfoResponse.class)))
     })
     public ResponseEntity<EnumInfoResponse> listarStatusAtivo() {
         log.debug("REQUEST GET /v1/enums/status-ativo");
@@ -498,8 +503,7 @@ public class EnumsController {
     @GetMapping("/status-cirurgia")
     @Operation(summary = "Listar valores de StatusCirurgiaEnum")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Valores do enum retornados com sucesso",
-                    content = @Content(schema = @Schema(implementation = EnumInfoResponse.class)))
+            @ApiResponse(responseCode = "200", description = "Valores do enum retornados com sucesso", content = @Content(schema = @Schema(implementation = EnumInfoResponse.class)))
     })
     public ResponseEntity<EnumInfoResponse> listarStatusCirurgia() {
         log.debug("REQUEST GET /v1/enums/status-cirurgia");
@@ -514,8 +518,7 @@ public class EnumsController {
     @GetMapping("/status-consulta")
     @Operation(summary = "Listar valores de StatusConsultaEnum")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Valores do enum retornados com sucesso",
-                    content = @Content(schema = @Schema(implementation = EnumInfoResponse.class)))
+            @ApiResponse(responseCode = "200", description = "Valores do enum retornados com sucesso", content = @Content(schema = @Schema(implementation = EnumInfoResponse.class)))
     })
     public ResponseEntity<EnumInfoResponse> listarStatusConsulta() {
         log.debug("REQUEST GET /v1/enums/status-consulta");
@@ -530,8 +533,7 @@ public class EnumsController {
     @GetMapping("/status-diagnostico")
     @Operation(summary = "Listar valores de StatusDiagnosticoEnum")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Valores do enum retornados com sucesso",
-                    content = @Content(schema = @Schema(implementation = EnumInfoResponse.class)))
+            @ApiResponse(responseCode = "200", description = "Valores do enum retornados com sucesso", content = @Content(schema = @Schema(implementation = EnumInfoResponse.class)))
     })
     public ResponseEntity<EnumInfoResponse> listarStatusDiagnostico() {
         log.debug("REQUEST GET /v1/enums/status-diagnostico");
@@ -546,8 +548,7 @@ public class EnumsController {
     @GetMapping("/status-funcionamento")
     @Operation(summary = "Listar valores de StatusFuncionamentoEnum")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Valores do enum retornados com sucesso",
-                    content = @Content(schema = @Schema(implementation = EnumInfoResponse.class)))
+            @ApiResponse(responseCode = "200", description = "Valores do enum retornados com sucesso", content = @Content(schema = @Schema(implementation = EnumInfoResponse.class)))
     })
     public ResponseEntity<EnumInfoResponse> listarStatusFuncionamento() {
         log.debug("REQUEST GET /v1/enums/status-funcionamento");
@@ -562,8 +563,7 @@ public class EnumsController {
     @GetMapping("/status-manutencao")
     @Operation(summary = "Listar valores de StatusManutencaoEnum")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Valores do enum retornados com sucesso",
-                    content = @Content(schema = @Schema(implementation = EnumInfoResponse.class)))
+            @ApiResponse(responseCode = "200", description = "Valores do enum retornados com sucesso", content = @Content(schema = @Schema(implementation = EnumInfoResponse.class)))
     })
     public ResponseEntity<EnumInfoResponse> listarStatusManutencao() {
         log.debug("REQUEST GET /v1/enums/status-manutencao");
@@ -578,8 +578,7 @@ public class EnumsController {
     @GetMapping("/status-paciente")
     @Operation(summary = "Listar valores de StatusPacienteEnum")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Valores do enum retornados com sucesso",
-                    content = @Content(schema = @Schema(implementation = EnumInfoResponse.class)))
+            @ApiResponse(responseCode = "200", description = "Valores do enum retornados com sucesso", content = @Content(schema = @Schema(implementation = EnumInfoResponse.class)))
     })
     public ResponseEntity<EnumInfoResponse> listarStatusPaciente() {
         log.debug("REQUEST GET /v1/enums/status-paciente");
@@ -591,12 +590,10 @@ public class EnumsController {
         }
     }
 
-
     @GetMapping("/status-receita")
     @Operation(summary = "Listar valores de StatusReceitaEnum")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Valores do enum retornados com sucesso",
-                    content = @Content(schema = @Schema(implementation = EnumInfoResponse.class)))
+            @ApiResponse(responseCode = "200", description = "Valores do enum retornados com sucesso", content = @Content(schema = @Schema(implementation = EnumInfoResponse.class)))
     })
     public ResponseEntity<EnumInfoResponse> listarStatusReceita() {
         log.debug("REQUEST GET /v1/enums/status-receita");
@@ -611,8 +608,7 @@ public class EnumsController {
     @GetMapping("/status-registro-medico")
     @Operation(summary = "Listar valores de StatusRegistroMedicoEnum")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Valores do enum retornados com sucesso",
-                    content = @Content(schema = @Schema(implementation = EnumInfoResponse.class)))
+            @ApiResponse(responseCode = "200", description = "Valores do enum retornados com sucesso", content = @Content(schema = @Schema(implementation = EnumInfoResponse.class)))
     })
     public ResponseEntity<EnumInfoResponse> listarStatusRegistroMedico() {
         log.debug("REQUEST GET /v1/enums/status-registro-medico");
@@ -624,12 +620,10 @@ public class EnumsController {
         }
     }
 
-
     @GetMapping("/tipo-alergia")
     @Operation(summary = "Listar valores de TipoAlergiaEnum")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Valores do enum retornados com sucesso",
-                    content = @Content(schema = @Schema(implementation = EnumInfoResponse.class)))
+            @ApiResponse(responseCode = "200", description = "Valores do enum retornados com sucesso", content = @Content(schema = @Schema(implementation = EnumInfoResponse.class)))
     })
     public ResponseEntity<EnumInfoResponse> listarTipoAlergia() {
         log.debug("REQUEST GET /v1/enums/tipo-alergia");
@@ -644,8 +638,7 @@ public class EnumsController {
     @GetMapping("/tipo-atendimento")
     @Operation(summary = "Listar valores de TipoAtendimentoEnum")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Valores do enum retornados com sucesso",
-                    content = @Content(schema = @Schema(implementation = EnumInfoResponse.class)))
+            @ApiResponse(responseCode = "200", description = "Valores do enum retornados com sucesso", content = @Content(schema = @Schema(implementation = EnumInfoResponse.class)))
     })
     public ResponseEntity<EnumInfoResponse> listarTipoAtendimento() {
         log.debug("REQUEST GET /v1/enums/tipo-atendimento");
@@ -660,13 +653,13 @@ public class EnumsController {
     @GetMapping("/tipo-atendimento-preferencial")
     @Operation(summary = "Listar valores de TipoAtendimentoPreferencialEnum")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Valores do enum retornados com sucesso",
-                    content = @Content(schema = @Schema(implementation = EnumInfoResponse.class)))
+            @ApiResponse(responseCode = "200", description = "Valores do enum retornados com sucesso", content = @Content(schema = @Schema(implementation = EnumInfoResponse.class)))
     })
     public ResponseEntity<EnumInfoResponse> listarTipoAtendimentoPreferencial() {
         log.debug("REQUEST GET /v1/enums/tipo-atendimento-preferencial");
         try {
-            return ResponseEntity.ok(converterEnum(TipoAtendimentoPreferencialEnum.class, TipoAtendimentoPreferencialEnum.values()));
+            return ResponseEntity
+                    .ok(converterEnum(TipoAtendimentoPreferencialEnum.class, TipoAtendimentoPreferencialEnum.values()));
         } catch (Exception ex) {
             log.error("Erro inesperado ao listar TipoAtendimentoPreferencialEnum", ex);
             throw ex;
@@ -676,13 +669,13 @@ public class EnumsController {
     @GetMapping("/tipo-atividade-profissional")
     @Operation(summary = "Listar valores de TipoAtividadeProfissionalEnum")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Valores do enum retornados com sucesso",
-                    content = @Content(schema = @Schema(implementation = EnumInfoResponse.class)))
+            @ApiResponse(responseCode = "200", description = "Valores do enum retornados com sucesso", content = @Content(schema = @Schema(implementation = EnumInfoResponse.class)))
     })
     public ResponseEntity<EnumInfoResponse> listarTipoAtividadeProfissional() {
         log.debug("REQUEST GET /v1/enums/tipo-atividade-profissional");
         try {
-            return ResponseEntity.ok(converterEnum(TipoAtividadeProfissionalEnum.class, TipoAtividadeProfissionalEnum.values()));
+            return ResponseEntity
+                    .ok(converterEnum(TipoAtividadeProfissionalEnum.class, TipoAtividadeProfissionalEnum.values()));
         } catch (Exception ex) {
             log.error("Erro inesperado ao listar TipoAtividadeProfissionalEnum", ex);
             throw ex;
@@ -692,8 +685,7 @@ public class EnumsController {
     @GetMapping("/tipo-cns")
     @Operation(summary = "Listar valores de TipoCnsEnum")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Valores do enum retornados com sucesso",
-                    content = @Content(schema = @Schema(implementation = EnumInfoResponse.class)))
+            @ApiResponse(responseCode = "200", description = "Valores do enum retornados com sucesso", content = @Content(schema = @Schema(implementation = EnumInfoResponse.class)))
     })
     public ResponseEntity<EnumInfoResponse> listarTipoCns() {
         log.debug("REQUEST GET /v1/enums/tipo-cns");
@@ -708,8 +700,7 @@ public class EnumsController {
     @GetMapping("/tipo-consulta")
     @Operation(summary = "Listar valores de TipoConsultaEnum")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Valores do enum retornados com sucesso",
-                    content = @Content(schema = @Schema(implementation = EnumInfoResponse.class)))
+            @ApiResponse(responseCode = "200", description = "Valores do enum retornados com sucesso", content = @Content(schema = @Schema(implementation = EnumInfoResponse.class)))
     })
     public ResponseEntity<EnumInfoResponse> listarTipoConsulta() {
         log.debug("REQUEST GET /v1/enums/tipo-consulta");
@@ -724,13 +715,13 @@ public class EnumsController {
     @GetMapping("/tipo-controle-medicamento")
     @Operation(summary = "Listar valores de TipoControleMedicamentoEnum")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Valores do enum retornados com sucesso",
-                    content = @Content(schema = @Schema(implementation = EnumInfoResponse.class)))
+            @ApiResponse(responseCode = "200", description = "Valores do enum retornados com sucesso", content = @Content(schema = @Schema(implementation = EnumInfoResponse.class)))
     })
     public ResponseEntity<EnumInfoResponse> listarTipoControleMedicamento() {
         log.debug("REQUEST GET /v1/enums/tipo-controle-medicamento");
         try {
-            return ResponseEntity.ok(converterEnum(TipoControleMedicamentoEnum.class, TipoControleMedicamentoEnum.values()));
+            return ResponseEntity
+                    .ok(converterEnum(TipoControleMedicamentoEnum.class, TipoControleMedicamentoEnum.values()));
         } catch (Exception ex) {
             log.error("Erro inesperado ao listar TipoControleMedicamentoEnum", ex);
             throw ex;
@@ -740,8 +731,7 @@ public class EnumsController {
     @GetMapping("/tipo-convenio")
     @Operation(summary = "Listar valores de TipoConvenioEnum")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Valores do enum retornados com sucesso",
-                    content = @Content(schema = @Schema(implementation = EnumInfoResponse.class)))
+            @ApiResponse(responseCode = "200", description = "Valores do enum retornados com sucesso", content = @Content(schema = @Schema(implementation = EnumInfoResponse.class)))
     })
     public ResponseEntity<EnumInfoResponse> listarTipoConvenio() {
         log.debug("REQUEST GET /v1/enums/tipo-convenio");
@@ -756,13 +746,13 @@ public class EnumsController {
     @GetMapping("/tipo-cuidado-enfermagem")
     @Operation(summary = "Listar valores de TipoCuidadoEnfermagemEnum")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Valores do enum retornados com sucesso",
-                    content = @Content(schema = @Schema(implementation = EnumInfoResponse.class)))
+            @ApiResponse(responseCode = "200", description = "Valores do enum retornados com sucesso", content = @Content(schema = @Schema(implementation = EnumInfoResponse.class)))
     })
     public ResponseEntity<EnumInfoResponse> listarTipoCuidadoEnfermagem() {
         log.debug("REQUEST GET /v1/enums/tipo-cuidado-enfermagem");
         try {
-            return ResponseEntity.ok(converterEnum(TipoCuidadoEnfermagemEnum.class, TipoCuidadoEnfermagemEnum.values()));
+            return ResponseEntity
+                    .ok(converterEnum(TipoCuidadoEnfermagemEnum.class, TipoCuidadoEnfermagemEnum.values()));
         } catch (Exception ex) {
             log.error("Erro inesperado ao listar TipoCuidadoEnfermagemEnum", ex);
             throw ex;
@@ -772,8 +762,7 @@ public class EnumsController {
     @GetMapping("/tipo-deficiencia")
     @Operation(summary = "Listar valores de TipoDeficienciaEnum")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Valores do enum retornados com sucesso",
-                    content = @Content(schema = @Schema(implementation = EnumInfoResponse.class)))
+            @ApiResponse(responseCode = "200", description = "Valores do enum retornados com sucesso", content = @Content(schema = @Schema(implementation = EnumInfoResponse.class)))
     })
     public ResponseEntity<EnumInfoResponse> listarTipoDeficiencia() {
         log.debug("REQUEST GET /v1/enums/tipo-deficiencia");
@@ -788,8 +777,7 @@ public class EnumsController {
     @GetMapping("/tipo-doenca")
     @Operation(summary = "Listar valores de TipoDoencaEnum")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Valores do enum retornados com sucesso",
-                    content = @Content(schema = @Schema(implementation = EnumInfoResponse.class)))
+            @ApiResponse(responseCode = "200", description = "Valores do enum retornados com sucesso", content = @Content(schema = @Schema(implementation = EnumInfoResponse.class)))
     })
     public ResponseEntity<EnumInfoResponse> listarTipoDoenca() {
         log.debug("REQUEST GET /v1/enums/tipo-doenca");
@@ -801,12 +789,10 @@ public class EnumsController {
         }
     }
 
-
     @GetMapping("/tipo-endereco")
     @Operation(summary = "Listar valores de TipoEnderecoEnum")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Valores do enum retornados com sucesso",
-                    content = @Content(schema = @Schema(implementation = EnumInfoResponse.class)))
+            @ApiResponse(responseCode = "200", description = "Valores do enum retornados com sucesso", content = @Content(schema = @Schema(implementation = EnumInfoResponse.class)))
     })
     public ResponseEntity<EnumInfoResponse> listarTipoEndereco() {
         log.debug("REQUEST GET /v1/enums/tipo-endereco");
@@ -821,8 +807,7 @@ public class EnumsController {
     @GetMapping("/tipo-equipamento")
     @Operation(summary = "Listar valores de TipoEquipamentoEnum")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Valores do enum retornados com sucesso",
-                    content = @Content(schema = @Schema(implementation = EnumInfoResponse.class)))
+            @ApiResponse(responseCode = "200", description = "Valores do enum retornados com sucesso", content = @Content(schema = @Schema(implementation = EnumInfoResponse.class)))
     })
     public ResponseEntity<EnumInfoResponse> listarTipoEquipamento() {
         log.debug("REQUEST GET /v1/enums/tipo-equipamento");
@@ -837,8 +822,7 @@ public class EnumsController {
     @GetMapping("/tipo-equipe")
     @Operation(summary = "Listar valores de TipoEquipeEnum")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Valores do enum retornados com sucesso",
-                    content = @Content(schema = @Schema(implementation = EnumInfoResponse.class)))
+            @ApiResponse(responseCode = "200", description = "Valores do enum retornados com sucesso", content = @Content(schema = @Schema(implementation = EnumInfoResponse.class)))
     })
     public ResponseEntity<EnumInfoResponse> listarTipoEquipe() {
         log.debug("REQUEST GET /v1/enums/tipo-equipe");
@@ -853,13 +837,13 @@ public class EnumsController {
     @GetMapping("/tipo-especialidade-medica")
     @Operation(summary = "Listar valores de TipoEspecialidadeMedicaEnum")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Valores do enum retornados com sucesso",
-                    content = @Content(schema = @Schema(implementation = EnumInfoResponse.class)))
+            @ApiResponse(responseCode = "200", description = "Valores do enum retornados com sucesso", content = @Content(schema = @Schema(implementation = EnumInfoResponse.class)))
     })
     public ResponseEntity<EnumInfoResponse> listarTipoEspecialidadeMedica() {
         log.debug("REQUEST GET /v1/enums/tipo-especialidade-medica");
         try {
-            return ResponseEntity.ok(converterEnum(TipoEspecialidadeMedicaEnum.class, TipoEspecialidadeMedicaEnum.values()));
+            return ResponseEntity
+                    .ok(converterEnum(TipoEspecialidadeMedicaEnum.class, TipoEspecialidadeMedicaEnum.values()));
         } catch (Exception ex) {
             log.error("Erro inesperado ao listar TipoEspecialidadeMedicaEnum", ex);
             throw ex;
@@ -869,8 +853,7 @@ public class EnumsController {
     @GetMapping("/tipo-estabelecimento")
     @Operation(summary = "Listar valores de TipoEstabelecimentoEnum")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Valores do enum retornados com sucesso",
-                    content = @Content(schema = @Schema(implementation = EnumInfoResponse.class)))
+            @ApiResponse(responseCode = "200", description = "Valores do enum retornados com sucesso", content = @Content(schema = @Schema(implementation = EnumInfoResponse.class)))
     })
     public ResponseEntity<EnumInfoResponse> listarTipoEstabelecimento() {
         log.debug("REQUEST GET /v1/enums/tipo-estabelecimento");
@@ -885,8 +868,7 @@ public class EnumsController {
     @GetMapping("/tipo-exame")
     @Operation(summary = "Listar valores de TipoExameEnum")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Valores do enum retornados com sucesso",
-                    content = @Content(schema = @Schema(implementation = EnumInfoResponse.class)))
+            @ApiResponse(responseCode = "200", description = "Valores do enum retornados com sucesso", content = @Content(schema = @Schema(implementation = EnumInfoResponse.class)))
     })
     public ResponseEntity<EnumInfoResponse> listarTipoExame() {
         log.debug("REQUEST GET /v1/enums/tipo-exame");
@@ -901,8 +883,7 @@ public class EnumsController {
     @GetMapping("/tipo-falta")
     @Operation(summary = "Listar valores de TipoFaltaEnum")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Valores do enum retornados com sucesso",
-                    content = @Content(schema = @Schema(implementation = EnumInfoResponse.class)))
+            @ApiResponse(responseCode = "200", description = "Valores do enum retornados com sucesso", content = @Content(schema = @Schema(implementation = EnumInfoResponse.class)))
     })
     public ResponseEntity<EnumInfoResponse> listarTipoFalta() {
         log.debug("REQUEST GET /v1/enums/tipo-falta");
@@ -917,8 +898,7 @@ public class EnumsController {
     @GetMapping("/tipo-logradouro")
     @Operation(summary = "Listar valores de TipoLogradouroEnum")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Valores do enum retornados com sucesso",
-                    content = @Content(schema = @Schema(implementation = EnumInfoResponse.class)))
+            @ApiResponse(responseCode = "200", description = "Valores do enum retornados com sucesso", content = @Content(schema = @Schema(implementation = EnumInfoResponse.class)))
     })
     public ResponseEntity<EnumInfoResponse> listarTipoLogradouro() {
         log.debug("REQUEST GET /v1/enums/tipo-logradouro");
@@ -933,13 +913,13 @@ public class EnumsController {
     @GetMapping("/tipo-metodo-contraceptivo")
     @Operation(summary = "Listar valores de TipoMetodoContraceptivoEnum")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Valores do enum retornados com sucesso",
-                    content = @Content(schema = @Schema(implementation = EnumInfoResponse.class)))
+            @ApiResponse(responseCode = "200", description = "Valores do enum retornados com sucesso", content = @Content(schema = @Schema(implementation = EnumInfoResponse.class)))
     })
     public ResponseEntity<EnumInfoResponse> listarTipoMetodoContraceptivo() {
         log.debug("REQUEST GET /v1/enums/tipo-metodo-contraceptivo");
         try {
-            return ResponseEntity.ok(converterEnum(TipoMetodoContraceptivoEnum.class, TipoMetodoContraceptivoEnum.values()));
+            return ResponseEntity
+                    .ok(converterEnum(TipoMetodoContraceptivoEnum.class, TipoMetodoContraceptivoEnum.values()));
         } catch (Exception ex) {
             log.error("Erro inesperado ao listar TipoMetodoContraceptivoEnum", ex);
             throw ex;
@@ -949,8 +929,7 @@ public class EnumsController {
     @GetMapping("/tipo-notificacao")
     @Operation(summary = "Listar valores de TipoNotificacaoEnum")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Valores do enum retornados com sucesso",
-                    content = @Content(schema = @Schema(implementation = EnumInfoResponse.class)))
+            @ApiResponse(responseCode = "200", description = "Valores do enum retornados com sucesso", content = @Content(schema = @Schema(implementation = EnumInfoResponse.class)))
     })
     public ResponseEntity<EnumInfoResponse> listarTipoNotificacao() {
         log.debug("REQUEST GET /v1/enums/tipo-notificacao");
@@ -965,8 +944,7 @@ public class EnumsController {
     @GetMapping("/tipo-planto")
     @Operation(summary = "Listar valores de TipoPlantaoEnum")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Valores do enum retornados com sucesso",
-                    content = @Content(schema = @Schema(implementation = EnumInfoResponse.class)))
+            @ApiResponse(responseCode = "200", description = "Valores do enum retornados com sucesso", content = @Content(schema = @Schema(implementation = EnumInfoResponse.class)))
     })
     public ResponseEntity<EnumInfoResponse> listarTipoPlantao() {
         log.debug("REQUEST GET /v1/enums/tipo-planto");
@@ -981,8 +959,7 @@ public class EnumsController {
     @GetMapping("/tipo-ponto")
     @Operation(summary = "Listar valores de TipoPontoEnum")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Valores do enum retornados com sucesso",
-                    content = @Content(schema = @Schema(implementation = EnumInfoResponse.class)))
+            @ApiResponse(responseCode = "200", description = "Valores do enum retornados com sucesso", content = @Content(schema = @Schema(implementation = EnumInfoResponse.class)))
     })
     public ResponseEntity<EnumInfoResponse> listarTipoPonto() {
         log.debug("REQUEST GET /v1/enums/tipo-ponto");
@@ -997,8 +974,7 @@ public class EnumsController {
     @GetMapping("/tipo-procedimento")
     @Operation(summary = "Listar valores de TipoProcedimentoEnum")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Valores do enum retornados com sucesso",
-                    content = @Content(schema = @Schema(implementation = EnumInfoResponse.class)))
+            @ApiResponse(responseCode = "200", description = "Valores do enum retornados com sucesso", content = @Content(schema = @Schema(implementation = EnumInfoResponse.class)))
     })
     public ResponseEntity<EnumInfoResponse> listarTipoProcedimento() {
         log.debug("REQUEST GET /v1/enums/tipo-procedimento");
@@ -1013,8 +989,7 @@ public class EnumsController {
     @GetMapping("/tipo-profissional")
     @Operation(summary = "Listar valores de TipoProfissionalEnum")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Valores do enum retornados com sucesso",
-                    content = @Content(schema = @Schema(implementation = EnumInfoResponse.class)))
+            @ApiResponse(responseCode = "200", description = "Valores do enum retornados com sucesso", content = @Content(schema = @Schema(implementation = EnumInfoResponse.class)))
     })
     public ResponseEntity<EnumInfoResponse> listarTipoProfissional() {
         log.debug("REQUEST GET /v1/enums/tipo-profissional");
@@ -1029,8 +1004,7 @@ public class EnumsController {
     @GetMapping("/tipo-reacao-alergica")
     @Operation(summary = "Listar valores de TipoReacaoAlergicaEnum")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Valores do enum retornados com sucesso",
-                    content = @Content(schema = @Schema(implementation = EnumInfoResponse.class)))
+            @ApiResponse(responseCode = "200", description = "Valores do enum retornados com sucesso", content = @Content(schema = @Schema(implementation = EnumInfoResponse.class)))
     })
     public ResponseEntity<EnumInfoResponse> listarTipoReacaoAlergica() {
         log.debug("REQUEST GET /v1/enums/tipo-reacao-alergica");
@@ -1045,8 +1019,7 @@ public class EnumsController {
     @GetMapping("/tipo-responsavel")
     @Operation(summary = "Listar valores de TipoResponsavelEnum")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Valores do enum retornados com sucesso",
-                    content = @Content(schema = @Schema(implementation = EnumInfoResponse.class)))
+            @ApiResponse(responseCode = "200", description = "Valores do enum retornados com sucesso", content = @Content(schema = @Schema(implementation = EnumInfoResponse.class)))
     })
     public ResponseEntity<EnumInfoResponse> listarTipoResponsavel() {
         log.debug("REQUEST GET /v1/enums/tipo-responsavel");
@@ -1061,8 +1034,7 @@ public class EnumsController {
     @GetMapping("/tipo-servico-saude")
     @Operation(summary = "Listar valores de TipoServicoSaudeEnum")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Valores do enum retornados com sucesso",
-                    content = @Content(schema = @Schema(implementation = EnumInfoResponse.class)))
+            @ApiResponse(responseCode = "200", description = "Valores do enum retornados com sucesso", content = @Content(schema = @Schema(implementation = EnumInfoResponse.class)))
     })
     public ResponseEntity<EnumInfoResponse> listarTipoServicoSaude() {
         log.debug("REQUEST GET /v1/enums/tipo-servico-saude");
@@ -1077,8 +1049,7 @@ public class EnumsController {
     @GetMapping("/tipo-usuario-sistema")
     @Operation(summary = "Listar valores de TipoUsuarioSistemaEnum")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Valores do enum retornados com sucesso",
-                    content = @Content(schema = @Schema(implementation = EnumInfoResponse.class)))
+            @ApiResponse(responseCode = "200", description = "Valores do enum retornados com sucesso", content = @Content(schema = @Schema(implementation = EnumInfoResponse.class)))
     })
     public ResponseEntity<EnumInfoResponse> listarTipoUsuarioSistema() {
         log.debug("REQUEST GET /v1/enums/tipo-usuario-sistema");
@@ -1093,8 +1064,7 @@ public class EnumsController {
     @GetMapping("/tipo-vacina")
     @Operation(summary = "Listar valores de TipoVacinaEnum")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Valores do enum retornados com sucesso",
-                    content = @Content(schema = @Schema(implementation = EnumInfoResponse.class)))
+            @ApiResponse(responseCode = "200", description = "Valores do enum retornados com sucesso", content = @Content(schema = @Schema(implementation = EnumInfoResponse.class)))
     })
     public ResponseEntity<EnumInfoResponse> listarTipoVacina() {
         log.debug("REQUEST GET /v1/enums/tipo-vacina");
@@ -1109,13 +1079,13 @@ public class EnumsController {
     @GetMapping("/tipo-vinculo-profissional")
     @Operation(summary = "Listar valores de TipoVinculoProfissionalEnum")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Valores do enum retornados com sucesso",
-                    content = @Content(schema = @Schema(implementation = EnumInfoResponse.class)))
+            @ApiResponse(responseCode = "200", description = "Valores do enum retornados com sucesso", content = @Content(schema = @Schema(implementation = EnumInfoResponse.class)))
     })
     public ResponseEntity<EnumInfoResponse> listarTipoVinculoProfissional() {
         log.debug("REQUEST GET /v1/enums/tipo-vinculo-profissional");
         try {
-            return ResponseEntity.ok(converterEnum(TipoVinculoProfissionalEnum.class, TipoVinculoProfissionalEnum.values()));
+            return ResponseEntity
+                    .ok(converterEnum(TipoVinculoProfissionalEnum.class, TipoVinculoProfissionalEnum.values()));
         } catch (Exception ex) {
             log.error("Erro inesperado ao listar TipoVinculoProfissionalEnum", ex);
             throw ex;
@@ -1125,8 +1095,7 @@ public class EnumsController {
     @GetMapping("/tipo-visita-domiciliar")
     @Operation(summary = "Listar valores de TipoVisitaDomiciliarEnum")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Valores do enum retornados com sucesso",
-                    content = @Content(schema = @Schema(implementation = EnumInfoResponse.class)))
+            @ApiResponse(responseCode = "200", description = "Valores do enum retornados com sucesso", content = @Content(schema = @Schema(implementation = EnumInfoResponse.class)))
     })
     public ResponseEntity<EnumInfoResponse> listarTipoVisitaDomiciliar() {
         log.debug("REQUEST GET /v1/enums/tipo-visita-domiciliar");
@@ -1141,8 +1110,7 @@ public class EnumsController {
     @GetMapping("/unidade-medida")
     @Operation(summary = "Listar valores de UnidadeMedidaEnum")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Valores do enum retornados com sucesso",
-                    content = @Content(schema = @Schema(implementation = EnumInfoResponse.class)))
+            @ApiResponse(responseCode = "200", description = "Valores do enum retornados com sucesso", content = @Content(schema = @Schema(implementation = EnumInfoResponse.class)))
     })
     public ResponseEntity<EnumInfoResponse> listarUnidadeMedida() {
         log.debug("REQUEST GET /v1/enums/unidade-medida");
@@ -1157,8 +1125,7 @@ public class EnumsController {
     @GetMapping("/via-administracao")
     @Operation(summary = "Listar valores de ViaAdministracaoEnum")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Valores do enum retornados com sucesso",
-                    content = @Content(schema = @Schema(implementation = EnumInfoResponse.class)))
+            @ApiResponse(responseCode = "200", description = "Valores do enum retornados com sucesso", content = @Content(schema = @Schema(implementation = EnumInfoResponse.class)))
     })
     public ResponseEntity<EnumInfoResponse> listarViaAdministracao() {
         log.debug("REQUEST GET /v1/enums/via-administracao");
@@ -1173,13 +1140,13 @@ public class EnumsController {
     @GetMapping("/via-administracao-medicamento")
     @Operation(summary = "Listar valores de ViaAdministracaoMedicamentoEnum")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Valores do enum retornados com sucesso",
-                    content = @Content(schema = @Schema(implementation = EnumInfoResponse.class)))
+            @ApiResponse(responseCode = "200", description = "Valores do enum retornados com sucesso", content = @Content(schema = @Schema(implementation = EnumInfoResponse.class)))
     })
     public ResponseEntity<EnumInfoResponse> listarViaAdministracaoMedicamento() {
         log.debug("REQUEST GET /v1/enums/via-administracao-medicamento");
         try {
-            return ResponseEntity.ok(converterEnum(ViaAdministracaoMedicamentoEnum.class, ViaAdministracaoMedicamentoEnum.values()));
+            return ResponseEntity
+                    .ok(converterEnum(ViaAdministracaoMedicamentoEnum.class, ViaAdministracaoMedicamentoEnum.values()));
         } catch (Exception ex) {
             log.error("Erro inesperado ao listar ViaAdministracaoMedicamentoEnum", ex);
             throw ex;
@@ -1189,13 +1156,13 @@ public class EnumsController {
     @GetMapping("/via-administracao-vacina")
     @Operation(summary = "Listar valores de ViaAdministracaoVacinaEnum")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Valores do enum retornados com sucesso",
-                    content = @Content(schema = @Schema(implementation = EnumInfoResponse.class)))
+            @ApiResponse(responseCode = "200", description = "Valores do enum retornados com sucesso", content = @Content(schema = @Schema(implementation = EnumInfoResponse.class)))
     })
     public ResponseEntity<EnumInfoResponse> listarViaAdministracaoVacina() {
         log.debug("REQUEST GET /v1/enums/via-administracao-vacina");
         try {
-            return ResponseEntity.ok(converterEnum(ViaAdministracaoVacinaEnum.class, ViaAdministracaoVacinaEnum.values()));
+            return ResponseEntity
+                    .ok(converterEnum(ViaAdministracaoVacinaEnum.class, ViaAdministracaoVacinaEnum.values()));
         } catch (Exception ex) {
             log.error("Erro inesperado ao listar ViaAdministracaoVacinaEnum", ex);
             throw ex;
@@ -1205,8 +1172,7 @@ public class EnumsController {
     @GetMapping("/zona-domicilio")
     @Operation(summary = "Listar valores de ZonaDomicilioEnum")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Valores do enum retornados com sucesso",
-                    content = @Content(schema = @Schema(implementation = EnumInfoResponse.class)))
+            @ApiResponse(responseCode = "200", description = "Valores do enum retornados com sucesso", content = @Content(schema = @Schema(implementation = EnumInfoResponse.class)))
     })
     public ResponseEntity<EnumInfoResponse> listarZonaDomicilio() {
         log.debug("REQUEST GET /v1/enums/zona-domicilio");
@@ -1214,6 +1180,36 @@ public class EnumsController {
             return ResponseEntity.ok(converterEnum(ZonaDomicilioEnum.class, ZonaDomicilioEnum.values()));
         } catch (Exception ex) {
             log.error("Erro inesperado ao listar ZonaDomicilioEnum", ex);
+            throw ex;
+        }
+    }
+
+    @GetMapping("/tipo-identificador")
+    @Operation(summary = "Listar valores de TipoIdentificadorEnum (com códigos FHIR)")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Valores do enum retornados com sucesso", content = @Content(schema = @Schema(implementation = EnumInfoResponse.class)))
+    })
+    public ResponseEntity<EnumInfoResponse> listarTipoIdentificador() {
+        log.debug("REQUEST GET /v1/enums/tipo-identificador");
+        try {
+            return ResponseEntity.ok(converterEnum(TipoIdentificadorEnum.class, TipoIdentificadorEnum.values()));
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao listar TipoIdentificadorEnum", ex);
+            throw ex;
+        }
+    }
+
+    @GetMapping("/modalidade-financeira")
+    @Operation(summary = "Listar valores de ModalidadeFinanceiraEnum (com códigos FHIR)")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Valores do enum retornados com sucesso", content = @Content(schema = @Schema(implementation = EnumInfoResponse.class)))
+    })
+    public ResponseEntity<EnumInfoResponse> listarModalidadeFinanceira() {
+        log.debug("REQUEST GET /v1/enums/modalidade-financeira");
+        try {
+            return ResponseEntity.ok(converterEnum(ModalidadeFinanceiraEnum.class, ModalidadeFinanceiraEnum.values()));
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao listar ModalidadeFinanceiraEnum", ex);
             throw ex;
         }
     }

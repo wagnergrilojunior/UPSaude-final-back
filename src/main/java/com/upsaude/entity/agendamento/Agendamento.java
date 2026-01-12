@@ -176,6 +176,27 @@ public class Agendamento extends BaseEntity {
     @Column(name = "confirmacao_enviada")
     private Boolean confirmacaoEnviada;
 
+    // =================================================================================
+    // CAMPOS DE INTEGRAÇÃO SUS / RNDS (FHIR APPOINTMENT)
+    // =================================================================================
+
+    @Convert(converter = com.upsaude.util.converter.TipoAgendamentoEnumConverter.class)
+    @Column(name = "tipo_agendamento", length = 50)
+    private com.upsaude.enums.TipoAgendamentoEnum tipoAgendamento;
+
+    @Column(name = "categoria_servico", length = 50)
+    private String categoriaServico;
+
+    @Convert(converter = com.upsaude.util.converter.TipoServicoAgendamentoEnumConverter.class)
+    @Column(name = "tipo_servico", length = 50)
+    private com.upsaude.enums.TipoServicoAgendamentoEnum tipoServico;
+
+    @Column(name = "motivos_agendamento", columnDefinition = "jsonb")
+    private String motivosAgendamento;
+
+    @Column(name = "periodo_solicitado", columnDefinition = "jsonb")
+    private String periodoSolicitado;
+
     @PrePersist
     @PreUpdate
     public void validateCollections() {

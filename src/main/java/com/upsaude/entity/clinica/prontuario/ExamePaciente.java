@@ -18,11 +18,10 @@ import lombok.EqualsAndHashCode;
 import java.time.OffsetDateTime;
 
 @Entity
-@Table(name = "exames", schema = "public",
-       indexes = {
-           @Index(name = "idx_exame_prontuario", columnList = "prontuario_id"),
-           @Index(name = "idx_exame_data_exame", columnList = "data_exame")
-       })
+@Table(name = "exames", schema = "public", indexes = {
+        @Index(name = "idx_exame_prontuario", columnList = "prontuario_id"),
+        @Index(name = "idx_exame_data_exame", columnList = "data_exame")
+})
 @Data
 @EqualsAndHashCode(callSuper = true)
 public class ExamePaciente extends BaseEntity {
@@ -30,6 +29,22 @@ public class ExamePaciente extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "prontuario_id", nullable = false)
     private Prontuario prontuario;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "atendimento_id")
+    private com.upsaude.entity.clinica.atendimento.Atendimento atendimento;
+
+    @Column(name = "status", length = 20)
+    private String status;
+
+    @Column(name = "intent", length = 20)
+    private String intent;
+
+    @Column(name = "priority", length = 20)
+    private String priority;
+
+    @Column(name = "category", length = 50)
+    private String category;
 
     @Column(name = "tipo_exame")
     private String tipoExame;
@@ -73,5 +88,8 @@ public class ExamePaciente extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "cid10_subcategorias_id")
     private Cid10Subcategorias diagnosticoRelacionado;
-}
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "catalogo_exame_id")
+    private com.upsaude.entity.referencia.exame.CatalogoExame catalogoExame;
+}

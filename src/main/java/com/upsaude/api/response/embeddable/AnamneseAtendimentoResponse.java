@@ -1,5 +1,6 @@
 package com.upsaude.api.response.embeddable;
 
+import com.upsaude.api.response.clinica.atendimento.SinalVitalResponse;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -19,5 +20,6 @@ public class AnamneseAtendimentoResponse {
     private String alergiasConhecidas;
     private String exameFisico;
     private String sinaisVitais;
+    private SinalVitalResponse sinalVitalRecord;
     private String observacoesAnamnese;
 }

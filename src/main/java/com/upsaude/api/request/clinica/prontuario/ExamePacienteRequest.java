@@ -26,6 +26,13 @@ public class ExamePacienteRequest {
     @NotNull(message = "Prontuário é obrigatório")
     private UUID prontuario;
 
+    private UUID atendimentoId;
+
+    private String status;
+    private String intent;
+    private String priority;
+    private String category;
+
     @Size(max = 50, message = "Tipo de exame deve ter no máximo 50 caracteres")
     private String tipoExame;
 
@@ -56,5 +63,6 @@ public class ExamePacienteRequest {
     private UUID procedimento;
 
     private UUID diagnosticoRelacionado;
-}
 
+    private UUID catalogoExameId;
+}

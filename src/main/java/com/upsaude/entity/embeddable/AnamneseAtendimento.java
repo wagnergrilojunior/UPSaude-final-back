@@ -1,7 +1,11 @@
 package com.upsaude.entity.embeddable;
 
+import com.upsaude.entity.clinica.atendimento.SinalVital;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.OneToOne;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -43,6 +47,10 @@ public class AnamneseAtendimento {
 
     @Column(name = "sinais_vitais", columnDefinition = "TEXT")
     private String sinaisVitais;
+
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "sinal_vital_record_id")
+    private SinalVital sinalVitalRecord;
 
     @Column(name = "observacoes_anamnese", columnDefinition = "TEXT")
     private String observacoesAnamnese;

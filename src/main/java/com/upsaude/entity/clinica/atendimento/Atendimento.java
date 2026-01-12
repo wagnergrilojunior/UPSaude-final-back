@@ -1,4 +1,5 @@
 package com.upsaude.entity.clinica.atendimento;
+
 import com.upsaude.entity.BaseEntity;
 
 import com.upsaude.entity.profissional.ProfissionaisSaude;
@@ -13,6 +14,7 @@ import com.upsaude.entity.embeddable.DiagnosticoAtendimento;
 import com.upsaude.entity.embeddable.InformacoesAtendimento;
 import com.upsaude.entity.embeddable.ProcedimentosRealizadosAtendimento;
 import jakarta.persistence.Column;
+import jakarta.persistence.Convert;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -27,15 +29,14 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 
 @Entity
-@Table(name = "atendimentos", schema = "public",
-       indexes = {
-           @Index(name = "idx_atendimento_paciente", columnList = "paciente_id"),
-           @Index(name = "idx_atendimento_profissional", columnList = "profissional_id"),
-           @Index(name = "idx_atendimento_data_hora", columnList = "data_hora"),
-           @Index(name = "idx_atendimento_tipo", columnList = "tipo_atendimento"),
-           @Index(name = "idx_atendimento_status", columnList = "status_atendimento"),
-           @Index(name = "idx_atendimento_estabelecimento", columnList = "estabelecimento_id")
-       })
+@Table(name = "atendimentos", schema = "public", indexes = {
+        @Index(name = "idx_atendimento_paciente", columnList = "paciente_id"),
+        @Index(name = "idx_atendimento_profissional", columnList = "profissional_id"),
+        @Index(name = "idx_atendimento_data_hora", columnList = "data_hora"),
+        @Index(name = "idx_atendimento_tipo", columnList = "tipo_atendimento"),
+        @Index(name = "idx_atendimento_status", columnList = "status_atendimento"),
+        @Index(name = "idx_atendimento_estabelecimento", columnList = "estabelecimento_id")
+})
 @Data
 @EqualsAndHashCode(callSuper = true)
 public class Atendimento extends BaseEntity {
@@ -84,6 +85,33 @@ public class Atendimento extends BaseEntity {
 
     @Column(name = "observacoes_internas", columnDefinition = "TEXT")
     private String observacoesInternas;
+
+    // =================================================================================
+    // CAMPOS DE INTEGRAÇÃO SUS / RNDS (FHIR ENCOUNTER)
+    // =================================================================================
+
+    @Convert(converter = com.upsaude.util.converter.ClasseAtendimentoEnumConverter.class)
+    @Column(name = "classe_atendimento", length = 50)
+    private com.upsaude.enums.ClasseAtendimentoEnum classeAtendimento;
+
+    @Column(name = "tipo_atendimento_detalhado", length = 100)
+    private String tipoAtendimentoDetalhado;
+
+    @Convert(converter = com.upsaude.util.converter.PrioridadeAtendimentoEnumConverter.class)
+    @Column(name = "prioridade_atendimento", length = 20)
+    private com.upsaude.enums.PrioridadeAtendimentoEnum prioridadeAtendimento;
+
+    @Column(name = "motivo_atendimento", columnDefinition = "jsonb")
+    private String motivoAtendimento;
+
+    @Column(name = "diagnosticos_admissao", columnDefinition = "jsonb")
+    private String diagnosticosAdmissao;
+
+    @Column(name = "dados_internacao", columnDefinition = "jsonb")
+    private String dadosInternacao;
+
+    @Column(name = "periodo_real", columnDefinition = "jsonb")
+    private String periodoReal;
 
     @OneToOne(mappedBy = "atendimento", fetch = FetchType.LAZY)
     private Consulta consulta;

@@ -89,4 +89,7 @@ public class ReceitaItem extends BaseEntity {
 
         @Column(name = "observacoes", columnDefinition = "TEXT")
         private String observacoes;
+
+        @Column(name = "dosage_instruction", columnDefinition = "jsonb")
+        private String dosageInstruction;
 }

@@ -14,5 +14,6 @@ public interface EstadosRepository extends JpaRepository<Estados, UUID> {
     Optional<Estados> findByCodigoIbge(String codigoIbge);
 
     Optional<Estados> findBySigla(String sigla);
-}
 
+    long countByCodigoFhirIsNotNull();
+}

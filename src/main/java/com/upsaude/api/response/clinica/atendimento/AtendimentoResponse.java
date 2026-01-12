@@ -36,7 +36,17 @@ public class AtendimentoResponse {
     private ClassificacaoRiscoAtendimentoResponse classificacaoRisco;
     private String anotacoes;
     private String observacoesInternas;
-    
+
+    // Campos de Integração SUS / RNDS
+    private com.upsaude.enums.ClasseAtendimentoEnum classeAtendimento;
+    private String tipoAtendimentoDetalhado;
+    private com.upsaude.enums.PrioridadeAtendimentoEnum prioridadeAtendimento;
+    private String motivoAtendimento;
+    private String diagnosticosAdmissao;
+    private String dadosInternacao;
+    private String periodoReal;
+
+    private ConsultaResponse consulta;
     // IDs de relacionamentos importantes
     private UUID estabelecimentoId;
     private UUID tenantId;
