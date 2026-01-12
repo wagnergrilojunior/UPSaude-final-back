@@ -1,5 +1,6 @@
 package com.upsaude.mapper.clinica.atendimento;
 
+import org.mapstruct.AfterMapping;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
@@ -10,12 +11,17 @@ import com.upsaude.api.request.clinica.atendimento.AtendimentoRequest;
 import com.upsaude.api.response.clinica.atendimento.AtendimentoResponse;
 import com.upsaude.api.response.clinica.atendimento.PacienteAtendimentoResponse;
 import com.upsaude.api.response.clinica.atendimento.ProfissionalAtendimentoResponse;
+import com.upsaude.api.response.convenio.ConvenioSimplificadoResponse;
+import com.upsaude.api.response.profissional.equipe.EquipeSaudeSimplificadoResponse;
 import com.upsaude.entity.clinica.atendimento.Atendimento;
+import com.upsaude.entity.convenio.Convenio;
 import com.upsaude.entity.paciente.Paciente;
 import com.upsaude.entity.profissional.ProfissionaisSaude;
+import com.upsaude.entity.profissional.equipe.EquipeSaude;
 import com.upsaude.enums.TipoContatoEnum;
 import com.upsaude.enums.TipoIdentificadorEnum;
 import com.upsaude.mapper.config.MappingConfig;
+import java.util.UUID;
 import com.upsaude.mapper.convenio.ConvenioMapper;
 import com.upsaude.mapper.paciente.PacienteMapper;
 import com.upsaude.mapper.profissional.ProfissionaisSaudeMapper;
@@ -63,16 +69,34 @@ public interface AtendimentoMapper {
 
     @Mapping(target = "paciente", source = "paciente", qualifiedByName = "mapPacienteSimplificado")
     @Mapping(target = "profissional", source = "profissional", qualifiedByName = "mapProfissionalSimplificado")
-    @Mapping(target = "equipeSaude", ignore = true)
-    @Mapping(target = "convenio", ignore = true)
-    @Mapping(target = "informacoes", ignore = true)
-    @Mapping(target = "anamnese", ignore = true)
-    @Mapping(target = "diagnostico", ignore = true)
-    @Mapping(target = "procedimentosRealizados", ignore = true)
-    @Mapping(target = "classificacaoRisco", ignore = true)
-    @Mapping(target = "anotacoes", ignore = true)
-    @Mapping(target = "observacoesInternas", ignore = true)
+    @Mapping(target = "equipeSaude", source = "equipeSaude", qualifiedByName = "mapEquipeSaudeSimplificado")
+    @Mapping(target = "convenio", source = "convenio", qualifiedByName = "mapConvenioSimplificado")
+    @Mapping(target = "estabelecimentoId", ignore = true)
+    @Mapping(target = "tenantId", source = "tenant.id")
+    @Mapping(target = "enderecoId", ignore = true)
     AtendimentoResponse toResponse(Atendimento entity);
+
+    @AfterMapping
+    default void mapIdsRelacionamentos(@MappingTarget AtendimentoResponse response, Atendimento entity) {
+        if (entity == null) {
+            return;
+        }
+
+        // Mapeia tenantId (sempre existe pois é obrigatório)
+        if (entity.getTenant() != null) {
+            response.setTenantId(entity.getTenant().getId());
+        }
+
+        // Mapeia estabelecimentoId (pode ser null)
+        if (entity.getEstabelecimento() != null) {
+            response.setEstabelecimentoId(entity.getEstabelecimento().getId());
+            
+            // Mapeia enderecoId se existir
+            if (entity.getEstabelecimento().getEndereco() != null) {
+                response.setEnderecoId(entity.getEstabelecimento().getEndereco().getId());
+            }
+        }
+    }
 
     @Named("mapPacienteSimplificado")
     default PacienteAtendimentoResponse mapPacienteSimplificado(Paciente paciente) {
@@ -144,6 +168,46 @@ public interface AtendimentoMapper {
             .nomeCompleto(nomeCompleto)
             .registroProfissional(registroProfissional)
             .ufRegistro(ufRegistro)
+            .build();
+    }
+
+    @Named("mapEquipeSaudeSimplificado")
+    default EquipeSaudeSimplificadoResponse mapEquipeSaudeSimplificado(EquipeSaude equipeSaude) {
+        if (equipeSaude == null) {
+            return null;
+        }
+
+        UUID estabelecimentoId = equipeSaude.getEstabelecimento() != null 
+            ? equipeSaude.getEstabelecimento().getId() 
+            : null;
+
+        return EquipeSaudeSimplificadoResponse.builder()
+            .id(equipeSaude.getId())
+            .nomeReferencia(equipeSaude.getNomeReferencia())
+            .tipoEquipe(equipeSaude.getTipoEquipe())
+            .estabelecimentoId(estabelecimentoId)
+            .build();
+    }
+
+    @Named("mapConvenioSimplificado")
+    default ConvenioSimplificadoResponse mapConvenioSimplificado(Convenio convenio) {
+        if (convenio == null) {
+            return null;
+        }
+
+        UUID estabelecimentoId = convenio.getEstabelecimento() != null 
+            ? convenio.getEstabelecimento().getId() 
+            : convenio.getEstabelecimentoId();
+
+        UUID tenantId = convenio.getTenant() != null 
+            ? convenio.getTenant().getId() 
+            : convenio.getTenantId();
+
+        return ConvenioSimplificadoResponse.builder()
+            .id(convenio.getId())
+            .nome(convenio.getNome())
+            .estabelecimentoId(estabelecimentoId)
+            .tenantId(tenantId)
             .build();
     }
 }
