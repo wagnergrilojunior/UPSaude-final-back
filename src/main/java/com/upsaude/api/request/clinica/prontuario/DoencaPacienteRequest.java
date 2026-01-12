@@ -26,8 +26,21 @@ public class DoencaPacienteRequest {
     @NotNull(message = "Prontuário é obrigatório")
     private UUID prontuario;
 
-    @NotNull(message = "Diagnóstico CID-10 é obrigatório")
+    @Schema(description = "ID do Diagnóstico CID-10 (opcional se CIAP-2 for fornecido)")
     private UUID diagnostico;
+
+    @Schema(description = "ID do Diagnóstico CIAP-2 (opcional se CID-10 for fornecido)")
+    private UUID ciap2;
+
+    @NotNull(message = "Tipo de catálogo é obrigatório")
+    @Schema(description = "Tipo de catálogo: CID10, CIAP2, OUTRO", example = "CID10")
+    private String tipoCatalogo;
+
+    @Schema(description = "Código do diagnóstico no catálogo original")
+    private String codigo;
+
+    @Schema(description = "Descrição personalizada do diagnóstico pelo médico")
+    private String descricaoPersonalizada;
 
     @NotNull(message = "Data de diagnóstico é obrigatória")
     private LocalDate dataDiagnostico;
@@ -35,7 +48,12 @@ public class DoencaPacienteRequest {
     @NotNull(message = "Status ativa é obrigatório")
     private Boolean ativa;
 
+    @Schema(description = "Status clínico: ativo, resolvido, erro", example = "ativo")
+    private String status;
+
+    @Schema(description = "Indica se é uma condição crônica")
+    private Boolean cronico;
+
     @Size(max = 1000, message = "Observações deve ter no máximo 1000 caracteres")
     private String observacoes;
 }
-

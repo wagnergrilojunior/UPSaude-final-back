@@ -44,5 +44,12 @@ public class AlergiaPacienteRequest {
     private String observacoes;
 
     private UUID diagnosticoRelacionado;
-}
 
+    private UUID alergeno;
+
+    private UUID reacaoAdversaCatalogo;
+
+    private UUID criticidade;
+
+    private UUID categoriaAgente;
+}

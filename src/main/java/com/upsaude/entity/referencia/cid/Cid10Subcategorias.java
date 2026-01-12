@@ -1,5 +1,7 @@
 package com.upsaude.entity.referencia.cid;
+
 import com.upsaude.entity.BaseEntityWithoutTenant;
+import java.time.OffsetDateTime;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -17,24 +19,19 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 
 @Entity
-@Table(
-    name = "cid10_subcategorias",
-    schema = "public",
-    uniqueConstraints = {
-        @UniqueConstraint(name = "uk_cid10_subcategorias_subcat", columnNames = {"subcat"})
-    },
-    indexes = {
+@Table(name = "cid10_subcategorias", schema = "public", uniqueConstraints = {
+        @UniqueConstraint(name = "uk_cid10_subcategorias_subcat", columnNames = { "subcat" })
+}, indexes = {
         @Index(name = "idx_cid10_subcategorias_subcat", columnList = "subcat"),
         @Index(name = "idx_cid10_subcategorias_categoria_cat", columnList = "categoria_cat"),
         @Index(name = "idx_cid10_subcategorias_classif", columnList = "classif"),
         @Index(name = "idx_cid10_subcategorias_restrsexo", columnList = "restrsexo"),
         @Index(name = "idx_cid10_subcategorias_causaobito", columnList = "causaobito")
-    }
-)
+})
 @DynamicUpdate
 @BatchSize(size = 50)
 @Data
-@EqualsAndHashCode(callSuper = true, exclude = {"categoria"})
+@EqualsAndHashCode(callSuper = true, exclude = { "categoria" })
 public class Cid10Subcategorias extends BaseEntityWithoutTenant {
 
     @Column(name = "subcat", nullable = false, length = 10)
@@ -67,6 +64,9 @@ public class Cid10Subcategorias extends BaseEntityWithoutTenant {
 
     @Column(name = "excluidos", columnDefinition = "TEXT")
     private String excluidos;
+
+    @Column(name = "data_sincronizacao")
+    private OffsetDateTime dataSincronizacao;
 
     @PrePersist
     @PreUpdate

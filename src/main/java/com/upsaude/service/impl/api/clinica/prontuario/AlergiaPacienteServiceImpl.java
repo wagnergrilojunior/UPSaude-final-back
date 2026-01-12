@@ -28,6 +28,10 @@ import com.upsaude.mapper.clinica.prontuario.AlergiaPacienteMapper;
 import com.upsaude.repository.clinica.prontuario.AlergiaPacienteRepository;
 import com.upsaude.repository.clinica.prontuario.ProntuarioRepository;
 import com.upsaude.repository.referencia.cid.Cid10SubcategoriasRepository;
+import com.upsaude.repository.alergia.AlergenoRepository;
+import com.upsaude.repository.alergia.ReacaoAdversaCatalogoRepository;
+import com.upsaude.repository.alergia.CriticidadeAlergiaRepository;
+import com.upsaude.repository.alergia.CategoriaAgenteAlergiaRepository;
 import com.upsaude.service.api.clinica.prontuario.AlergiaPacienteService;
 import com.upsaude.service.api.sistema.multitenancy.TenantService;
 
@@ -46,8 +50,14 @@ public class AlergiaPacienteServiceImpl implements AlergiaPacienteService {
     private final TenantService tenantService;
     private final AlergiaPacienteMapper mapper;
 
+    private final AlergenoRepository alergenoRepository;
+    private final ReacaoAdversaCatalogoRepository reacaoAdversaCatalogoRepository;
+    private final CriticidadeAlergiaRepository criticidadeAlergiaRepository;
+    private final CategoriaAgenteAlergiaRepository categoriaAgenteAlergiaRepository;
+
     @Override
     @Transactional
+    @SuppressWarnings("null")
     public AlergiaPacienteResponse criar(AlergiaPacienteRequest request) {
         log.debug("Criando nova alergia do paciente");
 
@@ -61,13 +71,35 @@ public class AlergiaPacienteServiceImpl implements AlergiaPacienteService {
             entity.setTenant(tenant);
 
             Prontuario prontuario = prontuarioRepository.findByIdAndTenant(request.getProntuario(), tenantId)
-                .orElseThrow(() -> new NotFoundException("Prontuário não encontrado"));
+                    .orElseThrow(() -> new NotFoundException("Prontuário não encontrado"));
             entity.setProntuario(prontuario);
 
             if (request.getDiagnosticoRelacionado() != null) {
-                Cid10Subcategorias diagnostico = cid10SubcategoriasRepository.findById(request.getDiagnosticoRelacionado())
-                    .orElseThrow(() -> new NotFoundException("Diagnóstico CID-10 não encontrado"));
+                Cid10Subcategorias diagnostico = cid10SubcategoriasRepository
+                        .findById(request.getDiagnosticoRelacionado())
+                        .orElseThrow(() -> new NotFoundException("Diagnóstico CID-10 não encontrado"));
                 entity.setDiagnosticoRelacionado(diagnostico);
+            }
+
+            if (request.getAlergeno() != null) {
+                entity.setAlergeno(alergenoRepository.findById(request.getAlergeno())
+                        .orElseThrow(() -> new NotFoundException("Alérgeno não encontrado no catálogo")));
+            }
+
+            if (request.getReacaoAdversaCatalogo() != null) {
+                entity.setReacaoAdversaCatalogo(
+                        reacaoAdversaCatalogoRepository.findById(request.getReacaoAdversaCatalogo())
+                                .orElseThrow(() -> new NotFoundException("Reação adversa não encontrada no catálogo")));
+            }
+
+            if (request.getCriticidade() != null) {
+                entity.setCriticidade(criticidadeAlergiaRepository.findById(request.getCriticidade())
+                        .orElseThrow(() -> new NotFoundException("Nível de criticidade não encontrado no catálogo")));
+            }
+
+            if (request.getCategoriaAgente() != null) {
+                entity.setCategoriaAgente(categoriaAgenteAlergiaRepository.findById(request.getCategoriaAgente())
+                        .orElseThrow(() -> new NotFoundException("Categoria de agente não encontrada no catálogo")));
             }
 
             AlergiaPaciente saved = repository.save(Objects.requireNonNull(entity));
@@ -100,7 +132,7 @@ public class AlergiaPacienteServiceImpl implements AlergiaPacienteService {
 
         UUID tenantId = tenantService.validarTenantAtual();
         AlergiaPaciente entity = repository.findByIdAndTenant(id, tenantId)
-            .orElseThrow(() -> new NotFoundException("Alergia do paciente não encontrada"));
+                .orElseThrow(() -> new NotFoundException("Alergia do paciente não encontrada"));
 
         return mapper.toResponse(entity);
     }
@@ -127,22 +159,53 @@ public class AlergiaPacienteServiceImpl implements AlergiaPacienteService {
     @Override
     @Transactional
     @CachePut(cacheNames = CacheKeyUtil.CACHE_PRONTUARIOS, keyGenerator = "prontuarioCacheKeyGenerator")
+    @SuppressWarnings("null")
     public AlergiaPacienteResponse atualizar(UUID id, AlergiaPacienteRequest request) {
         log.debug("Atualizando alergia do paciente. ID: {}", id);
 
         try {
             UUID tenantId = tenantService.validarTenantAtual();
             AlergiaPaciente entity = repository.findByIdAndTenant(id, tenantId)
-                .orElseThrow(() -> new NotFoundException("Alergia do paciente não encontrada"));
+                    .orElseThrow(() -> new NotFoundException("Alergia do paciente não encontrada"));
 
             mapper.updateFromRequest(request, entity);
 
             if (request.getDiagnosticoRelacionado() != null) {
-                Cid10Subcategorias diagnostico = cid10SubcategoriasRepository.findById(request.getDiagnosticoRelacionado())
-                    .orElseThrow(() -> new NotFoundException("Diagnóstico CID-10 não encontrado"));
+                Cid10Subcategorias diagnostico = cid10SubcategoriasRepository
+                        .findById(request.getDiagnosticoRelacionado())
+                        .orElseThrow(() -> new NotFoundException("Diagnóstico CID-10 não encontrado"));
                 entity.setDiagnosticoRelacionado(diagnostico);
             } else {
                 entity.setDiagnosticoRelacionado(null);
+            }
+
+            if (request.getAlergeno() != null) {
+                entity.setAlergeno(alergenoRepository.findById(request.getAlergeno())
+                        .orElseThrow(() -> new NotFoundException("Alérgeno não encontrado no catálogo")));
+            } else {
+                entity.setAlergeno(null);
+            }
+
+            if (request.getReacaoAdversaCatalogo() != null) {
+                entity.setReacaoAdversaCatalogo(
+                        reacaoAdversaCatalogoRepository.findById(request.getReacaoAdversaCatalogo())
+                                .orElseThrow(() -> new NotFoundException("Reação adversa não encontrada no catálogo")));
+            } else {
+                entity.setReacaoAdversaCatalogo(null);
+            }
+
+            if (request.getCriticidade() != null) {
+                entity.setCriticidade(criticidadeAlergiaRepository.findById(request.getCriticidade())
+                        .orElseThrow(() -> new NotFoundException("Nível de criticidade não encontrado no catálogo")));
+            } else {
+                entity.setCriticidade(null);
+            }
+
+            if (request.getCategoriaAgente() != null) {
+                entity.setCategoriaAgente(categoriaAgenteAlergiaRepository.findById(request.getCategoriaAgente())
+                        .orElseThrow(() -> new NotFoundException("Categoria de agente não encontrada no catálogo")));
+            } else {
+                entity.setCategoriaAgente(null);
             }
 
             AlergiaPaciente saved = repository.save(entity);
@@ -150,7 +213,8 @@ public class AlergiaPacienteServiceImpl implements AlergiaPacienteService {
 
             Cache cache = cacheManager.getCache(CacheKeyUtil.CACHE_PRONTUARIOS);
             if (cache != null && entity.getProntuario() != null) {
-                Object key = Objects.requireNonNull((Object) CacheKeyUtil.prontuario(tenantId, entity.getProntuario().getId()));
+                Object key = Objects
+                        .requireNonNull((Object) CacheKeyUtil.prontuario(tenantId, entity.getProntuario().getId()));
                 cache.evict(key);
             }
 
@@ -159,7 +223,8 @@ public class AlergiaPacienteServiceImpl implements AlergiaPacienteService {
         } catch (BadRequestException | NotFoundException e) {
             throw e;
         } catch (DataAccessException e) {
-            log.error("Erro de acesso a dados ao atualizar alergia do paciente. Exception: {}", e.getClass().getSimpleName(), e);
+            log.error("Erro de acesso a dados ao atualizar alergia do paciente. Exception: {}",
+                    e.getClass().getSimpleName(), e);
             throw new InternalServerErrorException("Erro ao atualizar alergia do paciente", e);
         } catch (Exception e) {
             log.error("Erro inesperado ao atualizar alergia do paciente. ID: {}", id, e);
@@ -176,7 +241,7 @@ public class AlergiaPacienteServiceImpl implements AlergiaPacienteService {
         try {
             UUID tenantId = tenantService.validarTenantAtual();
             AlergiaPaciente entity = repository.findByIdAndTenant(id, tenantId)
-                .orElseThrow(() -> new NotFoundException("Alergia do paciente não encontrada"));
+                    .orElseThrow(() -> new NotFoundException("Alergia do paciente não encontrada"));
 
             UUID prontuarioId = entity.getProntuario() != null ? entity.getProntuario().getId() : null;
             repository.delete(entity);
@@ -191,7 +256,8 @@ public class AlergiaPacienteServiceImpl implements AlergiaPacienteService {
         } catch (NotFoundException e) {
             throw e;
         } catch (DataAccessException e) {
-            log.error("Erro de acesso a dados ao excluir alergia do paciente. Exception: {}", e.getClass().getSimpleName(), e);
+            log.error("Erro de acesso a dados ao excluir alergia do paciente. Exception: {}",
+                    e.getClass().getSimpleName(), e);
             throw new InternalServerErrorException("Erro ao excluir alergia do paciente", e);
         } catch (Exception e) {
             log.error("Erro inesperado ao excluir alergia do paciente. ID: {}", id, e);
@@ -208,14 +274,15 @@ public class AlergiaPacienteServiceImpl implements AlergiaPacienteService {
         try {
             UUID tenantId = tenantService.validarTenantAtual();
             AlergiaPaciente entity = repository.findByIdAndTenant(id, tenantId)
-                .orElseThrow(() -> new NotFoundException("Alergia do paciente não encontrada"));
+                    .orElseThrow(() -> new NotFoundException("Alergia do paciente não encontrada"));
 
             entity.setActive(false);
             repository.save(entity);
 
             Cache cache = cacheManager.getCache(CacheKeyUtil.CACHE_PRONTUARIOS);
             if (cache != null && entity.getProntuario() != null) {
-                Object key = Objects.requireNonNull((Object) CacheKeyUtil.prontuario(tenantId, entity.getProntuario().getId()));
+                Object key = Objects
+                        .requireNonNull((Object) CacheKeyUtil.prontuario(tenantId, entity.getProntuario().getId()));
                 cache.evict(key);
             }
 
@@ -223,7 +290,8 @@ public class AlergiaPacienteServiceImpl implements AlergiaPacienteService {
         } catch (NotFoundException e) {
             throw e;
         } catch (DataAccessException e) {
-            log.error("Erro de acesso a dados ao inativar alergia do paciente. Exception: {}", e.getClass().getSimpleName(), e);
+            log.error("Erro de acesso a dados ao inativar alergia do paciente. Exception: {}",
+                    e.getClass().getSimpleName(), e);
             throw new InternalServerErrorException("Erro ao inativar alergia do paciente", e);
         } catch (Exception e) {
             log.error("Erro inesperado ao inativar alergia do paciente. ID: {}", id, e);
@@ -237,4 +305,3 @@ public class AlergiaPacienteServiceImpl implements AlergiaPacienteService {
         }
     }
 }
-
