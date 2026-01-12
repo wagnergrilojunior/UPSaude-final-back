@@ -39,6 +39,7 @@ import com.upsaude.repository.vacinacao.LocalAplicacaoRepository;
 import com.upsaude.repository.vacinacao.LoteVacinaRepository;
 import com.upsaude.repository.vacinacao.TipoDoseRepository;
 import com.upsaude.repository.vacinacao.ViaAdministracaoRepository;
+import com.upsaude.repository.clinica.prontuario.AlergiaPacienteRepository;
 import com.upsaude.service.api.sistema.multitenancy.TenantService;
 
 import lombok.RequiredArgsConstructor;
@@ -63,10 +64,13 @@ public class AplicacaoVacinaService {
     private final TenantRepository tenantRepository;
     private final TenantService tenantService;
     private final LoteVacinaService loteVacinaService;
+    private final AlergiaPacienteRepository alergiaRepository;
 
     @Transactional
     public AplicacaoVacinaResponse criar(AplicacaoVacinaRequest request) {
         UUID tenantId = tenantService.validarTenantAtual();
+
+        validarContraindicacoes(request.getPacienteId(), request.getImunobiologicoId(), tenantId);
 
         Paciente paciente = pacienteRepository.findById(request.getPacienteId())
                 .orElseThrow(() -> new NotFoundException("Paciente não encontrado"));
@@ -290,5 +294,36 @@ public class AplicacaoVacinaService {
     public long contarPorPaciente(UUID pacienteId) {
         UUID tenantId = tenantService.validarTenantAtual();
         return aplicacaoRepository.countByPacienteIdAndTenantId(pacienteId, tenantId);
+    }
+
+    private void validarContraindicacoes(UUID pacienteId, UUID imunobiologicoId, UUID tenantId) {
+        List<com.upsaude.entity.clinica.prontuario.AlergiaPaciente> alergiasAtivas = alergiaRepository
+                .findActiveByPacienteId(pacienteId, tenantId);
+
+        if (alergiasAtivas.isEmpty()) {
+            return;
+        }
+
+        Imunobiologico imunobiologico = imunobiologicoRepository.findById(imunobiologicoId)
+                .orElseThrow(() -> new NotFoundException("Imunobiológico não encontrado"));
+
+        for (com.upsaude.entity.clinica.prontuario.AlergiaPaciente alergia : alergiasAtivas) {
+            // Validação 1: Se o alérgeno é o próprio imunobiológico
+            if (alergia.getAlergeno() != null && alergia.getAlergeno().getNome() != null &&
+                    imunobiologico.getNome().toLowerCase().contains(alergia.getAlergeno().getNome().toLowerCase())) {
+                throw new BadRequestException("Contraindicação: Paciente possui alergia ativa registrada para "
+                        + alergia.getAlergeno().getNome());
+            }
+
+            // Validação 2: Se a categoria da alergia é "biologic" (biológico), emitir
+            // alerta mais genérico
+            if (alergia.getCategoriaAgente() != null
+                    && "biologic".equalsIgnoreCase(alergia.getCategoriaAgente().getCodigoFhir())) {
+                log.warn("Alerta: Paciente {} possui alergia ativa a agente biológico: {}", pacienteId,
+                        alergia.getDescricao());
+                // Poderíamos bloquear aqui, mas por enquanto vamos deixar como aviso ou
+                // bloqueio se for o mesmo nome
+            }
+        }
     }
 }

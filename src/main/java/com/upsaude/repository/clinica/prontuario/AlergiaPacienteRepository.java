@@ -22,13 +22,11 @@ public interface AlergiaPacienteRepository extends JpaRepository<AlergiaPaciente
 
     @Query("SELECT a FROM AlergiaPaciente a WHERE a.prontuario.id = :prontuarioId AND a.tenant.id = :tenantId ORDER BY a.dataDiagnostico DESC")
     Page<AlergiaPaciente> findByProntuarioIdAndTenantId(
-        @Param("prontuarioId") UUID prontuarioId,
-        @Param("tenantId") UUID tenantId,
-        Pageable pageable);
+            @Param("prontuarioId") UUID prontuarioId,
+            @Param("tenantId") UUID tenantId,
+            Pageable pageable);
 
-    @Query("SELECT a FROM AlergiaPaciente a WHERE a.prontuario.id = :prontuarioId AND a.tenant.id = :tenantId")
-    List<AlergiaPaciente> findAllByProntuarioIdAndTenantId(
-        @Param("prontuarioId") UUID prontuarioId,
-        @Param("tenantId") UUID tenantId);
+    @Query("SELECT a FROM AlergiaPaciente a WHERE a.prontuario.id = (SELECT p.id FROM Prontuario p WHERE p.paciente.id = :pacienteId) AND a.tenant.id = :tenantId AND a.clinicalStatus = 'active' AND a.active = true")
+    List<AlergiaPaciente> findActiveByPacienteId(@Param("pacienteId") UUID pacienteId,
+            @Param("tenantId") UUID tenantId);
 }
-
