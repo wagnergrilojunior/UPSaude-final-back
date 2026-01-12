@@ -9,15 +9,25 @@ import org.springframework.data.repository.query.Param;
 import java.util.Optional;
 import java.util.UUID;
 
-public interface SigtapProcedimentoRepository extends JpaRepository<SigtapProcedimento, UUID>, JpaSpecificationExecutor<SigtapProcedimento> {
+public interface SigtapProcedimentoRepository
+        extends JpaRepository<SigtapProcedimento, UUID>, JpaSpecificationExecutor<SigtapProcedimento> {
     Optional<SigtapProcedimento> findByCodigoOficial(String codigoOficial);
+
     Optional<SigtapProcedimento> findTopByCodigoOficialOrderByCompetenciaInicialDesc(String codigoOficial);
-    Optional<SigtapProcedimento> findByCodigoOficialAndCompetenciaInicial(String codigoOficial, String competenciaInicial);
-    
+
+    Optional<SigtapProcedimento> findByCodigoOficialAndCompetenciaInicial(String codigoOficial,
+            String competenciaInicial);
+
     @Query("SELECT p FROM SigtapProcedimento p " +
-           "LEFT JOIN FETCH p.formaOrganizacao fo " +
-           "LEFT JOIN FETCH fo.subgrupo sg " +
-           "LEFT JOIN FETCH sg.grupo g " +
-           "WHERE p.active = true")
+            "LEFT JOIN FETCH p.formaOrganizacao fo " +
+            "LEFT JOIN FETCH fo.subgrupo sg " +
+            "LEFT JOIN FETCH sg.grupo g " +
+            "WHERE p.active = true")
     java.util.List<SigtapProcedimento> findAllWithRelationships();
+
+    @Query("SELECT p FROM SigtapProcedimento p WHERE p.active = true AND p.codigoOficial LIKE '06%' AND (" +
+            "LOWER(p.codigoOficial) LIKE LOWER(CONCAT('%', :termo, '%')) OR " +
+            "LOWER(p.nome) LIKE LOWER(CONCAT('%', :termo, '%')))")
+    org.springframework.data.domain.Page<SigtapProcedimento> buscarMedicamentos(@Param("termo") String termo,
+            org.springframework.data.domain.Pageable pageable);
 }
