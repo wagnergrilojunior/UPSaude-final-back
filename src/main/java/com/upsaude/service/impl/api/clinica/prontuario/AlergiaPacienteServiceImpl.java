@@ -70,6 +70,14 @@ public class AlergiaPacienteServiceImpl implements AlergiaPacienteService {
             entity.setActive(true);
             entity.setTenant(tenant);
 
+            // Set FHIR statuses from request or defaults
+            if (request.getClinicalStatus() != null)
+                entity.setClinicalStatus(request.getClinicalStatus());
+            if (request.getVerificationStatus() != null)
+                entity.setVerificationStatus(request.getVerificationStatus());
+            if (request.getGrauCerteza() != null)
+                entity.setGrauCerteza(request.getGrauCerteza());
+
             Prontuario prontuario = prontuarioRepository.findByIdAndTenant(request.getProntuario(), tenantId)
                     .orElseThrow(() -> new NotFoundException("Prontuário não encontrado"));
             entity.setProntuario(prontuario);
@@ -207,6 +215,14 @@ public class AlergiaPacienteServiceImpl implements AlergiaPacienteService {
             } else {
                 entity.setCategoriaAgente(null);
             }
+
+            // Explicitly set FHIR statuses during update if provided
+            if (request.getClinicalStatus() != null)
+                entity.setClinicalStatus(request.getClinicalStatus());
+            if (request.getVerificationStatus() != null)
+                entity.setVerificationStatus(request.getVerificationStatus());
+            if (request.getGrauCerteza() != null)
+                entity.setGrauCerteza(request.getGrauCerteza());
 
             AlergiaPaciente saved = repository.save(entity);
             AlergiaPacienteResponse response = mapper.toResponse(saved);

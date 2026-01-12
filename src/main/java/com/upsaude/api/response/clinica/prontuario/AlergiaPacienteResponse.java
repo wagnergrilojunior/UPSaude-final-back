@@ -34,4 +34,7 @@ public class AlergiaPacienteResponse {
     private ReacaoAdversaResponse reacaoAdversaCatalogo;
     private CriticidadeAlergiaResponse criticidade;
     private CategoriaAgenteAlergiaResponse categoriaAgente;
+    private String clinicalStatus;
+    private String verificationStatus;
+    private String grauCerteza;
 }

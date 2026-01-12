@@ -63,6 +63,15 @@ public class AlergiaPaciente extends BaseEntity {
     @JoinColumn(name = "criticidade_id")
     private CriticidadeAlergia criticidade;
 
+    @Column(name = "clinical_status", length = 20)
+    private String clinicalStatus = "active";
+
+    @Column(name = "verification_status", length = 20)
+    private String verificationStatus = "unconfirmed";
+
+    @Column(name = "grau_certeza", length = 50)
+    private String grauCerteza;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "categoria_agente_id")
     private CategoriaAgenteAlergia categoriaAgente;

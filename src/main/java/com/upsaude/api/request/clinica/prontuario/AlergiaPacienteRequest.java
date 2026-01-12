@@ -52,4 +52,7 @@ public class AlergiaPacienteRequest {
     private UUID criticidade;
 
     private UUID categoriaAgente;
+    private String clinicalStatus;
+    private String verificationStatus;
+    private String grauCerteza;
 }
