@@ -20,7 +20,6 @@ import com.upsaude.api.response.clinica.atendimento.AtendimentoResponse;
 import com.upsaude.cache.CacheKeyUtil;
 import com.upsaude.entity.clinica.atendimento.Atendimento;
 import com.upsaude.entity.clinica.atendimento.SinalVital;
-import com.upsaude.entity.clinica.prontuario.Prontuario;
 import com.upsaude.entity.sistema.multitenancy.Tenant;
 import com.upsaude.enums.StatusAtendimentoEnum;
 import com.upsaude.enums.TipoAtendimentoEnum;
@@ -32,6 +31,7 @@ import com.upsaude.exception.BadRequestException;
 import com.upsaude.repository.clinica.atendimento.AtendimentoRepository;
 import com.upsaude.repository.clinica.atendimento.SinalVitalRepository;
 import com.upsaude.repository.sistema.multitenancy.TenantRepository;
+import com.upsaude.service.api.financeiro.FinanceiroIntegrationService;
 import com.upsaude.service.api.clinica.atendimento.AtendimentoService;
 import com.upsaude.service.api.sistema.multitenancy.TenantService;
 import com.upsaude.service.api.support.atendimento.AtendimentoCreator;
@@ -68,6 +68,7 @@ public class AtendimentoServiceImpl implements AtendimentoService {
     private final AtendimentoUpdater updater;
     private final AtendimentoResponseBuilder responseBuilder;
     private final AtendimentoDomainService domainService;
+    private final FinanceiroIntegrationService financeiroIntegrationService;
 
     @Override
     @Transactional
@@ -81,7 +82,7 @@ public class AtendimentoServiceImpl implements AtendimentoService {
         Tenant tenant = tenantService.obterTenantDoUsuarioAutenticado();
         if (tenant == null) {
             // Fallback para testes: buscar tenant do banco quando não houver autenticação
-            tenant = tenantRepository.findById(tenantId).orElse(null);
+            tenant = tenantRepository.findById(Objects.requireNonNull(tenantId)).orElse(null);
         }
 
         AtendimentoRequest atendimentoRequest = new AtendimentoRequest();
@@ -110,7 +111,7 @@ public class AtendimentoServiceImpl implements AtendimentoService {
 
         Cache cache = cacheManager.getCache(CacheKeyUtil.CACHE_ATENDIMENTO);
         if (cache != null && response != null && response.getId() != null) {
-            cache.put(Objects.requireNonNull((Object) CacheKeyUtil.atendimento(tenantId, response.getId())), response);
+            cache.put(Objects.requireNonNull(CacheKeyUtil.atendimento(tenantId, response.getId())), response);
         }
 
         return response;
@@ -312,7 +313,7 @@ public class AtendimentoServiceImpl implements AtendimentoService {
             diagnosticoAtendimentoMapper.updateFromRequest(request.getDiagnostico(), entity.getDiagnostico());
         }
 
-        Atendimento saved = atendimentoRepository.save(entity);
+        Atendimento saved = atendimentoRepository.save(Objects.requireNonNull(entity));
         log.info("Triagem do atendimento atualizada com sucesso. ID: {}", id);
         return responseBuilder.build(saved);
     }
@@ -348,7 +349,6 @@ public class AtendimentoServiceImpl implements AtendimentoService {
         log.debug("Encerrando atendimento. ID: {}", id);
         validationService.validarId(id);
         UUID tenantId = tenantService.validarTenantAtual();
-        Tenant tenant = tenantService.obterTenantDoUsuarioAutenticado();
         Atendimento entity = tenantEnforcer.validarAcesso(id, tenantId);
 
         if (entity.getInformacoes() == null) {
@@ -375,6 +375,9 @@ public class AtendimentoServiceImpl implements AtendimentoService {
         }
 
         Atendimento saved = atendimentoRepository.save(entity);
+
+        // Consumir reserva ao realizar/encerrar atendimento (modelo híbrido)
+        financeiroIntegrationService.consumirReserva(saved.getId());
 
         log.info("Atendimento encerrado com sucesso. ID: {}", id);
         return responseBuilder.build(saved);

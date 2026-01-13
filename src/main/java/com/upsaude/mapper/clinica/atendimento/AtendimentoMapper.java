@@ -55,6 +55,8 @@ public interface AtendimentoMapper {
     @Mapping(target = "equipeSaude", ignore = true)
     @Mapping(target = "paciente", ignore = true)
     @Mapping(target = "profissional", ignore = true)
+    @Mapping(target = "competenciaFinanceira", ignore = true)
+    @Mapping(target = "procedimentos", ignore = true)
     Atendimento fromRequest(AtendimentoRequest request);
 
     @Mapping(target = "id", ignore = true)
@@ -65,6 +67,8 @@ public interface AtendimentoMapper {
     @Mapping(target = "equipeSaude", ignore = true)
     @Mapping(target = "paciente", ignore = true)
     @Mapping(target = "profissional", ignore = true)
+    @Mapping(target = "competenciaFinanceira", ignore = true)
+    @Mapping(target = "procedimentos", ignore = true)
     void updateFromRequest(AtendimentoRequest request, @MappingTarget Atendimento entity);
 
     @Mapping(target = "paciente", source = "paciente", qualifiedByName = "mapPacienteSimplificado")

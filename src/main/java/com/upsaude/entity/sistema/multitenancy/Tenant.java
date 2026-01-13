@@ -1,5 +1,6 @@
 package com.upsaude.entity.sistema.multitenancy;
 
+import com.upsaude.entity.embeddable.ConfiguracaoFinanceiraTenant;
 import com.upsaude.entity.embeddable.ContatoTenant;
 import com.upsaude.entity.embeddable.DadosFiscaisTenant;
 import com.upsaude.entity.embeddable.DadosIdentificacaoTenant;
@@ -79,6 +80,9 @@ public class Tenant {
     @Embedded
     private InformacoesAdicionaisTenant informacoesAdicionais;
 
+    @Embedded
+    private ConfiguracaoFinanceiraTenant configuracaoFinanceira;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "endereco_id")
     private Endereco endereco;
@@ -100,6 +104,9 @@ public class Tenant {
         }
         if (informacoesAdicionais == null) {
             informacoesAdicionais = new InformacoesAdicionaisTenant();
+        }
+        if (configuracaoFinanceira == null) {
+            configuracaoFinanceira = new ConfiguracaoFinanceiraTenant();
         }
     }
 }

@@ -34,6 +34,8 @@ import java.util.Map;
                 "com.upsaude.repository.deficiencia",
                 "com.upsaude.repository.estabelecimento",
                 "com.upsaude.repository.farmacia",
+                "com.upsaude.repository.faturamento",
+                "com.upsaude.repository.financeiro",
                 "com.upsaude.repository.geral",
                 "com.upsaude.repository.paciente",
                 "com.upsaude.repository.profissional",
@@ -83,6 +85,8 @@ public class JpaConfig {
                                                 "com.upsaude.entity.deficiencia",
                                                 "com.upsaude.entity.estabelecimento",
                                                 "com.upsaude.entity.farmacia",
+                                                "com.upsaude.entity.faturamento",
+                                                "com.upsaude.entity.financeiro",
                                                 "com.upsaude.entity.geral",
                                                 "com.upsaude.entity.paciente",
                                                 "com.upsaude.entity.profissional",
@@ -196,7 +200,9 @@ public class JpaConfig {
                                                 "com.upsaude.entity.geral", // Pode ser referenciado
                                                 "com.upsaude.entity.vacinacao", // ViaAdministracao (referenciado por
                                                                                 // ReceitaItem)
-                                                "com.upsaude.entity.fhir" // FHIR Sync objects
+                                                "com.upsaude.entity.fhir", // FHIR Sync objects
+                                                "com.upsaude.entity.financeiro", // CompetenciaFinanceira (referenciado por Agendamento)
+                                                "com.upsaude.entity.faturamento" // Pode ser referenciado
                                 )
                                 .persistenceUnit("job")
                                 .properties(properties)

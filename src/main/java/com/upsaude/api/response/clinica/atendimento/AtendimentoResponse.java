@@ -7,7 +7,10 @@ import com.upsaude.api.response.embeddable.DiagnosticoAtendimentoResponse;
 import com.upsaude.api.response.profissional.equipe.EquipeSaudeSimplificadoResponse;
 import com.upsaude.api.response.embeddable.InformacoesAtendimentoResponse;
 import com.upsaude.api.response.embeddable.ProcedimentosRealizadosAtendimentoResponse;
+import com.upsaude.api.response.financeiro.CompetenciaFinanceiraResponse;
 import java.time.OffsetDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -51,4 +54,10 @@ public class AtendimentoResponse {
     private UUID estabelecimentoId;
     private UUID tenantId;
     private UUID enderecoId;
+
+    // Campos financeiros
+    private CompetenciaFinanceiraResponse competenciaFinanceira;
+
+    @Builder.Default
+    private List<AtendimentoProcedimentoResponse> procedimentos = new ArrayList<>();
 }

@@ -10,6 +10,7 @@ import com.upsaude.entity.agendamento.Agendamento;
 import com.upsaude.entity.sistema.multitenancy.Tenant;
 import com.upsaude.mapper.agendamento.AgendamentoMapper;
 import com.upsaude.repository.agendamento.AgendamentoRepository;
+import com.upsaude.service.api.financeiro.FinanceiroIntegrationService;
 import com.upsaude.service.sistema.integracao.IntegracaoEventoGenerator;
 
 import lombok.RequiredArgsConstructor;
@@ -27,6 +28,7 @@ public class AgendamentoUpdater {
     private final AgendamentoDomainService domainService;
     private final AgendamentoMapper mapper;
     private final IntegracaoEventoGenerator eventoGenerator;
+    private final FinanceiroIntegrationService financeiroIntegrationService;
 
     public Agendamento atualizar(UUID id, AgendamentoRequest request, UUID tenantId, Tenant tenant) {
         validationService.validarId(id);
@@ -34,8 +36,11 @@ public class AgendamentoUpdater {
 
         Agendamento entity = tenantEnforcer.validarAcesso(id, tenantId);
 
-        if (request.getStatus() != null && !request.getStatus().equals(entity.getStatus())) {
-            domainService.validarTransicaoStatus(entity, request.getStatus());
+        com.upsaude.enums.StatusAgendamentoEnum statusAnterior = entity.getStatus();
+        com.upsaude.enums.StatusAgendamentoEnum statusNovo = request.getStatus();
+
+        if (statusNovo != null && !statusNovo.equals(statusAnterior)) {
+            domainService.validarTransicaoStatus(entity, statusNovo);
         }
 
         mapper.updateFromRequest(request, entity);
@@ -44,6 +49,19 @@ public class AgendamentoUpdater {
 
         Agendamento saved = repository.save(Objects.requireNonNull(entity));
         eventoGenerator.gerarEventosParaAgendamento(saved);
+
+        // Integração financeira baseada em transições de status (modelo híbrido)
+        if (statusNovo != null && statusAnterior != statusNovo) {
+            if (statusNovo == com.upsaude.enums.StatusAgendamentoEnum.CONFIRMADO) {
+                financeiroIntegrationService.reservarOrcamento(saved.getId());
+            }
+            if (statusNovo == com.upsaude.enums.StatusAgendamentoEnum.CANCELADO
+                    || statusNovo == com.upsaude.enums.StatusAgendamentoEnum.FALTA
+                    || statusNovo == com.upsaude.enums.StatusAgendamentoEnum.REAGENDADO) {
+                financeiroIntegrationService.estornarReserva(saved.getId(), statusNovo.name());
+            }
+        }
+
         log.info("Agendamento atualizado com sucesso. ID: {}, tenant: {}", saved.getId(), tenantId);
         return saved;
     }

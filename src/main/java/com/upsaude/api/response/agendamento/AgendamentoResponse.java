@@ -6,9 +6,11 @@ import com.upsaude.api.response.clinica.atendimento.AtendimentoResponse;
 import com.upsaude.api.response.clinica.atendimento.PacienteAtendimentoResponse;
 import com.upsaude.api.response.clinica.atendimento.ProfissionalAtendimentoResponse;
 import com.upsaude.api.response.clinica.atendimento.MedicoConsultaResponse;
+import com.upsaude.api.response.financeiro.CompetenciaFinanceiraResponse;
 
 import com.upsaude.enums.PrioridadeAtendimentoEnum;
 import com.upsaude.enums.StatusAgendamentoEnum;
+import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -70,6 +72,11 @@ public class AgendamentoResponse {
     private com.upsaude.enums.TipoServicoAgendamentoEnum tipoServico;
     private String motivosAgendamento;
     private String periodoSolicitado;
+
+    // Campos financeiros
+    private CompetenciaFinanceiraResponse competenciaFinanceira;
+    private BigDecimal valorEstimadoTotal;
+    private String statusFinanceiro;
 
     @Builder.Default
     private List<AgendamentoResponse> reagendamentos = new ArrayList<>();
