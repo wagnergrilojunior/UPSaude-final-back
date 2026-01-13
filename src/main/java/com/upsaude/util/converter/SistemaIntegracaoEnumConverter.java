@@ -23,4 +23,3 @@ public class SistemaIntegracaoEnumConverter implements AttributeConverter<Sistem
         return SistemaIntegracaoEnum.fromCodigo(dbData);
     }
 }
-

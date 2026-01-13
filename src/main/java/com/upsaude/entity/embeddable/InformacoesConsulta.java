@@ -23,6 +23,8 @@ public class InformacoesConsulta {
         this.motivo = "";
         this.localAtendimento = "";
         this.numeroConsulta = "";
+        this.statusConsulta = StatusConsultaEnum.AGENDADA;
+        this.dataConsulta = java.time.OffsetDateTime.now();
     }
 
     @Column(name = "data_consulta", nullable = false)

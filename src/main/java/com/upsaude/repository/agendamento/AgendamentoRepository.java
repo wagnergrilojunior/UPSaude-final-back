@@ -141,4 +141,23 @@ public interface AgendamentoRepository extends JpaRepository<Agendamento, UUID> 
             @Param("inicio") OffsetDateTime inicio,
             @Param("fim") OffsetDateTime fim,
             @Param("statusCancelado") StatusAgendamentoEnum statusCancelado);
+
+    @Query("SELECT a FROM Agendamento a WHERE a.competenciaFinanceira.id = :competenciaId AND a.tenant.id = :tenantId ORDER BY a.dataHora DESC")
+    Page<Agendamento> findByCompetenciaFinanceira(
+            @Param("competenciaId") UUID competenciaId,
+            @Param("tenantId") UUID tenantId,
+            Pageable pageable);
+
+    @Query("SELECT a FROM Agendamento a WHERE a.tenant.id = :tenantId AND a.competenciaFinanceira.id = :competenciaId ORDER BY a.dataHora DESC")
+    Page<Agendamento> findByTenantAndCompetenciaFinanceira(
+            @Param("tenantId") UUID tenantId,
+            @Param("competenciaId") UUID competenciaId,
+            Pageable pageable);
+
+    @EntityGraph(attributePaths = {"paciente", "profissional", "medico", "convenio", "atendimento", "agendamentoOriginal", "estabelecimento", "competenciaFinanceira"})
+    @Query("SELECT a FROM Agendamento a WHERE a.id = :id AND a.tenant.id = :tenantId")
+    Optional<Agendamento> findByIdAndTenantComProcedimentosEstimados(@Param("id") UUID id, @Param("tenantId") UUID tenantId);
+
+    @Query("SELECT a FROM Agendamento a WHERE a.atendimento.id = :atendimentoId AND a.tenant.id = :tenantId")
+    Optional<Agendamento> findByAtendimento(@Param("atendimentoId") UUID atendimentoId, @Param("tenantId") UUID tenantId);
 }

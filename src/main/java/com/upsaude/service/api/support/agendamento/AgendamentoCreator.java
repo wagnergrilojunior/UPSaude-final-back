@@ -10,6 +10,8 @@ import com.upsaude.entity.agendamento.Agendamento;
 import com.upsaude.entity.sistema.multitenancy.Tenant;
 import com.upsaude.mapper.agendamento.AgendamentoMapper;
 import com.upsaude.repository.agendamento.AgendamentoRepository;
+import com.upsaude.service.api.financeiro.FinanceiroIntegrationService;
+import com.upsaude.service.sistema.integracao.IntegracaoEventoGenerator;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -24,6 +26,8 @@ public class AgendamentoCreator {
     private final AgendamentoValidationService validationService;
     private final AgendamentoRelacionamentosHandler relacionamentosHandler;
     private final AgendamentoDomainService domainService;
+    private final IntegracaoEventoGenerator eventoGenerator;
+    private final FinanceiroIntegrationService financeiroIntegrationService;
 
     public Agendamento criar(AgendamentoRequest request, UUID tenantId, Tenant tenant) {
         validationService.validarObrigatorios(request);
@@ -35,6 +39,13 @@ public class AgendamentoCreator {
         relacionamentosHandler.resolver(entity, request, tenantId, tenant);
 
         Agendamento saved = repository.save(Objects.requireNonNull(entity));
+        eventoGenerator.gerarEventosParaAgendamento(saved);
+
+        // Reserva automática no momento da aprovação/confirmação (modelo híbrido)
+        if (saved.getStatus() == com.upsaude.enums.StatusAgendamentoEnum.CONFIRMADO) {
+            financeiroIntegrationService.reservarOrcamento(saved.getId());
+        }
+
         log.info("Agendamento criado com sucesso. ID: {}, tenant: {}", saved.getId(), tenantId);
         return saved;
     }

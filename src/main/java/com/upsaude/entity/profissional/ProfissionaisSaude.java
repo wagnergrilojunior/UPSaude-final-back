@@ -56,6 +56,10 @@ public class ProfissionaisSaude extends BaseEntity {
         @JoinColumn(name = "sigtap_ocupacao_id")
         private SigtapOcupacao sigtapOcupacao;
 
+        @ManyToOne(fetch = FetchType.LAZY)
+        @JoinColumn(name = "conselho_profissional_id")
+        private com.upsaude.entity.referencia.profissional.ConselhoProfissional conselhoProfissional;
+
         @Embedded
         private ContatoProfissional contato;
 

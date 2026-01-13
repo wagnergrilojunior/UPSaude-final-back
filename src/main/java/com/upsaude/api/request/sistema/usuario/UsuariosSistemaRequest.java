@@ -1,5 +1,6 @@
 package com.upsaude.api.request.sistema.usuario;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.upsaude.api.request.embeddable.ConfiguracaoUsuarioRequest;
 import com.upsaude.api.request.embeddable.DadosExibicaoUsuarioRequest;
@@ -26,10 +27,9 @@ import java.util.UUID;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@JsonIgnoreProperties(ignoreUnknown = true)
 @Schema(description = "Dados de usuários sistema")
 public class UsuariosSistemaRequest {
-
-    private UUID userId;
 
     @EmailValido
     @Size(max = 255, message = "Email deve ter no máximo 255 caracteres")

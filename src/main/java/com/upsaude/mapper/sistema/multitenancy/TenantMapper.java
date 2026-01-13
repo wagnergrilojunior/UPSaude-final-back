@@ -9,6 +9,7 @@ import com.upsaude.mapper.embeddable.DadosFiscaisTenantMapper;
 import com.upsaude.mapper.embeddable.DadosIdentificacaoTenantMapper;
 import com.upsaude.mapper.embeddable.InformacoesAdicionaisTenantMapper;
 import com.upsaude.mapper.embeddable.ResponsavelTenantMapper;
+import com.upsaude.mapper.geral.EnderecoMapper;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
@@ -18,7 +19,8 @@ import org.mapstruct.MappingTarget;
         ContatoTenantMapper.class,
         DadosFiscaisTenantMapper.class,
         ResponsavelTenantMapper.class,
-        InformacoesAdicionaisTenantMapper.class
+        InformacoesAdicionaisTenantMapper.class,
+        EnderecoMapper.class
 })
 public interface TenantMapper {
 
@@ -36,5 +38,6 @@ public interface TenantMapper {
     @Mapping(target = "endereco", ignore = true)
     void updateFromRequest(TenantRequest request, @MappingTarget Tenant entity);
 
+    @Mapping(target = "endereco", source = "endereco", qualifiedByName = "toResponseSimplificado")
     TenantResponse toResponse(Tenant entity);
 }

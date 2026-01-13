@@ -14,6 +14,7 @@ import com.upsaude.entity.profissional.equipe.EquipeSaude;
 import com.upsaude.entity.sistema.multitenancy.Tenant;
 import com.upsaude.exception.NotFoundException;
 import com.upsaude.repository.convenio.ConvenioRepository;
+import com.upsaude.repository.financeiro.CompetenciaFinanceiraRepository;
 import com.upsaude.service.api.support.equipesaude.EquipeSaudeTenantEnforcer;
 import com.upsaude.service.api.support.paciente.PacienteTenantEnforcer;
 import com.upsaude.service.api.support.profissionaissaude.ProfissionaisSaudeTenantEnforcer;
@@ -28,6 +29,7 @@ public class AtendimentoRelacionamentosHandler {
     private final ProfissionaisSaudeTenantEnforcer profissionaisSaudeTenantEnforcer;
     private final EquipeSaudeTenantEnforcer equipeSaudeTenantEnforcer;
     private final ConvenioRepository convenioRepository;
+    private final CompetenciaFinanceiraRepository competenciaFinanceiraRepository;
 
     public void resolver(Atendimento entity, AtendimentoRequest request, UUID tenantId, Tenant tenant) {
         if (request == null) return;
@@ -63,6 +65,16 @@ public class AtendimentoRelacionamentosHandler {
             entity.setEstabelecimento(entity.getProfissional().getEstabelecimento());
         } else {
             entity.setEstabelecimento(null);
+        }
+
+        if (request.getCompetenciaFinanceira() != null) {
+            com.upsaude.entity.financeiro.CompetenciaFinanceira competencia = competenciaFinanceiraRepository
+                    .findById(Objects.requireNonNull(request.getCompetenciaFinanceira()))
+                    .orElseThrow(() -> new NotFoundException(
+                            "Competência financeira não encontrada com ID: " + request.getCompetenciaFinanceira()));
+            entity.setCompetenciaFinanceira(competencia);
+        } else {
+            entity.setCompetenciaFinanceira(null);
         }
     }
 }

@@ -1,5 +1,6 @@
 package com.upsaude.api.response.clinica.prontuario;
 
+import com.upsaude.api.response.diagnostico.Ciap2Response;
 import com.upsaude.api.response.referencia.cid.Cid10SubcategoriaResponse;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
@@ -21,8 +22,14 @@ public class DoencaPacienteResponse {
     private OffsetDateTime updatedAt;
     private Boolean active;
     private Cid10SubcategoriaResponse diagnostico;
+    private Ciap2Response ciap2;
+    private String tipoCatalogo;
+    private String codigo;
+    private String descricaoPersonalizada;
     private LocalDate dataDiagnostico;
+    private String status;
+    private Boolean cronico;
     private Boolean ativa;
+    private OffsetDateTime dataSincronizacao;
     private String observacoes;
 }
-

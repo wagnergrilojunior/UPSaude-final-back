@@ -19,6 +19,7 @@ import com.upsaude.repository.agendamento.AgendamentoRepository;
 import com.upsaude.repository.referencia.sigtap.SigtapCboRepository;
 import com.upsaude.repository.clinica.atendimento.AtendimentoRepository;
 import com.upsaude.repository.convenio.ConvenioRepository;
+import com.upsaude.repository.financeiro.CompetenciaFinanceiraRepository;
 import com.upsaude.service.api.support.medico.MedicoTenantEnforcer;
 import com.upsaude.service.api.support.paciente.PacienteTenantEnforcer;
 import com.upsaude.service.api.support.profissionaissaude.ProfissionaisSaudeTenantEnforcer;
@@ -36,6 +37,7 @@ public class AgendamentoRelacionamentosHandler {
     private final AtendimentoRepository atendimentoRepository;
     private final AgendamentoRepository agendamentoRepository;
     private final SigtapCboRepository sigtapCboRepository;
+    private final CompetenciaFinanceiraRepository competenciaFinanceiraRepository;
 
     public void resolver(Agendamento entity, AgendamentoRequest request, UUID tenantId, Tenant tenant) {
         if (request == null)
@@ -63,7 +65,7 @@ public class AgendamentoRelacionamentosHandler {
         }
 
         if (request.getEspecialidade() != null) {
-            SigtapOcupacao especialidade = sigtapCboRepository.findById(request.getEspecialidade())
+            SigtapOcupacao especialidade = sigtapCboRepository.findById(Objects.requireNonNull(request.getEspecialidade()))
                     .orElseThrow(() -> new NotFoundException(
                             "Especialidade não encontrada com ID: " + request.getEspecialidade()));
             entity.setEspecialidade(especialidade);
@@ -89,6 +91,16 @@ public class AgendamentoRelacionamentosHandler {
                     .orElseThrow(() -> new NotFoundException(
                             "Agendamento original não encontrado com ID: " + request.getAgendamentoOriginal()));
             entity.setAgendamentoOriginal(agendamentoOriginal);
+        }
+
+        if (request.getCompetenciaFinanceira() != null) {
+            com.upsaude.entity.financeiro.CompetenciaFinanceira competencia = competenciaFinanceiraRepository
+                    .findById(Objects.requireNonNull(request.getCompetenciaFinanceira()))
+                    .orElseThrow(() -> new NotFoundException(
+                            "Competência financeira não encontrada com ID: " + request.getCompetenciaFinanceira()));
+            entity.setCompetenciaFinanceira(competencia);
+        } else {
+            entity.setCompetenciaFinanceira(null);
         }
     }
 }

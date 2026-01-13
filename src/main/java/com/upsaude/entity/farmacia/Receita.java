@@ -45,6 +45,10 @@ public class Receita extends BaseEntity {
     private Consulta consulta;
 
     @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "atendimento_id")
+    private com.upsaude.entity.clinica.atendimento.Atendimento atendimento;
+
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "medico_id")
     private Medicos medico;
 
@@ -63,6 +67,12 @@ public class Receita extends BaseEntity {
     @Convert(converter = TipoControleMedicamentoEnumConverter.class)
     @Column(name = "tipo_receita")
     private TipoControleMedicamentoEnum tipoReceita;
+
+    @Column(name = "fhir_status", length = 20)
+    private String fhirStatus;
+
+    @Column(name = "intent", length = 20)
+    private String intent;
 
     @Column(name = "observacoes", columnDefinition = "TEXT")
     private String observacoes;

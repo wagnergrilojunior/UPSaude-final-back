@@ -24,5 +24,10 @@ public interface CidadesRepository extends JpaRepository<Cidades, UUID> {
 
     @Query("SELECT c FROM Cidades c WHERE c.nome = :nome AND c.estado.id = :estadoId")
     Optional<Cidades> findByNomeAndEstadoId(@Param("nome") String nome, @Param("estadoId") UUID estadoId);
-}
 
+    List<Cidades> findByEstadoSiglaOrderByNomeAsc(String sigla);
+
+    List<Cidades> findByNomeContainingIgnoreCase(String nome);
+
+    long countByCodigoFhirIsNotNull();
+}

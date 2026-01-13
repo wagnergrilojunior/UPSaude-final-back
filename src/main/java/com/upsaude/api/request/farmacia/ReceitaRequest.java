@@ -36,6 +36,9 @@ public class ReceitaRequest {
     @Schema(description = "ID da consulta (opcional)")
     private UUID consultaId;
 
+    @Schema(description = "ID do atendimento (opcional)")
+    private UUID atendimentoId;
+
     @Schema(description = "ID do médico prescritor (opcional)")
     private UUID medicoId;
 
@@ -56,6 +59,12 @@ public class ReceitaRequest {
 
     @Schema(description = "Observações gerais")
     private String observacoes;
+
+    @Schema(description = "Status FHIR (active, on-hold, cancelled, etc)")
+    private String fhirStatus;
+
+    @Schema(description = "Intenção FHIR (order, proposal, plan, etc)")
+    private String intent;
 
     @NotEmpty(message = "Receita deve ter pelo menos um item")
     @Valid

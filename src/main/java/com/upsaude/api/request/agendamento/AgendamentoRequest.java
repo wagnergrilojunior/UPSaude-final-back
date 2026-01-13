@@ -1,5 +1,6 @@
 package com.upsaude.api.request.agendamento;
 
+import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 import java.util.UUID;
 
@@ -67,4 +68,16 @@ public class AgendamentoRequest {
     private Boolean notificacaoEnviada24h;
     private Boolean notificacaoEnviada1h;
     private Boolean confirmacaoEnviada;
+
+    // Campos de Integração SUS / RNDS
+    private com.upsaude.enums.TipoAgendamentoEnum tipoAgendamento;
+    private String categoriaServico;
+    private com.upsaude.enums.TipoServicoAgendamentoEnum tipoServico;
+    private String motivosAgendamento;
+    private String periodoSolicitado;
+
+    // Campos financeiros
+    private UUID competenciaFinanceira;
+    private BigDecimal valorEstimadoTotal;
+    private String statusFinanceiro; // SEM_RESERVA | RESERVADO | CONSUMIDO | ESTORNADO | AJUSTADO
 }

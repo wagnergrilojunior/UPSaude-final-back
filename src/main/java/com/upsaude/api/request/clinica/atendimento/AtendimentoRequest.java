@@ -1,12 +1,5 @@
 package com.upsaude.api.request.clinica.atendimento;
 
-import com.upsaude.entity.paciente.Paciente;
-import com.upsaude.api.request.embeddable.AnamneseAtendimentoRequest;
-import com.upsaude.api.request.embeddable.ClassificacaoRiscoAtendimentoRequest;
-import com.upsaude.api.request.embeddable.DiagnosticoAtendimentoRequest;
-import com.upsaude.api.request.embeddable.InformacoesAtendimentoRequest;
-import com.upsaude.api.request.embeddable.ProcedimentosRealizadosAtendimentoRequest;
-
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.upsaude.api.request.embeddable.AnamneseAtendimentoRequest;
@@ -14,16 +7,18 @@ import com.upsaude.api.request.embeddable.ClassificacaoRiscoAtendimentoRequest;
 import com.upsaude.api.request.embeddable.DiagnosticoAtendimentoRequest;
 import com.upsaude.api.request.embeddable.InformacoesAtendimentoRequest;
 import com.upsaude.api.request.embeddable.ProcedimentosRealizadosAtendimentoRequest;
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
-import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import io.swagger.v3.oas.annotations.media.Schema;
+
+import java.util.List;
+import java.util.UUID;
 
 @Getter
 @Setter
@@ -65,4 +60,10 @@ public class AtendimentoRequest {
 
     @Size(max = 1000, message = "Observações internas deve ter no máximo 1000 caracteres")
     private String observacoesInternas;
+
+    // Campos financeiros
+    private UUID competenciaFinanceira;
+
+    @Valid
+    private List<AtendimentoProcedimentoRequest> procedimentos;
 }

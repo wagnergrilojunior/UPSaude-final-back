@@ -1,5 +1,6 @@
 package com.upsaude.api.request.embeddable;
 
+import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -15,6 +16,10 @@ import io.swagger.v3.oas.annotations.media.Schema;
 @Schema(description = "Dados de diagnostico atendimento")
 public class DiagnosticoAtendimentoRequest {
     private String diagnostico;
+    private UUID mainCid10Id;
+    private UUID mainCiap2Id;
+    private String mainClinicalStatus;
+    private String mainVerificationStatus;
     private String diagnosticosSecundarios;
     private String hipoteseDiagnostica;
     private String conduta;

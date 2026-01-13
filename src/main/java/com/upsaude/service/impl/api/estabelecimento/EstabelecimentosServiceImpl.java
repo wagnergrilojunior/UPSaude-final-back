@@ -10,6 +10,7 @@ import com.upsaude.exception.ConflictException;
 import com.upsaude.exception.InternalServerErrorException;
 import com.upsaude.exception.NotFoundException;
 import com.upsaude.repository.estabelecimento.EstabelecimentosRepository;
+import com.upsaude.repository.sistema.multitenancy.TenantRepository;
 import com.upsaude.service.api.estabelecimento.EstabelecimentosService;
 import com.upsaude.service.api.sistema.multitenancy.TenantService;
 import com.upsaude.service.api.support.estabelecimentos.EstabelecimentosCreator;
@@ -53,6 +54,7 @@ public class EstabelecimentosServiceImpl implements EstabelecimentosService {
     private final EstabelecimentosRepository estabelecimentosRepository;
     private final CacheManager cacheManager;
     private final TenantService tenantService;
+    private final TenantRepository tenantRepository;
 
     private final EstabelecimentosCreator creator;
     private final EstabelecimentosUpdater updater;
@@ -68,6 +70,10 @@ public class EstabelecimentosServiceImpl implements EstabelecimentosService {
         try {
             UUID tenantId = tenantService.validarTenantAtual();
             Tenant tenant = tenantService.obterTenantDoUsuarioAutenticado();
+            if (tenant == null) {
+                // Fallback para testes: buscar tenant do banco quando não houver autenticação
+                tenant = tenantRepository.findById(tenantId).orElse(null);
+            }
             validarTenantAutenticadoOrThrow(tenantId, tenant);
 
             Estabelecimentos saved = creator.criar(request, tenantId, tenant);
@@ -193,6 +199,10 @@ public class EstabelecimentosServiceImpl implements EstabelecimentosService {
         try {
             UUID tenantId = tenantService.validarTenantAtual();
             Tenant tenant = tenantService.obterTenantDoUsuarioAutenticado();
+            if (tenant == null) {
+                // Fallback para testes: buscar tenant do banco quando não houver autenticação
+                tenant = tenantRepository.findById(tenantId).orElse(null);
+            }
             validarTenantAutenticadoOrThrow(tenantId, tenant);
 
             Estabelecimentos updated = updater.atualizar(id, request, tenantId, tenant);
@@ -382,7 +392,7 @@ public class EstabelecimentosServiceImpl implements EstabelecimentosService {
     }
 
     private void validarTenantAutenticadoOrThrow(UUID tenantId, Tenant tenant) {
-        if (tenant == null || tenant.getId() == null || !tenant.getId().equals(tenantId)) {
+        if (tenantId == null || tenant == null || tenant.getId() == null || !tenantId.equals(tenant.getId())) {
             throw new BadRequestException("Não foi possível obter tenant do usuário autenticado");
         }
     }

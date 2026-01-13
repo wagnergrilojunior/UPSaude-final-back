@@ -1,6 +1,10 @@
 package com.upsaude.api.response.clinica.prontuario;
 
 import com.upsaude.api.response.referencia.cid.Cid10SubcategoriaResponse;
+import com.upsaude.dto.alergia.AlergenoResponse;
+import com.upsaude.dto.alergia.CategoriaAgenteAlergiaResponse;
+import com.upsaude.dto.alergia.CriticidadeAlergiaResponse;
+import com.upsaude.dto.alergia.ReacaoAdversaResponse;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.UUID;
@@ -26,5 +30,11 @@ public class AlergiaPacienteResponse {
     private String gravidade;
     private String observacoes;
     private Cid10SubcategoriaResponse diagnosticoRelacionado;
+    private AlergenoResponse alergeno;
+    private ReacaoAdversaResponse reacaoAdversaCatalogo;
+    private CriticidadeAlergiaResponse criticidade;
+    private CategoriaAgenteAlergiaResponse categoriaAgente;
+    private String clinicalStatus;
+    private String verificationStatus;
+    private String grauCerteza;
 }
-
