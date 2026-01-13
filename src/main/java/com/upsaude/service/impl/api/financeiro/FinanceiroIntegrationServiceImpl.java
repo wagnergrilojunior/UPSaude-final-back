@@ -197,8 +197,10 @@ public class FinanceiroIntegrationServiceImpl implements FinanceiroIntegrationSe
     @Override
     @Transactional
     public void fecharCompetencia(UUID competenciaFinanceiraId) {
-        // Implementação completa envolve geração do BPA e hash de integridade.
+        // Este método é mantido para compatibilidade, mas a implementação completa está em CompetenciaFechamentoService
+        // O controller deve chamar diretamente o CompetenciaFechamentoService
         if (competenciaFinanceiraId == null) throw new BadRequestException("competenciaFinanceiraId é obrigatório");
+        log.warn("fecharCompetencia chamado sem tenantId e usuarioId. Use CompetenciaFechamentoService diretamente.");
     }
 }
 

@@ -13,9 +13,11 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 
 import java.math.BigDecimal;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -54,8 +56,18 @@ public class SiaPaAnomaliaDetectionServiceImpl implements SiaPaAnomaliaDetection
         if (!StringUtils.hasText(competencia)) throw new BadRequestException("competencia é obrigatória (AAAAMM)");
         if (!StringUtils.hasText(uf)) throw new BadRequestException("uf é obrigatória (2 letras)");
 
-        return repository.findByCompetenciaAndUf(competencia, uf.trim().toUpperCase(), pageable)
-                .map(this::toResponse);
+        try {
+            return repository.findByCompetenciaAndUf(competencia, uf.trim().toUpperCase(), pageable)
+                    .map(this::toResponse);
+        } catch (org.springframework.dao.InvalidDataAccessResourceUsageException e) {
+            // Se a tabela não existir, retorna página vazia
+            log.debug("Tabela sia_pa_anomalia não encontrada, retornando lista vazia");
+            return new PageImpl<>(List.of(), pageable, 0);
+        } catch (org.hibernate.exception.SQLGrammarException e) {
+            // Se a tabela não existir (via Hibernate), retorna página vazia
+            log.debug("Tabela sia_pa_anomalia não encontrada, retornando lista vazia");
+            return new PageImpl<>(List.of(), pageable, 0);
+        }
     }
 
     @Override

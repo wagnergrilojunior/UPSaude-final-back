@@ -8,6 +8,7 @@ import com.upsaude.service.api.sia.SiaPaKpiService;
 import com.upsaude.service.api.sistema.multitenancy.TenantService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DataAccessResourceFailureException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
@@ -29,6 +30,7 @@ public class SiaPaKpiServiceImpl implements SiaPaKpiService {
         String ufEfetiva = resolverUf(uf);
         validarParametrosObrigatorios(competencia, ufEfetiva);
 
+        try {
         Map<String, Object> row = jdbcTemplate.queryForMap("""
                 SELECT
                     COUNT(*) AS total_registros,
@@ -44,6 +46,30 @@ public class SiaPaKpiServiceImpl implements SiaPaKpiService {
                 """, competencia, ufEfetiva);
 
         return montarResposta(competencia, ufEfetiva, row, true);
+        } catch (DataAccessResourceFailureException e) {
+            log.error("Erro de conexão ao executar query KPI geral - competencia: {}, uf: {}", competencia, ufEfetiva, e);
+            
+            // Verifica se a causa é um PSQLException com erro de I/O
+            Throwable cause = e.getCause();
+            if (cause instanceof org.postgresql.util.PSQLException) {
+                org.postgresql.util.PSQLException psqlEx = (org.postgresql.util.PSQLException) cause;
+                if (psqlEx.getMessage() != null && psqlEx.getMessage().contains("I/O error")) {
+                    throw new DataAccessResourceFailureException(
+                            String.format("Timeout ou erro de conexão ao consultar dados do SIA-PA. A query pode estar demorando muito para processar. Competência: %s, UF: %s. " +
+                                    "Tente novamente em alguns instantes ou verifique se há muitos registros para esta competência.", 
+                                    competencia, ufEfetiva), e);
+                }
+            }
+            
+            throw new DataAccessResourceFailureException(
+                    String.format("Erro ao consultar dados do SIA-PA. Verifique a conexão com o banco de dados. Competência: %s, UF: %s", 
+                            competencia, ufEfetiva), e);
+        } catch (Exception e) {
+            log.error("Erro inesperado ao executar query KPI geral - competencia: {}, uf: {}", competencia, ufEfetiva, e);
+            throw new RuntimeException(
+                    String.format("Erro inesperado ao consultar dados do SIA-PA. Competência: %s, UF: %s", 
+                            competencia, ufEfetiva), e);
+        }
     }
 
     @Override
@@ -54,6 +80,7 @@ public class SiaPaKpiServiceImpl implements SiaPaKpiService {
             throw new BadRequestException("codigoCnes é obrigatório");
         }
 
+        try {
         Map<String, Object> row = jdbcTemplate.queryForMap("""
                 SELECT
                     COUNT(*) AS total_registros,
@@ -69,6 +96,30 @@ public class SiaPaKpiServiceImpl implements SiaPaKpiService {
                 """, competencia, ufEfetiva, codigoCnes);
 
         return montarResposta(competencia, ufEfetiva, row, false);
+        } catch (DataAccessResourceFailureException e) {
+            log.error("Erro de conexão ao executar query KPI por estabelecimento - competencia: {}, uf: {}, cnes: {}", 
+                    competencia, ufEfetiva, codigoCnes, e);
+            
+            Throwable cause = e.getCause();
+            if (cause instanceof org.postgresql.util.PSQLException) {
+                org.postgresql.util.PSQLException psqlEx = (org.postgresql.util.PSQLException) cause;
+                if (psqlEx.getMessage() != null && psqlEx.getMessage().contains("I/O error")) {
+                    throw new DataAccessResourceFailureException(
+                            String.format("Timeout ou erro de conexão ao consultar dados do SIA-PA. Competência: %s, UF: %s, CNES: %s", 
+                                    competencia, ufEfetiva, codigoCnes), e);
+                }
+            }
+            
+            throw new DataAccessResourceFailureException(
+                    String.format("Erro ao consultar dados do SIA-PA. Competência: %s, UF: %s, CNES: %s", 
+                            competencia, ufEfetiva, codigoCnes), e);
+        } catch (Exception e) {
+            log.error("Erro inesperado ao executar query KPI por estabelecimento - competencia: {}, uf: {}, cnes: {}", 
+                    competencia, ufEfetiva, codigoCnes, e);
+            throw new RuntimeException(
+                    String.format("Erro inesperado ao consultar dados do SIA-PA. Competência: %s, UF: %s, CNES: %s", 
+                            competencia, ufEfetiva, codigoCnes), e);
+        }
     }
 
     @Override
@@ -79,6 +130,7 @@ public class SiaPaKpiServiceImpl implements SiaPaKpiService {
             throw new BadRequestException("procedimentoCodigo é obrigatório");
         }
 
+        try {
         Map<String, Object> row = jdbcTemplate.queryForMap("""
                 SELECT
                     COUNT(*) AS total_registros,
@@ -94,6 +146,30 @@ public class SiaPaKpiServiceImpl implements SiaPaKpiService {
                 """, competencia, ufEfetiva, procedimentoCodigo);
 
         return montarResposta(competencia, ufEfetiva, row, false);
+        } catch (DataAccessResourceFailureException e) {
+            log.error("Erro de conexão ao executar query KPI por procedimento - competencia: {}, uf: {}, procedimento: {}", 
+                    competencia, ufEfetiva, procedimentoCodigo, e);
+            
+            Throwable cause = e.getCause();
+            if (cause instanceof org.postgresql.util.PSQLException) {
+                org.postgresql.util.PSQLException psqlEx = (org.postgresql.util.PSQLException) cause;
+                if (psqlEx.getMessage() != null && psqlEx.getMessage().contains("I/O error")) {
+                    throw new DataAccessResourceFailureException(
+                            String.format("Timeout ou erro de conexão ao consultar dados do SIA-PA. Competência: %s, UF: %s, Procedimento: %s", 
+                                    competencia, ufEfetiva, procedimentoCodigo), e);
+                }
+            }
+            
+            throw new DataAccessResourceFailureException(
+                    String.format("Erro ao consultar dados do SIA-PA. Competência: %s, UF: %s, Procedimento: %s", 
+                            competencia, ufEfetiva, procedimentoCodigo), e);
+        } catch (Exception e) {
+            log.error("Erro inesperado ao executar query KPI por procedimento - competencia: {}, uf: {}, procedimento: {}", 
+                    competencia, ufEfetiva, procedimentoCodigo, e);
+            throw new RuntimeException(
+                    String.format("Erro inesperado ao consultar dados do SIA-PA. Competência: %s, UF: %s, Procedimento: %s", 
+                            competencia, ufEfetiva, procedimentoCodigo), e);
+        }
     }
 
     private void validarParametrosObrigatorios(String competencia, String uf) {
@@ -194,6 +270,7 @@ public class SiaPaKpiServiceImpl implements SiaPaKpiService {
                     // SIA usa frequentemente código de município com 6 dígitos; derivamos a versão 6.
                     String municipioSia6 = municipioIbgeLocal.length() >= 6 ? municipioIbgeLocal.substring(0, 6) : municipioIbgeLocal;
 
+                    try {
                     Map<String, Object> rowMun = jdbcTemplate.queryForMap("""
                             SELECT COALESCE(SUM(COALESCE(s.quantidade_produzida, 0)), 0) AS quantidade_produzida_total
                             FROM public.sia_pa s
@@ -203,6 +280,11 @@ public class SiaPaKpiServiceImpl implements SiaPaKpiService {
                     long qtdMun = toLong(rowMun.get("quantidade_produzida_total"));
                     producaoPerCapita = new BigDecimal(qtdMun)
                             .divide(new BigDecimal(populacao), 6, RoundingMode.HALF_UP);
+                    } catch (DataAccessResourceFailureException e) {
+                        log.debug("Erro de conexão ao calcular produção per capita - competencia: {}, uf: {}, municipio: {} - {}", 
+                                competencia, uf, municipioSia6, e.getMessage());
+                        // Continua sem produção per capita em caso de erro de conexão
+                    }
                 }
             } catch (Exception e) {
                 log.debug("Não foi possível calcular produção per capita: {}", e.getMessage());

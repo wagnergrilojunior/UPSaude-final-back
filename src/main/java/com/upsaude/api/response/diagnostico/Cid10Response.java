@@ -1,6 +1,5 @@
 package com.upsaude.api.response.diagnostico;
 
-import java.time.OffsetDateTime;
 import java.util.UUID;
 
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -19,5 +18,5 @@ public class Cid10Response {
     private String subcat;
     private String descricao;
     private Boolean ativo;
-    private OffsetDateTime dataSincronizacao;
+
 }
