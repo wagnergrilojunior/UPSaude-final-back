@@ -10,6 +10,7 @@ Esta documentação cobre o **módulo Financeiro** com foco em:
 ## Leitura recomendada (ordem)
 
 - **1) Integração Front**: [INTEGRACAO_FRONT.md](./INTEGRACAO_FRONT.md)
+- **1.1) Como o Financeiro roda no Assistencial (Agendamento/Atendimento/Consulta)**: [FINANCEIRO_NO_ASSISTENCIAL.md](./FINANCEIRO_NO_ASSISTENCIAL.md)
 - **2) Fluxos e Sequências**: [FLUXOS_E_SEQUENCIAS.md](./FLUXOS_E_SEQUENCIAS.md)
 - **3) Regras de Negócio**: [NEGOCIO.md](./NEGOCIO.md)
 - **4) Técnico (arquitetura + dados)**: [TECNICO.md](./TECNICO.md) e [DADOS_E_STATUS.md](./DADOS_E_STATUS.md)
