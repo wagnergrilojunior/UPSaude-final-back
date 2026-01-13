@@ -30,10 +30,10 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 @RestController
-@RequestMapping("/api/fhir/dados-referencia")
+@RequestMapping("/fhir/dados-referencia")
 @RequiredArgsConstructor
 @Slf4j
-@Tag(name = "FHIR Dados de Referência", description = "Endpoints para dados demográficos e geográficos FHIR")
+@Tag(name = "Dados de Referência", description = "Dados demográficos e geográficos")
 public class FhirDadosReferenciaController {
 
     private final GeografiaFhirSyncService geografiaSyncService;
@@ -43,21 +43,21 @@ public class FhirDadosReferenciaController {
     // ==================== SINCRONIZAÇÃO ====================
 
     @PostMapping("/geografia/sincronizar/estados")
-    @Operation(summary = "Sincronizar estados com FHIR BRDivisaoGeografica")
+    @Operation(summary = "[FHIR] Sincronizar estados com FHIR BRDivisaoGeografica")
     public ResponseEntity<Map<String, Object>> sincronizarEstados() {
         FhirSyncLog result = geografiaSyncService.sincronizarEstados();
         return ResponseEntity.ok(buildSyncResponse(result));
     }
 
     @PostMapping("/geografia/sincronizar/municipios")
-    @Operation(summary = "Sincronizar municípios com FHIR BRDivisaoGeografica")
+    @Operation(summary = "[FHIR] Sincronizar municípios com FHIR BRDivisaoGeografica")
     public ResponseEntity<Map<String, Object>> sincronizarMunicipios() {
         FhirSyncLog result = geografiaSyncService.sincronizarMunicipios();
         return ResponseEntity.ok(buildSyncResponse(result));
     }
 
     @PostMapping("/geografia/sincronizar/todos")
-    @Operation(summary = "Sincronizar todos os dados geográficos com FHIR")
+    @Operation(summary = "[FHIR] Sincronizar todos os dados geográficos com FHIR", tags = "FHIR Dados de Referência")
     public ResponseEntity<Map<String, Object>> sincronizarGeografiaCompleta() {
         List<FhirSyncLog> results = geografiaSyncService.sincronizarTodos();
 
@@ -72,7 +72,7 @@ public class FhirDadosReferenciaController {
     // ==================== CONSULTA DIRETA FHIR (LIVE) ====================
 
     @GetMapping("/geografia/externo/divisoes")
-    @Operation(summary = "Consultar divisões geográficas diretamente no FHIR (Live)")
+    @Operation(summary = "Consultar divisões geográficas diretamente no FHIR (Live)", tags = "FHIR Dados de Referência")
     public ResponseEntity<List<ConceptDTO>> consultarDivisoesExternas() {
         return ResponseEntity.ok(geografiaSyncService.consultarDivisoesGeograficasExternas());
     }
@@ -105,15 +105,17 @@ public class FhirDadosReferenciaController {
         } else {
             municipios = cidadesRepository.findAll().stream().limit(limit).collect(Collectors.toList());
         }
-        
+
         if (municipios.isEmpty()) {
             Map<String, Object> response = new HashMap<>();
-            response.put("message", "Nenhum município encontrado. É necessário sincronizar os municípios do IBGE primeiro.");
-            response.put("sugestao", "Execute POST /v1/integracoes/ibge/sincronizar/municipios para popular a base de dados");
+            response.put("message",
+                    "Nenhum município encontrado. É necessário sincronizar os municípios do IBGE primeiro.");
+            response.put("sugestao",
+                    "Execute POST /v1/integracoes/ibge/sincronizar/municipios para popular a base de dados");
             response.put("total", 0);
             return ResponseEntity.ok(response);
         }
-        
+
         return ResponseEntity.ok(municipios);
     }
 

@@ -14,7 +14,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/fhir/diagnostico")
+@RequestMapping("/fhir/diagnostico")
 @RequiredArgsConstructor
 @Tag(name = "FHIR Diagnósticos", description = "Endpoints para sincronização de CID-10 e CIAP-2 via FHIR")
 public class FhirDiagnosticoController {
