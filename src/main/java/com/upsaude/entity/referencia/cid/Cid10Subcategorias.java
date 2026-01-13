@@ -1,7 +1,6 @@
 package com.upsaude.entity.referencia.cid;
 
 import com.upsaude.entity.BaseEntityWithoutTenant;
-import java.time.OffsetDateTime;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -64,9 +63,6 @@ public class Cid10Subcategorias extends BaseEntityWithoutTenant {
 
     @Column(name = "excluidos", columnDefinition = "TEXT")
     private String excluidos;
-
-    @Column(name = "data_sincronizacao")
-    private OffsetDateTime dataSincronizacao;
 
     @PrePersist
     @PreUpdate
