@@ -53,9 +53,14 @@ public class SiaPaDashboardServiceImpl implements SiaPaDashboardService {
         var topCid = relatorioService.gerarTopCid(ufEfetiva, competencia, 10);
         var tendencia = analyticsService.calcularTendenciaTemporal(ufEfetiva, inicio, fim);
 
-        List<SiaPaAnomaliaResponse> anomalias = anomaliaService
-                .listar(competencia, ufEfetiva, PageRequest.of(0, 20))
-                .getContent();
+        List<SiaPaAnomaliaResponse> anomalias = List.of();
+        try {
+            anomalias = anomaliaService
+                    .listar(competencia, ufEfetiva, PageRequest.of(0, 20))
+                    .getContent();
+        } catch (Exception e) {
+            log.debug("Dashboard: anomalias indisponíveis (tabela pode não existir): {}", e.getMessage());
+        }
 
         SiaPaFinanceiroIntegracaoResponse conciliacao = null;
         if (Boolean.TRUE.equals(incluirFinanceiro)) {

@@ -1,9 +1,15 @@
 package com.upsaude.controller.api.financeiro;
 
+import com.upsaude.api.request.financeiro.CompetenciaFechamentoRequest;
 import com.upsaude.api.request.financeiro.FinanceiroOperacaoMotivoRequest;
+import com.upsaude.api.response.financeiro.CompetenciaFechamentoResponse;
 import com.upsaude.exception.BadRequestException;
 import com.upsaude.exception.NotFoundException;
+import com.upsaude.service.api.financeiro.CompetenciaFechamentoService;
 import com.upsaude.service.api.financeiro.FinanceiroIntegrationService;
+import com.upsaude.service.api.sistema.multitenancy.TenantService;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -29,6 +35,8 @@ import java.util.UUID;
 public class FinanceiroOperacoesController {
 
     private final FinanceiroIntegrationService financeiroIntegrationService;
+    private final CompetenciaFechamentoService competenciaFechamentoService;
+    private final TenantService tenantService;
 
     @PostMapping("/agendamentos/{agendamentoId}/reservar")
     @Operation(
@@ -150,19 +158,28 @@ public class FinanceiroOperacoesController {
             description = "Dispara o fechamento da competência financeira (base para BPA e travas de integridade)."
     )
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "204", description = "Competência fechada com sucesso"),
+            @ApiResponse(responseCode = "200", description = "Competência fechada com sucesso"),
             @ApiResponse(responseCode = "400", description = "Requisição inválida"),
             @ApiResponse(responseCode = "404", description = "Competência não encontrada"),
             @ApiResponse(responseCode = "403", description = "Acesso negado")
     })
-    public ResponseEntity<Void> fecharCompetencia(
+    public ResponseEntity<CompetenciaFechamentoResponse> fecharCompetencia(
             @Parameter(description = "ID da competência financeira", required = true)
-            @PathVariable UUID competenciaFinanceiraId
+            @PathVariable UUID competenciaFinanceiraId,
+            @Valid @RequestBody(required = false) CompetenciaFechamentoRequest request
     ) {
         log.debug("REQUEST POST /v1/financeiro/operacoes/competencias/{}/fechar", competenciaFinanceiraId);
         try {
-            financeiroIntegrationService.fecharCompetencia(competenciaFinanceiraId);
-            return ResponseEntity.noContent().build();
+            UUID tenantId = tenantService.validarTenantAtual();
+            UUID usuarioId = obterUserIdAutenticado();
+            
+            if (request == null) {
+                request = CompetenciaFechamentoRequest.builder().build();
+            }
+            
+            CompetenciaFechamentoResponse response = competenciaFechamentoService.fecharCompetencia(
+                    competenciaFinanceiraId, tenantId, usuarioId, request);
+            return ResponseEntity.ok(response);
         } catch (BadRequestException | NotFoundException ex) {
             log.warn("Falha ao fechar competência financeira — competenciaFinanceiraId: {}, mensagem: {}", competenciaFinanceiraId, ex.getMessage());
             throw ex;
@@ -170,6 +187,26 @@ public class FinanceiroOperacoesController {
             log.error("Erro inesperado ao fechar competência financeira — competenciaFinanceiraId: {}", competenciaFinanceiraId, ex);
             throw ex;
         }
+    }
+    
+    private UUID obterUserIdAutenticado() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || !authentication.isAuthenticated()) {
+            return null;
+        }
+        Object details = authentication.getDetails();
+        if (details instanceof com.upsaude.integration.supabase.SupabaseAuthResponse.User) {
+            return ((com.upsaude.integration.supabase.SupabaseAuthResponse.User) details).getId();
+        }
+        Object principal = authentication.getPrincipal();
+        if (principal instanceof String) {
+            try {
+                return UUID.fromString((String) principal);
+            } catch (IllegalArgumentException e) {
+                return null;
+            }
+        }
+        return null;
     }
 }
 
