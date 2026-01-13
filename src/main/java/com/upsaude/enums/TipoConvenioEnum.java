@@ -3,36 +3,28 @@ package com.upsaude.enums;
 import java.util.Arrays;
 import java.util.Locale;
 
+/**
+ * Tipo de Convênio/Modalidade Financeira conforme FHIR BR (TipoConvenio).
+ * Descrições em português para consumo pelo frontend.
+ */
 public enum TipoConvenioEnum {
-    PLANO_SAUDE(1, "Plano de Saúde"),
-    OPERADORA_PLANO_SAUDE(2, "Operadora de Plano de Saúde"),
-    SEGURADORA(3, "Seguradora"),
-    AUTOGESTAO(4, "Autogestão"),
-    MEDICINA_GRUPO(5, "Medicina de Grupo"),
-    COOPERATIVA_MEDICA(6, "Cooperativa Médica"),
-    PLANO_ADMINISTRADOR(7, "Plano Administrador"),
-    PLANO_DENTAL(8, "Plano Dental"),
-    PLANO_ODONTO(9, "Plano Odontológico"),
-    CONVENIO_MEDICO(10, "Convênio Médico"),
-    CONVENIO_ODONTOLOGICO(11, "Convênio Odontológico"),
-    CONVENIO_FARMACIA(12, "Convênio Farmácia"),
-    CONVENIO_LABORATORIO(13, "Convênio Laboratório"),
-    CONVENIO_EXAMES(14, "Convênio Exames"),
-    CONVENIO_FISIOTERAPIA(15, "Convênio Fisioterapia"),
-    CONVENIO_PSICOLOGIA(16, "Convênio Psicologia"),
-    CONVENIO_NUTRICIONISTA(17, "Convênio Nutricionista"),
-    CONVENIO_FONOAUDIOLOGIA(18, "Convênio Fonoaudiologia"),
-    CONVENIO_TERAPIA_OCUPACIONAL(19, "Convênio Terapia Ocupacional"),
-    SUS(20, "SUS - Sistema Único de Saúde"),
-    PARTICULAR(21, "Particular"),
-    OUTRO(99, "Outro");
+    SUS(1, "Sistema Único de Saúde", "SUS", "http://www.saude.gov.br/fhir/r4/CodeSystem/TipoConvenio"),
+    PARTICULAR(2, "Particular", "PARTICULAR", "http://www.saude.gov.br/fhir/r4/CodeSystem/TipoConvenio"),
+    PLANO_SAUDE(3, "Plano de Saúde", "PLANO", "http://www.saude.gov.br/fhir/r4/CodeSystem/TipoConvenio"),
+    CONVENIO(4, "Convênio", "CONVENIO", "http://www.saude.gov.br/fhir/r4/CodeSystem/TipoConvenio"),
+    CORTESIA(5, "Cortesia", "CORTESIA", "http://www.saude.gov.br/fhir/r4/CodeSystem/TipoConvenio"),
+    GRATUIDADE(6, "Gratuidade", "GRATUIDADE", "http://www.saude.gov.br/fhir/r4/CodeSystem/TipoConvenio");
 
     private final Integer codigo;
     private final String descricao;
+    private final String codigoFhir;
+    private final String systemFhir;
 
-    TipoConvenioEnum(Integer codigo, String descricao) {
+    TipoConvenioEnum(Integer codigo, String descricao, String codigoFhir, String systemFhir) {
         this.codigo = codigo;
         this.descricao = descricao;
+        this.codigoFhir = codigoFhir;
+        this.systemFhir = systemFhir;
     }
 
     public Integer getCodigo() {
@@ -43,20 +35,31 @@ public enum TipoConvenioEnum {
         return descricao;
     }
 
+    public String getCodigoFhir() {
+        return codigoFhir;
+    }
+
+    public String getSystemFhir() {
+        return systemFhir;
+    }
+
     public static TipoConvenioEnum fromCodigo(Integer codigo) {
-        if (codigo == null) return null;
-        return Arrays.stream(values())
-                .filter(v -> v.codigo.equals(codigo))
-                .findFirst()
-                .orElse(null);
+        if (codigo == null)
+            return null;
+        return Arrays.stream(values()).filter(v -> v.codigo.equals(codigo)).findFirst().orElse(null);
+    }
+
+    public static TipoConvenioEnum fromCodigoFhir(String codigoFhir) {
+        if (codigoFhir == null)
+            return null;
+        return Arrays.stream(values()).filter(v -> v.codigoFhir.equalsIgnoreCase(codigoFhir)).findFirst().orElse(null);
     }
 
     public static TipoConvenioEnum fromDescricao(String descricao) {
-        if (descricao == null) return null;
+        if (descricao == null)
+            return null;
         String d = descricao.trim().toLowerCase(Locale.ROOT);
-        return Arrays.stream(values())
-                .filter(v -> v.descricao.toLowerCase(Locale.ROOT).equals(d))
-                .findFirst()
+        return Arrays.stream(values()).filter(v -> v.descricao.toLowerCase(Locale.ROOT).equals(d)).findFirst()
                 .orElse(null);
     }
 }

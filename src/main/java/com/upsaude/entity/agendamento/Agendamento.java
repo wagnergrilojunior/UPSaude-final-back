@@ -20,6 +20,8 @@ import com.upsaude.util.converter.StatusAgendamentoEnumConverter;
 import jakarta.persistence.Column;
 import jakarta.persistence.Convert;
 import jakarta.persistence.Entity;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
@@ -175,6 +177,29 @@ public class Agendamento extends BaseEntity {
 
     @Column(name = "confirmacao_enviada")
     private Boolean confirmacaoEnviada;
+
+    // =================================================================================
+    // CAMPOS DE INTEGRAÇÃO SUS / RNDS (FHIR APPOINTMENT)
+    // =================================================================================
+
+    @Convert(converter = com.upsaude.util.converter.TipoAgendamentoEnumConverter.class)
+    @Column(name = "tipo_agendamento", length = 50)
+    private com.upsaude.enums.TipoAgendamentoEnum tipoAgendamento;
+
+    @Column(name = "categoria_servico", length = 50)
+    private String categoriaServico;
+
+    @Convert(converter = com.upsaude.util.converter.TipoServicoAgendamentoEnumConverter.class)
+    @Column(name = "tipo_servico", length = 50)
+    private com.upsaude.enums.TipoServicoAgendamentoEnum tipoServico;
+
+    @Column(name = "motivos_agendamento", columnDefinition = "jsonb")
+    @JdbcTypeCode(SqlTypes.JSON)
+    private String motivosAgendamento;
+
+    @Column(name = "periodo_solicitado", columnDefinition = "jsonb")
+    @JdbcTypeCode(SqlTypes.JSON)
+    private String periodoSolicitado;
 
     @PrePersist
     @PreUpdate

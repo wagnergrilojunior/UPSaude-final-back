@@ -14,6 +14,7 @@ import com.upsaude.mapper.embeddable.DiagnosticoAtendimentoMapper;
 import com.upsaude.mapper.embeddable.InformacoesAtendimentoMapper;
 import com.upsaude.mapper.embeddable.ProcedimentosRealizadosAtendimentoMapper;
 import com.upsaude.repository.clinica.atendimento.AtendimentoRepository;
+import com.upsaude.service.sistema.integracao.IntegracaoEventoGenerator;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -34,6 +35,7 @@ public class AtendimentoUpdater {
     private final DiagnosticoAtendimentoMapper diagnosticoAtendimentoMapper;
     private final ProcedimentosRealizadosAtendimentoMapper procedimentosRealizadosAtendimentoMapper;
     private final ClassificacaoRiscoAtendimentoMapper classificacaoRiscoAtendimentoMapper;
+    private final IntegracaoEventoGenerator eventoGenerator;
 
     public Atendimento atualizar(UUID id, AtendimentoRequest request, UUID tenantId, Tenant tenant) {
         validationService.validarId(id);
@@ -41,11 +43,19 @@ public class AtendimentoUpdater {
 
         Atendimento entity = tenantEnforcer.validarAcesso(id, tenantId);
 
+        if (request.getInformacoes() != null && request.getInformacoes().getStatusAtendimento() != null) {
+            com.upsaude.enums.StatusAtendimentoEnum statusAtual = entity.getInformacoes() != null ? entity.getInformacoes().getStatusAtendimento() : null;
+            if (statusAtual != null && !statusAtual.equals(request.getInformacoes().getStatusAtendimento())) {
+                domainService.validarTransicaoStatus(entity, request.getInformacoes().getStatusAtendimento());
+            }
+        }
+
         atualizarCampos(entity, request);
         domainService.aplicarDefaults(entity);
         relacionamentosHandler.resolver(entity, request, tenantId, tenant);
 
         Atendimento saved = repository.save(Objects.requireNonNull(entity));
+        eventoGenerator.gerarEventosParaAtendimento(saved);
         log.info("Atendimento atualizado com sucesso. ID: {}, tenant: {}", saved.getId(), tenantId);
         return saved;
     }

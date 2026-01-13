@@ -19,14 +19,18 @@ import com.upsaude.api.request.clinica.atendimento.AtendimentoTriagemRequest;
 import com.upsaude.api.response.clinica.atendimento.AtendimentoResponse;
 import com.upsaude.cache.CacheKeyUtil;
 import com.upsaude.entity.clinica.atendimento.Atendimento;
+import com.upsaude.entity.clinica.atendimento.SinalVital;
 import com.upsaude.entity.clinica.prontuario.Prontuario;
 import com.upsaude.entity.sistema.multitenancy.Tenant;
 import com.upsaude.enums.StatusAtendimentoEnum;
 import com.upsaude.enums.TipoAtendimentoEnum;
+import com.upsaude.mapper.clinica.atendimento.SinalVitalMapper;
 import com.upsaude.mapper.embeddable.AnamneseAtendimentoMapper;
 import com.upsaude.mapper.embeddable.ClassificacaoRiscoAtendimentoMapper;
+import com.upsaude.mapper.embeddable.DiagnosticoAtendimentoMapper;
 import com.upsaude.exception.BadRequestException;
 import com.upsaude.repository.clinica.atendimento.AtendimentoRepository;
+import com.upsaude.repository.clinica.atendimento.SinalVitalRepository;
 import com.upsaude.repository.sistema.multitenancy.TenantRepository;
 import com.upsaude.service.api.clinica.atendimento.AtendimentoService;
 import com.upsaude.service.api.sistema.multitenancy.TenantService;
@@ -54,6 +58,9 @@ public class AtendimentoServiceImpl implements AtendimentoService {
     private final CacheManager cacheManager;
     private final AnamneseAtendimentoMapper anamneseAtendimentoMapper;
     private final ClassificacaoRiscoAtendimentoMapper classificacaoRiscoAtendimentoMapper;
+    private final DiagnosticoAtendimentoMapper diagnosticoAtendimentoMapper;
+    private final SinalVitalMapper sinalVitalMapper;
+    private final SinalVitalRepository sinalVitalRepository;
 
     private final AtendimentoValidationService validationService;
     private final AtendimentoTenantEnforcer tenantEnforcer;
@@ -82,7 +89,8 @@ public class AtendimentoServiceImpl implements AtendimentoService {
         atendimentoRequest.setProfissional(request.getProfissionalId());
         atendimentoRequest.setEquipeSaude(request.getEquipeSaudeId());
         atendimentoRequest.setConvenio(request.getConvenioId());
-        if (request.getTipoAtendimento() != null || request.getMotivo() != null || request.getLocalAtendimento() != null) {
+        if (request.getTipoAtendimento() != null || request.getMotivo() != null
+                || request.getLocalAtendimento() != null) {
             com.upsaude.api.request.embeddable.InformacoesAtendimentoRequest info = new com.upsaude.api.request.embeddable.InformacoesAtendimentoRequest();
             if (request.getTipoAtendimento() != null) {
                 try {
@@ -137,7 +145,8 @@ public class AtendimentoServiceImpl implements AtendimentoService {
             throw new BadRequestException("ID do paciente é obrigatório");
         }
         UUID tenantId = tenantService.validarTenantAtual();
-        Page<Atendimento> page = atendimentoRepository.findByPacienteIdAndTenantIdOrderByInformacoesDataHoraDesc(pacienteId, tenantId, pageable);
+        Page<Atendimento> page = atendimentoRepository
+                .findByPacienteIdAndTenantIdOrderByInformacoesDataHoraDesc(pacienteId, tenantId, pageable);
         return page.map(responseBuilder::build);
     }
 
@@ -149,7 +158,8 @@ public class AtendimentoServiceImpl implements AtendimentoService {
             throw new BadRequestException("ID do profissional é obrigatório");
         }
         UUID tenantId = tenantService.validarTenantAtual();
-        Page<Atendimento> page = atendimentoRepository.findByProfissionalIdAndTenantIdOrderByInformacoesDataHoraDesc(profissionalId, tenantId, pageable);
+        Page<Atendimento> page = atendimentoRepository
+                .findByProfissionalIdAndTenantIdOrderByInformacoesDataHoraDesc(profissionalId, tenantId, pageable);
         return page.map(responseBuilder::build);
     }
 
@@ -161,7 +171,8 @@ public class AtendimentoServiceImpl implements AtendimentoService {
             throw new BadRequestException("ID do estabelecimento é obrigatório");
         }
         UUID tenantId = tenantService.validarTenantAtual();
-        Page<Atendimento> page = atendimentoRepository.findByEstabelecimentoIdAndTenantIdOrderByInformacoesDataHoraDesc(estabelecimentoId, tenantId, pageable);
+        Page<Atendimento> page = atendimentoRepository.findByEstabelecimentoIdAndTenantIdOrderByInformacoesDataHoraDesc(
+                estabelecimentoId, tenantId, pageable);
         return page.map(responseBuilder::build);
     }
 
@@ -241,7 +252,7 @@ public class AtendimentoServiceImpl implements AtendimentoService {
         }
 
         if (entity.getInformacoes().getStatusAtendimento() != StatusAtendimentoEnum.AGENDADO &&
-            entity.getInformacoes().getStatusAtendimento() != StatusAtendimentoEnum.EM_ESPERA) {
+                entity.getInformacoes().getStatusAtendimento() != StatusAtendimentoEnum.EM_ESPERA) {
             throw new BadRequestException("Atendimento só pode ser iniciado se estiver agendado ou em espera");
         }
 
@@ -267,13 +278,38 @@ public class AtendimentoServiceImpl implements AtendimentoService {
                 entity.setAnamnese(new com.upsaude.entity.embeddable.AnamneseAtendimento());
             }
             anamneseAtendimentoMapper.updateFromRequest(request.getAnamnese(), entity.getAnamnese());
+
+            // Processar Sinais Vitais estruturados
+            if (request.getAnamnese().getSinalVitalRecord() != null) {
+                SinalVital sinalVital = entity.getAnamnese().getSinalVitalRecord();
+                if (sinalVital == null) {
+                    sinalVital = sinalVitalMapper.toEntity(request.getAnamnese().getSinalVitalRecord());
+                    sinalVital.setPaciente(entity.getPaciente());
+                    sinalVital.setAtendimento(entity);
+                    sinalVital.setTenant(entity.getTenant());
+                    sinalVital.setEstabelecimento(entity.getEstabelecimento());
+                    sinalVital.setDataMedicao(java.time.OffsetDateTime.now());
+                } else {
+                    sinalVitalMapper.updateEntityFromRequest(request.getAnamnese().getSinalVitalRecord(), sinalVital);
+                }
+                sinalVital = sinalVitalRepository.save(sinalVital);
+                entity.getAnamnese().setSinalVitalRecord(sinalVital);
+            }
         }
 
         if (request.getClassificacaoRisco() != null) {
             if (entity.getClassificacaoRisco() == null) {
                 entity.setClassificacaoRisco(new com.upsaude.entity.embeddable.ClassificacaoRiscoAtendimento());
             }
-            classificacaoRiscoAtendimentoMapper.updateFromRequest(request.getClassificacaoRisco(), entity.getClassificacaoRisco());
+            classificacaoRiscoAtendimentoMapper.updateFromRequest(request.getClassificacaoRisco(),
+                    entity.getClassificacaoRisco());
+        }
+
+        if (request.getDiagnostico() != null) {
+            if (entity.getDiagnostico() == null) {
+                entity.setDiagnostico(new com.upsaude.entity.embeddable.DiagnosticoAtendimento());
+            }
+            diagnosticoAtendimentoMapper.updateFromRequest(request.getDiagnostico(), entity.getDiagnostico());
         }
 
         Atendimento saved = atendimentoRepository.save(entity);
@@ -297,7 +333,8 @@ public class AtendimentoServiceImpl implements AtendimentoService {
         if (entity.getClassificacaoRisco() == null) {
             entity.setClassificacaoRisco(new com.upsaude.entity.embeddable.ClassificacaoRiscoAtendimento());
         }
-        classificacaoRiscoAtendimentoMapper.updateFromRequest(request.getClassificacaoRisco(), entity.getClassificacaoRisco());
+        classificacaoRiscoAtendimentoMapper.updateFromRequest(request.getClassificacaoRisco(),
+                entity.getClassificacaoRisco());
 
         Atendimento saved = atendimentoRepository.save(entity);
         log.info("Classificação de risco do atendimento atualizada com sucesso. ID: {}", id);
@@ -319,7 +356,7 @@ public class AtendimentoServiceImpl implements AtendimentoService {
         }
 
         if (entity.getInformacoes().getStatusAtendimento() == StatusAtendimentoEnum.CONCLUIDO ||
-            entity.getInformacoes().getStatusAtendimento() == StatusAtendimentoEnum.CANCELADO) {
+                entity.getInformacoes().getStatusAtendimento() == StatusAtendimentoEnum.CANCELADO) {
             throw new BadRequestException("Atendimento já está encerrado ou cancelado");
         }
 
@@ -332,9 +369,8 @@ public class AtendimentoServiceImpl implements AtendimentoService {
 
         if (entity.getInformacoes().getDataInicio() != null && entity.getInformacoes().getDataFim() != null) {
             long minutos = java.time.Duration.between(
-                entity.getInformacoes().getDataInicio(),
-                entity.getInformacoes().getDataFim()
-            ).toMinutes();
+                    entity.getInformacoes().getDataInicio(),
+                    entity.getInformacoes().getDataFim()).toMinutes();
             entity.getInformacoes().setDuracaoRealMinutos((int) minutos);
         }
 

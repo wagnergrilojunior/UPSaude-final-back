@@ -140,7 +140,7 @@ class ProfissionalSaudeCadastroRegressionTest extends BaseRegressionTest {
                     "nacionalidade": "BRASILEIRA",
                     "naturalidade": "Belo Horizonte",
                     "estadoCivil": "SOLTEIRO",
-                    "identidadeGenero": "CIS",
+                    "identidadeGenero": "HOMEM",
                     "racaCor": "PARDA"
                   },
                   "dadosDeficiencia": {

@@ -1,4 +1,5 @@
 package com.upsaude.entity.referencia.geografico;
+
 import com.upsaude.entity.referencia.geografico.Estados;
 import com.upsaude.entity.BaseEntityWithoutTenant;
 
@@ -47,4 +48,20 @@ public class Cidades extends BaseEntityWithoutTenant {
 
     @Column(name = "data_ultima_sincronizacao_ibge")
     private java.time.OffsetDateTime dataUltimaSincronizacaoIbge;
+
+    // Campos FHIR - BRDivisaoGeografica
+    @Column(name = "codigo_fhir", length = 20)
+    private String codigoFhir;
+
+    @Column(name = "fhir_code_system", length = 200)
+    private String fhirCodeSystem;
+
+    @Column(name = "regiao_saude", length = 100)
+    private String regiaoSaude;
+
+    @Column(name = "macrorregiao_saude", length = 100)
+    private String macrorregiaoSaude;
+
+    @Column(name = "data_ultima_sincronizacao_fhir")
+    private java.time.OffsetDateTime dataUltimaSincronizacaoFhir;
 }

@@ -37,7 +37,7 @@ import lombok.extern.slf4j.Slf4j;
 @RequestMapping("/fhir/vacinacao")
 @RequiredArgsConstructor
 @Slf4j
-@Tag(name = "FHIR Vacinação", description = "Endpoints para sincronização e consulta de dados FHIR de vacinação")
+@Tag(name = "Vacinação", description = "Gestão de imunobiológicos e vacinação")
 public class FhirVacinacaoController {
 
     private final VacinacaoSyncService syncService;
@@ -49,49 +49,49 @@ public class FhirVacinacaoController {
     private final EstrategiaVacinacaoRepository estrategiaRepository;
 
     @PostMapping("/sincronizar/imunobiologicos")
-    @Operation(summary = "Sincronizar catálogo de vacinas do FHIR")
+    @Operation(summary = "[FHIR] Sincronizar catálogo de vacinas do FHIR", tags = "FHIR Vacinação")
     public ResponseEntity<Map<String, Object>> sincronizarImunobiologicos() {
         SyncResult result = syncService.sincronizarImunobiologicos(null);
         return ResponseEntity.ok(buildSyncResponse(result));
     }
 
     @PostMapping("/sincronizar/fabricantes")
-    @Operation(summary = "Sincronizar fabricantes de vacinas do FHIR")
+    @Operation(summary = "[FHIR] Sincronizar fabricantes de vacinas do FHIR", tags = "FHIR Vacinação")
     public ResponseEntity<Map<String, Object>> sincronizarFabricantes() {
         SyncResult result = syncService.sincronizarFabricantes(null);
         return ResponseEntity.ok(buildSyncResponse(result));
     }
 
     @PostMapping("/sincronizar/doses")
-    @Operation(summary = "Sincronizar tipos de dose do FHIR")
+    @Operation(summary = "[FHIR] Sincronizar tipos de dose do FHIR", tags = "FHIR Vacinação")
     public ResponseEntity<Map<String, Object>> sincronizarDoses() {
         SyncResult result = syncService.sincronizarTiposDose(null);
         return ResponseEntity.ok(buildSyncResponse(result));
     }
 
     @PostMapping("/sincronizar/locais-aplicacao")
-    @Operation(summary = "Sincronizar locais de aplicação do FHIR")
+    @Operation(summary = "[FHIR] Sincronizar locais de aplicação do FHIR", tags = "FHIR Vacinação")
     public ResponseEntity<Map<String, Object>> sincronizarLocaisAplicacao() {
         SyncResult result = syncService.sincronizarLocaisAplicacao(null);
         return ResponseEntity.ok(buildSyncResponse(result));
     }
 
     @PostMapping("/sincronizar/vias-administracao")
-    @Operation(summary = "Sincronizar vias de administração do FHIR")
+    @Operation(summary = "[FHIR] Sincronizar vias de administração do FHIR", tags = "FHIR Vacinação")
     public ResponseEntity<Map<String, Object>> sincronizarViasAdministracao() {
         SyncResult result = syncService.sincronizarViasAdministracao(null);
         return ResponseEntity.ok(buildSyncResponse(result));
     }
 
     @PostMapping("/sincronizar/estrategias")
-    @Operation(summary = "Sincronizar estratégias de vacinação do FHIR")
+    @Operation(summary = "[FHIR] Sincronizar estratégias de vacinação do FHIR", tags = "FHIR Vacinação")
     public ResponseEntity<Map<String, Object>> sincronizarEstrategias() {
         SyncResult result = syncService.sincronizarEstrategias(null);
         return ResponseEntity.ok(buildSyncResponse(result));
     }
 
     @PostMapping("/sincronizar/todos")
-    @Operation(summary = "Sincronizar todos os recursos de vacinação do FHIR")
+    @Operation(summary = "[FHIR] Sincronizar todos os recursos de vacinação do FHIR", tags = "FHIR Vacinação")
     public ResponseEntity<Map<String, Object>> sincronizarTodos() {
         List<SyncResult> results = new ArrayList<>();
 
@@ -156,37 +156,37 @@ public class FhirVacinacaoController {
     }
 
     @GetMapping("/externo/imunobiologicos")
-    @Operation(summary = "Consultar imunobiológicos diretamente no FHIR (Live)")
+    @Operation(summary = "Consultar imunobiológicos diretamente no FHIR (Live)", tags = "FHIR Vacinação")
     public ResponseEntity<List<ConceptDTO>> consultarImunobiologicosExternos() {
         return ResponseEntity.ok(syncService.consultarImunobiologicosExternos());
     }
 
     @GetMapping("/externo/fabricantes")
-    @Operation(summary = "Consultar fabricantes diretamente no FHIR (Live)")
+    @Operation(summary = "Consultar fabricantes diretamente no FHIR (Live)", tags = "FHIR Vacinação")
     public ResponseEntity<List<ConceptDTO>> consultarFabricantesExternos() {
         return ResponseEntity.ok(syncService.consultarFabricantesExternos());
     }
 
     @GetMapping("/externo/doses")
-    @Operation(summary = "Consultar tipos de dose diretamente no FHIR (Live)")
+    @Operation(summary = "Consultar tipos de dose diretamente no FHIR (Live)", tags = "FHIR Vacinação")
     public ResponseEntity<List<ConceptDTO>> consultarDosesExternas() {
         return ResponseEntity.ok(syncService.consultarTiposDoseExternos());
     }
 
     @GetMapping("/externo/locais-aplicacao")
-    @Operation(summary = "Consultar locais de aplicação diretamente no FHIR (Live)")
+    @Operation(summary = "Consultar locais de aplicação diretamente no FHIR (Live)", tags = "FHIR Vacinação")
     public ResponseEntity<List<ConceptDTO>> consultarLocaisAplicacaoExternos() {
         return ResponseEntity.ok(syncService.consultarLocaisAplicacaoExternos());
     }
 
     @GetMapping("/externo/vias-administracao")
-    @Operation(summary = "Consultar vias de administração diretamente no FHIR (Live)")
+    @Operation(summary = "Consultar vias de administração diretamente no FHIR (Live)", tags = "FHIR Vacinação")
     public ResponseEntity<List<ConceptDTO>> consultarViasAdministracaoExternas() {
         return ResponseEntity.ok(syncService.consultarViasAdministracaoExternos());
     }
 
     @GetMapping("/externo/estrategias")
-    @Operation(summary = "Consultar estratégias diretamente no FHIR (Live)")
+    @Operation(summary = "Consultar estratégias diretamente no FHIR (Live)", tags = "FHIR Vacinação")
     public ResponseEntity<List<ConceptDTO>> consultarEstrategiasExternas() {
         return ResponseEntity.ok(syncService.consultarEstrategiasExternos());
     }

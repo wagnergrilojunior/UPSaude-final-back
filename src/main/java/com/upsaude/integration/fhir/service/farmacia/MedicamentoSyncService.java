@@ -18,6 +18,7 @@ import com.upsaude.integration.fhir.dto.CodeSystemDTO;
 import com.upsaude.integration.fhir.dto.ConceptDTO;
 import com.upsaude.integration.fhir.dto.ValueSetDTO;
 import com.upsaude.integration.fhir.dto.ValueSetDTO.ConceptReferenceDTO;
+import com.upsaude.integration.fhir.config.FhirResourceNames;
 import com.upsaude.integration.fhir.service.FhirSyncLogService;
 import com.upsaude.repository.farmacia.PrincipioAtivoRepository;
 import com.upsaude.repository.farmacia.MedicamentoRepository;
@@ -40,10 +41,10 @@ public class MedicamentoSyncService {
     private final UnidadeMedidaRepository unidadeMedidaRepository;
     private final ViaAdministracaoRepository viaAdministracaoRepository;
 
-    private static final String RECURSO_VTM = "BRObmVTM";
-    private static final String RECURSO_MEDICAMENTO = "BRMedicamento";
-    private static final String RECURSO_UNIDADE = "BRUnidadeMedida";
-    private static final String RECURSO_VIA = "BRViaAdministracao";
+    private static final String RECURSO_VTM = FhirResourceNames.OBM_VTM;
+    private static final String RECURSO_MEDICAMENTO = FhirResourceNames.MEDICAMENTO;
+    private static final String RECURSO_UNIDADE = FhirResourceNames.UNIDADE_MEDIDA;
+    private static final String RECURSO_VIA = FhirResourceNames.VIA_ADMINISTRACAO;
 
     private List<ConceptDTO> fetchConcepts(String recurso) {
         log.info("Tentando buscar conceitos para recurso: {}", recurso);

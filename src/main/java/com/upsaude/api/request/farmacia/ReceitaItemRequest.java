@@ -38,6 +38,15 @@ public class ReceitaItemRequest {
     @Schema(description = "Quantidade prescrita")
     private BigDecimal quantidadePrescrita;
 
+    @Schema(description = "ID do medicamento (opcional se procedure SIGTAP informado)")
+    private UUID medicamentoId;
+
+    @Schema(description = "ID da via de administração (opcional)")
+    private UUID viaAdministracaoId;
+
+    @Schema(description = "Instrução de dosagem FHIR (JSON string)")
+    private String dosageInstruction;
+
     @JsonDeserialize(using = UnidadeMedidaEnumDeserializer.class)
     @Schema(description = "Unidade de medida")
     private UnidadeMedidaEnum unidadeMedida;

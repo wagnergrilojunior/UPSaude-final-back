@@ -1,152 +1,155 @@
 # 👨‍⚕️ Integração FHIR - Módulo de Profissionais
 
-## 1. Visão Geral
+## ✅ Status: IMPLEMENTADO (Modelo Canônico Único)
 
-O módulo de profissionais integra com os recursos FHIR para padronização de:
+## 1. Arquitetura
 
-- CBO - Classificação Brasileira de Ocupações
-- Conselhos profissionais de saúde
-- Tipos de participantes
-- Responsabilidades em atendimentos
+### Princípio: Enriquecimento Progressivo
 
----
+O sistema utiliza a **tabela existente `sigtap_ocupacao`** enriquecida com campos FHIR:
 
-## 2. Recursos FHIR Utilizados
+❌ **NÃO criamos tabelas separadas** como `cbo_fhir`, `ocupacoes_fhir`, etc.
 
-| Recurso | URL | Descrição |
-|---------|-----|-----------|
-| **BRCBO** | `/CodeSystem/BRCBO` | Classificação Brasileira de Ocupações |
-| **BRConselhoProfissional** | `/CodeSystem/BRConselhoProfissional` | Conselhos de classe |
-| **BRResponsabilidadeParticipante** | `/CodeSystem/BRResponsabilidadeParticipante` | Papel do profissional |
-| **BRTipoParticipante** | `/CodeSystem/BRTipoParticipante` | Tipo de participante |
+✅ **`sigtap_ocupacao`** recebe campos FHIR adicionais mantendo retrocompatibilidade.
 
 ---
 
-## 3. Conselhos Profissionais de Saúde
+## 2. Entidade Enriquecida: SigtapOcupacao
 
-O FHIR BR define NamingSystem para todos os conselhos regionais:
-
-| Conselho | Sigla | Estados |
-|----------|-------|---------|
-| Conselho Regional de Medicina | CRM | Todos (27 UFs) |
-| Conselho Regional de Odontologia | CRO | Todos (27 UFs) |
-| Conselho Regional de Enfermagem | COREN | Todos (27 UFs) |
-| Conselho Regional de Farmácia | CRF | Todos (27 UFs) |
-| Conselho Regional de Psicologia | CRP | Todos (27 UFs) |
-| Conselho Regional de Nutricionista | CRN | Por região |
-| Conselho Regional de Fisioterapia | CREFITO | Por região |
-| Conselho Regional de Fonoaudiologia | CREFONO | Por região |
-
----
-
-## 4. CBO - Classificação Brasileira de Ocupações
-
-Códigos CBO relevantes para saúde:
-
-| CBO | Ocupação |
-|-----|----------|
-| 2251-01 | Médico clínico |
-| 2251-25 | Médico generalista |
-| 2252-10 | Médico cirurgião geral |
-| 2232-04 | Cirurgião-dentista clínico geral |
-| 2235-05 | Enfermeiro |
-| 2234-05 | Farmacêutico |
-| 2237-10 | Nutricionista |
-| 2236-05 | Fisioterapeuta geral |
-| 2238-10 | Fonoaudiólogo geral |
-| 2239-05 | Psicólogo clínico |
-| 3222-05 | Técnico de enfermagem |
-
----
-
-## 5. Responsabilidades do Participante
-
-| Código | Descrição |
-|--------|-----------|
-| atendimento | Profissional responsável pelo atendimento clínico |
-| alta | Profissional que realizou a alta |
-| admissao | Profissional que admitiu o indivíduo |
-| autorizador | Profissional que autorizou o procedimento |
-| solicitante | Profissional que solicitou o atendimento |
-
----
-
-## 6. Endpoints do Sistema UPSaude
-
-### 6.1 Sincronização
-
-```http
-POST /api/fhir/sincronizar/cbo
-POST /api/fhir/sincronizar/conselhos-profissionais
-POST /api/fhir/sincronizar/responsabilidades
-```
-
-### 6.2 Consulta
-
-```http
-GET /api/fhir/consultar/cbo?termo={termo}
-GET /api/fhir/consultar/cbo/{codigo}
-GET /api/fhir/consultar/conselhos/{sigla}/{uf}
+```java
+@Entity
+@Table(name = "sigtap_ocupacao")
+public class SigtapOcupacao {
+    // Campos SIGTAP originais (mantidos)
+    private String codigoOficial;  // Código SIGTAP (6 dígitos)
+    private String nome;
+    
+    // Campos FHIR adicionados (enriquecimento)
+    private String codigoCboCompleto;    // Código CBO completo (ex: 2251-01)
+    private String grandeGrupo;
+    private String subgrupoPrincipal;
+    private String subgrupo;
+    private String familia;
+    private String descricaoFhir;
+}
 ```
 
 ---
 
-## 7. Modelagem de Dados
+## 3. Nova Entidade: ConselhoProfissional
+
+Esta é uma entidade **nova e legítima** pois não existia tabela de conselhos no sistema:
+
+```java
+@Entity
+@Table(name = "conselhos_profissionais")
+public class ConselhoProfissional {
+    private String codigo;      // Código único
+    private String sigla;       // CRM, COREN, CRO, etc.
+    private String nome;
+    private String uf;
+    private String tipo;
+}
+```
+
+---
+
+## 4. Vinculação com Profissionais
+
+```java
+@Entity
+@Table(name = "profissionais_saude")
+public class ProfissionaisSaude {
+    // SIGTAP (mantido - enriquecido com FHIR)
+    @ManyToOne
+    private SigtapOcupacao sigtapOcupacao;
+    
+    // Conselho (novo - FHIR)
+    @ManyToOne
+    private ConselhoProfissional conselhoProfissional;
+}
+```
+
+---
+
+## 5. Sincronização FHIR
+
+### ProfissionalSyncService
+
+```java
+public FhirSyncLog sincronizarCBO() {
+    // Busca na mesma tabela SIGTAP
+    SigtapOcupacao ocupacao = sigtapOcupacaoRepository
+        .findByCodigoCbo(code)
+        .orElse(new SigtapOcupacao());
+    
+    // Enriquece com dados FHIR
+    ocupacao.setCodigoCboCompleto(code);
+    ocupacao.setGrandeGrupo(grandeGrupo);
+    ocupacao.setDescricaoFhir(descricao);
+    // ...
+}
+```
+
+### Endpoints
+```http
+POST /api/fhir/sync/profissionais/cbo
+POST /api/fhir/sync/profissionais/conselhos
+POST /api/fhir/sync/profissionais/todos
+```
+
+---
+
+## 6. Migração de Banco
+
+### V20260113140000__add_professional_catalogs_fhir.sql
 
 ```sql
--- Classificação Brasileira de Ocupações
-CREATE TABLE cbo (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    codigo VARCHAR(10) NOT NULL UNIQUE,
-    descricao VARCHAR(255) NOT NULL,
-    familia VARCHAR(10),
-    familia_descricao VARCHAR(255),
-    ativo BOOLEAN DEFAULT TRUE,
-    data_sincronizacao TIMESTAMP,
-    criado_em TIMESTAMP DEFAULT NOW()
-);
+-- Enriquece tabela existente (NÃO cria nova)
+ALTER TABLE sigtap_ocupacao
+ADD COLUMN grande_grupo VARCHAR(100),
+ADD COLUMN subgrupo_principal VARCHAR(100),
+ADD COLUMN subgrupo VARCHAR(100),
+ADD COLUMN familia VARCHAR(100),
+ADD COLUMN descricao_fhir TEXT,
+ADD COLUMN codigo_cbo_completo VARCHAR(10);
 
--- Conselhos Profissionais
+-- Nova tabela apenas para conselhos (não existia)
 CREATE TABLE conselhos_profissionais (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    sigla VARCHAR(20) NOT NULL, -- CRM, CRO, COREN, etc.
-    uf VARCHAR(2) NOT NULL,
-    nome VARCHAR(255) NOT NULL,
-    url_validacao VARCHAR(500),
-    ativo BOOLEAN DEFAULT TRUE,
-    criado_em TIMESTAMP DEFAULT NOW(),
-    UNIQUE(sigla, uf)
-);
-
--- Responsabilidades
-CREATE TABLE responsabilidades_participante (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    codigo_fhir VARCHAR(50) NOT NULL UNIQUE,
-    nome VARCHAR(100) NOT NULL,
-    descricao TEXT,
-    ativo BOOLEAN DEFAULT TRUE,
-    criado_em TIMESTAMP DEFAULT NOW()
+    id UUID PRIMARY KEY,
+    codigo VARCHAR(20) UNIQUE NOT NULL,
+    sigla VARCHAR(20) NOT NULL,
+    nome VARCHAR(200) NOT NULL,
+    uf VARCHAR(2),
+    tipo VARCHAR(50)
 );
 ```
 
 ---
 
-## 8. Integração com Cadastro de Profissionais
+## 7. Convivência SIGTAP + FHIR
 
-A tabela `profissionais_saude` do sistema deve incluir:
+### Regras de Isolamento
+- `codigoOficial` = Código SIGTAP original (6 dígitos)
+- `codigoCboCompleto` = Código CBO FHIR completo (ex: 2251-01)
+- Ambos coexistem na mesma entidade
 
-```sql
-ALTER TABLE profissionais_saude ADD COLUMN IF NOT EXISTS cbo_id UUID REFERENCES cbo(id);
-ALTER TABLE profissionais_saude ADD COLUMN IF NOT EXISTS conselho_sigla VARCHAR(20);
-ALTER TABLE profissionais_saude ADD COLUMN IF NOT EXISTS conselho_uf VARCHAR(2);
-ALTER TABLE profissionais_saude ADD COLUMN IF NOT EXISTS conselho_numero VARCHAR(20);
+### Estratégia de Busca
+```java
+// Busca SIGTAP
+sigtapOcupacaoRepository.findByCodigo("225101");
+
+// Busca FHIR
+sigtapOcupacaoRepository.findByCodigoCbo("2251-01");
+
+// Ambos retornam o mesmo registro
 ```
 
 ---
 
-## 9. Casos de Uso
+## 8. Próximos Passos
 
-- **Validação de CRM/COREN**: verificar número do conselho
-- **Escalas de trabalho**: filtrar por CBO
-- **Relatórios de produção**: agrupar por ocupação
-- **Assinatura digital**: identificar profissional responsável
+- [ ] Implementar BRResponsabilidadeParticipante
+- [ ] Implementar BRTipoParticipante
+- [ ] Criar validação de registro profissional
+- [ ] Integrar com assinatura digital

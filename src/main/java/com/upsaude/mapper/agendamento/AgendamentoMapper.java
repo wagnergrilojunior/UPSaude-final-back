@@ -42,6 +42,11 @@ public interface AgendamentoMapper {
     @Mapping(target = "notificacoes", ignore = true)
     @Mapping(target = "checkIns", ignore = true)
     @Mapping(target = "especialidade", ignore = true)
+    @Mapping(target = "tipoAgendamento", source = "request.tipoAgendamento")
+    @Mapping(target = "categoriaServico", source = "request.categoriaServico")
+    @Mapping(target = "tipoServico", source = "request.tipoServico")
+    @Mapping(target = "motivosAgendamento", source = "request.motivosAgendamento")
+    @Mapping(target = "periodoSolicitado", source = "request.periodoSolicitado")
     Agendamento fromRequest(AgendamentoRequest request);
 
     @Mapping(target = "id", ignore = true)
