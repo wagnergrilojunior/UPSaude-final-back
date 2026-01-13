@@ -10,6 +10,7 @@ import com.upsaude.entity.clinica.atendimento.Atendimento;
 import com.upsaude.entity.sistema.multitenancy.Tenant;
 import com.upsaude.mapper.clinica.atendimento.AtendimentoMapper;
 import com.upsaude.repository.clinica.atendimento.AtendimentoRepository;
+import com.upsaude.service.sistema.integracao.IntegracaoEventoGenerator;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -24,6 +25,7 @@ public class AtendimentoCreator {
     private final AtendimentoValidationService validationService;
     private final AtendimentoRelacionamentosHandler relacionamentosHandler;
     private final AtendimentoDomainService domainService;
+    private final IntegracaoEventoGenerator eventoGenerator;
 
     public Atendimento criar(AtendimentoRequest request, UUID tenantId, Tenant tenant) {
         validationService.validarObrigatorios(request);
@@ -35,6 +37,7 @@ public class AtendimentoCreator {
         relacionamentosHandler.resolver(entity, request, tenantId, tenant);
 
         Atendimento saved = repository.save(Objects.requireNonNull(entity));
+        eventoGenerator.gerarEventosParaAtendimento(saved);
         log.info("Atendimento criado com sucesso. ID: {}, tenant: {}", saved.getId(), tenantId);
         return saved;
     }

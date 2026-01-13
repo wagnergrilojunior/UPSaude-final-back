@@ -18,6 +18,7 @@ import com.upsaude.integration.fhir.dto.CodeSystemDTO;
 import com.upsaude.integration.fhir.dto.ConceptDTO;
 import com.upsaude.integration.fhir.dto.ValueSetDTO;
 import com.upsaude.integration.fhir.dto.ValueSetDTO.ConceptReferenceDTO;
+import com.upsaude.integration.fhir.config.FhirResourceNames;
 import com.upsaude.integration.fhir.service.FhirCacheService;
 import com.upsaude.integration.fhir.service.FhirSyncLogService;
 import com.upsaude.repository.alergia.AlergenoRepository;
@@ -42,10 +43,10 @@ public class AlergiaSyncService {
     private final CriticidadeAlergiaRepository criticidadeRepository;
     private final CategoriaAgenteAlergiaRepository categoriaRepository;
 
-    private static final String RECURSO_ALERGENO = "BRAlergenos";
-    private static final String RECURSO_REACAO = "BRReacoesAdversasMedDRA";
-    private static final String RECURSO_CRITICIDADE = "BRCriticidadeAlergiasReacoesAdversas";
-    private static final String RECURSO_CATEGORIA = "BRCategoriaAgenteAlergiasReacoesAdversas";
+    private static final String RECURSO_ALERGENO = FhirResourceNames.ALERGENOS;
+    private static final String RECURSO_REACAO = FhirResourceNames.REACOES_ADVERSAS_MED_DRA;
+    private static final String RECURSO_CRITICIDADE = FhirResourceNames.CRITICIDADE_ALERGIAS;
+    private static final String RECURSO_CATEGORIA = FhirResourceNames.CATEGORIA_AGENTE_ALERGIAS;
 
     private List<ConceptDTO> fetchConcepts(String recurso) {
         log.info("Tentando buscar conceitos para recurso: {}", recurso);

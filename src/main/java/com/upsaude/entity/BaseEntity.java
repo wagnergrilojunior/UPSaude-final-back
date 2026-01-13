@@ -48,10 +48,12 @@ public abstract class BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "tenant_id", nullable = false)
+    @com.fasterxml.jackson.annotation.JsonIgnore
     private Tenant tenant;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = true)
     @JoinColumn(name = "estabelecimento_id", nullable = true)
+    @com.fasterxml.jackson.annotation.JsonIgnore
     private Estabelecimentos estabelecimento;
 
     @Column(name = "ativo", nullable = false)

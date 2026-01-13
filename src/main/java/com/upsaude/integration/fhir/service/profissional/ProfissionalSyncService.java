@@ -14,6 +14,7 @@ import com.upsaude.integration.fhir.dto.CodeSystemDTO;
 import com.upsaude.integration.fhir.dto.ConceptDTO;
 import com.upsaude.integration.fhir.dto.ValueSetDTO;
 import com.upsaude.integration.fhir.dto.ValueSetDTO.ConceptReferenceDTO;
+import com.upsaude.integration.fhir.config.FhirResourceNames;
 import com.upsaude.integration.fhir.service.FhirSyncLogService;
 import com.upsaude.repository.referencia.profissional.ConselhoProfissionalRepository;
 import com.upsaude.repository.referencia.sigtap.SigtapOcupacaoRepository;
@@ -32,8 +33,8 @@ public class ProfissionalSyncService {
     private final SigtapOcupacaoRepository sigtapOcupacaoRepository;
     private final ConselhoProfissionalRepository conselhoRepository;
 
-    private static final String RECURSO_CBO = "BRCBO";
-    private static final String RECURSO_CONSELHO = "BRConselhoProfissional";
+    private static final String RECURSO_CBO = FhirResourceNames.CBO;
+    private static final String RECURSO_CONSELHO = FhirResourceNames.CONSELHO_PROFISSIONAL;
 
     @Transactional
     public FhirSyncLog sincronizarCBO() {

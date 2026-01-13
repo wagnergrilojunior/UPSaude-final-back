@@ -8,11 +8,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.upsaude.entity.fhir.FhirSyncLog;
-import com.upsaude.entity.referencia.geografico.Cidades;
-import com.upsaude.entity.referencia.geografico.Estados;
 import com.upsaude.integration.fhir.client.FhirClient;
 import com.upsaude.integration.fhir.dto.CodeSystemDTO;
 import com.upsaude.integration.fhir.dto.ConceptDTO;
+import com.upsaude.integration.fhir.config.FhirResourceNames;
 import com.upsaude.integration.fhir.dto.ValueSetDTO;
 import com.upsaude.integration.fhir.dto.ValueSetDTO.ConceptReferenceDTO;
 import com.upsaude.integration.fhir.service.FhirSyncLogService;
@@ -32,7 +31,7 @@ public class GeografiaFhirSyncService {
     private final EstadosRepository estadosRepository;
     private final CidadesRepository cidadesRepository;
 
-    private static final String RECURSO_DIVISAO_GEOGRAFICA = "BRDivisaoGeografica";
+    private static final String RECURSO_DIVISAO_GEOGRAFICA = FhirResourceNames.DIVISAO_GEOGRAFICA;
     private static final String FHIR_CODE_SYSTEM = "http://www.saude.gov.br/fhir/r4/CodeSystem/BRDivisaoGeografica";
 
     @Transactional
@@ -72,6 +71,18 @@ public class GeografiaFhirSyncService {
     @Transactional
     public FhirSyncLog sincronizarMunicipios() {
         log.info("Iniciando sincronização de Municípios com FHIR BRDivisaoGeografica");
+        
+        // Verificar se há municípios no banco antes de sincronizar
+        long totalMunicipios = cidadesRepository.count();
+        if (totalMunicipios == 0) {
+            String mensagem = "Nenhum município encontrado no banco de dados. " +
+                    "É necessário sincronizar os municípios do IBGE primeiro através do endpoint " +
+                    "POST /v1/integracoes/ibge/sincronizar/municipios";
+            log.warn(mensagem);
+            FhirSyncLog syncLog = syncLogService.iniciarSincronizacao("BRDivisaoGeografica-Municipios", null);
+            return syncLogService.registrarErro(syncLog.getId(), mensagem, 0);
+        }
+        
         FhirSyncLog syncLog = syncLogService.iniciarSincronizacao("BRDivisaoGeografica-Municipios", null);
         int atualizados = 0;
 

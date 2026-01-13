@@ -21,8 +21,6 @@ public class FhirCacheService {
     private final ObjectMapper objectMapper;
     private final FhirProperties fhirProperties;
 
-    private static final String CACHE_PREFIX = "fhir::";
-
     @Autowired
     public FhirCacheService(
             @Autowired(required = false) RedisTemplate<String, Object> redisTemplate,
@@ -37,13 +35,17 @@ public class FhirCacheService {
         return redisTemplate != null && fhirProperties.getCache().isEnabled();
     }
 
+    private String getCachePrefix() {
+        return fhirProperties.getCache().getKeyPrefix();
+    }
+
     public <T> Optional<T> get(String key, Class<T> type) {
         if (!isRedisAvailable()) {
             return Optional.empty();
         }
 
         try {
-            String fullKey = CACHE_PREFIX + key;
+            String fullKey = getCachePrefix() + key;
             Object cached = redisTemplate.opsForValue().get(fullKey);
 
             if (cached == null) {
@@ -72,7 +74,7 @@ public class FhirCacheService {
         }
 
         try {
-            String fullKey = CACHE_PREFIX + key;
+            String fullKey = getCachePrefix() + key;
             String json = objectMapper.writeValueAsString(value);
             Duration ttl = Duration.ofHours(fhirProperties.getCache().getTtlHours());
 
@@ -88,7 +90,7 @@ public class FhirCacheService {
         if (!isRedisAvailable()) {
             return;
         }
-        String fullKey = CACHE_PREFIX + key;
+        String fullKey = getCachePrefix() + key;
         Boolean deleted = redisTemplate.delete(fullKey);
         if (Boolean.TRUE.equals(deleted)) {
             log.debug("Cache evicted: {}", key);
@@ -100,7 +102,7 @@ public class FhirCacheService {
             return;
         }
         try {
-            var keys = redisTemplate.keys(CACHE_PREFIX + pattern + "*");
+            var keys = redisTemplate.keys(getCachePrefix() + pattern + "*");
             if (keys != null && !keys.isEmpty()) {
                 redisTemplate.delete(keys);
                 log.info("Evicted {} chaves do cache FHIR com pattern: {}", keys.size(), pattern);

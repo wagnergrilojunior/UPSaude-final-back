@@ -27,6 +27,8 @@ import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 @Entity
 @Table(name = "atendimentos", schema = "public", indexes = {
@@ -101,15 +103,19 @@ public class Atendimento extends BaseEntity {
     @Column(name = "prioridade_atendimento", length = 20)
     private com.upsaude.enums.PrioridadeAtendimentoEnum prioridadeAtendimento;
 
+    @JdbcTypeCode(SqlTypes.JSON)
     @Column(name = "motivo_atendimento", columnDefinition = "jsonb")
     private String motivoAtendimento;
 
+    @JdbcTypeCode(SqlTypes.JSON)
     @Column(name = "diagnosticos_admissao", columnDefinition = "jsonb")
     private String diagnosticosAdmissao;
 
+    @JdbcTypeCode(SqlTypes.JSON)
     @Column(name = "dados_internacao", columnDefinition = "jsonb")
     private String dadosInternacao;
 
+    @JdbcTypeCode(SqlTypes.JSON)
     @Column(name = "periodo_real", columnDefinition = "jsonb")
     private String periodoReal;
 

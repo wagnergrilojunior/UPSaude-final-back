@@ -5,6 +5,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -38,17 +40,31 @@ public class FhirSyncLogService {
 
     @Transactional
     public FhirSyncLog concluirSincronizacao(UUID logId, int totalEncontrados, int novosInseridos, int atualizados) {
+        return concluirSincronizacao(logId, totalEncontrados, novosInseridos, atualizados, 0, null);
+    }
+
+    @Transactional
+    public FhirSyncLog concluirSincronizacao(UUID logId, int totalEncontrados, int novosInseridos, int atualizados, int erros, String mensagemErro) {
         FhirSyncLog syncLog = repository.findById(logId)
                 .orElseThrow(() -> new IllegalArgumentException("Log de sincronização não encontrado: " + logId));
 
         syncLog.setTotalEncontrados(totalEncontrados);
         syncLog.setNovosInseridos(novosInseridos);
         syncLog.setAtualizados(atualizados);
+        syncLog.setErros(erros);
+        if (mensagemErro != null) {
+            syncLog.setMensagemErro(mensagemErro);
+        }
         syncLog.concluir();
 
         FhirSyncLog saved = repository.save(syncLog);
+        if (erros > 0) {
+            log.warn("Sincronização FHIR concluída com falhas para {}: {} encontrados, {} novos, {} atualizados, {} erros",
+                    syncLog.getRecurso(), totalEncontrados, novosInseridos, atualizados, erros);
+        } else {
         log.info("Sincronização FHIR concluída para {}: {} encontrados, {} novos, {} atualizados",
                 syncLog.getRecurso(), totalEncontrados, novosInseridos, atualizados);
+        }
         return saved;
     }
 
@@ -66,7 +82,7 @@ public class FhirSyncLogService {
     }
 
     public Optional<FhirSyncLog> buscarUltimaSincronizacao(String recurso) {
-        return repository.findLastByRecurso(recurso);
+        return repository.findFirstByRecursoOrderByDataInicioDesc(recurso);
     }
 
     public Optional<FhirSyncLog> buscarUltimaSincronizacaoBemSucedida(String recurso) {
@@ -78,7 +94,8 @@ public class FhirSyncLogService {
     }
 
     public List<FhirSyncLog> listarRecentes(int limite) {
-        return repository.findRecent(limite);
+        Pageable pageable = PageRequest.of(0, limite);
+        return repository.findByOrderByDataInicioDesc(pageable);
     }
 
     public List<FhirSyncLog> listarPorStatus(SyncStatus status) {

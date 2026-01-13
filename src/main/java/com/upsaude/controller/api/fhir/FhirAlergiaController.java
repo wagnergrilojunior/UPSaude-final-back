@@ -21,7 +21,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 @RestController
-@RequestMapping("/fhir/alergia")
+@RequestMapping("/api/fhir/alergia")
 @RequiredArgsConstructor
 @Slf4j
 @Tag(name = "FHIR Alergias", description = "Sincronização e consulta externa de alergias e reações FHIR")

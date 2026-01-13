@@ -18,7 +18,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 @RestController
-@RequestMapping("/fhir/medicamento")
+@RequestMapping("/api/fhir/medicamento")
 @RequiredArgsConstructor
 @Slf4j
 @Tag(name = "FHIR Medicamentos", description = "Sincronização de catálogos de medicamentos via FHIR (RNDS/OBM)")

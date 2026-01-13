@@ -29,7 +29,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 @RestController
-@RequestMapping("/fhir/test")
+@RequestMapping("/api/fhir/test")
 @RequiredArgsConstructor
 @Slf4j
 @Tag(name = "FHIR Test", description = "Endpoints para teste da integração FHIR")

@@ -20,6 +20,7 @@ import com.upsaude.integration.fhir.dto.CodeSystemDTO;
 import com.upsaude.integration.fhir.dto.ConceptDTO;
 import com.upsaude.integration.fhir.dto.ValueSetDTO;
 import com.upsaude.integration.fhir.dto.ValueSetDTO.ConceptReferenceDTO;
+import com.upsaude.integration.fhir.config.FhirResourceNames;
 import com.upsaude.integration.fhir.service.FhirCacheService;
 import com.upsaude.integration.fhir.service.FhirSyncLogService;
 import com.upsaude.repository.vacinacao.EstrategiaVacinacaoRepository;
@@ -48,12 +49,12 @@ public class VacinacaoSyncService {
     private final ViaAdministracaoRepository viaAdministracaoRepository;
     private final EstrategiaVacinacaoRepository estrategiaRepository;
 
-    private static final String RECURSO_IMUNOBIOLOGICO = "BRImunobiologico";
-    private static final String RECURSO_FABRICANTE = "BRFabricantePNI";
-    private static final String RECURSO_DOSE = "BRDose";
-    private static final String RECURSO_LOCAL = "BRLocalAplicacao";
-    private static final String RECURSO_VIA = "BRViaAdministracao";
-    private static final String RECURSO_ESTRATEGIA = "BREstrategiaVacinacao";
+    private static final String RECURSO_IMUNOBIOLOGICO = FhirResourceNames.IMUNOBIOLOGICO;
+    private static final String RECURSO_FABRICANTE = FhirResourceNames.FABRICANTE_PNI;
+    private static final String RECURSO_DOSE = FhirResourceNames.DOSE;
+    private static final String RECURSO_LOCAL = FhirResourceNames.LOCAL_APLICACAO;
+    private static final String RECURSO_VIA = FhirResourceNames.VIA_ADMINISTRACAO;
+    private static final String RECURSO_ESTRATEGIA = FhirResourceNames.ESTRATEGIA_VACINACAO;
 
     private List<ConceptDTO> fetchConcepts(String recurso) {
         log.info("Tentando buscar conceitos para recurso: {}", recurso);

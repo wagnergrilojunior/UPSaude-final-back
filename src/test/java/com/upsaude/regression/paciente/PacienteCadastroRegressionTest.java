@@ -99,7 +99,7 @@ class PacienteCadastroRegressionTest extends BaseRegressionTest {
                     "racaCor": "PARDA",
                     "ocupacaoProfissao": "Engenheiro de Software",
                     "situacaoRua": false,
-                    "identidadeGenero": "CIS",
+                    "identidadeGenero": "HOMEM",
                     "orientacaoSexual": "HETEROSSEXUAL"
                   },
                   "statusPaciente": "ATIVO",
@@ -151,7 +151,7 @@ class PacienteCadastroRegressionTest extends BaseRegressionTest {
                   ],
                   "identificadores": [
                     {
-                      "tipo": "OUTRO",
+                      "tipo": "OUTROS",
                       "valor": "PASSAPORTE123456",
                       "origem": "UPSAUDE",
                       "validado": true,
@@ -196,7 +196,7 @@ class PacienteCadastroRegressionTest extends BaseRegressionTest {
                   "dadosPessoaisComplementares": {
                     "nomeMae": "Maria da Silva",
                     "nomePai": "João da Silva",
-                    "identidadeGenero": "CIS",
+                    "identidadeGenero": "HOMEM",
                     "orientacaoSexual": "HETEROSSEXUAL"
                   },
                   "responsavelLegal": {

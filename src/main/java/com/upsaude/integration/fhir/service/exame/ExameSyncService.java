@@ -14,6 +14,7 @@ import com.upsaude.integration.fhir.dto.CodeSystemDTO;
 import com.upsaude.integration.fhir.dto.ConceptDTO;
 import com.upsaude.integration.fhir.dto.ValueSetDTO;
 import com.upsaude.integration.fhir.dto.ValueSetDTO.ConceptReferenceDTO;
+import com.upsaude.integration.fhir.config.FhirResourceNames;
 import com.upsaude.integration.fhir.service.FhirSyncLogService;
 import com.upsaude.repository.referencia.exame.CatalogoExameRepository;
 
@@ -32,8 +33,8 @@ public class ExameSyncService {
     private static final String SOURCE_LOINC = "LOINC";
     private static final String SOURCE_GAL = "GAL";
 
-    private static final String RECURSO_LOINC = "BRNomeExameLOINC";
-    private static final String RECURSO_GAL = "BRNomeExameGAL";
+    private static final String RECURSO_LOINC = FhirResourceNames.NOME_EXAME_LOINC;
+    private static final String RECURSO_GAL = FhirResourceNames.NOME_EXAME_GAL;
 
     @Transactional
     public FhirSyncLog sincronizarExamesLoinc() {

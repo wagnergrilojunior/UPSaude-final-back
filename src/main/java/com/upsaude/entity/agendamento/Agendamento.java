@@ -20,6 +20,8 @@ import com.upsaude.util.converter.StatusAgendamentoEnumConverter;
 import jakarta.persistence.Column;
 import jakarta.persistence.Convert;
 import jakarta.persistence.Entity;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
@@ -192,9 +194,11 @@ public class Agendamento extends BaseEntity {
     private com.upsaude.enums.TipoServicoAgendamentoEnum tipoServico;
 
     @Column(name = "motivos_agendamento", columnDefinition = "jsonb")
+    @JdbcTypeCode(SqlTypes.JSON)
     private String motivosAgendamento;
 
     @Column(name = "periodo_solicitado", columnDefinition = "jsonb")
+    @JdbcTypeCode(SqlTypes.JSON)
     private String periodoSolicitado;
 
     @PrePersist

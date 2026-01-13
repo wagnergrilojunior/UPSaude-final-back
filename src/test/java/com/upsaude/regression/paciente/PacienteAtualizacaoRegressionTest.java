@@ -124,7 +124,7 @@ class PacienteAtualizacaoRegressionTest extends BaseRegressionTest {
                     "racaCor": "PRETA",
                     "ocupacaoProfissao": "Médico",
                     "situacaoRua": false,
-                    "identidadeGenero": "TRANS",
+                    "identidadeGenero": "HOMEM_TRANS",
                     "orientacaoSexual": "BISSEXUAL"
                   },
                   "statusPaciente": "ATIVO",
@@ -172,7 +172,7 @@ class PacienteAtualizacaoRegressionTest extends BaseRegressionTest {
                   ],
                   "identificadores": [
                     {
-                      "tipo": "OUTRO",
+                      "tipo": "OUTROS",
                       "valor": "PASSAPORTE987654",
                       "origem": "CADSUS",
                       "validado": false,
@@ -211,7 +211,7 @@ class PacienteAtualizacaoRegressionTest extends BaseRegressionTest {
                   "dadosPessoaisComplementares": {
                     "nomeMae": "Maria Santos",
                     "nomePai": "João Santos",
-                    "identidadeGenero": "TRANS",
+                    "identidadeGenero": "HOMEM_TRANS",
                     "orientacaoSexual": "BISSEXUAL"
                   },
                   "responsavelLegal": {

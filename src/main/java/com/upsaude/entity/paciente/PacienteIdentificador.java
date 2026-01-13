@@ -35,6 +35,7 @@ public class PacienteIdentificador extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "paciente_id", nullable = false)
+    @com.fasterxml.jackson.annotation.JsonIgnore
     private Paciente paciente;
 
     @Convert(converter = TipoIdentificadorEnumConverter.class)

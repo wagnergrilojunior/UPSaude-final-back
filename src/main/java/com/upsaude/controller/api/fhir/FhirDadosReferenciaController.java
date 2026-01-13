@@ -30,7 +30,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 @RestController
-@RequestMapping("/fhir/dados-referencia")
+@RequestMapping("/api/fhir/dados-referencia")
 @RequiredArgsConstructor
 @Slf4j
 @Tag(name = "FHIR Dados de Referência", description = "Endpoints para dados demográficos e geográficos FHIR")
@@ -95,14 +95,26 @@ public class FhirDadosReferenciaController {
 
     @GetMapping("/geografia/municipios")
     @Operation(summary = "Listar municípios sincronizados (paginado)")
-    public ResponseEntity<List<Cidades>> listarMunicipios(
+    public ResponseEntity<?> listarMunicipios(
             @RequestParam(required = false) String uf,
             @RequestParam(defaultValue = "100") int limit) {
+        List<Cidades> municipios;
         if (uf != null) {
-            return ResponseEntity.ok(cidadesRepository.findByEstadoSiglaOrderByNomeAsc(uf.toUpperCase())
-                    .stream().limit(limit).collect(Collectors.toList()));
+            municipios = cidadesRepository.findByEstadoSiglaOrderByNomeAsc(uf.toUpperCase())
+                    .stream().limit(limit).collect(Collectors.toList());
+        } else {
+            municipios = cidadesRepository.findAll().stream().limit(limit).collect(Collectors.toList());
         }
-        return ResponseEntity.ok(cidadesRepository.findAll().stream().limit(limit).collect(Collectors.toList()));
+        
+        if (municipios.isEmpty()) {
+            Map<String, Object> response = new HashMap<>();
+            response.put("message", "Nenhum município encontrado. É necessário sincronizar os municípios do IBGE primeiro.");
+            response.put("sugestao", "Execute POST /v1/integracoes/ibge/sincronizar/municipios para popular a base de dados");
+            response.put("total", 0);
+            return ResponseEntity.ok(response);
+        }
+        
+        return ResponseEntity.ok(municipios);
     }
 
     @GetMapping("/geografia/municipios/{codigoIbge}")
