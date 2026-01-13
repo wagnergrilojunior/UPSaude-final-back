@@ -11,8 +11,10 @@ import java.time.OffsetDateTime;
 import java.util.UUID;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+@SuppressWarnings("null")
 class AgendamentoCadastroRegressionTest extends BaseRegressionTest {
 
     @Autowired
@@ -92,7 +94,12 @@ class AgendamentoCadastroRegressionTest extends BaseRegressionTest {
                   "ehEncaixe": false,
                   "ehRetorno": false,
                   "motivoConsulta": "Consulta de rotina",
-                  "observacoesAgendamento": "Observações do agendamento"
+                  "observacoesAgendamento": "Observações do agendamento",
+                  "tipoAgendamento": "ROTINA",
+                  "categoriaServico": "AMBULATORIAL",
+                  "tipoServico": "CONSULTA",
+                  "motivosAgendamento": "Acompanhamento de rotina",
+                  "periodoSolicitado": "MANHA"
                 }
                 """, pacienteId, dataHora, dataHoraFim);
 
@@ -125,13 +132,29 @@ class AgendamentoCadastroRegressionTest extends BaseRegressionTest {
                   "justificativaConflito": "",
                   "notificacaoEnviada24h": false,
                   "notificacaoEnviada1h": false,
-                  "confirmacaoEnviada": false
+                  "confirmacaoEnviada": false,
+
+                  "tipoAgendamento": "ROTINA",
+                  "categoriaServico": "AMBULATORIAL",
+                  "tipoServico": "CONSULTA",
+                  "motivosAgendamento": "Consulta completa (regressão)",
+                  "periodoSolicitado": "TARDE",
+
+                  "valorEstimadoTotal": 120.50
                 }
                 """, pacienteId, dataHora, dataHoraFim);
 
         mockMvc.perform(post("/v1/agendamentos")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(jsonPayload))
-                .andExpect(status().isCreated());
+                .andExpect(status().isCreated())
+                // asserts leves para garantir que os novos campos estão aceitos/serializados no response
+                .andExpect(jsonPath("$.id").exists())
+                .andExpect(jsonPath("$.tipoAgendamento").value("ROTINA"))
+                .andExpect(jsonPath("$.categoriaServico").value("AMBULATORIAL"))
+                .andExpect(jsonPath("$.tipoServico").value("CONSULTA"))
+                .andExpect(jsonPath("$.motivosAgendamento").value("Consulta completa (regressão)"))
+                .andExpect(jsonPath("$.periodoSolicitado").value("TARDE"))
+                .andExpect(jsonPath("$.valorEstimadoTotal").isNumber());
     }
 }

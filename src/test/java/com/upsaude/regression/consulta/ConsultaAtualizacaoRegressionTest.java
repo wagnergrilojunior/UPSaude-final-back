@@ -12,8 +12,10 @@ import java.util.UUID;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+@SuppressWarnings("null")
 class ConsultaAtualizacaoRegressionTest extends BaseRegressionTest {
 
     @Autowired
@@ -181,7 +183,9 @@ class ConsultaAtualizacaoRegressionTest extends BaseRegressionTest {
         mockMvc.perform(put("/v1/consultas/" + consultaId + "/anamnese")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(jsonPayload))
-                .andExpect(status().isOk());
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(consultaId.toString()))
+                .andExpect(jsonPath("$.anamnese.queixaPrincipal").value("Atualização mínima de anamnese"));
     }
 
     @Test
@@ -199,7 +203,11 @@ class ConsultaAtualizacaoRegressionTest extends BaseRegressionTest {
         mockMvc.perform(put("/v1/consultas/" + consultaId + "/anamnese")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(jsonPayload))
-                .andExpect(status().isOk());
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(consultaId.toString()))
+                .andExpect(jsonPath("$.anamnese.queixaPrincipal").value("Consulta completa"))
+                .andExpect(jsonPath("$.anamnese.historiaDoencaAtual").value("História da doença atual"))
+                .andExpect(jsonPath("$.anamnese.exameFisico").value("Exame físico completo"));
     }
 
     @Test
@@ -213,7 +221,9 @@ class ConsultaAtualizacaoRegressionTest extends BaseRegressionTest {
                     "antecedentesPessoais": "Antecedentes pessoais",
                     "antecedentesFamiliares": "Antecedentes familiares",
                     "medicamentosUso": "Medicamentos em uso",
-                    "alergias": "Alergias conhecidas"
+                    "alergias": "Alergias conhecidas",
+                    "habitosVida": "Sedentário",
+                    "sinaisVitais": "PA 120/80; FC 72"
                   }
                 }
                 """;
@@ -221,6 +231,110 @@ class ConsultaAtualizacaoRegressionTest extends BaseRegressionTest {
         mockMvc.perform(put("/v1/consultas/" + consultaId + "/anamnese")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(jsonPayload))
-                .andExpect(status().isOk());
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(consultaId.toString()))
+                .andExpect(jsonPath("$.anamnese.queixaPrincipal").value("Queixa principal completa"))
+                .andExpect(jsonPath("$.anamnese.antecedentesPessoais").value("Antecedentes pessoais"))
+                .andExpect(jsonPath("$.anamnese.alergias").value("Alergias conhecidas"));
+    }
+
+    @Test
+    void atualizacaoDeDiagnosticoPrescricaoExamesEncaminhamentoAtestadoNaoPodeQuebrar() throws Exception {
+        // 1) Diagnóstico
+        String diagnosticoPayload = """
+                {
+                  "diagnostico": {
+                    "diagnostico": "Hipertensão arterial (suspeita)",
+                    "diagnosticosSecundarios": "Cefaleia recorrente",
+                    "hipoteseDiagnostica": "HAS estágio 1",
+                    "diagnosticoDiferencial": "Enxaqueca",
+                    "conduta": "Acompanhamento e orientações"
+                  }
+                }
+                """;
+        mockMvc.perform(put("/v1/consultas/" + consultaId + "/diagnostico")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(diagnosticoPayload))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(consultaId.toString()))
+                .andExpect(jsonPath("$.diagnostico.diagnostico").value("Hipertensão arterial (suspeita)"));
+
+        // 2) Prescrição
+        String prescricaoPayload = """
+                {
+                  "prescricao": {
+                    "medicamentosPrescritos": "Dipirona 500mg se dor",
+                    "orientacoes": "Hidratação e repouso",
+                    "dieta": "Reduzir sódio",
+                    "atividadeFisica": "Caminhada 30min 3x/semana",
+                    "repouso": "Dormir 8h",
+                    "outrasOrientacoes": "Retornar se piora"
+                  }
+                }
+                """;
+        mockMvc.perform(put("/v1/consultas/" + consultaId + "/prescricao")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(prescricaoPayload))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(consultaId.toString()))
+                .andExpect(jsonPath("$.prescricao.medicamentosPrescritos").value("Dipirona 500mg se dor"));
+
+        // 3) Exames solicitados
+        String examesPayload = """
+                {
+                  "exames": {
+                    "examesSolicitados": "Hemograma, glicemia, perfil lipídico",
+                    "examesLaboratoriais": "Hemograma completo",
+                    "examesImagem": "ECG",
+                    "examesOutros": "MAPA (se disponível)",
+                    "urgenciaExames": false
+                  }
+                }
+                """;
+        mockMvc.perform(put("/v1/consultas/" + consultaId + "/exames")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(examesPayload))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(consultaId.toString()))
+                .andExpect(jsonPath("$.examesSolicitados.urgenciaExames").value(false));
+
+        // 4) Encaminhamento
+        String encaminhamentoPayload = """
+                {
+                  "encaminhamento": {
+                    "encaminhamentos": "Encaminhar para cardiologia",
+                    "especialistaEncaminhado": "Cardiologista",
+                    "motivoEncaminhamento": "Avaliação de HAS",
+                    "urgenciaEncaminhamento": false,
+                    "prazoEncaminhamento": "30 dias"
+                  }
+                }
+                """;
+        mockMvc.perform(put("/v1/consultas/" + consultaId + "/encaminhamento")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(encaminhamentoPayload))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(consultaId.toString()))
+                .andExpect(jsonPath("$.encaminhamento.especialistaEncaminhado").value("Cardiologista"));
+
+        // 5) Atestado
+        String atestadoPayload = """
+                {
+                  "atestado": {
+                    "atestadoEmitido": true,
+                    "tipoAtestado": "AFASTAMENTO",
+                    "diasAfastamento": 2,
+                    "motivoAtestado": "Cefaleia intensa",
+                    "cidAtestado": "R51"
+                  }
+                }
+                """;
+        mockMvc.perform(put("/v1/consultas/" + consultaId + "/atestado")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(atestadoPayload))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(consultaId.toString()))
+                .andExpect(jsonPath("$.atestado.atestadoEmitido").value(true))
+                .andExpect(jsonPath("$.atestado.cidAtestado").value("R51"));
     }
 }
