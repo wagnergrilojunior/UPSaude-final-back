@@ -13,6 +13,7 @@ import com.upsaude.entity.embeddable.ClassificacaoRiscoAtendimento;
 import com.upsaude.entity.embeddable.DiagnosticoAtendimento;
 import com.upsaude.entity.embeddable.InformacoesAtendimento;
 import com.upsaude.entity.embeddable.ProcedimentosRealizadosAtendimento;
+import com.upsaude.entity.financeiro.CompetenciaFinanceira;
 import jakarta.persistence.Column;
 import jakarta.persistence.Convert;
 import jakarta.persistence.Embedded;
@@ -21,10 +22,13 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
+import java.util.ArrayList;
+import java.util.List;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import org.hibernate.annotations.JdbcTypeCode;
@@ -37,7 +41,8 @@ import org.hibernate.type.SqlTypes;
         @Index(name = "idx_atendimento_data_hora", columnList = "data_hora"),
         @Index(name = "idx_atendimento_tipo", columnList = "tipo_atendimento"),
         @Index(name = "idx_atendimento_status", columnList = "status_atendimento"),
-        @Index(name = "idx_atendimento_estabelecimento", columnList = "estabelecimento_id")
+        @Index(name = "idx_atendimento_estabelecimento", columnList = "estabelecimento_id"),
+        @Index(name = "idx_atendimento_competencia", columnList = "competencia_financeira_id")
 })
 @Data
 @EqualsAndHashCode(callSuper = true)
@@ -49,6 +54,7 @@ public class Atendimento extends BaseEntity {
         this.diagnostico = new DiagnosticoAtendimento();
         this.procedimentosRealizados = new ProcedimentosRealizadosAtendimento();
         this.classificacaoRisco = new ClassificacaoRiscoAtendimento();
+        this.procedimentos = new ArrayList<>();
     }
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -121,6 +127,13 @@ public class Atendimento extends BaseEntity {
 
     @OneToOne(mappedBy = "atendimento", fetch = FetchType.LAZY)
     private Consulta consulta;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "competencia_financeira_id")
+    private CompetenciaFinanceira competenciaFinanceira;
+
+    @OneToMany(mappedBy = "atendimento", fetch = FetchType.LAZY)
+    private List<AtendimentoProcedimento> procedimentos = new ArrayList<>();
 
     @PrePersist
     @PreUpdate

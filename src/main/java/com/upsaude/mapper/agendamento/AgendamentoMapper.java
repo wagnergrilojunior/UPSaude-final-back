@@ -42,6 +42,7 @@ public interface AgendamentoMapper {
     @Mapping(target = "notificacoes", ignore = true)
     @Mapping(target = "checkIns", ignore = true)
     @Mapping(target = "especialidade", ignore = true)
+    @Mapping(target = "competenciaFinanceira", ignore = true)
     @Mapping(target = "tipoAgendamento", source = "request.tipoAgendamento")
     @Mapping(target = "categoriaServico", source = "request.categoriaServico")
     @Mapping(target = "tipoServico", source = "request.tipoServico")
@@ -63,6 +64,7 @@ public interface AgendamentoMapper {
     @Mapping(target = "notificacoes", ignore = true)
     @Mapping(target = "checkIns", ignore = true)
     @Mapping(target = "especialidade", ignore = true)
+    @Mapping(target = "competenciaFinanceira", ignore = true)
     void updateFromRequest(AgendamentoRequest request, @MappingTarget Agendamento entity);
 
     @Mapping(target = "agendamentoOriginal", ignore = true)

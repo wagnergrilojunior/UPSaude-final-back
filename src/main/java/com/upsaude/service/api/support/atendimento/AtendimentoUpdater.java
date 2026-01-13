@@ -14,6 +14,7 @@ import com.upsaude.mapper.embeddable.DiagnosticoAtendimentoMapper;
 import com.upsaude.mapper.embeddable.InformacoesAtendimentoMapper;
 import com.upsaude.mapper.embeddable.ProcedimentosRealizadosAtendimentoMapper;
 import com.upsaude.repository.clinica.atendimento.AtendimentoRepository;
+import com.upsaude.service.api.financeiro.FinanceiroIntegrationService;
 import com.upsaude.service.sistema.integracao.IntegracaoEventoGenerator;
 
 import lombok.RequiredArgsConstructor;
@@ -36,6 +37,7 @@ public class AtendimentoUpdater {
     private final ProcedimentosRealizadosAtendimentoMapper procedimentosRealizadosAtendimentoMapper;
     private final ClassificacaoRiscoAtendimentoMapper classificacaoRiscoAtendimentoMapper;
     private final IntegracaoEventoGenerator eventoGenerator;
+    private final FinanceiroIntegrationService financeiroIntegrationService;
 
     public Atendimento atualizar(UUID id, AtendimentoRequest request, UUID tenantId, Tenant tenant) {
         validationService.validarId(id);
@@ -43,11 +45,11 @@ public class AtendimentoUpdater {
 
         Atendimento entity = tenantEnforcer.validarAcesso(id, tenantId);
 
-        if (request.getInformacoes() != null && request.getInformacoes().getStatusAtendimento() != null) {
-            com.upsaude.enums.StatusAtendimentoEnum statusAtual = entity.getInformacoes() != null ? entity.getInformacoes().getStatusAtendimento() : null;
-            if (statusAtual != null && !statusAtual.equals(request.getInformacoes().getStatusAtendimento())) {
-                domainService.validarTransicaoStatus(entity, request.getInformacoes().getStatusAtendimento());
-            }
+        com.upsaude.enums.StatusAtendimentoEnum statusAnterior = entity.getInformacoes() != null ? entity.getInformacoes().getStatusAtendimento() : null;
+        com.upsaude.enums.StatusAtendimentoEnum statusNovo = request.getInformacoes() != null ? request.getInformacoes().getStatusAtendimento() : null;
+
+        if (statusNovo != null && statusAnterior != null && !statusAnterior.equals(statusNovo)) {
+            domainService.validarTransicaoStatus(entity, statusNovo);
         }
 
         atualizarCampos(entity, request);
@@ -56,6 +58,18 @@ public class AtendimentoUpdater {
 
         Atendimento saved = repository.save(Objects.requireNonNull(entity));
         eventoGenerator.gerarEventosParaAtendimento(saved);
+
+        // Integração financeira: consumir ao concluir; estornar ao cancelar/falta (quando aplicável)
+        if (statusNovo != null && statusAnterior != statusNovo) {
+            if (statusNovo == com.upsaude.enums.StatusAtendimentoEnum.CONCLUIDO) {
+                financeiroIntegrationService.consumirReserva(saved.getId());
+            }
+            if (statusNovo == com.upsaude.enums.StatusAtendimentoEnum.CANCELADO
+                    || statusNovo == com.upsaude.enums.StatusAtendimentoEnum.FALTA_PACIENTE) {
+                financeiroIntegrationService.estornarConsumo(saved.getId(), statusNovo.name());
+            }
+        }
+
         log.info("Atendimento atualizado com sucesso. ID: {}, tenant: {}", saved.getId(), tenantId);
         return saved;
     }

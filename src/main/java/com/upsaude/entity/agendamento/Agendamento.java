@@ -12,11 +12,14 @@ import com.upsaude.entity.clinica.atendimento.Atendimento;
 
 import com.upsaude.entity.paciente.Paciente;
 import com.upsaude.entity.referencia.sigtap.SigtapOcupacao;
+import com.upsaude.entity.financeiro.CompetenciaFinanceira;
 
 import com.upsaude.enums.PrioridadeAtendimentoEnum;
 import com.upsaude.enums.StatusAgendamentoEnum;
 import com.upsaude.util.converter.PrioridadeAtendimentoEnumConverter;
 import com.upsaude.util.converter.StatusAgendamentoEnumConverter;
+
+import java.math.BigDecimal;
 import jakarta.persistence.Column;
 import jakarta.persistence.Convert;
 import jakarta.persistence.Entity;
@@ -46,7 +49,8 @@ import java.util.List;
         @Index(name = "idx_agendamento_estabelecimento", columnList = "estabelecimento_id"),
         @Index(name = "idx_agendamento_prioridade", columnList = "prioridade"),
         @Index(name = "idx_agendamento_periodo", columnList = "data_hora,data_hora_fim"),
-        @Index(name = "idx_agendamento_agendado_por", columnList = "agendado_por")
+        @Index(name = "idx_agendamento_agendado_por", columnList = "agendado_por"),
+        @Index(name = "idx_agendamento_competencia", columnList = "competencia_financeira_id")
 })
 @Data
 @EqualsAndHashCode(callSuper = true)
@@ -177,6 +181,16 @@ public class Agendamento extends BaseEntity {
 
     @Column(name = "confirmacao_enviada")
     private Boolean confirmacaoEnviada;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "competencia_financeira_id")
+    private CompetenciaFinanceira competenciaFinanceira;
+
+    @Column(name = "valor_estimado_total", precision = 14, scale = 2)
+    private BigDecimal valorEstimadoTotal;
+
+    @Column(name = "status_financeiro", length = 30)
+    private String statusFinanceiro; // SEM_RESERVA | RESERVADO | CONSUMIDO | ESTORNADO | AJUSTADO
 
     // =================================================================================
     // CAMPOS DE INTEGRAÇÃO SUS / RNDS (FHIR APPOINTMENT)
