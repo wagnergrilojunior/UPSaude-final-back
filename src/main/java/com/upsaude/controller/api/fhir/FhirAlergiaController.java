@@ -6,19 +6,13 @@ import java.util.Map;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.upsaude.integration.fhir.dto.ConceptDTO;
 import com.upsaude.integration.fhir.service.alergia.AlergiaSyncService;
 import com.upsaude.integration.fhir.service.alergia.AlergiaSyncService.SyncResult;
-import com.upsaude.repository.alergia.AlergenoRepository;
-import com.upsaude.repository.alergia.CategoriaAgenteAlergiaRepository;
-import com.upsaude.repository.alergia.CriticidadeAlergiaRepository;
-import com.upsaude.repository.alergia.ReacaoAdversaCatalogoRepository;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -33,10 +27,6 @@ import lombok.extern.slf4j.Slf4j;
 public class FhirAlergiaController {
 
     private final AlergiaSyncService alergiaSyncService;
-    private final AlergenoRepository alergenoRepository;
-    private final ReacaoAdversaCatalogoRepository reacaoAdversaRepository;
-    private final CriticidadeAlergiaRepository criticidadeRepository;
-    private final CategoriaAgenteAlergiaRepository categoriaAgenteRepository;
 
     @PostMapping("/sincronizar/todos")
     @Operation(summary = "[FHIR] Sincronizar todos os catálogos de alergias", tags = "FHIR Alergias")
@@ -89,77 +79,6 @@ public class FhirAlergiaController {
     @Operation(summary = "[FHIR] Consultar reações adversas direto no servidor FHIR", tags = "FHIR Alergias")
     public ResponseEntity<List<ConceptDTO>> consultarReacoesExternas() {
         return ResponseEntity.ok(alergiaSyncService.consultarReacoesAdversasExternas());
-    }
-
-    // ==================== CONSULTA LOCAL (SINCRONIZADO) ====================
-
-    @GetMapping("/alergenos")
-    @Operation(summary = "Listar alérgenos sincronizados")
-    public ResponseEntity<List<com.upsaude.entity.alergia.Alergeno>> listarAlergenos(
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "100") int size) {
-        return ResponseEntity.ok(alergenoRepository.findByAtivoTrue(
-                org.springframework.data.domain.PageRequest.of(page, size)).getContent());
-    }
-
-    @GetMapping("/alergenos/{id}")
-    @Operation(summary = "Buscar alérgeno por ID")
-    public ResponseEntity<com.upsaude.entity.alergia.Alergeno> buscarAlergenoPorId(
-            @PathVariable java.util.UUID id) {
-        return alergenoRepository.findById(id)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
-    }
-
-    @GetMapping("/alergenos/buscar")
-    @Operation(summary = "Buscar alérgenos por termo (nome ou código)")
-    public ResponseEntity<List<com.upsaude.entity.alergia.Alergeno>> buscarAlergenos(
-            @RequestParam String termo,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "100") int size) {
-        return ResponseEntity.ok(alergenoRepository.buscarPorTermo(termo,
-                org.springframework.data.domain.PageRequest.of(page, size)).getContent());
-    }
-
-    @GetMapping("/reacoes-adversas")
-    @Operation(summary = "Listar reações adversas sincronizadas")
-    public ResponseEntity<List<com.upsaude.entity.alergia.ReacaoAdversaCatalogo>> listarReacoesAdversas(
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "100") int size) {
-        return ResponseEntity.ok(reacaoAdversaRepository.findByAtivoTrue(
-                org.springframework.data.domain.PageRequest.of(page, size)).getContent());
-    }
-
-    @GetMapping("/reacoes-adversas/{id}")
-    @Operation(summary = "Buscar reação adversa por ID")
-    public ResponseEntity<com.upsaude.entity.alergia.ReacaoAdversaCatalogo> buscarReacaoPorId(
-            @PathVariable java.util.UUID id) {
-        return reacaoAdversaRepository.findById(id)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
-    }
-
-    @GetMapping("/criticidade")
-    @Operation(summary = "Listar níveis de criticidade sincronizados")
-    public ResponseEntity<List<com.upsaude.entity.alergia.CriticidadeAlergia>> listarCriticidade() {
-        return ResponseEntity.ok(criticidadeRepository.findAll());
-    }
-
-    @GetMapping("/categorias-agente")
-    @Operation(summary = "Listar categorias de agente sincronizadas")
-    public ResponseEntity<List<com.upsaude.entity.alergia.CategoriaAgenteAlergia>> listarCategoriasAgente() {
-        return ResponseEntity.ok(categoriaAgenteRepository.findAll());
-    }
-
-    @GetMapping("/status")
-    @Operation(summary = "Status dos dados de alergias sincronizados")
-    public ResponseEntity<Map<String, Object>> status() {
-        Map<String, Object> response = new HashMap<>();
-        response.put("alergenos", alergenoRepository.count());
-        response.put("reacoesAdversas", reacaoAdversaRepository.count());
-        response.put("criticidade", criticidadeRepository.count());
-        response.put("categoriasAgente", categoriaAgenteRepository.count());
-        return ResponseEntity.ok(response);
     }
 
     private Map<String, Object> buildSyncResponse(SyncResult result) {
