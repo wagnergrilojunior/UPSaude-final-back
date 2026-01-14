@@ -50,11 +50,12 @@ class TenantAtualizacaoErroRegressionTest extends BaseRegressionTest {
     }
 
     @Test
-    void tenantAtualizadoSemSlugSempreRetorna400() throws Exception {
+    void tenantAtualizadoSemSlugPodeSerAtualizadoComSucesso() throws Exception {
+        // Slug agora é opcional, então pode ser atualizado sem fornecer slug
         String jsonPayload = """
                 {
                   "dadosIdentificacao": {
-                    "nome": "Tenant Sem Slug"
+                    "nome": "Tenant Sem Slug Atualizado"
                   }
                 }
                 """;
@@ -62,7 +63,7 @@ class TenantAtualizacaoErroRegressionTest extends BaseRegressionTest {
         mockMvc.perform(put("/v1/tenants/" + tenantId)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(jsonPayload))
-                .andExpect(status().isBadRequest());
+                .andExpect(status().isOk());
     }
 
     @Test
@@ -82,19 +83,21 @@ class TenantAtualizacaoErroRegressionTest extends BaseRegressionTest {
     }
 
     @Test
-    void tenantAtualizadoComSlugInvalidoSempreRetorna400() throws Exception {
-        String jsonPayload = """
+    void tenantAtualizadoComSlugPodeSerAtualizadoComSucesso() throws Exception {
+        // Slug agora é opcional e não tem validação de formato rígida
+        String novoSlug = gerarSlugUnico();
+        String jsonPayload = String.format("""
                 {
-                  "slug": "SLUG_INVALIDO_COM_MAIUSCULAS_E_ESPACOS",
+                  "slug": "%s",
                   "dadosIdentificacao": {
-                    "nome": "Tenant Com Slug Inválido"
+                    "nome": "Tenant Com Slug Atualizado"
                   }
                 }
-                """;
+                """, novoSlug);
 
         mockMvc.perform(put("/v1/tenants/" + tenantId)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(jsonPayload))
-                .andExpect(status().isBadRequest());
+                .andExpect(status().isOk());
     }
 }

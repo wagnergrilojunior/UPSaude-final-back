@@ -29,6 +29,7 @@ public interface TenantMapper {
     @Mapping(target = "updatedAt", ignore = true)
     @Mapping(target = "ativo", ignore = true)
     @Mapping(target = "endereco", ignore = true)
+    @Mapping(target = "slug", source = "slug")
     Tenant fromRequest(TenantRequest request);
 
     @Mapping(target = "id", ignore = true)
