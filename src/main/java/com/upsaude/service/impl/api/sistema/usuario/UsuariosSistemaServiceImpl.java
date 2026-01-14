@@ -73,6 +73,7 @@ public class UsuariosSistemaServiceImpl implements UsuariosSistemaService {
     private final SupabaseStorageService supabaseStorageService;
     private final com.upsaude.integration.supabase.SupabaseAuthService supabaseAuthService;
     private final UserService userService;
+    private final com.upsaude.service.sistema.notificacao.NotificacaoOrchestrator notificacaoOrchestrator;
 
     @PersistenceContext
     private EntityManager entityManager;
@@ -153,6 +154,19 @@ public class UsuariosSistemaServiceImpl implements UsuariosSistemaService {
             } else if (request.getEstabelecimentosIds() != null && !request.getEstabelecimentosIds().isEmpty()) {
 
                 criarVinculosEstabelecimentos(usuariosSistemaSalvo, request.getEstabelecimentosIds());
+            }
+
+            // Notificar criação de usuário
+            try {
+                String nomeUsuario = usuariosSistemaSalvo.getDadosExibicao() != null 
+                        ? usuariosSistemaSalvo.getDadosExibicao().getNomeExibicao() 
+                        : (usuariosSistemaSalvo.getDadosIdentificacao() != null 
+                                ? usuariosSistemaSalvo.getDadosIdentificacao().getUsername() 
+                                : null);
+                notificacaoOrchestrator.notificarUsuarioCriado(usuariosSistemaSalvo, user.getEmail(), nomeUsuario);
+            } catch (Exception e) {
+                log.warn("Erro ao enviar notificação de usuário criado. Usuário ID: {}", usuariosSistemaSalvo.getId(), e);
+                // Não propagar erro para não abortar criação do usuário
             }
 
             return enrichResponseWithEntity(usuariosSistemaSalvo);
@@ -279,8 +293,10 @@ public class UsuariosSistemaServiceImpl implements UsuariosSistemaService {
             precisaAtualizarUser = true;
         }
 
+        boolean senhaAlterada = false;
         if (precisaAtualizarUser) {
             log.debug("Atualizando User no Supabase Auth primeiro");
+            senhaAlterada = request.getSenha() != null && !request.getSenha().trim().isEmpty();
             UserRequest userRequest = UserRequest.builder()
                     .email(request.getEmail())
                     .senha(request.getSenha())
@@ -312,6 +328,31 @@ public class UsuariosSistemaServiceImpl implements UsuariosSistemaService {
         } else if (request.getEstabelecimentosIds() != null) {
 
             atualizarVinculosEstabelecimentos(usuariosSistemaAtualizado, request.getEstabelecimentosIds());
+        }
+
+        // Notificar alterações
+        try {
+            String email = userAtualizado != null ? userAtualizado.getEmail() : null;
+            String nomeUsuario = usuariosSistemaAtualizado.getDadosExibicao() != null 
+                    ? usuariosSistemaAtualizado.getDadosExibicao().getNomeExibicao() 
+                    : (usuariosSistemaAtualizado.getDadosIdentificacao() != null 
+                            ? usuariosSistemaAtualizado.getDadosIdentificacao().getUsername() 
+                            : null);
+            
+            if (senhaAlterada && email != null) {
+                notificacaoOrchestrator.notificarSenhaAlterada(email, nomeUsuario);
+            }
+            
+            // Notificar atualização de dados pessoais se houver alterações relevantes
+            if (email != null && (request.getDadosIdentificacao() != null || request.getDadosExibicao() != null)) {
+                UUID pacienteId = usuariosSistemaAtualizado.getPaciente() != null 
+                        ? usuariosSistemaAtualizado.getPaciente().getId() 
+                        : null;
+                notificacaoOrchestrator.notificarDadosPessoaisAtualizados(email, nomeUsuario, pacienteId, null);
+            }
+        } catch (Exception e) {
+            log.warn("Erro ao enviar notificações de atualização. Usuário ID: {}", usuariosSistemaAtualizado.getId(), e);
+            // Não propagar erro
         }
 
         return enrichResponseWithEntity(usuariosSistemaAtualizado);
@@ -717,6 +758,19 @@ public class UsuariosSistemaServiceImpl implements UsuariosSistemaService {
 
         userService.atualizar(userId, userRequest);
         log.info("Senha trocada com sucesso para o usuário do sistema ID: {}, UserID: {}", id, userId);
+
+        // Notificar alteração de senha
+        try {
+            String nomeUsuario = usuario.getDadosExibicao() != null 
+                    ? usuario.getDadosExibicao().getNomeExibicao() 
+                    : (usuario.getDadosIdentificacao() != null 
+                            ? usuario.getDadosIdentificacao().getUsername() 
+                            : null);
+            notificacaoOrchestrator.notificarSenhaAlterada(email, nomeUsuario);
+        } catch (Exception e) {
+            log.warn("Erro ao enviar notificação de senha alterada. Usuário ID: {}", id, e);
+            // Não propagar erro
+        }
     }
 
     private UsuariosSistemaResponse enrichResponseWithEntity(UsuariosSistema usuario) {

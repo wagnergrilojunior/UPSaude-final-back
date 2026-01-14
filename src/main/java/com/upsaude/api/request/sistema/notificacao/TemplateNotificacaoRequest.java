@@ -46,5 +46,6 @@ public class TemplateNotificacaoRequest {
     private Integer ordemPrioridade;
     private Boolean enviaAutomaticamente;
     private String condicoesEnvioJson;
+    private Integer brevoTemplateId;
     private String observacoes;
 }

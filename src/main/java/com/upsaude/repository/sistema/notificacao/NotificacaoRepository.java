@@ -12,6 +12,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.time.OffsetDateTime;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -56,5 +57,8 @@ public interface NotificacaoRepository extends JpaRepository<Notificacao, UUID> 
     Page<Notificacao> findByDataEnvioBetweenAndTenantIdOrderByDataEnvioDesc(OffsetDateTime dataInicio, OffsetDateTime dataFim, UUID tenantId, Pageable pageable);
 
     Page<Notificacao> findByDataEnvioPrevistaBetweenAndTenantIdOrderByDataEnvioPrevistaDesc(OffsetDateTime dataInicio, OffsetDateTime dataFim, UUID tenantId, Pageable pageable);
+
+    @Query("SELECT n FROM Notificacao n WHERE n.statusEnvio = 'PENDENTE' AND (n.dataEnvioPrevista IS NULL OR n.dataEnvioPrevista <= :agora) AND n.active = true ORDER BY n.dataEnvioPrevista ASC NULLS FIRST")
+    List<Notificacao> findPendentesParaEnvio(@Param("agora") OffsetDateTime agora);
 }
 

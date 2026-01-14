@@ -192,4 +192,16 @@ public interface AgendamentoRepository extends JpaRepository<Agendamento, UUID> 
 
     @Query("SELECT a FROM Agendamento a WHERE a.atendimento.id = :atendimentoId AND a.tenant.id = :tenantId")
     Optional<Agendamento> findByAtendimento(@Param("atendimentoId") UUID atendimentoId, @Param("tenantId") UUID tenantId);
+
+    @Query("SELECT a FROM Agendamento a WHERE a.status = :status AND a.active = true AND a.dataHora BETWEEN :inicio AND :fim AND (a.notificacaoEnviada24h IS NULL OR a.notificacaoEnviada24h = false)")
+    List<Agendamento> findAgendamentosParaLembrete24h(
+            @Param("status") StatusAgendamentoEnum status,
+            @Param("inicio") OffsetDateTime inicio,
+            @Param("fim") OffsetDateTime fim);
+
+    @Query("SELECT a FROM Agendamento a WHERE a.status = :status AND a.active = true AND a.dataHora BETWEEN :inicio AND :fim AND (a.notificacaoEnviada1h IS NULL OR a.notificacaoEnviada1h = false)")
+    List<Agendamento> findAgendamentosParaLembrete1h(
+            @Param("status") StatusAgendamentoEnum status,
+            @Param("inicio") OffsetDateTime inicio,
+            @Param("fim") OffsetDateTime fim);
 }

@@ -28,6 +28,7 @@ public class AgendamentoCreator {
     private final AgendamentoDomainService domainService;
     private final IntegracaoEventoGenerator eventoGenerator;
     private final FinanceiroIntegrationService financeiroIntegrationService;
+    private final com.upsaude.service.sistema.notificacao.NotificacaoOrchestrator notificacaoOrchestrator;
 
     public Agendamento criar(AgendamentoRequest request, UUID tenantId, Tenant tenant) {
         validationService.validarObrigatorios(request);
@@ -44,6 +45,20 @@ public class AgendamentoCreator {
         // Reserva automática no momento da aprovação/confirmação (modelo híbrido)
         if (saved.getStatus() == com.upsaude.enums.StatusAgendamentoEnum.CONFIRMADO) {
             financeiroIntegrationService.reservarOrcamento(saved.getId());
+            // Notificar confirmação de agendamento
+            try {
+                notificacaoOrchestrator.notificarAgendamentoConfirmado(saved);
+                notificacaoOrchestrator.agendarLembretesAgendamento(saved);
+            } catch (Exception e) {
+                log.warn("Erro ao enviar notificação de agendamento confirmado. Agendamento ID: {}", saved.getId(), e);
+            }
+        } else {
+            // Agendar lembretes mesmo se não confirmado ainda
+            try {
+                notificacaoOrchestrator.agendarLembretesAgendamento(saved);
+            } catch (Exception e) {
+                log.warn("Erro ao agendar lembretes de agendamento. Agendamento ID: {}", saved.getId(), e);
+            }
         }
 
         log.info("Agendamento criado com sucesso. ID: {}, tenant: {}", saved.getId(), tenantId);

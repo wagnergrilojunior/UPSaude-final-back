@@ -29,6 +29,7 @@ public class AgendamentoUpdater {
     private final AgendamentoMapper mapper;
     private final IntegracaoEventoGenerator eventoGenerator;
     private final FinanceiroIntegrationService financeiroIntegrationService;
+    private final com.upsaude.service.sistema.notificacao.NotificacaoOrchestrator notificacaoOrchestrator;
 
     public Agendamento atualizar(UUID id, AgendamentoRequest request, UUID tenantId, Tenant tenant) {
         validationService.validarId(id);
@@ -54,9 +55,24 @@ public class AgendamentoUpdater {
         if (statusNovo != null && statusAnterior != statusNovo) {
             if (statusNovo == com.upsaude.enums.StatusAgendamentoEnum.CONFIRMADO) {
                 financeiroIntegrationService.reservarOrcamento(saved.getId());
+                // Notificar confirmação de agendamento
+                try {
+                    notificacaoOrchestrator.notificarAgendamentoConfirmado(saved);
+                    notificacaoOrchestrator.agendarLembretesAgendamento(saved);
+                } catch (Exception e) {
+                    log.warn("Erro ao enviar notificação de agendamento confirmado. Agendamento ID: {}", saved.getId(), e);
+                }
             }
-            if (statusNovo == com.upsaude.enums.StatusAgendamentoEnum.CANCELADO
-                    || statusNovo == com.upsaude.enums.StatusAgendamentoEnum.FALTA
+            if (statusNovo == com.upsaude.enums.StatusAgendamentoEnum.CANCELADO) {
+                financeiroIntegrationService.estornarReserva(saved.getId(), statusNovo.name());
+                // Notificar cancelamento de agendamento
+                try {
+                    notificacaoOrchestrator.notificarAgendamentoCancelado(saved);
+                } catch (Exception e) {
+                    log.warn("Erro ao enviar notificação de agendamento cancelado. Agendamento ID: {}", saved.getId(), e);
+                }
+            }
+            if (statusNovo == com.upsaude.enums.StatusAgendamentoEnum.FALTA
                     || statusNovo == com.upsaude.enums.StatusAgendamentoEnum.REAGENDADO) {
                 financeiroIntegrationService.estornarReserva(saved.getId(), statusNovo.name());
             }
