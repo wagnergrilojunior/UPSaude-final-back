@@ -19,7 +19,7 @@ class TenantCadastroErroRegressionTest extends BaseRegressionTest {
     }
 
     @Test
-    void tenantSemSlugSempreRetorna400() throws Exception {
+    void tenantSemSlugPodeSerCriadoComSucesso() throws Exception {
         String jsonPayload = """
                 {
                   "dadosIdentificacao": {
@@ -31,7 +31,7 @@ class TenantCadastroErroRegressionTest extends BaseRegressionTest {
         mockMvc.perform(post("/v1/tenants")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(jsonPayload))
-                .andExpect(status().isBadRequest());
+                .andExpect(status().isCreated());
     }
 
     @Test
@@ -51,19 +51,21 @@ class TenantCadastroErroRegressionTest extends BaseRegressionTest {
     }
 
     @Test
-    void tenantComSlugInvalidoSempreRetorna400() throws Exception {
-        String jsonPayload = """
+    void tenantComSlugInvalidoPodeSerCriadoComSucesso() throws Exception {
+        // Slug agora é opcional e não tem validação de formato rígida
+        String slug = gerarSlugUnico();
+        String jsonPayload = String.format("""
                 {
-                  "slug": "SLUG_INVALIDO_COM_MAIUSCULAS",
+                  "slug": "%s",
                   "dadosIdentificacao": {
-                    "nome": "Tenant Com Slug Inválido"
+                    "nome": "Tenant Com Slug"
                   }
                 }
-                """;
+                """, slug);
 
         mockMvc.perform(post("/v1/tenants")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(jsonPayload))
-                .andExpect(status().isBadRequest());
+                .andExpect(status().isCreated());
     }
 }
