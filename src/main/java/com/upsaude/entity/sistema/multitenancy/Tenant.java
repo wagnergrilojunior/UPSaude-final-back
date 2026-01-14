@@ -34,19 +34,17 @@ import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 @Entity
-@Table(name = "tenants", schema = "public",
-       uniqueConstraints = {
-           @UniqueConstraint(name = "uk_tenants_slug", columnNames = {"slug"}),
-           @UniqueConstraint(name = "uk_tenants_cnpj", columnNames = {"cnpj"})
-       },
-       indexes = {
-           @Index(name = "idx_tenants_slug", columnList = "slug"),
-           @Index(name = "idx_tenants_cnpj", columnList = "cnpj")
-       })
+@Table(name = "tenants", schema = "public", uniqueConstraints = {
+        @UniqueConstraint(name = "uk_tenants_slug", columnNames = { "slug" }),
+        @UniqueConstraint(name = "uk_tenants_cnpj", columnNames = { "cnpj" })
+}, indexes = {
+        @Index(name = "idx_tenants_slug", columnList = "slug"),
+        @Index(name = "idx_tenants_cnpj", columnList = "cnpj")
+})
 @Getter
 @Setter
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
-@EntityListeners({AuditingEntityListener.class})
+@EntityListeners({ AuditingEntityListener.class })
 public class Tenant {
 
     @Id
@@ -92,6 +90,9 @@ public class Tenant {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "endereco_id")
     private Endereco endereco;
+
+    @Column(name = "codigo_ibge_municipio", length = 10)
+    private String codigoIbgeMunicipio;
 
     @PrePersist
     @PreUpdate

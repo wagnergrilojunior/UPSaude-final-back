@@ -77,6 +77,9 @@ public class TemplateNotificacao extends BaseEntity {
     @Column(name = "condicoes_envio_json", columnDefinition = "TEXT")
     private String condicoesEnvioJson;
 
+    @Column(name = "brevo_template_id")
+    private Integer brevoTemplateId;
+
     @Column(name = "observacoes", columnDefinition = "TEXT")
     private String observacoes;
 }
