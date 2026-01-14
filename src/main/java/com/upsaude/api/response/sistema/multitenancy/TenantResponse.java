@@ -25,6 +25,7 @@ public class TenantResponse {
     private OffsetDateTime createdAt;
     private OffsetDateTime updatedAt;
     private Boolean ativo;
+    private Boolean consorcio;
     private String slug;
     private String metadados;
     private String cnes;

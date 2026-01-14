@@ -106,6 +106,7 @@ public class EstabelecimentosRequest {
     @Size(max = 1000, message = "Observações deve ter no máximo 1000 caracteres")
     private String observacoes;
 
+    @NotNull(message = "Prestador de serviço é obrigatório")
     @Schema(description = "Indica se o estabelecimento é um prestador de serviço")
     private Boolean prestadorServico;
 

@@ -31,6 +31,11 @@ public class EstabelecimentosUpdater {
 
         mapper.updateFromRequest(request, entity);
         entity.setTenant(Objects.requireNonNull(tenant, "tenant é obrigatório para atualizar estabelecimento"));
+        
+        // Garantir que prestadorServico não seja null após atualização
+        if (entity.getPrestadorServico() == null) {
+            entity.setPrestadorServico(false);
+        }
 
         relacionamentosHandler.processarEnderecoPrincipal(request, entity, tenantId, tenant);
         relacionamentosHandler.processarResponsaveis(request, entity, tenantId);

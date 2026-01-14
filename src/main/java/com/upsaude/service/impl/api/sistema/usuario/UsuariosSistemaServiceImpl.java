@@ -859,6 +859,11 @@ public class UsuariosSistemaServiceImpl implements UsuariosSistemaService {
             response.setTipoUsuario(null);
         }
 
+        // Garantir que o campo usuarioConsorcio seja incluído na resposta
+        if (response.getUsuarioConsorcio() == null && usuario.getUsuarioConsorcio() != null) {
+            response.setUsuarioConsorcio(usuario.getUsuarioConsorcio());
+        }
+
         return response;
     }
 

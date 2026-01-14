@@ -55,6 +55,7 @@ public interface EstabelecimentosMapper {
     @Mapping(target = "endereco", ignore = true)
     @Mapping(target = "equipamentos", ignore = true)
     @Mapping(target = "contasBancarias", ignore = true)
+    @Mapping(target = "prestadorServico", ignore = true)
     void updateFromRequest(EstabelecimentosRequest request, @MappingTarget Estabelecimentos entity);
 
     @Mapping(target = "equipamentos", ignore = true)

@@ -56,6 +56,7 @@ class UsuariosSistemaAtualizacaoErroRegressionTest extends BaseRegressionTest {
                 {
                   "email": "%s",
                   "tenantId": "26c54644-56c9-4237-9a01-737b6625099f",
+                  "usuarioConsorcio": false,
                   "dadosIdentificacao": {
                     "username": "%s",
                     "cpf": "%s"
@@ -80,6 +81,7 @@ class UsuariosSistemaAtualizacaoErroRegressionTest extends BaseRegressionTest {
                 {
                   "email": "%s",
                   "tenantId": "26c54644-56c9-4237-9a01-737b6625099f",
+                  "usuarioConsorcio": false,
                   "dadosIdentificacao": {
                     "cpf": "%s"
                   }

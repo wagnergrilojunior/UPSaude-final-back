@@ -23,6 +23,7 @@ public class EstabelecimentosResponseBuilder {
                 Hibernate.initialize(entity.getResponsaveis().getResponsavelAdministrativo());
             }
             if (entity.getEquipamentos() != null) Hibernate.initialize(entity.getEquipamentos());
+            if (entity.getContasBancarias() != null) Hibernate.initialize(entity.getContasBancarias());
         }
         return mapper.toResponse(entity);
     }

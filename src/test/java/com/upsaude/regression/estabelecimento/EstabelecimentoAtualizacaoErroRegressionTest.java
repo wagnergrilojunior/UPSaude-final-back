@@ -28,7 +28,8 @@ class EstabelecimentoAtualizacaoErroRegressionTest extends BaseRegressionTest {
                   "dadosIdentificacao": {
                     "nome": "Estabelecimento Para Erro",
                     "tipo": "CLINICA"
-                  }
+                  },
+                  "prestadorServico": false
                 }
                 """;
 
