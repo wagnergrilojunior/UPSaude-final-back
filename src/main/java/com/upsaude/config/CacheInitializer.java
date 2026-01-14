@@ -48,7 +48,15 @@ public class CacheInitializer implements ApplicationListener<ContextRefreshedEve
         "equipamentos", "equipamentosestabelecimento", "escalatrabalho",
         "atendimento",
         "checkinatendimento", "historicoclinico", "infraestruturaestabelecimento",
-        "integracaogov", "lgpdconsentimento", "logsauditoria"
+        "integracaogov", "lgpdconsentimento", "logsauditoria",
+        // Caches de relatórios e KPIs
+        "siaKpiGeral", "siaKpiEstabelecimento", "siaKpiProcedimento",
+        "siaKpiTenant", "siaKpiPorEstabelecimentoId", "siaKpiPorMedicoId",
+        "siaRelatorioProducaoMensal", "siaRelatorioTopProcedimentos", "siaRelatorioTopCid",
+        "dashboardTenant", "dashboardEstabelecimento", "dashboardMedico",
+        "relatorioEstatisticas", "relatorioComparativo",
+        "sigtapProcedimento", "cid10Subcategoria",
+        "estabelecimentoPorCnes", "medicoPorCns"
     );
 
     @Override

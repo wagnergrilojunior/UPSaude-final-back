@@ -100,6 +100,38 @@ public interface AgendamentoRepository extends JpaRepository<Agendamento, UUID> 
             @Param("tenantId") UUID tenantId,
             Pageable pageable);
 
+    @Query("SELECT a FROM Agendamento a WHERE a.dataHora BETWEEN :dataInicio AND :dataFim AND a.tenant.id = :tenantId ORDER BY a.dataHora ASC")
+    Page<Agendamento> findByDataHoraBetweenAndTenantIdOrderByDataHoraAsc(
+            @Param("dataInicio") OffsetDateTime dataInicio,
+            @Param("dataFim") OffsetDateTime dataFim,
+            @Param("tenantId") UUID tenantId,
+            Pageable pageable);
+
+    @Query("SELECT a FROM Agendamento a WHERE a.medico.id = :medicoId AND a.dataHora BETWEEN :dataInicio AND :dataFim AND a.tenant.id = :tenantId ORDER BY a.dataHora ASC")
+    Page<Agendamento> findByMedicoIdAndDataHoraBetweenAndTenantIdOrderByDataHoraAsc(
+            @Param("medicoId") UUID medicoId,
+            @Param("dataInicio") OffsetDateTime dataInicio,
+            @Param("dataFim") OffsetDateTime dataFim,
+            @Param("tenantId") UUID tenantId,
+            Pageable pageable);
+
+    @Query("SELECT a FROM Agendamento a WHERE a.especialidade.id = :especialidadeId AND a.dataHora BETWEEN :dataInicio AND :dataFim AND a.tenant.id = :tenantId ORDER BY a.dataHora ASC")
+    Page<Agendamento> findByEspecialidadeIdAndDataHoraBetweenAndTenantIdOrderByDataHoraAsc(
+            @Param("especialidadeId") UUID especialidadeId,
+            @Param("dataInicio") OffsetDateTime dataInicio,
+            @Param("dataFim") OffsetDateTime dataFim,
+            @Param("tenantId") UUID tenantId,
+            Pageable pageable);
+
+    @Query("SELECT a FROM Agendamento a WHERE a.estabelecimento.id = :estabelecimentoId AND a.medico.id = :medicoId AND a.dataHora BETWEEN :dataInicio AND :dataFim AND a.tenant.id = :tenantId ORDER BY a.dataHora ASC")
+    Page<Agendamento> findByEstabelecimentoIdAndMedicoIdAndDataHoraBetweenAndTenantIdOrderByDataHoraAsc(
+            @Param("estabelecimentoId") UUID estabelecimentoId,
+            @Param("medicoId") UUID medicoId,
+            @Param("dataInicio") OffsetDateTime dataInicio,
+            @Param("dataFim") OffsetDateTime dataFim,
+            @Param("tenantId") UUID tenantId,
+            Pageable pageable);
+
     @Query("SELECT a FROM Agendamento a WHERE a.profissional.id = :profissionalId AND a.status = :status AND a.tenant.id = :tenantId ORDER BY a.dataHora ASC")
     Page<Agendamento> findByProfissionalIdAndStatusAndTenantIdOrderByDataHoraAsc(
             @Param("profissionalId") UUID profissionalId,
