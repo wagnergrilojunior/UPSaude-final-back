@@ -26,12 +26,14 @@ import org.mapstruct.MappingTarget;
         InfraestruturaFisicaEstabelecimentoMapper.class,
         LocalizacaoEstabelecimentoMapper.class,
         EnderecoMapper.class,
-        TenantMapper.class
+        TenantMapper.class,
+        ContaBancariaEstabelecimentoMapper.class
 })
 public interface EstabelecimentosMapper {
 
     @Mapping(target = "active", ignore = true)
     @Mapping(target = "equipamentos", ignore = true)
+    @Mapping(target = "contasBancarias", ignore = true)
     @Mapping(target = "endereco", ignore = true)
     @Mapping(target = "responsaveis.responsavelTecnico", ignore = true)
     @Mapping(target = "responsaveis.responsavelAdministrativo", ignore = true)
@@ -43,6 +45,7 @@ public interface EstabelecimentosMapper {
     @Mapping(target = "active", ignore = true)
     @Mapping(target = "endereco", ignore = true)
     @Mapping(target = "equipamentos", ignore = true)
+    @Mapping(target = "contasBancarias", ignore = true)
     Estabelecimentos fromRequest(EstabelecimentosRequest request);
 
     @Mapping(target = "id", ignore = true)
@@ -51,6 +54,8 @@ public interface EstabelecimentosMapper {
     @Mapping(target = "active", ignore = true)
     @Mapping(target = "endereco", ignore = true)
     @Mapping(target = "equipamentos", ignore = true)
+    @Mapping(target = "contasBancarias", ignore = true)
+    @Mapping(target = "prestadorServico", ignore = true)
     void updateFromRequest(EstabelecimentosRequest request, @MappingTarget Estabelecimentos entity);
 
     @Mapping(target = "equipamentos", ignore = true)

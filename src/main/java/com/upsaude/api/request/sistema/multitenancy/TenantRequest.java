@@ -37,6 +37,9 @@ public class TenantRequest {
 
     private Boolean ativo;
 
+    @Schema(description = "Indica se o tenant é um consórcio")
+    private Boolean consorcio;
+
     @CNESValido
     @Size(max = 7, message = "CNES deve ter no máximo 7 caracteres")
     private String cnes;

@@ -47,7 +47,8 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
            @UniqueConstraint(name = "uk_usuarios_sistema_username", columnNames = {"username"})
        },
        indexes = {
-           @Index(name = "idx_usuarios_sistema_user", columnList = "user_id")
+           @Index(name = "idx_usuarios_sistema_user", columnList = "user_id"),
+           @Index(name = "idx_usuarios_sistema_consorcio", columnList = "usuario_consorcio")
        })
 @Getter
 @Setter
@@ -70,6 +71,9 @@ public class UsuariosSistema {
 
     @Column(name = "ativo", nullable = false)
     private Boolean ativo = true;
+
+    @Column(name = "usuario_consorcio", nullable = false, columnDefinition = "boolean default false")
+    private Boolean usuarioConsorcio = false;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "tenant_id", nullable = false)
@@ -114,6 +118,9 @@ public class UsuariosSistema {
         }
         if (configuracao == null) {
             configuracao = new ConfiguracaoUsuario();
+        }
+        if (usuarioConsorcio == null) {
+            usuarioConsorcio = false;
         }
 
         if (estabelecimentosVinculados == null) {

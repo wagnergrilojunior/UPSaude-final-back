@@ -58,4 +58,9 @@ public class EstabelecimentosResponse {
 
     @Builder.Default
     private List<EquipamentosEstabelecimentoResponse> equipamentos = new ArrayList<>();
+
+    private Boolean prestadorServico;
+
+    @Builder.Default
+    private List<ContaBancariaEstabelecimentoResponse> contasBancarias = new ArrayList<>();
 }

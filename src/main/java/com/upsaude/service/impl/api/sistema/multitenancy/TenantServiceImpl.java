@@ -51,6 +51,11 @@ public class TenantServiceImpl implements TenantService {
 
         Tenant tenant = tenantMapper.fromRequest(request);
         tenant.setAtivo(true);
+        
+        // Garantir que consorcio tenha valor padrão se não fornecido
+        if (tenant.getConsorcio() == null) {
+            tenant.setConsorcio(false);
+        }
 
         Tenant tenantSalvo = tenantRepository.save(tenant);
         log.info("Tenant criado com sucesso. ID: {}", tenantSalvo.getId());
@@ -147,8 +152,12 @@ public class TenantServiceImpl implements TenantService {
     }
 
     private void atualizarDadosTenant(Tenant tenant, TenantRequest request) {
-
         tenantMapper.updateFromRequest(request, tenant);
+        
+        // Garantir que consorcio tenha valor padrão se não fornecido na atualização
+        if (tenant.getConsorcio() == null) {
+            tenant.setConsorcio(false);
+        }
     }
 
     @Override

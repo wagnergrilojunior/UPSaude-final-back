@@ -40,6 +40,8 @@ public class UsuariosSistemaResponse {
 
     private TipoUsuarioSistemaEnum tipoUsuario;
 
+    private Boolean usuarioConsorcio;
+
     @Builder.Default
     private List<EstabelecimentoVinculoSimples> estabelecimentosVinculados = new ArrayList<>();
 

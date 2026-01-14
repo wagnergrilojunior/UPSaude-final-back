@@ -29,6 +29,11 @@ public class EstabelecimentosCreator {
         Estabelecimentos entity = mapper.fromRequest(request);
         entity.setActive(true);
         entity.setTenant(Objects.requireNonNull(tenant, "tenant é obrigatório para criar estabelecimento"));
+        
+        // Garantir que prestadorServico não seja null
+        if (entity.getPrestadorServico() == null) {
+            entity.setPrestadorServico(false);
+        }
 
         relacionamentosHandler.processarEnderecoPrincipal(request, entity, tenantId, tenant);
         relacionamentosHandler.processarResponsaveis(request, entity, tenantId);

@@ -52,7 +52,8 @@ class EstabelecimentoAtualizacaoRegressionTest extends BaseRegressionTest {
                   "dadosIdentificacao": {
                     "nome": "Estabelecimento Para Atualizar",
                     "tipo": "CLINICA"
-                  }
+                  },
+                  "prestadorServico": false
                 }
                 """;
 
@@ -74,7 +75,8 @@ class EstabelecimentoAtualizacaoRegressionTest extends BaseRegressionTest {
                   "dadosIdentificacao": {
                     "nome": "Estabelecimento Atualizado Minimo",
                     "tipo": "CLINICA"
-                  }
+                  },
+                  "prestadorServico": false
                 }
                 """;
 
@@ -97,7 +99,8 @@ class EstabelecimentoAtualizacaoRegressionTest extends BaseRegressionTest {
                     "cnes": "%s",
                     "cnpj": "%s"
                   },
-                  "observacoes": "Atualização completa"
+                  "observacoes": "Atualização completa",
+                  "prestadorServico": false
                 }
                 """, cnes, cnpj);
 
@@ -129,7 +132,8 @@ class EstabelecimentoAtualizacaoRegressionTest extends BaseRegressionTest {
                     "latitude": -23.5505,
                     "longitude": -46.6333
                   },
-                  "observacoes": "Atualização com todos os campos"
+                  "observacoes": "Atualização com todos os campos",
+                  "prestadorServico": false
                 }
                 """, cnes, cnpj);
 

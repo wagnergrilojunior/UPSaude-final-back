@@ -65,6 +65,9 @@ public class Tenant {
     @Column(name = "ativo", nullable = false)
     private Boolean ativo = true;
 
+    @Column(name = "consorcio", nullable = false, columnDefinition = "boolean default false")
+    private Boolean consorcio = false;
+
     @Embedded
     private DadosIdentificacaoTenant dadosIdentificacao;
 
@@ -107,6 +110,9 @@ public class Tenant {
         }
         if (configuracaoFinanceira == null) {
             configuracaoFinanceira = new ConfiguracaoFinanceiraTenant();
+        }
+        if (consorcio == null) {
+            consorcio = false;
         }
     }
 }
