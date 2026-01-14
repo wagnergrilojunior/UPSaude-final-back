@@ -29,6 +29,7 @@ import java.util.Map;
 @EnableJpaRepositories(basePackages = {
                 "com.upsaude.repository.agendamento",
                 "com.upsaude.repository.alergia",
+                "com.upsaude.repository.anexo",
                 "com.upsaude.repository.clinica",
                 "com.upsaude.repository.convenio",
                 "com.upsaude.repository.deficiencia",
@@ -80,6 +81,7 @@ public class JpaConfig {
                                 .packages(
                                                 "com.upsaude.entity.agendamento",
                                                 "com.upsaude.entity.alergia",
+                                                "com.upsaude.entity.anexo",
                                                 "com.upsaude.entity.clinica",
                                                 "com.upsaude.entity.convenio",
                                                 "com.upsaude.entity.deficiencia",

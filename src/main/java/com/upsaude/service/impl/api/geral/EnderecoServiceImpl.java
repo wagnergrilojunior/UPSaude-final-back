@@ -24,6 +24,7 @@ import com.upsaude.mapper.geral.EnderecoMapper;
 import com.upsaude.repository.paciente.EnderecoRepository;
 import com.upsaude.repository.referencia.geografico.CidadesRepository;
 import com.upsaude.repository.referencia.geografico.EstadosRepository;
+import com.upsaude.repository.sistema.multitenancy.TenantRepository;
 import com.upsaude.service.api.geral.EnderecoService;
 import com.upsaude.service.api.sistema.multitenancy.TenantService;
 
@@ -40,6 +41,7 @@ public class EnderecoServiceImpl implements EnderecoService {
     private final EstadosRepository estadosRepository;
     private final CidadesRepository cidadesRepository;
     private final TenantService tenantService;
+    private final TenantRepository tenantRepository;
 
     @Override
     @Transactional
@@ -53,9 +55,21 @@ public class EnderecoServiceImpl implements EnderecoService {
         }
 
         try {
+            // Obter tenant do usuário autenticado (com fallback para testes)
+            UUID tenantId = tenantService.validarTenantAtual();
+            com.upsaude.entity.sistema.multitenancy.Tenant tenant = tenantService.obterTenantDoUsuarioAutenticado();
+            if (tenant == null) {
+                // Fallback para testes: buscar tenant do banco quando não houver autenticação
+                tenant = tenantRepository.findById(tenantId).orElse(null);
+            }
+            if (tenant == null) {
+                log.warn("Tenant não encontrado. ID: {}", tenantId);
+                throw new BadRequestException("Tenant não encontrado");
+            }
 
             Endereco endereco = enderecoMapper.fromRequest(request);
             endereco.setActive(true);
+            endereco.setTenant(tenant);
 
             if (endereco.getSemNumero() == null) {
                 endereco.setSemNumero(false);

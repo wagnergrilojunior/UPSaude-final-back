@@ -5,7 +5,11 @@ import com.upsaude.entity.paciente.Endereco;
 import com.upsaude.entity.referencia.geografico.Cidades;
 import com.upsaude.entity.referencia.geografico.Estados;
 import com.upsaude.entity.sistema.multitenancy.Tenant;
+import com.upsaude.service.api.cnes.CnesEstabelecimentoService;
 import com.upsaude.service.api.sistema.multitenancy.TenantService;
+import com.upsaude.service.api.support.relatorios.TenantFilterHelper;
+import com.upsaude.repository.estabelecimento.EstabelecimentosRepository;
+import com.upsaude.repository.profissional.MedicosRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -15,6 +19,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 
 import java.math.BigDecimal;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -30,6 +35,18 @@ class SiaPaKpiServiceImplTest {
 
     @Mock
     private TenantService tenantService;
+
+    @Mock
+    private TenantFilterHelper tenantFilterHelper;
+
+    @Mock
+    private CnesEstabelecimentoService cnesEstabelecimentoService;
+
+    @Mock
+    private EstabelecimentosRepository estabelecimentosRepository;
+
+    @Mock
+    private MedicosRepository medicosRepository;
 
     @InjectMocks
     private SiaPaKpiServiceImpl service;
@@ -49,6 +66,7 @@ class SiaPaKpiServiceImplTest {
         tenant.setEndereco(endereco);
 
         when(tenantService.obterTenantDoUsuarioAutenticado()).thenReturn(tenant);
+        when(tenantFilterHelper.obterCnesDoTenant(any())).thenReturn(List.of("1234567"));
 
         Map<String, Object> baseRow = new HashMap<>();
         baseRow.put("total_registros", 10L);
