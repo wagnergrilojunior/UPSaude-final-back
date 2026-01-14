@@ -25,6 +25,7 @@ import com.upsaude.mapper.sistema.multitenancy.TenantMapper;
 import com.upsaude.repository.sistema.multitenancy.TenantRepository;
 import com.upsaude.repository.sistema.usuario.UsuariosSistemaRepository;
 import com.upsaude.service.api.sistema.multitenancy.TenantService;
+import com.upsaude.validation.util.DocumentoUtil;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -48,6 +49,9 @@ public class TenantServiceImpl implements TenantService {
             log.warn("Request nulo recebido para criação de Tenant");
             throw new BadRequestException("Dados do tenant são obrigatórios");
         }
+
+        // Validar unicidade antes de criar
+        validarUnicidadeParaCriacao(request);
 
         Tenant tenant = tenantMapper.fromRequest(request);
         tenant.setAtivo(true);
@@ -152,11 +156,76 @@ public class TenantServiceImpl implements TenantService {
     }
 
     private void atualizarDadosTenant(Tenant tenant, TenantRequest request) {
+        // Validar unicidade antes de atualizar
+        validarUnicidadeParaAtualizacao(tenant.getId(), request);
+        
         tenantMapper.updateFromRequest(request, tenant);
         
         // Garantir que consorcio tenha valor padrão se não fornecido na atualização
         if (tenant.getConsorcio() == null) {
             tenant.setConsorcio(false);
+        }
+    }
+
+    /**
+     * Valida unicidade de email, CNPJ e slug antes de criar um novo tenant
+     */
+    private void validarUnicidadeParaCriacao(TenantRequest request) {
+        // Validar email
+        if (request.getContato() != null && request.getContato().getEmail() != null 
+                && !request.getContato().getEmail().trim().isEmpty()) {
+            String email = request.getContato().getEmail().trim();
+            tenantRepository.findByEmail(email).ifPresent(t -> {
+                throw new BadRequestException("Já existe um tenant cadastrado com o email: " + email);
+            });
+        }
+
+        // Validar CNPJ
+        if (request.getDadosIdentificacao() != null && request.getDadosIdentificacao().getCnpj() != null 
+                && !request.getDadosIdentificacao().getCnpj().trim().isEmpty()) {
+            String cnpj = DocumentoUtil.somenteDigitos(request.getDadosIdentificacao().getCnpj());
+            tenantRepository.findByCnpj(cnpj).ifPresent(t -> {
+                throw new BadRequestException("Já existe um tenant cadastrado com o CNPJ: " + request.getDadosIdentificacao().getCnpj());
+            });
+        }
+
+        // Validar slug
+        if (request.getSlug() != null && !request.getSlug().trim().isEmpty()) {
+            String slug = request.getSlug().trim();
+            tenantRepository.findBySlug(slug).ifPresent(t -> {
+                throw new BadRequestException("Já existe um tenant cadastrado com o slug: " + slug);
+            });
+        }
+    }
+
+    /**
+     * Valida unicidade de email, CNPJ e slug antes de atualizar um tenant existente
+     */
+    private void validarUnicidadeParaAtualizacao(UUID tenantId, TenantRequest request) {
+        // Validar email
+        if (request.getContato() != null && request.getContato().getEmail() != null 
+                && !request.getContato().getEmail().trim().isEmpty()) {
+            String email = request.getContato().getEmail().trim();
+            tenantRepository.findByEmailExcludingId(email, tenantId).ifPresent(t -> {
+                throw new BadRequestException("Já existe outro tenant cadastrado com o email: " + email);
+            });
+        }
+
+        // Validar CNPJ
+        if (request.getDadosIdentificacao() != null && request.getDadosIdentificacao().getCnpj() != null 
+                && !request.getDadosIdentificacao().getCnpj().trim().isEmpty()) {
+            String cnpj = DocumentoUtil.somenteDigitos(request.getDadosIdentificacao().getCnpj());
+            tenantRepository.findByCnpjExcludingId(cnpj, tenantId).ifPresent(t -> {
+                throw new BadRequestException("Já existe outro tenant cadastrado com o CNPJ: " + request.getDadosIdentificacao().getCnpj());
+            });
+        }
+
+        // Validar slug
+        if (request.getSlug() != null && !request.getSlug().trim().isEmpty()) {
+            String slug = request.getSlug().trim();
+            tenantRepository.findBySlugExcludingId(slug, tenantId).ifPresent(t -> {
+                throw new BadRequestException("Já existe outro tenant cadastrado com o slug: " + slug);
+            });
         }
     }
 
