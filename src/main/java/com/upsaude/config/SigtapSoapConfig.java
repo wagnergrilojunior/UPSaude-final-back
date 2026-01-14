@@ -43,7 +43,8 @@ public class SigtapSoapConfig {
     public SaajSoapMessageFactory sigtapSoapMessageFactory() {
         SaajSoapMessageFactory factory = new SaajSoapMessageFactory();
         factory.setSoapVersion(SoapVersion.SOAP_12);
-        factory.afterPropertiesSet();
+        // afterPropertiesSet() será chamado automaticamente quando o bean for realmente usado
+        // Não inicializar no startup para evitar carregamento de WSDL/SOAP
         return factory;
     }
 
@@ -92,12 +93,9 @@ public class SigtapSoapConfig {
         marshaller.setMtomEnabled(false);
         // Processa schemas aninhados (imports de XSDs)
         marshaller.setProcessExternalEntities(false);
-        try {
-            marshaller.afterPropertiesSet();
-        } catch (Exception e) {
-            throw new RuntimeException("Falha ao inicializar JAXB marshaller para SIGTAP. " +
-                    "Verifique se as classes foram geradas corretamente via wsimport. Erro: " + e.getMessage(), e);
-        }
+        // afterPropertiesSet() será chamado automaticamente quando o marshaller for realmente usado
+        // Não inicializar no startup para evitar carregamento de WSDL/SOAP no startup
+        // A inicialização acontecerá apenas quando o WebServiceTemplate for usado pela primeira vez
         return marshaller;
     }
 
