@@ -77,7 +77,8 @@ public class EstabelecimentosRequest {
             }
         } catch (Exception e) {
             log.error("Erro ao processar enderecoPrincipal: {}", e.getMessage(), e);
-            throw new IllegalArgumentException("Erro ao processar enderecoPrincipal. Deve ser UUID (string) ou objeto EnderecoRequest.", e);
+            throw new IllegalArgumentException(
+                    "Erro ao processar enderecoPrincipal. Deve ser UUID (string) ou objeto EnderecoRequest.", e);
         }
     }
 
@@ -104,4 +105,11 @@ public class EstabelecimentosRequest {
 
     @Size(max = 1000, message = "Observações deve ter no máximo 1000 caracteres")
     private String observacoes;
+
+    @Schema(description = "Indica se o estabelecimento é um prestador de serviço")
+    private Boolean prestadorServico;
+
+    @Schema(description = "Lista de contas bancárias do estabelecimento")
+    @Valid
+    private java.util.List<ContaBancariaEstabelecimentoRequest> contasBancarias;
 }
