@@ -6,6 +6,8 @@ import com.upsaude.api.response.sia.relatorios.SiaPaRelatorioTopProcedimentosRes
 import com.upsaude.exception.BadRequestException;
 import com.upsaude.service.api.sia.SiaPaRelatorioService;
 import com.upsaude.service.api.sistema.multitenancy.TenantService;
+import com.upsaude.service.api.support.relatorios.TenantFilterHelper;
+import com.upsaude.service.api.support.sia.SiaDataEnricher;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -14,6 +16,8 @@ import org.springframework.util.StringUtils;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Objects;
+import java.util.UUID;
 
 @Slf4j
 @Service
@@ -22,8 +26,15 @@ public class SiaPaRelatorioServiceImpl implements SiaPaRelatorioService {
 
     private final JdbcTemplate jdbcTemplate;
     private final TenantService tenantService;
+    private final TenantFilterHelper tenantFilterHelper;
+    private final SiaDataEnricher siaDataEnricher;
 
     @Override
+    @org.springframework.cache.annotation.Cacheable(
+            value = "siaRelatorioProducaoMensal",
+            keyGenerator = "relatoriosCacheKeyGenerator",
+            unless = "#result == null"
+    )
     public SiaPaRelatorioProducaoResponse gerarRelatorioProducaoMensal(String uf, String competenciaInicio, String competenciaFim) {
         String ufEfetiva = resolverUf(uf);
         if (!StringUtils.hasText(ufEfetiva)) {
@@ -33,33 +44,96 @@ public class SiaPaRelatorioServiceImpl implements SiaPaRelatorioService {
             throw new BadRequestException("competenciaInicio e competenciaFim são obrigatórias (AAAAMM)");
         }
 
-        // Usa a materialized view sia_pa_agregado_temporal
-        List<SiaPaRelatorioProducaoResponse.ItemProducaoMensal> itens = jdbcTemplate.query("""
-                    SELECT
-                        t.competencia,
-                        t.quantidade_produzida_total,
-                        t.valor_produzido_total,
-                        t.valor_aprovado_total,
-                        t.valor_aprovado_prev,
-                        t.delta_valor_aprovado,
-                        t.crescimento_valor_aprovado_pct
-                    FROM public.sia_pa_agregado_temporal t
-                    WHERE t.uf = ?
-                      AND t.competencia >= ?
-                      AND t.competencia <= ?
-                    ORDER BY t.competencia ASC
-                    """,
-            (rs, rowNum) -> SiaPaRelatorioProducaoResponse.ItemProducaoMensal.builder()
-                    .competencia(rs.getString("competencia"))
-                    .quantidadeProduzidaTotal(getLong(rs.getObject("quantidade_produzida_total")))
-                    .valorProduzidoTotal((BigDecimal) rs.getObject("valor_produzido_total"))
-                    .valorAprovadoTotal((BigDecimal) rs.getObject("valor_aprovado_total"))
-                    .valorAprovadoPrev((BigDecimal) rs.getObject("valor_aprovado_prev"))
-                    .deltaValorAprovado((BigDecimal) rs.getObject("delta_valor_aprovado"))
-                    .crescimentoValorAprovadoPct((BigDecimal) rs.getObject("crescimento_valor_aprovado_pct"))
-                    .build(),
-            ufEfetiva, competenciaInicio, competenciaFim
-        );
+        UUID tenantId = tenantService.validarTenantAtual();
+        List<String> cnesList = tenantFilterHelper.obterCnesDoTenant(tenantId);
+        
+        if (cnesList.isEmpty()) {
+            log.warn("Nenhum CNES encontrado para o tenant {}. Retornando relatório vazio.", tenantId);
+            return SiaPaRelatorioProducaoResponse.builder()
+                    .uf(ufEfetiva)
+                    .competenciaInicio(competenciaInicio)
+                    .competenciaFim(competenciaFim)
+                    .itens(List.of())
+                    .build();
+        }
+
+        // Filtrar diretamente na tabela sia_pa pelos CNES do tenant
+        String placeholders = String.join(",", java.util.Collections.nCopies(cnesList.size(), "?"));
+        Object[] params = new Object[3 + cnesList.size()];
+        params[0] = Objects.requireNonNull(ufEfetiva, "UF não pode ser null");
+        params[1] = Objects.requireNonNull(competenciaInicio, "Competência início não pode ser null");
+        params[2] = Objects.requireNonNull(competenciaFim, "Competência fim não pode ser null");
+        for (int i = 0; i < cnesList.size(); i++) {
+            params[3 + i] = Objects.requireNonNull(cnesList.get(i), "CNES não pode ser null");
+        }
+
+        // Tenta usar view materializada primeiro (mais rápido), com fallback para tabela original
+        List<SiaPaRelatorioProducaoResponse.ItemProducaoMensal> itens;
+        try {
+            String querySql = String.format("""
+                        SELECT
+                            mv.competencia,
+                            SUM(mv.quantidade_produzida_total) AS quantidade_produzida_total,
+                            SUM(mv.valor_produzido_total) AS valor_produzido_total,
+                            SUM(mv.valor_aprovado_total) AS valor_aprovado_total,
+                            NULL AS valor_aprovado_prev,
+                            NULL AS delta_valor_aprovado,
+                            NULL AS crescimento_valor_aprovado_pct
+                        FROM public.mv_sia_pa_producao_mensal mv
+                        WHERE mv.uf = ?
+                          AND mv.competencia >= ?
+                          AND mv.competencia <= ?
+                          AND mv.codigo_cnes IN (%s)
+                        GROUP BY mv.competencia
+                        ORDER BY mv.competencia ASC
+                        """, placeholders);
+            itens = jdbcTemplate.query(
+                Objects.requireNonNull(querySql, "Query SQL não pode ser null"),
+                (rs, rowNum) -> SiaPaRelatorioProducaoResponse.ItemProducaoMensal.builder()
+                        .competencia(rs.getString("competencia"))
+                        .quantidadeProduzidaTotal(getLong(rs.getObject("quantidade_produzida_total")))
+                        .valorProduzidoTotal((BigDecimal) rs.getObject("valor_produzido_total"))
+                        .valorAprovadoTotal((BigDecimal) rs.getObject("valor_aprovado_total"))
+                        .valorAprovadoPrev((BigDecimal) rs.getObject("valor_aprovado_prev"))
+                        .deltaValorAprovado((BigDecimal) rs.getObject("delta_valor_aprovado"))
+                        .crescimentoValorAprovadoPct((BigDecimal) rs.getObject("crescimento_valor_aprovado_pct"))
+                        .build(),
+                params
+            );
+        } catch (Exception e) {
+            // Fallback para tabela original se view não existir ou não estiver atualizada
+            log.debug("View materializada não disponível, usando tabela original: {}", e.getMessage());
+            String querySql = String.format("""
+                        SELECT
+                            s.competencia,
+                            COALESCE(SUM(COALESCE(s.quantidade_produzida, 0)), 0) AS quantidade_produzida_total,
+                            COALESCE(SUM(COALESCE(s.valor_produzido, 0)), 0) AS valor_produzido_total,
+                            COALESCE(SUM(COALESCE(s.valor_aprovado, 0)), 0) AS valor_aprovado_total,
+                            NULL AS valor_aprovado_prev,
+                            NULL AS delta_valor_aprovado,
+                            NULL AS crescimento_valor_aprovado_pct
+                        FROM public.sia_pa s
+                        WHERE s.uf = ?
+                          AND s.competencia >= ?
+                          AND s.competencia <= ?
+                          AND s.codigo_cnes IN (%s)
+                        GROUP BY s.competencia
+                        ORDER BY s.competencia ASC
+                        """, placeholders);
+            itens = jdbcTemplate.query(
+                Objects.requireNonNull(querySql, "Query SQL não pode ser null"),
+                (rs, rowNum) -> SiaPaRelatorioProducaoResponse.ItemProducaoMensal.builder()
+                        .competencia(rs.getString("competencia"))
+                        .quantidadeProduzidaTotal(getLong(rs.getObject("quantidade_produzida_total")))
+                        .valorProduzidoTotal((BigDecimal) rs.getObject("valor_produzido_total"))
+                        .valorAprovadoTotal((BigDecimal) rs.getObject("valor_aprovado_total"))
+                        .valorAprovadoPrev((BigDecimal) rs.getObject("valor_aprovado_prev"))
+                        .deltaValorAprovado((BigDecimal) rs.getObject("delta_valor_aprovado"))
+                        .crescimentoValorAprovadoPct((BigDecimal) rs.getObject("crescimento_valor_aprovado_pct"))
+                        .build(),
+                params
+            );
+        }
 
         return SiaPaRelatorioProducaoResponse.builder()
                 .uf(ufEfetiva)
@@ -70,6 +144,11 @@ public class SiaPaRelatorioServiceImpl implements SiaPaRelatorioService {
     }
 
     @Override
+    @org.springframework.cache.annotation.Cacheable(
+            value = "siaRelatorioTopProcedimentos",
+            keyGenerator = "relatoriosCacheKeyGenerator",
+            unless = "#result == null"
+    )
     public SiaPaRelatorioTopProcedimentosResponse gerarTopProcedimentos(String uf, String competencia, Integer limit) {
         String ufEfetiva = resolverUf(uf);
         if (!StringUtils.hasText(ufEfetiva)) {
@@ -80,44 +159,92 @@ public class SiaPaRelatorioServiceImpl implements SiaPaRelatorioService {
         }
         int lim = limit != null && limit > 0 ? Math.min(limit, 100) : 10;
 
-        // Usa a materialized view sia_pa_agregado_procedimento
-        // Busca o nome do procedimento: primeiro tenta encontrar um válido para a competência,
-        // se não encontrar, busca o mais recente disponível
-        List<SiaPaRelatorioTopProcedimentosResponse.ItemTopProcedimento> itens = jdbcTemplate.query("""
+        UUID tenantId = tenantService.validarTenantAtual();
+        List<String> cnesList = tenantFilterHelper.obterCnesDoTenant(tenantId);
+        
+        if (cnesList.isEmpty()) {
+            log.warn("Nenhum CNES encontrado para o tenant {}. Retornando relatório vazio.", tenantId);
+            return SiaPaRelatorioTopProcedimentosResponse.builder()
+                    .uf(ufEfetiva)
+                    .competencia(competencia)
+                    .limit(lim)
+                    .itens(List.of())
+                    .build();
+        }
+
+        // Filtrar diretamente na tabela sia_pa pelos CNES do tenant
+        String placeholders = String.join(",", java.util.Collections.nCopies(cnesList.size(), "?"));
+        Object[] params = new Object[3 + cnesList.size()];
+        params[0] = Objects.requireNonNull(ufEfetiva, "UF não pode ser null");
+        params[1] = Objects.requireNonNull(competencia, "Competência não pode ser null");
+        params[2] = lim;
+        for (int i = 0; i < cnesList.size(); i++) {
+            params[3 + i] = Objects.requireNonNull(cnesList.get(i), "CNES não pode ser null");
+        }
+
+        // Tenta usar view materializada primeiro, com fallback para tabela original
+        String querySql;
+        try {
+            // Verifica se a view materializada existe
+            Integer viewExists = jdbcTemplate.queryForObject(
+                "SELECT COUNT(*) FROM pg_matviews WHERE matviewname = 'mv_sia_pa_top_procedimentos'",
+                Integer.class
+            );
+            if (viewExists != null && viewExists > 0) {
+                // Usa view materializada agregando por CNES do tenant
+                querySql = String.format("""
+                        SELECT
+                            mv.procedimento_codigo,
+                            SUM(mv.quantidade_produzida_total) AS quantidade_produzida_total,
+                            SUM(mv.valor_aprovado_total) AS valor_aprovado_total,
+                            COUNT(DISTINCT mv.estabelecimentos_unicos) AS estabelecimentos_unicos,
+                            COUNT(DISTINCT s.municipio_ufmun_codigo) AS municipios_unicos
+                        FROM public.mv_sia_pa_top_procedimentos mv
+                        INNER JOIN public.sia_pa s ON s.procedimento_codigo = mv.procedimento_codigo 
+                            AND s.competencia = mv.competencia AND s.uf = mv.uf
+                        WHERE mv.uf = ? AND mv.competencia = ? AND s.codigo_cnes IN (%s)
+                        GROUP BY mv.procedimento_codigo, mv.competencia
+                        ORDER BY quantidade_produzida_total DESC NULLS LAST
+                        LIMIT ?
+                        """, placeholders);
+            } else {
+                throw new Exception("View materializada não existe");
+            }
+        } catch (Exception e) {
+            // Fallback para tabela original
+            log.debug("View materializada não disponível, usando tabela original: {}", e.getMessage());
+            querySql = String.format("""
                     SELECT
-                        ap.procedimento_codigo,
-                        ap.quantidade_produzida_total,
-                        ap.valor_aprovado_total,
-                        ap.estabelecimentos_unicos,
-                        ap.municipios_unicos,
-                        COALESCE(
-                            (SELECT p.nome
-                             FROM public.sigtap_procedimento p
-                             WHERE p.codigo_oficial = ap.procedimento_codigo
-                               AND (p.competencia_inicial IS NULL OR p.competencia_inicial <= ap.competencia)
-                               AND (p.competencia_final IS NULL OR p.competencia_final >= ap.competencia)
-                             ORDER BY p.competencia_inicial DESC NULLS LAST
-                             LIMIT 1),
-                            (SELECT p.nome
-                             FROM public.sigtap_procedimento p
-                             WHERE p.codigo_oficial = ap.procedimento_codigo
-                             ORDER BY p.competencia_inicial DESC NULLS LAST
-                             LIMIT 1)
-                        ) AS procedimento_nome
-                    FROM public.sia_pa_agregado_procedimento ap
-                    WHERE ap.uf = ? AND ap.competencia = ?
-                    ORDER BY ap.quantidade_produzida_total DESC NULLS LAST
+                        s.procedimento_codigo,
+                        COALESCE(SUM(COALESCE(s.quantidade_produzida, 0)), 0) AS quantidade_produzida_total,
+                        COALESCE(SUM(COALESCE(s.valor_aprovado, 0)), 0) AS valor_aprovado_total,
+                        COUNT(DISTINCT s.codigo_cnes) AS estabelecimentos_unicos,
+                        COUNT(DISTINCT s.municipio_ufmun_codigo) AS municipios_unicos
+                    FROM public.sia_pa s
+                    WHERE s.uf = ? AND s.competencia = ? AND s.codigo_cnes IN (%s)
+                    GROUP BY s.procedimento_codigo, s.competencia
+                    ORDER BY quantidade_produzida_total DESC NULLS LAST
                     LIMIT ?
-                    """,
-            (rs, rowNum) -> SiaPaRelatorioTopProcedimentosResponse.ItemTopProcedimento.builder()
-                    .procedimentoCodigo(rs.getString("procedimento_codigo"))
-                    .procedimentoNome(rs.getString("procedimento_nome"))
-                    .quantidadeProduzidaTotal(getLong(rs.getObject("quantidade_produzida_total")))
-                    .valorAprovadoTotal((BigDecimal) rs.getObject("valor_aprovado_total"))
-                    .estabelecimentosUnicos(getLong(rs.getObject("estabelecimentos_unicos")))
-                    .municipiosUnicos(getLong(rs.getObject("municipios_unicos")))
-                    .build(),
-            ufEfetiva, competencia, lim
+                    """, placeholders);
+        }
+        
+        List<SiaPaRelatorioTopProcedimentosResponse.ItemTopProcedimento> itens = jdbcTemplate.query(
+            Objects.requireNonNull(querySql, "Query SQL não pode ser null"),
+            (rs, rowNum) -> {
+                String procedimentoCodigo = rs.getString("procedimento_codigo");
+                // Enriquece com nome do procedimento usando o serviço
+                String procedimentoNome = siaDataEnricher.enriquecerComProcedimento(procedimentoCodigo);
+                
+                return SiaPaRelatorioTopProcedimentosResponse.ItemTopProcedimento.builder()
+                        .procedimentoCodigo(procedimentoCodigo)
+                        .procedimentoNome(procedimentoNome)
+                        .quantidadeProduzidaTotal(getLong(rs.getObject("quantidade_produzida_total")))
+                        .valorAprovadoTotal((BigDecimal) rs.getObject("valor_aprovado_total"))
+                        .estabelecimentosUnicos(getLong(rs.getObject("estabelecimentos_unicos")))
+                        .municipiosUnicos(getLong(rs.getObject("municipios_unicos")))
+                        .build();
+            },
+            params
         );
 
         return SiaPaRelatorioTopProcedimentosResponse.builder()
@@ -129,6 +256,11 @@ public class SiaPaRelatorioServiceImpl implements SiaPaRelatorioService {
     }
 
     @Override
+    @org.springframework.cache.annotation.Cacheable(
+            value = "siaRelatorioTopCid",
+            keyGenerator = "relatoriosCacheKeyGenerator",
+            unless = "#result == null"
+    )
     public SiaPaRelatorioTopCidResponse gerarTopCid(String uf, String competencia, Integer limit) {
         String ufEfetiva = resolverUf(uf);
         if (!StringUtils.hasText(ufEfetiva)) {
@@ -139,82 +271,223 @@ public class SiaPaRelatorioServiceImpl implements SiaPaRelatorioService {
         }
         int lim = limit != null && limit > 0 ? Math.min(limit, 100) : 10;
 
-        // Usa a materialized view sia_pa_agregado_cid e busca descrição do CID de múltiplas tabelas
-        // Os topos serão calculados em uma segunda passada apenas para os itens que precisarem
-        List<SiaPaRelatorioTopCidResponse.ItemTopCid> itens = jdbcTemplate.query("""
-                    SELECT
-                        ac.cid_principal_codigo,
-                        ac.quantidade_produzida_total,
-                        ac.valor_aprovado_total,
-                        ac.top_procedimento_codigo,
-                        ac.top_procedimento_total,
-                        ac.top_municipio_ufmun_codigo,
-                        ac.top_municipio_total,
-                        COALESCE(
-                            cid_sub.descricao, 
-                            cid_cat.descricao,
-                            CASE WHEN ac.cid_principal_codigo = '0000' THEN 'Sem diagnóstico principal' ELSE NULL END
-                        ) AS cid_descricao
-                    FROM public.sia_pa_agregado_cid ac
-                    LEFT JOIN public.cid10_subcategorias cid_sub ON cid_sub.subcat = ac.cid_principal_codigo
-                    LEFT JOIN public.cid10_categorias cid_cat ON cid_cat.cat = ac.cid_principal_codigo
-                    WHERE ac.uf = ? AND ac.competencia = ?
-                    ORDER BY ac.quantidade_produzida_total DESC NULLS LAST
-                    LIMIT ?
-                    """,
-            (rs, rowNum) -> SiaPaRelatorioTopCidResponse.ItemTopCid.builder()
-                    .cidPrincipalCodigo(rs.getString("cid_principal_codigo"))
-                    .cidDescricao(rs.getString("cid_descricao"))
-                    .quantidadeProduzidaTotal(getLong(rs.getObject("quantidade_produzida_total")))
-                    .valorAprovadoTotal((BigDecimal) rs.getObject("valor_aprovado_total"))
-                    .topProcedimentoCodigo(rs.getString("top_procedimento_codigo"))
-                    .topProcedimentoTotal(getLong(rs.getObject("top_procedimento_total")))
-                    .topMunicipioUfmunCodigo(rs.getString("top_municipio_ufmun_codigo"))
-                    .topMunicipioTotal(getLong(rs.getObject("top_municipio_total")))
-                    .build(),
-            ufEfetiva, competencia, lim
-        );
+        UUID tenantId = tenantService.validarTenantAtual();
+        List<String> cnesList = tenantFilterHelper.obterCnesDoTenant(tenantId);
+        
+        if (cnesList.isEmpty()) {
+            log.warn("Nenhum CNES encontrado para o tenant {}. Retornando relatório vazio.", tenantId);
+            return SiaPaRelatorioTopCidResponse.builder()
+                    .uf(ufEfetiva)
+                    .competencia(competencia)
+                    .limit(lim)
+                    .itens(List.of())
+                    .build();
+        }
 
-        // Preenche os topos que estão null calculando diretamente da tabela sia_pa
+        // Filtrar diretamente na tabela sia_pa pelos CNES do tenant
+        String placeholders = String.join(",", java.util.Collections.nCopies(cnesList.size(), "?"));
+        Object[] params = new Object[3 + cnesList.size()];
+        params[0] = Objects.requireNonNull(ufEfetiva, "UF não pode ser null");
+        params[1] = Objects.requireNonNull(competencia, "Competência não pode ser null");
+        params[2] = lim;
+        for (int i = 0; i < cnesList.size(); i++) {
+            params[3 + i] = Objects.requireNonNull(cnesList.get(i), "CNES não pode ser null");
+        }
+
+        // Tenta usar view materializada primeiro (mais rápido), com fallback para tabela original
+        List<SiaPaRelatorioTopCidResponse.ItemTopCid> itens;
+        try {
+            String querySql = String.format("""
+                        SELECT
+                            mv.cid_principal_codigo,
+                            SUM(mv.quantidade_produzida_total) AS quantidade_produzida_total,
+                            SUM(mv.valor_aprovado_total) AS valor_aprovado_total,
+                            COALESCE(
+                                cid_sub.descricao, 
+                                cid_cat.descricao,
+                                CASE WHEN mv.cid_principal_codigo = '0000' THEN 'Sem diagnóstico principal' ELSE NULL END
+                            ) AS cid_descricao
+                        FROM public.mv_sia_pa_top_cid mv
+                        LEFT JOIN public.cid10_subcategorias cid_sub ON cid_sub.subcat = mv.cid_principal_codigo
+                        LEFT JOIN public.cid10_categorias cid_cat ON cid_cat.cat = mv.cid_principal_codigo
+                        WHERE mv.uf = ? AND mv.competencia = ? AND mv.cid_principal_codigo IN (
+                            SELECT DISTINCT cid_principal_codigo 
+                            FROM public.sia_pa 
+                            WHERE uf = ? AND competencia = ? AND codigo_cnes IN (%s) AND cid_principal_codigo IS NOT NULL
+                        )
+                        GROUP BY mv.cid_principal_codigo, cid_sub.descricao, cid_cat.descricao
+                        ORDER BY quantidade_produzida_total DESC NULLS LAST
+                        LIMIT ?
+                        """, placeholders);
+            Object[] paramsView = new Object[4 + cnesList.size()];
+            paramsView[0] = Objects.requireNonNull(ufEfetiva, "UF não pode ser null");
+            paramsView[1] = Objects.requireNonNull(competencia, "Competência não pode ser null");
+            paramsView[2] = Objects.requireNonNull(ufEfetiva, "UF não pode ser null");
+            paramsView[3] = Objects.requireNonNull(competencia, "Competência não pode ser null");
+            for (int i = 0; i < cnesList.size(); i++) {
+                paramsView[4 + i] = Objects.requireNonNull(cnesList.get(i), "CNES não pode ser null");
+            }
+            paramsView[4 + cnesList.size()] = lim;
+            
+            itens = jdbcTemplate.query(
+                Objects.requireNonNull(querySql, "Query SQL não pode ser null"),
+                (rs, rowNum) -> {
+                    String cidCodigo = rs.getString("cid_principal_codigo");
+                    String cidDescricaoFromDb = rs.getString("cid_descricao");
+                    // Se não encontrou descrição no banco, tenta enriquecer usando o serviço
+                    String cidDescricao = cidDescricaoFromDb != null && !cidDescricaoFromDb.isEmpty() 
+                            ? cidDescricaoFromDb 
+                            : siaDataEnricher.enriquecerComCid(cidCodigo);
+                    
+                    return SiaPaRelatorioTopCidResponse.ItemTopCid.builder()
+                            .cidPrincipalCodigo(cidCodigo)
+                            .cidDescricao(cidDescricao != null ? cidDescricao : cidCodigo)
+                            .quantidadeProduzidaTotal(getLong(rs.getObject("quantidade_produzida_total")))
+                            .valorAprovadoTotal((BigDecimal) rs.getObject("valor_aprovado_total"))
+                            .topProcedimentoCodigo(null)
+                            .topProcedimentoTotal(null)
+                            .topMunicipioUfmunCodigo(null)
+                            .topMunicipioTotal(null)
+                            .build();
+                },
+                paramsView
+            );
+        } catch (Exception e) {
+            // Fallback para tabela original se view não existir ou não estiver atualizada
+            log.debug("View materializada não disponível, usando tabela original: {}", e.getMessage());
+            String querySql = String.format("""
+                        SELECT
+                            s.cid_principal_codigo,
+                            COALESCE(SUM(COALESCE(s.quantidade_produzida, 0)), 0) AS quantidade_produzida_total,
+                            COALESCE(SUM(COALESCE(s.valor_aprovado, 0)), 0) AS valor_aprovado_total,
+                            COALESCE(
+                                cid_sub.descricao, 
+                                cid_cat.descricao,
+                                CASE WHEN s.cid_principal_codigo = '0000' THEN 'Sem diagnóstico principal' ELSE NULL END
+                            ) AS cid_descricao
+                        FROM public.sia_pa s
+                        LEFT JOIN public.cid10_subcategorias cid_sub ON cid_sub.subcat = s.cid_principal_codigo
+                        LEFT JOIN public.cid10_categorias cid_cat ON cid_cat.cat = s.cid_principal_codigo
+                        WHERE s.uf = ? AND s.competencia = ? AND s.codigo_cnes IN (%s)
+                          AND s.cid_principal_codigo IS NOT NULL
+                        GROUP BY s.cid_principal_codigo, cid_sub.descricao, cid_cat.descricao
+                        ORDER BY quantidade_produzida_total DESC NULLS LAST
+                        LIMIT ?
+                        """, placeholders);
+            itens = jdbcTemplate.query(
+                Objects.requireNonNull(querySql, "Query SQL não pode ser null"),
+                (rs, rowNum) -> {
+                    String cidCodigo = rs.getString("cid_principal_codigo");
+                    String cidDescricaoFromDb = rs.getString("cid_descricao");
+                    // Se não encontrou descrição no banco, tenta enriquecer usando o serviço
+                    String cidDescricao = cidDescricaoFromDb != null && !cidDescricaoFromDb.isEmpty() 
+                            ? cidDescricaoFromDb 
+                            : siaDataEnricher.enriquecerComCid(cidCodigo);
+                    
+                    return SiaPaRelatorioTopCidResponse.ItemTopCid.builder()
+                            .cidPrincipalCodigo(cidCodigo)
+                            .cidDescricao(cidDescricao != null ? cidDescricao : cidCodigo)
+                            .quantidadeProduzidaTotal(getLong(rs.getObject("quantidade_produzida_total")))
+                            .valorAprovadoTotal((BigDecimal) rs.getObject("valor_aprovado_total"))
+                            .topProcedimentoCodigo(null)
+                            .topProcedimentoTotal(null)
+                            .topMunicipioUfmunCodigo(null)
+                            .topMunicipioTotal(null)
+                            .build();
+                },
+                params
+            );
+        }
+
+        // Preenche os topos calculando diretamente da tabela sia_pa com filtro por CNES
+        String placeholdersTop = String.join(",", java.util.Collections.nCopies(cnesList.size(), "?"));
         for (SiaPaRelatorioTopCidResponse.ItemTopCid item : itens) {
-            if (item.getTopProcedimentoCodigo() == null) {
-                String topProc = jdbcTemplate.queryForObject("""
+            Object[] paramsTopProc = new Object[3 + cnesList.size()];
+            paramsTopProc[0] = ufEfetiva;
+            paramsTopProc[1] = competencia;
+            paramsTopProc[2] = item.getCidPrincipalCodigo();
+            for (int i = 0; i < cnesList.size(); i++) {
+                paramsTopProc[3 + i] = cnesList.get(i);
+            }
+            
+            try {
+                String queryTopProcSql = String.format("""
                         SELECT procedimento_codigo
                         FROM public.sia_pa
-                        WHERE uf = ? AND competencia = ? AND cid_principal_codigo = ?
+                        WHERE uf = ? AND competencia = ? AND cid_principal_codigo = ? AND codigo_cnes IN (%s)
                         GROUP BY procedimento_codigo
                         ORDER BY COUNT(*) DESC
                         LIMIT 1
-                        """, String.class, ufEfetiva, competencia, item.getCidPrincipalCodigo());
+                        """, placeholdersTop);
+                String topProc = jdbcTemplate.queryForObject(
+                    Objects.requireNonNull(queryTopProcSql, "Query SQL não pode ser null"), 
+                    String.class, 
+                    Objects.requireNonNull(paramsTopProc, "Parâmetros não podem ser null"));
                 if (topProc != null) {
-                    Long topProcTotal = jdbcTemplate.queryForObject("""
+                    Object[] paramsTopProcTotal = new Object[4 + cnesList.size()];
+                    paramsTopProcTotal[0] = Objects.requireNonNull(ufEfetiva, "UF não pode ser null");
+                    paramsTopProcTotal[1] = Objects.requireNonNull(competencia, "Competência não pode ser null");
+                    paramsTopProcTotal[2] = Objects.requireNonNull(item.getCidPrincipalCodigo(), "CID não pode ser null");
+                    paramsTopProcTotal[3] = Objects.requireNonNull(topProc, "Código procedimento não pode ser null");
+                    for (int i = 0; i < cnesList.size(); i++) {
+                        paramsTopProcTotal[4 + i] = Objects.requireNonNull(cnesList.get(i), "CNES não pode ser null");
+                    }
+                    String queryTopProcTotal = String.format("""
                             SELECT COUNT(*)
                             FROM public.sia_pa
-                            WHERE uf = ? AND competencia = ? AND cid_principal_codigo = ? AND procedimento_codigo = ?
-                            """, Long.class, ufEfetiva, competencia, item.getCidPrincipalCodigo(), topProc);
+                            WHERE uf = ? AND competencia = ? AND cid_principal_codigo = ? AND procedimento_codigo = ? AND codigo_cnes IN (%s)
+                            """, placeholdersTop);
+                    Long topProcTotal = jdbcTemplate.queryForObject(
+                        Objects.requireNonNull(queryTopProcTotal, "Query SQL não pode ser null"), 
+                        Long.class, paramsTopProcTotal);
                     item.setTopProcedimentoCodigo(topProc);
                     item.setTopProcedimentoTotal(topProcTotal);
                 }
+            } catch (Exception e) {
+                log.debug("Erro ao calcular top procedimento para CID {}: {}", item.getCidPrincipalCodigo(), e.getMessage());
             }
             
-            if (item.getTopMunicipioUfmunCodigo() == null) {
-                String topMun = jdbcTemplate.queryForObject("""
+            try {
+                Object[] paramsTopMun = new Object[3 + cnesList.size()];
+                paramsTopMun[0] = Objects.requireNonNull(ufEfetiva, "UF não pode ser null");
+                paramsTopMun[1] = Objects.requireNonNull(competencia, "Competência não pode ser null");
+                paramsTopMun[2] = Objects.requireNonNull(item.getCidPrincipalCodigo(), "CID não pode ser null");
+                for (int i = 0; i < cnesList.size(); i++) {
+                    paramsTopMun[3 + i] = Objects.requireNonNull(cnesList.get(i), "CNES não pode ser null");
+                }
+                String queryTopMun = String.format("""
                         SELECT municipio_ufmun_codigo
                         FROM public.sia_pa
-                        WHERE uf = ? AND competencia = ? AND cid_principal_codigo = ? AND municipio_ufmun_codigo IS NOT NULL
+                        WHERE uf = ? AND competencia = ? AND cid_principal_codigo = ? AND municipio_ufmun_codigo IS NOT NULL AND codigo_cnes IN (%s)
                         GROUP BY municipio_ufmun_codigo
                         ORDER BY COUNT(*) DESC
                         LIMIT 1
-                        """, String.class, ufEfetiva, competencia, item.getCidPrincipalCodigo());
+                        """, placeholdersTop);
+                String topMun = jdbcTemplate.queryForObject(
+                    Objects.requireNonNull(queryTopMun, "Query SQL não pode ser null"), 
+                    String.class, paramsTopMun);
                 if (topMun != null) {
-                    Long topMunTotal = jdbcTemplate.queryForObject("""
+                    Object[] paramsTopMunTotal = new Object[4 + cnesList.size()];
+                    paramsTopMunTotal[0] = Objects.requireNonNull(ufEfetiva, "UF não pode ser null");
+                    paramsTopMunTotal[1] = Objects.requireNonNull(competencia, "Competência não pode ser null");
+                    paramsTopMunTotal[2] = Objects.requireNonNull(item.getCidPrincipalCodigo(), "CID não pode ser null");
+                    paramsTopMunTotal[3] = Objects.requireNonNull(topMun, "Código município não pode ser null");
+                    for (int i = 0; i < cnesList.size(); i++) {
+                        paramsTopMunTotal[4 + i] = Objects.requireNonNull(cnesList.get(i), "CNES não pode ser null");
+                    }
+                    String queryTopMunTotal = String.format("""
                             SELECT COUNT(*)
                             FROM public.sia_pa
-                            WHERE uf = ? AND competencia = ? AND cid_principal_codigo = ? AND municipio_ufmun_codigo = ?
-                            """, Long.class, ufEfetiva, competencia, item.getCidPrincipalCodigo(), topMun);
+                            WHERE uf = ? AND competencia = ? AND cid_principal_codigo = ? AND municipio_ufmun_codigo = ? AND codigo_cnes IN (%s)
+                            """, placeholdersTop);
+                    Long topMunTotal = jdbcTemplate.queryForObject(
+                        Objects.requireNonNull(queryTopMunTotal, "Query SQL não pode ser null"), 
+                        Long.class, paramsTopMunTotal);
                     item.setTopMunicipioUfmunCodigo(topMun);
                     item.setTopMunicipioTotal(topMunTotal);
                 }
+            } catch (Exception e) {
+                log.debug("Erro ao calcular top município para CID {}: {}", item.getCidPrincipalCodigo(), e.getMessage());
             }
         }
 

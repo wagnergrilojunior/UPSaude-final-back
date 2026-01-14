@@ -1,5 +1,6 @@
 package com.upsaude.api.response.sia.kpi;
 
+import com.upsaude.api.response.estabelecimento.EstabelecimentosResponse;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -36,5 +37,8 @@ public class SiaPaKpiResponse {
     private BigDecimal producaoPerCapita;
     private Integer populacaoEstimada;
     private String municipioIbge;
+
+    // Dados do estabelecimento (quando disponível)
+    private EstabelecimentosResponse estabelecimento;
 }
 
