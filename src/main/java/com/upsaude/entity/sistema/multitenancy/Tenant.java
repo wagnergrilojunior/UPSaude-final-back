@@ -68,6 +68,9 @@ public class Tenant {
     @Column(name = "consorcio", nullable = false, columnDefinition = "boolean default false")
     private Boolean consorcio = false;
 
+    @Column(name = "slug", length = 100)
+    private String slug;
+
     @Embedded
     private DadosIdentificacaoTenant dadosIdentificacao;
 
