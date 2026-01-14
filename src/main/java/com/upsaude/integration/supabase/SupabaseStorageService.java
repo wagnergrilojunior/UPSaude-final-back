@@ -468,6 +468,127 @@ public class SupabaseStorageService {
         }
     }
 
+    /**
+     * Gera uma URL assinada (signed URL) para download de arquivo do Supabase Storage.
+     * Endpoint: POST {supabaseUrl}/storage/v1/object/sign/{bucket}/{objectPath}
+     * 
+     * @param bucket Nome do bucket
+     * @param objectPath Caminho do objeto dentro do bucket
+     * @param expiresInSeconds Tempo de expiração da URL em segundos (padrão: 60 segundos)
+     * @return URL assinada válida por expiresInSeconds
+     */
+    public String generateSignedUrl(String bucket, String objectPath, int expiresInSeconds) {
+        if (!StringUtils.hasText(bucket)) {
+            throw new BadRequestException("Bucket é obrigatório");
+        }
+        if (!StringUtils.hasText(objectPath)) {
+            throw new BadRequestException("Caminho do objeto é obrigatório");
+        }
+        if (expiresInSeconds <= 0) {
+            expiresInSeconds = 60; // Padrão: 60 segundos
+        }
+
+        String baseUrl = normalizarBaseUrl(supabaseConfig.getUrl());
+        String signUrl = baseUrl + "/storage/v1/object/sign/" + bucket + "/" + objectPath;
+
+        try {
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+            headers.set("apikey", supabaseConfig.getServiceRoleKey());
+            headers.set("Authorization", "Bearer " + supabaseConfig.getServiceRoleKey());
+
+            Map<String, Object> requestBody = new HashMap<>();
+            requestBody.put("expiresIn", expiresInSeconds);
+
+            HttpEntity<Map<String, Object>> request = new HttpEntity<>(requestBody, headers);
+
+            ResponseEntity<Map<String, Object>> response = restTemplate.exchange(
+                    signUrl,
+                    HttpMethod.POST,
+                    request,
+                    new org.springframework.core.ParameterizedTypeReference<Map<String, Object>>() {}
+            );
+
+            if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
+                Map<String, Object> body = response.getBody();
+                if (body == null) {
+                    throw new InternalServerErrorException("Erro ao gerar URL assinada: resposta sem body");
+                }
+                String signedUrl = (String) body.get("signedURL");
+                if (StringUtils.hasText(signedUrl)) {
+                    // A resposta do Supabase retorna apenas o path assinado, precisamos construir a URL completa
+                    if (signedUrl.startsWith("/")) {
+                        signedUrl = baseUrl + signedUrl;
+                    } else if (!signedUrl.startsWith("http")) {
+                        signedUrl = baseUrl + "/" + signedUrl;
+                    }
+                    log.debug("URL assinada gerada para bucket={}, path={}, expiresIn={}s", bucket, objectPath, expiresInSeconds);
+                    return signedUrl;
+                } else {
+                    log.error("Resposta do Supabase não contém signedURL. Body: {}", body);
+                    throw new InternalServerErrorException("Erro ao gerar URL assinada: resposta inválida");
+                }
+            } else {
+                log.error("Erro ao gerar URL assinada. Status: {}", response.getStatusCode());
+                throw new InternalServerErrorException("Erro ao gerar URL assinada: " + response.getStatusCode());
+            }
+        } catch (HttpClientErrorException e) {
+            log.error("Erro HTTP ao gerar URL assinada - Status: {}, Body: {}", e.getStatusCode(), e.getResponseBodyAsString());
+            if (e.getStatusCode() == HttpStatus.NOT_FOUND) {
+                throw new com.upsaude.exception.NotFoundException("Arquivo não encontrado no Supabase Storage: " + objectPath);
+            }
+            throw new InternalServerErrorException("Erro ao gerar URL assinada: " + e.getMessage(), e);
+        } catch (Exception e) {
+            log.error("Erro inesperado ao gerar URL assinada", e);
+            throw new InternalServerErrorException("Erro inesperado ao gerar URL assinada: " + e.getMessage(), e);
+        }
+    }
+
+    /**
+     * Deleta um arquivo do Supabase Storage.
+     * 
+     * @param bucket Nome do bucket
+     * @param objectPath Caminho do objeto dentro do bucket
+     */
+    public void deleteObject(String bucket, String objectPath) {
+        if (!StringUtils.hasText(bucket)) {
+            throw new BadRequestException("Bucket é obrigatório");
+        }
+        if (!StringUtils.hasText(objectPath)) {
+            throw new BadRequestException("Caminho do objeto é obrigatório");
+        }
+
+        String baseUrl = normalizarBaseUrl(supabaseConfig.getUrl());
+        String deleteUrl = baseUrl + "/storage/v1/object/" + bucket + "/" + objectPath;
+
+        try {
+            HttpHeaders headers = new HttpHeaders();
+            headers.set("apikey", supabaseConfig.getServiceRoleKey());
+            headers.set("Authorization", "Bearer " + supabaseConfig.getServiceRoleKey());
+
+            HttpEntity<Void> request = new HttpEntity<>(headers);
+
+            restTemplate.exchange(
+                    deleteUrl,
+                    HttpMethod.DELETE,
+                    request,
+                    Void.class
+            );
+
+            log.debug("Arquivo deletado com sucesso: bucket={}, path={}", bucket, objectPath);
+        } catch (HttpClientErrorException e) {
+            if (e.getStatusCode() == HttpStatus.NOT_FOUND) {
+                log.warn("Arquivo não encontrado para deletar: bucket={}, path={}", bucket, objectPath);
+            } else {
+                log.error("Erro HTTP ao deletar arquivo - Status: {}, Body: {}", e.getStatusCode(), e.getResponseBodyAsString());
+                throw new InternalServerErrorException("Erro ao deletar arquivo: " + e.getMessage());
+            }
+        } catch (Exception e) {
+            log.error("Erro ao deletar arquivo: bucket={}, path={}", bucket, objectPath, e);
+            throw new InternalServerErrorException("Erro ao deletar arquivo: " + e.getMessage(), e);
+        }
+    }
+
     private String normalizarBaseUrl(String baseUrl) {
         if (!StringUtils.hasText(baseUrl)) {
             throw new BadRequestException("Supabase URL não configurada");

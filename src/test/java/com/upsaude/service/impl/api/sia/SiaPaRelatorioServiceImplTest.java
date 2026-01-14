@@ -4,6 +4,8 @@ import com.upsaude.api.response.sia.relatorios.SiaPaRelatorioTopCidResponse;
 import com.upsaude.api.response.sia.relatorios.SiaPaRelatorioTopProcedimentosResponse;
 import com.upsaude.exception.BadRequestException;
 import com.upsaude.service.api.sistema.multitenancy.TenantService;
+import com.upsaude.service.api.support.relatorios.TenantFilterHelper;
+import com.upsaude.service.api.support.sia.SiaDataEnricher;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -18,6 +20,7 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 @SuppressWarnings({"null", "unchecked"})
@@ -29,6 +32,12 @@ class SiaPaRelatorioServiceImplTest {
     @Mock
     private TenantService tenantService;
 
+    @Mock
+    private TenantFilterHelper tenantFilterHelper;
+
+    @Mock
+    private SiaDataEnricher siaDataEnricher;
+
     @InjectMocks
     private SiaPaRelatorioServiceImpl service;
 
@@ -39,6 +48,8 @@ class SiaPaRelatorioServiceImplTest {
 
     @Test
     void deveRetornarTopProcedimentos() {
+        when(tenantFilterHelper.obterCnesDoTenant(any())).thenReturn(List.of("1234567"));
+        
         var item = SiaPaRelatorioTopProcedimentosResponse.ItemTopProcedimento.builder()
                 .procedimentoCodigo("0301010010")
                 .procedimentoNome("CONSULTA")
@@ -50,7 +61,7 @@ class SiaPaRelatorioServiceImplTest {
 
         doReturn(List.of(item))
                 .when(jdbcTemplate)
-                .query(anyString(), any(RowMapper.class), any(), any(), any());
+                .query(anyString(), any(RowMapper.class), any(Object[].class));
 
         SiaPaRelatorioTopProcedimentosResponse resp = service.gerarTopProcedimentos("MG", "202501", 10);
         assertEquals(1, resp.getItens().size());
@@ -59,6 +70,8 @@ class SiaPaRelatorioServiceImplTest {
 
     @Test
     void deveRetornarTopCid() {
+        when(tenantFilterHelper.obterCnesDoTenant(any())).thenReturn(List.of("1234567"));
+        
         var item = SiaPaRelatorioTopCidResponse.ItemTopCid.builder()
                 .cidPrincipalCodigo("I10")
                 .cidDescricao("Hipertensão")
@@ -68,7 +81,7 @@ class SiaPaRelatorioServiceImplTest {
 
         doReturn(List.of(item))
                 .when(jdbcTemplate)
-                .query(anyString(), any(RowMapper.class), any(), any(), any());
+                .query(anyString(), any(RowMapper.class), any(Object[].class));
 
         SiaPaRelatorioTopCidResponse resp = service.gerarTopCid("MG", "202501", 10);
         assertEquals(1, resp.getItens().size());
