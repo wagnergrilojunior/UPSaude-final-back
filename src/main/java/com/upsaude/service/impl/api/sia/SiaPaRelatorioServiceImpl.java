@@ -81,6 +81,8 @@ public class SiaPaRelatorioServiceImpl implements SiaPaRelatorioService {
         int lim = limit != null && limit > 0 ? Math.min(limit, 100) : 10;
 
         // Usa a materialized view sia_pa_agregado_procedimento
+        // Busca o nome do procedimento: primeiro tenta encontrar um válido para a competência,
+        // se não encontrar, busca o mais recente disponível
         List<SiaPaRelatorioTopProcedimentosResponse.ItemTopProcedimento> itens = jdbcTemplate.query("""
                     SELECT
                         ap.procedimento_codigo,
@@ -88,17 +90,21 @@ public class SiaPaRelatorioServiceImpl implements SiaPaRelatorioService {
                         ap.valor_aprovado_total,
                         ap.estabelecimentos_unicos,
                         ap.municipios_unicos,
-                        sp.nome AS procedimento_nome
+                        COALESCE(
+                            (SELECT p.nome
+                             FROM public.sigtap_procedimento p
+                             WHERE p.codigo_oficial = ap.procedimento_codigo
+                               AND (p.competencia_inicial IS NULL OR p.competencia_inicial <= ap.competencia)
+                               AND (p.competencia_final IS NULL OR p.competencia_final >= ap.competencia)
+                             ORDER BY p.competencia_inicial DESC NULLS LAST
+                             LIMIT 1),
+                            (SELECT p.nome
+                             FROM public.sigtap_procedimento p
+                             WHERE p.codigo_oficial = ap.procedimento_codigo
+                             ORDER BY p.competencia_inicial DESC NULLS LAST
+                             LIMIT 1)
+                        ) AS procedimento_nome
                     FROM public.sia_pa_agregado_procedimento ap
-                    LEFT JOIN LATERAL (
-                        SELECT p.nome
-                        FROM public.sigtap_procedimento p
-                        WHERE p.codigo_oficial = ap.procedimento_codigo
-                          AND (p.competencia_inicial IS NULL OR p.competencia_inicial <= ap.competencia)
-                          AND (p.competencia_final IS NULL OR p.competencia_final >= ap.competencia)
-                        ORDER BY p.competencia_inicial DESC NULLS LAST
-                        LIMIT 1
-                    ) sp ON true
                     WHERE ap.uf = ? AND ap.competencia = ?
                     ORDER BY ap.quantidade_produzida_total DESC NULLS LAST
                     LIMIT ?
@@ -133,7 +139,8 @@ public class SiaPaRelatorioServiceImpl implements SiaPaRelatorioService {
         }
         int lim = limit != null && limit > 0 ? Math.min(limit, 100) : 10;
 
-        // Usa a materialized view sia_pa_agregado_cid
+        // Usa a materialized view sia_pa_agregado_cid e busca descrição do CID de múltiplas tabelas
+        // Os topos serão calculados em uma segunda passada apenas para os itens que precisarem
         List<SiaPaRelatorioTopCidResponse.ItemTopCid> itens = jdbcTemplate.query("""
                     SELECT
                         ac.cid_principal_codigo,
@@ -143,9 +150,14 @@ public class SiaPaRelatorioServiceImpl implements SiaPaRelatorioService {
                         ac.top_procedimento_total,
                         ac.top_municipio_ufmun_codigo,
                         ac.top_municipio_total,
-                        cid.descricao AS cid_descricao
+                        COALESCE(
+                            cid_sub.descricao, 
+                            cid_cat.descricao,
+                            CASE WHEN ac.cid_principal_codigo = '0000' THEN 'Sem diagnóstico principal' ELSE NULL END
+                        ) AS cid_descricao
                     FROM public.sia_pa_agregado_cid ac
-                    LEFT JOIN public.cid10_subcategorias cid ON cid.subcat = ac.cid_principal_codigo
+                    LEFT JOIN public.cid10_subcategorias cid_sub ON cid_sub.subcat = ac.cid_principal_codigo
+                    LEFT JOIN public.cid10_categorias cid_cat ON cid_cat.cat = ac.cid_principal_codigo
                     WHERE ac.uf = ? AND ac.competencia = ?
                     ORDER BY ac.quantidade_produzida_total DESC NULLS LAST
                     LIMIT ?
@@ -162,6 +174,49 @@ public class SiaPaRelatorioServiceImpl implements SiaPaRelatorioService {
                     .build(),
             ufEfetiva, competencia, lim
         );
+
+        // Preenche os topos que estão null calculando diretamente da tabela sia_pa
+        for (SiaPaRelatorioTopCidResponse.ItemTopCid item : itens) {
+            if (item.getTopProcedimentoCodigo() == null) {
+                String topProc = jdbcTemplate.queryForObject("""
+                        SELECT procedimento_codigo
+                        FROM public.sia_pa
+                        WHERE uf = ? AND competencia = ? AND cid_principal_codigo = ?
+                        GROUP BY procedimento_codigo
+                        ORDER BY COUNT(*) DESC
+                        LIMIT 1
+                        """, String.class, ufEfetiva, competencia, item.getCidPrincipalCodigo());
+                if (topProc != null) {
+                    Long topProcTotal = jdbcTemplate.queryForObject("""
+                            SELECT COUNT(*)
+                            FROM public.sia_pa
+                            WHERE uf = ? AND competencia = ? AND cid_principal_codigo = ? AND procedimento_codigo = ?
+                            """, Long.class, ufEfetiva, competencia, item.getCidPrincipalCodigo(), topProc);
+                    item.setTopProcedimentoCodigo(topProc);
+                    item.setTopProcedimentoTotal(topProcTotal);
+                }
+            }
+            
+            if (item.getTopMunicipioUfmunCodigo() == null) {
+                String topMun = jdbcTemplate.queryForObject("""
+                        SELECT municipio_ufmun_codigo
+                        FROM public.sia_pa
+                        WHERE uf = ? AND competencia = ? AND cid_principal_codigo = ? AND municipio_ufmun_codigo IS NOT NULL
+                        GROUP BY municipio_ufmun_codigo
+                        ORDER BY COUNT(*) DESC
+                        LIMIT 1
+                        """, String.class, ufEfetiva, competencia, item.getCidPrincipalCodigo());
+                if (topMun != null) {
+                    Long topMunTotal = jdbcTemplate.queryForObject("""
+                            SELECT COUNT(*)
+                            FROM public.sia_pa
+                            WHERE uf = ? AND competencia = ? AND cid_principal_codigo = ? AND municipio_ufmun_codigo = ?
+                            """, Long.class, ufEfetiva, competencia, item.getCidPrincipalCodigo(), topMun);
+                    item.setTopMunicipioUfmunCodigo(topMun);
+                    item.setTopMunicipioTotal(topMunTotal);
+                }
+            }
+        }
 
         return SiaPaRelatorioTopCidResponse.builder()
                 .uf(ufEfetiva)
