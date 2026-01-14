@@ -25,4 +25,6 @@ public interface CidadesService {
     void excluir(UUID id);
 
     void inativar(UUID id);
+
+    boolean existePorCodigoIbge(String codigoIbge);
 }

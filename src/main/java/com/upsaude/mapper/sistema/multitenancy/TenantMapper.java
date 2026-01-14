@@ -39,6 +39,6 @@ public interface TenantMapper {
     @Mapping(target = "endereco", ignore = true)
     void updateFromRequest(TenantRequest request, @MappingTarget Tenant entity);
 
-    @Mapping(target = "endereco", source = "endereco", qualifiedByName = "toResponseSimplificado")
+    @Mapping(target = "endereco", source = "endereco")
     TenantResponse toResponse(Tenant entity);
 }

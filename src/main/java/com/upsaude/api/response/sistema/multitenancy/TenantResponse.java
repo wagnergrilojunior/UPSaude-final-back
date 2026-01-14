@@ -31,6 +31,7 @@ public class TenantResponse {
     private String cnes;
     private String tipoInstituicao;
     private EnderecoResponse endereco;
+    private String codigoIbgeMunicipio;
     private DadosIdentificacaoTenantResponse dadosIdentificacao;
     private ContatoTenantResponse contato;
     private DadosFiscaisTenantResponse dadosFiscais;

@@ -46,6 +46,10 @@ public class TenantRequest {
 
     private UUID enderecoId;
 
+    @Size(max = 10, message = "Código IBGE do município deve ter no máximo 10 caracteres")
+    @Schema(description = "Código IBGE do município (referência à tabela cidades)")
+    private String codigoIbgeMunicipio;
+
     @Valid
     private DadosIdentificacaoTenantRequest dadosIdentificacao;
 
