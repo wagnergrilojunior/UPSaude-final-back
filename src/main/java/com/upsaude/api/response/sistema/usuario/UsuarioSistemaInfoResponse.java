@@ -23,6 +23,7 @@ public class UsuarioSistemaInfoResponse {
     private String fotoUrl;
 
     private Boolean adminTenant;
+    private Boolean usuarioConsorcio;
 
     private ProfissionalSaudeSimplificadoResponse profissionalSaude;
     private MedicoSimplificadoResponse medico;
