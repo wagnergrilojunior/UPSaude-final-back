@@ -1,10 +1,14 @@
 package com.upsaude.controller.api.sistema.notificacao;
 
 import com.upsaude.api.request.sistema.notificacao.NotificacaoRequest;
+import com.upsaude.api.request.sistema.notificacao.TesteEmailBrevoRequest;
 import com.upsaude.api.response.sistema.notificacao.NotificacaoResponse;
+import com.upsaude.api.response.sistema.notificacao.TesteEmailBrevoResponse;
 import com.upsaude.exception.BadRequestException;
 import com.upsaude.exception.ConflictException;
 import com.upsaude.exception.NotFoundException;
+import com.upsaude.integration.brevo.BrevoEmailClient;
+import com.upsaude.integration.brevo.exception.BrevoException;
 import com.upsaude.service.api.sistema.notificacao.NotificacaoService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -23,6 +27,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.OffsetDateTime;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
 
 @RestController
@@ -33,6 +39,7 @@ import java.util.UUID;
 public class NotificacaoController {
 
     private final NotificacaoService service;
+    private final BrevoEmailClient brevoEmailClient;
 
     @PostMapping
     @Operation(summary = "Criar notificação", description = "Cria uma nova notificação")
@@ -134,6 +141,91 @@ public class NotificacaoController {
         } catch (Exception ex) {
             log.error("Erro inesperado ao inativar notificação — ID: {}", id, ex);
             throw ex;
+        }
+    }
+
+    @PostMapping("/teste-email-brevo")
+    @Operation(
+        summary = "Teste de envio de email via Brevo",
+        description = "Endpoint de teste que envia um email imediatamente usando o template ID 5 do Brevo. " +
+                     "Útil para testar a integração com o Brevo sem passar pelo dispatcher de notificações."
+    )
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Email enviado com sucesso",
+            content = @Content(schema = @Schema(implementation = TesteEmailBrevoResponse.class))),
+        @ApiResponse(responseCode = "400", description = "Dados inválidos fornecidos"),
+        @ApiResponse(responseCode = "500", description = "Erro ao enviar email")
+    })
+    public ResponseEntity<TesteEmailBrevoResponse> testeEmailBrevo(
+            @RequestBody(required = false) TesteEmailBrevoRequest request) {
+        
+        log.info("REQUEST POST /v1/notificacoes/teste-email-brevo - email: {}", 
+                request != null ? request.getEmail() : "não informado");
+        
+        try {
+            // Valores padrão se request for null ou vazio
+            String email = (request != null && request.getEmail() != null && !request.getEmail().trim().isEmpty())
+                    ? request.getEmail()
+                    : "wagner.grilo85@gmail.com";
+            
+            String nome = (request != null && request.getNome() != null) 
+                    ? request.getNome() 
+                    : "Teste UPSaude";
+            
+            // Template ID fixo: 5
+            Integer templateId = 5;
+            
+            // Parâmetros padrão ou do request
+            Map<String, Object> params = new HashMap<>();
+            if (request != null && request.getParametros() != null) {
+                params.putAll(request.getParametros());
+            } else {
+                // Parâmetros padrão para teste
+                params.put("nome", nome);
+                params.put("email", email);
+                params.put("dataHora", OffsetDateTime.now().toString());
+                params.put("mensagem", "Este é um email de teste do sistema UPSaude via Brevo.");
+            }
+            
+            // Enviar email via Brevo usando template ID 5
+            String messageId = brevoEmailClient.sendTemplateEmail(
+                    templateId,
+                    email,
+                    nome,
+                    params,
+                    BrevoEmailClient.SenderType.NOREPLY
+            );
+            
+            log.info("Email de teste enviado com sucesso via Brevo. MessageId: {}, Email: {}", messageId, email);
+            
+            TesteEmailBrevoResponse response = TesteEmailBrevoResponse.builder()
+                    .sucesso(true)
+                    .messageId(messageId)
+                    .mensagem("Email enviado com sucesso via Brevo usando template ID " + templateId)
+                    .erro(null)
+                    .build();
+            
+            return ResponseEntity.ok(response);
+            
+        } catch (BrevoException e) {
+            log.error("Erro ao enviar email de teste via Brevo", e);
+            TesteEmailBrevoResponse response = TesteEmailBrevoResponse.builder()
+                    .sucesso(false)
+                    .messageId(null)
+                    .mensagem("Erro ao enviar email via Brevo")
+                    .erro(e.getMessage())
+                    .build();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+            
+        } catch (Exception e) {
+            log.error("Erro inesperado ao enviar email de teste", e);
+            TesteEmailBrevoResponse response = TesteEmailBrevoResponse.builder()
+                    .sucesso(false)
+                    .messageId(null)
+                    .mensagem("Erro inesperado ao enviar email")
+                    .erro(e.getMessage())
+                    .build();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
         }
     }
 }
