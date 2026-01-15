@@ -18,6 +18,8 @@ public interface PacienteEnderecoMapper {
     @Mapping(target = "active", ignore = true)
     @Mapping(target = "paciente", ignore = true)
     @Mapping(target = "endereco", source = "dadosEndereco")
+    @Mapping(target = "tenant", ignore = true)
+    @Mapping(target = "estabelecimento", ignore = true)
     PacienteEndereco fromRequest(PacienteEnderecoRequest request);
 
     @Mapping(target = "id", source = "endereco.id")

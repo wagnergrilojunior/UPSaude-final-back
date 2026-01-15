@@ -16,6 +16,8 @@ public interface PacienteContatoMapper {
     @Mapping(target = "updatedAt", ignore = true)
     @Mapping(target = "active", ignore = true)
     @Mapping(target = "paciente", ignore = true)
+    @Mapping(target = "tenant", ignore = true)
+    @Mapping(target = "estabelecimento", ignore = true)
     PacienteContato fromRequest(PacienteContatoRequest request);
 
     PacienteContatoResponse toResponse(PacienteContato entity);

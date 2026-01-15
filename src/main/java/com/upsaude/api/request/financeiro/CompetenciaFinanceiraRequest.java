@@ -30,7 +30,7 @@ public class CompetenciaFinanceiraRequest {
 
     @NotBlank(message = "Tipo é obrigatório")
     @Size(max = 20, message = "Tipo deve ter no máximo 20 caracteres")
-    private String tipo; // MENSAL | CUSTOM
+private String tipo;
 
     @NotNull(message = "Data início é obrigatória")
     private LocalDate dataInicio;

@@ -31,7 +31,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/v1/financeiro/planos-contas")
+@RequestMapping("/api/v1/financeiro/planos-contas")
 @Tag(name = "Financeiro - Plano de Contas", description = "API para gerenciamento de Plano de Contas")
 @RequiredArgsConstructor
 @Slf4j
@@ -48,7 +48,7 @@ public class PlanoContasController {
             @ApiResponse(responseCode = "403", description = "Acesso negado")
     })
     public ResponseEntity<PlanoContasResponse> criar(@Valid @RequestBody PlanoContasRequest request) {
-        log.debug("REQUEST POST /v1/financeiro/planos-contas - payload: {}", request);
+        log.debug("REQUEST POST /api/v1/financeiro/planos-contas - payload: {}", request);
         try {
             PlanoContasResponse response = service.criar(request);
             log.info("Plano de contas criado com sucesso. ID: {}", response.getId());
@@ -71,7 +71,7 @@ public class PlanoContasController {
     public ResponseEntity<Page<PlanoContasResponse>> listar(
             @Parameter(description = "Parâmetros de paginação (page, size, sort)")
             Pageable pageable) {
-        log.debug("REQUEST GET /v1/financeiro/planos-contas - pageable: {}", pageable);
+        log.debug("REQUEST GET /api/v1/financeiro/planos-contas - pageable: {}", pageable);
         try {
             Page<PlanoContasResponse> response = service.listar(pageable);
             return ResponseEntity.ok(response);
@@ -92,7 +92,7 @@ public class PlanoContasController {
     public ResponseEntity<PlanoContasResponse> obterPorId(
             @Parameter(description = "ID do plano de contas", required = true)
             @PathVariable UUID id) {
-        log.debug("REQUEST GET /v1/financeiro/planos-contas/{}", id);
+        log.debug("REQUEST GET /api/v1/financeiro/planos-contas/{}", id);
         try {
             PlanoContasResponse response = service.obterPorId(id);
             return ResponseEntity.ok(response);
@@ -118,7 +118,7 @@ public class PlanoContasController {
             @Parameter(description = "ID do plano de contas", required = true)
             @PathVariable UUID id,
             @Valid @RequestBody PlanoContasRequest request) {
-        log.debug("REQUEST PUT /v1/financeiro/planos-contas/{} - payload: {}", id, request);
+        log.debug("REQUEST PUT /api/v1/financeiro/planos-contas/{} - payload: {}", id, request);
         try {
             PlanoContasResponse response = service.atualizar(id, request);
             log.info("Plano de contas atualizado com sucesso. ID: {}", id);
@@ -142,7 +142,7 @@ public class PlanoContasController {
     public ResponseEntity<Void> excluir(
             @Parameter(description = "ID do plano de contas", required = true)
             @PathVariable UUID id) {
-        log.debug("REQUEST DELETE /v1/financeiro/planos-contas/{}", id);
+        log.debug("REQUEST DELETE /api/v1/financeiro/planos-contas/{}", id);
         try {
             service.excluir(id);
             log.info("Plano de contas excluído com sucesso. ID: {}", id);
@@ -166,7 +166,7 @@ public class PlanoContasController {
     public ResponseEntity<Void> inativar(
             @Parameter(description = "ID do plano de contas", required = true)
             @PathVariable UUID id) {
-        log.debug("REQUEST PUT /v1/financeiro/planos-contas/{}/inativar", id);
+        log.debug("REQUEST PUT /api/v1/financeiro/planos-contas/{}/inativar", id);
         try {
             service.inativar(id);
             log.info("Plano de contas inativado com sucesso. ID: {}", id);

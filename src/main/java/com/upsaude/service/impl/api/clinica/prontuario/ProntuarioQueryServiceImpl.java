@@ -38,7 +38,8 @@ public class ProntuarioQueryServiceImpl implements ProntuarioQueryService {
         log.debug("Buscando timeline do prontuário. Paciente ID: {}", pacienteId);
         UUID tenantId = tenantService.validarTenantAtual();
 
-        Paciente paciente = pacienteRepository.findByIdAndTenant(pacienteId, tenantId)
+        // Paciente não tem tenant_id (estende BaseEntityWithoutTenant)
+        Paciente paciente = pacienteRepository.findById(pacienteId)
                 .orElseThrow(() -> new NotFoundException("Paciente não encontrado"));
 
         Prontuario prontuario = prontuarioRepository.findByPacienteIdAndTenantId(pacienteId, tenantId, Pageable.unpaged())
@@ -64,7 +65,8 @@ public class ProntuarioQueryServiceImpl implements ProntuarioQueryService {
         log.debug("Buscando resumo do prontuário. Paciente ID: {}", pacienteId);
         UUID tenantId = tenantService.validarTenantAtual();
 
-        Paciente paciente = pacienteRepository.findByIdAndTenant(pacienteId, tenantId)
+        // Paciente não tem tenant_id (estende BaseEntityWithoutTenant)
+        Paciente paciente = pacienteRepository.findById(pacienteId)
                 .orElseThrow(() -> new NotFoundException("Paciente não encontrado"));
 
         Prontuario prontuario = prontuarioRepository.findByPacienteIdAndTenantId(pacienteId, tenantId, Pageable.unpaged())

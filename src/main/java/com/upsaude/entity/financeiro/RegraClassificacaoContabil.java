@@ -1,6 +1,5 @@
 package com.upsaude.entity.financeiro;
 
-import com.upsaude.entity.BaseEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -23,19 +22,19 @@ import org.hibernate.type.SqlTypes;
 )
 @Data
 @EqualsAndHashCode(callSuper = true)
-public class RegraClassificacaoContabil extends BaseEntity {
+public class RegraClassificacaoContabil extends BaseEntityFinanceiro {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "conta_contabil_destino_id", nullable = false)
     private ContaContabil contaContabilDestino;
 
     @Column(name = "escopo", nullable = false, length = 50)
-    private String escopo; // ASSISTENCIAL | FATURAMENTO | FINANCEIRO
+private String escopo;
 
     @Column(name = "prioridade", nullable = false)
     private Integer prioridade;
 
     @JdbcTypeCode(SqlTypes.JSON)
     @Column(name = "condicao_jsonb", columnDefinition = "jsonb")
-    private String condicaoJsonb; // JSON com critérios configuráveis
+private String condicaoJsonb;
 }

@@ -1,5 +1,6 @@
 package com.upsaude.api.response.financeiro;
 
+import com.upsaude.api.response.sistema.usuario.UsuarioSistemaSimplificadoResponse;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -23,7 +24,7 @@ public class LogFinanceiroResponse {
     private String entidadeTipo;
     private UUID entidadeId;
     private String acao;
-    private UUID usuarioId;
+    private UsuarioSistemaSimplificadoResponse usuario;
     private String correlationId;
     private String payloadAntes;
     private String payloadDepois;

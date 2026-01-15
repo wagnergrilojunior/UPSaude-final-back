@@ -25,7 +25,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/v1/financeiro/creditos-orcamentarios")
+@RequestMapping("/api/v1/financeiro/creditos-orcamentarios")
 @Tag(name = "Financeiro - Créditos Orçamentários", description = "API para gerenciamento de Créditos Orçamentários")
 @RequiredArgsConstructor
 @Slf4j
@@ -43,7 +43,7 @@ public class CreditoOrcamentarioController {
             @ApiResponse(responseCode = "403", description = "Acesso negado")
     })
     public ResponseEntity<CreditoOrcamentarioResponse> criar(@Valid @RequestBody CreditoOrcamentarioRequest request) {
-        log.debug("REQUEST POST /v1/financeiro/creditos-orcamentarios - payload: {}", request);
+        log.debug("REQUEST POST /api/v1/financeiro/creditos-orcamentarios - payload: {}", request);
         try {
             CreditoOrcamentarioResponse response = service.criar(request);
             log.info("Crédito orçamentário criado com sucesso. ID: {}", response.getId());
@@ -66,7 +66,7 @@ public class CreditoOrcamentarioController {
     public ResponseEntity<Page<CreditoOrcamentarioResponse>> listar(
             @Parameter(description = "Parâmetros de paginação (page, size, sort)")
             Pageable pageable) {
-        log.debug("REQUEST GET /v1/financeiro/creditos-orcamentarios - pageable: {}", pageable);
+        log.debug("REQUEST GET /api/v1/financeiro/creditos-orcamentarios - pageable: {}", pageable);
         try {
             return ResponseEntity.ok(service.listar(pageable));
         } catch (Exception ex) {
@@ -86,7 +86,7 @@ public class CreditoOrcamentarioController {
     public ResponseEntity<CreditoOrcamentarioResponse> obterPorId(
             @Parameter(description = "ID do crédito", required = true)
             @PathVariable UUID id) {
-        log.debug("REQUEST GET /v1/financeiro/creditos-orcamentarios/{}", id);
+        log.debug("REQUEST GET /api/v1/financeiro/creditos-orcamentarios/{}", id);
         try {
             return ResponseEntity.ok(service.obterPorId(id));
         } catch (NotFoundException ex) {
@@ -112,7 +112,7 @@ public class CreditoOrcamentarioController {
             @Parameter(description = "ID do crédito", required = true)
             @PathVariable UUID id,
             @Valid @RequestBody CreditoOrcamentarioRequest request) {
-        log.debug("REQUEST PUT /v1/financeiro/creditos-orcamentarios/{} - payload: {}", id, request);
+        log.debug("REQUEST PUT /api/v1/financeiro/creditos-orcamentarios/{} - payload: {}", id, request);
         try {
             CreditoOrcamentarioResponse response = service.atualizar(id, request);
             log.info("Crédito orçamentário atualizado com sucesso. ID: {}", id);
@@ -136,7 +136,7 @@ public class CreditoOrcamentarioController {
     public ResponseEntity<Void> excluir(
             @Parameter(description = "ID do crédito", required = true)
             @PathVariable UUID id) {
-        log.debug("REQUEST DELETE /v1/financeiro/creditos-orcamentarios/{}", id);
+        log.debug("REQUEST DELETE /api/v1/financeiro/creditos-orcamentarios/{}", id);
         try {
             service.excluir(id);
             log.info("Crédito orçamentário excluído com sucesso. ID: {}", id);
@@ -160,7 +160,7 @@ public class CreditoOrcamentarioController {
     public ResponseEntity<Void> inativar(
             @Parameter(description = "ID do crédito", required = true)
             @PathVariable UUID id) {
-        log.debug("REQUEST PUT /v1/financeiro/creditos-orcamentarios/{}/inativar", id);
+        log.debug("REQUEST PUT /api/v1/financeiro/creditos-orcamentarios/{}/inativar", id);
         try {
             service.inativar(id);
             log.info("Crédito orçamentário inativado com sucesso. ID: {}", id);

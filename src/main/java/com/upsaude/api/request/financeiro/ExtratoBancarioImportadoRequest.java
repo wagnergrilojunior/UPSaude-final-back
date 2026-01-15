@@ -49,6 +49,6 @@ public class ExtratoBancarioImportadoRequest {
 
     @NotBlank(message = "Status de conciliação é obrigatório")
     @Size(max = 30, message = "Status de conciliação deve ter no máximo 30 caracteres")
-    private String statusConciliacao; // NAO_CONCILIADO | CONCILIADO | IGNORADO
+private String statusConciliacao;
 }
 

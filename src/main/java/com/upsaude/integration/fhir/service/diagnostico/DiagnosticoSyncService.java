@@ -67,23 +67,22 @@ public class DiagnosticoSyncService {
                 for (ConceptDTO concept : batch) {
                     try {
                         Cid10Subcategorias cid = existentes.getOrDefault(concept.getCode(), new Cid10Subcategorias());
-                boolean isNew = cid.getId() == null;
+                        boolean isNew = cid.getId() == null;
 
-                cid.setSubcat(concept.getCode());
-                cid.setDescricao(concept.getDisplay());
-                cid.setActive(true);
-                cid.setDataSincronizacao(OffsetDateTime.now());
+                        cid.setSubcat(concept.getCode());
+                        cid.setDescricao(concept.getDisplay());
+                        cid.setActive(true);
 
                         toSave.add(cid);
-                if (isNew)
-                    criados++;
-                else
-                    atualizados++;
-            } catch (Exception e) {
+                        if (isNew)
+                            criados++;
+                        else
+                            atualizados++;
+                    } catch (Exception e) {
                         log.error("Erro ao processar CID {}: {}", concept.getCode(), e.getMessage());
-                falhas++;
-            }
-        }
+                        falhas++;
+                    }
+                }
 
                 // Salvar batch
                 if (!toSave.isEmpty()) {
@@ -97,7 +96,8 @@ public class DiagnosticoSyncService {
         }
 
         String mensagemErro = falhas > 0 ? "Alguns itens falharam na sincronização" : null;
-        syncLogService.concluirSincronizacao(logEntry.getId(), concepts.size(), criados, atualizados, falhas, mensagemErro);
+        syncLogService.concluirSincronizacao(logEntry.getId(), concepts.size(), criados, atualizados, falhas,
+                mensagemErro);
 
         log.info("Sincronização CID-10 concluída: {} processados, {} criados, {} atualizados, {} falhas",
                 concepts.size(), criados, atualizados, falhas);
@@ -126,31 +126,31 @@ public class DiagnosticoSyncService {
                 // Para CIAP2, manter busca individual mas salvar em batch
                 List<Ciap2> toSave = new ArrayList<>();
                 for (ConceptDTO concept : batch) {
-            try {
-                Ciap2 ciap = ciap2Repository.findByCodigo(concept.getCode())
-                        .orElse(new Ciap2());
-                boolean isNew = ciap.getId() == null;
+                    try {
+                        Ciap2 ciap = ciap2Repository.findByCodigo(concept.getCode())
+                                .orElse(new Ciap2());
+                        boolean isNew = ciap.getId() == null;
 
-                ciap.setCodigo(concept.getCode());
-                ciap.setDescricao(concept.getDisplay());
+                        ciap.setCodigo(concept.getCode());
+                        ciap.setDescricao(concept.getDisplay());
 
-                if (concept.getCode().length() > 0 && Character.isLetter(concept.getCode().charAt(0))) {
-                    ciap.setCapitulo(String.valueOf(concept.getCode().charAt(0)));
-                }
+                        if (concept.getCode().length() > 0 && Character.isLetter(concept.getCode().charAt(0))) {
+                            ciap.setCapitulo(String.valueOf(concept.getCode().charAt(0)));
+                        }
 
-                ciap.setAtivo(true);
-                ciap.setDataSincronizacao(OffsetDateTime.now());
+                        ciap.setAtivo(true);
+                        ciap.setDataSincronizacao(OffsetDateTime.now());
 
                         toSave.add(ciap);
-                if (isNew)
-                    criados++;
-                else
-                    atualizados++;
-            } catch (Exception e) {
+                        if (isNew)
+                            criados++;
+                        else
+                            atualizados++;
+                    } catch (Exception e) {
                         log.error("Erro ao processar CIAP {}: {}", concept.getCode(), e.getMessage());
-                falhas++;
-            }
-        }
+                        falhas++;
+                    }
+                }
 
                 // Salvar batch
                 if (!toSave.isEmpty()) {
@@ -164,7 +164,8 @@ public class DiagnosticoSyncService {
         }
 
         String mensagemErro = falhas > 0 ? "Alguns itens falharam na sincronização" : null;
-        syncLogService.concluirSincronizacao(logEntry.getId(), concepts.size(), criados, atualizados, falhas, mensagemErro);
+        syncLogService.concluirSincronizacao(logEntry.getId(), concepts.size(), criados, atualizados, falhas,
+                mensagemErro);
 
         log.info("Sincronização CIAP-2 concluída: {} processados, {} criados, {} atualizados, {} falhas",
                 concepts.size(), criados, atualizados, falhas);

@@ -39,7 +39,7 @@ public class ContaContabilRequest {
 
     @NotBlank(message = "Natureza é obrigatória")
     @Size(max = 20, message = "Natureza deve ter no máximo 20 caracteres")
-    private String natureza; // RECEITA | DESPESA | ATIVO | PASSIVO | PL
+private String natureza;
 
     private Boolean aceitaLancamento;
     private Integer nivel;

@@ -74,6 +74,9 @@ public class Estabelecimentos extends BaseEntityWithoutEstabelecimento {
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "estabelecimento", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<EquipamentosEstabelecimento> equipamentos = new ArrayList<>();
 
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "estabelecimento", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ContaBancariaEstabelecimento> contasBancarias = new ArrayList<>();
+
     @Enumerated(EnumType.STRING)
     @Column(name = "esfera_administrativa", length = 50)
     private EsferaAdministrativaEnum esferaAdministrativa;
@@ -93,6 +96,9 @@ public class Estabelecimentos extends BaseEntityWithoutEstabelecimento {
     @Column(name = "cnes_dados_json", columnDefinition = "jsonb")
     @org.hibernate.annotations.JdbcTypeCode(org.hibernate.type.SqlTypes.JSON)
     private String cnesDadosJson;
+
+    @Column(name = "prestador_servico", nullable = false, columnDefinition = "boolean default false")
+    private Boolean prestadorServico = false;
 
     @Column(name = "observacoes", columnDefinition = "TEXT")
     private String observacoes;
@@ -122,6 +128,9 @@ public class Estabelecimentos extends BaseEntityWithoutEstabelecimento {
         if (equipamentos == null) {
             equipamentos = new ArrayList<>();
         }
+        if (contasBancarias == null) {
+            contasBancarias = new ArrayList<>();
+        }
     }
 
     public void addEquipamento(EquipamentosEstabelecimento equipamento) {
@@ -143,6 +152,28 @@ public class Estabelecimentos extends BaseEntityWithoutEstabelecimento {
         }
         if (equipamentos.remove(equipamento)) {
             equipamento.setEstabelecimento(null);
+        }
+    }
+
+    public void addContaBancaria(ContaBancariaEstabelecimento contaBancaria) {
+        if (contaBancaria == null) {
+            return;
+        }
+        if (contasBancarias == null) {
+            contasBancarias = new ArrayList<>();
+        }
+        if (!contasBancarias.contains(contaBancaria)) {
+            contasBancarias.add(contaBancaria);
+            contaBancaria.setEstabelecimento(this);
+        }
+    }
+
+    public void removeContaBancaria(ContaBancariaEstabelecimento contaBancaria) {
+        if (contaBancaria == null || contasBancarias == null) {
+            return;
+        }
+        if (contasBancarias.remove(contaBancaria)) {
+            contaBancaria.setEstabelecimento(null);
         }
     }
 }

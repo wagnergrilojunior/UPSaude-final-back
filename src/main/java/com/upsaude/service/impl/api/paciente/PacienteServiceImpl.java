@@ -54,6 +54,7 @@ public class PacienteServiceImpl implements PacienteService {
     private final PacienteTenantEnforcer tenantEnforcer;
     private final PacienteResponseBuilder responseBuilder;
     private final PacienteDomainService domainService;
+    private final com.upsaude.service.sistema.notificacao.NotificacaoOrchestrator notificacaoOrchestrator;
 
     @PostConstruct
     public void init() {
@@ -183,6 +184,23 @@ public class PacienteServiceImpl implements PacienteService {
         try {
             UUID tenantId = tenantService.validarTenantAtual();
             Paciente paciente = pacienteUpdater.atualizar(id, request, tenantId);
+            
+            // Notificar atualização de dados pessoais
+            try {
+                String email = obterEmailPaciente(paciente);
+                if (email != null && !email.trim().isEmpty()) {
+                    notificacaoOrchestrator.notificarDadosPessoaisAtualizados(
+                            email, 
+                            paciente.getNomeCompleto(), 
+                            paciente.getId(),
+                            null // estabelecimentoId pode ser obtido se necessário
+                    );
+                }
+            } catch (Exception e) {
+                log.warn("Erro ao enviar notificação de dados pessoais atualizados. Paciente ID: {}", id, e);
+                // Não propagar erro
+            }
+            
             return responseBuilder.build(paciente);
         } catch (BadRequestException | NotFoundException e) {
             log.warn("Erro de validação ao atualizar Paciente. Erro: {}", e.getMessage());
@@ -191,6 +209,18 @@ public class PacienteServiceImpl implements PacienteService {
             log.error("Erro de acesso a dados ao atualizar Paciente. Exception: {}", e.getClass().getSimpleName(), e);
             throw new InternalServerErrorException("Erro ao atualizar Paciente", e);
         }
+    }
+
+    private String obterEmailPaciente(com.upsaude.entity.paciente.Paciente paciente) {
+        if (paciente.getContatos() != null) {
+            return paciente.getContatos().stream()
+                    .filter(c -> c.getTipo() == com.upsaude.enums.TipoContatoEnum.EMAIL)
+                    .map(c -> c.getEmail())
+                    .filter(e -> e != null && !e.trim().isEmpty())
+                    .findFirst()
+                    .orElse(null);
+        }
+        return null;
     }
 
     @Override

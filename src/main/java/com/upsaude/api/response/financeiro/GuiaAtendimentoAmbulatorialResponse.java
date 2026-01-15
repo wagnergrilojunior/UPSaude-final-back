@@ -5,6 +5,7 @@ import com.upsaude.api.response.agendamento.EstabelecimentoSimplificadoResponse;
 import com.upsaude.api.response.clinica.atendimento.AtendimentoSimplificadoResponse;
 import com.upsaude.api.response.faturamento.DocumentoFaturamentoSimplificadoResponse;
 import com.upsaude.api.response.sistema.usuario.PacienteSimplificadoResponse;
+import com.upsaude.api.response.sistema.usuario.UsuarioSistemaSimplificadoResponse;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -36,7 +37,7 @@ public class GuiaAtendimentoAmbulatorialResponse {
     private String status;
     private OffsetDateTime emitidaEm;
     private OffsetDateTime canceladaEm;
-    private UUID canceladaPor;
+    private UsuarioSistemaSimplificadoResponse canceladaPor;
     private String observacoes;
 }
 

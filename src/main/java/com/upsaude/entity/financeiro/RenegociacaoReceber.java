@@ -1,6 +1,5 @@
 package com.upsaude.entity.financeiro;
 
-import com.upsaude.entity.BaseEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Index;
@@ -20,7 +19,7 @@ import java.time.LocalDate;
 )
 @Data
 @EqualsAndHashCode(callSuper = true)
-public class RenegociacaoReceber extends BaseEntity {
+public class RenegociacaoReceber extends BaseEntityFinanceiro {
 
     @Column(name = "data", nullable = false)
     private LocalDate data;
@@ -31,6 +30,4 @@ public class RenegociacaoReceber extends BaseEntity {
     @Column(name = "observacao", columnDefinition = "TEXT")
     private String observacao;
 
-    // Nota: Relacionamento N..N com títulos originais será feito via tabela associativa
-    // e referência aos novos títulos gerados será feita via serviço
 }

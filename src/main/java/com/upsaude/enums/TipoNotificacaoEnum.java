@@ -22,6 +22,9 @@ public enum TipoNotificacaoEnum {
     FALTA_AVISO(12, "Aviso de Falta"),
     FILA_ESPERA(13, "Vaga Disponível na Fila de Espera"),
     ATENDIMENTO_INICIADO(14, "Atendimento Iniciado"),
+    USUARIO_CRIADO(15, "Usuário Criado"),
+    SENHA_ALTERADA(16, "Senha Alterada"),
+    DADOS_PESSOAIS_ATUALIZADOS(17, "Dados Pessoais Atualizados"),
     OUTRO(99, "Outro");
 
     private final Integer codigo;

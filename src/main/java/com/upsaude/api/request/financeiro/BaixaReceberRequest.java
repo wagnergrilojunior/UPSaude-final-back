@@ -48,7 +48,7 @@ public class BaixaReceberRequest {
 
     @NotBlank(message = "Status é obrigatório")
     @Size(max = 30, message = "Status deve ter no máximo 30 caracteres")
-    private String status; // EFETIVADO | CANCELADO_POR_REVERSAO
+private String status;
 
     private String observacao;
 }

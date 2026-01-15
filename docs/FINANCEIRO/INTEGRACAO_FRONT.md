@@ -8,6 +8,7 @@ Este documento é para o time de frontend integrar corretamente com o Financeiro
 
 ## Links rápidos (para não se perder)
 
+- **Como o Financeiro roda no Assistencial (Agendamento/Atendimento/Consulta)**: [FINANCEIRO_NO_ASSISTENCIAL.md](./FINANCEIRO_NO_ASSISTENCIAL.md)
 - **Fluxos e ordem sugerida**: [FLUXOS_E_SEQUENCIAS.md](./FLUXOS_E_SEQUENCIAS.md)
 - **Dados e status** (o que renderizar): [DADOS_E_STATUS.md](./DADOS_E_STATUS.md)
 - **Catálogo de endpoints (por domínio)**: [ENDPOINTS.md](./ENDPOINTS.md)

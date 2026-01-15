@@ -88,7 +88,6 @@ public class CreditoOrcamentarioServiceImpl implements CreditoOrcamentarioServic
         try {
             CreditoOrcamentario entity = tenantEnforcer.validarAcesso(id, tenantId);
             domainService.validarPodeDeletar(entity);
-            // Ajusta orçamento (se existir)
             OrcamentoCompetencia orcamento = orcamentoRepository.findByTenantAndCompetencia(tenantId, entity.getCompetencia().getId()).orElse(null);
             if (orcamento != null) {
                 BigDecimal creditosAtuais = orcamento.getCreditos() != null ? orcamento.getCreditos() : BigDecimal.ZERO;

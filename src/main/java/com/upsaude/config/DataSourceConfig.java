@@ -54,7 +54,7 @@ public class DataSourceConfig {
         config.addDataSourceProperty("preparedStatementCacheQueries", "0");
         config.addDataSourceProperty("preparedStatementCacheSizeMiB", "0");
         config.addDataSourceProperty("tcpKeepAlive", "true");
-        config.addDataSourceProperty("socketTimeout", "30");
+        config.addDataSourceProperty("socketTimeout", "120"); // Aumentado para 120s para suportar queries de agregação longas
         config.addDataSourceProperty("loginTimeout", "10");
         config.addDataSourceProperty("cancelSignalTimeout", "30");
 
@@ -112,7 +112,7 @@ public class DataSourceConfig {
         config.addDataSourceProperty("preparedStatementCacheQueries", "0");
         config.addDataSourceProperty("preparedStatementCacheSizeMiB", "0");
         config.addDataSourceProperty("tcpKeepAlive", "true");
-        config.addDataSourceProperty("socketTimeout", "30");
+        config.addDataSourceProperty("socketTimeout", "120"); // Aumentado para 120s para suportar queries de agregação longas
         config.addDataSourceProperty("loginTimeout", "10");
         config.addDataSourceProperty("cancelSignalTimeout", "30");
 

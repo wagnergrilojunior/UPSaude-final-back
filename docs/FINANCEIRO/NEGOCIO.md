@@ -1,214 +1,329 @@
 # FINANCEIRO — Documentação de Negócio
 
-## Links úteis (para produto/front)
+## 📚 Links Úteis
 
 - **Fluxos e ordem de integração**: [FLUXOS_E_SEQUENCIAS.md](./FLUXOS_E_SEQUENCIAS.md)
 - **Dados e status para UI**: [DADOS_E_STATUS.md](./DADOS_E_STATUS.md)
 - **Catálogo de endpoints (por domínio)**: [ENDPOINTS.md](./ENDPOINTS.md)
+- **Documentação técnica**: [TECNICO.md](./TECNICO.md)
 
-## Objetivo do módulo
+## 🎯 Objetivo do Módulo
 
 O módulo **Financeiro** existe para controlar **recursos públicos** destinados aos atendimentos ambulatoriais, com:
 
-- **Saldo por município (tenant)** e por **competência financeira**;
-- **Rastreabilidade total** (auditoria) de créditos, reservas, consumos e estornos;
-- **Automação**: o usuário final não precisa “lançar financeiro” manualmente no dia a dia;
-- **Proibição de saldo negativo** (regra de negócio — o sistema deve bloquear operações que ultrapassem o orçamento);
-- **Integração com produção ambulatorial/BPA** (fechamento por competência e consistência dos dados).
+- **Saldo por município (tenant)** e por **competência financeira**
+- **Rastreabilidade total** (auditoria) de créditos, reservas, consumos e estornos
+- **Automação**: o usuário final não precisa "lançar financeiro" manualmente no dia a dia
+- **Proibição de saldo negativo** (regra de negócio — o sistema deve bloquear operações que ultrapassem o orçamento)
+- **Integração com produção ambulatorial/BPA** (fechamento por competência e consistência dos dados)
 
-> Observação importante: o domínio foi desenhado para suportar um financeiro “completo” (contas, conciliação, títulos, lançamentos, plano de contas). Porém, o **fluxo de BPA/fechamento completo** ainda depende de evoluções específicas (ver [TECNICO.md](./TECNICO.md)).
+> **Observação importante**: o domínio foi desenhado para suportar um financeiro "completo" (contas, conciliação, títulos, lançamentos, plano de contas). Porém, o **fluxo de BPA/fechamento completo** ainda depende de evoluções específicas (ver [TECNICO.md](./TECNICO.md)).
 
----
+## 📖 Conceitos (Linguagem de Negócio)
 
-## Conceitos (linguagem de negócio)
+### Competência Financeira
 
-### Competência financeira
 Período de referência do financeiro (normalmente **mensal**, mas pode ser personalizado).
 
-- Ex.: `2026-01` (01/01/2026 a 31/01/2026)
+- **Exemplo**: `2026-01` (01/01/2026 a 31/01/2026)
+- **Tipos**: `MENSAL`, `BIMESTRAL`, `TRIMESTRAL`, `SEMESTRAL`, `ANUAL`, `OUTRO`
+- **Status**: `ABERTA` ou `FECHADA`
+- **Uso**: Todas as operações financeiras devem estar vinculadas a uma competência
 
 ### Tenant = Município
+
 Cada município é um **tenant** e possui:
 
-- Seu próprio orçamento/saldo por competência;
-- Visão segregada dos seus registros financeiros.
+- Seu próprio orçamento/saldo por competência
+- Visão segregada dos seus registros financeiros
+- Isolamento completo de dados entre municípios
 
-### Orçamento por competência
-É o “espelho” do saldo do município na competência:
+### Orçamento por Competência
 
-- saldo anterior
-- créditos liberados
-- reservas ativas (compromissos ainda não consumidos)
-- consumos (execução/atendimento concluído)
-- estornos (cancelamentos/no-shows/ajustes)
-- despesas administrativas (quando aplicável)
-- saldo final / saldo disponível (calculado)
+É o "espelho" do saldo do município na competência, contendo:
 
-### Reserva (compromisso)
-Uma reserva é uma “separação do saldo” para um evento futuro.
+- **saldoAnterior**: Saldo da competência anterior (quando aplicável)
+- **creditos**: Créditos liberados na competência
+- **reservasAtivas**: Compromissos ainda não consumidos
+- **consumos**: Execução/atendimento concluído
+- **estornos**: Cancelamentos/no-shows/ajustes
+- **despesasAdmin**: Despesas administrativas (quando aplicável)
+- **saldoFinal**: Saldo final calculado
+- **saldoDisponivel**: Saldo disponível para novas reservas (calculado)
 
-No modelo atual (híbrido):
+**Fórmula de Cálculo**:
+```
+saldoDisponivel = saldoAnterior + creditos - reservasAtivas - consumos + estornos - despesasAdmin
+```
+
+### Reserva (Compromisso)
+
+Uma reserva é uma "separação do saldo" para um evento futuro.
+
+**No modelo atual (híbrido)**:
 
 - **Reserva** ocorre quando o agendamento é **CONFIRMADO**
-- **Consumo** ocorre quando o atendimento é **CONCLUÍDO**
+- **Consumo** ocorre quando o atendimento é **CONCLUIDO**
 - **Estorno** ocorre quando o agendamento é **CANCELADO/FALTA/REAGENDADO** (ou quando o atendimento é CANCELADO/FALTA_PACIENTE)
 
+**Status da Reserva**:
+- `ATIVA`: Reserva criada, aguardando consumo
+- `CONSUMIDA`: Reserva foi consumida (atendimento concluído)
+- `LIBERADA`: Reserva foi estornada/liberada
+- `PARCIAL`: Reserva parcialmente consumida (uso futuro)
+
 ### Estorno
-Estorno significa “devolver saldo” (ou desfazer um consumo). Ele precisa ser:
 
-- automático quando aplicável
-- auditável
-- com motivo e vínculo ao evento que originou
+Estorno significa "devolver saldo" (ou desfazer um consumo). Ele precisa ser:
 
----
+- **Automático** quando aplicável (cancelamentos, faltas)
+- **Auditável** (registro completo com motivo)
+- **Com motivo** e vínculo ao evento que originou
 
-## Fluxos de negócio (o que o front precisa entender)
+**Motivos de Estorno**:
+- `CANCELAMENTO`: Agendamento/atendimento cancelado
+- `FALTA_PACIENTE`: Paciente não compareceu
+- `NAO_EXECUTADO`: Procedimento não executado
+- `AJUSTE`: Ajuste manual/operacional
+- `OUTRO`: Outros motivos
 
-## 1) Preparação da competência (backoffice)
+## 🔄 Fluxos de Negócio
 
-Antes de operar o dia a dia, precisa existir:
+### 1) Preparação da Competência (Backoffice)
 
-- Uma **Competência Financeira** cadastrada
-- Um **Orçamento da Competência** (do tenant/município)
-- Créditos (se houver) para compor o saldo
+**Antes de operar o dia a dia, precisa existir**:
 
-Sem isso, o sistema não consegue reservar automaticamente.
+1. Uma **Competência Financeira** cadastrada
+2. Um **Orçamento da Competência** (do tenant/município)
+3. **Créditos** (se houver) para compor o saldo
 
-## 2) Fluxo ambulatorial padrão (modelo híbrido)
+**Sem isso, o sistema não consegue reservar automaticamente.**
 
-### 2.1 Confirmar agendamento → Reservar orçamento
+**Ordem recomendada**:
+1. Criar competência financeira (`POST /v1/financeiro/competencias`)
+2. Criar orçamento da competência (`POST /v1/financeiro/orcamentos-competencia`)
+3. Lançar créditos orçamentários (`POST /v1/financeiro/creditos-orcamentarios`)
 
-Quando um agendamento entra em `CONFIRMADO`:
+### 2) Fluxo Ambulatorial Padrão (Modelo Híbrido)
 
-- o sistema cria uma **Reserva Orçamentária Assistencial**
-- marca o agendamento como `statusFinanceiro = RESERVADO`
+#### 2.1 Confirmar Agendamento → Reservar Orçamento
 
-**Pré-requisitos para a reserva automática funcionar:**
+**Quando um agendamento entra em `CONFIRMADO`**:
+
+- O sistema cria uma **Reserva Orçamentária Assistencial**
+- Marca o agendamento como `statusFinanceiro = RESERVADO`
+
+**Pré-requisitos para a reserva automática funcionar**:
 
 - `agendamento.competenciaFinanceira` preenchido
 - `agendamento.valorEstimadoTotal > 0`
+- Saldo disponível suficiente no orçamento
 
-Se o agendamento estiver sem competência/valor, o sistema não reserva (o front deve evitar esse cenário).
+**Se o agendamento estiver sem competência/valor, o sistema não reserva** (o front deve evitar esse cenário).
 
-### 2.2 Concluir atendimento → Consumir reserva
+#### 2.2 Concluir Atendimento → Consumir Reserva
 
-Quando um atendimento muda para `CONCLUIDO`:
+**Quando um atendimento muda para `CONCLUIDO`**:
 
-- o sistema procura o agendamento vinculado
-- marca a reserva como `CONSUMIDA`
-- marca o agendamento como `statusFinanceiro = CONSUMIDO`
+- O sistema procura o agendamento vinculado
+- Marca a reserva como `CONSUMIDA`
+- Marca o agendamento como `statusFinanceiro = CONSUMIDO`
+- Atualiza o orçamento (diminui reservas ativas, aumenta consumos)
 
-### 2.3 Cancelar/No-show → Estornar
+#### 2.3 Cancelar/No-show → Estornar
 
-Se o agendamento virar:
+**Se o agendamento virar**:
 
 - `CANCELADO` **ou** `FALTA` **ou** `REAGENDADO`
 
-o sistema:
+**O sistema**:
 
-- registra um **Estorno Financeiro** (quando possível, com paciente)
-- marca a reserva como `LIBERADA`
-- marca o agendamento como `statusFinanceiro = ESTORNADO`
+- Registra um **Estorno Financeiro** (quando possível, com paciente)
+- Marca a reserva como `LIBERADA`
+- Marca o agendamento como `statusFinanceiro = ESTORNADO`
+- Atualiza o orçamento (diminui reservas ativas, aumenta estornos)
 
-Se o atendimento virar:
+**Se o atendimento virar**:
 
 - `CANCELADO` **ou** `FALTA_PACIENTE`
 
-o sistema tenta estornar via o agendamento vinculado.
+**O sistema tenta estornar via o agendamento vinculado**.
 
----
-
-## Exemplo completo (com números)
+## 💰 Exemplo Completo (Com Números)
 
 ### Cenário
+
 - Município A (tenant A)
 - Competência: `2026-01`
-- Saldo inicial: 0
+- Saldo inicial: R$ 0,00
 - Crédito liberado na competência: R$ 10.000,00
 
-### Passo a passo
+### Passo a Passo
 
-1) Crédito: +10.000 → saldo disponível = 10.000
+**1) Crédito**: +R$ 10.000,00
+- Saldo disponível = R$ 10.000,00
 
-2) Agendamento CONFIRMADO (estimado R$ 120,50):
-- Reserva: -120,50 (como “reservas ativas”)
-- saldo disponível passa a 9.879,50
+**2) Agendamento CONFIRMADO** (estimado R$ 120,50):
+- Reserva: -R$ 120,50 (como "reservas ativas")
+- Saldo disponível passa a R$ 9.879,50
 
-3) Atendimento CONCLUÍDO:
-- Reserva vira consumo: “reservas ativas” diminui, “consumos” aumenta
-- saldo disponível permanece coerente, mas o uso fica registrado como realizado
+**3) Atendimento CONCLUIDO**:
+- Reserva vira consumo: "reservas ativas" diminui, "consumos" aumenta
+- Saldo disponível permanece coerente, mas o uso fica registrado como realizado
 
-4) Agendamento CANCELADO (antes do consumo):
+**4) Agendamento CANCELADO** (antes do consumo):
 - Reserva é liberada
 - Estorno é registrado
-- saldo disponível volta ao valor anterior
+- Saldo disponível volta a R$ 10.000,00
 
----
+## ⚠️ Regras de Negócio Críticas
 
-## Regras de negócio críticas (para UI/UX do front)
+### Para UI/UX do Front
 
-- **Bloqueio por saldo**: a UI deve impedir (ou alertar) quando não houver saldo para confirmar.
-  - Na prática: a confirmação pode falhar (400/409) por regras financeiras.
-- **Operação sempre por competência**:
-  - agendamento/atendimento devem estar vinculados a uma competência.
-- **Auditabilidade**:
-  - a UI deve expor histórico (reservas, estornos, logs) e permitir filtragem por competência.
-- **Sem alteração retroativa**:
-  - correções devem acontecer via **ajustes/estornos**, não “editando o passado”.
+1. **Bloqueio por Saldo**
+   - A UI deve impedir (ou alertar) quando não houver saldo para confirmar
+   - Na prática: a confirmação pode falhar (400/409) por regras financeiras
+   - **Recomendação**: Verificar saldo disponível antes de permitir confirmação
 
----
+2. **Operação Sempre por Competência**
+   - Agendamento/atendimento devem estar vinculados a uma competência
+   - Sem competência, não há reserva automática
+   - **Recomendação**: Seleção obrigatória de competência no formulário
 
-## Sugestão de “Mapa de Telas” (mínimo recomendado)
+3. **Auditabilidade**
+   - A UI deve expor histórico (reservas, estornos, logs)
+   - Permitir filtragem por competência
+   - Exibir trilha completa de operações financeiras
 
-- **Painel Financeiro do Município (por competência)**:
-  - mostra `saldoDisponivel`, `creditos`, `reservasAtivas`, `consumos`, `estornos`
-  - fonte: `GET /v1/financeiro/orcamentos-competencia`
-- **Tela de Reservas**:
-  - reservas `ATIVA` / `CONSUMIDA` / `LIBERADA` (auditoria e pendências)
-  - fonte: `GET /v1/financeiro/reservas-orcamentarias`
-- **Tela de Estornos**:
-  - fonte: `GET /v1/financeiro/estornos`
-- **Detalhe do Agendamento**:
-  - exibir `competenciaFinanceira`, `valorEstimadoTotal`, `statusFinanceiro`
-  - fonte: `GET /v1/agendamentos/{id}`
-- **Detalhe do Atendimento**:
-  - exibir `competenciaFinanceira` e status clínico
-  - fonte: `GET /v1/atendimentos/{id}`
+4. **Sem Alteração Retroativa**
+   - Correções devem acontecer via **ajustes/estornos**
+   - Não permitir "editar o passado"
+   - **Recomendação**: Usar operações explícitas para correções
 
----
+5. **Idempotência**
+   - Operações de reserva são idempotentes (não criam duplicatas)
+   - Sistema previne reservas duplicadas automaticamente
 
-## Exemplos de consultas (para relatórios simples no Front)
+6. **Validação de Valor**
+   - `valorEstimadoTotal` deve ser maior que zero para reserva automática
+   - Valores negativos não são permitidos
 
-### Orçamento por competência (paginado)
+## 🖥️ Sugestão de "Mapa de Telas" (Mínimo Recomendado)
+
+### Painel Financeiro do Município (por competência)
+
+- **Funcionalidade**: Visão geral do orçamento
+- **Dados exibidos**: `saldoDisponivel`, `creditos`, `reservasAtivas`, `consumos`, `estornos`
+- **Fonte**: `GET /v1/financeiro/orcamentos-competencia`
+- **Filtros**: Por competência, período
+
+### Tela de Reservas
+
+- **Funcionalidade**: Listagem e auditoria de reservas
+- **Dados exibidos**: Reservas `ATIVA` / `CONSUMIDA` / `LIBERADA`
+- **Fonte**: `GET /v1/financeiro/reservas-orcamentarias`
+- **Filtros**: Por status, competência, período, agendamento
+
+### Tela de Estornos
+
+- **Funcionalidade**: Histórico de estornos
+- **Dados exibidos**: Estornos com motivo e vínculo ao evento
+- **Fonte**: `GET /v1/financeiro/estornos`
+- **Filtros**: Por motivo, competência, período, paciente
+
+### Detalhe do Agendamento
+
+- **Funcionalidade**: Exibir informações financeiras do agendamento
+- **Dados exibidos**: 
+  - `competenciaFinanceira`
+  - `valorEstimadoTotal`
+  - `statusFinanceiro` (SEM_RESERVA | RESERVADO | CONSUMIDO | ESTORNADO | AJUSTADO)
+- **Fonte**: `GET /v1/agendamentos/{id}`
+
+### Detalhe do Atendimento
+
+- **Funcionalidade**: Exibir informações financeiras do atendimento
+- **Dados exibidos**: 
+  - `competenciaFinanceira`
+  - Status clínico
+  - Vínculo com agendamento (se houver)
+- **Fonte**: `GET /v1/atendimentos/{id}`
+
+## 📊 Exemplos de Consultas (Para Relatórios Simples no Front)
+
+### Orçamento por Competência (Paginado)
 
 ```bash
 GET /api/v1/financeiro/orcamentos-competencia?page=0&size=20&sort=createdAt,desc
 ```
 
-### Reservas (paginado)
+### Reservas (Paginado)
 
 ```bash
 GET /api/v1/financeiro/reservas-orcamentarias?page=0&size=20&sort=createdAt,desc
 ```
 
-### Estornos (paginado)
+### Estornos (Paginado)
 
 ```bash
 GET /api/v1/financeiro/estornos?page=0&size=20&sort=dataEstorno,desc
 ```
 
-> Nota: filtros avançados (por prestador, procedimento, período) ainda não estão expostos como query params dedicados em todos endpoints; no MVP, o front pode filtrar client-side e depois evoluímos para endpoints de relatório.
+> **Nota**: Filtros avançados (por prestador, procedimento, período) ainda não estão expostos como query params dedicados em todos endpoints; no MVP, o front pode filtrar client-side e depois evoluímos para endpoints de relatório.
 
----
+## 📋 O que o Front Deve Exibir (Mínimo Recomendado)
 
-## O que o front deve exibir (mínimo recomendado)
+### No Agendamento
 
-- No agendamento:
-  - `competenciaFinanceira`
-  - `valorEstimadoTotal`
-  - `statusFinanceiro` (SEM_RESERVA | RESERVADO | CONSUMIDO | ESTORNADO | AJUSTADO)
-- Painel financeiro do município:
-  - Orçamento por competência (saldo anterior, créditos, reservas, consumos, estornos, saldo disponível)
-  - Estornos com motivo e vínculo ao evento
-  - Reservas ativas (pendências)
+- `competenciaFinanceira` (objeto com código e descrição)
+- `valorEstimadoTotal` (formatado como moeda)
+- `statusFinanceiro` (SEM_RESERVA | RESERVADO | CONSUMIDO | ESTORNADO | AJUSTADO)
+- Link para detalhes da reserva (se houver)
 
+### Painel Financeiro do Município
+
+- **Orçamento por competência**:
+  - Saldo anterior
+  - Créditos
+  - Reservas ativas
+  - Consumos
+  - Estornos
+  - Saldo disponível (destacado)
+- **Estornos com motivo** e vínculo ao evento
+- **Reservas ativas** (pendências)
+- **Gráficos** (opcional): evolução do saldo, distribuição de consumos, etc.
+
+### Indicadores Visuais
+
+- **Saldo disponível**: Verde se positivo, vermelho se negativo (não deve ocorrer)
+- **Status financeiro**: Badge colorido (RESERVADO=azul, CONSUMIDO=verde, ESTORNADO=amarelo)
+- **Alertas**: Quando saldo está baixo ou próximo de zero
+
+## 🔍 Casos de Uso Especiais
+
+### Reprocessamento
+
+Quando é necessário reprocessar uma operação financeira:
+
+- Usar endpoints de operações explícitas: `/v1/financeiro/operacoes/...`
+- Ver [ENDPOINTS_FINANCEIRO_01_OPERACOES.md](./ENDPOINTS_FINANCEIRO_01_OPERACOES.md)
+
+### Ajustes Manuais
+
+Para correções operacionais:
+
+- Criar estorno manual com motivo `AJUSTE`
+- Registrar observações no campo de motivo
+- Manter rastreabilidade completa
+
+### Fechamento de Competência
+
+- Processo de fechamento ainda em desenvolvimento
+- Ver [TECNICO.md](./TECNICO.md) para limitações conhecidas
+
+## 📖 Referências
+
+- [README Principal](./README.md)
+- [Fluxos e Sequências](./FLUXOS_E_SEQUENCIAS.md)
+- [Dados e Status](./DADOS_E_STATUS.md)
+- [Documentação Técnica](./TECNICO.md)

@@ -13,8 +13,10 @@ import java.util.UUID;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+@SuppressWarnings("null")
 class AgendamentoAtualizacaoRegressionTest extends BaseRegressionTest {
 
     @Autowired
@@ -118,7 +120,15 @@ class AgendamentoAtualizacaoRegressionTest extends BaseRegressionTest {
                   "ehEncaixe": false,
                   "ehRetorno": false,
                   "motivoConsulta": "Consulta atualizada",
-                  "observacoesAgendamento": "Observações atualizadas"
+                  "observacoesAgendamento": "Observações atualizadas",
+
+                  "tipoAgendamento": "ROTINA",
+                  "categoriaServico": "AMBULATORIAL",
+                  "tipoServico": "CONSULTA",
+                  "motivosAgendamento": "Atualização completa (regressão)",
+                  "periodoSolicitado": "MANHA",
+
+                  "valorEstimadoTotal": 150.00
                 }
                 """, pacienteId, dataHora, dataHoraFim);
 
@@ -150,13 +160,26 @@ class AgendamentoAtualizacaoRegressionTest extends BaseRegressionTest {
                   "justificativaConflito": "",
                   "notificacaoEnviada24h": true,
                   "notificacaoEnviada1h": false,
-                  "confirmacaoEnviada": true
+                  "confirmacaoEnviada": true,
+
+                  "tipoAgendamento": "ACOMPANHAMENTO",
+                  "categoriaServico": "AMBULATORIAL",
+                  "tipoServico": "RETORNO",
+                  "motivosAgendamento": "Retorno / acompanhamento",
+                  "periodoSolicitado": "TARDE",
+
+                  "valorEstimadoTotal": 200.00
                 }
                 """, pacienteId, dataHora, dataHoraFim);
 
         mockMvc.perform(put("/v1/agendamentos/" + agendamentoId)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(jsonPayload))
-                .andExpect(status().isOk());
+                .andExpect(status().isOk())
+                // asserts leves para garantir que os novos campos estão aceitos/serializados no response
+                .andExpect(jsonPath("$.id").exists())
+                .andExpect(jsonPath("$.tipoAgendamento").value("ACOMPANHAMENTO"))
+                .andExpect(jsonPath("$.tipoServico").value("RETORNO"))
+                .andExpect(jsonPath("$.valorEstimadoTotal").isNumber());
     }
 }

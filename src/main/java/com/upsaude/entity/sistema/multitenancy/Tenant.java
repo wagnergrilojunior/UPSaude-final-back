@@ -34,19 +34,17 @@ import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 @Entity
-@Table(name = "tenants", schema = "public",
-       uniqueConstraints = {
-           @UniqueConstraint(name = "uk_tenants_slug", columnNames = {"slug"}),
-           @UniqueConstraint(name = "uk_tenants_cnpj", columnNames = {"cnpj"})
-       },
-       indexes = {
-           @Index(name = "idx_tenants_slug", columnList = "slug"),
-           @Index(name = "idx_tenants_cnpj", columnList = "cnpj")
-       })
+@Table(name = "tenants", schema = "public", uniqueConstraints = {
+        @UniqueConstraint(name = "uk_tenants_slug", columnNames = { "slug" }),
+        @UniqueConstraint(name = "uk_tenants_cnpj", columnNames = { "cnpj" })
+}, indexes = {
+        @Index(name = "idx_tenants_slug", columnList = "slug"),
+        @Index(name = "idx_tenants_cnpj", columnList = "cnpj")
+})
 @Getter
 @Setter
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
-@EntityListeners({AuditingEntityListener.class})
+@EntityListeners({ AuditingEntityListener.class })
 public class Tenant {
 
     @Id
@@ -64,6 +62,12 @@ public class Tenant {
 
     @Column(name = "ativo", nullable = false)
     private Boolean ativo = true;
+
+    @Column(name = "consorcio", nullable = false, columnDefinition = "boolean default false")
+    private Boolean consorcio = false;
+
+    @Column(name = "slug", length = 100)
+    private String slug;
 
     @Embedded
     private DadosIdentificacaoTenant dadosIdentificacao;
@@ -87,6 +91,9 @@ public class Tenant {
     @JoinColumn(name = "endereco_id")
     private Endereco endereco;
 
+    @Column(name = "codigo_ibge_municipio", length = 10)
+    private String codigoIbgeMunicipio;
+
     @PrePersist
     @PreUpdate
     public void validateEmbeddables() {
@@ -107,6 +114,9 @@ public class Tenant {
         }
         if (configuracaoFinanceira == null) {
             configuracaoFinanceira = new ConfiguracaoFinanceiraTenant();
+        }
+        if (consorcio == null) {
+            consorcio = false;
         }
     }
 }

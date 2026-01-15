@@ -61,6 +61,10 @@ public class UsuariosSistemaRequest {
     @Builder.Default
     private List<UUID> estabelecimentosIds = new ArrayList<>();
 
+    @NotNull(message = "UsuarioConsorcio é obrigatório")
+    @Schema(description = "Indica se o usuário tem acesso a todos os tenants do consórcio")
+    private Boolean usuarioConsorcio;
+
     @Getter
     @Setter
     @Builder

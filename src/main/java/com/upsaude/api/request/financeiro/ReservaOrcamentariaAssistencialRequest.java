@@ -36,7 +36,7 @@ public class ReservaOrcamentariaAssistencialRequest {
     private UUID prestadorId;
 
     @Size(max = 30, message = "Tipo do prestador deve ter no máximo 30 caracteres")
-    private String prestadorTipo; // ESTABELECIMENTO | PROFISSIONAL
+private String prestadorTipo;
 
     @NotNull(message = "Valor reservado total é obrigatório")
     @Positive(message = "Valor reservado total deve ser maior que zero")
@@ -44,7 +44,7 @@ public class ReservaOrcamentariaAssistencialRequest {
 
     @NotBlank(message = "Status é obrigatório")
     @Size(max = 20, message = "Status deve ter no máximo 20 caracteres")
-    private String status; // ATIVA | CONSUMIDA | LIBERADA | PARCIAL
+private String status;
 
     private UUID grupoReserva;
 }

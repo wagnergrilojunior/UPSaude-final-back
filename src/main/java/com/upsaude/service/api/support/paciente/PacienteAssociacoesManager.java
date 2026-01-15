@@ -14,15 +14,11 @@ import com.upsaude.entity.sistema.multitenancy.Tenant;
 import com.upsaude.enums.TipoContatoEnum;
 import com.upsaude.enums.TipoIdentificadorEnum;
 import com.upsaude.mapper.geral.EnderecoMapper;
-import com.upsaude.mapper.paciente.DadosClinicosBasicosMapper;
-import com.upsaude.mapper.paciente.DadosSociodemograficosMapper;
 import com.upsaude.mapper.paciente.PacienteContatoMapper;
-import com.upsaude.mapper.paciente.PacienteDadosPessoaisComplementaresMapper;
 import com.upsaude.mapper.paciente.PacienteEnderecoMapper;
 import com.upsaude.mapper.paciente.PacienteIdentificadorMapper;
 import com.upsaude.mapper.paciente.PacienteObitoMapper;
 import com.upsaude.mapper.paciente.PacienteVinculoTerritorialMapper;
-import com.upsaude.mapper.paciente.ResponsavelLegalMapper;
 import com.upsaude.mapper.paciente.deficiencia.DeficienciasPacienteMapper;
 import com.upsaude.mapper.sistema.lgpd.LGPDConsentimentoMapper;
 import com.upsaude.repository.convenio.ConvenioRepository;
@@ -36,6 +32,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class PacienteAssociacoesManager {
 
     private final EnderecoService enderecoService;
@@ -47,9 +44,6 @@ public class PacienteAssociacoesManager {
     private final EnderecoMapper enderecoMapper;
     private final PacienteIdentificadorMapper pacienteIdentificadorMapper;
     private final PacienteContatoMapper pacienteContatoMapper;
-    private final DadosSociodemograficosMapper dadosSociodemograficosMapper;
-    private final DadosClinicosBasicosMapper dadosClinicosBasicosMapper;
-    private final PacienteDadosPessoaisComplementaresMapper dadosPessoaisComplementaresMapper;
     private final PacienteObitoMapper pacienteObitoMapper;
     private final DeficienciasPacienteMapper deficienciasPacienteMapper;
     private final PacienteVinculoTerritorialMapper pacienteVinculoTerritorialMapper;
@@ -59,7 +53,8 @@ public class PacienteAssociacoesManager {
     public void processarTodas(Paciente paciente, PacienteRequest request, UUID tenantId) {
         log.debug("Processando todas as associações para paciente ID: {}", paciente.getId());
 
-        Tenant tenant = tenantRepository.getReferenceById(tenantId);
+        com.upsaude.entity.sistema.multitenancy.Tenant tenant = tenantRepository.findById(tenantId)
+                .orElseThrow(() -> new com.upsaude.exception.NotFoundException("Tenant não encontrado: " + tenantId));
 
         if (request.getConvenio() != null) {
             convenioRepository.findById(request.getConvenio())
@@ -190,26 +185,11 @@ public class PacienteAssociacoesManager {
             });
         }
 
-        if (request.getDadosSociodemograficos() != null) {
-            var entity = dadosSociodemograficosMapper.fromRequest(request.getDadosSociodemograficos());
-            entity.setPaciente(paciente);
-            entity.setTenant(tenant);
-            paciente.setDadosSociodemograficos(entity);
-        }
-
-        if (request.getDadosClinicosBasicos() != null) {
-            var entity = dadosClinicosBasicosMapper.fromRequest(request.getDadosClinicosBasicos());
-            entity.setPaciente(paciente);
-            entity.setTenant(tenant);
-            paciente.setDadosClinicosBasicos(entity);
-        }
-
-        if (request.getDadosPessoaisComplementares() != null) {
-            var entity = dadosPessoaisComplementaresMapper.fromRequest(request.getDadosPessoaisComplementares());
-            entity.setPaciente(paciente);
-            entity.setTenant(tenant);
-            paciente.setDadosPessoaisComplementares(entity);
-        }
+        // Blocos de DadosSociodemograficos, DadosClinicosBasicos e
+        // DadosPessoaisComplementares
+        // movidos para o Creator para maior controle no 'modelo antigo'.
+        // No Manager, apenas garantimos que as listas e documentos complexos sejam
+        // processados.
 
         if (request.getObito() != null) {
             boolean obitoVazio = request.getObito().getDataObito() == null

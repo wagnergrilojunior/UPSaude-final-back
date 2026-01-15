@@ -12,13 +12,22 @@
 
   <groupId>com.upsaude</groupId>
   <artifactId>upsaude-back</artifactId>
-  <version>1.0.0.11</version>
+  <version>1.0.0.12</version>
   <name>UPSaude-back</name>
   <description>UP Saude Backend</description>
   <properties>
     <java.version>17</java.version>
+    <!-- Otimizações de compilação -->
+    <maven.compiler.fork>true</maven.compiler.fork>
+    <maven.compiler.maxmem>2048m</maven.compiler.maxmem>
   </properties>
   <dependencies>
+
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-actuator</artifactId>
+    </dependency>
+
     <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-web</artifactId>
@@ -164,8 +173,8 @@
         </configuration>
         <executions>
           <execution>
+            <id>build-info</id>
             <goals>
-              <goal>repackage</goal>
               <goal>build-info</goal>
             </goals>
           </execution>
@@ -178,6 +187,10 @@
         <configuration>
           <source>${java.version}</source>
           <target>${java.version}</target>
+          <!-- Otimizações de compilação -->
+          <useIncrementalCompilation>true</useIncrementalCompilation>
+          <meminitial>512m</meminitial>
+          <maxmem>2048m</maxmem>
           <annotationProcessorPaths>
             <path>
               <groupId>org.projectlombok</groupId>
@@ -218,7 +231,7 @@
               <sourceDestDir>${project.build.directory}/generated-sources/wsimport</sourceDestDir>
               <xnocompile>true</xnocompile>
               <extension>true</extension>
-              <verbose>true</verbose>
+              <verbose>false</verbose>
               <keep>true</keep>
             </configuration>
           </execution>

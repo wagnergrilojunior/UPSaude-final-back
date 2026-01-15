@@ -37,13 +37,13 @@ public class LancamentoFinanceiroRequest {
 
     @NotBlank(message = "Tipo de origem é obrigatório")
     @Size(max = 50, message = "Tipo de origem deve ter no máximo 50 caracteres")
-    private String origemTipo; // AGENDAMENTO | ATENDIMENTO | DOCUMENTO_FATURAMENTO | TITULO | CONCILIACAO | MANUAL | AJUSTE_SISTEMA
+private String origemTipo;
 
     private UUID origemId;
 
     @NotBlank(message = "Status é obrigatório")
     @Size(max = 30, message = "Status deve ter no máximo 30 caracteres")
-    private String status; // PREVISTO | REALIZADO | ESTORNADO | AJUSTADO | CANCELADO_POR_REVERSAO
+private String status;
 
     @NotNull(message = "Data do evento é obrigatória")
     private OffsetDateTime dataEvento;

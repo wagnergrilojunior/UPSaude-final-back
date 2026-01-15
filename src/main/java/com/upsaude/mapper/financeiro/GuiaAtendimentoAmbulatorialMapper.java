@@ -8,6 +8,7 @@ import com.upsaude.api.response.faturamento.DocumentoFaturamentoSimplificadoResp
 import com.upsaude.api.response.financeiro.GuiaAtendimentoAmbulatorialResponse;
 import com.upsaude.api.response.financeiro.GuiaAtendimentoAmbulatorialSimplificadoResponse;
 import com.upsaude.api.response.sistema.usuario.PacienteSimplificadoResponse;
+import com.upsaude.api.response.sistema.usuario.UsuarioSistemaSimplificadoResponse;
 import com.upsaude.entity.financeiro.GuiaAtendimentoAmbulatorial;
 import com.upsaude.mapper.config.MappingConfig;
 import org.mapstruct.Mapper;
@@ -15,7 +16,7 @@ import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 import org.mapstruct.Named;
 
-@Mapper(config = MappingConfig.class, uses = { CompetenciaFinanceiraMapper.class })
+@Mapper(config = MappingConfig.class, uses = { CompetenciaFinanceiraMapper.class, UsuarioSistemaMapper.class })
 public interface GuiaAtendimentoAmbulatorialMapper {
 
     @Mapping(target = "id", ignore = true)
@@ -48,6 +49,8 @@ public interface GuiaAtendimentoAmbulatorialMapper {
     @Mapping(target = "canceladaPor", ignore = true)
     void updateFromRequest(GuiaAtendimentoAmbulatorialRequest request, @MappingTarget GuiaAtendimentoAmbulatorial entity);
 
+    @Mapping(target = "canceladaPor", source = "canceladaPor", qualifiedByName = "mapUsuarioSistemaSimplificado")
+    @Mapping(target = "documentoFaturamento", source = "documentoFaturamento", qualifiedByName = "mapDocumentoFaturamentoParaGuia")
     GuiaAtendimentoAmbulatorialResponse toResponse(GuiaAtendimentoAmbulatorial entity);
 
     @Named("toSimplifiedResponse")
@@ -108,7 +111,8 @@ public interface GuiaAtendimentoAmbulatorialMapper {
         }
     }
 
-    default DocumentoFaturamentoSimplificadoResponse mapDocumentoFaturamento(com.upsaude.entity.faturamento.DocumentoFaturamento doc) {
+    @Named("mapDocumentoFaturamentoParaGuia")
+    default DocumentoFaturamentoSimplificadoResponse mapDocumentoFaturamentoParaGuia(com.upsaude.entity.faturamento.DocumentoFaturamento doc) {
         if (doc == null) return null;
         try {
             return DocumentoFaturamentoSimplificadoResponse.builder()
@@ -122,5 +126,6 @@ public interface GuiaAtendimentoAmbulatorialMapper {
             return null;
         }
     }
+
 }
 

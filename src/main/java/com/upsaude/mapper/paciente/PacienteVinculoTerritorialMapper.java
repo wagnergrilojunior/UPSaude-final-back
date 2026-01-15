@@ -16,6 +16,8 @@ public interface PacienteVinculoTerritorialMapper {
     @Mapping(target = "updatedAt", ignore = true)
     @Mapping(target = "active", ignore = true)
     @Mapping(target = "paciente", ignore = true)
+    @Mapping(target = "tenant", ignore = true)
+    @Mapping(target = "estabelecimento", ignore = true)
     PacienteVinculoTerritorial fromRequest(PacienteVinculoTerritorialRequest request);
 
     PacienteVinculoTerritorialResponse toResponse(PacienteVinculoTerritorial entity);

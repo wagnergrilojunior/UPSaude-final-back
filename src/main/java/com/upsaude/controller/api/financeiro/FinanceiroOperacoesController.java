@@ -1,9 +1,13 @@
 package com.upsaude.controller.api.financeiro;
 
+import com.upsaude.api.request.financeiro.CompetenciaFechamentoRequest;
 import com.upsaude.api.request.financeiro.FinanceiroOperacaoMotivoRequest;
+import com.upsaude.api.response.financeiro.CompetenciaFechamentoResponse;
 import com.upsaude.exception.BadRequestException;
 import com.upsaude.exception.NotFoundException;
+import com.upsaude.service.api.financeiro.CompetenciaFechamentoService;
 import com.upsaude.service.api.financeiro.FinanceiroIntegrationService;
+import com.upsaude.service.api.sistema.multitenancy.TenantService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -22,13 +26,15 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/v1/financeiro/operacoes")
+@RequestMapping("/api/v1/financeiro/operacoes")
 @Tag(name = "Financeiro - Operações", description = "API de ações explícitas para orquestração do financeiro (reserva/consumo/estorno/fechamento)")
 @RequiredArgsConstructor
 @Slf4j
 public class FinanceiroOperacoesController {
 
     private final FinanceiroIntegrationService financeiroIntegrationService;
+    private final CompetenciaFechamentoService competenciaFechamentoService;
+    private final TenantService tenantService;
 
     @PostMapping("/agendamentos/{agendamentoId}/reservar")
     @Operation(
@@ -45,7 +51,7 @@ public class FinanceiroOperacoesController {
             @Parameter(description = "ID do agendamento", required = true)
             @PathVariable UUID agendamentoId
     ) {
-        log.debug("REQUEST POST /v1/financeiro/operacoes/agendamentos/{}/reservar", agendamentoId);
+        log.debug("REQUEST POST /api/v1/financeiro/operacoes/agendamentos/{}/reservar", agendamentoId);
         try {
             financeiroIntegrationService.reservarOrcamento(agendamentoId);
             return ResponseEntity.noContent().build();
@@ -74,7 +80,7 @@ public class FinanceiroOperacoesController {
             @PathVariable UUID agendamentoId,
             @Valid @RequestBody FinanceiroOperacaoMotivoRequest request
     ) {
-        log.debug("REQUEST POST /v1/financeiro/operacoes/agendamentos/{}/estornar - payload: {}", agendamentoId, request);
+        log.debug("REQUEST POST /api/v1/financeiro/operacoes/agendamentos/{}/estornar - payload: {}", agendamentoId, request);
         try {
             financeiroIntegrationService.estornarReserva(agendamentoId, request.getMotivo());
             return ResponseEntity.noContent().build();
@@ -102,7 +108,7 @@ public class FinanceiroOperacoesController {
             @Parameter(description = "ID do atendimento", required = true)
             @PathVariable UUID atendimentoId
     ) {
-        log.debug("REQUEST POST /v1/financeiro/operacoes/atendimentos/{}/consumir", atendimentoId);
+        log.debug("REQUEST POST /api/v1/financeiro/operacoes/atendimentos/{}/consumir", atendimentoId);
         try {
             financeiroIntegrationService.consumirReserva(atendimentoId);
             return ResponseEntity.noContent().build();
@@ -131,7 +137,7 @@ public class FinanceiroOperacoesController {
             @PathVariable UUID atendimentoId,
             @Valid @RequestBody FinanceiroOperacaoMotivoRequest request
     ) {
-        log.debug("REQUEST POST /v1/financeiro/operacoes/atendimentos/{}/estornar - payload: {}", atendimentoId, request);
+        log.debug("REQUEST POST /api/v1/financeiro/operacoes/atendimentos/{}/estornar - payload: {}", atendimentoId, request);
         try {
             financeiroIntegrationService.estornarConsumo(atendimentoId, request.getMotivo());
             return ResponseEntity.noContent().build();
@@ -150,19 +156,27 @@ public class FinanceiroOperacoesController {
             description = "Dispara o fechamento da competência financeira (base para BPA e travas de integridade)."
     )
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "204", description = "Competência fechada com sucesso"),
+            @ApiResponse(responseCode = "200", description = "Competência fechada com sucesso"),
             @ApiResponse(responseCode = "400", description = "Requisição inválida"),
             @ApiResponse(responseCode = "404", description = "Competência não encontrada"),
             @ApiResponse(responseCode = "403", description = "Acesso negado")
     })
-    public ResponseEntity<Void> fecharCompetencia(
+    public ResponseEntity<CompetenciaFechamentoResponse> fecharCompetencia(
             @Parameter(description = "ID da competência financeira", required = true)
-            @PathVariable UUID competenciaFinanceiraId
+            @PathVariable UUID competenciaFinanceiraId,
+            @Valid @RequestBody(required = false) CompetenciaFechamentoRequest request
     ) {
-        log.debug("REQUEST POST /v1/financeiro/operacoes/competencias/{}/fechar", competenciaFinanceiraId);
+        log.debug("REQUEST POST /api/v1/financeiro/operacoes/competencias/{}/fechar", competenciaFinanceiraId);
         try {
-            financeiroIntegrationService.fecharCompetencia(competenciaFinanceiraId);
-            return ResponseEntity.noContent().build();
+            UUID tenantId = tenantService.validarTenantAtual();
+
+            if (request == null) {
+                request = CompetenciaFechamentoRequest.builder().build();
+            }
+
+            CompetenciaFechamentoResponse response = competenciaFechamentoService.fecharCompetencia(
+                    competenciaFinanceiraId, tenantId, request);
+            return ResponseEntity.ok(response);
         } catch (BadRequestException | NotFoundException ex) {
             log.warn("Falha ao fechar competência financeira — competenciaFinanceiraId: {}, mensagem: {}", competenciaFinanceiraId, ex.getMessage());
             throw ex;

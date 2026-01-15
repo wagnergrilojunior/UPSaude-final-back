@@ -31,7 +31,6 @@ public class OrcamentoCompetenciaResponse {
     private BigDecimal saldoFinal;
     private OffsetDateTime atualizadoEm;
 
-    // Campo calculado (helper de domínio)
     private BigDecimal saldoDisponivel;
 }
 

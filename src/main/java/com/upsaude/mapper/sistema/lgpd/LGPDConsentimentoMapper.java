@@ -18,6 +18,8 @@ public interface LGPDConsentimentoMapper {
     @Mapping(target = "updatedAt", ignore = true)
     @Mapping(target = "active", ignore = true)
     @Mapping(target = "paciente", ignore = true)
+    @Mapping(target = "tenant", ignore = true)
+    @Mapping(target = "estabelecimento", ignore = true)
     LGPDConsentimento fromRequest(LGPDConsentimentoRequest request);
 
     @Mapping(target = "id", ignore = true)
@@ -25,6 +27,8 @@ public interface LGPDConsentimentoMapper {
     @Mapping(target = "updatedAt", ignore = true)
     @Mapping(target = "active", ignore = true)
     @Mapping(target = "paciente", ignore = true)
+    @Mapping(target = "tenant", ignore = true)
+    @Mapping(target = "estabelecimento", ignore = true)
     void updateFromRequest(LGPDConsentimentoRequest request, @MappingTarget LGPDConsentimento entity);
 
     @Mapping(target = "paciente", ignore = true)

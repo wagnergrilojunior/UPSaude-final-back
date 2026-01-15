@@ -29,7 +29,7 @@ public class RegraClassificacaoContabilRequest {
 
     @NotBlank(message = "Escopo é obrigatório")
     @Size(max = 50, message = "Escopo deve ter no máximo 50 caracteres")
-    private String escopo; // ASSISTENCIAL | FATURAMENTO | FINANCEIRO
+private String escopo;
 
     @NotNull(message = "Prioridade é obrigatória")
     private Integer prioridade;

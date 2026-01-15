@@ -45,7 +45,8 @@ class EstabelecimentoCadastroRegressionTest extends BaseRegressionTest {
                   "dadosIdentificacao": {
                     "nome": "Estabelecimento Teste Minimo",
                     "tipo": "CLINICA"
-                  }
+                  },
+                  "prestadorServico": false
                 }
                 """;
 
@@ -68,7 +69,8 @@ class EstabelecimentoCadastroRegressionTest extends BaseRegressionTest {
                     "cnes": "%s",
                     "cnpj": "%s"
                   },
-                  "observacoes": "Estabelecimento de teste completo"
+                  "observacoes": "Estabelecimento de teste completo",
+                  "prestadorServico": false
                 }
                 """, cnes, cnpj);
 
@@ -100,7 +102,8 @@ class EstabelecimentoCadastroRegressionTest extends BaseRegressionTest {
                     "latitude": -23.5505,
                     "longitude": -46.6333
                   },
-                  "observacoes": "Estabelecimento de teste com todos os campos"
+                  "observacoes": "Estabelecimento de teste com todos os campos",
+                  "prestadorServico": false
                 }
                 """, cnes, cnpj);
 

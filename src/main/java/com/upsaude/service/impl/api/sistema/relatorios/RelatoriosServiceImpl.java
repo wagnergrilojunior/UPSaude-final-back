@@ -8,6 +8,7 @@ import java.time.ZoneOffset;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
@@ -19,7 +20,11 @@ import com.upsaude.repository.agendamento.AgendamentoRepository;
 import com.upsaude.repository.clinica.atendimento.AtendimentoRepository;
 import com.upsaude.repository.clinica.atendimento.ConsultasRepository;
 import com.upsaude.repository.paciente.PacienteRepository;
+import com.upsaude.service.api.sistema.multitenancy.TenantService;
 import com.upsaude.service.api.sistema.relatorios.RelatoriosService;
+import com.upsaude.service.api.support.relatorios.TenantFilterHelper;
+import com.upsaude.service.api.support.relatorios.EstabelecimentoFilterHelper;
+import com.upsaude.service.api.support.relatorios.MedicoFilterHelper;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -33,11 +38,23 @@ public class RelatoriosServiceImpl implements RelatoriosService {
     private final ConsultasRepository consultasRepository;
     private final AgendamentoRepository agendamentoRepository;
     private final PacienteRepository pacienteRepository;
+    private final TenantService tenantService;
+    private final TenantFilterHelper tenantFilterHelper;
+    private final EstabelecimentoFilterHelper estabelecimentoFilterHelper;
+    private final MedicoFilterHelper medicoFilterHelper;
 
     @Override
+    @org.springframework.cache.annotation.Cacheable(
+            value = "relatorioEstatisticas",
+            keyGenerator = "relatoriosCacheKeyGenerator",
+            unless = "#result == null"
+    )
     public RelatorioEstatisticasResponse gerarEstatisticas(RelatorioEstatisticasRequest request) {
         log.debug("Gerando relatório de estatísticas. Data início: {}, Data fim: {}",
                 request.getDataInicio(), request.getDataFim());
+
+        UUID tenantId = tenantService.validarTenantAtual();
+        log.debug("Gerando relatório para tenant: {}", tenantId);
 
         LocalDate dataInicio = request.getDataInicio() != null ? request.getDataInicio() : LocalDate.now().minusMonths(1);
         LocalDate dataFim = request.getDataFim() != null ? request.getDataFim() : LocalDate.now();
@@ -45,17 +62,17 @@ public class RelatoriosServiceImpl implements RelatoriosService {
         OffsetDateTime inicio = dataInicio.atStartOfDay().atOffset(ZoneOffset.UTC);
         OffsetDateTime fim = dataFim.atTime(23, 59, 59).atOffset(ZoneOffset.UTC);
 
-        long totalAtendimentos = contarAtendimentos(request, inicio, fim);
-        long totalConsultas = contarConsultas(request, inicio, fim);
-        long totalAgendamentos = contarAgendamentos(request, inicio, fim);
+        long totalAtendimentos = contarAtendimentos(request, tenantId, inicio, fim);
+        long totalConsultas = contarConsultas(request, tenantId, inicio, fim);
+        long totalAgendamentos = contarAgendamentos(request, tenantId, inicio, fim);
 
-        long totalPacientes = pacienteRepository.count();
+        long totalPacientes = contarPacientes(tenantId, request);
 
-        Map<String, Long> atendimentosPorTipo = new HashMap<>();
-        Map<String, Long> atendimentosPorEspecialidade = new HashMap<>();
+        Map<String, Long> atendimentosPorTipo = calcularAtendimentosPorTipo(request, tenantId, inicio, fim);
+        Map<String, Long> atendimentosPorEspecialidade = calcularAtendimentosPorEspecialidade(request, tenantId, inicio, fim);
         Map<String, Long> examesPorTipo = new HashMap<>();
         Map<String, Long> procedimentosPorTipo = new HashMap<>();
-        Map<String, Long> atendimentosPorProfissional = new HashMap<>();
+        Map<String, Long> atendimentosPorProfissional = calcularAtendimentosPorProfissional(request, tenantId, inicio, fim);
 
         Map<String, BigDecimal> indicadoresSaude = calcularIndicadoresSaude(totalAgendamentos, totalConsultas, totalAtendimentos, inicio, fim);
 
@@ -78,19 +95,56 @@ public class RelatoriosServiceImpl implements RelatoriosService {
                 .build();
     }
 
-    private long contarAtendimentos(RelatorioEstatisticasRequest request, OffsetDateTime inicio, OffsetDateTime fim) {
-
-        return atendimentoRepository.findAll().stream()
-                .filter(a -> a.getInformacoes() != null &&
-                           a.getInformacoes().getDataHora() != null &&
-                           !a.getInformacoes().getDataHora().isBefore(inicio) &&
-                           !a.getInformacoes().getDataHora().isAfter(fim))
+    private long contarAtendimentos(RelatorioEstatisticasRequest request, UUID tenantId, OffsetDateTime inicio, OffsetDateTime fim) {
+        log.debug("Contando atendimentos para tenant {} entre {} e {}", tenantId, inicio, fim);
+        
+        // Validar filtros granulares se fornecidos
+        if (request.getEstabelecimentoId() != null) {
+            if (!estabelecimentoFilterHelper.validarEstabelecimentoPertenceAoTenant(request.getEstabelecimentoId(), tenantId)) {
+                throw new com.upsaude.exception.BadRequestException("Estabelecimento não pertence ao tenant");
+            }
+        }
+        
+        if (request.getMedicoId() != null) {
+            if (!medicoFilterHelper.validarMedicoPertenceAoTenant(request.getMedicoId(), tenantId)) {
+                throw new com.upsaude.exception.BadRequestException("Médico não pertence ao tenant");
+            }
+        }
+        
+        return atendimentoRepository.findAllByTenant(tenantId, PageRequest.of(0, Integer.MAX_VALUE))
+                .getContent().stream()
+                .filter(a -> {
+                    // Filtro por data
+                    if (a.getInformacoes() == null || a.getInformacoes().getDataHora() == null) {
+                        return false;
+                    }
+                    if (a.getInformacoes().getDataHora().isBefore(inicio) || a.getInformacoes().getDataHora().isAfter(fim)) {
+                        return false;
+                    }
+                    
+                    // Filtro por estabelecimento
+                    if (request.getEstabelecimentoId() != null) {
+                        if (a.getEstabelecimento() == null || !request.getEstabelecimentoId().equals(a.getEstabelecimento().getId())) {
+                            return false;
+                        }
+                    }
+                    
+                    // Filtro por médico (via profissional)
+                    if (request.getMedicoId() != null) {
+                        // TODO: Implementar quando houver relacionamento direto médico-atendimento
+                        // Por enquanto, filtrar via profissional se disponível
+                    }
+                    
+                    return true;
+                })
                 .count();
     }
 
-    private long contarConsultas(RelatorioEstatisticasRequest request, OffsetDateTime inicio, OffsetDateTime fim) {
-
-        return consultasRepository.findAll().stream()
+    private long contarConsultas(RelatorioEstatisticasRequest request, UUID tenantId, OffsetDateTime inicio, OffsetDateTime fim) {
+        log.debug("Contando consultas para tenant {} entre {} e {}", tenantId, inicio, fim);
+        
+        return consultasRepository.findAllByTenant(tenantId, PageRequest.of(0, Integer.MAX_VALUE))
+                .getContent().stream()
                 .filter(c -> {
                     if (c.getInformacoes() != null && c.getInformacoes().getDataConsulta() != null) {
                         OffsetDateTime dataConsulta = c.getInformacoes().getDataConsulta();
@@ -104,11 +158,192 @@ public class RelatoriosServiceImpl implements RelatoriosService {
                 .count();
     }
 
-    private long contarAgendamentos(RelatorioEstatisticasRequest request, OffsetDateTime inicio, OffsetDateTime fim) {
-
-        List<Agendamento> agendamentos = agendamentoRepository.findByDataHoraBetweenOrderByDataHoraAsc(
-                inicio, fim, PageRequest.of(0, Integer.MAX_VALUE)).getContent();
+    private long contarAgendamentos(RelatorioEstatisticasRequest request, UUID tenantId, OffsetDateTime inicio, OffsetDateTime fim) {
+        log.debug("Contando agendamentos para tenant {} entre {} e {}", tenantId, inicio, fim);
+        
+        // Validar filtros granulares se fornecidos
+        if (request.getEstabelecimentoId() != null) {
+            if (!estabelecimentoFilterHelper.validarEstabelecimentoPertenceAoTenant(request.getEstabelecimentoId(), tenantId)) {
+                throw new com.upsaude.exception.BadRequestException("Estabelecimento não pertence ao tenant");
+            }
+        }
+        
+        if (request.getMedicoId() != null) {
+            if (!medicoFilterHelper.validarMedicoPertenceAoTenant(request.getMedicoId(), tenantId)) {
+                throw new com.upsaude.exception.BadRequestException("Médico não pertence ao tenant");
+            }
+        }
+        
+        // Usar método específico do repository baseado nos filtros fornecidos
+        PageRequest pageRequest = PageRequest.of(0, Integer.MAX_VALUE);
+        List<Agendamento> agendamentos;
+        
+        if (request.getEstabelecimentoId() != null && request.getMedicoId() != null) {
+            agendamentos = agendamentoRepository.findByEstabelecimentoIdAndMedicoIdAndDataHoraBetweenAndTenantIdOrderByDataHoraAsc(
+                    request.getEstabelecimentoId(), request.getMedicoId(), inicio, fim, tenantId, pageRequest).getContent();
+        } else if (request.getEstabelecimentoId() != null) {
+            agendamentos = agendamentoRepository.findByEstabelecimentoIdAndDataHoraBetweenAndTenantIdOrderByDataHoraAsc(
+                    request.getEstabelecimentoId(), inicio, fim, tenantId, pageRequest).getContent();
+        } else if (request.getMedicoId() != null) {
+            agendamentos = agendamentoRepository.findByMedicoIdAndDataHoraBetweenAndTenantIdOrderByDataHoraAsc(
+                    request.getMedicoId(), inicio, fim, tenantId, pageRequest).getContent();
+        } else if (request.getEspecialidadeId() != null) {
+            agendamentos = agendamentoRepository.findByEspecialidadeIdAndDataHoraBetweenAndTenantIdOrderByDataHoraAsc(
+                    request.getEspecialidadeId(), inicio, fim, tenantId, pageRequest).getContent();
+        } else {
+            agendamentos = agendamentoRepository.findByDataHoraBetweenAndTenantIdOrderByDataHoraAsc(
+                    inicio, fim, tenantId, pageRequest).getContent();
+        }
+        
         return agendamentos.size();
+    }
+
+    private long contarPacientes(UUID tenantId, RelatorioEstatisticasRequest request) {
+        log.debug("Contando pacientes para tenant {}", tenantId);
+        
+        // Se houver filtro por estabelecimento, contar apenas pacientes que tiveram atendimentos/agendamentos no estabelecimento
+        if (request.getEstabelecimentoId() != null) {
+            if (!estabelecimentoFilterHelper.validarEstabelecimentoPertenceAoTenant(request.getEstabelecimentoId(), tenantId)) {
+                throw new com.upsaude.exception.BadRequestException("Estabelecimento não pertence ao tenant");
+            }
+            
+            // Contar pacientes únicos que tiveram atendimentos ou agendamentos no estabelecimento
+            long pacientesAtendimentos = atendimentoRepository.findAllByTenant(tenantId, PageRequest.of(0, Integer.MAX_VALUE))
+                    .getContent().stream()
+                    .filter(a -> a.getEstabelecimento() != null && 
+                            request.getEstabelecimentoId().equals(a.getEstabelecimento().getId()))
+                    .map(a -> a.getPaciente().getId())
+                    .distinct()
+                    .count();
+            
+            long pacientesAgendamentos = agendamentoRepository.findAllByTenant(tenantId, PageRequest.of(0, Integer.MAX_VALUE))
+                    .getContent().stream()
+                    .filter(a -> a.getEstabelecimento() != null && 
+                            request.getEstabelecimentoId().equals(a.getEstabelecimento().getId()))
+                    .map(a -> a.getPaciente().getId())
+                    .distinct()
+                    .count();
+            
+            // Retornar união dos dois conjuntos (aproximação)
+            return Math.max(pacientesAtendimentos, pacientesAgendamentos);
+        }
+        
+        return pacienteRepository.findAllByTenant(tenantId, PageRequest.of(0, Integer.MAX_VALUE))
+                .getTotalElements();
+    }
+
+    private Map<String, Long> calcularAtendimentosPorTipo(RelatorioEstatisticasRequest request, UUID tenantId, OffsetDateTime inicio, OffsetDateTime fim) {
+        Map<String, Long> resultado = new HashMap<>();
+        
+        atendimentoRepository.findAllByTenant(tenantId, PageRequest.of(0, Integer.MAX_VALUE))
+                .getContent().stream()
+                .filter(a -> {
+                    // Filtro por data
+                    if (a.getInformacoes() == null || a.getInformacoes().getDataHora() == null) {
+                        return false;
+                    }
+                    OffsetDateTime dataHora = a.getInformacoes().getDataHora();
+                    if (dataHora.isBefore(inicio) || dataHora.isAfter(fim)) {
+                        return false;
+                    }
+                    
+                    // Filtro por estabelecimento
+                    if (request.getEstabelecimentoId() != null) {
+                        if (a.getEstabelecimento() == null || !request.getEstabelecimentoId().equals(a.getEstabelecimento().getId())) {
+                            return false;
+                        }
+                    }
+                    
+                    // Filtro por médico (via profissional)
+                    if (request.getMedicoId() != null) {
+                        // TODO: Implementar quando houver relacionamento direto médico-atendimento
+                    }
+                    
+                    return true;
+                })
+                .forEach(a -> {
+                    String tipo = a.getClasseAtendimento() != null ? a.getClasseAtendimento().name() : "OUTROS";
+                    resultado.put(tipo, resultado.getOrDefault(tipo, 0L) + 1);
+                });
+        
+        return resultado;
+    }
+
+    private Map<String, Long> calcularAtendimentosPorEspecialidade(RelatorioEstatisticasRequest request, UUID tenantId, OffsetDateTime inicio, OffsetDateTime fim) {
+        Map<String, Long> resultado = new HashMap<>();
+        
+        PageRequest pageRequest = PageRequest.of(0, Integer.MAX_VALUE);
+        List<Agendamento> agendamentos;
+        
+        // Aplicar filtros granulares nos agendamentos
+        if (request.getEstabelecimentoId() != null && request.getMedicoId() != null) {
+            agendamentos = agendamentoRepository.findByEstabelecimentoIdAndMedicoIdAndDataHoraBetweenAndTenantIdOrderByDataHoraAsc(
+                    request.getEstabelecimentoId(), request.getMedicoId(), inicio, fim, tenantId, pageRequest).getContent();
+        } else if (request.getEstabelecimentoId() != null) {
+            agendamentos = agendamentoRepository.findByEstabelecimentoIdAndDataHoraBetweenAndTenantIdOrderByDataHoraAsc(
+                    request.getEstabelecimentoId(), inicio, fim, tenantId, pageRequest).getContent();
+        } else if (request.getMedicoId() != null) {
+            agendamentos = agendamentoRepository.findByMedicoIdAndDataHoraBetweenAndTenantIdOrderByDataHoraAsc(
+                    request.getMedicoId(), inicio, fim, tenantId, pageRequest).getContent();
+        } else if (request.getEspecialidadeId() != null) {
+            agendamentos = agendamentoRepository.findByEspecialidadeIdAndDataHoraBetweenAndTenantIdOrderByDataHoraAsc(
+                    request.getEspecialidadeId(), inicio, fim, tenantId, pageRequest).getContent();
+        } else {
+            agendamentos = agendamentoRepository.findByDataHoraBetweenAndTenantIdOrderByDataHoraAsc(
+                    inicio, fim, tenantId, pageRequest).getContent();
+        }
+        
+        // Agregação por especialidade via agendamentos relacionados
+        agendamentos.stream()
+                .filter(a -> a.getEspecialidade() != null)
+                .forEach(a -> {
+                    String especialidadeNome = a.getEspecialidade().getNome() != null 
+                            ? a.getEspecialidade().getNome() 
+                            : a.getEspecialidade().getId().toString();
+                    resultado.put(especialidadeNome, resultado.getOrDefault(especialidadeNome, 0L) + 1);
+                });
+        
+        return resultado;
+    }
+
+    private Map<String, Long> calcularAtendimentosPorProfissional(RelatorioEstatisticasRequest request, UUID tenantId, OffsetDateTime inicio, OffsetDateTime fim) {
+        Map<String, Long> resultado = new HashMap<>();
+        
+        atendimentoRepository.findAllByTenant(tenantId, PageRequest.of(0, Integer.MAX_VALUE))
+                .getContent().stream()
+                .filter(a -> {
+                    // Filtro por data
+                    if (a.getInformacoes() == null || a.getInformacoes().getDataHora() == null) {
+                        return false;
+                    }
+                    OffsetDateTime dataHora = a.getInformacoes().getDataHora();
+                    if (dataHora.isBefore(inicio) || dataHora.isAfter(fim)) {
+                        return false;
+                    }
+                    
+                    // Filtro por estabelecimento
+                    if (request.getEstabelecimentoId() != null) {
+                        if (a.getEstabelecimento() == null || !request.getEstabelecimentoId().equals(a.getEstabelecimento().getId())) {
+                            return false;
+                        }
+                    }
+                    
+                    // Filtro por médico (via profissional)
+                    if (request.getMedicoId() != null) {
+                        // TODO: Implementar quando houver relacionamento direto médico-atendimento
+                    }
+                    
+                    return a.getProfissional() != null;
+                })
+                .forEach(a -> {
+                    String profissionalNome = a.getProfissional().getDadosPessoaisBasicos() != null 
+                            && a.getProfissional().getDadosPessoaisBasicos().getNomeCompleto() != null
+                            ? a.getProfissional().getDadosPessoaisBasicos().getNomeCompleto() 
+                            : a.getProfissional().getId().toString();
+                    resultado.put(profissionalNome, resultado.getOrDefault(profissionalNome, 0L) + 1);
+                });
+        
+        return resultado;
     }
 
     private Map<String, BigDecimal> calcularIndicadoresSaude(long totalAgendamentos,

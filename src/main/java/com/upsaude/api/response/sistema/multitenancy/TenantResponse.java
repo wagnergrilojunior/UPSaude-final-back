@@ -25,11 +25,13 @@ public class TenantResponse {
     private OffsetDateTime createdAt;
     private OffsetDateTime updatedAt;
     private Boolean ativo;
+    private Boolean consorcio;
     private String slug;
     private String metadados;
     private String cnes;
     private String tipoInstituicao;
     private EnderecoResponse endereco;
+    private String codigoIbgeMunicipio;
     private DadosIdentificacaoTenantResponse dadosIdentificacao;
     private ContatoTenantResponse contato;
     private DadosFiscaisTenantResponse dadosFiscais;

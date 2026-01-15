@@ -14,12 +14,11 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+@SuppressWarnings("null")
 class ConsultaAtualizacaoErroRegressionTest extends BaseRegressionTest {
 
     @Autowired
     private MockMvc mockMvc;
-
-    private UUID consultaId;
 
     private String gerarCpfUnico() {
         long timestamp = System.currentTimeMillis();
@@ -163,7 +162,8 @@ class ConsultaAtualizacaoErroRegressionTest extends BaseRegressionTest {
 
         String responseBody = result.getResponse().getContentAsString();
         String idStr = responseBody.split("\"id\":\"")[1].split("\"")[0];
-        consultaId = UUID.fromString(idStr);
+        // Apenas garante que existe uma consulta válida no banco antes do teste de 404 com ID inválido
+        UUID.fromString(idStr);
     }
 
     @Test

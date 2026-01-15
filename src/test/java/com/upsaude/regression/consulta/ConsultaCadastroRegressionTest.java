@@ -10,8 +10,10 @@ import org.springframework.test.web.servlet.MvcResult;
 import java.util.UUID;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+@SuppressWarnings("null")
 class ConsultaCadastroRegressionTest extends BaseRegressionTest {
 
     @Autowired
@@ -176,7 +178,15 @@ class ConsultaCadastroRegressionTest extends BaseRegressionTest {
         mockMvc.perform(post("/v1/consultas")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(jsonPayload))
-                .andExpect(status().isCreated());
+                .andExpect(status().isCreated())
+                // asserts leves para garantir que os campos do create request entram em Informacoes
+                .andExpect(jsonPath("$.id").exists())
+                .andExpect(jsonPath("$.informacoes").exists())
+                .andExpect(jsonPath("$.informacoes.motivo").value("Consulta de rotina"))
+                .andExpect(jsonPath("$.informacoes.localAtendimento").value("Consultório 1"))
+                // defaults esperados do backend
+                .andExpect(jsonPath("$.informacoes.dataConsulta").exists())
+                .andExpect(jsonPath("$.informacoes.statusConsulta").value("AGENDADA"));
     }
 
     @Test
@@ -198,6 +208,13 @@ class ConsultaCadastroRegressionTest extends BaseRegressionTest {
         mockMvc.perform(post("/v1/consultas")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(jsonPayload))
-                .andExpect(status().isCreated());
+                .andExpect(status().isCreated())
+                // asserts leves para garantir que o response traz os campos em Informacoes e que Médico está presente
+                .andExpect(jsonPath("$.id").exists())
+                .andExpect(jsonPath("$.medico.id").exists())
+                .andExpect(jsonPath("$.informacoes.motivo").value("Consulta completa de teste"))
+                .andExpect(jsonPath("$.informacoes.localAtendimento").value("Consultório completo"))
+                .andExpect(jsonPath("$.informacoes.dataConsulta").exists())
+                .andExpect(jsonPath("$.informacoes.statusConsulta").value("AGENDADA"));
     }
 }

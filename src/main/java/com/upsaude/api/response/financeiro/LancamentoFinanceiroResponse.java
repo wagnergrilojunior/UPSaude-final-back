@@ -1,6 +1,7 @@
 package com.upsaude.api.response.financeiro;
 
 import com.upsaude.api.response.faturamento.DocumentoFaturamentoSimplificadoResponse;
+import com.upsaude.api.response.sistema.usuario.UsuarioSistemaSimplificadoResponse;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -36,6 +37,7 @@ public class LancamentoFinanceiroResponse {
 
     private Boolean travado;
     private OffsetDateTime travadoEm;
+    private UsuarioSistemaSimplificadoResponse travadoPor;
     private UUID grupoLancamento;
 
     private String motivoEstorno;

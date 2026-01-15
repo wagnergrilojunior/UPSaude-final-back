@@ -42,7 +42,6 @@ public class FinanceiroIntegrationServiceImpl implements FinanceiroIntegrationSe
         Agendamento agendamento = agendamentoRepository.findById(agendamentoId)
                 .orElseThrow(() -> new NotFoundException("Agendamento não encontrado com ID: " + agendamentoId));
 
-        // Evita duplicidade (idempotência simples)
         UUID tenantId = agendamento.getTenant() != null ? agendamento.getTenant().getId() : null;
         if (tenantId != null) {
             Optional<ReservaOrcamentariaAssistencial> existingOpt = reservaRepository.findByAgendamento(agendamentoId, tenantId);
@@ -98,7 +97,6 @@ public class FinanceiroIntegrationServiceImpl implements FinanceiroIntegrationSe
             return;
         }
 
-        // Idempotência: se já foi liberada, não gerar novo estorno.
         if ("LIBERADA".equalsIgnoreCase(reserva.getStatus())) {
             log.info("Reserva já liberada; ignorando estorno duplicado. reservaId: {}, agendamentoId: {}", reserva.getId(), agendamentoId);
             agendamento.setStatusFinanceiro("ESTORNADO");
@@ -118,13 +116,11 @@ public class FinanceiroIntegrationServiceImpl implements FinanceiroIntegrationSe
                     .observacoes("Estorno automático de reserva orçamentária")
                     .build();
 
-            // Se não houver paciente, o request é inválido; nesse caso apenas libera a reserva.
             if (estornoReq.getPaciente() != null) {
                 estornoService.criar(estornoReq);
             }
         }
 
-        // Libera a reserva de forma auditável (não remove o registro; apenas marca como LIBERADA).
         reserva.setStatus("LIBERADA");
         reservaRepository.save(reserva);
         agendamento.setStatusFinanceiro("ESTORNADO");
@@ -144,7 +140,6 @@ public class FinanceiroIntegrationServiceImpl implements FinanceiroIntegrationSe
             return;
         }
 
-        // Localizar agendamento vinculado ao atendimento para consolidar a reserva (modelo híbrido).
         Optional<Agendamento> agendamentoOpt = agendamentoRepository.findByAtendimento(atendimentoId, tenantId);
         if (agendamentoOpt.isEmpty()) {
             log.info("Nenhum agendamento vinculado ao atendimento; nada a consumir. atendimentoId: {}", atendimentoId);
@@ -197,8 +192,8 @@ public class FinanceiroIntegrationServiceImpl implements FinanceiroIntegrationSe
     @Override
     @Transactional
     public void fecharCompetencia(UUID competenciaFinanceiraId) {
-        // Implementação completa envolve geração do BPA e hash de integridade.
         if (competenciaFinanceiraId == null) throw new BadRequestException("competenciaFinanceiraId é obrigatório");
+        log.warn("fecharCompetencia chamado sem tenantId e usuarioId. Use CompetenciaFechamentoService diretamente.");
     }
 }
 

@@ -27,15 +27,15 @@ import java.util.UUID;
 @Schema(description = "Dados de tenant")
 public class TenantRequest {
 
-    @NotBlank(message = "Slug é obrigatório")
-    @Size(max = 100, message = "Slug deve ter no máximo 100 caracteres")
-    @Pattern(regexp = "^[a-z0-9-]+$", message = "Slug deve conter apenas letras minúsculas, números e hífens")
     private String slug;
 
     @Size(max = 500, message = "Metadados deve ter no máximo 500 caracteres")
     private String metadados;
 
     private Boolean ativo;
+
+    @Schema(description = "Indica se o tenant é um consórcio")
+    private Boolean consorcio;
 
     @CNESValido
     @Size(max = 7, message = "CNES deve ter no máximo 7 caracteres")
@@ -45,6 +45,10 @@ public class TenantRequest {
     private String tipoInstituicao;
 
     private UUID enderecoId;
+
+    @Size(max = 10, message = "Código IBGE do município deve ter no máximo 10 caracteres")
+    @Schema(description = "Código IBGE do município (referência à tabela cidades)")
+    private String codigoIbgeMunicipio;
 
     @Valid
     private DadosIdentificacaoTenantRequest dadosIdentificacao;

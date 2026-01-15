@@ -29,6 +29,7 @@ public interface TenantMapper {
     @Mapping(target = "updatedAt", ignore = true)
     @Mapping(target = "ativo", ignore = true)
     @Mapping(target = "endereco", ignore = true)
+    @Mapping(target = "slug", source = "slug")
     Tenant fromRequest(TenantRequest request);
 
     @Mapping(target = "id", ignore = true)
@@ -38,6 +39,6 @@ public interface TenantMapper {
     @Mapping(target = "endereco", ignore = true)
     void updateFromRequest(TenantRequest request, @MappingTarget Tenant entity);
 
-    @Mapping(target = "endereco", source = "endereco", qualifiedByName = "toResponseSimplificado")
+    @Mapping(target = "endereco", source = "endereco")
     TenantResponse toResponse(Tenant entity);
 }

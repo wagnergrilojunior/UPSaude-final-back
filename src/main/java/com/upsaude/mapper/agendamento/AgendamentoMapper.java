@@ -20,12 +20,13 @@ import com.upsaude.mapper.clinica.atendimento.AtendimentoMapper;
 import com.upsaude.mapper.clinica.atendimento.ConsultaMapper;
 import com.upsaude.mapper.config.MappingConfig;
 import com.upsaude.mapper.convenio.ConvenioMapper;
+import com.upsaude.mapper.financeiro.CompetenciaFinanceiraMapper;
 import com.upsaude.mapper.paciente.PacienteMapper;
 import com.upsaude.mapper.profissional.MedicosMapper;
 import com.upsaude.mapper.profissional.ProfissionaisSaudeMapper;
 
 @Mapper(config = MappingConfig.class, uses = { AtendimentoMapper.class, ConvenioMapper.class, MedicosMapper.class,
-        PacienteMapper.class, ProfissionaisSaudeMapper.class, ConsultaMapper.class })
+        PacienteMapper.class, ProfissionaisSaudeMapper.class, ConsultaMapper.class, CompetenciaFinanceiraMapper.class })
 public interface AgendamentoMapper {
 
     @Mapping(target = "id", ignore = true)

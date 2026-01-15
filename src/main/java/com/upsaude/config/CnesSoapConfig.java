@@ -45,7 +45,8 @@ public class CnesSoapConfig {
     public SaajSoapMessageFactory cnesSoapMessageFactory() {
         SaajSoapMessageFactory factory = new SaajSoapMessageFactory();
         factory.setSoapVersion(SoapVersion.SOAP_12);
-        factory.afterPropertiesSet();
+        // afterPropertiesSet() será chamado automaticamente quando o bean for realmente usado
+        // Não inicializar no startup para evitar carregamento de WSDL/SOAP
         return factory;
     }
 

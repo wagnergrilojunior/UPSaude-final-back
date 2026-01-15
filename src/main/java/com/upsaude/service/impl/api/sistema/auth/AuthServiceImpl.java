@@ -1,4 +1,5 @@
 package com.upsaude.service.impl.api.sistema.auth;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
@@ -51,7 +52,8 @@ public class AuthServiceImpl implements AuthService {
 
             if (usuarioSistema != null) {
 
-                SupabaseAuthResponse.User user = supabaseAuthService.getUserById(usuarioSistema.getUser() != null ? usuarioSistema.getUser().getId() : null);
+                SupabaseAuthResponse.User user = supabaseAuthService
+                        .getUserById(usuarioSistema.getUser() != null ? usuarioSistema.getUser().getId() : null);
 
                 if (user != null && user.getEmail() != null) {
                     emailParaLogin = user.getEmail();
@@ -59,8 +61,7 @@ public class AuthServiceImpl implements AuthService {
                 } else {
                     log.warn("Não foi possível obter email do usuário '{}' no Supabase Auth", loginIdentifier);
                     throw new com.upsaude.exception.UnauthorizedException(
-                            "Não foi possível obter email do usuário. Entre em contato com o administrador."
-                    );
+                            "Não foi possível obter email do usuário. Entre em contato com o administrador.");
                 }
             } else {
                 log.warn("Usuário não encontrado com 'user': {}", loginIdentifier);
@@ -70,8 +71,7 @@ public class AuthServiceImpl implements AuthService {
 
         SupabaseAuthResponse authResponse = supabaseAuthService.signInWithEmail(
                 emailParaLogin,
-                request.getPassword()
-        );
+                request.getPassword());
 
         UUID userId = authResponse.getUser() != null ? authResponse.getUser().getId() : null;
 
@@ -87,7 +87,8 @@ public class AuthServiceImpl implements AuthService {
                 .expiresIn(authResponse.getExpiresIn())
                 .userId(userId)
                 .email(authResponse.getUser() != null ? authResponse.getUser().getEmail() : null)
-                .userMetadata(authResponse.getUser() != null ? authResponse.getUser().getUserMetadata() : new HashMap<>())
+                .userMetadata(
+                        authResponse.getUser() != null ? authResponse.getUser().getUserMetadata() : new HashMap<>())
                 .appMetadata(authResponse.getUser() != null ? authResponse.getUser().getAppMetadata() : new HashMap<>())
                 .role(authResponse.getUser() != null ? authResponse.getUser().getRole() : null)
                 .usuarioSistema(usuarioSistemaInfo)
@@ -109,35 +110,51 @@ public class AuthServiceImpl implements AuthService {
             return null;
         }
 
-        List<UsuarioEstabelecimento> estabelecimentosVinculados =
-                usuarioEstabelecimentoRepository.findByUsuarioUserId(userId);
+        List<UsuarioEstabelecimento> estabelecimentosVinculados = usuarioEstabelecimentoRepository
+                .findByUsuarioUserId(userId);
 
-        List<com.upsaude.api.response.sistema.usuario.EstabelecimentoVinculoSimplificadoResponse> estabelecimentosResponse =
-                estabelecimentosVinculados.stream()
-                        .map(ue -> {
-                            com.upsaude.entity.paciente.Endereco estabelecimentoEndereco = ue.getEstabelecimento().getEndereco();
-                            return com.upsaude.api.response.sistema.usuario.EstabelecimentoVinculoSimplificadoResponse.builder()
-                                    .id(ue.getId())
-                                    .tenantId(ue.getTenant() != null ? ue.getTenant().getId() : null)
-                                    .estabelecimentoId(ue.getEstabelecimento().getId())
-                                    .estabelecimentoTenantId(ue.getEstabelecimento().getTenant() != null ? ue.getEstabelecimento().getTenant().getId() : null)
-                                    .estabelecimentoEnderecoId(estabelecimentoEndereco != null ? estabelecimentoEndereco.getId() : null)
-                                    .estabelecimentoEnderecoEstadoId(estabelecimentoEndereco != null && estabelecimentoEndereco.getEstado() != null ? estabelecimentoEndereco.getEstado().getId() : null)
-                                    .estabelecimentoEnderecoCidadeId(estabelecimentoEndereco != null && estabelecimentoEndereco.getCidade() != null ? estabelecimentoEndereco.getCidade().getId() : null)
-                                    .tipoUsuario(ue.getTipoUsuario())
-                                    .build();
-                        })
-                        .collect(Collectors.toList());
+        List<com.upsaude.api.response.sistema.usuario.EstabelecimentoVinculoSimplificadoResponse> estabelecimentosResponse = estabelecimentosVinculados
+                .stream()
+                .map(ue -> {
+                    com.upsaude.entity.paciente.Endereco estabelecimentoEndereco = ue.getEstabelecimento()
+                            .getEndereco();
+                    return com.upsaude.api.response.sistema.usuario.EstabelecimentoVinculoSimplificadoResponse.builder()
+                            .id(ue.getId())
+                            .tenantId(ue.getTenant() != null ? ue.getTenant().getId() : null)
+                            .estabelecimentoId(ue.getEstabelecimento().getId())
+                            .estabelecimentoTenantId(ue.getEstabelecimento().getTenant() != null
+                                    ? ue.getEstabelecimento().getTenant().getId()
+                                    : null)
+                            .estabelecimentoEnderecoId(
+                                    estabelecimentoEndereco != null ? estabelecimentoEndereco.getId() : null)
+                            .estabelecimentoEnderecoEstadoId(
+                                    estabelecimentoEndereco != null && estabelecimentoEndereco.getEstado() != null
+                                            ? estabelecimentoEndereco.getEstado().getId()
+                                            : null)
+                            .estabelecimentoEnderecoCidadeId(
+                                    estabelecimentoEndereco != null && estabelecimentoEndereco.getCidade() != null
+                                            ? estabelecimentoEndereco.getCidade().getId()
+                                            : null)
+                            .tipoUsuario(ue.getTipoUsuario())
+                            .build();
+                })
+                .collect(Collectors.toList());
 
         com.upsaude.api.response.sistema.usuario.TenantSimplificadoResponse tenantResponse = null;
         if (usuarioSistema.getTenant() != null) {
             com.upsaude.entity.paciente.Endereco tenantEndereco = usuarioSistema.getTenant().getEndereco();
             tenantResponse = com.upsaude.api.response.sistema.usuario.TenantSimplificadoResponse.builder()
                     .id(usuarioSistema.getTenant().getId())
-                    .nome(usuarioSistema.getTenant().getDadosIdentificacao() != null ? usuarioSistema.getTenant().getDadosIdentificacao().getNome() : null)
+                    .nome(usuarioSistema.getTenant().getDadosIdentificacao() != null
+                            ? usuarioSistema.getTenant().getDadosIdentificacao().getNome()
+                            : null)
                     .enderecoId(tenantEndereco != null ? tenantEndereco.getId() : null)
-                    .enderecoEstadoId(tenantEndereco != null && tenantEndereco.getEstado() != null ? tenantEndereco.getEstado().getId() : null)
-                    .enderecoCidadeId(tenantEndereco != null && tenantEndereco.getCidade() != null ? tenantEndereco.getCidade().getId() : null)
+                    .enderecoEstadoId(tenantEndereco != null && tenantEndereco.getEstado() != null
+                            ? tenantEndereco.getEstado().getId()
+                            : null)
+                    .enderecoCidadeId(tenantEndereco != null && tenantEndereco.getCidade() != null
+                            ? tenantEndereco.getCidade().getId()
+                            : null)
                     .build();
         }
 
@@ -153,7 +170,9 @@ public class AuthServiceImpl implements AuthService {
             }
             profissionalSaudeResponse = ProfissionalSaudeSimplificadoResponse.builder()
                     .id(profissional.getId())
-                    .nome(profissional.getDadosPessoaisBasicos() != null ? profissional.getDadosPessoaisBasicos().getNomeCompleto() : null)
+                    .nome(profissional.getDadosPessoaisBasicos() != null
+                            ? profissional.getDadosPessoaisBasicos().getNomeCompleto()
+                            : null)
                     .email(profissional.getContato() != null ? profissional.getContato().getEmail() : null)
                     .build();
         }
@@ -170,7 +189,8 @@ public class AuthServiceImpl implements AuthService {
             }
             medicoResponse = MedicoSimplificadoResponse.builder()
                     .id(medico.getId())
-                    .nome(medico.getDadosPessoaisBasicos() != null ? medico.getDadosPessoaisBasicos().getNomeCompleto() : null)
+                    .nome(medico.getDadosPessoaisBasicos() != null ? medico.getDadosPessoaisBasicos().getNomeCompleto()
+                            : null)
                     .email(medico.getContato() != null ? medico.getContato().getEmail() : null)
                     .build();
         }
@@ -182,12 +202,11 @@ public class AuthServiceImpl implements AuthService {
             if (paciente.getContatos() != null) {
                 Hibernate.initialize(paciente.getContatos());
             }
-            String emailPaciente = paciente.getContatos() != null ?
-                    paciente.getContatos().stream()
-                            .filter(c -> c.getTipo() == TipoContatoEnum.EMAIL)
-                            .map(c -> c.getEmail())
-                            .filter(e -> e != null && !e.trim().isEmpty())
-                            .findFirst().orElse(null) : null;
+            String emailPaciente = paciente.getContatos() != null ? paciente.getContatos().stream()
+                    .filter(c -> c.getTipo() == TipoContatoEnum.EMAIL)
+                    .map(c -> c.getEmail())
+                    .filter(e -> e != null && !e.trim().isEmpty())
+                    .findFirst().orElse(null) : null;
             pacienteResponse = PacienteSimplificadoResponse.builder()
                     .id(paciente.getId())
                     .nome(paciente.getNomeCompleto())
@@ -199,8 +218,9 @@ public class AuthServiceImpl implements AuthService {
         if (usuarioSistema.getUser() != null) {
             var user = usuarioSistema.getUser();
             Hibernate.initialize(user);
-            String nomeUsuario = usuarioSistema.getDadosExibicao() != null ?
-                    usuarioSistema.getDadosExibicao().getNomeExibicao() : null;
+            String nomeUsuario = usuarioSistema.getDadosExibicao() != null
+                    ? usuarioSistema.getDadosExibicao().getNomeExibicao()
+                    : null;
             if (nomeUsuario == null && usuarioSistema.getDadosIdentificacao() != null) {
                 nomeUsuario = usuarioSistema.getDadosIdentificacao().getUsername();
             }
@@ -214,10 +234,18 @@ public class AuthServiceImpl implements AuthService {
         UsuarioSistemaInfoResponse response = UsuarioSistemaInfoResponse.builder()
                 .id(usuarioSistema.getId())
                 .userId(usuarioSistema.getUser() != null ? usuarioSistema.getUser().getId() : null)
-                .nomeExibicao(usuarioSistema.getDadosExibicao() != null ? usuarioSistema.getDadosExibicao().getNomeExibicao() : null)
-                .username(usuarioSistema.getDadosIdentificacao() != null ? usuarioSistema.getDadosIdentificacao().getUsername() : null)
-                .fotoUrl(usuarioSistema.getDadosExibicao() != null ? usuarioSistema.getDadosExibicao().getFotoUrl() : null)
-                .adminTenant(usuarioSistema.getConfiguracao() != null ? usuarioSistema.getConfiguracao().getAdminTenant() : null)
+                .nomeExibicao(
+                        usuarioSistema.getDadosExibicao() != null ? usuarioSistema.getDadosExibicao().getNomeExibicao()
+                                : null)
+                .username(usuarioSistema.getDadosIdentificacao() != null
+                        ? usuarioSistema.getDadosIdentificacao().getUsername()
+                        : null)
+                .fotoUrl(usuarioSistema.getDadosExibicao() != null ? usuarioSistema.getDadosExibicao().getFotoUrl()
+                        : null)
+                .adminTenant(
+                        usuarioSistema.getConfiguracao() != null ? usuarioSistema.getConfiguracao().getAdminTenant()
+                                : null)
+                .usuarioConsorcio(usuarioSistema.getUsuarioConsorcio())
                 .profissionalSaude(profissionalSaudeResponse)
                 .medico(medicoResponse)
                 .paciente(pacienteResponse)

@@ -24,7 +24,9 @@ import com.upsaude.exception.NotFoundException;
 import com.upsaude.mapper.sistema.multitenancy.TenantMapper;
 import com.upsaude.repository.sistema.multitenancy.TenantRepository;
 import com.upsaude.repository.sistema.usuario.UsuariosSistemaRepository;
+import com.upsaude.service.api.referencia.geografico.CidadesService;
 import com.upsaude.service.api.sistema.multitenancy.TenantService;
+import com.upsaude.validation.util.DocumentoUtil;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -37,6 +39,7 @@ public class TenantServiceImpl implements TenantService {
     private final TenantRepository tenantRepository;
     private final TenantMapper tenantMapper;
     private final UsuariosSistemaRepository usuariosSistemaRepository;
+    private final CidadesService cidadesService;
 
     @Override
     @Transactional
@@ -49,8 +52,19 @@ public class TenantServiceImpl implements TenantService {
             throw new BadRequestException("Dados do tenant são obrigatórios");
         }
 
+        // Validar unicidade antes de criar
+        validarUnicidadeParaCriacao(request);
+
+        // Validar código IBGE se fornecido
+        validarCodigoIbge(request.getCodigoIbgeMunicipio());
+
         Tenant tenant = tenantMapper.fromRequest(request);
         tenant.setAtivo(true);
+
+        // Garantir que consorcio tenha valor padrão se não fornecido
+        if (tenant.getConsorcio() == null) {
+            tenant.setConsorcio(false);
+        }
 
         Tenant tenantSalvo = tenantRepository.save(tenant);
         log.info("Tenant criado com sucesso. ID: {}", tenantSalvo.getId());
@@ -147,8 +161,99 @@ public class TenantServiceImpl implements TenantService {
     }
 
     private void atualizarDadosTenant(Tenant tenant, TenantRequest request) {
+        // Validar unicidade antes de atualizar
+        validarUnicidadeParaAtualizacao(tenant.getId(), request);
+
+        // Validar código IBGE se fornecido
+        validarCodigoIbge(request.getCodigoIbgeMunicipio());
 
         tenantMapper.updateFromRequest(request, tenant);
+
+        // Garantir que consorcio tenha valor padrão se não fornecido na atualização
+        if (tenant.getConsorcio() == null) {
+            tenant.setConsorcio(false);
+        }
+    }
+
+    /**
+     * Valida unicidade de email, CNPJ e slug antes de criar um novo tenant
+     */
+    private void validarUnicidadeParaCriacao(TenantRequest request) {
+        // Validar email
+        if (request.getContato() != null && request.getContato().getEmail() != null
+                && !request.getContato().getEmail().trim().isEmpty()) {
+            String email = request.getContato().getEmail().trim();
+            tenantRepository.findByEmail(email).ifPresent(t -> {
+                throw new BadRequestException("Já existe um tenant cadastrado com o email: " + email);
+            });
+        }
+
+        // Validar CNPJ
+        if (request.getDadosIdentificacao() != null && request.getDadosIdentificacao().getCnpj() != null
+                && !request.getDadosIdentificacao().getCnpj().trim().isEmpty()) {
+            String cnpj = DocumentoUtil.somenteDigitos(request.getDadosIdentificacao().getCnpj());
+            tenantRepository.findByCnpj(cnpj).ifPresent(t -> {
+                throw new BadRequestException(
+                        "Já existe um tenant cadastrado com o CNPJ: " + request.getDadosIdentificacao().getCnpj());
+            });
+        }
+
+        // Validar slug
+        if (request.getSlug() != null && !request.getSlug().trim().isEmpty()) {
+            String slug = request.getSlug().trim();
+            tenantRepository.findBySlug(slug).ifPresent(t -> {
+                throw new BadRequestException("Já existe um tenant cadastrado com o slug: " + slug);
+            });
+        }
+    }
+
+    /**
+     * Valida unicidade de email, CNPJ e slug antes de atualizar um tenant existente
+     */
+    private void validarUnicidadeParaAtualizacao(UUID tenantId, TenantRequest request) {
+        // Validar email
+        if (request.getContato() != null && request.getContato().getEmail() != null
+                && !request.getContato().getEmail().trim().isEmpty()) {
+            String email = request.getContato().getEmail().trim();
+            tenantRepository.findByEmailExcludingId(email, tenantId).ifPresent(t -> {
+                throw new BadRequestException("Já existe outro tenant cadastrado com o email: " + email);
+            });
+        }
+
+        // Validar CNPJ
+        if (request.getDadosIdentificacao() != null && request.getDadosIdentificacao().getCnpj() != null
+                && !request.getDadosIdentificacao().getCnpj().trim().isEmpty()) {
+            String cnpj = DocumentoUtil.somenteDigitos(request.getDadosIdentificacao().getCnpj());
+            tenantRepository.findByCnpjExcludingId(cnpj, tenantId).ifPresent(t -> {
+                throw new BadRequestException(
+                        "Já existe outro tenant cadastrado com o CNPJ: " + request.getDadosIdentificacao().getCnpj());
+            });
+        }
+
+        // Validar slug
+        if (request.getSlug() != null && !request.getSlug().trim().isEmpty()) {
+            String slug = request.getSlug().trim();
+            tenantRepository.findBySlugExcludingId(slug, tenantId).ifPresent(t -> {
+                throw new BadRequestException("Já existe outro tenant cadastrado com o slug: " + slug);
+            });
+        }
+    }
+
+    /**
+     * Valida se o código IBGE do município existe na base de dados
+     */
+    private void validarCodigoIbge(String codigoIbge) {
+        if (codigoIbge != null && !codigoIbge.trim().isEmpty()) {
+            String codigo = codigoIbge.trim();
+            if (!cidadesService.existePorCodigoIbge(codigo)) {
+                log.warn("Código IBGE inválido fornecido: {}", codigo);
+                throw new BadRequestException(
+                        String.format(
+                                "Código IBGE do município '%s' não encontrado. Verifique se o código está correto.",
+                                codigo));
+            }
+            log.debug("Código IBGE validado com sucesso: {}", codigo);
+        }
     }
 
     @Override

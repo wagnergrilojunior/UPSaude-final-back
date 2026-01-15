@@ -23,11 +23,12 @@ import com.upsaude.enums.TipoIdentificadorEnum;
 import com.upsaude.mapper.config.MappingConfig;
 import java.util.UUID;
 import com.upsaude.mapper.convenio.ConvenioMapper;
+import com.upsaude.mapper.financeiro.CompetenciaFinanceiraMapper;
 import com.upsaude.mapper.paciente.PacienteMapper;
 import com.upsaude.mapper.profissional.ProfissionaisSaudeMapper;
 import com.upsaude.mapper.profissional.equipe.EquipeSaudeMapper;
 
-@Mapper(config = MappingConfig.class, uses = {ConvenioMapper.class, EquipeSaudeMapper.class, PacienteMapper.class, ProfissionaisSaudeMapper.class, com.upsaude.mapper.embeddable.InformacoesAtendimentoMapper.class, com.upsaude.mapper.embeddable.AnamneseAtendimentoMapper.class, com.upsaude.mapper.embeddable.DiagnosticoAtendimentoMapper.class, com.upsaude.mapper.embeddable.ProcedimentosRealizadosAtendimentoMapper.class, com.upsaude.mapper.embeddable.ClassificacaoRiscoAtendimentoMapper.class})
+@Mapper(config = MappingConfig.class, uses = {ConvenioMapper.class, EquipeSaudeMapper.class, PacienteMapper.class, ProfissionaisSaudeMapper.class, CompetenciaFinanceiraMapper.class, com.upsaude.mapper.embeddable.InformacoesAtendimentoMapper.class, com.upsaude.mapper.embeddable.AnamneseAtendimentoMapper.class, com.upsaude.mapper.embeddable.DiagnosticoAtendimentoMapper.class, com.upsaude.mapper.embeddable.ProcedimentosRealizadosAtendimentoMapper.class, com.upsaude.mapper.embeddable.ClassificacaoRiscoAtendimentoMapper.class})
 public interface AtendimentoMapper {
 
     @Mapping(target = "id", ignore = true)

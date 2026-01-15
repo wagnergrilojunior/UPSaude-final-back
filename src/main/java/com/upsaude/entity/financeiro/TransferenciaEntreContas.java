@@ -1,6 +1,5 @@
 package com.upsaude.entity.financeiro;
 
-import com.upsaude.entity.BaseEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -29,7 +28,7 @@ import java.time.OffsetDateTime;
 )
 @Data
 @EqualsAndHashCode(callSuper = true)
-public class TransferenciaEntreContas extends BaseEntity {
+public class TransferenciaEntreContas extends BaseEntityFinanceiro {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "conta_origem_id", nullable = false)
@@ -47,7 +46,7 @@ public class TransferenciaEntreContas extends BaseEntity {
     private OffsetDateTime data;
 
     @Column(name = "status", nullable = false, length = 30)
-    private String status; // PENDENTE | EFETIVADO | CANCELADO_POR_REVERSAO
+private String status;
 
     @Column(name = "idempotency_key", nullable = false, length = 255)
     private String idempotencyKey;

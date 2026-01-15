@@ -1,9 +1,12 @@
 package com.upsaude.entity.financeiro;
 
-import com.upsaude.entity.BaseEntity;
+import com.upsaude.entity.sistema.usuario.UsuariosSistema;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.Index;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -23,19 +26,20 @@ import java.util.UUID;
 )
 @Data
 @EqualsAndHashCode(callSuper = true)
-public class LogFinanceiro extends BaseEntity {
+public class LogFinanceiro extends BaseEntityFinanceiro {
 
     @Column(name = "entidade_tipo", nullable = false, length = 50)
-    private String entidadeTipo; // LANCAMENTO | TITULO_RECEBER | BAIXA_RECEBER | TITULO_PAGAR | PAGAMENTO_PAGAR | DOCUMENTO_FATURAMENTO | CONCILIACAO | CONTA_FINANCEIRA | ORCAMENTO_COMPETENCIA | RESERVA_ORCAMENTARIA | OUTRO
+private String entidadeTipo;
 
     @Column(name = "entidade_id", nullable = false)
     private UUID entidadeId;
 
     @Column(name = "acao", nullable = false, length = 50)
-    private String acao; // CRIAR | REVERSAO | AJUSTE | CONCILIAR | IMPORTAR_EXTRATO | FECHAR_COMPETENCIA | REABRIR_COMPETENCIA | OUTRO
+private String acao;
 
-    @Column(name = "usuario_id")
-    private UUID usuarioId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "usuario_id")
+    private UsuariosSistema usuario;
 
     @Column(name = "correlation_id", length = 100)
     private String correlationId;

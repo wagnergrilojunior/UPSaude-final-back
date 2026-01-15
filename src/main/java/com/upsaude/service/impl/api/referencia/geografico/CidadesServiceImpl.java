@@ -133,13 +133,16 @@ public class CidadesServiceImpl implements CidadesService {
         try {
             Page<Cidades> cidades = cidadesRepository.findByEstadoId(estadoId, pageable);
 
-            log.debug("Listagem de cidades por estado concluída. Estado ID: {}, Total: {}", estadoId, cidades.getTotalElements());
+            log.debug("Listagem de cidades por estado concluída. Estado ID: {}, Total: {}", estadoId,
+                    cidades.getTotalElements());
             return cidades.map(responseBuilder::build);
         } catch (DataAccessException e) {
-            log.error("Erro de acesso a dados ao listar cidades por estado. Estado ID: {}, Pageable: {}", estadoId, pageable, e);
+            log.error("Erro de acesso a dados ao listar cidades por estado. Estado ID: {}, Pageable: {}", estadoId,
+                    pageable, e);
             throw new InternalServerErrorException("Erro ao listar cidades por estado", e);
         } catch (RuntimeException e) {
-            log.error("Erro inesperado ao listar cidades por estado. Estado ID: {}, Pageable: {}", estadoId, pageable, e);
+            log.error("Erro inesperado ao listar cidades por estado. Estado ID: {}, Pageable: {}", estadoId, pageable,
+                    e);
             throw e;
         }
     }
@@ -157,7 +160,8 @@ public class CidadesServiceImpl implements CidadesService {
         try {
             List<Cidades> cidades = cidadesRepository.findAllByEstadoId(estadoId);
 
-            log.debug("Listagem de todas as cidades por estado concluída. Estado ID: {}, Total: {}", estadoId, cidades.size());
+            log.debug("Listagem de todas as cidades por estado concluída. Estado ID: {}, Total: {}", estadoId,
+                    cidades.size());
             return cidades.stream()
                     .map(responseBuilder::build)
                     .collect(Collectors.toList());
@@ -192,7 +196,8 @@ public class CidadesServiceImpl implements CidadesService {
             log.warn("Tentativa de atualizar cidade não existente. ID: {}", id);
             throw e;
         } catch (BadRequestException e) {
-            log.warn("Erro de validação ao atualizar cidade. ID: {}, Request: {}. Erro: {}", id, request, e.getMessage());
+            log.warn("Erro de validação ao atualizar cidade. ID: {}, Request: {}. Erro: {}", id, request,
+                    e.getMessage());
             throw e;
         } catch (DataAccessException e) {
             log.error("Erro de acesso a dados ao atualizar cidade. ID: {}, Request: {}", id, request, e);
@@ -215,7 +220,7 @@ public class CidadesServiceImpl implements CidadesService {
             }
 
             Cidades cidades = cidadesRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("Cidade não encontrada com ID: " + id));
+                    .orElseThrow(() -> new NotFoundException("Cidade não encontrada com ID: " + id));
 
             domainService.validarPodeDeletar(cidades);
             cidadesRepository.delete(Objects.requireNonNull(cidades));
@@ -264,12 +269,31 @@ public class CidadesServiceImpl implements CidadesService {
         }
 
         Cidades cidades = cidadesRepository.findById(id)
-            .orElseThrow(() -> new NotFoundException("Cidade não encontrada com ID: " + id));
+                .orElseThrow(() -> new NotFoundException("Cidade não encontrada com ID: " + id));
 
         domainService.validarPodeInativar(cidades);
         cidades.setActive(false);
         cidadesRepository.save(Objects.requireNonNull(cidades));
         log.info("Cidade inativada com sucesso. ID: {}", id);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public boolean existePorCodigoIbge(String codigoIbge) {
+        log.debug("Verificando existência de cidade por código IBGE: {}", codigoIbge);
+
+        if (codigoIbge == null || codigoIbge.trim().isEmpty()) {
+            return false;
+        }
+
+        try {
+            boolean existe = cidadesRepository.findByCodigoIbge(codigoIbge).isPresent();
+            log.debug("Código IBGE {} {} no banco de dados", codigoIbge, existe ? "encontrado" : "não encontrado");
+            return existe;
+        } catch (DataAccessException e) {
+            log.error("Erro de acesso a dados ao verificar código IBGE: {}", codigoIbge, e);
+            return false;
+        }
     }
 
 }

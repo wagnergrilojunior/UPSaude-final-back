@@ -25,7 +25,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/v1/financeiro/orcamentos-competencia")
+@RequestMapping("/api/v1/financeiro/orcamentos-competencia")
 @Tag(name = "Financeiro - Orçamentos por Competência", description = "API para gerenciamento de Orçamento por competência (tenant/município)")
 @RequiredArgsConstructor
 @Slf4j
@@ -43,7 +43,7 @@ public class OrcamentoCompetenciaController {
             @ApiResponse(responseCode = "403", description = "Acesso negado")
     })
     public ResponseEntity<OrcamentoCompetenciaResponse> criar(@Valid @RequestBody OrcamentoCompetenciaRequest request) {
-        log.debug("REQUEST POST /v1/financeiro/orcamentos-competencia - payload: {}", request);
+        log.debug("REQUEST POST /api/v1/financeiro/orcamentos-competencia - payload: {}", request);
         try {
             OrcamentoCompetenciaResponse response = service.criar(request);
             log.info("Orçamento de competência criado com sucesso. ID: {}", response.getId());
@@ -66,7 +66,7 @@ public class OrcamentoCompetenciaController {
     public ResponseEntity<Page<OrcamentoCompetenciaResponse>> listar(
             @Parameter(description = "Parâmetros de paginação (page, size, sort)")
             Pageable pageable) {
-        log.debug("REQUEST GET /v1/financeiro/orcamentos-competencia - pageable: {}", pageable);
+        log.debug("REQUEST GET /api/v1/financeiro/orcamentos-competencia - pageable: {}", pageable);
         try {
             return ResponseEntity.ok(service.listar(pageable));
         } catch (Exception ex) {
@@ -86,7 +86,7 @@ public class OrcamentoCompetenciaController {
     public ResponseEntity<OrcamentoCompetenciaResponse> obterPorId(
             @Parameter(description = "ID do orçamento", required = true)
             @PathVariable UUID id) {
-        log.debug("REQUEST GET /v1/financeiro/orcamentos-competencia/{}", id);
+        log.debug("REQUEST GET /api/v1/financeiro/orcamentos-competencia/{}", id);
         try {
             return ResponseEntity.ok(service.obterPorId(id));
         } catch (NotFoundException ex) {
@@ -112,7 +112,7 @@ public class OrcamentoCompetenciaController {
             @Parameter(description = "ID do orçamento", required = true)
             @PathVariable UUID id,
             @Valid @RequestBody OrcamentoCompetenciaRequest request) {
-        log.debug("REQUEST PUT /v1/financeiro/orcamentos-competencia/{} - payload: {}", id, request);
+        log.debug("REQUEST PUT /api/v1/financeiro/orcamentos-competencia/{} - payload: {}", id, request);
         try {
             OrcamentoCompetenciaResponse response = service.atualizar(id, request);
             log.info("Orçamento atualizado com sucesso. ID: {}", id);
@@ -136,7 +136,7 @@ public class OrcamentoCompetenciaController {
     public ResponseEntity<Void> excluir(
             @Parameter(description = "ID do orçamento", required = true)
             @PathVariable UUID id) {
-        log.debug("REQUEST DELETE /v1/financeiro/orcamentos-competencia/{}", id);
+        log.debug("REQUEST DELETE /api/v1/financeiro/orcamentos-competencia/{}", id);
         try {
             service.excluir(id);
             log.info("Orçamento excluído com sucesso. ID: {}", id);
@@ -160,7 +160,7 @@ public class OrcamentoCompetenciaController {
     public ResponseEntity<Void> inativar(
             @Parameter(description = "ID do orçamento", required = true)
             @PathVariable UUID id) {
-        log.debug("REQUEST PUT /v1/financeiro/orcamentos-competencia/{}/inativar", id);
+        log.debug("REQUEST PUT /api/v1/financeiro/orcamentos-competencia/{}/inativar", id);
         try {
             service.inativar(id);
             log.info("Orçamento inativado com sucesso. ID: {}", id);
