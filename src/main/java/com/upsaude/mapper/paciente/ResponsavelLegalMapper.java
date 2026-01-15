@@ -10,14 +10,15 @@ import com.upsaude.entity.paciente.ResponsavelLegal;
 import com.upsaude.mapper.config.MappingConfig;
 import com.upsaude.mapper.estabelecimento.EstabelecimentosMapper;
 
-@Mapper(config = MappingConfig.class, uses = {EstabelecimentosMapper.class})
-public interface ResponsavelLegalMapper  {
+@Mapper(config = MappingConfig.class, uses = { EstabelecimentosMapper.class })
+public interface ResponsavelLegalMapper {
 
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
     @Mapping(target = "active", ignore = true)
     @Mapping(target = "paciente", ignore = true)
+    @Mapping(target = "tenant", ignore = true)
     @Mapping(target = "estabelecimento", ignore = true)
     ResponsavelLegal fromRequest(ResponsavelLegalRequest request);
 
@@ -26,6 +27,7 @@ public interface ResponsavelLegalMapper  {
     @Mapping(target = "updatedAt", ignore = true)
     @Mapping(target = "active", ignore = true)
     @Mapping(target = "paciente", ignore = true)
+    @Mapping(target = "tenant", ignore = true)
     @Mapping(target = "estabelecimento", ignore = true)
     void updateFromRequest(ResponsavelLegalRequest request, @MappingTarget ResponsavelLegal entity);
 
