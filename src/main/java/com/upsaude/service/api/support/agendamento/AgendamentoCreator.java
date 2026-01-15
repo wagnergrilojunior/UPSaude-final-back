@@ -42,10 +42,8 @@ public class AgendamentoCreator {
         Agendamento saved = repository.save(Objects.requireNonNull(entity));
         eventoGenerator.gerarEventosParaAgendamento(saved);
 
-        // Reserva automática no momento da aprovação/confirmação (modelo híbrido)
         if (saved.getStatus() == com.upsaude.enums.StatusAgendamentoEnum.CONFIRMADO) {
             financeiroIntegrationService.reservarOrcamento(saved.getId());
-            // Notificar confirmação de agendamento
             try {
                 notificacaoOrchestrator.notificarAgendamentoConfirmado(saved);
                 notificacaoOrchestrator.agendarLembretesAgendamento(saved);
@@ -53,7 +51,6 @@ public class AgendamentoCreator {
                 log.warn("Erro ao enviar notificação de agendamento confirmado. Agendamento ID: {}", saved.getId(), e);
             }
         } else {
-            // Agendar lembretes mesmo se não confirmado ainda
             try {
                 notificacaoOrchestrator.agendarLembretesAgendamento(saved);
             } catch (Exception e) {

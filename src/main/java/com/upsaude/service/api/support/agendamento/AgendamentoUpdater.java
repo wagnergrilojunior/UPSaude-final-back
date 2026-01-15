@@ -12,7 +12,6 @@ import com.upsaude.mapper.agendamento.AgendamentoMapper;
 import com.upsaude.repository.agendamento.AgendamentoRepository;
 import com.upsaude.service.api.financeiro.FinanceiroIntegrationService;
 import com.upsaude.service.sistema.integracao.IntegracaoEventoGenerator;
-
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -44,18 +43,16 @@ public class AgendamentoUpdater {
             domainService.validarTransicaoStatus(entity, statusNovo);
         }
 
+        relacionamentosHandler.resolver(entity, request, tenantId, tenant);
         mapper.updateFromRequest(request, entity);
         domainService.aplicarDefaults(entity);
-        relacionamentosHandler.resolver(entity, request, tenantId, tenant);
 
         Agendamento saved = repository.save(Objects.requireNonNull(entity));
         eventoGenerator.gerarEventosParaAgendamento(saved);
 
-        // Integração financeira baseada em transições de status (modelo híbrido)
         if (statusNovo != null && statusAnterior != statusNovo) {
             if (statusNovo == com.upsaude.enums.StatusAgendamentoEnum.CONFIRMADO) {
                 financeiroIntegrationService.reservarOrcamento(saved.getId());
-                // Notificar confirmação de agendamento
                 try {
                     notificacaoOrchestrator.notificarAgendamentoConfirmado(saved);
                     notificacaoOrchestrator.agendarLembretesAgendamento(saved);
@@ -65,7 +62,6 @@ public class AgendamentoUpdater {
             }
             if (statusNovo == com.upsaude.enums.StatusAgendamentoEnum.CANCELADO) {
                 financeiroIntegrationService.estornarReserva(saved.getId(), statusNovo.name());
-                // Notificar cancelamento de agendamento
                 try {
                     notificacaoOrchestrator.notificarAgendamentoCancelado(saved);
                 } catch (Exception e) {
