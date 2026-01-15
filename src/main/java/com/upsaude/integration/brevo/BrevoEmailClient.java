@@ -172,7 +172,33 @@ public class BrevoEmailClient {
         
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
-        headers.set("api-key", brevoConfig.getApiKey());
+        
+        // Limpar espaços em branco da chave (pode vir do arquivo de propriedades)
+        String apiKey = brevoConfig.getApiKey();
+        if (apiKey != null) {
+            apiKey = apiKey.trim();
+        }
+        
+        // Validar formato da chave
+        if (apiKey == null || apiKey.isEmpty()) {
+            log.error("Chave API do Brevo está vazia ou nula!");
+            throw new BrevoException("Chave API do Brevo não configurada");
+        }
+        
+        // Verificar se a chave começa com o prefixo esperado
+        if (!apiKey.startsWith("xkeysib-") && !apiKey.startsWith("xsmtpsib-")) {
+            log.warn("Chave API do Brevo não tem formato esperado (deve começar com 'xkeysib-' ou 'xsmtpsib-'). " +
+                    "Chave recebida começa com: {}", 
+                    apiKey.length() > 10 ? apiKey.substring(0, 10) : apiKey);
+        }
+        
+        headers.set("api-key", apiKey);
+
+        // Log parcial da chave para diagnóstico (mostra apenas primeiros e últimos caracteres)
+        String apiKeyMasked = apiKey.length() > 10 
+                ? apiKey.substring(0, 8) + "..." + apiKey.substring(apiKey.length() - 4)
+                : "N/A";
+        log.info("Usando chave API Brevo: {} (tamanho: {} caracteres)", apiKeyMasked, apiKey.length());
 
         HttpEntity<BrevoEmailRequest> httpEntity = new HttpEntity<>(request, headers);
 
@@ -200,8 +226,19 @@ public class BrevoEmailClient {
             throw new BrevoException("Resposta inesperada do Brevo: " + response.getStatusCode());
 
         } catch (HttpClientErrorException e) {
+            String errorBody = e.getResponseBodyAsString();
             log.error("Erro HTTP 4xx ao enviar e-mail via Brevo. Status: {}, Body: {}", 
-                    e.getStatusCode(), e.getResponseBodyAsString());
+                    e.getStatusCode(), errorBody);
+            
+            // Mensagem mais clara para erro 401
+            if (e.getStatusCode().value() == 401) {
+                String errorMessage = "Chave API do Brevo não está habilitada ou não tem permissões. " +
+                        "Verifique no painel do Brevo (https://app.brevo.com/settings/keys/api) se a chave está: " +
+                        "1) Ativa, 2) Com permissões de 'Send emails' habilitadas, 3) Não bloqueada/suspensa. " +
+                        "Erro original: " + errorBody;
+                throw new BrevoException(errorMessage, e);
+            }
+            
             throw new BrevoException("Erro ao enviar e-mail via Brevo: " + e.getMessage(), e);
         } catch (HttpServerErrorException e) {
             log.error("Erro HTTP 5xx ao enviar e-mail via Brevo. Status: {}, Body: {}", 

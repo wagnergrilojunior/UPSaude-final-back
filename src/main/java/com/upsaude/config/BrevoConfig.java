@@ -1,6 +1,8 @@
 package com.upsaude.config;
 
+import jakarta.annotation.PostConstruct;
 import lombok.Data;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
@@ -14,6 +16,7 @@ import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManager;
 import org.apache.hc.core5.util.TimeValue;
 import org.apache.hc.core5.util.Timeout;
 
+@Slf4j
 @Data
 @Configuration
 @EnableConfigurationProperties
@@ -26,6 +29,31 @@ public class BrevoConfig {
     private Integer timeoutSeconds = 30;
     private Retry retry = new Retry();
     private Sender sender = new Sender();
+
+    @PostConstruct
+    public void init() {
+        if (apiKey != null) {
+            apiKey = apiKey.trim(); // Remove espaços em branco
+        }
+        
+        if (Boolean.TRUE.equals(enabled)) {
+            if (apiKey == null || apiKey.isEmpty()) {
+                log.warn("⚠️ Brevo está habilitado mas a chave API não está configurada!");
+            } else {
+                String masked = apiKey.length() > 10 
+                        ? apiKey.substring(0, 8) + "..." + apiKey.substring(apiKey.length() - 4)
+                        : "N/A";
+                log.info("✅ Brevo configurado. Chave API: {} (tamanho: {} caracteres)", masked, apiKey.length());
+                
+                // Validar formato
+                if (!apiKey.startsWith("xkeysib-") && !apiKey.startsWith("xsmtpsib-")) {
+                    log.warn("⚠️ Chave API do Brevo não tem formato esperado. Deve começar com 'xkeysib-' ou 'xsmtpsib-'");
+                }
+            }
+        } else {
+            log.info("ℹ️ Brevo está desabilitado (brevo.enabled=false)");
+        }
+    }
 
     @Data
     public static class Retry {

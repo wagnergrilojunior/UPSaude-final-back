@@ -7,6 +7,7 @@ import com.upsaude.api.response.sistema.notificacao.TesteEmailBrevoResponse;
 import com.upsaude.exception.BadRequestException;
 import com.upsaude.exception.ConflictException;
 import com.upsaude.exception.NotFoundException;
+import com.upsaude.config.BrevoConfig;
 import com.upsaude.integration.brevo.BrevoEmailClient;
 import com.upsaude.integration.brevo.exception.BrevoException;
 import com.upsaude.service.api.sistema.notificacao.NotificacaoService;
@@ -22,9 +23,16 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.RestTemplate;
 
 import java.time.OffsetDateTime;
 import java.util.HashMap;
@@ -40,6 +48,7 @@ public class NotificacaoController {
 
     private final NotificacaoService service;
     private final BrevoEmailClient brevoEmailClient;
+    private final BrevoConfig brevoConfig;
 
     @PostMapping
     @Operation(summary = "Criar notificação", description = "Cria uma nova notificação")
@@ -227,6 +236,121 @@ public class NotificacaoController {
                     .build();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
         }
+    }
+
+    @GetMapping("/teste-email-brevo/config")
+    @Operation(
+        summary = "Verificar configuração do Brevo",
+        description = "Endpoint de diagnóstico que mostra a configuração atual do Brevo (sem enviar email)"
+    )
+    public ResponseEntity<Map<String, Object>> verificarConfigBrevo() {
+        Map<String, Object> config = new HashMap<>();
+        
+        try {
+            String apiKey = brevoConfig.getApiKey();
+            
+            config.put("enabled", brevoConfig.getEnabled());
+            config.put("apiKeyPresent", apiKey != null && !apiKey.trim().isEmpty());
+            config.put("apiKeyLength", apiKey != null ? apiKey.length() : 0);
+            config.put("apiKeyPrefix", apiKey != null && apiKey.length() > 8 ? apiKey.substring(0, 8) : "N/A");
+            config.put("apiKeySuffix", apiKey != null && apiKey.length() > 4 ? apiKey.substring(apiKey.length() - 4) : "N/A");
+            config.put("apiKeyFormatValid", apiKey != null && (apiKey.startsWith("xkeysib-") || apiKey.startsWith("xsmtpsib-")));
+            config.put("baseUrl", brevoConfig.getBaseUrl());
+            config.put("message", "Configuração carregada com sucesso");
+            
+            if (apiKey == null || apiKey.trim().isEmpty()) {
+                config.put("warning", "Chave API não está configurada!");
+            } else if (!apiKey.startsWith("xkeysib-") && !apiKey.startsWith("xsmtpsib-")) {
+                config.put("warning", "Chave API não tem formato esperado (deve começar com 'xkeysib-' ou 'xsmtpsib-')");
+            }
+        } catch (Exception e) {
+            config.put("enabled", false);
+            config.put("error", "Erro ao verificar configuração: " + e.getMessage());
+            log.error("Erro ao verificar configuração do Brevo", e);
+        }
+        
+        return ResponseEntity.ok(config);
+    }
+
+    @GetMapping("/teste-email-brevo/validar-chave")
+    @Operation(
+        summary = "Validar chave API do Brevo",
+        description = "Testa a chave API fazendo uma chamada simples ao Brevo (/account) para verificar se está habilitada"
+    )
+    public ResponseEntity<Map<String, Object>> validarChaveBrevo() {
+        Map<String, Object> resultado = new HashMap<>();
+        
+        try {
+            String apiKey = brevoConfig.getApiKey();
+            if (apiKey == null || apiKey.trim().isEmpty()) {
+                resultado.put("valido", false);
+                resultado.put("erro", "Chave API não configurada");
+                return ResponseEntity.ok(resultado);
+            }
+            
+            apiKey = apiKey.trim();
+            
+            // Tentar fazer uma chamada simples ao Brevo para verificar a chave
+            String url = brevoConfig.getBaseUrl() + "/account";
+            
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+            headers.set("api-key", apiKey);
+            
+            HttpEntity<Void> httpEntity = new HttpEntity<>(headers);
+            
+            RestTemplate restTemplate = new RestTemplate();
+            try {
+                ParameterizedTypeReference<Map<String, Object>> responseType = 
+                        new ParameterizedTypeReference<Map<String, Object>>() {};
+                
+                ResponseEntity<Map<String, Object>> response = restTemplate.exchange(
+                        url,
+                        HttpMethod.GET,
+                        httpEntity,
+                        responseType
+                );
+                
+                if (response.getStatusCode().is2xxSuccessful()) {
+                    resultado.put("valido", true);
+                    resultado.put("mensagem", "Chave API válida e habilitada");
+                    Map<String, Object> accountData = response.getBody();
+                    if (accountData != null) {
+                        resultado.put("email", accountData.get("email"));
+                        resultado.put("firstName", accountData.get("firstName"));
+                        resultado.put("lastName", accountData.get("lastName"));
+                        resultado.put("companyName", accountData.get("companyName"));
+                    }
+                } else {
+                    resultado.put("valido", false);
+                    resultado.put("erro", "Status: " + response.getStatusCode());
+                }
+            } catch (HttpClientErrorException e2) {
+                resultado.put("valido", false);
+                resultado.put("statusCode", e2.getStatusCode().value());
+                resultado.put("erro", e2.getResponseBodyAsString());
+                
+                if (e2.getStatusCode().value() == 401) {
+                    resultado.put("detalhes", "A chave API não está habilitada ou não tem permissões. " +
+                            "Possíveis causas:\n" +
+                            "1. A chave foi desabilitada no painel do Brevo\n" +
+                            "2. Bloqueio de IP - seu IP não está autorizado\n" +
+                            "3. A chave não tem permissões de 'Send emails'\n" +
+                            "4. A chave foi revogada ou expirou\n\n" +
+                            "Solução: Acesse https://app.brevo.com/settings/keys/api e:\n" +
+                            "- Verifique se a chave está 'Active'\n" +
+                            "- Verifique as permissões da chave\n" +
+                            "- Vá em Settings → Security → Authorized IPs e autorize seu IP\n" +
+                            "- Ou gere uma nova chave com permissões corretas");
+                }
+            }
+        } catch (Exception e) {
+            resultado.put("valido", false);
+            resultado.put("erro", "Erro ao validar chave: " + e.getMessage());
+            log.error("Erro ao validar chave do Brevo", e);
+        }
+        
+        return ResponseEntity.ok(resultado);
     }
 }
 
