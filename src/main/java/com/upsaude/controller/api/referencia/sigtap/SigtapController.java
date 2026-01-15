@@ -23,23 +23,7 @@ import java.util.List;
 @RequestMapping("/v1/sigtap")
 @Tag(
         name = "SIGTAP Consulta",
-        description = "API completa para consulta de dados do SIGTAP (Sistema de Gestão da Tabela Unificada de Procedimentos). " +
-                "O SIGTAP é o sistema oficial do Ministério da Saúde que mantém o cadastro de procedimentos, medicamentos, " +
-                "órteses, próteses e materiais especiais (OPME) do SUS. " +
-                "\n\n" +
-                "**Hierarquia SIGTAP:**\n" +
-                "- **Grupo** (1º nível): Categorias principais (ex: 03=Procedimentos clínicos, 04=Procedimentos cirúrgicos, 06=Medicamentos)\n" +
-                "- **Subgrupo** (2º nível): Subcategorias dentro de cada grupo\n" +
-                "- **Forma de Organização** (3º nível): Tipos de organização do procedimento\n" +
-                "- **Procedimento** (4º nível): Procedimentos específicos\n" +
-                "\n\n" +
-                "**Estrutura do Código Oficial:**\n" +
-                "- Primeiros 2 dígitos: código do grupo\n" +
-                "- Próximos 2 dígitos: código do subgrupo\n" +
-                "- Próximos 2 dígitos: código da forma de organização\n" +
-                "- Resto: código específico do procedimento\n" +
-                "\n\n" +
-                "**Exemplo:** Código `0401010015` = Grupo 04 (Cirúrgicos) + Subgrupo 01 + Forma Org 01 + Procedimento 0015"
+        description = "API para consulta de dados do SIGTAP (Sistema de Gestão da Tabela Unificada de Procedimentos do SUS)."
 )
 @RequiredArgsConstructor
 @Slf4j
@@ -50,19 +34,7 @@ public class SigtapController {
     @GetMapping("/grupos")
     @Operation(
             summary = "Listar todos os grupos SIGTAP",
-            description = "Retorna a lista completa de todos os grupos SIGTAP ordenados por código. " +
-                    "Os grupos representam o primeiro nível da hierarquia SIGTAP e categorizam os procedimentos. " +
-                    "\n\n" +
-                    "**Grupos Principais:**\n" +
-                    "- **01**: Ações de promoção e prevenção\n" +
-                    "- **02**: Procedimentos diagnósticos\n" +
-                    "- **03**: Procedimentos clínicos\n" +
-                    "- **04**: Procedimentos cirúrgicos\n" +
-                    "- **05**: Transplantes\n" +
-                    "- **06**: Medicamentos\n" +
-                    "- **07**: Órteses, próteses e materiais especiais (OPME)\n" +
-                    "- **08**: Ações complementares\n" +
-                    "- **09**: Ofertas de cuidados integrados"
+            description = "Retorna a lista completa de todos os grupos SIGTAP ordenados por código."
     )
     @ApiResponses(value = {
             @ApiResponse(
@@ -87,22 +59,7 @@ public class SigtapController {
     @GetMapping("/procedimentos")
     @Operation(
             summary = "Pesquisar procedimentos SIGTAP",
-            description = "Retorna uma lista paginada de procedimentos SIGTAP com filtros hierárquicos opcionais. " +
-                    "Permite filtrar por grupo, grupo+subgrupo, ou grupo+subgrupo+forma de organização. " +
-                    "Também suporta busca por código ou nome do procedimento e filtro por competência." +
-                    "\n\n" +
-                    "**Filtros Hierárquicos:**\n" +
-                    "1. **Apenas `grupoCodigo`**: Retorna todos os procedimentos do grupo (ex: todos os procedimentos cirúrgicos)\n" +
-                    "2. **`grupoCodigo` + `subgrupoCodigo`**: Retorna procedimentos do subgrupo específico (ex: pequenas cirurgias)\n" +
-                    "3. **`grupoCodigo` + `subgrupoCodigo` + `formaOrganizacaoCodigo`**: Retorna procedimentos da forma de organização específica\n" +
-                    "\n\n" +
-                    "**Exemplos de Uso:**\n" +
-                    "- Buscar todos os medicamentos: `?grupoCodigo=06`\n" +
-                    "- Buscar medicamentos de dispensação excepcional: `?grupoCodigo=06&subgrupoCodigo=01`\n" +
-                    "- Buscar procedimentos cirúrgicos específicos: `?grupoCodigo=04&subgrupoCodigo=01&formaOrganizacaoCodigo=01`\n" +
-                    "- Buscar por nome: `?grupoCodigo=04&q=cirurgia`\n" +
-                    "\n\n" +
-                    "**Nota:** Os filtros hierárquicos são baseados nos primeiros dígitos do código oficial do procedimento."
+            description = "Retorna uma lista paginada de procedimentos SIGTAP. Permite filtrar por grupo, subgrupo, forma de organização, código, nome e competência."
     )
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Lista de procedimentos retornada com sucesso",
@@ -112,47 +69,17 @@ public class SigtapController {
             @ApiResponse(responseCode = "500", description = "Erro interno do servidor")
     })
     public ResponseEntity<Page<SigtapProcedimentoResponse>> pesquisarProcedimentos(
-            @Parameter(
-                    description = "Termo de busca livre (código ou nome do procedimento). " +
-                            "Busca parcial e case-insensitive. Exemplo: 'consulta' ou '0301010010'",
-                    example = "consulta médica"
-            )
+            @Parameter(description = "Termo de busca (código ou nome)", example = "consulta médica")
             @RequestParam(name = "q", required = false) String q,
-            @Parameter(
-                    description = "Código do grupo para filtrar (2 dígitos). " +
-                            "Exemplos: '03' (Procedimentos clínicos), '04' (Procedimentos cirúrgicos), '06' (Medicamentos). " +
-                            "Pode ser usado sozinho ou combinado com subgrupoCodigo e formaOrganizacaoCodigo",
-                    example = "04"
-            )
+            @Parameter(description = "Código do grupo (2 dígitos)", example = "04")
             @RequestParam(name = "grupoCodigo", required = false) String grupoCodigo,
-            @Parameter(
-                    description = "Código do subgrupo para filtrar (2 dígitos). " +
-                            "Deve ser usado junto com grupoCodigo. " +
-                            "Exemplo: grupoCodigo='04' e subgrupoCodigo='01' retorna procedimentos que começam com '0401'",
-                    example = "01"
-            )
+            @Parameter(description = "Código do subgrupo (2 dígitos)", example = "01")
             @RequestParam(name = "subgrupoCodigo", required = false) String subgrupoCodigo,
-            @Parameter(
-                    description = "Código da forma de organização para filtrar (2 dígitos). " +
-                            "Deve ser usado junto com grupoCodigo e subgrupoCodigo. " +
-                            "Exemplo: grupoCodigo='04', subgrupoCodigo='01', formaOrganizacaoCodigo='01' " +
-                            "retorna procedimentos que começam com '040101'",
-                    example = "01"
-            )
+            @Parameter(description = "Código da forma de organização (2 dígitos)", example = "01")
             @RequestParam(name = "formaOrganizacaoCodigo", required = false) String formaOrganizacaoCodigo,
-            @Parameter(
-                    description = "Competência no formato AAAAMM (Ano + Mês). " +
-                            "Filtra procedimentos válidos na competência especificada. " +
-                            "Exemplo: '202512' para dezembro de 2025",
-                    example = "202512"
-            )
+            @Parameter(description = "Competência no formato AAAAMM", example = "202512")
             @RequestParam(name = "competencia", required = false) String competencia,
-            @Parameter(
-                    description = "Parâmetros de paginação. " +
-                            "page: número da página (padrão: 0), " +
-                            "size: tamanho da página (padrão: 20), " +
-                            "sort: ordenação (ex: 'codigoOficial,asc' ou 'nome,desc')"
-            )
+            @Parameter(description = "Parâmetros de paginação")
             Pageable pageable) {
         log.debug("REQUEST GET /v1/sigtap/procedimentos - q: {}, grupoCodigo: {}, subgrupoCodigo: {}, formaOrganizacaoCodigo: {}, competencia: {}, pageable: {}", 
                 q, grupoCodigo, subgrupoCodigo, formaOrganizacaoCodigo, competencia, pageable);
@@ -170,18 +97,7 @@ public class SigtapController {
     @GetMapping("/procedimentos/{codigo}")
     @Operation(
             summary = "Obter procedimento detalhado por código",
-            description = "Retorna um procedimento SIGTAP específico com todos os seus detalhes, incluindo informações adicionais " +
-                    "armazenadas na tabela de detalhes. Se múltiplas competências existirem para o mesmo código, retorna a mais recente. " +
-                    "\n\n" +
-                    "**Campos Retornados:**\n" +
-                    "- Informações básicas do procedimento (código, nome, valores)\n" +
-                    "- Hierarquia completa (grupo, subgrupo, forma de organização)\n" +
-                    "- Restrições (sexo permitido, idade mínima/máxima)\n" +
-                    "- Detalhes adicionais (quando disponíveis)\n" +
-                    "\n\n" +
-                    "**Parâmetros:**\n" +
-                    "- `codigo`: Código oficial do procedimento (ex: '0401010015')\n" +
-                    "- `competencia` (opcional): Filtra por competência específica. Se não informado, retorna a competência mais recente."
+            description = "Retorna um procedimento SIGTAP específico com todos os seus detalhes. Se múltiplas competências existirem, retorna a mais recente."
     )
     @ApiResponses(value = {
             @ApiResponse(
@@ -197,20 +113,9 @@ public class SigtapController {
             @ApiResponse(responseCode = "500", description = "Erro interno do servidor.")
     })
     public ResponseEntity<SigtapProcedimentoDetalhadoResponse> obterProcedimentoDetalhado(
-            @Parameter(
-                    description = "Código oficial do procedimento SIGTAP (formato: 10 dígitos). " +
-                            "Exemplos: '0301010010' (Consulta médica), '0401010015' (Procedimento cirúrgico), '0601010101' (Medicamento)",
-                    required = true,
-                    example = "0401010015"
-            )
+            @Parameter(description = "Código oficial do procedimento (10 dígitos)", required = true, example = "0401010015")
             @PathVariable String codigo,
-            @Parameter(
-                    description = "Competência no formato AAAAMM (Ano + Mês). " +
-                            "Filtra o procedimento válido na competência especificada. " +
-                            "Se não informado, retorna a competência mais recente disponível. " +
-                            "Exemplo: '202512' para dezembro de 2025",
-                    example = "202512"
-            )
+            @Parameter(description = "Competência no formato AAAAMM", example = "202512")
             @RequestParam(name = "competencia", required = false) String competencia) {
         log.debug("REQUEST GET /v1/sigtap/procedimentos/{} - competencia: {}", codigo, competencia);
         try {
@@ -228,9 +133,7 @@ public class SigtapController {
     @GetMapping("/servicos")
     @Operation(
             summary = "Pesquisar serviços/exames SIGTAP",
-            description = "Retorna uma lista paginada de serviços/exames SIGTAP. " +
-                    "Permite buscar por código ou nome do serviço. " +
-                    "Serviços representam tipos de atendimento (hospitalar, ambulatorial, etc.)."
+            description = "Retorna uma lista paginada de serviços/exames SIGTAP."
     )
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Lista de serviços retornada com sucesso",
@@ -240,18 +143,9 @@ public class SigtapController {
             @ApiResponse(responseCode = "500", description = "Erro interno do servidor")
     })
     public ResponseEntity<Page<SigtapServicoResponse>> pesquisarServicos(
-            @Parameter(
-                    description = "Termo de busca livre (código ou nome do serviço). " +
-                            "Busca parcial e case-insensitive. Exemplo: 'hospitalar' ou '01'",
-                    example = "hospitalar"
-            )
+            @Parameter(description = "Termo de busca (código ou nome)", example = "hospitalar")
             @RequestParam(name = "q", required = false) String q,
-            @Parameter(
-                    description = "Parâmetros de paginação. " +
-                            "page: número da página (padrão: 0), " +
-                            "size: tamanho da página (padrão: 20), " +
-                            "sort: ordenação (ex: 'codigoOficial,asc' ou 'nome,desc')"
-            )
+            @Parameter(description = "Parâmetros de paginação")
             Pageable pageable) {
         log.debug("REQUEST GET /v1/sigtap/servicos - q: {}, pageable: {}", q, pageable);
         try {
@@ -266,9 +160,7 @@ public class SigtapController {
     @GetMapping("/servicos/{codigo}")
     @Operation(
             summary = "Obter serviço por código",
-            description = "Retorna um serviço/exame SIGTAP específico pelo código oficial. " +
-                    "Serviços representam tipos de atendimento como hospitalar, ambulatorial, etc. " +
-                    "São usados para classificar onde o procedimento pode ser realizado."
+            description = "Retorna um serviço/exame SIGTAP específico pelo código oficial."
     )
     @ApiResponses(value = {
             @ApiResponse(
@@ -284,12 +176,7 @@ public class SigtapController {
             @ApiResponse(responseCode = "500", description = "Erro interno do servidor.")
     })
     public ResponseEntity<SigtapServicoResponse> obterServicoPorCodigo(
-            @Parameter(
-                    description = "Código oficial do serviço SIGTAP (geralmente 1-2 dígitos). " +
-                            "Exemplos: '01' (Serviço hospitalar), '02' (Serviço ambulatorial)",
-                    required = true,
-                    example = "01"
-            )
+            @Parameter(description = "Código oficial do serviço", required = true, example = "01")
             @PathVariable String codigo) {
         log.debug("REQUEST GET /v1/sigtap/servicos/{}", codigo);
         try {
@@ -307,9 +194,7 @@ public class SigtapController {
     @GetMapping("/renases")
     @Operation(
             summary = "Pesquisar RENASES SIGTAP",
-            description = "Retorna uma lista paginada de RENASES (Rede Nacional de Atenção Especializada em Saúde) SIGTAP. " +
-                    "RENASES identifica estabelecimentos de saúde especializados e suas habilitações. " +
-                    "Permite buscar por código ou nome do RENASES."
+            description = "Retorna uma lista paginada de RENASES (Rede Nacional de Atenção Especializada em Saúde) SIGTAP."
     )
     @ApiResponses(value = {
             @ApiResponse(
@@ -322,18 +207,9 @@ public class SigtapController {
             @ApiResponse(responseCode = "500", description = "Erro interno do servidor.")
     })
     public ResponseEntity<Page<SigtapRenasesResponse>> pesquisarRenases(
-            @Parameter(
-                    description = "Termo de busca livre (código ou nome do RENASES). " +
-                            "Busca parcial e case-insensitive. Exemplo: 'cardiologia' ou '01'",
-                    example = "cardiologia"
-            )
+            @Parameter(description = "Termo de busca (código ou nome)", example = "cardiologia")
             @RequestParam(name = "q", required = false) String q,
-            @Parameter(
-                    description = "Parâmetros de paginação. " +
-                            "page: número da página (padrão: 0), " +
-                            "size: tamanho da página (padrão: 20), " +
-                            "sort: ordenação (ex: 'codigoOficial,asc' ou 'nome,desc')"
-            )
+            @Parameter(description = "Parâmetros de paginação")
             Pageable pageable) {
         log.debug("REQUEST GET /v1/sigtap/renases - q: {}, pageable: {}", q, pageable);
         try {
@@ -348,8 +224,7 @@ public class SigtapController {
     @GetMapping("/renases/{codigo}")
     @Operation(
             summary = "Obter RENASES por código",
-            description = "Retorna um RENASES SIGTAP específico pelo código oficial. " +
-                    "RENASES identifica estabelecimentos de saúde especializados e suas habilitações para execução de procedimentos."
+            description = "Retorna um RENASES SIGTAP específico pelo código oficial."
     )
     @ApiResponses(value = {
             @ApiResponse(
@@ -365,12 +240,7 @@ public class SigtapController {
             @ApiResponse(responseCode = "500", description = "Erro interno do servidor.")
     })
     public ResponseEntity<SigtapRenasesResponse> obterRenasesPorCodigo(
-            @Parameter(
-                    description = "Código oficial do RENASES. " +
-                            "Exemplo: '01' para um estabelecimento específico",
-                    required = true,
-                    example = "01"
-            )
+            @Parameter(description = "Código oficial do RENASES", required = true, example = "01")
             @PathVariable String codigo) {
         log.debug("REQUEST GET /v1/sigtap/renases/{}", codigo);
         try {
@@ -388,10 +258,7 @@ public class SigtapController {
     @GetMapping("/subgrupos")
     @Operation(
             summary = "Pesquisar subgrupos ou formas de organização SIGTAP",
-            description = "Retorna uma lista paginada com comportamento dinâmico baseado nos parâmetros: " +
-                    "- Se apenas `grupoCodigo` for informado: retorna subgrupos do grupo especificado. " +
-                    "- Se `grupoCodigo` e `subgrupoCodigo` forem informados: retorna formas de organização do subgrupo especificado. " +
-                    "Também suporta busca por código ou nome."
+            description = "Retorna subgrupos se apenas grupoCodigo for informado, ou formas de organização se grupoCodigo e subgrupoCodigo forem informados."
     )
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Lista retornada com sucesso (subgrupos ou formas de organização conforme parâmetros)",
@@ -401,40 +268,15 @@ public class SigtapController {
             @ApiResponse(responseCode = "500", description = "Erro interno do servidor")
     })
     public ResponseEntity<?> pesquisarSubgrupos(
-            @Parameter(
-                    description = "Termo de busca livre (código ou nome). " +
-                            "Busca parcial e case-insensitive. Exemplo: 'pequenas cirurgias'",
-                    example = "pequenas cirurgias"
-            )
+            @Parameter(description = "Termo de busca (código ou nome)", example = "pequenas cirurgias")
             @RequestParam(name = "q", required = false) String q,
-            @Parameter(
-                    description = "Código do grupo para filtrar (2 dígitos). " +
-                            "Quando informado sozinho, retorna subgrupos do grupo. " +
-                            "Quando informado com subgrupoCodigo, retorna formas de organização. " +
-                            "Exemplo: '04' retorna todos os subgrupos de Procedimentos cirúrgicos",
-                    example = "04"
-            )
+            @Parameter(description = "Código do grupo (2 dígitos)", example = "04")
             @RequestParam(name = "grupoCodigo", required = false) String grupoCodigo,
-            @Parameter(
-                    description = "Código do subgrupo para filtrar (2 dígitos). " +
-                            "Quando informado junto com grupoCodigo, retorna formas de organização do subgrupo. " +
-                            "Exemplo: grupoCodigo='04' e subgrupoCodigo='01' retorna formas de organização do subgrupo '01' do grupo '04'",
-                    example = "01"
-            )
+            @Parameter(description = "Código do subgrupo (2 dígitos)", example = "01")
             @RequestParam(name = "subgrupoCodigo", required = false) String subgrupoCodigo,
-            @Parameter(
-                    description = "Competência no formato AAAAMM (Ano + Mês). " +
-                            "Filtra resultados válidos na competência especificada. " +
-                            "Exemplo: '202512' para dezembro de 2025",
-                    example = "202512"
-            )
+            @Parameter(description = "Competência no formato AAAAMM", example = "202512")
             @RequestParam(name = "competencia", required = false) String competencia,
-            @Parameter(
-                    description = "Parâmetros de paginação. " +
-                            "page: número da página (padrão: 0), " +
-                            "size: tamanho da página (padrão: 20), " +
-                            "sort: ordenação (ex: 'codigoOficial,asc' ou 'nome,desc')"
-            )
+            @Parameter(description = "Parâmetros de paginação")
             Pageable pageable) {
         log.debug("REQUEST GET /v1/sigtap/subgrupos - q: {}, grupoCodigo: {}, subgrupoCodigo: {}, competencia: {}, pageable: {}", q, grupoCodigo, subgrupoCodigo, competencia, pageable);
         try {
@@ -455,11 +297,7 @@ public class SigtapController {
     @GetMapping("/subgrupos/{codigo}")
     @Operation(
             summary = "Obter subgrupo por código",
-            description = "Retorna um subgrupo SIGTAP específico pelo código oficial. " +
-                    "O subgrupo é o segundo nível da hierarquia SIGTAP e representa subcategorias dentro de um grupo. " +
-                    "\n\n" +
-                    "**Exemplo:** Para o grupo 04 (Procedimentos cirúrgicos), o subgrupo '01' representa " +
-                    "'Pequenas cirurgias e cirurgias de pele, tecido subcutâneo e mucosa'."
+            description = "Retorna um subgrupo SIGTAP específico pelo código oficial."
     )
     @ApiResponses(value = {
             @ApiResponse(
@@ -475,19 +313,9 @@ public class SigtapController {
             @ApiResponse(responseCode = "500", description = "Erro interno do servidor.")
     })
     public ResponseEntity<SigtapSubgrupoResponse> obterSubgrupoPorCodigo(
-            @Parameter(
-                    description = "Código oficial do subgrupo (2 dígitos). " +
-                            "Exemplo: '01' para o primeiro subgrupo de um grupo",
-                    required = true,
-                    example = "01"
-            )
+            @Parameter(description = "Código oficial do subgrupo (2 dígitos)", required = true, example = "01")
             @PathVariable String codigo,
-            @Parameter(
-                    description = "Código do grupo (2 dígitos, opcional). " +
-                            "Quando informado, torna a busca mais precisa, pois o mesmo código de subgrupo pode existir em diferentes grupos. " +
-                            "Exemplo: grupoCodigo='04' para buscar o subgrupo '01' do grupo de Procedimentos cirúrgicos",
-                    example = "04"
-            )
+            @Parameter(description = "Código do grupo (2 dígitos, opcional)", example = "04")
             @RequestParam(name = "grupoCodigo", required = false) String grupoCodigo) {
         log.debug("REQUEST GET /v1/sigtap/subgrupos/{} - grupoCodigo: {}", codigo, grupoCodigo);
         try {
@@ -505,9 +333,7 @@ public class SigtapController {
     @GetMapping("/formas-organizacao")
     @Operation(
             summary = "Pesquisar formas de organização SIGTAP",
-            description = "Retorna uma lista paginada de formas de organização SIGTAP com filtros opcionais. " +
-                    "Permite filtrar por grupo, subgrupo ou ambos. " +
-                    "A forma de organização é o terceiro nível da hierarquia SIGTAP (Grupo > Subgrupo > Forma de Organização)."
+            description = "Retorna uma lista paginada de formas de organização SIGTAP com filtros opcionais."
     )
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Lista de formas de organização retornada com sucesso",
@@ -517,41 +343,15 @@ public class SigtapController {
             @ApiResponse(responseCode = "500", description = "Erro interno do servidor")
     })
     public ResponseEntity<Page<SigtapFormaOrganizacaoResponse>> pesquisarFormasOrganizacao(
-            @Parameter(
-                    description = "Termo de busca livre (código ou nome da forma de organização). " +
-                            "Busca parcial e case-insensitive. Exemplo: 'pequenas cirurgias'",
-                    example = "pequenas cirurgias"
-            )
+            @Parameter(description = "Termo de busca (código ou nome)", example = "pequenas cirurgias")
             @RequestParam(name = "q", required = false) String q,
-            @Parameter(
-                    description = "Código do grupo para filtrar (2 dígitos). " +
-                            "Quando informado, retorna apenas formas de organização do grupo especificado. " +
-                            "Pode ser usado sozinho ou combinado com subgrupoCodigo. " +
-                            "Exemplo: '04' retorna todas as formas de organização de Procedimentos cirúrgicos",
-                    example = "04"
-            )
+            @Parameter(description = "Código do grupo (2 dígitos)", example = "04")
             @RequestParam(name = "grupoCodigo", required = false) String grupoCodigo,
-            @Parameter(
-                    description = "Código do subgrupo para filtrar (2 dígitos). " +
-                            "Quando informado, retorna apenas formas de organização do subgrupo especificado. " +
-                            "Pode ser usado sozinho ou combinado com grupoCodigo. " +
-                            "Exemplo: '01' retorna todas as formas de organização do subgrupo '01'",
-                    example = "01"
-            )
+            @Parameter(description = "Código do subgrupo (2 dígitos)", example = "01")
             @RequestParam(name = "subgrupoCodigo", required = false) String subgrupoCodigo,
-            @Parameter(
-                    description = "Competência no formato AAAAMM (Ano + Mês). " +
-                            "Filtra formas de organização válidas na competência especificada. " +
-                            "Exemplo: '202512' para dezembro de 2025",
-                    example = "202512"
-            )
+            @Parameter(description = "Competência no formato AAAAMM", example = "202512")
             @RequestParam(name = "competencia", required = false) String competencia,
-            @Parameter(
-                    description = "Parâmetros de paginação. " +
-                            "page: número da página (padrão: 0), " +
-                            "size: tamanho da página (padrão: 20), " +
-                            "sort: ordenação (ex: 'codigoOficial,asc' ou 'nome,desc')"
-            )
+            @Parameter(description = "Parâmetros de paginação")
             Pageable pageable) {
         log.debug("REQUEST GET /v1/sigtap/formas-organizacao - q: {}, grupoCodigo: {}, subgrupoCodigo: {}, competencia: {}, pageable: {}", q, grupoCodigo, subgrupoCodigo, competencia, pageable);
         try {
@@ -566,11 +366,7 @@ public class SigtapController {
     @GetMapping("/formas-organizacao/{codigo}")
     @Operation(
             summary = "Obter forma de organização por código",
-            description = "Retorna uma forma de organização SIGTAP específica pelo código oficial. " +
-                    "A forma de organização é o terceiro nível da hierarquia SIGTAP e representa como o procedimento é organizado. " +
-                    "\n\n" +
-                    "**Exemplo:** Para o grupo 04, subgrupo 01, a forma de organização '01' pode representar " +
-                    "'Pequenas cirurgias' enquanto '02' pode representar 'Cirurgias de pele, tecido subcutâneo e mucosa'."
+            description = "Retorna uma forma de organização SIGTAP específica pelo código oficial."
     )
     @ApiResponses(value = {
             @ApiResponse(
@@ -586,19 +382,9 @@ public class SigtapController {
             @ApiResponse(responseCode = "500", description = "Erro interno do servidor.")
     })
     public ResponseEntity<SigtapFormaOrganizacaoResponse> obterFormaOrganizacaoPorCodigo(
-            @Parameter(
-                    description = "Código oficial da forma de organização (2 dígitos). " +
-                            "Exemplo: '01' para a primeira forma de organização de um subgrupo",
-                    required = true,
-                    example = "01"
-            )
+            @Parameter(description = "Código oficial da forma de organização (2 dígitos)", required = true, example = "01")
             @PathVariable String codigo,
-            @Parameter(
-                    description = "Código do subgrupo (2 dígitos, opcional). " +
-                            "Quando informado, torna a busca mais precisa, pois o mesmo código de forma de organização pode existir em diferentes subgrupos. " +
-                            "Exemplo: subgrupoCodigo='01' para buscar a forma de organização '01' do subgrupo '01'",
-                    example = "01"
-            )
+            @Parameter(description = "Código do subgrupo (2 dígitos, opcional)", example = "01")
             @RequestParam(name = "subgrupoCodigo", required = false) String subgrupoCodigo) {
         log.debug("REQUEST GET /v1/sigtap/formas-organizacao/{} - subgrupoCodigo: {}", codigo, subgrupoCodigo);
         try {
@@ -616,9 +402,7 @@ public class SigtapController {
     @GetMapping("/habilitacoes")
     @Operation(
             summary = "Pesquisar habilitações SIGTAP",
-            description = "Retorna uma lista paginada de habilitações SIGTAP. " +
-                    "Habilitações representam requisitos e condições necessárias para a execução de procedimentos. " +
-                    "Permite buscar por código ou nome da habilitação e filtrar por competência."
+            description = "Retorna uma lista paginada de habilitações SIGTAP."
     )
     @ApiResponses(value = {
             @ApiResponse(
@@ -631,25 +415,11 @@ public class SigtapController {
             @ApiResponse(responseCode = "500", description = "Erro interno do servidor.")
     })
     public ResponseEntity<Page<SigtapHabilitacaoResponse>> pesquisarHabilitacoes(
-            @Parameter(
-                    description = "Termo de busca livre (código ou nome da habilitação). " +
-                            "Busca parcial e case-insensitive. Exemplo: 'hospital' ou '01'",
-                    example = "hospital"
-            )
+            @Parameter(description = "Termo de busca (código ou nome)", example = "hospital")
             @RequestParam(name = "q", required = false) String q,
-            @Parameter(
-                    description = "Competência no formato AAAAMM (Ano + Mês). " +
-                            "Filtra habilitações válidas na competência especificada. " +
-                            "Exemplo: '202512' para dezembro de 2025",
-                    example = "202512"
-            )
+            @Parameter(description = "Competência no formato AAAAMM", example = "202512")
             @RequestParam(name = "competencia", required = false) String competencia,
-            @Parameter(
-                    description = "Parâmetros de paginação. " +
-                            "page: número da página (padrão: 0), " +
-                            "size: tamanho da página (padrão: 20), " +
-                            "sort: ordenação (ex: 'codigoOficial,asc' ou 'nome,desc')"
-            )
+            @Parameter(description = "Parâmetros de paginação")
             Pageable pageable) {
         log.debug("REQUEST GET /v1/sigtap/habilitacoes - q: {}, competencia: {}, pageable: {}", q, competencia, pageable);
         try {
@@ -664,9 +434,7 @@ public class SigtapController {
     @GetMapping("/habilitacoes/{codigo}")
     @Operation(
             summary = "Obter habilitação por código",
-            description = "Retorna uma habilitação SIGTAP específica pelo código oficial. " +
-                    "Se múltiplas competências existirem para o mesmo código, retorna a mais recente. " +
-                    "Habilitações definem requisitos e condições para execução de procedimentos."
+            description = "Retorna uma habilitação SIGTAP específica pelo código oficial. Se múltiplas competências existirem, retorna a mais recente."
     )
     @ApiResponses(value = {
             @ApiResponse(
@@ -682,20 +450,9 @@ public class SigtapController {
             @ApiResponse(responseCode = "500", description = "Erro interno do servidor.")
     })
     public ResponseEntity<SigtapHabilitacaoResponse> obterHabilitacaoPorCodigo(
-            @Parameter(
-                    description = "Código oficial da habilitação. " +
-                            "Exemplo: '01' para uma habilitação específica",
-                    required = true,
-                    example = "01"
-            )
+            @Parameter(description = "Código oficial da habilitação", required = true, example = "01")
             @PathVariable String codigo,
-            @Parameter(
-                    description = "Competência no formato AAAAMM (Ano + Mês). " +
-                            "Filtra a habilitação válida na competência especificada. " +
-                            "Se não informado, retorna a competência mais recente. " +
-                            "Exemplo: '202512' para dezembro de 2025",
-                    example = "202512"
-            )
+            @Parameter(description = "Competência no formato AAAAMM", example = "202512")
             @RequestParam(name = "competencia", required = false) String competencia) {
         log.debug("REQUEST GET /v1/sigtap/habilitacoes/{} - competencia: {}", codigo, competencia);
         try {
@@ -713,9 +470,7 @@ public class SigtapController {
     @GetMapping("/tuss")
     @Operation(
             summary = "Pesquisar TUSS SIGTAP",
-            description = "Retorna uma lista paginada de TUSS (Terminologia Unificada da Saúde Suplementar) SIGTAP. " +
-                    "TUSS é uma terminologia padronizada usada no sistema de saúde suplementar brasileiro. " +
-                    "Permite buscar por código ou nome do TUSS."
+            description = "Retorna uma lista paginada de TUSS (Terminologia Unificada da Saúde Suplementar) SIGTAP."
     )
     @ApiResponses(value = {
             @ApiResponse(
@@ -728,18 +483,9 @@ public class SigtapController {
             @ApiResponse(responseCode = "500", description = "Erro interno do servidor.")
     })
     public ResponseEntity<Page<SigtapTussResponse>> pesquisarTuss(
-            @Parameter(
-                    description = "Termo de busca livre (código ou nome do TUSS). " +
-                            "Busca parcial e case-insensitive. Exemplo: '10101010' ou 'consulta'",
-                    example = "10101010"
-            )
+            @Parameter(description = "Termo de busca (código ou nome)", example = "10101010")
             @RequestParam(name = "q", required = false) String q,
-            @Parameter(
-                    description = "Parâmetros de paginação. " +
-                            "page: número da página (padrão: 0), " +
-                            "size: tamanho da página (padrão: 20), " +
-                            "sort: ordenação (ex: 'codigoOficial,asc' ou 'nome,desc')"
-            )
+            @Parameter(description = "Parâmetros de paginação")
             Pageable pageable) {
         log.debug("REQUEST GET /v1/sigtap/tuss - q: {}, pageable: {}", q, pageable);
         try {
@@ -754,9 +500,7 @@ public class SigtapController {
     @GetMapping("/tuss/{codigo}")
     @Operation(
             summary = "Obter TUSS por código",
-            description = "Retorna um TUSS SIGTAP específico pelo código oficial. " +
-                    "TUSS (Terminologia Unificada da Saúde Suplementar) é uma terminologia padronizada " +
-                    "usada no sistema de saúde suplementar brasileiro para padronizar procedimentos e serviços."
+            description = "Retorna um TUSS SIGTAP específico pelo código oficial."
     )
     @ApiResponses(value = {
             @ApiResponse(
@@ -772,12 +516,7 @@ public class SigtapController {
             @ApiResponse(responseCode = "500", description = "Erro interno do servidor.")
     })
     public ResponseEntity<SigtapTussResponse> obterTussPorCodigo(
-            @Parameter(
-                    description = "Código oficial do TUSS. " +
-                            "Exemplo: '10101010' para um código TUSS específico",
-                    required = true,
-                    example = "10101010"
-            )
+            @Parameter(description = "Código oficial do TUSS", required = true, example = "10101010")
             @PathVariable String codigo) {
         log.debug("REQUEST GET /v1/sigtap/tuss/{}", codigo);
         try {
@@ -795,8 +534,7 @@ public class SigtapController {
     @GetMapping("/cbo")
     @Operation(
             summary = "Pesquisar CBO (Classificação Brasileira de Ocupações) SIGTAP",
-            description = "Retorna uma lista paginada de CBOs SIGTAP baseadas na Classificação Brasileira de Ocupações. " +
-                    "Permite buscar por código CBO, nome da ocupação e filtrar por grupo de ocupações."
+            description = "Retorna uma lista paginada de CBOs SIGTAP."
     )
     @ApiResponses(value = {
             @ApiResponse(
@@ -809,24 +547,11 @@ public class SigtapController {
             @ApiResponse(responseCode = "500", description = "Erro interno do servidor.")
     })
     public ResponseEntity<Page<SigtapCboResponse>> pesquisarCbo(
-            @Parameter(
-                    description = "Termo de busca livre (código CBO ou nome da ocupação). " +
-                            "Busca parcial e case-insensitive. Exemplo: '225110' (código CBO) ou 'médico' (nome)",
-                    example = "médico"
-            )
+            @Parameter(description = "Termo de busca (código CBO ou nome)", example = "médico")
             @RequestParam(name = "q", required = false) String q,
-            @Parameter(
-                    description = "Código do grupo CBO para filtrar. Exemplos: 'MEDICOS', 'ENFERMAGEM', 'ODONTOLOGIA'. " +
-                            "Use o endpoint /cbo/grupos para listar todos os grupos disponíveis.",
-                    example = "MEDICOS"
-            )
+            @Parameter(description = "Código do grupo CBO", example = "MEDICOS")
             @RequestParam(name = "grupo", required = false) String grupo,
-            @Parameter(
-                    description = "Parâmetros de paginação. " +
-                            "page: número da página (padrão: 0), " +
-                            "size: tamanho da página (padrão: 20), " +
-                            "sort: ordenação (ex: 'codigoOficial,asc' ou 'nome,desc')"
-            )
+            @Parameter(description = "Parâmetros de paginação")
             Pageable pageable) {
         log.debug("REQUEST GET /v1/sigtap/cbo - q: {}, grupo: {}, pageable: {}", q, grupo, pageable);
         try {
@@ -841,12 +566,7 @@ public class SigtapController {
     @GetMapping("/cbo/todos")
     @Operation(
             summary = "Listar todos os CBOs sem paginação",
-            description = "Retorna uma lista completa de todos os CBOs SIGTAP sem paginação. " +
-                    "Permite filtrar por termo de busca (código ou nome) e por grupo CBO. " +
-                    "\n\n" +
-                    "**Nota:** Este endpoint retorna todos os resultados de uma vez, sem paginação. " +
-                    "Use com cuidado para grupos grandes, pois pode retornar uma grande quantidade de dados. " +
-                    "Para listagens paginadas, use o endpoint GET /v1/sigtap/cbo."
+            description = "Retorna uma lista completa de todos os CBOs SIGTAP sem paginação. Use com cuidado para grupos grandes."
     )
     @ApiResponses(value = {
             @ApiResponse(
@@ -859,19 +579,9 @@ public class SigtapController {
             @ApiResponse(responseCode = "500", description = "Erro interno do servidor.")
     })
     public ResponseEntity<List<SigtapCboResponse>> listarCbo(
-            @Parameter(
-                    description = "Termo de busca livre (código CBO ou nome da ocupação). " +
-                            "Busca parcial e case-insensitive. Exemplo: '225110' (código CBO) ou 'médico' (nome). " +
-                            "Se não informado, retorna todos os CBOs (ou todos do grupo especificado).",
-                    example = "médico"
-            )
+            @Parameter(description = "Termo de busca (código CBO ou nome)", example = "médico")
             @RequestParam(name = "q", required = false) String q,
-            @Parameter(
-                    description = "Código do grupo CBO para filtrar. Exemplos: 'MEDICOS', 'ENFERMAGEM', 'ODONTOLOGIA'. " +
-                            "Use o endpoint /cbo/grupos para listar todos os grupos disponíveis. " +
-                            "Se não informado, retorna CBOs de todos os grupos.",
-                    example = "MEDICOS"
-            )
+            @Parameter(description = "Código do grupo CBO", example = "MEDICOS")
             @RequestParam(name = "grupo", required = false) String grupo) {
         log.debug("REQUEST GET /v1/sigtap/cbo/todos - q: {}, grupo: {}", q, grupo);
         try {
@@ -902,12 +612,7 @@ public class SigtapController {
             @ApiResponse(responseCode = "500", description = "Erro interno do servidor.")
     })
     public ResponseEntity<SigtapCboResponse> obterCboPorCodigo(
-            @Parameter(
-                    description = "Código CBO (Classificação Brasileira de Ocupações). " +
-                            "Exemplo: '225110' para 'Médico clínico geral'",
-                    required = true,
-                    example = "225110"
-            )
+            @Parameter(description = "Código CBO", required = true, example = "225110")
             @PathVariable String codigo) {
         log.debug("REQUEST GET /v1/sigtap/cbo/{}", codigo);
         try {
@@ -925,7 +630,7 @@ public class SigtapController {
     @GetMapping("/cbo/grupos")
     @Operation(
             summary = "Listar grupos CBO disponíveis",
-            description = "Retorna uma lista de todos os grupos CBO disponíveis no sistema, incluindo grupos da área de saúde e outras áreas."
+            description = "Retorna uma lista de todos os grupos CBO disponíveis no sistema."
     )
     @ApiResponses(value = {
             @ApiResponse(
@@ -950,7 +655,7 @@ public class SigtapController {
     @GetMapping("/cbo/grupos/{codigoGrupo}")
     @Operation(
             summary = "Obter detalhes de um grupo CBO",
-            description = "Retorna informações detalhadas sobre um grupo CBO específico, incluindo total de CBOs no grupo."
+            description = "Retorna informações detalhadas sobre um grupo CBO específico."
     )
     @ApiResponses(value = {
             @ApiResponse(
@@ -966,11 +671,7 @@ public class SigtapController {
             @ApiResponse(responseCode = "500", description = "Erro interno do servidor.")
     })
     public ResponseEntity<SigtapGrupoCboResponse> obterGrupoCboPorCodigo(
-            @Parameter(
-                    description = "Código do grupo CBO. Exemplos: 'MEDICOS', 'ENFERMAGEM', 'ODONTOLOGIA'",
-                    required = true,
-                    example = "MEDICOS"
-            )
+            @Parameter(description = "Código do grupo CBO", required = true, example = "MEDICOS")
             @PathVariable String codigoGrupo) {
         log.debug("REQUEST GET /v1/sigtap/cbo/grupos/{}", codigoGrupo);
         try {
@@ -988,8 +689,7 @@ public class SigtapController {
     @GetMapping("/cbo/grupos/{codigoGrupo}/cbo")
     @Operation(
             summary = "Pesquisar CBOs de um grupo específico",
-            description = "Retorna uma lista paginada de CBOs pertencentes a um grupo específico. " +
-                    "Permite buscar por código CBO ou nome da ocupação dentro do grupo."
+            description = "Retorna uma lista paginada de CBOs pertencentes a um grupo específico."
     )
     @ApiResponses(value = {
             @ApiResponse(
@@ -1006,24 +706,11 @@ public class SigtapController {
             @ApiResponse(responseCode = "500", description = "Erro interno do servidor.")
     })
     public ResponseEntity<Page<SigtapCboResponse>> pesquisarCboPorGrupo(
-            @Parameter(
-                    description = "Código do grupo CBO. Exemplos: 'MEDICOS', 'ENFERMAGEM', 'ODONTOLOGIA'",
-                    required = true,
-                    example = "MEDICOS"
-            )
+            @Parameter(description = "Código do grupo CBO", required = true, example = "MEDICOS")
             @PathVariable String codigoGrupo,
-            @Parameter(
-                    description = "Termo de busca livre (código CBO ou nome da ocupação). " +
-                            "Busca parcial e case-insensitive. Exemplo: 'cardiologista'",
-                    example = "cardiologista"
-            )
+            @Parameter(description = "Termo de busca (código CBO ou nome)", example = "cardiologista")
             @RequestParam(name = "q", required = false) String q,
-            @Parameter(
-                    description = "Parâmetros de paginação. " +
-                            "page: número da página (padrão: 0), " +
-                            "size: tamanho da página (padrão: 20), " +
-                            "sort: ordenação (ex: 'codigoOficial,asc' ou 'nome,desc')"
-            )
+            @Parameter(description = "Parâmetros de paginação")
             Pageable pageable) {
         log.debug("REQUEST GET /v1/sigtap/cbo/grupos/{}/cbo - q: {}, pageable: {}", codigoGrupo, q, pageable);
         try {
@@ -1041,9 +728,7 @@ public class SigtapController {
     @GetMapping("/modalidades")
     @Operation(
             summary = "Pesquisar modalidades SIGTAP",
-            description = "Retorna uma lista paginada de modalidades SIGTAP. " +
-                    "Modalidades representam formas de atendimento ou tipos de procedimentos. " +
-                    "Permite buscar por código ou nome da modalidade e filtrar por competência."
+            description = "Retorna uma lista paginada de modalidades SIGTAP."
     )
     @ApiResponses(value = {
             @ApiResponse(
@@ -1056,25 +741,11 @@ public class SigtapController {
             @ApiResponse(responseCode = "500", description = "Erro interno do servidor.")
     })
     public ResponseEntity<Page<SigtapModalidadeResponse>> pesquisarModalidades(
-            @Parameter(
-                    description = "Termo de busca livre (código ou nome da modalidade). " +
-                            "Busca parcial e case-insensitive. Exemplo: '01' ou 'ambulatorial'",
-                    example = "ambulatorial"
-            )
+            @Parameter(description = "Termo de busca (código ou nome)", example = "ambulatorial")
             @RequestParam(name = "q", required = false) String q,
-            @Parameter(
-                    description = "Competência no formato AAAAMM (Ano + Mês). " +
-                            "Filtra modalidades válidas na competência especificada. " +
-                            "Exemplo: '202512' para dezembro de 2025",
-                    example = "202512"
-            )
+            @Parameter(description = "Competência no formato AAAAMM", example = "202512")
             @RequestParam(name = "competencia", required = false) String competencia,
-            @Parameter(
-                    description = "Parâmetros de paginação. " +
-                            "page: número da página (padrão: 0), " +
-                            "size: tamanho da página (padrão: 20), " +
-                            "sort: ordenação (ex: 'codigoOficial,asc' ou 'nome,desc')"
-            )
+            @Parameter(description = "Parâmetros de paginação")
             Pageable pageable) {
         log.debug("REQUEST GET /v1/sigtap/modalidades - q: {}, competencia: {}, pageable: {}", q, competencia, pageable);
         try {
@@ -1089,9 +760,7 @@ public class SigtapController {
     @GetMapping("/modalidades/{codigo}")
     @Operation(
             summary = "Obter modalidade por código",
-            description = "Retorna uma modalidade SIGTAP específica pelo código oficial. " +
-                    "Se múltiplas competências existirem para o mesmo código, retorna a mais recente. " +
-                    "Modalidades representam formas de atendimento ou tipos de procedimentos."
+            description = "Retorna uma modalidade SIGTAP específica pelo código oficial. Se múltiplas competências existirem, retorna a mais recente."
     )
     @ApiResponses(value = {
             @ApiResponse(
@@ -1107,20 +776,9 @@ public class SigtapController {
             @ApiResponse(responseCode = "500", description = "Erro interno do servidor.")
     })
     public ResponseEntity<SigtapModalidadeResponse> obterModalidadePorCodigo(
-            @Parameter(
-                    description = "Código oficial da modalidade. " +
-                            "Exemplo: '01' para uma modalidade específica",
-                    required = true,
-                    example = "01"
-            )
+            @Parameter(description = "Código oficial da modalidade", required = true, example = "01")
             @PathVariable String codigo,
-            @Parameter(
-                    description = "Competência no formato AAAAMM (Ano + Mês). " +
-                            "Filtra a modalidade válida na competência especificada. " +
-                            "Se não informado, retorna a competência mais recente. " +
-                            "Exemplo: '202512' para dezembro de 2025",
-                    example = "202512"
-            )
+            @Parameter(description = "Competência no formato AAAAMM", example = "202512")
             @RequestParam(name = "competencia", required = false) String competencia) {
         log.debug("REQUEST GET /v1/sigtap/modalidades/{} - competencia: {}", codigo, competencia);
         try {
@@ -1138,14 +796,7 @@ public class SigtapController {
     @GetMapping("/compatibilidades")
     @Operation(
             summary = "Pesquisar compatibilidades entre procedimentos SIGTAP",
-            description = "Retorna uma lista paginada de compatibilidades entre procedimentos SIGTAP. " +
-                    "Compatibilidades definem quais procedimentos podem ser realizados juntos ou são incompatíveis. " +
-                    "Permite filtrar por procedimento principal e competência." +
-                    "\n\n" +
-                    "**Tipos de Compatibilidade:**\n" +
-                    "- **PERMITIDA**: Procedimentos que podem ser realizados juntos\n" +
-                    "- **INCOMPATÍVEL**: Procedimentos que não podem ser realizados juntos\n" +
-                    "- **EXCLUSIVA**: Procedimentos que são mutuamente exclusivos"
+            description = "Retorna uma lista paginada de compatibilidades entre procedimentos SIGTAP."
     )
     @ApiResponses(value = {
             @ApiResponse(
@@ -1158,26 +809,11 @@ public class SigtapController {
             @ApiResponse(responseCode = "500", description = "Erro interno do servidor.")
     })
     public ResponseEntity<Page<SigtapCompatibilidadeResponse>> pesquisarCompatibilidades(
-            @Parameter(
-                    description = "Código do procedimento principal para filtrar. " +
-                            "Quando informado, retorna apenas compatibilidades relacionadas a este procedimento. " +
-                            "Exemplo: '0301010010' para ver compatibilidades da consulta médica",
-                    example = "0301010010"
-            )
+            @Parameter(description = "Código do procedimento principal", example = "0301010010")
             @RequestParam(name = "codigoProcedimentoPrincipal", required = false) String codigoProcedimentoPrincipal,
-            @Parameter(
-                    description = "Competência no formato AAAAMM (Ano + Mês). " +
-                            "Filtra compatibilidades válidas na competência especificada. " +
-                            "Exemplo: '202512' para dezembro de 2025",
-                    example = "202512"
-            )
+            @Parameter(description = "Competência no formato AAAAMM", example = "202512")
             @RequestParam(name = "competencia", required = false) String competencia,
-            @Parameter(
-                    description = "Parâmetros de paginação. " +
-                            "page: número da página (padrão: 0), " +
-                            "size: tamanho da página (padrão: 20), " +
-                            "sort: ordenação (ex: 'codigoOficial,asc' ou 'nome,desc')"
-            )
+            @Parameter(description = "Parâmetros de paginação")
             Pageable pageable) {
         log.debug("REQUEST GET /v1/sigtap/compatibilidades - codigoProcedimentoPrincipal: {}, competencia: {}, pageable: {}", codigoProcedimentoPrincipal, competencia, pageable);
         try {
