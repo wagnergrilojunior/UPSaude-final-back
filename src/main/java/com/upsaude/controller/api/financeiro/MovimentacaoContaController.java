@@ -25,7 +25,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/v1/financeiro/movimentacoes")
+@RequestMapping("/api/v1/financeiro/movimentacoes")
 @Tag(name = "Financeiro - Movimentações", description = "API para gerenciamento de Movimentações de Conta")
 @RequiredArgsConstructor
 @Slf4j
@@ -43,7 +43,7 @@ public class MovimentacaoContaController {
             @ApiResponse(responseCode = "403", description = "Acesso negado")
     })
     public ResponseEntity<MovimentacaoContaResponse> criar(@Valid @RequestBody MovimentacaoContaRequest request) {
-        log.debug("REQUEST POST /v1/financeiro/movimentacoes - payload: {}", request);
+        log.debug("REQUEST POST /api/v1/financeiro/movimentacoes - payload: {}", request);
         try {
             MovimentacaoContaResponse response = service.criar(request);
             log.info("Movimentação criada com sucesso. ID: {}", response.getId());
@@ -66,7 +66,7 @@ public class MovimentacaoContaController {
     public ResponseEntity<Page<MovimentacaoContaResponse>> listar(
             @Parameter(description = "Parâmetros de paginação (page, size, sort)")
             Pageable pageable) {
-        log.debug("REQUEST GET /v1/financeiro/movimentacoes - pageable: {}", pageable);
+        log.debug("REQUEST GET /api/v1/financeiro/movimentacoes - pageable: {}", pageable);
         try {
             return ResponseEntity.ok(service.listar(pageable));
         } catch (Exception ex) {
@@ -86,7 +86,7 @@ public class MovimentacaoContaController {
     public ResponseEntity<MovimentacaoContaResponse> obterPorId(
             @Parameter(description = "ID da movimentação", required = true)
             @PathVariable UUID id) {
-        log.debug("REQUEST GET /v1/financeiro/movimentacoes/{}", id);
+        log.debug("REQUEST GET /api/v1/financeiro/movimentacoes/{}", id);
         try {
             return ResponseEntity.ok(service.obterPorId(id));
         } catch (NotFoundException ex) {
@@ -112,7 +112,7 @@ public class MovimentacaoContaController {
             @Parameter(description = "ID da movimentação", required = true)
             @PathVariable UUID id,
             @Valid @RequestBody MovimentacaoContaRequest request) {
-        log.debug("REQUEST PUT /v1/financeiro/movimentacoes/{} - payload: {}", id, request);
+        log.debug("REQUEST PUT /api/v1/financeiro/movimentacoes/{} - payload: {}", id, request);
         try {
             MovimentacaoContaResponse response = service.atualizar(id, request);
             log.info("Movimentação atualizada com sucesso. ID: {}", id);
@@ -136,7 +136,7 @@ public class MovimentacaoContaController {
     public ResponseEntity<Void> excluir(
             @Parameter(description = "ID da movimentação", required = true)
             @PathVariable UUID id) {
-        log.debug("REQUEST DELETE /v1/financeiro/movimentacoes/{}", id);
+        log.debug("REQUEST DELETE /api/v1/financeiro/movimentacoes/{}", id);
         try {
             service.excluir(id);
             log.info("Movimentação excluída com sucesso. ID: {}", id);
@@ -160,7 +160,7 @@ public class MovimentacaoContaController {
     public ResponseEntity<Void> inativar(
             @Parameter(description = "ID da movimentação", required = true)
             @PathVariable UUID id) {
-        log.debug("REQUEST PUT /v1/financeiro/movimentacoes/{}/inativar", id);
+        log.debug("REQUEST PUT /api/v1/financeiro/movimentacoes/{}/inativar", id);
         try {
             service.inativar(id);
             log.info("Movimentação inativada com sucesso. ID: {}", id);

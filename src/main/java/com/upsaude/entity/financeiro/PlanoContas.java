@@ -1,6 +1,5 @@
 package com.upsaude.entity.financeiro;
 
-import com.upsaude.entity.BaseEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Index;
@@ -23,7 +22,7 @@ import lombok.EqualsAndHashCode;
 )
 @Data
 @EqualsAndHashCode(callSuper = true)
-public class PlanoContas extends BaseEntity {
+public class PlanoContas extends BaseEntityFinanceiro {
 
     @Column(name = "nome", nullable = false, length = 255)
     private String nome;

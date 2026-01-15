@@ -1,6 +1,6 @@
 package com.upsaude.entity.financeiro;
 
-import com.upsaude.entity.BaseEntity;
+import com.upsaude.entity.sistema.usuario.UsuariosSistema;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -27,7 +27,7 @@ import java.util.List;
 )
 @Data
 @EqualsAndHashCode(callSuper = true)
-public class ConciliacaoBancaria extends BaseEntity {
+public class ConciliacaoBancaria extends BaseEntityFinanceiro {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "conta_financeira_id", nullable = false)
@@ -40,10 +40,14 @@ public class ConciliacaoBancaria extends BaseEntity {
     private LocalDate periodoFim;
 
     @Column(name = "status", nullable = false, length = 20)
-    private String status; // ABERTA | FECHADA
+private String status;
 
     @Column(name = "fechada_em")
     private OffsetDateTime fechadaEm;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "fechada_por")
+    private UsuariosSistema fechadaPor;
 
     @OneToMany(mappedBy = "conciliacao", fetch = FetchType.LAZY)
     private List<ConciliacaoItem> itens = new ArrayList<>();

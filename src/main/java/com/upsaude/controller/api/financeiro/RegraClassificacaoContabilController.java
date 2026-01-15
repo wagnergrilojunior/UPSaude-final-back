@@ -25,7 +25,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/v1/financeiro/regras-classificacao")
+@RequestMapping("/api/v1/financeiro/regras-classificacao")
 @Tag(name = "Financeiro - Regras de Classificação", description = "API para gerenciamento de Regras de Classificação Contábil")
 @RequiredArgsConstructor
 @Slf4j
@@ -43,7 +43,7 @@ public class RegraClassificacaoContabilController {
             @ApiResponse(responseCode = "403", description = "Acesso negado")
     })
     public ResponseEntity<RegraClassificacaoContabilResponse> criar(@Valid @RequestBody RegraClassificacaoContabilRequest request) {
-        log.debug("REQUEST POST /v1/financeiro/regras-classificacao - payload: {}", request);
+        log.debug("REQUEST POST /api/v1/financeiro/regras-classificacao - payload: {}", request);
         try {
             RegraClassificacaoContabilResponse response = service.criar(request);
             log.info("Regra de classificação criada com sucesso. ID: {}", response.getId());
@@ -66,7 +66,7 @@ public class RegraClassificacaoContabilController {
     public ResponseEntity<Page<RegraClassificacaoContabilResponse>> listar(
             @Parameter(description = "Parâmetros de paginação (page, size, sort)")
             Pageable pageable) {
-        log.debug("REQUEST GET /v1/financeiro/regras-classificacao - pageable: {}", pageable);
+        log.debug("REQUEST GET /api/v1/financeiro/regras-classificacao - pageable: {}", pageable);
         try {
             return ResponseEntity.ok(service.listar(pageable));
         } catch (Exception ex) {
@@ -86,7 +86,7 @@ public class RegraClassificacaoContabilController {
     public ResponseEntity<RegraClassificacaoContabilResponse> obterPorId(
             @Parameter(description = "ID da regra", required = true)
             @PathVariable UUID id) {
-        log.debug("REQUEST GET /v1/financeiro/regras-classificacao/{}", id);
+        log.debug("REQUEST GET /api/v1/financeiro/regras-classificacao/{}", id);
         try {
             return ResponseEntity.ok(service.obterPorId(id));
         } catch (NotFoundException ex) {
@@ -112,7 +112,7 @@ public class RegraClassificacaoContabilController {
             @Parameter(description = "ID da regra", required = true)
             @PathVariable UUID id,
             @Valid @RequestBody RegraClassificacaoContabilRequest request) {
-        log.debug("REQUEST PUT /v1/financeiro/regras-classificacao/{} - payload: {}", id, request);
+        log.debug("REQUEST PUT /api/v1/financeiro/regras-classificacao/{} - payload: {}", id, request);
         try {
             RegraClassificacaoContabilResponse response = service.atualizar(id, request);
             log.info("Regra de classificação atualizada com sucesso. ID: {}", id);
@@ -136,7 +136,7 @@ public class RegraClassificacaoContabilController {
     public ResponseEntity<Void> excluir(
             @Parameter(description = "ID da regra", required = true)
             @PathVariable UUID id) {
-        log.debug("REQUEST DELETE /v1/financeiro/regras-classificacao/{}", id);
+        log.debug("REQUEST DELETE /api/v1/financeiro/regras-classificacao/{}", id);
         try {
             service.excluir(id);
             log.info("Regra excluída com sucesso. ID: {}", id);
@@ -160,7 +160,7 @@ public class RegraClassificacaoContabilController {
     public ResponseEntity<Void> inativar(
             @Parameter(description = "ID da regra", required = true)
             @PathVariable UUID id) {
-        log.debug("REQUEST PUT /v1/financeiro/regras-classificacao/{}/inativar", id);
+        log.debug("REQUEST PUT /api/v1/financeiro/regras-classificacao/{}/inativar", id);
         try {
             service.inativar(id);
             log.info("Regra inativada com sucesso. ID: {}", id);

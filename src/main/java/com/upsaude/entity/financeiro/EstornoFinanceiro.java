@@ -1,6 +1,5 @@
 package com.upsaude.entity.financeiro;
 
-import com.upsaude.entity.BaseEntity;
 import com.upsaude.entity.agendamento.Agendamento;
 import com.upsaude.entity.clinica.atendimento.Atendimento;
 import com.upsaude.entity.clinica.atendimento.AtendimentoProcedimento;
@@ -29,7 +28,7 @@ import java.time.OffsetDateTime;
 )
 @Data
 @EqualsAndHashCode(callSuper = true)
-public class EstornoFinanceiro extends BaseEntity {
+public class EstornoFinanceiro extends BaseEntityFinanceiro {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "competencia_id", nullable = false)
@@ -64,16 +63,16 @@ public class EstornoFinanceiro extends BaseEntity {
     private LancamentoFinanceiro lancamentoFinanceiroEstorno;
 
     @Column(name = "motivo", nullable = false, length = 30)
-    private String motivo; // CANCELAMENTO | FALTA_PACIENTE | NAO_EXECUTADO | AJUSTE | OUTRO
+private String motivo;
 
     @Column(name = "valor_estornado", nullable = false, precision = 14, scale = 2)
     private BigDecimal valorEstornado;
 
     @Column(name = "procedimento_codigo", length = 20)
-    private String procedimentoCodigo; // Snapshot do código SIGTAP
+private String procedimentoCodigo;
 
     @Column(name = "procedimento_nome", length = 255)
-    private String procedimentoNome; // Snapshot do nome
+private String procedimentoNome;
 
     @Column(name = "data_estorno", nullable = false)
     private OffsetDateTime dataEstorno;

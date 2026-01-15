@@ -25,14 +25,14 @@ public class RecorrenciaFinanceiraRequest {
 
     @NotBlank(message = "Tipo é obrigatório")
     @Size(max = 20, message = "Tipo deve ter no máximo 20 caracteres")
-    private String tipo; // PAGAR | RECEBER
+private String tipo;
 
     @NotBlank(message = "Periodicidade é obrigatória")
     @Size(max = 20, message = "Periodicidade deve ter no máximo 20 caracteres")
-    private String periodicidade; // MENSAL | SEMANAL | ANUAL
+private String periodicidade;
 
     private Integer diaMes;
-    private Integer diaSemana; // 1=Segunda, 7=Domingo
+private Integer diaSemana;
 
     private OffsetDateTime proximaGeracaoEm;
     private Boolean ativo;

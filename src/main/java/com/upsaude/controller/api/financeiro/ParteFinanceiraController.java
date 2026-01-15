@@ -25,7 +25,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/v1/financeiro/partes-financeiras")
+@RequestMapping("/api/v1/financeiro/partes-financeiras")
 @Tag(name = "Financeiro - Partes Financeiras", description = "API para gerenciamento de Partes Financeiras")
 @RequiredArgsConstructor
 @Slf4j
@@ -43,7 +43,7 @@ public class ParteFinanceiraController {
             @ApiResponse(responseCode = "403", description = "Acesso negado")
     })
     public ResponseEntity<ParteFinanceiraResponse> criar(@Valid @RequestBody ParteFinanceiraRequest request) {
-        log.debug("REQUEST POST /v1/financeiro/partes-financeiras - payload: {}", request);
+        log.debug("REQUEST POST /api/v1/financeiro/partes-financeiras - payload: {}", request);
         try {
             ParteFinanceiraResponse response = service.criar(request);
             log.info("Parte financeira criada com sucesso. ID: {}", response.getId());
@@ -66,7 +66,7 @@ public class ParteFinanceiraController {
     public ResponseEntity<Page<ParteFinanceiraResponse>> listar(
             @Parameter(description = "Parâmetros de paginação (page, size, sort)")
             Pageable pageable) {
-        log.debug("REQUEST GET /v1/financeiro/partes-financeiras - pageable: {}", pageable);
+        log.debug("REQUEST GET /api/v1/financeiro/partes-financeiras - pageable: {}", pageable);
         try {
             return ResponseEntity.ok(service.listar(pageable));
         } catch (Exception ex) {
@@ -86,7 +86,7 @@ public class ParteFinanceiraController {
     public ResponseEntity<ParteFinanceiraResponse> obterPorId(
             @Parameter(description = "ID da parte", required = true)
             @PathVariable UUID id) {
-        log.debug("REQUEST GET /v1/financeiro/partes-financeiras/{}", id);
+        log.debug("REQUEST GET /api/v1/financeiro/partes-financeiras/{}", id);
         try {
             return ResponseEntity.ok(service.obterPorId(id));
         } catch (NotFoundException ex) {
@@ -112,7 +112,7 @@ public class ParteFinanceiraController {
             @Parameter(description = "ID da parte", required = true)
             @PathVariable UUID id,
             @Valid @RequestBody ParteFinanceiraRequest request) {
-        log.debug("REQUEST PUT /v1/financeiro/partes-financeiras/{} - payload: {}", id, request);
+        log.debug("REQUEST PUT /api/v1/financeiro/partes-financeiras/{} - payload: {}", id, request);
         try {
             ParteFinanceiraResponse response = service.atualizar(id, request);
             log.info("Parte financeira atualizada com sucesso. ID: {}", id);
@@ -136,7 +136,7 @@ public class ParteFinanceiraController {
     public ResponseEntity<Void> excluir(
             @Parameter(description = "ID da parte", required = true)
             @PathVariable UUID id) {
-        log.debug("REQUEST DELETE /v1/financeiro/partes-financeiras/{}", id);
+        log.debug("REQUEST DELETE /api/v1/financeiro/partes-financeiras/{}", id);
         try {
             service.excluir(id);
             log.info("Parte financeira excluída com sucesso. ID: {}", id);
@@ -160,7 +160,7 @@ public class ParteFinanceiraController {
     public ResponseEntity<Void> inativar(
             @Parameter(description = "ID da parte", required = true)
             @PathVariable UUID id) {
-        log.debug("REQUEST PUT /v1/financeiro/partes-financeiras/{}/inativar", id);
+        log.debug("REQUEST PUT /api/v1/financeiro/partes-financeiras/{}/inativar", id);
         try {
             service.inativar(id);
             log.info("Parte financeira inativada com sucesso. ID: {}", id);

@@ -8,8 +8,6 @@ import com.upsaude.exception.NotFoundException;
 import com.upsaude.service.api.financeiro.CompetenciaFechamentoService;
 import com.upsaude.service.api.financeiro.FinanceiroIntegrationService;
 import com.upsaude.service.api.sistema.multitenancy.TenantService;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -28,7 +26,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/v1/financeiro/operacoes")
+@RequestMapping("/api/v1/financeiro/operacoes")
 @Tag(name = "Financeiro - Operações", description = "API de ações explícitas para orquestração do financeiro (reserva/consumo/estorno/fechamento)")
 @RequiredArgsConstructor
 @Slf4j
@@ -53,7 +51,7 @@ public class FinanceiroOperacoesController {
             @Parameter(description = "ID do agendamento", required = true)
             @PathVariable UUID agendamentoId
     ) {
-        log.debug("REQUEST POST /v1/financeiro/operacoes/agendamentos/{}/reservar", agendamentoId);
+        log.debug("REQUEST POST /api/v1/financeiro/operacoes/agendamentos/{}/reservar", agendamentoId);
         try {
             financeiroIntegrationService.reservarOrcamento(agendamentoId);
             return ResponseEntity.noContent().build();
@@ -82,7 +80,7 @@ public class FinanceiroOperacoesController {
             @PathVariable UUID agendamentoId,
             @Valid @RequestBody FinanceiroOperacaoMotivoRequest request
     ) {
-        log.debug("REQUEST POST /v1/financeiro/operacoes/agendamentos/{}/estornar - payload: {}", agendamentoId, request);
+        log.debug("REQUEST POST /api/v1/financeiro/operacoes/agendamentos/{}/estornar - payload: {}", agendamentoId, request);
         try {
             financeiroIntegrationService.estornarReserva(agendamentoId, request.getMotivo());
             return ResponseEntity.noContent().build();
@@ -110,7 +108,7 @@ public class FinanceiroOperacoesController {
             @Parameter(description = "ID do atendimento", required = true)
             @PathVariable UUID atendimentoId
     ) {
-        log.debug("REQUEST POST /v1/financeiro/operacoes/atendimentos/{}/consumir", atendimentoId);
+        log.debug("REQUEST POST /api/v1/financeiro/operacoes/atendimentos/{}/consumir", atendimentoId);
         try {
             financeiroIntegrationService.consumirReserva(atendimentoId);
             return ResponseEntity.noContent().build();
@@ -139,7 +137,7 @@ public class FinanceiroOperacoesController {
             @PathVariable UUID atendimentoId,
             @Valid @RequestBody FinanceiroOperacaoMotivoRequest request
     ) {
-        log.debug("REQUEST POST /v1/financeiro/operacoes/atendimentos/{}/estornar - payload: {}", atendimentoId, request);
+        log.debug("REQUEST POST /api/v1/financeiro/operacoes/atendimentos/{}/estornar - payload: {}", atendimentoId, request);
         try {
             financeiroIntegrationService.estornarConsumo(atendimentoId, request.getMotivo());
             return ResponseEntity.noContent().build();
@@ -168,17 +166,16 @@ public class FinanceiroOperacoesController {
             @PathVariable UUID competenciaFinanceiraId,
             @Valid @RequestBody(required = false) CompetenciaFechamentoRequest request
     ) {
-        log.debug("REQUEST POST /v1/financeiro/operacoes/competencias/{}/fechar", competenciaFinanceiraId);
+        log.debug("REQUEST POST /api/v1/financeiro/operacoes/competencias/{}/fechar", competenciaFinanceiraId);
         try {
             UUID tenantId = tenantService.validarTenantAtual();
-            UUID usuarioId = obterUserIdAutenticado();
-            
+
             if (request == null) {
                 request = CompetenciaFechamentoRequest.builder().build();
             }
-            
+
             CompetenciaFechamentoResponse response = competenciaFechamentoService.fecharCompetencia(
-                    competenciaFinanceiraId, tenantId, usuarioId, request);
+                    competenciaFinanceiraId, tenantId, request);
             return ResponseEntity.ok(response);
         } catch (BadRequestException | NotFoundException ex) {
             log.warn("Falha ao fechar competência financeira — competenciaFinanceiraId: {}, mensagem: {}", competenciaFinanceiraId, ex.getMessage());
@@ -187,26 +184,6 @@ public class FinanceiroOperacoesController {
             log.error("Erro inesperado ao fechar competência financeira — competenciaFinanceiraId: {}", competenciaFinanceiraId, ex);
             throw ex;
         }
-    }
-    
-    private UUID obterUserIdAutenticado() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication == null || !authentication.isAuthenticated()) {
-            return null;
-        }
-        Object details = authentication.getDetails();
-        if (details instanceof com.upsaude.integration.supabase.SupabaseAuthResponse.User) {
-            return ((com.upsaude.integration.supabase.SupabaseAuthResponse.User) details).getId();
-        }
-        Object principal = authentication.getPrincipal();
-        if (principal instanceof String) {
-            try {
-                return UUID.fromString((String) principal);
-            } catch (IllegalArgumentException e) {
-                return null;
-            }
-        }
-        return null;
     }
 }
 

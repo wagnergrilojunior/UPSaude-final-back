@@ -1,6 +1,5 @@
 package com.upsaude.entity.financeiro;
 
-import com.upsaude.entity.BaseEntity;
 import com.upsaude.entity.agendamento.Agendamento;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -21,13 +20,13 @@ import java.util.UUID;
     schema = "public",
     indexes = {
         @Index(name = "idx_reserva_orcamentaria_competencia", columnList = "tenant_id, competencia_id, status"),
-        @Index(name = "idx_reserva_orcamentaria_agendamento", columnList = "agendamento_id"),
+        @Index(name = "idx_reserva_orcamentaria_tenant_agendamento", columnList = "tenant_id, agendamento_id"),
         @Index(name = "idx_reserva_orcamentaria_prestador", columnList = "tenant_id, prestador_tipo, prestador_id")
     }
 )
 @Data
 @EqualsAndHashCode(callSuper = true)
-public class ReservaOrcamentariaAssistencial extends BaseEntity {
+public class ReservaOrcamentariaAssistencial extends BaseEntityFinanceiro {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "competencia_id", nullable = false)
@@ -46,16 +45,16 @@ public class ReservaOrcamentariaAssistencial extends BaseEntity {
     private GuiaAtendimentoAmbulatorial guiaAmbulatorial;
 
     @Column(name = "prestador_id")
-    private UUID prestadorId; // Pode ser estabelecimento ou profissional
+private UUID prestadorId;
 
     @Column(name = "prestador_tipo", length = 30)
-    private String prestadorTipo; // ESTABELECIMENTO | PROFISSIONAL
+private String prestadorTipo;
 
     @Column(name = "valor_reservado_total", nullable = false, precision = 14, scale = 2)
     private BigDecimal valorReservadoTotal;
 
     @Column(name = "status", nullable = false, length = 20)
-    private String status; // ATIVA | CONSUMIDA | LIBERADA | PARCIAL
+private String status;
 
     @Column(name = "grupo_reserva")
     private UUID grupoReserva;

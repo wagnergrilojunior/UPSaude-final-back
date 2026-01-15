@@ -1,6 +1,5 @@
 package com.upsaude.entity.financeiro;
 
-import com.upsaude.entity.BaseEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -27,7 +26,7 @@ import java.math.BigDecimal;
 )
 @Data
 @EqualsAndHashCode(callSuper = true)
-public class OrcamentoCompetencia extends BaseEntity {
+public class OrcamentoCompetencia extends BaseEntityFinanceiro {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "competencia_id", nullable = false)
@@ -54,12 +53,7 @@ public class OrcamentoCompetencia extends BaseEntity {
     @Column(name = "saldo_final", precision = 14, scale = 2)
     private BigDecimal saldoFinal;
 
-    /**
-     * Calcula o saldo disponível considerando todos os movimentos da competência.
-     * Fórmula: saldoAnterior + créditos - reservasAtivas - consumos + estornos - despesasAdmin
-     * 
-     * @return BigDecimal com o saldo disponível (pode ser negativo se houver problemas de integridade)
-     */
+    
     public BigDecimal calcularSaldoDisponivel() {
         BigDecimal saldo = saldoAnterior != null ? saldoAnterior : BigDecimal.ZERO;
         saldo = saldo.add(creditos != null ? creditos : BigDecimal.ZERO);
@@ -70,12 +64,7 @@ public class OrcamentoCompetencia extends BaseEntity {
         return saldo;
     }
 
-    /**
-     * Verifica se há saldo disponível suficiente para um valor requerido.
-     * 
-     * @param valorRequerido Valor que se deseja verificar disponibilidade
-     * @return true se saldo disponível >= valor requerido, false caso contrário
-     */
+    
     public boolean temSaldoDisponivel(BigDecimal valorRequerido) {
         if (valorRequerido == null || valorRequerido.compareTo(BigDecimal.ZERO) <= 0) {
             return true;

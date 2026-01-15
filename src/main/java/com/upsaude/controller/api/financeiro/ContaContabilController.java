@@ -31,7 +31,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/v1/financeiro/contas-contabeis")
+@RequestMapping("/api/v1/financeiro/contas-contabeis")
 @Tag(name = "Financeiro - Contas Contábeis", description = "API para gerenciamento de Conta Contábil")
 @RequiredArgsConstructor
 @Slf4j
@@ -48,7 +48,7 @@ public class ContaContabilController {
             @ApiResponse(responseCode = "403", description = "Acesso negado")
     })
     public ResponseEntity<ContaContabilResponse> criar(@Valid @RequestBody ContaContabilRequest request) {
-        log.debug("REQUEST POST /v1/financeiro/contas-contabeis - payload: {}", request);
+        log.debug("REQUEST POST /api/v1/financeiro/contas-contabeis - payload: {}", request);
         try {
             ContaContabilResponse response = service.criar(request);
             log.info("Conta contábil criada com sucesso. ID: {}", response.getId());
@@ -71,7 +71,7 @@ public class ContaContabilController {
     public ResponseEntity<Page<ContaContabilResponse>> listar(
             @Parameter(description = "Parâmetros de paginação (page, size, sort)")
             Pageable pageable) {
-        log.debug("REQUEST GET /v1/financeiro/contas-contabeis - pageable: {}", pageable);
+        log.debug("REQUEST GET /api/v1/financeiro/contas-contabeis - pageable: {}", pageable);
         try {
             Page<ContaContabilResponse> response = service.listar(pageable);
             return ResponseEntity.ok(response);
@@ -92,7 +92,7 @@ public class ContaContabilController {
     public ResponseEntity<ContaContabilResponse> obterPorId(
             @Parameter(description = "ID da conta contábil", required = true)
             @PathVariable UUID id) {
-        log.debug("REQUEST GET /v1/financeiro/contas-contabeis/{}", id);
+        log.debug("REQUEST GET /api/v1/financeiro/contas-contabeis/{}", id);
         try {
             ContaContabilResponse response = service.obterPorId(id);
             return ResponseEntity.ok(response);
@@ -118,7 +118,7 @@ public class ContaContabilController {
             @Parameter(description = "ID da conta contábil", required = true)
             @PathVariable UUID id,
             @Valid @RequestBody ContaContabilRequest request) {
-        log.debug("REQUEST PUT /v1/financeiro/contas-contabeis/{} - payload: {}", id, request);
+        log.debug("REQUEST PUT /api/v1/financeiro/contas-contabeis/{} - payload: {}", id, request);
         try {
             ContaContabilResponse response = service.atualizar(id, request);
             log.info("Conta contábil atualizada com sucesso. ID: {}", id);
@@ -142,7 +142,7 @@ public class ContaContabilController {
     public ResponseEntity<Void> excluir(
             @Parameter(description = "ID da conta contábil", required = true)
             @PathVariable UUID id) {
-        log.debug("REQUEST DELETE /v1/financeiro/contas-contabeis/{}", id);
+        log.debug("REQUEST DELETE /api/v1/financeiro/contas-contabeis/{}", id);
         try {
             service.excluir(id);
             log.info("Conta contábil excluída com sucesso. ID: {}", id);
@@ -166,7 +166,7 @@ public class ContaContabilController {
     public ResponseEntity<Void> inativar(
             @Parameter(description = "ID da conta contábil", required = true)
             @PathVariable UUID id) {
-        log.debug("REQUEST PUT /v1/financeiro/contas-contabeis/{}/inativar", id);
+        log.debug("REQUEST PUT /api/v1/financeiro/contas-contabeis/{}/inativar", id);
         try {
             service.inativar(id);
             log.info("Conta contábil inativada com sucesso. ID: {}", id);

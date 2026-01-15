@@ -25,7 +25,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/v1/financeiro/estornos")
+@RequestMapping("/api/v1/financeiro/estornos")
 @Tag(name = "Financeiro - Estornos", description = "API para gerenciamento de Estorno Financeiro")
 @RequiredArgsConstructor
 @Slf4j
@@ -43,7 +43,7 @@ public class EstornoFinanceiroController {
             @ApiResponse(responseCode = "403", description = "Acesso negado")
     })
     public ResponseEntity<EstornoFinanceiroResponse> criar(@Valid @RequestBody EstornoFinanceiroRequest request) {
-        log.debug("REQUEST POST /v1/financeiro/estornos - payload: {}", request);
+        log.debug("REQUEST POST /api/v1/financeiro/estornos - payload: {}", request);
         try {
             EstornoFinanceiroResponse response = service.criar(request);
             log.info("Estorno financeiro criado com sucesso. ID: {}", response.getId());
@@ -66,7 +66,7 @@ public class EstornoFinanceiroController {
     public ResponseEntity<Page<EstornoFinanceiroResponse>> listar(
             @Parameter(description = "Parâmetros de paginação (page, size, sort)")
             Pageable pageable) {
-        log.debug("REQUEST GET /v1/financeiro/estornos - pageable: {}", pageable);
+        log.debug("REQUEST GET /api/v1/financeiro/estornos - pageable: {}", pageable);
         try {
             return ResponseEntity.ok(service.listar(pageable));
         } catch (Exception ex) {
@@ -86,7 +86,7 @@ public class EstornoFinanceiroController {
     public ResponseEntity<EstornoFinanceiroResponse> obterPorId(
             @Parameter(description = "ID do estorno", required = true)
             @PathVariable UUID id) {
-        log.debug("REQUEST GET /v1/financeiro/estornos/{}", id);
+        log.debug("REQUEST GET /api/v1/financeiro/estornos/{}", id);
         try {
             return ResponseEntity.ok(service.obterPorId(id));
         } catch (NotFoundException ex) {
@@ -112,7 +112,7 @@ public class EstornoFinanceiroController {
             @Parameter(description = "ID do estorno", required = true)
             @PathVariable UUID id,
             @Valid @RequestBody EstornoFinanceiroRequest request) {
-        log.debug("REQUEST PUT /v1/financeiro/estornos/{} - payload: {}", id, request);
+        log.debug("REQUEST PUT /api/v1/financeiro/estornos/{} - payload: {}", id, request);
         try {
             EstornoFinanceiroResponse response = service.atualizar(id, request);
             log.info("Estorno financeiro atualizado com sucesso. ID: {}", id);
@@ -136,7 +136,7 @@ public class EstornoFinanceiroController {
     public ResponseEntity<Void> excluir(
             @Parameter(description = "ID do estorno", required = true)
             @PathVariable UUID id) {
-        log.debug("REQUEST DELETE /v1/financeiro/estornos/{}", id);
+        log.debug("REQUEST DELETE /api/v1/financeiro/estornos/{}", id);
         try {
             service.excluir(id);
             log.info("Estorno financeiro excluído com sucesso. ID: {}", id);
@@ -160,7 +160,7 @@ public class EstornoFinanceiroController {
     public ResponseEntity<Void> inativar(
             @Parameter(description = "ID do estorno", required = true)
             @PathVariable UUID id) {
-        log.debug("REQUEST PUT /v1/financeiro/estornos/{}/inativar", id);
+        log.debug("REQUEST PUT /api/v1/financeiro/estornos/{}/inativar", id);
         try {
             service.inativar(id);
             log.info("Estorno financeiro inativado com sucesso. ID: {}", id);

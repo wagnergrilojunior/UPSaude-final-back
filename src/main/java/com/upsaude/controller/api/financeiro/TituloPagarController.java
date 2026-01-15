@@ -25,7 +25,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/v1/financeiro/titulos-pagar")
+@RequestMapping("/api/v1/financeiro/titulos-pagar")
 @Tag(name = "Financeiro - Títulos a Pagar", description = "API para gerenciamento de Títulos a Pagar")
 @RequiredArgsConstructor
 @Slf4j
@@ -43,7 +43,7 @@ public class TituloPagarController {
             @ApiResponse(responseCode = "403", description = "Acesso negado")
     })
     public ResponseEntity<TituloPagarResponse> criar(@Valid @RequestBody TituloPagarRequest request) {
-        log.debug("REQUEST POST /v1/financeiro/titulos-pagar - payload: {}", request);
+        log.debug("REQUEST POST /api/v1/financeiro/titulos-pagar - payload: {}", request);
         try {
             TituloPagarResponse response = service.criar(request);
             log.info("Título a pagar criado com sucesso. ID: {}", response.getId());
@@ -66,7 +66,7 @@ public class TituloPagarController {
     public ResponseEntity<Page<TituloPagarResponse>> listar(
             @Parameter(description = "Parâmetros de paginação (page, size, sort)")
             Pageable pageable) {
-        log.debug("REQUEST GET /v1/financeiro/titulos-pagar - pageable: {}", pageable);
+        log.debug("REQUEST GET /api/v1/financeiro/titulos-pagar - pageable: {}", pageable);
         try {
             return ResponseEntity.ok(service.listar(pageable));
         } catch (Exception ex) {
@@ -86,7 +86,7 @@ public class TituloPagarController {
     public ResponseEntity<TituloPagarResponse> obterPorId(
             @Parameter(description = "ID do título", required = true)
             @PathVariable UUID id) {
-        log.debug("REQUEST GET /v1/financeiro/titulos-pagar/{}", id);
+        log.debug("REQUEST GET /api/v1/financeiro/titulos-pagar/{}", id);
         try {
             return ResponseEntity.ok(service.obterPorId(id));
         } catch (NotFoundException ex) {
@@ -112,7 +112,7 @@ public class TituloPagarController {
             @Parameter(description = "ID do título", required = true)
             @PathVariable UUID id,
             @Valid @RequestBody TituloPagarRequest request) {
-        log.debug("REQUEST PUT /v1/financeiro/titulos-pagar/{} - payload: {}", id, request);
+        log.debug("REQUEST PUT /api/v1/financeiro/titulos-pagar/{} - payload: {}", id, request);
         try {
             TituloPagarResponse response = service.atualizar(id, request);
             log.info("Título a pagar atualizado com sucesso. ID: {}", id);
@@ -136,7 +136,7 @@ public class TituloPagarController {
     public ResponseEntity<Void> excluir(
             @Parameter(description = "ID do título", required = true)
             @PathVariable UUID id) {
-        log.debug("REQUEST DELETE /v1/financeiro/titulos-pagar/{}", id);
+        log.debug("REQUEST DELETE /api/v1/financeiro/titulos-pagar/{}", id);
         try {
             service.excluir(id);
             log.info("Título a pagar excluído com sucesso. ID: {}", id);
@@ -160,7 +160,7 @@ public class TituloPagarController {
     public ResponseEntity<Void> inativar(
             @Parameter(description = "ID do título", required = true)
             @PathVariable UUID id) {
-        log.debug("REQUEST PUT /v1/financeiro/titulos-pagar/{}/inativar", id);
+        log.debug("REQUEST PUT /api/v1/financeiro/titulos-pagar/{}/inativar", id);
         try {
             service.inativar(id);
             log.info("Título a pagar inativado com sucesso. ID: {}", id);

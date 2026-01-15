@@ -25,7 +25,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/v1/financeiro/lancamentos-itens")
+@RequestMapping("/api/v1/financeiro/lancamentos-itens")
 @Tag(name = "Financeiro - Itens de Lançamento", description = "API para gerenciamento de Itens de Lançamento Financeiro")
 @RequiredArgsConstructor
 @Slf4j
@@ -46,7 +46,7 @@ public class LancamentoFinanceiroItemController {
             @Parameter(description = "ID do lançamento financeiro pai", required = true)
             @RequestParam UUID lancamentoId,
             @Valid @RequestBody LancamentoFinanceiroItemRequest request) {
-        log.debug("REQUEST POST /v1/financeiro/lancamentos-itens - lancamentoId: {}, payload: {}", lancamentoId, request);
+        log.debug("REQUEST POST /api/v1/financeiro/lancamentos-itens - lancamentoId: {}, payload: {}", lancamentoId, request);
         try {
             LancamentoFinanceiroItemResponse response = service.criar(lancamentoId, request);
             log.info("Item de lançamento criado com sucesso. ID: {}", response.getId());
@@ -69,7 +69,7 @@ public class LancamentoFinanceiroItemController {
     public ResponseEntity<Page<LancamentoFinanceiroItemResponse>> listar(
             @Parameter(description = "Parâmetros de paginação (page, size, sort)")
             Pageable pageable) {
-        log.debug("REQUEST GET /v1/financeiro/lancamentos-itens - pageable: {}", pageable);
+        log.debug("REQUEST GET /api/v1/financeiro/lancamentos-itens - pageable: {}", pageable);
         try {
             return ResponseEntity.ok(service.listar(pageable));
         } catch (Exception ex) {
@@ -89,7 +89,7 @@ public class LancamentoFinanceiroItemController {
     public ResponseEntity<LancamentoFinanceiroItemResponse> obterPorId(
             @Parameter(description = "ID do item", required = true)
             @PathVariable UUID id) {
-        log.debug("REQUEST GET /v1/financeiro/lancamentos-itens/{}", id);
+        log.debug("REQUEST GET /api/v1/financeiro/lancamentos-itens/{}", id);
         try {
             return ResponseEntity.ok(service.obterPorId(id));
         } catch (NotFoundException ex) {
@@ -115,7 +115,7 @@ public class LancamentoFinanceiroItemController {
             @Parameter(description = "ID do item", required = true)
             @PathVariable UUID id,
             @Valid @RequestBody LancamentoFinanceiroItemRequest request) {
-        log.debug("REQUEST PUT /v1/financeiro/lancamentos-itens/{} - payload: {}", id, request);
+        log.debug("REQUEST PUT /api/v1/financeiro/lancamentos-itens/{} - payload: {}", id, request);
         try {
             LancamentoFinanceiroItemResponse response = service.atualizar(id, request);
             log.info("Item de lançamento atualizado com sucesso. ID: {}", id);
@@ -139,7 +139,7 @@ public class LancamentoFinanceiroItemController {
     public ResponseEntity<Void> excluir(
             @Parameter(description = "ID do item", required = true)
             @PathVariable UUID id) {
-        log.debug("REQUEST DELETE /v1/financeiro/lancamentos-itens/{}", id);
+        log.debug("REQUEST DELETE /api/v1/financeiro/lancamentos-itens/{}", id);
         try {
             service.excluir(id);
             log.info("Item de lançamento excluído com sucesso. ID: {}", id);
@@ -163,7 +163,7 @@ public class LancamentoFinanceiroItemController {
     public ResponseEntity<Void> inativar(
             @Parameter(description = "ID do item", required = true)
             @PathVariable UUID id) {
-        log.debug("REQUEST PUT /v1/financeiro/lancamentos-itens/{}/inativar", id);
+        log.debug("REQUEST PUT /api/v1/financeiro/lancamentos-itens/{}/inativar", id);
         try {
             service.inativar(id);
             log.info("Item de lançamento inativado com sucesso. ID: {}", id);

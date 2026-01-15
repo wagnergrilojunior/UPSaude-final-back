@@ -25,7 +25,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/v1/financeiro/conciliacoes")
+@RequestMapping("/api/v1/financeiro/conciliacoes")
 @Tag(name = "Financeiro - Conciliações", description = "API para gerenciamento de Conciliação Bancária")
 @RequiredArgsConstructor
 @Slf4j
@@ -43,7 +43,7 @@ public class ConciliacaoBancariaController {
             @ApiResponse(responseCode = "403", description = "Acesso negado")
     })
     public ResponseEntity<ConciliacaoBancariaResponse> criar(@Valid @RequestBody ConciliacaoBancariaRequest request) {
-        log.debug("REQUEST POST /v1/financeiro/conciliacoes - payload: {}", request);
+        log.debug("REQUEST POST /api/v1/financeiro/conciliacoes - payload: {}", request);
         try {
             ConciliacaoBancariaResponse response = service.criar(request);
             log.info("Conciliação criada com sucesso. ID: {}", response.getId());
@@ -66,7 +66,7 @@ public class ConciliacaoBancariaController {
     public ResponseEntity<Page<ConciliacaoBancariaResponse>> listar(
             @Parameter(description = "Parâmetros de paginação (page, size, sort)")
             Pageable pageable) {
-        log.debug("REQUEST GET /v1/financeiro/conciliacoes - pageable: {}", pageable);
+        log.debug("REQUEST GET /api/v1/financeiro/conciliacoes - pageable: {}", pageable);
         try {
             return ResponseEntity.ok(service.listar(pageable));
         } catch (Exception ex) {
@@ -86,7 +86,7 @@ public class ConciliacaoBancariaController {
     public ResponseEntity<ConciliacaoBancariaResponse> obterPorId(
             @Parameter(description = "ID da conciliação", required = true)
             @PathVariable UUID id) {
-        log.debug("REQUEST GET /v1/financeiro/conciliacoes/{}", id);
+        log.debug("REQUEST GET /api/v1/financeiro/conciliacoes/{}", id);
         try {
             return ResponseEntity.ok(service.obterPorId(id));
         } catch (NotFoundException ex) {
@@ -112,7 +112,7 @@ public class ConciliacaoBancariaController {
             @Parameter(description = "ID da conciliação", required = true)
             @PathVariable UUID id,
             @Valid @RequestBody ConciliacaoBancariaRequest request) {
-        log.debug("REQUEST PUT /v1/financeiro/conciliacoes/{} - payload: {}", id, request);
+        log.debug("REQUEST PUT /api/v1/financeiro/conciliacoes/{} - payload: {}", id, request);
         try {
             ConciliacaoBancariaResponse response = service.atualizar(id, request);
             log.info("Conciliação atualizada com sucesso. ID: {}", id);
@@ -136,7 +136,7 @@ public class ConciliacaoBancariaController {
     public ResponseEntity<Void> excluir(
             @Parameter(description = "ID da conciliação", required = true)
             @PathVariable UUID id) {
-        log.debug("REQUEST DELETE /v1/financeiro/conciliacoes/{}", id);
+        log.debug("REQUEST DELETE /api/v1/financeiro/conciliacoes/{}", id);
         try {
             service.excluir(id);
             log.info("Conciliação excluída com sucesso. ID: {}", id);
@@ -160,7 +160,7 @@ public class ConciliacaoBancariaController {
     public ResponseEntity<Void> inativar(
             @Parameter(description = "ID da conciliação", required = true)
             @PathVariable UUID id) {
-        log.debug("REQUEST PUT /v1/financeiro/conciliacoes/{}/inativar", id);
+        log.debug("REQUEST PUT /api/v1/financeiro/conciliacoes/{}/inativar", id);
         try {
             service.inativar(id);
             log.info("Conciliação inativada com sucesso. ID: {}", id);

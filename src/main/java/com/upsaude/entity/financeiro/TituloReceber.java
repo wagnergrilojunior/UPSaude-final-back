@@ -1,6 +1,5 @@
 package com.upsaude.entity.financeiro;
 
-import com.upsaude.entity.BaseEntity;
 import com.upsaude.entity.faturamento.DocumentoFaturamento;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -32,7 +31,7 @@ import java.util.List;
 )
 @Data
 @EqualsAndHashCode(callSuper = true)
-public class TituloReceber extends BaseEntity {
+public class TituloReceber extends BaseEntityFinanceiro {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "documento_faturamento_id")
@@ -81,7 +80,7 @@ public class TituloReceber extends BaseEntity {
     private LocalDate dataVencimento;
 
     @Column(name = "status", nullable = false, length = 30)
-    private String status; // ABERTO | PARCIAL | PAGO | CANCELADO_POR_REVERSAO | RENEGOCIADO
+private String status;
 
     @Column(name = "idempotency_key", nullable = false, length = 255)
     private String idempotencyKey;

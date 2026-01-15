@@ -1,6 +1,5 @@
 package com.upsaude.entity.financeiro;
 
-import com.upsaude.entity.BaseEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -25,7 +24,7 @@ import lombok.EqualsAndHashCode;
 )
 @Data
 @EqualsAndHashCode(callSuper = true)
-public class CentroCusto extends BaseEntity {
+public class CentroCusto extends BaseEntityFinanceiro {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "pai_id")

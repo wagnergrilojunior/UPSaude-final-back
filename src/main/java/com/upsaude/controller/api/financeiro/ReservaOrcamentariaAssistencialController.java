@@ -25,7 +25,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/v1/financeiro/reservas-orcamentarias")
+@RequestMapping("/api/v1/financeiro/reservas-orcamentarias")
 @Tag(name = "Financeiro - Reservas Orçamentárias", description = "API para gerenciamento de Reserva Orçamentária Assistencial")
 @RequiredArgsConstructor
 @Slf4j
@@ -43,7 +43,7 @@ public class ReservaOrcamentariaAssistencialController {
             @ApiResponse(responseCode = "403", description = "Acesso negado")
     })
     public ResponseEntity<ReservaOrcamentariaAssistencialResponse> criar(@Valid @RequestBody ReservaOrcamentariaAssistencialRequest request) {
-        log.debug("REQUEST POST /v1/financeiro/reservas-orcamentarias - payload: {}", request);
+        log.debug("REQUEST POST /api/v1/financeiro/reservas-orcamentarias - payload: {}", request);
         try {
             ReservaOrcamentariaAssistencialResponse response = service.criar(request);
             log.info("Reserva orçamentária criada com sucesso. ID: {}", response.getId());
@@ -66,7 +66,7 @@ public class ReservaOrcamentariaAssistencialController {
     public ResponseEntity<Page<ReservaOrcamentariaAssistencialResponse>> listar(
             @Parameter(description = "Parâmetros de paginação (page, size, sort)")
             Pageable pageable) {
-        log.debug("REQUEST GET /v1/financeiro/reservas-orcamentarias - pageable: {}", pageable);
+        log.debug("REQUEST GET /api/v1/financeiro/reservas-orcamentarias - pageable: {}", pageable);
         try {
             return ResponseEntity.ok(service.listar(pageable));
         } catch (Exception ex) {
@@ -86,7 +86,7 @@ public class ReservaOrcamentariaAssistencialController {
     public ResponseEntity<ReservaOrcamentariaAssistencialResponse> obterPorId(
             @Parameter(description = "ID da reserva", required = true)
             @PathVariable UUID id) {
-        log.debug("REQUEST GET /v1/financeiro/reservas-orcamentarias/{}", id);
+        log.debug("REQUEST GET /api/v1/financeiro/reservas-orcamentarias/{}", id);
         try {
             return ResponseEntity.ok(service.obterPorId(id));
         } catch (NotFoundException ex) {
@@ -112,7 +112,7 @@ public class ReservaOrcamentariaAssistencialController {
             @Parameter(description = "ID da reserva", required = true)
             @PathVariable UUID id,
             @Valid @RequestBody ReservaOrcamentariaAssistencialRequest request) {
-        log.debug("REQUEST PUT /v1/financeiro/reservas-orcamentarias/{} - payload: {}", id, request);
+        log.debug("REQUEST PUT /api/v1/financeiro/reservas-orcamentarias/{} - payload: {}", id, request);
         try {
             ReservaOrcamentariaAssistencialResponse response = service.atualizar(id, request);
             log.info("Reserva orçamentária atualizada com sucesso. ID: {}", id);
@@ -136,7 +136,7 @@ public class ReservaOrcamentariaAssistencialController {
     public ResponseEntity<Void> excluir(
             @Parameter(description = "ID da reserva", required = true)
             @PathVariable UUID id) {
-        log.debug("REQUEST DELETE /v1/financeiro/reservas-orcamentarias/{}", id);
+        log.debug("REQUEST DELETE /api/v1/financeiro/reservas-orcamentarias/{}", id);
         try {
             service.excluir(id);
             log.info("Reserva orçamentária excluída com sucesso. ID: {}", id);
@@ -160,7 +160,7 @@ public class ReservaOrcamentariaAssistencialController {
     public ResponseEntity<Void> inativar(
             @Parameter(description = "ID da reserva", required = true)
             @PathVariable UUID id) {
-        log.debug("REQUEST PUT /v1/financeiro/reservas-orcamentarias/{}/inativar", id);
+        log.debug("REQUEST PUT /api/v1/financeiro/reservas-orcamentarias/{}/inativar", id);
         try {
             service.inativar(id);
             log.info("Reserva orçamentária inativada com sucesso. ID: {}", id);

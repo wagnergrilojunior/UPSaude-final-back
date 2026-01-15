@@ -25,7 +25,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/v1/financeiro/baixas-receber")
+@RequestMapping("/api/v1/financeiro/baixas-receber")
 @Tag(name = "Financeiro - Baixas (Receber)", description = "API para gerenciamento de Baixas de Títulos a Receber")
 @RequiredArgsConstructor
 @Slf4j
@@ -43,7 +43,7 @@ public class BaixaReceberController {
             @ApiResponse(responseCode = "403", description = "Acesso negado")
     })
     public ResponseEntity<BaixaReceberResponse> criar(@Valid @RequestBody BaixaReceberRequest request) {
-        log.debug("REQUEST POST /v1/financeiro/baixas-receber - payload: {}", request);
+        log.debug("REQUEST POST /api/v1/financeiro/baixas-receber - payload: {}", request);
         try {
             BaixaReceberResponse response = service.criar(request);
             log.info("Baixa a receber criada com sucesso. ID: {}", response.getId());
@@ -66,7 +66,7 @@ public class BaixaReceberController {
     public ResponseEntity<Page<BaixaReceberResponse>> listar(
             @Parameter(description = "Parâmetros de paginação (page, size, sort)")
             Pageable pageable) {
-        log.debug("REQUEST GET /v1/financeiro/baixas-receber - pageable: {}", pageable);
+        log.debug("REQUEST GET /api/v1/financeiro/baixas-receber - pageable: {}", pageable);
         try {
             return ResponseEntity.ok(service.listar(pageable));
         } catch (Exception ex) {
@@ -86,7 +86,7 @@ public class BaixaReceberController {
     public ResponseEntity<BaixaReceberResponse> obterPorId(
             @Parameter(description = "ID da baixa", required = true)
             @PathVariable UUID id) {
-        log.debug("REQUEST GET /v1/financeiro/baixas-receber/{}", id);
+        log.debug("REQUEST GET /api/v1/financeiro/baixas-receber/{}", id);
         try {
             return ResponseEntity.ok(service.obterPorId(id));
         } catch (NotFoundException ex) {
@@ -112,7 +112,7 @@ public class BaixaReceberController {
             @Parameter(description = "ID da baixa", required = true)
             @PathVariable UUID id,
             @Valid @RequestBody BaixaReceberRequest request) {
-        log.debug("REQUEST PUT /v1/financeiro/baixas-receber/{} - payload: {}", id, request);
+        log.debug("REQUEST PUT /api/v1/financeiro/baixas-receber/{} - payload: {}", id, request);
         try {
             BaixaReceberResponse response = service.atualizar(id, request);
             log.info("Baixa a receber atualizada com sucesso. ID: {}", id);
@@ -136,7 +136,7 @@ public class BaixaReceberController {
     public ResponseEntity<Void> excluir(
             @Parameter(description = "ID da baixa", required = true)
             @PathVariable UUID id) {
-        log.debug("REQUEST DELETE /v1/financeiro/baixas-receber/{}", id);
+        log.debug("REQUEST DELETE /api/v1/financeiro/baixas-receber/{}", id);
         try {
             service.excluir(id);
             log.info("Baixa a receber excluída com sucesso. ID: {}", id);
@@ -160,7 +160,7 @@ public class BaixaReceberController {
     public ResponseEntity<Void> inativar(
             @Parameter(description = "ID da baixa", required = true)
             @PathVariable UUID id) {
-        log.debug("REQUEST PUT /v1/financeiro/baixas-receber/{}/inativar", id);
+        log.debug("REQUEST PUT /api/v1/financeiro/baixas-receber/{}/inativar", id);
         try {
             service.inativar(id);
             log.info("Baixa a receber inativada com sucesso. ID: {}", id);

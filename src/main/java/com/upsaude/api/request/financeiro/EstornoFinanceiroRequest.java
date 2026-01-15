@@ -41,7 +41,7 @@ public class EstornoFinanceiroRequest {
 
     @NotBlank(message = "Motivo é obrigatório")
     @Size(max = 30, message = "Motivo deve ter no máximo 30 caracteres")
-    private String motivo; // CANCELAMENTO | FALTA_PACIENTE | NAO_EXECUTADO | AJUSTE | OUTRO
+private String motivo;
 
     @NotNull(message = "Valor estornado é obrigatório")
     @Positive(message = "Valor estornado deve ser maior que zero")

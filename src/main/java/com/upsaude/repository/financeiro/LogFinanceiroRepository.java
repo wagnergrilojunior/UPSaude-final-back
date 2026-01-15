@@ -31,7 +31,7 @@ public interface LogFinanceiroRepository extends JpaRepository<LogFinanceiro, UU
     @Query("SELECT l FROM LogFinanceiro l WHERE l.acao = :acao AND l.tenant.id = :tenantId ORDER BY l.createdAt DESC")
     Page<LogFinanceiro> findByAcao(@Param("acao") String acao, @Param("tenantId") UUID tenantId, Pageable pageable);
 
-    @Query("SELECT l FROM LogFinanceiro l WHERE l.usuarioId = :usuarioId AND l.tenant.id = :tenantId ORDER BY l.createdAt DESC")
+    @Query("SELECT l FROM LogFinanceiro l WHERE l.usuario.id = :usuarioId AND l.tenant.id = :tenantId ORDER BY l.createdAt DESC")
     Page<LogFinanceiro> findByUsuarioId(@Param("usuarioId") UUID usuarioId, @Param("tenantId") UUID tenantId, Pageable pageable);
 
     @Query("SELECT l FROM LogFinanceiro l WHERE l.createdAt BETWEEN :inicio AND :fim AND l.tenant.id = :tenantId ORDER BY l.createdAt DESC")

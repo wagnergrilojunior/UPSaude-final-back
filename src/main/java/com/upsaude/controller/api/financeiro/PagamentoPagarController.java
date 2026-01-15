@@ -25,7 +25,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/v1/financeiro/pagamentos-pagar")
+@RequestMapping("/api/v1/financeiro/pagamentos-pagar")
 @Tag(name = "Financeiro - Pagamentos (Pagar)", description = "API para gerenciamento de Pagamentos de Títulos a Pagar")
 @RequiredArgsConstructor
 @Slf4j
@@ -43,7 +43,7 @@ public class PagamentoPagarController {
             @ApiResponse(responseCode = "403", description = "Acesso negado")
     })
     public ResponseEntity<PagamentoPagarResponse> criar(@Valid @RequestBody PagamentoPagarRequest request) {
-        log.debug("REQUEST POST /v1/financeiro/pagamentos-pagar - payload: {}", request);
+        log.debug("REQUEST POST /api/v1/financeiro/pagamentos-pagar - payload: {}", request);
         try {
             PagamentoPagarResponse response = service.criar(request);
             log.info("Pagamento criado com sucesso. ID: {}", response.getId());
@@ -66,7 +66,7 @@ public class PagamentoPagarController {
     public ResponseEntity<Page<PagamentoPagarResponse>> listar(
             @Parameter(description = "Parâmetros de paginação (page, size, sort)")
             Pageable pageable) {
-        log.debug("REQUEST GET /v1/financeiro/pagamentos-pagar - pageable: {}", pageable);
+        log.debug("REQUEST GET /api/v1/financeiro/pagamentos-pagar - pageable: {}", pageable);
         try {
             return ResponseEntity.ok(service.listar(pageable));
         } catch (Exception ex) {
@@ -86,7 +86,7 @@ public class PagamentoPagarController {
     public ResponseEntity<PagamentoPagarResponse> obterPorId(
             @Parameter(description = "ID do pagamento", required = true)
             @PathVariable UUID id) {
-        log.debug("REQUEST GET /v1/financeiro/pagamentos-pagar/{}", id);
+        log.debug("REQUEST GET /api/v1/financeiro/pagamentos-pagar/{}", id);
         try {
             return ResponseEntity.ok(service.obterPorId(id));
         } catch (NotFoundException ex) {
@@ -112,7 +112,7 @@ public class PagamentoPagarController {
             @Parameter(description = "ID do pagamento", required = true)
             @PathVariable UUID id,
             @Valid @RequestBody PagamentoPagarRequest request) {
-        log.debug("REQUEST PUT /v1/financeiro/pagamentos-pagar/{} - payload: {}", id, request);
+        log.debug("REQUEST PUT /api/v1/financeiro/pagamentos-pagar/{} - payload: {}", id, request);
         try {
             PagamentoPagarResponse response = service.atualizar(id, request);
             log.info("Pagamento atualizado com sucesso. ID: {}", id);
@@ -136,7 +136,7 @@ public class PagamentoPagarController {
     public ResponseEntity<Void> excluir(
             @Parameter(description = "ID do pagamento", required = true)
             @PathVariable UUID id) {
-        log.debug("REQUEST DELETE /v1/financeiro/pagamentos-pagar/{}", id);
+        log.debug("REQUEST DELETE /api/v1/financeiro/pagamentos-pagar/{}", id);
         try {
             service.excluir(id);
             log.info("Pagamento excluído com sucesso. ID: {}", id);
@@ -160,7 +160,7 @@ public class PagamentoPagarController {
     public ResponseEntity<Void> inativar(
             @Parameter(description = "ID do pagamento", required = true)
             @PathVariable UUID id) {
-        log.debug("REQUEST PUT /v1/financeiro/pagamentos-pagar/{}/inativar", id);
+        log.debug("REQUEST PUT /api/v1/financeiro/pagamentos-pagar/{}/inativar", id);
         try {
             service.inativar(id);
             log.info("Pagamento inativado com sucesso. ID: {}", id);

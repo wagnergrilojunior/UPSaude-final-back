@@ -1,6 +1,5 @@
 package com.upsaude.entity.financeiro;
 
-import com.upsaude.entity.BaseEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -29,7 +28,7 @@ import java.time.LocalDate;
 )
 @Data
 @EqualsAndHashCode(callSuper = true)
-public class PagamentoPagar extends BaseEntity {
+public class PagamentoPagar extends BaseEntityFinanceiro {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "titulo_pagar_id", nullable = false)
@@ -55,10 +54,10 @@ public class PagamentoPagar extends BaseEntity {
     private LocalDate dataPagamento;
 
     @Column(name = "meio_pagamento", length = 30)
-    private String meioPagamento; // PIX | BOLETO | TED | DINHEIRO | CARTAO | OUTRO
+private String meioPagamento;
 
     @Column(name = "status", nullable = false, length = 30)
-    private String status; // EFETIVADO | CANCELADO_POR_REVERSAO
+private String status;
 
     @Column(name = "idempotency_key", nullable = false, length = 255)
     private String idempotencyKey;

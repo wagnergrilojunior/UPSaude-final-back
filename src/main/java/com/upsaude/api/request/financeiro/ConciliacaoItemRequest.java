@@ -33,7 +33,7 @@ public class ConciliacaoItemRequest {
 
     @NotBlank(message = "Tipo de match é obrigatório")
     @Size(max = 20, message = "Tipo de match deve ter no máximo 20 caracteres")
-    private String tipoMatch; // AUTO | MANUAL
+private String tipoMatch;
 
     private BigDecimal diferenca;
 }

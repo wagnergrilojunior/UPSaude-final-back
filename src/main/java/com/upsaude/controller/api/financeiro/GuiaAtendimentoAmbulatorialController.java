@@ -25,7 +25,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/v1/financeiro/guias-ambulatoriais")
+@RequestMapping("/api/v1/financeiro/guias-ambulatoriais")
 @Tag(name = "Financeiro - Guias Ambulatoriais", description = "API para gerenciamento de Guia de Atendimento Ambulatorial (GAA)")
 @RequiredArgsConstructor
 @Slf4j
@@ -43,7 +43,7 @@ public class GuiaAtendimentoAmbulatorialController {
             @ApiResponse(responseCode = "403", description = "Acesso negado")
     })
     public ResponseEntity<GuiaAtendimentoAmbulatorialResponse> criar(@Valid @RequestBody GuiaAtendimentoAmbulatorialRequest request) {
-        log.debug("REQUEST POST /v1/financeiro/guias-ambulatoriais - payload: {}", request);
+        log.debug("REQUEST POST /api/v1/financeiro/guias-ambulatoriais - payload: {}", request);
         try {
             GuiaAtendimentoAmbulatorialResponse response = service.criar(request);
             log.info("Guia ambulatorial criada com sucesso. ID: {}", response.getId());
@@ -66,7 +66,7 @@ public class GuiaAtendimentoAmbulatorialController {
     public ResponseEntity<Page<GuiaAtendimentoAmbulatorialResponse>> listar(
             @Parameter(description = "Parâmetros de paginação (page, size, sort)")
             Pageable pageable) {
-        log.debug("REQUEST GET /v1/financeiro/guias-ambulatoriais - pageable: {}", pageable);
+        log.debug("REQUEST GET /api/v1/financeiro/guias-ambulatoriais - pageable: {}", pageable);
         try {
             return ResponseEntity.ok(service.listar(pageable));
         } catch (Exception ex) {
@@ -86,7 +86,7 @@ public class GuiaAtendimentoAmbulatorialController {
     public ResponseEntity<GuiaAtendimentoAmbulatorialResponse> obterPorId(
             @Parameter(description = "ID da guia", required = true)
             @PathVariable UUID id) {
-        log.debug("REQUEST GET /v1/financeiro/guias-ambulatoriais/{}", id);
+        log.debug("REQUEST GET /api/v1/financeiro/guias-ambulatoriais/{}", id);
         try {
             return ResponseEntity.ok(service.obterPorId(id));
         } catch (NotFoundException ex) {
@@ -112,7 +112,7 @@ public class GuiaAtendimentoAmbulatorialController {
             @Parameter(description = "ID da guia", required = true)
             @PathVariable UUID id,
             @Valid @RequestBody GuiaAtendimentoAmbulatorialRequest request) {
-        log.debug("REQUEST PUT /v1/financeiro/guias-ambulatoriais/{} - payload: {}", id, request);
+        log.debug("REQUEST PUT /api/v1/financeiro/guias-ambulatoriais/{} - payload: {}", id, request);
         try {
             GuiaAtendimentoAmbulatorialResponse response = service.atualizar(id, request);
             log.info("Guia ambulatorial atualizada com sucesso. ID: {}", id);
@@ -136,7 +136,7 @@ public class GuiaAtendimentoAmbulatorialController {
     public ResponseEntity<Void> excluir(
             @Parameter(description = "ID da guia", required = true)
             @PathVariable UUID id) {
-        log.debug("REQUEST DELETE /v1/financeiro/guias-ambulatoriais/{}", id);
+        log.debug("REQUEST DELETE /api/v1/financeiro/guias-ambulatoriais/{}", id);
         try {
             service.excluir(id);
             log.info("Guia ambulatorial excluída com sucesso. ID: {}", id);
@@ -160,7 +160,7 @@ public class GuiaAtendimentoAmbulatorialController {
     public ResponseEntity<Void> inativar(
             @Parameter(description = "ID da guia", required = true)
             @PathVariable UUID id) {
-        log.debug("REQUEST PUT /v1/financeiro/guias-ambulatoriais/{}/inativar", id);
+        log.debug("REQUEST PUT /api/v1/financeiro/guias-ambulatoriais/{}/inativar", id);
         try {
             service.inativar(id);
             log.info("Guia ambulatorial inativada com sucesso. ID: {}", id);

@@ -1,6 +1,5 @@
 package com.upsaude.entity.financeiro;
 
-import com.upsaude.entity.BaseEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -28,7 +27,7 @@ import java.time.LocalDate;
 )
 @Data
 @EqualsAndHashCode(callSuper = true)
-public class CreditoOrcamentario extends BaseEntity {
+public class CreditoOrcamentario extends BaseEntityFinanceiro {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "competencia_id", nullable = false)
@@ -38,7 +37,7 @@ public class CreditoOrcamentario extends BaseEntity {
     private BigDecimal valor;
 
     @Column(name = "fonte", nullable = false, length = 50)
-    private String fonte; // TESOURO | PORTARIA | CONVENIO_PUBLICO | OUTRA
+private String fonte;
 
     @Column(name = "documento_referencia", length = 255)
     private String documentoReferencia;

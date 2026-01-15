@@ -37,7 +37,7 @@ public class MovimentacaoContaRequest {
 
     @NotBlank(message = "Tipo é obrigatório")
     @Size(max = 20, message = "Tipo deve ter no máximo 20 caracteres")
-    private String tipo; // ENTRADA | SAIDA
+private String tipo;
 
     @NotNull(message = "Valor é obrigatório")
     @Positive(message = "Valor deve ser maior que zero")
@@ -48,6 +48,6 @@ public class MovimentacaoContaRequest {
 
     @NotBlank(message = "Status é obrigatório")
     @Size(max = 30, message = "Status deve ter no máximo 30 caracteres")
-    private String status; // PENDENTE | EFETIVADO | CANCELADO_POR_REVERSAO
+private String status;
 }
 

@@ -1,6 +1,5 @@
 package com.upsaude.entity.financeiro;
 
-import com.upsaude.entity.BaseEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Index;
@@ -20,19 +19,19 @@ import java.time.OffsetDateTime;
 )
 @Data
 @EqualsAndHashCode(callSuper = true)
-public class RecorrenciaFinanceira extends BaseEntity {
+public class RecorrenciaFinanceira extends BaseEntityFinanceiro {
 
     @Column(name = "tipo", nullable = false, length = 20)
-    private String tipo; // PAGAR | RECEBER
+private String tipo;
 
     @Column(name = "periodicidade", nullable = false, length = 20)
-    private String periodicidade; // MENSAL | SEMANAL | ANUAL
+private String periodicidade;
 
     @Column(name = "dia_mes")
     private Integer diaMes;
 
     @Column(name = "dia_semana")
-    private Integer diaSemana; // 1=Segunda, 7=Domingo
+private Integer diaSemana;
 
     @Column(name = "proxima_geracao_em")
     private OffsetDateTime proximaGeracaoEm;

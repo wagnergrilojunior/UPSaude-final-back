@@ -33,7 +33,7 @@ public class LancamentoFinanceiroItemRequest {
 
     @NotBlank(message = "Tipo de partida é obrigatório")
     @Size(max = 20, message = "Tipo de partida deve ter no máximo 20 caracteres")
-    private String tipoPartida; // DEBITO | CREDITO
+private String tipoPartida;
 
     @NotNull(message = "Valor é obrigatório")
     @Positive(message = "Valor deve ser maior que zero")
