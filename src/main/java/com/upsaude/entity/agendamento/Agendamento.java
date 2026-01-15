@@ -190,11 +190,7 @@ public class Agendamento extends BaseEntity {
     private BigDecimal valorEstimadoTotal;
 
     @Column(name = "status_financeiro", length = 30)
-    private String statusFinanceiro; // SEM_RESERVA | RESERVADO | CONSUMIDO | ESTORNADO | AJUSTADO
-
-    // =================================================================================
-    // CAMPOS DE INTEGRAÇÃO SUS / RNDS (FHIR APPOINTMENT)
-    // =================================================================================
+    private String statusFinanceiro;
 
     @Convert(converter = com.upsaude.util.converter.TipoAgendamentoEnumConverter.class)
     @Column(name = "tipo_agendamento", length = 50)
@@ -226,6 +222,12 @@ public class Agendamento extends BaseEntity {
         }
         if (checkIns == null) {
             checkIns = new ArrayList<>();
+        }
+        if (motivosAgendamento != null && motivosAgendamento.trim().isEmpty()) {
+            motivosAgendamento = null;
+        }
+        if (periodoSolicitado != null && periodoSolicitado.trim().isEmpty()) {
+            periodoSolicitado = null;
         }
     }
 

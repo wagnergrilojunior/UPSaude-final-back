@@ -49,7 +49,6 @@ public class AgendamentoServiceImpl implements AgendamentoService {
         UUID tenantId = tenantService.validarTenantAtual();
         Tenant tenant = tenantService.obterTenantDoUsuarioAutenticado();
         if (tenant == null) {
-            // Fallback para testes: buscar tenant do banco quando não houver autenticação
             tenant = tenantRepository.findById(tenantId).orElse(null);
         }
 
@@ -84,7 +83,6 @@ public class AgendamentoServiceImpl implements AgendamentoService {
         UUID tenantId = tenantService.validarTenantAtual();
         Tenant tenant = tenantService.obterTenantDoUsuarioAutenticado();
         if (tenant == null) {
-            // Fallback para testes: buscar tenant do banco quando não houver autenticação
             tenant = tenantRepository.findById(tenantId).orElse(null);
         }
 

@@ -93,8 +93,6 @@ public interface AgendamentoMapper {
             response.setNome(especialidade.getNome());
             return response;
         } catch (jakarta.persistence.EntityNotFoundException e) {
-            // Entidade foi deletada ou não existe mais no banco de dados
-            // Retorna null para evitar erro na serialização
             return null;
         }
     }
