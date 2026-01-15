@@ -13,3 +13,7 @@
 .DS_Store
 /teste/
 /logs/
+# Environment variables
+.env
+.env.local
+.env.*.local
