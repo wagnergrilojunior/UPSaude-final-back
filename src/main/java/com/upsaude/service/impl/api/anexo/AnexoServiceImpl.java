@@ -23,12 +23,14 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
+import jakarta.persistence.criteria.Predicate;
 
 import java.io.BufferedInputStream;
 import java.io.InputStream;
@@ -170,6 +172,7 @@ public class AnexoServiceImpl implements AnexoService {
         StatusAnexoEnum excluido = StatusAnexoEnum.EXCLUIDO;
 
         if (targetType != null && targetId != null) {
+            // Filtrar por target específico
             if (categoria != null) {
                 anexos = anexoRepository.findByTargetAndCategoria(tenant.getId(), targetType, targetId, 
                                                                    categoria, excluido, pageable);
@@ -182,10 +185,39 @@ public class AnexoServiceImpl implements AnexoService {
             } else {
                 anexos = anexoRepository.findByTarget(tenant.getId(), targetType, targetId, excluido, pageable);
             }
-        } else if (status != null) {
-            anexos = anexoRepository.findByTenantAndStatus(tenant.getId(), status, pageable);
         } else {
-            throw new BadRequestException("targetType e targetId são obrigatórios para listar anexos");
+            // Listar todos os anexos do tenant (usando Specification para construir query dinamicamente)
+            Specification<Anexo> spec = (root, query, cb) -> {
+                Predicate predicate = cb.equal(root.get("tenant").get("id"), tenant.getId());
+                
+                // Excluir anexos com status EXCLUIDO por padrão
+                predicate = cb.and(predicate, cb.notEqual(root.get("status"), excluido));
+                
+                // Aplicar filtros opcionais
+                if (targetType != null) {
+                    predicate = cb.and(predicate, cb.equal(root.get("targetType"), targetType));
+                }
+                
+                if (targetId != null) {
+                    predicate = cb.and(predicate, cb.equal(root.get("targetId"), targetId));
+                }
+                
+                if (categoria != null) {
+                    predicate = cb.and(predicate, cb.equal(root.get("categoria"), categoria));
+                }
+                
+                if (status != null) {
+                    predicate = cb.and(predicate, cb.equal(root.get("status"), status));
+                }
+                
+                if (visivelParaPaciente != null) {
+                    predicate = cb.and(predicate, cb.equal(root.get("visivelParaPaciente"), visivelParaPaciente));
+                }
+                
+                return predicate;
+            };
+            
+            anexos = anexoRepository.findAll(spec, pageable);
         }
 
         return anexos.map(this::toResponse);
@@ -352,10 +384,54 @@ public class AnexoServiceImpl implements AnexoService {
             throw new ForbiddenException("Tenant não encontrado ou não autenticado");
         }
 
-        Page<Anexo> anexos = anexoRepository.findByGestao(
-                tenant.getId(), targetType, targetId, categoria, status,
-                visivelParaPaciente, fileName, criadoPor, dataInicio, dataFim, pageable
-        );
+        // Construir Specification dinamicamente para evitar problemas com NULL em queries nativas
+        Specification<Anexo> spec = (root, query, cb) -> {
+            Predicate predicate = cb.equal(root.get("tenant").get("id"), tenant.getId());
+            
+            if (targetType != null) {
+                predicate = cb.and(predicate, cb.equal(root.get("targetType"), targetType));
+            }
+            
+            if (targetId != null) {
+                predicate = cb.and(predicate, cb.equal(root.get("targetId"), targetId));
+            }
+            
+            if (categoria != null) {
+                predicate = cb.and(predicate, cb.equal(root.get("categoria"), categoria));
+            }
+            
+            if (status != null) {
+                predicate = cb.and(predicate, cb.equal(root.get("status"), status));
+            }
+            
+            if (visivelParaPaciente != null) {
+                predicate = cb.and(predicate, cb.equal(root.get("visivelParaPaciente"), visivelParaPaciente));
+            }
+            
+            if (fileName != null && !fileName.trim().isEmpty()) {
+                String likePattern = "%" + fileName.trim().toLowerCase() + "%";
+                predicate = cb.and(predicate, 
+                    cb.like(cb.lower(root.get("fileNameOriginal")), likePattern));
+            }
+            
+            if (criadoPor != null) {
+                predicate = cb.and(predicate, cb.equal(root.get("criadoPor"), criadoPor));
+            }
+            
+            if (dataInicio != null) {
+                predicate = cb.and(predicate, 
+                    cb.greaterThanOrEqualTo(root.get("createdAt"), dataInicio));
+            }
+            
+            if (dataFim != null) {
+                predicate = cb.and(predicate, 
+                    cb.lessThanOrEqualTo(root.get("createdAt"), dataFim));
+            }
+            
+            return predicate;
+        };
+        
+        Page<Anexo> anexos = anexoRepository.findAll(spec, pageable);
 
         return anexos.map(this::toGestaoResponse);
     }

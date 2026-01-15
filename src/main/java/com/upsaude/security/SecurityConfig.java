@@ -13,6 +13,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import com.upsaude.config.AuditorCacheCleanupFilter;
 
 import java.util.Arrays;
 import java.util.List;
@@ -25,6 +26,7 @@ public class SecurityConfig {
 
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
     private final CustomAuthenticationEntryPoint customAuthenticationEntryPoint;
+    private final AuditorCacheCleanupFilter auditorCacheCleanupFilter;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -85,7 +87,9 @@ public class SecurityConfig {
                         .authenticationEntryPoint(customAuthenticationEntryPoint))
 
                 // Adiciona o filtro JWT antes do filtro de autenticação padrão
-                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
+                // Adiciona o filtro de limpeza de cache do auditor no final da cadeia
+                .addFilterAfter(auditorCacheCleanupFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
