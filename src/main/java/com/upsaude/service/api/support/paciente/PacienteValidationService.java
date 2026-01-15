@@ -18,8 +18,23 @@ import java.util.UUID;
 public class PacienteValidationService {
 
     public void validarObrigatorios(PacienteRequest request) {
-        // Validar data do óbito apenas se o objeto óbito for fornecido (obito = true)
-        // Quando obito não é fornecido (null), significa obito = false e não precisa validar
+        if (request == null) {
+            throw new BadRequestException("Objeto de requisição nulo");
+        }
+
+        if (request.getDadosPessoaisBasicos() == null) {
+            throw new BadRequestException("Dados pessoais básicos são obrigatórios");
+        }
+
+        var dados = request.getDadosPessoaisBasicos();
+        if (!StringUtils.hasText(dados.getNomeCompleto())) {
+            throw new BadRequestException("Nome completo é obrigatório");
+        }
+        if (dados.getSexo() == null) {
+            throw new BadRequestException("Sexo é obrigatório");
+        }
+
+        // Validar data do óbito apenas se o objeto óbito for fornecido
         if (request.getObito() != null) {
             if (request.getObito().getDataObito() == null) {
                 throw new BadRequestException("Data de óbito é obrigatória quando informações de óbito são fornecidas");
@@ -27,32 +42,52 @@ public class PacienteValidationService {
         }
     }
 
-    public void validarUnicidadeParaCriacao(PacienteRequest request, 
-                                           PacienteRepository pacienteRepository,
-                                           PacienteIdentificadorRepository identificadorRepository,
-                                           PacienteContatoRepository contatoRepository,
-                                           UUID tenantId) {
+    public void validarUnicidadeParaCriacao(PacienteRequest request,
+            PacienteRepository pacienteRepository,
+            PacienteIdentificadorRepository identificadorRepository,
+            PacienteContatoRepository contatoRepository,
+            UUID tenantId) {
+        if (request.getDocumentosBasicos() != null) {
+            validarCpfUnico(null, request.getDocumentosBasicos().getCpf(), identificadorRepository, tenantId);
+            validarCnsUnico(null, request.getDocumentosBasicos().getCns(), identificadorRepository, tenantId);
+        }
 
+        if (request.getContato() != null) {
+            validarEmailUnico(null, request.getContato().getEmail(), contatoRepository, tenantId);
+        }
     }
 
     public void validarUnicidadeParaAtualizacao(UUID id, PacienteRequest request,
-                                                PacienteRepository pacienteRepository,
-                                                PacienteIdentificadorRepository identificadorRepository,
-                                                PacienteContatoRepository contatoRepository,
-                                                UUID tenantId) {
+            PacienteRepository pacienteRepository,
+            PacienteIdentificadorRepository identificadorRepository,
+            PacienteContatoRepository contatoRepository,
+            UUID tenantId) {
+        if (request.getDocumentosBasicos() != null) {
+            validarCpfUnico(id, request.getDocumentosBasicos().getCpf(), identificadorRepository, tenantId);
+            validarCnsUnico(id, request.getDocumentosBasicos().getCns(), identificadorRepository, tenantId);
+        }
 
+        if (request.getContato() != null) {
+            validarEmailUnico(id, request.getContato().getEmail(), contatoRepository, tenantId);
+        }
     }
 
     public void sanitizarFlags(PacienteRequest request) {
-
+        if (request.getDadosClinicosBasicos() != null) {
+            if (request.getDadosClinicosBasicos().getGestante() == null) {
+                request.getDadosClinicosBasicos().setGestante(false);
+            }
+        }
     }
 
-    private void validarCpfUnico(UUID pacienteId, String cpf, PacienteIdentificadorRepository identificadorRepository, UUID tenantId) {
+    private void validarCpfUnico(UUID pacienteId, String cpf, PacienteIdentificadorRepository identificadorRepository,
+            UUID tenantId) {
         if (!StringUtils.hasText(cpf)) {
             return;
         }
 
-        Optional<PacienteIdentificador> identificadorExistente = identificadorRepository.findByTipoAndValorAndTenantId(TipoIdentificadorEnum.CPF, cpf, tenantId);
+        Optional<PacienteIdentificador> identificadorExistente = identificadorRepository
+                .findByTipoAndValorAndTenantId(TipoIdentificadorEnum.CPF, cpf, tenantId);
 
         if (identificadorExistente.isPresent()) {
             PacienteIdentificador identificador = identificadorExistente.get();
@@ -68,7 +103,8 @@ public class PacienteValidationService {
         }
     }
 
-    private void validarEmailUnico(UUID pacienteId, String email, PacienteContatoRepository contatoRepository, UUID tenantId) {
+    private void validarEmailUnico(UUID pacienteId, String email, PacienteContatoRepository contatoRepository,
+            UUID tenantId) {
         if (!StringUtils.hasText(email)) {
             return;
         }
@@ -89,12 +125,14 @@ public class PacienteValidationService {
         }
     }
 
-    private void validarCnsUnico(UUID pacienteId, String cns, PacienteIdentificadorRepository identificadorRepository, UUID tenantId) {
+    private void validarCnsUnico(UUID pacienteId, String cns, PacienteIdentificadorRepository identificadorRepository,
+            UUID tenantId) {
         if (!StringUtils.hasText(cns)) {
             return;
         }
 
-        Optional<PacienteIdentificador> identificadorExistente = identificadorRepository.findByTipoAndValorAndTenantId(TipoIdentificadorEnum.CNS, cns, tenantId);
+        Optional<PacienteIdentificador> identificadorExistente = identificadorRepository
+                .findByTipoAndValorAndTenantId(TipoIdentificadorEnum.CNS, cns, tenantId);
 
         if (identificadorExistente.isPresent()) {
             PacienteIdentificador identificador = identificadorExistente.get();
@@ -110,12 +148,14 @@ public class PacienteValidationService {
         }
     }
 
-    private void validarRgUnico(UUID pacienteId, String rg, PacienteIdentificadorRepository identificadorRepository, UUID tenantId) {
+    private void validarRgUnico(UUID pacienteId, String rg, PacienteIdentificadorRepository identificadorRepository,
+            UUID tenantId) {
         if (!StringUtils.hasText(rg)) {
             return;
         }
 
-        Optional<PacienteIdentificador> identificadorExistente = identificadorRepository.findByTipoAndValorAndTenantId(TipoIdentificadorEnum.RG, rg, tenantId);
+        Optional<PacienteIdentificador> identificadorExistente = identificadorRepository
+                .findByTipoAndValorAndTenantId(TipoIdentificadorEnum.RG, rg, tenantId);
 
         if (identificadorExistente.isPresent()) {
             PacienteIdentificador identificador = identificadorExistente.get();

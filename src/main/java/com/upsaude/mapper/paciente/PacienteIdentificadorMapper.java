@@ -18,6 +18,8 @@ public interface PacienteIdentificadorMapper {
     @Mapping(target = "paciente", ignore = true)
     @Mapping(target = "validado", ignore = true)
     @Mapping(target = "dataValidacao", ignore = true)
+    @Mapping(target = "tenant", ignore = true)
+    @Mapping(target = "estabelecimento", ignore = true)
     PacienteIdentificador fromRequest(PacienteIdentificadorRequest request);
 
     PacienteIdentificadorResponse toResponse(PacienteIdentificador entity);

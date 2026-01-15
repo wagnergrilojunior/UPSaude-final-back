@@ -21,6 +21,8 @@ public interface DadosClinicosBasicosMapper {
     @Mapping(target = "updatedAt", ignore = true)
     @Mapping(target = "active", ignore = true)
     @Mapping(target = "paciente", ignore = true)
+    @Mapping(target = "tenant", ignore = true)
+    @Mapping(target = "estabelecimento", ignore = true)
     DadosClinicosBasicos fromRequest(DadosClinicosBasicosRequest request);
 
     @Mapping(target = "id", ignore = true)

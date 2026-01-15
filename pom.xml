@@ -12,7 +12,7 @@
 
   <groupId>com.upsaude</groupId>
   <artifactId>upsaude-back</artifactId>
-  <version>1.0.0.11</version>
+  <version>1.0.0.12</version>
   <name>UPSaude-back</name>
   <description>UP Saude Backend</description>
   <properties>
