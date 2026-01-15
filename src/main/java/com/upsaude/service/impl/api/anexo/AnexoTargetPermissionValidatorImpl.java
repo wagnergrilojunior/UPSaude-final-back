@@ -67,8 +67,9 @@ public class AnexoTargetPermissionValidatorImpl implements AnexoTargetPermission
     }
 
     private void validarPaciente(UUID pacienteId, UUID tenantId) {
-        // findByIdAndTenant já valida que o paciente pertence ao tenant
-        pacienteRepository.findByIdAndTenant(pacienteId, tenantId)
+        // Paciente não tem tenant_id (estende BaseEntityWithoutTenant)
+        // Apenas verifica se o paciente existe
+        pacienteRepository.findById(pacienteId)
                 .orElseThrow(() -> new NotFoundException("Paciente não encontrado: " + pacienteId));
     }
 

@@ -90,7 +90,7 @@ public class AnexoController {
     @GetMapping
     @Operation(
             summary = "Listar anexos",
-            description = "Retorna uma lista paginada de anexos filtrados por targetType e targetId"
+            description = "Retorna uma lista paginada de anexos. Se targetType e targetId não forem informados, lista todos os anexos do tenant"
     )
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Lista de anexos retornada com sucesso"),
@@ -98,10 +98,10 @@ public class AnexoController {
             @ApiResponse(responseCode = "403", description = "Acesso negado")
     })
     public ResponseEntity<Page<AnexoResponse>> listar(
-            @Parameter(description = "Tipo do recurso alvo", required = true)
-            @RequestParam("targetType") TargetTypeAnexoEnum targetType,
-            @Parameter(description = "ID do recurso alvo", required = true)
-            @RequestParam("targetId") UUID targetId,
+            @Parameter(description = "Tipo do recurso alvo")
+            @RequestParam(value = "targetType", required = false) TargetTypeAnexoEnum targetType,
+            @Parameter(description = "ID do recurso alvo")
+            @RequestParam(value = "targetId", required = false) UUID targetId,
             @Parameter(description = "Filtrar por categoria")
             @RequestParam(value = "categoria", required = false) CategoriaAnexoEnum categoria,
             @Parameter(description = "Filtrar por status")
