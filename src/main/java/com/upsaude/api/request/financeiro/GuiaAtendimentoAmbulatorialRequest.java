@@ -42,7 +42,7 @@ public class GuiaAtendimentoAmbulatorialRequest {
 
     @NotBlank(message = "Status é obrigatório")
     @Size(max = 30, message = "Status deve ter no máximo 30 caracteres")
-    private String status; // RASCUNHO | EMITIDA | CANCELADA | INTEGRADA_BPA
+private String status;
 
     private String observacoes;
 }

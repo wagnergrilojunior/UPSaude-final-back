@@ -57,6 +57,6 @@ public class TituloPagarRequest {
 
     @NotBlank(message = "Status é obrigatório")
     @Size(max = 30, message = "Status deve ter no máximo 30 caracteres")
-    private String status; // ABERTO | PARCIAL | PAGO | CANCELADO_POR_REVERSAO
+private String status;
 }
 

@@ -31,8 +31,10 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/v1/financeiro/competencias")
-@Tag(name = "Financeiro - Competências", description = "API para gerenciamento de Competência Financeira")
+@RequestMapping("/api/v1/financeiro/competencias")
+@Tag(name = "Financeiro - Competências", description = "API para gerenciamento de Competência Financeira por Tenant (município). " +
+        "Cada competência é única por tenant e inclui campos de status/fechamento. " +
+        "Para fechar uma competência, use o endpoint POST /api/v1/financeiro/operacoes/competencias/{id}/fechar")
 @RequiredArgsConstructor
 @Slf4j
 public class CompetenciaFinanceiraController {
@@ -48,7 +50,7 @@ public class CompetenciaFinanceiraController {
             @ApiResponse(responseCode = "403", description = "Acesso negado")
     })
     public ResponseEntity<CompetenciaFinanceiraResponse> criar(@Valid @RequestBody CompetenciaFinanceiraRequest request) {
-        log.debug("REQUEST POST /v1/financeiro/competencias - payload: {}", request);
+        log.debug("REQUEST POST /api/v1/financeiro/competencias - payload: {}", request);
         try {
             CompetenciaFinanceiraResponse response = service.criar(request);
             log.info("Competência financeira criada com sucesso. ID: {}", response.getId());
@@ -71,7 +73,7 @@ public class CompetenciaFinanceiraController {
     public ResponseEntity<Page<CompetenciaFinanceiraResponse>> listar(
             @Parameter(description = "Parâmetros de paginação (page, size, sort)")
             Pageable pageable) {
-        log.debug("REQUEST GET /v1/financeiro/competencias - pageable: {}", pageable);
+        log.debug("REQUEST GET /api/v1/financeiro/competencias - pageable: {}", pageable);
         try {
             Page<CompetenciaFinanceiraResponse> response = service.listar(pageable);
             return ResponseEntity.ok(response);
@@ -82,7 +84,10 @@ public class CompetenciaFinanceiraController {
     }
 
     @GetMapping("/{id}")
-    @Operation(summary = "Obter competência por ID", description = "Retorna uma competência financeira específica pelo ID")
+    @Operation(summary = "Obter competência por ID",
+            description = "Retorna uma competência financeira específica pelo ID. " +
+                    "A resposta inclui campos de status (ABERTA/FECHADA), dados de fechamento, " +
+                    "hash de integridade e documento BPA associado, se a competência estiver fechada.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Competência encontrada",
                     content = @Content(schema = @Schema(implementation = CompetenciaFinanceiraResponse.class))),
@@ -92,7 +97,7 @@ public class CompetenciaFinanceiraController {
     public ResponseEntity<CompetenciaFinanceiraResponse> obterPorId(
             @Parameter(description = "ID da competência", required = true)
             @PathVariable UUID id) {
-        log.debug("REQUEST GET /v1/financeiro/competencias/{}", id);
+        log.debug("REQUEST GET /api/v1/financeiro/competencias/{}", id);
         try {
             CompetenciaFinanceiraResponse response = service.obterPorId(id);
             return ResponseEntity.ok(response);
@@ -118,7 +123,7 @@ public class CompetenciaFinanceiraController {
             @Parameter(description = "ID da competência", required = true)
             @PathVariable UUID id,
             @Valid @RequestBody CompetenciaFinanceiraRequest request) {
-        log.debug("REQUEST PUT /v1/financeiro/competencias/{} - payload: {}", id, request);
+        log.debug("REQUEST PUT /api/v1/financeiro/competencias/{} - payload: {}", id, request);
         try {
             CompetenciaFinanceiraResponse response = service.atualizar(id, request);
             log.info("Competência financeira atualizada com sucesso. ID: {}", id);
@@ -142,7 +147,7 @@ public class CompetenciaFinanceiraController {
     public ResponseEntity<Void> excluir(
             @Parameter(description = "ID da competência", required = true)
             @PathVariable UUID id) {
-        log.debug("REQUEST DELETE /v1/financeiro/competencias/{}", id);
+        log.debug("REQUEST DELETE /api/v1/financeiro/competencias/{}", id);
         try {
             service.excluir(id);
             log.info("Competência financeira excluída com sucesso. ID: {}", id);
@@ -166,7 +171,7 @@ public class CompetenciaFinanceiraController {
     public ResponseEntity<Void> inativar(
             @Parameter(description = "ID da competência", required = true)
             @PathVariable UUID id) {
-        log.debug("REQUEST PUT /v1/financeiro/competencias/{}/inativar", id);
+        log.debug("REQUEST PUT /api/v1/financeiro/competencias/{}/inativar", id);
         try {
             service.inativar(id);
             log.info("Competência financeira inativada com sucesso. ID: {}", id);

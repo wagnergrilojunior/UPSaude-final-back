@@ -25,7 +25,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/v1/financeiro/extratos-importados")
+@RequestMapping("/api/v1/financeiro/extratos-importados")
 @Tag(name = "Financeiro - Extratos Importados", description = "API para gerenciamento de Extratos Bancários Importados")
 @RequiredArgsConstructor
 @Slf4j
@@ -43,7 +43,7 @@ public class ExtratoBancarioImportadoController {
             @ApiResponse(responseCode = "403", description = "Acesso negado")
     })
     public ResponseEntity<ExtratoBancarioImportadoResponse> criar(@Valid @RequestBody ExtratoBancarioImportadoRequest request) {
-        log.debug("REQUEST POST /v1/financeiro/extratos-importados - payload: {}", request);
+        log.debug("REQUEST POST /api/v1/financeiro/extratos-importados - payload: {}", request);
         try {
             ExtratoBancarioImportadoResponse response = service.criar(request);
             log.info("Extrato importado criado com sucesso. ID: {}", response.getId());
@@ -66,7 +66,7 @@ public class ExtratoBancarioImportadoController {
     public ResponseEntity<Page<ExtratoBancarioImportadoResponse>> listar(
             @Parameter(description = "Parâmetros de paginação (page, size, sort)")
             Pageable pageable) {
-        log.debug("REQUEST GET /v1/financeiro/extratos-importados - pageable: {}", pageable);
+        log.debug("REQUEST GET /api/v1/financeiro/extratos-importados - pageable: {}", pageable);
         try {
             return ResponseEntity.ok(service.listar(pageable));
         } catch (Exception ex) {
@@ -86,7 +86,7 @@ public class ExtratoBancarioImportadoController {
     public ResponseEntity<ExtratoBancarioImportadoResponse> obterPorId(
             @Parameter(description = "ID do extrato", required = true)
             @PathVariable UUID id) {
-        log.debug("REQUEST GET /v1/financeiro/extratos-importados/{}", id);
+        log.debug("REQUEST GET /api/v1/financeiro/extratos-importados/{}", id);
         try {
             return ResponseEntity.ok(service.obterPorId(id));
         } catch (NotFoundException ex) {
@@ -112,7 +112,7 @@ public class ExtratoBancarioImportadoController {
             @Parameter(description = "ID do extrato", required = true)
             @PathVariable UUID id,
             @Valid @RequestBody ExtratoBancarioImportadoRequest request) {
-        log.debug("REQUEST PUT /v1/financeiro/extratos-importados/{} - payload: {}", id, request);
+        log.debug("REQUEST PUT /api/v1/financeiro/extratos-importados/{} - payload: {}", id, request);
         try {
             ExtratoBancarioImportadoResponse response = service.atualizar(id, request);
             log.info("Extrato importado atualizado com sucesso. ID: {}", id);
@@ -136,7 +136,7 @@ public class ExtratoBancarioImportadoController {
     public ResponseEntity<Void> excluir(
             @Parameter(description = "ID do extrato", required = true)
             @PathVariable UUID id) {
-        log.debug("REQUEST DELETE /v1/financeiro/extratos-importados/{}", id);
+        log.debug("REQUEST DELETE /api/v1/financeiro/extratos-importados/{}", id);
         try {
             service.excluir(id);
             log.info("Extrato importado excluído com sucesso. ID: {}", id);
@@ -160,7 +160,7 @@ public class ExtratoBancarioImportadoController {
     public ResponseEntity<Void> inativar(
             @Parameter(description = "ID do extrato", required = true)
             @PathVariable UUID id) {
-        log.debug("REQUEST PUT /v1/financeiro/extratos-importados/{}/inativar", id);
+        log.debug("REQUEST PUT /api/v1/financeiro/extratos-importados/{}/inativar", id);
         try {
             service.inativar(id);
             log.info("Extrato importado inativado com sucesso. ID: {}", id);

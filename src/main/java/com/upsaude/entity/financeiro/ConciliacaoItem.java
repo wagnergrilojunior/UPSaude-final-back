@@ -1,6 +1,5 @@
 package com.upsaude.entity.financeiro;
 
-import com.upsaude.entity.BaseEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -23,7 +22,7 @@ import java.math.BigDecimal;
 )
 @Data
 @EqualsAndHashCode(callSuper = true)
-public class ConciliacaoItem extends BaseEntity {
+public class ConciliacaoItem extends BaseEntityFinanceiro {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "conciliacao_id", nullable = false)
@@ -38,8 +37,8 @@ public class ConciliacaoItem extends BaseEntity {
     private MovimentacaoConta movimentacaoConta;
 
     @Column(name = "tipo_match", nullable = false, length = 20)
-    private String tipoMatch; // AUTO | MANUAL
+private String tipoMatch;
 
     @Column(name = "diferenca", precision = 14, scale = 2)
-    private BigDecimal diferenca; // Para ajustes registrados como lançamentos
+private BigDecimal diferenca;
 }

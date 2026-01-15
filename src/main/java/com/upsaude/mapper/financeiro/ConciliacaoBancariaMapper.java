@@ -3,6 +3,7 @@ package com.upsaude.mapper.financeiro;
 import com.upsaude.api.request.financeiro.ConciliacaoBancariaRequest;
 import com.upsaude.api.response.financeiro.ConciliacaoBancariaResponse;
 import com.upsaude.api.response.financeiro.ConciliacaoBancariaSimplificadaResponse;
+import com.upsaude.api.response.sistema.usuario.UsuarioSistemaSimplificadoResponse;
 import com.upsaude.entity.financeiro.ConciliacaoBancaria;
 import com.upsaude.mapper.config.MappingConfig;
 import org.mapstruct.Mapper;
@@ -10,7 +11,7 @@ import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 import org.mapstruct.Named;
 
-@Mapper(config = MappingConfig.class, uses = { ContaFinanceiraMapper.class, ConciliacaoItemMapper.class })
+@Mapper(config = MappingConfig.class, uses = { ContaFinanceiraMapper.class, ConciliacaoItemMapper.class, UsuarioSistemaMapper.class })
 public interface ConciliacaoBancariaMapper {
 
     @Mapping(target = "id", ignore = true)
@@ -29,9 +30,11 @@ public interface ConciliacaoBancariaMapper {
     @Mapping(target = "itens", ignore = true)
     void updateFromRequest(ConciliacaoBancariaRequest request, @MappingTarget ConciliacaoBancaria entity);
 
+    @Mapping(target = "fechadaPor", source = "fechadaPor", qualifiedByName = "mapUsuarioSistemaSimplificado")
     ConciliacaoBancariaResponse toResponse(ConciliacaoBancaria entity);
 
     @Named("toSimplifiedResponse")
     ConciliacaoBancariaSimplificadaResponse toSimplifiedResponse(ConciliacaoBancaria entity);
+
 }
 

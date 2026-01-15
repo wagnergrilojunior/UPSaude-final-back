@@ -33,6 +33,7 @@ public interface ReservaOrcamentariaAssistencialMapper {
     @Mapping(target = "idempotencyKey", ignore = true)
     void updateFromRequest(ReservaOrcamentariaAssistencialRequest request, @MappingTarget ReservaOrcamentariaAssistencial entity);
 
+    @Mapping(target = "documentoFaturamento", source = "documentoFaturamento", qualifiedByName = "mapDocumentoFaturamentoParaGuia")
     ReservaOrcamentariaAssistencialResponse toResponse(ReservaOrcamentariaAssistencial entity);
 }
 

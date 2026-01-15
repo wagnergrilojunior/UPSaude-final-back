@@ -25,7 +25,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/v1/financeiro/recorrencias")
+@RequestMapping("/api/v1/financeiro/recorrencias")
 @Tag(name = "Financeiro - Recorrências", description = "API para gerenciamento de Recorrência Financeira")
 @RequiredArgsConstructor
 @Slf4j
@@ -43,7 +43,7 @@ public class RecorrenciaFinanceiraController {
             @ApiResponse(responseCode = "403", description = "Acesso negado")
     })
     public ResponseEntity<RecorrenciaFinanceiraResponse> criar(@Valid @RequestBody RecorrenciaFinanceiraRequest request) {
-        log.debug("REQUEST POST /v1/financeiro/recorrencias - payload: {}", request);
+        log.debug("REQUEST POST /api/v1/financeiro/recorrencias - payload: {}", request);
         try {
             RecorrenciaFinanceiraResponse response = service.criar(request);
             log.info("Recorrência financeira criada com sucesso. ID: {}", response.getId());
@@ -66,7 +66,7 @@ public class RecorrenciaFinanceiraController {
     public ResponseEntity<Page<RecorrenciaFinanceiraResponse>> listar(
             @Parameter(description = "Parâmetros de paginação (page, size, sort)")
             Pageable pageable) {
-        log.debug("REQUEST GET /v1/financeiro/recorrencias - pageable: {}", pageable);
+        log.debug("REQUEST GET /api/v1/financeiro/recorrencias - pageable: {}", pageable);
         try {
             return ResponseEntity.ok(service.listar(pageable));
         } catch (Exception ex) {
@@ -86,7 +86,7 @@ public class RecorrenciaFinanceiraController {
     public ResponseEntity<RecorrenciaFinanceiraResponse> obterPorId(
             @Parameter(description = "ID da recorrência", required = true)
             @PathVariable UUID id) {
-        log.debug("REQUEST GET /v1/financeiro/recorrencias/{}", id);
+        log.debug("REQUEST GET /api/v1/financeiro/recorrencias/{}", id);
         try {
             return ResponseEntity.ok(service.obterPorId(id));
         } catch (NotFoundException ex) {
@@ -112,7 +112,7 @@ public class RecorrenciaFinanceiraController {
             @Parameter(description = "ID da recorrência", required = true)
             @PathVariable UUID id,
             @Valid @RequestBody RecorrenciaFinanceiraRequest request) {
-        log.debug("REQUEST PUT /v1/financeiro/recorrencias/{} - payload: {}", id, request);
+        log.debug("REQUEST PUT /api/v1/financeiro/recorrencias/{} - payload: {}", id, request);
         try {
             RecorrenciaFinanceiraResponse response = service.atualizar(id, request);
             log.info("Recorrência financeira atualizada com sucesso. ID: {}", id);
@@ -136,7 +136,7 @@ public class RecorrenciaFinanceiraController {
     public ResponseEntity<Void> excluir(
             @Parameter(description = "ID da recorrência", required = true)
             @PathVariable UUID id) {
-        log.debug("REQUEST DELETE /v1/financeiro/recorrencias/{}", id);
+        log.debug("REQUEST DELETE /api/v1/financeiro/recorrencias/{}", id);
         try {
             service.excluir(id);
             log.info("Recorrência financeira excluída com sucesso. ID: {}", id);
@@ -160,7 +160,7 @@ public class RecorrenciaFinanceiraController {
     public ResponseEntity<Void> inativar(
             @Parameter(description = "ID da recorrência", required = true)
             @PathVariable UUID id) {
-        log.debug("REQUEST PUT /v1/financeiro/recorrencias/{}/inativar", id);
+        log.debug("REQUEST PUT /api/v1/financeiro/recorrencias/{}/inativar", id);
         try {
             service.inativar(id);
             log.info("Recorrência financeira inativada com sucesso. ID: {}", id);

@@ -1,6 +1,5 @@
 package com.upsaude.entity.financeiro;
 
-import com.upsaude.entity.BaseEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -31,7 +30,7 @@ import java.util.List;
 )
 @Data
 @EqualsAndHashCode(callSuper = true)
-public class TituloPagar extends BaseEntity {
+public class TituloPagar extends BaseEntityFinanceiro {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "fornecedor_id", nullable = false)
@@ -65,7 +64,7 @@ public class TituloPagar extends BaseEntity {
     private LocalDate dataVencimento;
 
     @Column(name = "status", nullable = false, length = 30)
-    private String status; // ABERTO | PARCIAL | PAGO | CANCELADO_POR_REVERSAO
+private String status;
 
     @Column(name = "idempotency_key", nullable = false, length = 255)
     private String idempotencyKey;

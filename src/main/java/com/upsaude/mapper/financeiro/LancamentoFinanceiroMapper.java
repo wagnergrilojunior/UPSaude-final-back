@@ -4,6 +4,7 @@ import com.upsaude.api.request.financeiro.LancamentoFinanceiroRequest;
 import com.upsaude.api.response.faturamento.DocumentoFaturamentoSimplificadoResponse;
 import com.upsaude.api.response.financeiro.LancamentoFinanceiroResponse;
 import com.upsaude.api.response.financeiro.LancamentoFinanceiroSimplificadoResponse;
+import com.upsaude.api.response.sistema.usuario.UsuarioSistemaSimplificadoResponse;
 import com.upsaude.entity.financeiro.LancamentoFinanceiro;
 import com.upsaude.mapper.config.MappingConfig;
 import org.mapstruct.Mapper;
@@ -11,7 +12,7 @@ import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 import org.mapstruct.Named;
 
-@Mapper(config = MappingConfig.class, uses = { CompetenciaFinanceiraMapper.class, TituloReceberMapper.class, TituloPagarMapper.class, LancamentoFinanceiroItemMapper.class })
+@Mapper(config = MappingConfig.class, uses = { CompetenciaFinanceiraMapper.class, TituloReceberMapper.class, TituloPagarMapper.class, LancamentoFinanceiroItemMapper.class, UsuarioSistemaMapper.class })
 public interface LancamentoFinanceiroMapper {
 
     @Mapping(target = "id", ignore = true)
@@ -47,6 +48,7 @@ public interface LancamentoFinanceiroMapper {
     @Mapping(target = "documentoFaturamento", source = "documentoFaturamento", qualifiedByName = "mapDocumentoFaturamentoSimplificado")
     @Mapping(target = "tituloReceber", source = "tituloReceber", qualifiedByName = "toSimplifiedResponse")
     @Mapping(target = "tituloPagar", source = "tituloPagar", qualifiedByName = "toSimplifiedResponse")
+    @Mapping(target = "travadoPor", source = "travadoPor", qualifiedByName = "mapUsuarioSistemaSimplificado")
     LancamentoFinanceiroResponse toResponse(LancamentoFinanceiro entity);
 
     @Named("toSimplifiedResponse")
@@ -67,5 +69,6 @@ public interface LancamentoFinanceiroMapper {
             return null;
         }
     }
+
 }
 

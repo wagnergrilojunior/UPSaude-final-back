@@ -25,7 +25,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/v1/financeiro/transferencias")
+@RequestMapping("/api/v1/financeiro/transferencias")
 @Tag(name = "Financeiro - Transferências", description = "API para gerenciamento de Transferências entre Contas")
 @RequiredArgsConstructor
 @Slf4j
@@ -43,7 +43,7 @@ public class TransferenciaEntreContasController {
             @ApiResponse(responseCode = "403", description = "Acesso negado")
     })
     public ResponseEntity<TransferenciaEntreContasResponse> criar(@Valid @RequestBody TransferenciaEntreContasRequest request) {
-        log.debug("REQUEST POST /v1/financeiro/transferencias - payload: {}", request);
+        log.debug("REQUEST POST /api/v1/financeiro/transferencias - payload: {}", request);
         try {
             TransferenciaEntreContasResponse response = service.criar(request);
             log.info("Transferência criada com sucesso. ID: {}", response.getId());
@@ -66,7 +66,7 @@ public class TransferenciaEntreContasController {
     public ResponseEntity<Page<TransferenciaEntreContasResponse>> listar(
             @Parameter(description = "Parâmetros de paginação (page, size, sort)")
             Pageable pageable) {
-        log.debug("REQUEST GET /v1/financeiro/transferencias - pageable: {}", pageable);
+        log.debug("REQUEST GET /api/v1/financeiro/transferencias - pageable: {}", pageable);
         try {
             return ResponseEntity.ok(service.listar(pageable));
         } catch (Exception ex) {
@@ -86,7 +86,7 @@ public class TransferenciaEntreContasController {
     public ResponseEntity<TransferenciaEntreContasResponse> obterPorId(
             @Parameter(description = "ID da transferência", required = true)
             @PathVariable UUID id) {
-        log.debug("REQUEST GET /v1/financeiro/transferencias/{}", id);
+        log.debug("REQUEST GET /api/v1/financeiro/transferencias/{}", id);
         try {
             return ResponseEntity.ok(service.obterPorId(id));
         } catch (NotFoundException ex) {
@@ -112,7 +112,7 @@ public class TransferenciaEntreContasController {
             @Parameter(description = "ID da transferência", required = true)
             @PathVariable UUID id,
             @Valid @RequestBody TransferenciaEntreContasRequest request) {
-        log.debug("REQUEST PUT /v1/financeiro/transferencias/{} - payload: {}", id, request);
+        log.debug("REQUEST PUT /api/v1/financeiro/transferencias/{} - payload: {}", id, request);
         try {
             TransferenciaEntreContasResponse response = service.atualizar(id, request);
             log.info("Transferência atualizada com sucesso. ID: {}", id);
@@ -136,7 +136,7 @@ public class TransferenciaEntreContasController {
     public ResponseEntity<Void> excluir(
             @Parameter(description = "ID da transferência", required = true)
             @PathVariable UUID id) {
-        log.debug("REQUEST DELETE /v1/financeiro/transferencias/{}", id);
+        log.debug("REQUEST DELETE /api/v1/financeiro/transferencias/{}", id);
         try {
             service.excluir(id);
             log.info("Transferência excluída com sucesso. ID: {}", id);
@@ -160,7 +160,7 @@ public class TransferenciaEntreContasController {
     public ResponseEntity<Void> inativar(
             @Parameter(description = "ID da transferência", required = true)
             @PathVariable UUID id) {
-        log.debug("REQUEST PUT /v1/financeiro/transferencias/{}/inativar", id);
+        log.debug("REQUEST PUT /api/v1/financeiro/transferencias/{}/inativar", id);
         try {
             service.inativar(id);
             log.info("Transferência inativada com sucesso. ID: {}", id);

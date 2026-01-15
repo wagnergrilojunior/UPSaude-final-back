@@ -1,6 +1,5 @@
 package com.upsaude.entity.financeiro;
 
-import com.upsaude.entity.BaseEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Index;
@@ -24,16 +23,16 @@ import java.util.UUID;
 )
 @Data
 @EqualsAndHashCode(callSuper = true)
-public class ParteFinanceira extends BaseEntity {
+public class ParteFinanceira extends BaseEntityFinanceiro {
 
     @Column(name = "tipo", nullable = false, length = 30)
-    private String tipo; // PACIENTE | CONVENIO | ORGAO_PUBLICO | EMPRESA | PESSOA_FISICA | OUTRO
+private String tipo;
 
     @Column(name = "nome", nullable = false, length = 255)
     private String nome;
 
     @Column(name = "documento", length = 20)
-    private String documento; // CPF/CNPJ
+private String documento;
 
     @Column(name = "email", length = 255)
     private String email;
@@ -42,7 +41,7 @@ public class ParteFinanceira extends BaseEntity {
     private String telefone;
 
     @Column(name = "referencia_tipo", length = 50)
-    private String referenciaTipo; // Para linkar com entidades existentes
+private String referenciaTipo;
 
     @Column(name = "referencia_id")
     private UUID referenciaId;

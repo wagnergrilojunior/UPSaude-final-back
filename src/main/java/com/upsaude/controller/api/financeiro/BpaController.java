@@ -24,7 +24,7 @@ import java.util.Map;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/v1/financeiro/bpa")
+@RequestMapping("/api/v1/financeiro/bpa")
 @Tag(name = "Financeiro - BPA", description = "API para geração e exportação de arquivos BPA")
 @RequiredArgsConstructor
 @Slf4j
@@ -48,15 +48,15 @@ public class BpaController {
             @Parameter(description = "ID da competência financeira", required = true)
             @PathVariable UUID competenciaId
     ) {
-        log.debug("REQUEST GET /v1/financeiro/bpa/competencias/{}/download", competenciaId);
-        
+        log.debug("REQUEST GET /api/v1/financeiro/bpa/competencias/{}/download", competenciaId);
+
         UUID tenantId = tenantService.validarTenantAtual();
-        
+
         try {
             Resource resource = bpaExportService.exportarBpa(competenciaId, tenantId);
-            
+
             String filename = "BPA-" + competenciaId + ".txt";
-            
+
             @SuppressWarnings("null")
             MediaType contentType = MediaType.TEXT_PLAIN;
             return ResponseEntity.ok()
@@ -85,19 +85,19 @@ public class BpaController {
             @Parameter(description = "ID da competência financeira", required = true)
             @PathVariable UUID competenciaId
     ) {
-        log.debug("REQUEST GET /v1/financeiro/bpa/competencias/{}/status", competenciaId);
-        
+        log.debug("REQUEST GET /api/v1/financeiro/bpa/competencias/{}/status", competenciaId);
+
         UUID tenantId = tenantService.validarTenantAtual();
-        
+
         boolean foiGerado = bpaExportService.bpaFoiGerado(competenciaId, tenantId);
-        
+
         Map<String, Object> response = new HashMap<>();
         response.put("competenciaId", competenciaId);
         response.put("bpaGerado", foiGerado);
-        response.put("mensagem", foiGerado 
-                ? "BPA foi gerado e está disponível para download" 
+        response.put("mensagem", foiGerado
+                ? "BPA foi gerado e está disponível para download"
                 : "BPA ainda não foi gerado. É necessário fechar a competência primeiro.");
-        
+
         return ResponseEntity.ok(response);
     }
 }

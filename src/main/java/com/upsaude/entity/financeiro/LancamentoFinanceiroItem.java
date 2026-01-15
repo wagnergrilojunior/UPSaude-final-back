@@ -13,7 +13,6 @@ import lombok.EqualsAndHashCode;
 
 import java.math.BigDecimal;
 
-import com.upsaude.entity.BaseEntity;
 
 @Entity
 @Table(
@@ -26,7 +25,7 @@ import com.upsaude.entity.BaseEntity;
 )
 @Data
 @EqualsAndHashCode(callSuper = true)
-public class LancamentoFinanceiroItem extends BaseEntity {
+public class LancamentoFinanceiroItem extends BaseEntityFinanceiro {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "lancamento_id", nullable = false)
@@ -41,7 +40,7 @@ public class LancamentoFinanceiroItem extends BaseEntity {
     private CentroCusto centroCusto;
 
     @Column(name = "tipo_partida", nullable = false, length = 20)
-    private String tipoPartida; // DEBITO | CREDITO
+private String tipoPartida;
 
     @Positive
     @Column(name = "valor", nullable = false, precision = 14, scale = 2)

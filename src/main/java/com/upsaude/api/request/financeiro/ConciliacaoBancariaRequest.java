@@ -36,6 +36,6 @@ public class ConciliacaoBancariaRequest {
 
     @NotBlank(message = "Status é obrigatório")
     @Size(max = 20, message = "Status deve ter no máximo 20 caracteres")
-    private String status; // ABERTA | FECHADA
+private String status;
 }
 

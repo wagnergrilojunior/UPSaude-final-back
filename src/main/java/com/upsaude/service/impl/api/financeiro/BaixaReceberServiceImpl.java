@@ -103,7 +103,6 @@ public class BaixaReceberServiceImpl implements BaixaReceberService {
         BaixaReceber entity = repository.findByIdAndTenant(id, tenantId)
                 .orElseThrow(() -> new NotFoundException("Baixa a receber não encontrada com ID: " + id));
 
-        // Atualização simples (sem recalcular saldo do título)
         mapper.updateFromRequest(request, entity);
         BaixaReceber saved = repository.save(entity);
         return mapper.toResponse(saved);

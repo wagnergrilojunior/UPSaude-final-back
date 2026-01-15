@@ -1,6 +1,5 @@
 package com.upsaude.entity.financeiro;
 
-import com.upsaude.entity.BaseEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -20,13 +19,13 @@ import lombok.EqualsAndHashCode;
         @UniqueConstraint(name = "uk_conta_contabil_plano_codigo", columnNames = {"plano_contas_id", "codigo"})
     },
     indexes = {
-        @Index(name = "idx_conta_contabil_plano", columnList = "plano_contas_id"),
-        @Index(name = "idx_conta_contabil_pai", columnList = "plano_contas_id, conta_pai_id")
+        @Index(name = "idx_conta_contabil_tenant_plano", columnList = "tenant_id, plano_contas_id"),
+        @Index(name = "idx_conta_contabil_tenant_pai", columnList = "tenant_id, plano_contas_id, conta_pai_id")
     }
 )
 @Data
 @EqualsAndHashCode(callSuper = true)
-public class ContaContabil extends BaseEntity {
+public class ContaContabil extends BaseEntityFinanceiro {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "plano_contas_id", nullable = false)
@@ -43,7 +42,7 @@ public class ContaContabil extends BaseEntity {
     private String nome;
 
     @Column(name = "natureza", nullable = false, length = 20)
-    private String natureza; // RECEITA | DESPESA | ATIVO | PASSIVO | PL
+private String natureza;
 
     @Column(name = "aceita_lancamento", nullable = false)
     private Boolean aceitaLancamento = false;

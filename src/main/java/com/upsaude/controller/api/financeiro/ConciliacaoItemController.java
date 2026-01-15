@@ -25,7 +25,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/v1/financeiro/conciliacoes-itens")
+@RequestMapping("/api/v1/financeiro/conciliacoes-itens")
 @Tag(name = "Financeiro - Itens de Conciliação", description = "API para gerenciamento de Itens de Conciliação")
 @RequiredArgsConstructor
 @Slf4j
@@ -43,7 +43,7 @@ public class ConciliacaoItemController {
             @ApiResponse(responseCode = "403", description = "Acesso negado")
     })
     public ResponseEntity<ConciliacaoItemResponse> criar(@Valid @RequestBody ConciliacaoItemRequest request) {
-        log.debug("REQUEST POST /v1/financeiro/conciliacoes-itens - payload: {}", request);
+        log.debug("REQUEST POST /api/v1/financeiro/conciliacoes-itens - payload: {}", request);
         try {
             ConciliacaoItemResponse response = service.criar(request);
             log.info("Item de conciliação criado com sucesso. ID: {}", response.getId());
@@ -66,7 +66,7 @@ public class ConciliacaoItemController {
     public ResponseEntity<Page<ConciliacaoItemResponse>> listar(
             @Parameter(description = "Parâmetros de paginação (page, size, sort)")
             Pageable pageable) {
-        log.debug("REQUEST GET /v1/financeiro/conciliacoes-itens - pageable: {}", pageable);
+        log.debug("REQUEST GET /api/v1/financeiro/conciliacoes-itens - pageable: {}", pageable);
         try {
             return ResponseEntity.ok(service.listar(pageable));
         } catch (Exception ex) {
@@ -86,7 +86,7 @@ public class ConciliacaoItemController {
     public ResponseEntity<ConciliacaoItemResponse> obterPorId(
             @Parameter(description = "ID do item", required = true)
             @PathVariable UUID id) {
-        log.debug("REQUEST GET /v1/financeiro/conciliacoes-itens/{}", id);
+        log.debug("REQUEST GET /api/v1/financeiro/conciliacoes-itens/{}", id);
         try {
             return ResponseEntity.ok(service.obterPorId(id));
         } catch (NotFoundException ex) {
@@ -112,7 +112,7 @@ public class ConciliacaoItemController {
             @Parameter(description = "ID do item", required = true)
             @PathVariable UUID id,
             @Valid @RequestBody ConciliacaoItemRequest request) {
-        log.debug("REQUEST PUT /v1/financeiro/conciliacoes-itens/{} - payload: {}", id, request);
+        log.debug("REQUEST PUT /api/v1/financeiro/conciliacoes-itens/{} - payload: {}", id, request);
         try {
             ConciliacaoItemResponse response = service.atualizar(id, request);
             log.info("Item de conciliação atualizado com sucesso. ID: {}", id);
@@ -136,7 +136,7 @@ public class ConciliacaoItemController {
     public ResponseEntity<Void> excluir(
             @Parameter(description = "ID do item", required = true)
             @PathVariable UUID id) {
-        log.debug("REQUEST DELETE /v1/financeiro/conciliacoes-itens/{}", id);
+        log.debug("REQUEST DELETE /api/v1/financeiro/conciliacoes-itens/{}", id);
         try {
             service.excluir(id);
             log.info("Item de conciliação excluído com sucesso. ID: {}", id);
@@ -160,7 +160,7 @@ public class ConciliacaoItemController {
     public ResponseEntity<Void> inativar(
             @Parameter(description = "ID do item", required = true)
             @PathVariable UUID id) {
-        log.debug("REQUEST PUT /v1/financeiro/conciliacoes-itens/{}/inativar", id);
+        log.debug("REQUEST PUT /api/v1/financeiro/conciliacoes-itens/{}/inativar", id);
         try {
             service.inativar(id);
             log.info("Item de conciliação inativado com sucesso. ID: {}", id);

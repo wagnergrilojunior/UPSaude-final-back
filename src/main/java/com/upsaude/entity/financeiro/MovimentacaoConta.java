@@ -1,6 +1,5 @@
 package com.upsaude.entity.financeiro;
 
-import com.upsaude.entity.BaseEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -21,15 +20,15 @@ import java.time.OffsetDateTime;
     name = "movimentacao_conta",
     schema = "public",
     uniqueConstraints = {
-        @UniqueConstraint(name = "uk_movimentacao_conta_conta_idempotency", columnNames = {"conta_financeira_id", "idempotency_key"})
+        @UniqueConstraint(name = "uk_movimentacao_conta_tenant_conta_idempotency", columnNames = {"tenant_id", "conta_financeira_id", "idempotency_key"})
     },
     indexes = {
-        @Index(name = "idx_movimentacao_conta_data", columnList = "conta_financeira_id, data_movimento")
+        @Index(name = "idx_movimentacao_conta_tenant_data", columnList = "tenant_id, conta_financeira_id, data_movimento")
     }
 )
 @Data
 @EqualsAndHashCode(callSuper = true)
-public class MovimentacaoConta extends BaseEntity {
+public class MovimentacaoConta extends BaseEntityFinanceiro {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "conta_financeira_id", nullable = false)
@@ -52,7 +51,7 @@ public class MovimentacaoConta extends BaseEntity {
     private LancamentoFinanceiro lancamentoFinanceiro;
 
     @Column(name = "tipo", nullable = false, length = 20)
-    private String tipo; // ENTRADA | SAIDA
+private String tipo;
 
     @Positive
     @Column(name = "valor", nullable = false, precision = 14, scale = 2)
@@ -62,7 +61,7 @@ public class MovimentacaoConta extends BaseEntity {
     private OffsetDateTime dataMovimento;
 
     @Column(name = "status", nullable = false, length = 30)
-    private String status; // PENDENTE | EFETIVADO | CANCELADO_POR_REVERSAO
+private String status;
 
     @Column(name = "idempotency_key", nullable = false, length = 255)
     private String idempotencyKey;

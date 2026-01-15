@@ -1,6 +1,6 @@
 package com.upsaude.entity.financeiro;
 
-import com.upsaude.entity.BaseEntity;
+import com.upsaude.entity.sistema.usuario.UsuariosSistema;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -34,7 +34,7 @@ import java.util.UUID;
 )
 @Data
 @EqualsAndHashCode(callSuper = true)
-public class LancamentoFinanceiro extends BaseEntity {
+public class LancamentoFinanceiro extends BaseEntityFinanceiro {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "competencia_id", nullable = false)
@@ -57,13 +57,13 @@ public class LancamentoFinanceiro extends BaseEntity {
     private ConciliacaoBancaria conciliacao;
 
     @Column(name = "origem_tipo", nullable = false, length = 50)
-    private String origemTipo; // AGENDAMENTO | ATENDIMENTO | DOCUMENTO_FATURAMENTO | TITULO | CONCILIACAO | MANUAL | AJUSTE_SISTEMA
+private String origemTipo;
 
     @Column(name = "origem_id")
     private UUID origemId;
 
     @Column(name = "status", nullable = false, length = 30)
-    private String status; // PREVISTO | REALIZADO | ESTORNADO | AJUSTADO | CANCELADO_POR_REVERSAO
+private String status;
 
     @Column(name = "data_evento", nullable = false)
     private OffsetDateTime dataEvento;
@@ -83,20 +83,24 @@ public class LancamentoFinanceiro extends BaseEntity {
     @Column(name = "travado_em")
     private OffsetDateTime travadoEm;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "travado_por_id")
+    private UsuariosSistema travadoPor;
+
     @Column(name = "motivo_estorno", length = 30)
-    private String motivoEstorno; // CANCELAMENTO | FALTA_PACIENTE | NAO_EXECUTADO | AJUSTE | OUTRO
+private String motivoEstorno;
 
     @Column(name = "referencia_estorno_tipo", length = 50)
-    private String referenciaEstornoTipo; // AGENDAMENTO | ATENDIMENTO | GUIA | DOCUMENTO_FATURAMENTO
+private String referenciaEstornoTipo;
 
     @Column(name = "referencia_estorno_id")
-    private UUID referenciaEstornoId; // Link direto ao agendamento/atendimento que gerou o estorno
+private UUID referenciaEstornoId;
 
     @Column(name = "prestador_id")
-    private UUID prestadorId; // Pode ser estabelecimento ou profissional
+private UUID prestadorId;
 
     @Column(name = "prestador_tipo", length = 30)
-    private String prestadorTipo; // ESTABELECIMENTO | PROFISSIONAL
+private String prestadorTipo;
 
     @OneToMany(mappedBy = "lancamento", fetch = FetchType.LAZY)
     private List<LancamentoFinanceiroItem> itens = new ArrayList<>();

@@ -3,13 +3,16 @@ package com.upsaude.service.impl.api.financeiro;
 import com.upsaude.api.request.financeiro.CompetenciaFinanceiraRequest;
 import com.upsaude.api.response.financeiro.CompetenciaFinanceiraResponse;
 import com.upsaude.entity.financeiro.CompetenciaFinanceira;
+import com.upsaude.entity.sistema.multitenancy.Tenant;
 import com.upsaude.exception.InternalServerErrorException;
-import com.upsaude.exception.NotFoundException;
 import com.upsaude.repository.financeiro.CompetenciaFinanceiraRepository;
+import com.upsaude.repository.sistema.multitenancy.TenantRepository;
 import com.upsaude.service.api.financeiro.CompetenciaFinanceiraService;
+import com.upsaude.service.api.sistema.multitenancy.TenantService;
 import com.upsaude.service.api.support.financeiro.competencia.CompetenciaFinanceiraCreator;
 import com.upsaude.service.api.support.financeiro.competencia.CompetenciaFinanceiraDomainService;
 import com.upsaude.service.api.support.financeiro.competencia.CompetenciaFinanceiraResponseBuilder;
+import com.upsaude.service.api.support.financeiro.competencia.CompetenciaFinanceiraTenantEnforcer;
 import com.upsaude.service.api.support.financeiro.competencia.CompetenciaFinanceiraUpdater;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -27,6 +30,9 @@ import java.util.UUID;
 public class CompetenciaFinanceiraServiceImpl implements CompetenciaFinanceiraService {
 
     private final CompetenciaFinanceiraRepository repository;
+    private final TenantService tenantService;
+    private final TenantRepository tenantRepository;
+    private final CompetenciaFinanceiraTenantEnforcer tenantEnforcer;
     private final CompetenciaFinanceiraCreator creator;
     private final CompetenciaFinanceiraUpdater updater;
     private final CompetenciaFinanceiraResponseBuilder responseBuilder;
@@ -36,7 +42,12 @@ public class CompetenciaFinanceiraServiceImpl implements CompetenciaFinanceiraSe
     @Transactional
     public CompetenciaFinanceiraResponse criar(CompetenciaFinanceiraRequest request) {
         log.debug("Criando competência financeira. Request: {}", request);
-        CompetenciaFinanceira saved = creator.criar(request);
+        UUID tenantId = tenantService.validarTenantAtual();
+        Tenant tenant = tenantService.obterTenantDoUsuarioAutenticado();
+        if (tenant == null) {
+            tenant = tenantRepository.findById(tenantId).orElse(null);
+        }
+        CompetenciaFinanceira saved = creator.criar(request, tenantId, tenant);
         return responseBuilder.build(saved);
     }
 
@@ -44,8 +55,8 @@ public class CompetenciaFinanceiraServiceImpl implements CompetenciaFinanceiraSe
     @Transactional(readOnly = true)
     public CompetenciaFinanceiraResponse obterPorId(UUID id) {
         log.debug("Buscando competência financeira por ID: {}", id);
-        CompetenciaFinanceira entity = repository.findById(id)
-                .orElseThrow(() -> new NotFoundException("Competência financeira não encontrada com ID: " + id));
+        UUID tenantId = tenantService.validarTenantAtual();
+        CompetenciaFinanceira entity = tenantEnforcer.validarAcessoCompleto(id, tenantId);
         return responseBuilder.build(entity);
     }
 
@@ -53,14 +64,20 @@ public class CompetenciaFinanceiraServiceImpl implements CompetenciaFinanceiraSe
     @Transactional(readOnly = true)
     public Page<CompetenciaFinanceiraResponse> listar(Pageable pageable) {
         log.debug("Listando competências financeiras. Pageable: {}", pageable);
-        return repository.findAll(pageable).map(responseBuilder::build);
+        UUID tenantId = tenantService.validarTenantAtual();
+        return repository.findAllByTenant(tenantId, pageable).map(responseBuilder::build);
     }
 
     @Override
     @Transactional
     public CompetenciaFinanceiraResponse atualizar(UUID id, CompetenciaFinanceiraRequest request) {
         log.debug("Atualizando competência financeira. ID: {}, Request: {}", id, request);
-        CompetenciaFinanceira updated = updater.atualizar(id, request);
+        UUID tenantId = tenantService.validarTenantAtual();
+        Tenant tenant = tenantService.obterTenantDoUsuarioAutenticado();
+        if (tenant == null) {
+            tenant = tenantRepository.findById(tenantId).orElse(null);
+        }
+        CompetenciaFinanceira updated = updater.atualizar(id, request, tenantId, tenant);
         return responseBuilder.build(updated);
     }
 
@@ -69,8 +86,8 @@ public class CompetenciaFinanceiraServiceImpl implements CompetenciaFinanceiraSe
     public void excluir(UUID id) {
         log.debug("Excluindo competência financeira. ID: {}", id);
         try {
-            CompetenciaFinanceira entity = repository.findById(id)
-                    .orElseThrow(() -> new NotFoundException("Competência financeira não encontrada com ID: " + id));
+            UUID tenantId = tenantService.validarTenantAtual();
+            CompetenciaFinanceira entity = tenantEnforcer.validarAcesso(id, tenantId);
             domainService.validarPodeDeletar(entity);
             repository.delete(entity);
         } catch (DataAccessException e) {
@@ -84,8 +101,8 @@ public class CompetenciaFinanceiraServiceImpl implements CompetenciaFinanceiraSe
     public void inativar(UUID id) {
         log.debug("Inativando competência financeira. ID: {}", id);
         try {
-            CompetenciaFinanceira entity = repository.findById(id)
-                    .orElseThrow(() -> new NotFoundException("Competência financeira não encontrada com ID: " + id));
+            UUID tenantId = tenantService.validarTenantAtual();
+            CompetenciaFinanceira entity = tenantEnforcer.validarAcesso(id, tenantId);
             domainService.validarPodeInativar(entity);
             entity.setActive(false);
             repository.save(entity);

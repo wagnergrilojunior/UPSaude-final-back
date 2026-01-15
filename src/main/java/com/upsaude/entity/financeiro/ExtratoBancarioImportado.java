@@ -1,6 +1,5 @@
 package com.upsaude.entity.financeiro;
 
-import com.upsaude.entity.BaseEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -20,22 +19,22 @@ import java.time.LocalDate;
     name = "extrato_bancario_importado",
     schema = "public",
     uniqueConstraints = {
-        @UniqueConstraint(name = "uk_extrato_bancario_hash", columnNames = {"hash_linha"})
+        @UniqueConstraint(name = "uk_extrato_bancario_tenant_hash", columnNames = {"tenant_id", "hash_linha"})
     },
     indexes = {
-        @Index(name = "idx_extrato_bancario_conta_data", columnList = "conta_financeira_id, data")
+        @Index(name = "idx_extrato_bancario_tenant_conta_data", columnList = "tenant_id, conta_financeira_id, data")
     }
 )
 @Data
 @EqualsAndHashCode(callSuper = true)
-public class ExtratoBancarioImportado extends BaseEntity {
+public class ExtratoBancarioImportado extends BaseEntityFinanceiro {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "conta_financeira_id", nullable = false)
     private ContaFinanceira contaFinanceira;
 
-    @Column(name = "hash_linha", nullable = false, length = 64, unique = true)
-    private String hashLinha;
+    @Column(name = "hash_linha", nullable = false, length = 64)
+private String hashLinha;
 
     @Column(name = "descricao", length = 500)
     private String descricao;

@@ -35,7 +35,6 @@ public class LogFinanceiroRequest {
     @Size(max = 50, message = "Ação deve ter no máximo 50 caracteres")
     private String acao;
 
-    private UUID usuarioId;
     private String correlationId;
     private String payloadAntes;
     private String payloadDepois;

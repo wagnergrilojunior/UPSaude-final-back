@@ -31,7 +31,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/v1/financeiro/centros-custo")
+@RequestMapping("/api/v1/financeiro/centros-custo")
 @Tag(name = "Financeiro - Centros de Custo", description = "API para gerenciamento de Centro de Custo")
 @RequiredArgsConstructor
 @Slf4j
@@ -48,7 +48,7 @@ public class CentroCustoController {
             @ApiResponse(responseCode = "403", description = "Acesso negado")
     })
     public ResponseEntity<CentroCustoResponse> criar(@Valid @RequestBody CentroCustoRequest request) {
-        log.debug("REQUEST POST /v1/financeiro/centros-custo - payload: {}", request);
+        log.debug("REQUEST POST /api/v1/financeiro/centros-custo - payload: {}", request);
         try {
             CentroCustoResponse response = service.criar(request);
             log.info("Centro de custo criado com sucesso. ID: {}", response.getId());
@@ -71,7 +71,7 @@ public class CentroCustoController {
     public ResponseEntity<Page<CentroCustoResponse>> listar(
             @Parameter(description = "Parâmetros de paginação (page, size, sort)")
             Pageable pageable) {
-        log.debug("REQUEST GET /v1/financeiro/centros-custo - pageable: {}", pageable);
+        log.debug("REQUEST GET /api/v1/financeiro/centros-custo - pageable: {}", pageable);
         try {
             Page<CentroCustoResponse> response = service.listar(pageable);
             return ResponseEntity.ok(response);
@@ -92,7 +92,7 @@ public class CentroCustoController {
     public ResponseEntity<CentroCustoResponse> obterPorId(
             @Parameter(description = "ID do centro de custo", required = true)
             @PathVariable UUID id) {
-        log.debug("REQUEST GET /v1/financeiro/centros-custo/{}", id);
+        log.debug("REQUEST GET /api/v1/financeiro/centros-custo/{}", id);
         try {
             CentroCustoResponse response = service.obterPorId(id);
             return ResponseEntity.ok(response);
@@ -118,7 +118,7 @@ public class CentroCustoController {
             @Parameter(description = "ID do centro de custo", required = true)
             @PathVariable UUID id,
             @Valid @RequestBody CentroCustoRequest request) {
-        log.debug("REQUEST PUT /v1/financeiro/centros-custo/{} - payload: {}", id, request);
+        log.debug("REQUEST PUT /api/v1/financeiro/centros-custo/{} - payload: {}", id, request);
         try {
             CentroCustoResponse response = service.atualizar(id, request);
             log.info("Centro de custo atualizado com sucesso. ID: {}", id);
@@ -142,7 +142,7 @@ public class CentroCustoController {
     public ResponseEntity<Void> excluir(
             @Parameter(description = "ID do centro de custo", required = true)
             @PathVariable UUID id) {
-        log.debug("REQUEST DELETE /v1/financeiro/centros-custo/{}", id);
+        log.debug("REQUEST DELETE /api/v1/financeiro/centros-custo/{}", id);
         try {
             service.excluir(id);
             log.info("Centro de custo excluído com sucesso. ID: {}", id);
@@ -166,7 +166,7 @@ public class CentroCustoController {
     public ResponseEntity<Void> inativar(
             @Parameter(description = "ID do centro de custo", required = true)
             @PathVariable UUID id) {
-        log.debug("REQUEST PUT /v1/financeiro/centros-custo/{}/inativar", id);
+        log.debug("REQUEST PUT /api/v1/financeiro/centros-custo/{}/inativar", id);
         try {
             service.inativar(id);
             log.info("Centro de custo inativado com sucesso. ID: {}", id);

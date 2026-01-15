@@ -1,5 +1,6 @@
 package com.upsaude.api.response.financeiro;
 
+import com.upsaude.api.response.sistema.usuario.UsuarioSistemaSimplificadoResponse;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -28,6 +29,7 @@ public class ConciliacaoBancariaResponse {
     private LocalDate periodoFim;
     private String status;
     private OffsetDateTime fechadaEm;
+    private UsuarioSistemaSimplificadoResponse fechadaPor;
 
     @Builder.Default
     private List<ConciliacaoItemResponse> itens = new ArrayList<>();

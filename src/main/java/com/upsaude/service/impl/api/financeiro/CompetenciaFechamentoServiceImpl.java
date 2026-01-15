@@ -4,19 +4,19 @@ import com.upsaude.api.request.financeiro.CompetenciaFechamentoRequest;
 import com.upsaude.api.response.financeiro.CompetenciaFechamentoResponse;
 import com.upsaude.entity.faturamento.DocumentoFaturamento;
 import com.upsaude.entity.financeiro.CompetenciaFinanceira;
-import com.upsaude.entity.financeiro.CompetenciaFinanceiraTenant;
 import com.upsaude.entity.financeiro.ReservaOrcamentariaAssistencial;
+import com.upsaude.entity.sistema.usuario.UsuariosSistema;
 import com.upsaude.exception.BadRequestException;
 import com.upsaude.exception.NotFoundException;
 import com.upsaude.repository.faturamento.DocumentoFaturamentoRepository;
 import com.upsaude.repository.financeiro.CompetenciaFinanceiraRepository;
-import com.upsaude.repository.financeiro.CompetenciaFinanceiraTenantRepository;
 import com.upsaude.repository.financeiro.ReservaOrcamentariaAssistencialRepository;
 import com.upsaude.service.api.financeiro.BpaGenerationService;
 import com.upsaude.service.api.financeiro.CompetenciaFechamentoService;
 import com.upsaude.util.bpa.BpaHashCalculator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.AuditorAware;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -31,58 +31,44 @@ import java.util.UUID;
 public class CompetenciaFechamentoServiceImpl implements CompetenciaFechamentoService {
 
     private final CompetenciaFinanceiraRepository competenciaFinanceiraRepository;
-    private final CompetenciaFinanceiraTenantRepository competenciaTenantRepository;
     private final ReservaOrcamentariaAssistencialRepository reservaRepository;
     private final DocumentoFaturamentoRepository documentoFaturamentoRepository;
     private final BpaGenerationService bpaGenerationService;
+    private final AuditorAware<UsuariosSistema> auditorAware;
 
     @Override
     @Transactional
     @SuppressWarnings("null")
     public CompetenciaFechamentoResponse fecharCompetencia(
-            UUID competenciaId, 
-            UUID tenantId, 
-            UUID usuarioId, 
+            UUID competenciaId,
+            UUID tenantId,
             CompetenciaFechamentoRequest request) {
-        
-        log.info("Iniciando fechamento de competência {} para tenant {} pelo usuário {}", competenciaId, tenantId, usuarioId);
-        
-        // 1. Validar pré-requisitos
-        validarPreRequisitos(competenciaId, tenantId);
-        
-        // 2. Buscar ou criar CompetenciaFinanceiraTenant
-        CompetenciaFinanceiraTenant competenciaTenant = competenciaTenantRepository
-                .findByTenantAndCompetencia(tenantId, competenciaId)
-                .orElseGet(() -> {
-                    CompetenciaFinanceira competencia = competenciaFinanceiraRepository.findById(competenciaId)
-                            .orElseThrow(() -> new NotFoundException("Competência não encontrada"));
-                    CompetenciaFinanceiraTenant nova = new CompetenciaFinanceiraTenant();
-                    nova.setCompetencia(competencia);
-                    nova.setStatus("ABERTA");
-                    return competenciaTenantRepository.save(nova);
-                });
-        
-        if ("FECHADA".equals(competenciaTenant.getStatus())) {
+
+        UsuariosSistema usuarioSistema = auditorAware.getCurrentAuditor().orElse(null);
+        log.info("Iniciando fechamento de competência {} para tenant {} pelo usuário {}", competenciaId, tenantId,
+                usuarioSistema != null ? usuarioSistema.getId() : null);
+
+        CompetenciaFinanceira competencia = competenciaFinanceiraRepository
+                .findByIdAndTenant(competenciaId, tenantId)
+                .orElseThrow(() -> new NotFoundException("Competência financeira não encontrada para o tenant"));
+
+        if (competencia.isFechada()) {
             throw new BadRequestException("Competência já está fechada");
         }
-        
-        // 3. Gerar arquivo BPA
+
+        validarPreRequisitos(competenciaId, tenantId);
+
         String conteudoBpa = bpaGenerationService.gerarBpa(competenciaId, tenantId);
         if (conteudoBpa == null || conteudoBpa.isEmpty()) {
             log.warn("Nenhum dado encontrado para gerar BPA. Competência: {}, Tenant: {}", competenciaId, tenantId);
-            conteudoBpa = ""; // Permitir fechamento mesmo sem dados
+            conteudoBpa = "";
         }
-        
-        // 4. Calcular hashes
+
         String hashBpa = BpaHashCalculator.calcularHash(conteudoBpa);
         String hashMovimentacoes = calcularHashMovimentacoes(competenciaId, tenantId);
         String snapshotHash = BpaHashCalculator.calcularHashCombinado(hashMovimentacoes, hashBpa);
         boolean validacaoIntegridade = BpaHashCalculator.validarHash(hashMovimentacoes, hashBpa);
-        
-        // 5. Criar DocumentoFaturamento BPA
-        CompetenciaFinanceira competencia = competenciaFinanceiraRepository.findById(competenciaId)
-                .orElseThrow(() -> new NotFoundException("Competência não encontrada"));
-        
+
         DocumentoFaturamento documentoBpa = new DocumentoFaturamento();
         documentoBpa.setCompetencia(competencia);
         documentoBpa.setTipo("BPA");
@@ -90,32 +76,31 @@ public class CompetenciaFechamentoServiceImpl implements CompetenciaFechamentoSe
         documentoBpa.setSerie("001");
         documentoBpa.setStatus("FECHADO");
         documentoBpa.setEmitidoEm(OffsetDateTime.now());
-        documentoBpa.setPayloadLayout(conteudoBpa); // Armazenar conteúdo do BPA
-        
+documentoBpa.setPayloadLayout(conteudoBpa);
+
         documentoBpa = documentoFaturamentoRepository.save(documentoBpa);
-        
-        // 6. Atualizar CompetenciaFinanceiraTenant
-        competenciaTenant.setStatus("FECHADA");
-        competenciaTenant.setFechadaEm(OffsetDateTime.now());
-        competenciaTenant.setFechadaPor(usuarioId);
-        competenciaTenant.setMotivoFechamento(request != null ? request.getMotivo() : null);
-        competenciaTenant.setDocumentoBpaFechamento(documentoBpa);
-        competenciaTenant.setHashMovimentacoes(hashMovimentacoes);
-        competenciaTenant.setHashBpa(hashBpa);
-        competenciaTenant.setSnapshotHash(snapshotHash);
-        competenciaTenant.setValidacaoIntegridade(validacaoIntegridade);
-        
-        competenciaTenant = competenciaTenantRepository.save(competenciaTenant);
-        
+
+        competencia.setStatus("FECHADA");
+        competencia.setFechadaEm(OffsetDateTime.now());
+        competencia.setFechadaPor(usuarioSistema);
+        competencia.setMotivoFechamento(request != null ? request.getMotivo() : null);
+        competencia.setDocumentoBpaFechamento(documentoBpa);
+        competencia.setHashMovimentacoes(hashMovimentacoes);
+        competencia.setHashBpa(hashBpa);
+        competencia.setSnapshotHash(snapshotHash);
+        competencia.setValidacaoIntegridade(validacaoIntegridade);
+
+        competencia = competenciaFinanceiraRepository.save(competencia);
+
         log.info("Competência fechada com sucesso. Documento BPA: {}", documentoBpa.getId());
-        
+
         return CompetenciaFechamentoResponse.builder()
                 .competenciaId(competenciaId)
                 .tenantId(tenantId)
-                .status(competenciaTenant.getStatus())
-                .fechadaEm(competenciaTenant.getFechadaEm())
-                .fechadaPor(competenciaTenant.getFechadaPor())
-                .motivoFechamento(competenciaTenant.getMotivoFechamento())
+                .status(competencia.getStatus())
+                .fechadaEm(competencia.getFechadaEm())
+                .fechadaPor(competencia.getFechadaPor() != null ? competencia.getFechadaPor().getId() : null)
+                .motivoFechamento(competencia.getMotivoFechamento())
                 .documentoBpaId(documentoBpa.getId())
                 .hashMovimentacoes(hashMovimentacoes)
                 .hashBpa(hashBpa)
@@ -127,36 +112,20 @@ public class CompetenciaFechamentoServiceImpl implements CompetenciaFechamentoSe
 
     @SuppressWarnings("null")
     private void validarPreRequisitos(UUID competenciaId, UUID tenantId) {
-        // Verificar se competência existe
-        competenciaFinanceiraRepository.findById(competenciaId)
-                .orElseThrow(() -> new NotFoundException("Competência financeira não encontrada"));
-        
-        // Verificar se já está fechada
-        competenciaTenantRepository.findByTenantAndCompetencia(tenantId, competenciaId)
-                .ifPresent(ct -> {
-                    if ("FECHADA".equals(ct.getStatus())) {
-                        throw new BadRequestException("Competência já está fechada");
-                    }
-                });
-        
-        // Verificar se há reservas ATIVAS pendentes (opcional - pode ser política de negócio)
         List<ReservaOrcamentariaAssistencial> reservasAtivas = reservaRepository
                 .findByCompetenciaAndStatus(competenciaId, "ATIVA", tenantId, PageRequest.of(0, 1))
                 .getContent();
-        
+
         if (!reservasAtivas.isEmpty()) {
             log.warn("Existem {} reservas ATIVAS para esta competência. Fechamento prosseguirá mesmo assim.", reservasAtivas.size());
-            // Não bloquear, apenas logar warning
         }
     }
 
     private String calcularHashMovimentacoes(UUID competenciaId, UUID tenantId) {
-        // Consolidar todas as movimentações financeiras (reservas, consumos, estornos)
         List<ReservaOrcamentariaAssistencial> reservas = reservaRepository
                 .findByCompetencia(competenciaId, tenantId, PageRequest.of(0, 10000))
                 .getContent();
-        
-        // Criar string consolidada para hash
+
         StringBuilder movimentacoes = new StringBuilder();
         for (ReservaOrcamentariaAssistencial reserva : reservas) {
             movimentacoes.append(reserva.getId())
@@ -166,7 +135,7 @@ public class CompetenciaFechamentoServiceImpl implements CompetenciaFechamentoSe
                     .append(reserva.getValorReservadoTotal())
                     .append("|");
         }
-        
+
         return BpaHashCalculator.calcularHash(movimentacoes.toString());
     }
 }

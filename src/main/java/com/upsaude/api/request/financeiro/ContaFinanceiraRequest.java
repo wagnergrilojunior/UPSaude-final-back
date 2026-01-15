@@ -23,7 +23,7 @@ public class ContaFinanceiraRequest {
 
     @NotBlank(message = "Tipo é obrigatório")
     @Size(max = 20, message = "Tipo deve ter no máximo 20 caracteres")
-    private String tipo; // CAIXA | BANCO
+private String tipo;
 
     @NotBlank(message = "Nome é obrigatório")
     @Size(max = 255, message = "Nome deve ter no máximo 255 caracteres")

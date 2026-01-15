@@ -1,6 +1,5 @@
 package com.upsaude.entity.financeiro;
 
-import com.upsaude.entity.BaseEntity;
 import com.upsaude.entity.agendamento.Agendamento;
 import com.upsaude.entity.clinica.atendimento.Atendimento;
 import com.upsaude.entity.faturamento.DocumentoFaturamento;
@@ -17,7 +16,7 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 
 import java.time.OffsetDateTime;
-import java.util.UUID;
+import com.upsaude.entity.sistema.usuario.UsuariosSistema;
 
 @Entity
 @Table(
@@ -32,7 +31,7 @@ import java.util.UUID;
 )
 @Data
 @EqualsAndHashCode(callSuper = true)
-public class GuiaAtendimentoAmbulatorial extends BaseEntity {
+public class GuiaAtendimentoAmbulatorial extends BaseEntityFinanceiro {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "competencia_id", nullable = false)
@@ -58,7 +57,7 @@ public class GuiaAtendimentoAmbulatorial extends BaseEntity {
     private String numero;
 
     @Column(name = "status", nullable = false, length = 30)
-    private String status; // RASCUNHO | EMITIDA | CANCELADA | INTEGRADA_BPA
+private String status;
 
     @Column(name = "emitida_em")
     private OffsetDateTime emitidaEm;
@@ -66,8 +65,9 @@ public class GuiaAtendimentoAmbulatorial extends BaseEntity {
     @Column(name = "cancelada_em")
     private OffsetDateTime canceladaEm;
 
-    @Column(name = "cancelada_por")
-    private UUID canceladaPor;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "cancelada_por")
+    private UsuariosSistema canceladaPor;
 
     @Column(name = "observacoes", columnDefinition = "TEXT")
     private String observacoes;

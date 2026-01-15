@@ -8,15 +8,12 @@ import lombok.NoArgsConstructor;
 import java.time.OffsetDateTime;
 import java.util.UUID;
 
-/**
- * Response do fechamento de competência financeira.
- */
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class CompetenciaFechamentoResponse {
-    
+
     private UUID competenciaId;
     private UUID tenantId;
     private String status;

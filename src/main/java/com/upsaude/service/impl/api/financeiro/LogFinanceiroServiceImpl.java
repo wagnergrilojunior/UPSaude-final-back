@@ -4,6 +4,7 @@ import com.upsaude.api.request.financeiro.LogFinanceiroRequest;
 import com.upsaude.api.response.financeiro.LogFinanceiroResponse;
 import com.upsaude.entity.financeiro.LogFinanceiro;
 import com.upsaude.entity.sistema.multitenancy.Tenant;
+import com.upsaude.entity.sistema.usuario.UsuariosSistema;
 import com.upsaude.exception.BadRequestException;
 import com.upsaude.exception.InternalServerErrorException;
 import com.upsaude.exception.NotFoundException;
@@ -15,6 +16,7 @@ import com.upsaude.service.api.sistema.multitenancy.TenantService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataAccessException;
+import org.springframework.data.domain.AuditorAware;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -31,6 +33,7 @@ public class LogFinanceiroServiceImpl implements LogFinanceiroService {
     private final LogFinanceiroMapper mapper;
     private final TenantService tenantService;
     private final TenantRepository tenantRepository;
+    private final AuditorAware<UsuariosSistema> auditorAware;
 
     @Override
     @Transactional
@@ -42,6 +45,7 @@ public class LogFinanceiroServiceImpl implements LogFinanceiroService {
         LogFinanceiro entity = mapper.fromRequest(request);
         entity.setActive(true);
         entity.setTenant(tenant);
+        entity.setUsuario(auditorAware.getCurrentAuditor().orElse(null));
         LogFinanceiro saved = repository.save(entity);
         return mapper.toResponse(saved);
     }
