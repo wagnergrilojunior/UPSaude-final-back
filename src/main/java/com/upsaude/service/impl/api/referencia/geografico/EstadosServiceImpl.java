@@ -133,6 +133,15 @@ public class EstadosServiceImpl implements EstadosService {
         }
 
         try {
+            // OTIMIZAÇÃO: Verificar se dados realmente mudaram antes de fazer UPDATE
+            Estados estadoExistente = estadosRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Estado não encontrado com ID: " + id));
+            
+            if (!precisaAtualizar(estadoExistente, request)) {
+                log.debug("Dados do estado {} não mudaram. Skip UPDATE para evitar dead tuples.", id);
+                return responseBuilder.build(estadoExistente);
+            }
+            
             Estados updated = updater.atualizar(id, request);
             return responseBuilder.build(updated);
         } catch (NotFoundException e) {
@@ -148,6 +157,19 @@ public class EstadosServiceImpl implements EstadosService {
             log.error("Erro inesperado ao atualizar estado. ID: {}, Request: {}", id, request, e);
             throw e;
         }
+    }
+    
+    /**
+     * Verifica se os dados do estado realmente mudaram para evitar UPDATE desnecessário.
+     * Isso reduz dead tuples no PostgreSQL e melhora performance.
+     */
+    private boolean precisaAtualizar(Estados existente, EstadosRequest request) {
+        return !Objects.equals(existente.getSigla(), request.getSigla())
+            || !Objects.equals(existente.getNome(), request.getNome())
+            || !Objects.equals(existente.getCodigoIbge(), request.getCodigoIbge())
+            || !Objects.equals(existente.getNomeOficialIbge(), request.getNomeOficialIbge())
+            || !Objects.equals(existente.getSiglaIbge(), request.getSiglaIbge())
+            || !Objects.equals(existente.getRegiaoIbge(), request.getRegiaoIbge());
     }
 
     @Override

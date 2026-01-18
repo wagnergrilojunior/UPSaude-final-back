@@ -19,6 +19,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import jakarta.persistence.EntityManager;
+import jakarta.persistence.FlushModeType;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.criteria.Predicate;
 import java.util.ArrayList;
@@ -275,6 +276,7 @@ public class UsuariosSistemaServiceImpl implements UsuariosSistemaService {
         UsuariosSistema usuariosSistemaExistente = usuariosSistemaRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("UsuariosSistema não encontrado com ID: " + id));
 
+
         User userAtualizado = usuariosSistemaExistente.getUser();
 
         if (userAtualizado == null) {
@@ -319,16 +321,21 @@ public class UsuariosSistemaServiceImpl implements UsuariosSistemaService {
         if (userAtualizado != null) {
             usuariosSistemaExistente.setUser(userAtualizado);
         }
-
+        
         UsuariosSistema usuariosSistemaAtualizado = usuariosSistemaRepository.save(usuariosSistemaExistente);
         log.info("UsuariosSistema atualizado com sucesso. ID: {}", usuariosSistemaAtualizado.getId());
 
+        // Atualizar vínculos se fornecidos
         if (request.getEstabelecimentos() != null && !request.getEstabelecimentos().isEmpty()) {
             atualizarVinculosComPapel(usuariosSistemaAtualizado, request.getEstabelecimentos());
         } else if (request.getEstabelecimentosIds() != null) {
-
             atualizarVinculosEstabelecimentos(usuariosSistemaAtualizado, request.getEstabelecimentosIds());
         }
+
+        // Recarregar a entidade após atualizar vínculos
+        UUID usuariosSistemaId = usuariosSistemaAtualizado.getId();
+        usuariosSistemaAtualizado = usuariosSistemaRepository.findById(usuariosSistemaId)
+                .orElseThrow(() -> new NotFoundException("UsuariosSistema não encontrado com ID: " + usuariosSistemaId));
 
         // Notificar alterações
         try {
@@ -573,14 +580,23 @@ public class UsuariosSistemaServiceImpl implements UsuariosSistemaService {
 
     private void atualizarVinculosComPapel(UsuariosSistema usuario,
             List<UsuariosSistemaRequest.EstabelecimentoVinculoRequest> vinculos) {
+        UUID usuarioId = usuario.getId();
+        UUID userId = usuario.getUser() != null ? usuario.getUser().getId() : null;
+        
+        if (userId == null) {
+            log.warn("Usuário não possui userId, não é possível atualizar vínculos");
+            return;
+        }
 
+        // Buscar vínculos existentes sem tocar na coleção da entidade usuario
         List<UsuarioEstabelecimento> vinculosExistentes = usuarioEstabelecimentoRepository
-                .findByUsuarioUserId(usuario.getUser() != null ? usuario.getUser().getId() : null);
+                .findByUsuarioUserId(userId);
 
         List<UUID> novosIds = vinculos.stream()
                 .map(UsuariosSistemaRequest.EstabelecimentoVinculoRequest::getEstabelecimentoId)
                 .collect(java.util.stream.Collectors.toList());
 
+        // Desativar vínculos que não estão mais na lista
         for (UsuarioEstabelecimento vinculo : vinculosExistentes) {
             if (Boolean.TRUE.equals(vinculo.getActive()) &&
                     !novosIds.contains(vinculo.getEstabelecimento().getId())) {
@@ -590,14 +606,14 @@ public class UsuariosSistemaServiceImpl implements UsuariosSistemaService {
             }
         }
 
+        // Atualizar ou criar vínculos
         for (UsuariosSistemaRequest.EstabelecimentoVinculoRequest vinculoRequest : vinculos) {
             usuarioEstabelecimentoRepository
                     .findByUsuarioUserIdAndEstabelecimentoId(
-                            usuario.getUser() != null ? usuario.getUser().getId() : null,
+                            userId,
                             vinculoRequest.getEstabelecimentoId())
                     .ifPresentOrElse(
                             vinculoExistente -> {
-
                                 vinculoExistente.setActive(true);
                                 vinculoExistente.setTipoUsuario(vinculoRequest.getTipoUsuario());
                                 usuarioEstabelecimentoRepository.save(vinculoExistente);
@@ -605,15 +621,18 @@ public class UsuariosSistemaServiceImpl implements UsuariosSistemaService {
                                         vinculoRequest.getTipoUsuario(), vinculoRequest.getEstabelecimentoId());
                             },
                             () -> {
+                                // Recarregar a entidade usuario para garantir que está no contexto
+                                UsuariosSistema usuarioGerenciado = usuariosSistemaRepository.findById(usuarioId)
+                                        .orElseThrow(() -> new NotFoundException("UsuariosSistema não encontrado com ID: " + usuarioId));
 
                                 Estabelecimentos estabelecimento = estabelecimentosRepository
                                         .findById(vinculoRequest.getEstabelecimentoId())
                                         .orElseThrow(() -> new NotFoundException("Estabelecimento não encontrado"));
 
                                 UsuarioEstabelecimento vinculo = new UsuarioEstabelecimento();
-                                vinculo.setUsuario(usuario);
+                                vinculo.setUsuario(usuarioGerenciado);
                                 vinculo.setEstabelecimento(estabelecimento);
-                                vinculo.setTenant(usuario.getTenant());
+                                vinculo.setTenant(usuarioGerenciado.getTenant());
                                 vinculo.setTipoUsuario(vinculoRequest.getTipoUsuario());
                                 vinculo.setActive(true);
 
@@ -626,30 +645,45 @@ public class UsuariosSistemaServiceImpl implements UsuariosSistemaService {
 
     @Deprecated
     private void atualizarVinculosEstabelecimentos(UsuariosSistema usuario, List<UUID> estabelecimentosIds) {
+        UUID usuarioId = usuario.getId();
+        UUID userId = usuario.getUser() != null ? usuario.getUser().getId() : null;
+        
+        if (userId == null) {
+            log.warn("Usuário não possui userId, não é possível atualizar vínculos");
+            return;
+        }
 
+        // Buscar vínculos existentes sem tocar na coleção da entidade usuario
         List<UsuarioEstabelecimento> vinculosExistentes = usuarioEstabelecimentoRepository
-                .findByUsuarioUserId(usuario.getUser() != null ? usuario.getUser().getId() : null);
+                .findByUsuarioUserId(userId);
 
         List<UUID> idsExistentes = vinculosExistentes.stream()
                 .filter(v -> Boolean.TRUE.equals(v.getActive()))
                 .map(v -> v.getEstabelecimento().getId())
                 .collect(Collectors.toList());
 
+        // Desativar vínculos que não estão mais na lista
         for (UsuarioEstabelecimento vinculo : vinculosExistentes) {
             if (Boolean.TRUE.equals(vinculo.getActive()) &&
                     !estabelecimentosIds.contains(vinculo.getEstabelecimento().getId())) {
                 vinculo.setActive(false);
                 usuarioEstabelecimentoRepository.save(vinculo);
-                log.debug("Vínculo desativado para usuário {} e estabelecimento {}", usuario.getId(),
+                log.debug("Vínculo desativado para usuário {} e estabelecimento {}", usuarioId,
                         vinculo.getEstabelecimento().getId());
             }
         }
 
+        // Criar novos vínculos
         List<UUID> idsParaCriar = estabelecimentosIds.stream()
                 .filter(id -> !idsExistentes.contains(id))
                 .collect(Collectors.toList());
 
-        criarVinculosEstabelecimentos(usuario, idsParaCriar);
+        if (!idsParaCriar.isEmpty()) {
+            // Recarregar a entidade usuario para garantir que está no contexto
+            UsuariosSistema usuarioGerenciado = usuariosSistemaRepository.findById(usuarioId)
+                    .orElseThrow(() -> new NotFoundException("UsuariosSistema não encontrado com ID: " + usuarioId));
+            criarVinculosEstabelecimentos(usuarioGerenciado, idsParaCriar);
+        }
     }
 
     @Override
@@ -783,6 +817,11 @@ public class UsuariosSistemaServiceImpl implements UsuariosSistemaService {
         }
         if (usuario.getConfiguracao() != null) {
             org.hibernate.Hibernate.initialize(usuario.getConfiguracao());
+        }
+        
+        // Garantir que a coleção estabelecimentosVinculados seja inicializada antes do mapper
+        if (usuario.getEstabelecimentosVinculados() != null) {
+            org.hibernate.Hibernate.initialize(usuario.getEstabelecimentosVinculados());
         }
 
         UsuariosSistemaResponse response = usuariosSistemaMapper.toResponse(usuario);
