@@ -39,19 +39,19 @@ public class SiaPaFinanceiroIntegrationServiceImpl implements SiaPaFinanceiroInt
         String ufEfetiva = uf.trim().toUpperCase();
         int limNaoFat = limitNaoFaturados != null && limitNaoFaturados > 0 ? Math.min(limitNaoFaturados, 200) : 50;
 
-        // Normaliza CNES para 7 dígitos (adiciona zeros à esquerda se necessário)
+        
         List<String> cnesList = estabelecimentosRepository.findByTenant(tenant).stream()
                 .map(e -> e.getDadosIdentificacao() != null ? e.getDadosIdentificacao().getCnes() : null)
                 .filter(StringUtils::hasText)
                 .map(cnes -> {
-                    // Normaliza CNES para 7 dígitos (padrão CNES)
+                    
                     String cnesNormalizado = cnes.trim();
                     try {
                         if (cnesNormalizado.length() < 7) {
                             cnesNormalizado = String.format("%07d", Integer.parseInt(cnesNormalizado));
                         }
                     } catch (NumberFormatException e) {
-                        // Se não for numérico, mantém como está
+                        
                         log.warn("CNES não numérico encontrado: {}", cnesNormalizado);
                     }
                     return cnesNormalizado;
@@ -123,23 +123,23 @@ public class SiaPaFinanceiroIntegrationServiceImpl implements SiaPaFinanceiroInt
 
         String ufEfetiva = uf.trim().toUpperCase();
 
-        // Busca CNES do tenant para filtrar apenas competências com dados do tenant
-        // Normaliza CNES para 7 dígitos (adiciona zeros à esquerda se necessário)
+        
+        
         List<String> cnesList = estabelecimentosRepository.findByTenant(tenant).stream()
                 .map(e -> e.getDadosIdentificacao() != null ? e.getDadosIdentificacao().getCnes() : null)
                 .filter(StringUtils::hasText)
                 .map(cnes -> {
-                    // Normaliza CNES para 7 dígitos (padrão CNES)
+                    
                     String cnesNormalizado = cnes.trim();
                     try {
                         if (cnesNormalizado.length() < 7) {
                             cnesNormalizado = String.format("%07d", Integer.parseInt(cnesNormalizado));
                         } else if (cnesNormalizado.length() > 7) {
-                            // Se tiver mais de 7 dígitos, pega os últimos 7
+                            
                             cnesNormalizado = cnesNormalizado.substring(cnesNormalizado.length() - 7);
                         }
                     } catch (NumberFormatException e) {
-                        // Se não for numérico, mantém como está
+                        
                         log.warn("CNES não numérico encontrado: {}", cnesNormalizado);
                     }
                     return cnesNormalizado;
@@ -152,11 +152,11 @@ public class SiaPaFinanceiroIntegrationServiceImpl implements SiaPaFinanceiroInt
         log.debug("CNES normalizados: {}", cnesList);
 
         List<String> competencias;
-        boolean buscarDadosAgregados = false; // Flag para indicar se deve buscar dados agregados sem filtrar por CNES
+        boolean buscarDadosAgregados = false; 
         if (cnesList.isEmpty()) {
             log.warn("Nenhum CNES encontrado para o tenant {}. Gerando competências do intervalo.", tenant.getId());
-            // Se não há CNES cadastrados, retorna lista vazia ou gera competências do intervalo
-            // Gerando competências do intervalo para manter compatibilidade
+            
+            
             competencias = new ArrayList<>();
             int inicio = Integer.parseInt(competenciaInicio);
             int fim = Integer.parseInt(competenciaFim);
@@ -174,7 +174,7 @@ public class SiaPaFinanceiroIntegrationServiceImpl implements SiaPaFinanceiroInt
                 atual = ano * 100 + mes;
             }
         } else {
-            // Busca competências filtrando pelos CNES do tenant
+            
             log.debug("Buscando competências para CNES: {}", cnesList);
             competencias = jdbcTemplate.execute((Connection con) -> {
                 Array cnesArray = con.createArrayOf("text", cnesList.toArray());
@@ -209,13 +209,13 @@ public class SiaPaFinanceiroIntegrationServiceImpl implements SiaPaFinanceiroInt
             });
             log.debug("Competências finais retornadas: {} (total: {})", competencias, competencias != null ? competencias.size() : 0);
             
-            // Garante que competencias não seja null
+            
             if (competencias == null) {
                 competencias = new ArrayList<>();
             }
             
-            // Se não encontrou competências filtradas pelos CNES, mas há dados no SIA,
-            // gera competências do intervalo para permitir que conciliacao busque dados
+            
+            
             if (competencias.isEmpty()) {
                 log.warn("Nenhuma competência encontrada para os CNES do tenant. Verificando se há dados no SIA para UF {} no intervalo {}-{}", 
                         ufEfetiva, competenciaInicio, competenciaFim);
@@ -229,10 +229,10 @@ public class SiaPaFinanceiroIntegrationServiceImpl implements SiaPaFinanceiroInt
                 log.warn("Total de registros SIA encontrados para UF {} no intervalo {}-{}: {}", 
                         ufEfetiva, competenciaInicio, competenciaFim, totalRegistros);
                 
-                // Se há dados no SIA, gera competências do intervalo para permitir busca
+                
                 if (totalRegistros != null && totalRegistros > 0) {
                     log.info("Há dados no SIA mas não correspondem aos CNES do tenant. Gerando competências do intervalo e buscando dados agregados.");
-                    buscarDadosAgregados = true; // Marca para buscar dados agregados sem filtrar por CNES
+                    buscarDadosAgregados = true; 
                     competencias = new ArrayList<>();
                     int inicio = Integer.parseInt(competenciaInicio);
                     int fim = Integer.parseInt(competenciaFim);
@@ -254,7 +254,7 @@ public class SiaPaFinanceiroIntegrationServiceImpl implements SiaPaFinanceiroInt
             }
         }
 
-        // Se não há CNES cadastrados, também busca dados agregados
+        
         if (cnesList.isEmpty() && !competencias.isEmpty()) {
             buscarDadosAgregados = true;
         }
@@ -265,13 +265,13 @@ public class SiaPaFinanceiroIntegrationServiceImpl implements SiaPaFinanceiroInt
             BigDecimal sia = BigDecimal.ZERO;
             
             if (buscarDadosAgregados) {
-                // Se não há correspondência de CNES, busca dados agregados do SIA para a UF/competência
+                
                 log.debug("Buscando dados agregados para competência {} e UF {}", comp, ufEfetiva);
                 sia = buscarValorTotalSiaPorCompetencia(comp, ufEfetiva);
-                // Busca faturamento normalmente (pode ter dados mesmo sem CNES correspondentes no SIA)
+                
                 fat = buscarValorTotalFaturamentoPorCompetencia(comp, tenant.getId());
             } else {
-                // Busca dados normalmente com filtro de CNES
+                
                 SiaPaFinanceiroIntegracaoResponse conc = conciliacao(comp, ufEfetiva, 0);
                 fat = conc.getFaturamentoValorTotal() != null ? conc.getFaturamentoValorTotal() : BigDecimal.ZERO;
                 sia = conc.getSiaValorAprovadoTotal() != null ? conc.getSiaValorAprovadoTotal() : BigDecimal.ZERO;
@@ -403,9 +403,7 @@ public class SiaPaFinanceiroIntegrationServiceImpl implements SiaPaFinanceiroInt
         }
     }
 
-    /**
-     * Busca valor total aprovado do SIA para uma competência/UF sem filtrar por CNES
-     */
+    
     private BigDecimal buscarValorTotalSiaPorCompetencia(String competencia, String uf) {
         try {
             BigDecimal valor = jdbcTemplate.queryForObject("""
@@ -422,9 +420,7 @@ public class SiaPaFinanceiroIntegrationServiceImpl implements SiaPaFinanceiroInt
         }
     }
 
-    /**
-     * Busca valor total de faturamento para uma competência/tenant
-     */
+    
     private BigDecimal buscarValorTotalFaturamentoPorCompetencia(String competencia, UUID tenantId) {
         try {
             BigDecimal valor = jdbcTemplate.queryForObject("""

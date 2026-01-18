@@ -17,10 +17,7 @@ import lombok.Setter;
 import java.time.OffsetDateTime;
 import java.util.UUID;
 
-/**
- * Response simplificado para notificações.
- * Contém apenas os dados essenciais para exibição na tela.
- */
+
 @Getter
 @Setter
 @Builder
@@ -68,7 +65,7 @@ public class NotificacaoResponse {
     @Schema(description = "ID externo retornado pelo serviço de envio (ex: Brevo messageId)")
     private String idExterno;
     
-    // Referências simplificadas (apenas ID e nome)
+    
     @Schema(description = "Referência simplificada do estabelecimento")
     private EstabelecimentoRef estabelecimento;
     

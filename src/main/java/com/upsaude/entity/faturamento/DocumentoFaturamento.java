@@ -60,7 +60,7 @@ public class DocumentoFaturamento extends BaseEntity {
     private com.upsaude.entity.financeiro.GuiaAtendimentoAmbulatorial guiaAmbulatorial;
 
     @Column(name = "tipo", nullable = false, length = 50)
-    private String tipo; // BPA | APAC | TISS | FATURA | GUIA_AMBULATORIAL | NOTA
+    private String tipo; 
 
     @Column(name = "numero", nullable = false, length = 100)
     private String numero;
@@ -69,10 +69,10 @@ public class DocumentoFaturamento extends BaseEntity {
     private String serie;
 
     @Column(name = "status", nullable = false, length = 30)
-    private String status; // ABERTO | FATURADO | ENVIADO | PARCIALMENTE_PAGO | PAGO | CANCELADO
+    private String status; 
 
     @Column(name = "pagador_tipo", length = 30)
-    private String pagadorTipo; // SUS | CONVENIO | PARTICULAR
+    private String pagadorTipo; 
 
     @Column(name = "emitido_em")
     private OffsetDateTime emitidoEm;
@@ -85,7 +85,7 @@ public class DocumentoFaturamento extends BaseEntity {
 
     @JdbcTypeCode(SqlTypes.JSON)
     @Column(name = "payload_layout", columnDefinition = "jsonb")
-    private String payloadLayout; // Para guardar dados de layout sem explodir schema
+    private String payloadLayout; 
 
     @OneToMany(mappedBy = "documento", fetch = FetchType.LAZY)
     private List<DocumentoFaturamentoItem> itens = new ArrayList<>();

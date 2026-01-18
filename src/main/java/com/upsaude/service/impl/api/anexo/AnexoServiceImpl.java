@@ -45,8 +45,8 @@ import java.util.UUID;
 public class AnexoServiceImpl implements AnexoService {
 
     private static final String BUCKET_NAME = "anexos";
-    private static final long MAX_FILE_SIZE = 50 * 1024 * 1024; // 50MB
-    private static final int DEFAULT_URL_EXPIRES_IN_SECONDS = 300; // 5 minutos
+    private static final long MAX_FILE_SIZE = 50 * 1024 * 1024; 
+    private static final int DEFAULT_URL_EXPIRES_IN_SECONDS = 300; 
 
     private final AnexoRepository anexoRepository;
     private final SupabaseStorageService supabaseStorageService;
@@ -62,28 +62,28 @@ public class AnexoServiceImpl implements AnexoService {
         log.debug("Iniciando upload de anexo - targetType: {}, targetId: {}, fileName: {}", 
                   targetType, targetId, file != null ? file.getOriginalFilename() : null);
 
-        // Validações básicas
+        
         validarArquivo(file);
         
-        // Validar tenant
+        
         Tenant tenant = tenantService.obterTenantDoUsuarioAutenticado();
         if (tenant == null || tenant.getId() == null) {
             throw new ForbiddenException("Tenant não encontrado ou não autenticado");
         }
 
-        // Validar permissão de acesso ao target
+        
         permissionValidator.validarAcesso(targetType, targetId, tenant.getId());
 
-        // Obter userId autenticado
+        
         UUID userId = obterUserIdAutenticado();
 
-        // Garantir que file não é null após validação
+        
         if (file == null || file.isEmpty()) {
             throw new BadRequestException("Arquivo não pode ser vazio");
         }
 
         try {
-            // Criar registro de anexo com status PENDENTE
+            
             Anexo anexo = new Anexo();
             anexo.setTenant(tenant);
             anexo.setTargetType(targetType);
@@ -100,45 +100,45 @@ public class AnexoServiceImpl implements AnexoService {
             anexo.setCriadoPor(userId);
             anexo.setActive(true);
 
-            // Gerar caminho único no storage
+            
             String objectPath = gerarObjectPath(tenant.getId(), targetType, targetId, anexo.getId(), 
                                                  sanitizeFileName(file.getOriginalFilename()));
             anexo.setStorageObjectPath(objectPath);
 
-            // Salvar anexo no banco (status PENDENTE) para obter o ID
+            
             anexo = anexoRepository.save(anexo);
 
-            // Atualizar objectPath com o ID real do anexo
+            
             objectPath = gerarObjectPath(tenant.getId(), targetType, targetId, anexo.getId(), 
                                          sanitizeFileName(file.getOriginalFilename()));
             anexo.setStorageObjectPath(objectPath);
             anexo = anexoRepository.save(anexo);
 
-            // Calcular checksum e fazer upload no Supabase Storage
+            
             try (InputStream inputStream = file.getInputStream();
                  BufferedInputStream bufferedStream = new BufferedInputStream(inputStream)) {
                 
-                // Marcar posição para poder resetar depois
+                
                 bufferedStream.mark((int) file.getSize() + 1);
                 
-                // Calcular checksum antes do upload
+                
                 try {
                     String checksum = calcularChecksum(bufferedStream);
                     anexo.setChecksum(checksum);
-                    // Resetar stream para fazer upload
+                    
                     bufferedStream.reset();
                 } catch (Exception e) {
                     log.warn("Erro ao calcular checksum do arquivo, continuando sem checksum", e);
-                    // Se não conseguir resetar, criar novo stream
+                    
                     bufferedStream.reset();
                 }
                 
-                // Fazer upload no Supabase Storage
+                
                 supabaseStorageService.uploadStream(BUCKET_NAME, objectPath, bufferedStream, 
                                                    file.getSize(), file.getContentType());
             }
 
-            // Atualizar status para ATIVO
+            
             anexo.setStatus(StatusAnexoEnum.ATIVO);
             anexo = anexoRepository.save(anexo);
 
@@ -163,7 +163,7 @@ public class AnexoServiceImpl implements AnexoService {
             throw new ForbiddenException("Tenant não encontrado ou não autenticado");
         }
 
-        // Validar permissão de acesso ao target
+        
         if (targetType != null && targetId != null) {
             permissionValidator.validarAcesso(targetType, targetId, tenant.getId());
         }
@@ -172,7 +172,7 @@ public class AnexoServiceImpl implements AnexoService {
         StatusAnexoEnum excluido = StatusAnexoEnum.EXCLUIDO;
 
         if (targetType != null && targetId != null) {
-            // Filtrar por target específico
+            
             if (categoria != null) {
                 anexos = anexoRepository.findByTargetAndCategoria(tenant.getId(), targetType, targetId, 
                                                                    categoria, excluido, pageable);
@@ -186,14 +186,14 @@ public class AnexoServiceImpl implements AnexoService {
                 anexos = anexoRepository.findByTarget(tenant.getId(), targetType, targetId, excluido, pageable);
             }
         } else {
-            // Listar todos os anexos do tenant (usando Specification para construir query dinamicamente)
+            
             Specification<Anexo> spec = (root, query, cb) -> {
                 Predicate predicate = cb.equal(root.get("tenant").get("id"), tenant.getId());
                 
-                // Excluir anexos com status EXCLUIDO por padrão
+                
                 predicate = cb.and(predicate, cb.notEqual(root.get("status"), excluido));
                 
-                // Aplicar filtros opcionais
+                
                 if (targetType != null) {
                     predicate = cb.and(predicate, cb.equal(root.get("targetType"), targetType));
                 }
@@ -234,7 +234,7 @@ public class AnexoServiceImpl implements AnexoService {
         Anexo anexo = anexoRepository.findByIdAndTenant(tenant.getId(), id)
                 .orElseThrow(() -> new NotFoundException("Anexo não encontrado: " + id));
 
-        // Validar permissão de acesso ao target
+        
         permissionValidator.validarAcesso(anexo.getTargetType(), anexo.getTargetId(), tenant.getId());
 
         return toResponse(anexo);
@@ -251,7 +251,7 @@ public class AnexoServiceImpl implements AnexoService {
         Anexo anexo = anexoRepository.findByIdAndTenant(tenant.getId(), id)
                 .orElseThrow(() -> new NotFoundException("Anexo não encontrado: " + id));
 
-        // Validar permissão de acesso ao target
+        
         permissionValidator.validarAcesso(anexo.getTargetType(), anexo.getTargetId(), tenant.getId());
 
         if (anexo.getStatus() == StatusAnexoEnum.EXCLUIDO) {
@@ -272,7 +272,7 @@ public class AnexoServiceImpl implements AnexoService {
         Anexo anexo = anexoRepository.findByIdAndTenant(tenant.getId(), id)
                 .orElseThrow(() -> new NotFoundException("Anexo não encontrado: " + id));
 
-        // Validar permissão de acesso ao target
+        
         permissionValidator.validarAcesso(anexo.getTargetType(), anexo.getTargetId(), tenant.getId());
 
         if (anexo.getStatus() == StatusAnexoEnum.EXCLUIDO) {
@@ -311,7 +311,7 @@ public class AnexoServiceImpl implements AnexoService {
         Anexo anexo = anexoRepository.findByIdAndTenant(tenant.getId(), id)
                 .orElseThrow(() -> new NotFoundException("Anexo não encontrado: " + id));
 
-        // Validar permissão de acesso ao target
+        
         permissionValidator.validarAcesso(anexo.getTargetType(), anexo.getTargetId(), tenant.getId());
 
         if (request.getCategoria() != null) {
@@ -347,18 +347,18 @@ public class AnexoServiceImpl implements AnexoService {
         Anexo anexo = anexoRepository.findByIdAndTenant(tenant.getId(), id)
                 .orElseThrow(() -> new NotFoundException("Anexo não encontrado: " + id));
 
-        // Validar permissão de acesso ao target
+        
         permissionValidator.validarAcesso(anexo.getTargetType(), anexo.getTargetId(), tenant.getId());
 
         UUID userId = obterUserIdAutenticado();
 
-        // Soft delete
+        
         anexo.setStatus(StatusAnexoEnum.EXCLUIDO);
         anexo.setExcluidoPor(userId);
         anexo.setActive(false);
         anexoRepository.save(anexo);
 
-        // Hard delete do storage (se solicitado)
+        
         if (deleteFromStorage) {
             try {
                 supabaseStorageService.deleteObject(anexo.getStorageBucket(), anexo.getStorageObjectPath());
@@ -384,7 +384,7 @@ public class AnexoServiceImpl implements AnexoService {
             throw new ForbiddenException("Tenant não encontrado ou não autenticado");
         }
 
-        // Construir Specification dinamicamente para evitar problemas com NULL em queries nativas
+        
         Specification<Anexo> spec = (root, query, cb) -> {
             Predicate predicate = cb.equal(root.get("tenant").get("id"), tenant.getId());
             
@@ -447,28 +447,28 @@ public class AnexoServiceImpl implements AnexoService {
         Anexo anexo = anexoRepository.findByIdAndTenant(tenant.getId(), id)
                 .orElseThrow(() -> new NotFoundException("Anexo não encontrado: " + id));
 
-        // Validar permissão de acesso ao target
+        
         permissionValidator.validarAcesso(anexo.getTargetType(), anexo.getTargetId(), tenant.getId());
 
         if (anexo.getStatus() == StatusAnexoEnum.EXCLUIDO) {
             throw new BadRequestException("Não é possível gerar thumbnail de anexo excluído");
         }
 
-        // Verificar se é imagem
+        
         if (!isImagem(anexo.getMimeType())) {
             throw new BadRequestException("Thumbnail só está disponível para arquivos de imagem");
         }
 
-        // Valores padrão para thumbnail
+        
         if (width <= 0) width = 200;
         if (height <= 0) height = 200;
 
-        // Gerar URL assinada com transformação de imagem (Supabase Storage suporta transformações)
-        // Por enquanto, retornamos URL assinada normal. Pode ser melhorado depois com transformações do Supabase
+        
+        
         return supabaseStorageService.generateSignedUrl(
                 anexo.getStorageBucket(),
                 anexo.getStorageObjectPath(),
-                300 // 5 minutos para thumbnail
+                300 
         );
     }
 
@@ -500,9 +500,9 @@ public class AnexoServiceImpl implements AnexoService {
         if (!StringUtils.hasText(fileName)) {
             return UUID.randomUUID().toString();
         }
-        // Remove caracteres perigosos e mantém apenas alfanuméricos, pontos, hífens e underscores
+        
         String sanitized = fileName.replaceAll("[^a-zA-Z0-9._-]", "_");
-        // Limita tamanho
+        
         if (sanitized.length() > 200) {
             String ext = "";
             int lastDot = sanitized.lastIndexOf('.');
@@ -647,16 +647,16 @@ public class AnexoServiceImpl implements AnexoService {
     }
 
     private String gerarThumbnailUrlInterno(Anexo anexo, int width, int height) {
-        // Valores padrão para thumbnail
+        
         if (width <= 0) width = 200;
         if (height <= 0) height = 200;
 
-        // Gerar URL assinada com transformação de imagem (Supabase Storage suporta transformações)
-        // Por enquanto, retornamos URL assinada normal. Pode ser melhorado depois com transformações do Supabase
+        
+        
         return supabaseStorageService.generateSignedUrl(
                 anexo.getStorageBucket(),
                 anexo.getStorageObjectPath(),
-                300 // 5 minutos para thumbnail
+                300 
         );
     }
 }

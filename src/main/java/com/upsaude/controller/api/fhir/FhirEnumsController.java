@@ -18,17 +18,14 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
 
-/**
- * Controller para exposição de Enums com suporte FHIR.
- * Retorna todos os valores com descrições em português para o frontend.
- */
+
 @RestController
 @RequestMapping("/api/enums")
 @Slf4j
 @Tag(name = "Enums FHIR", description = "Endpoints para consulta de enums com códigos FHIR e descrições em português")
 public class FhirEnumsController {
 
-    // ==================== DADOS DEMOGRÁFICOS ====================
+    
 
     @GetMapping("/estado-civil")
     @Operation(summary = "Listar opções de Estado Civil")
@@ -58,7 +55,7 @@ public class FhirEnumsController {
                 .map(this::toMap).collect(Collectors.toList()));
     }
 
-    // ==================== IDENTIFICADORES ====================
+    
 
     @GetMapping("/tipo-identificador")
     @Operation(summary = "Listar opções de Tipo de Identificador")
@@ -67,7 +64,7 @@ public class FhirEnumsController {
                 .map(this::toMap).collect(Collectors.toList()));
     }
 
-    // ==================== ENDEREÇO ====================
+    
 
     @GetMapping("/tipo-logradouro")
     @Operation(summary = "Listar opções de Tipo de Logradouro")
@@ -76,7 +73,7 @@ public class FhirEnumsController {
                 .map(this::toMap).collect(Collectors.toList()));
     }
 
-    // ==================== ALERGIAS ====================
+    
 
     @GetMapping("/severidade-alergia")
     @Operation(summary = "Listar opções de Severidade de Alergia")
@@ -92,7 +89,7 @@ public class FhirEnumsController {
                 .map(this::toMap).collect(Collectors.toList()));
     }
 
-    // ==================== ESTABELECIMENTOS ====================
+    
 
     @GetMapping("/tipo-estabelecimento")
     @Operation(summary = "Listar opções de Tipo de Estabelecimento")
@@ -101,7 +98,7 @@ public class FhirEnumsController {
                 .map(this::toMap).collect(Collectors.toList()));
     }
 
-    // ==================== FINANCEIRO ====================
+    
 
     @GetMapping("/tipo-convenio")
     @Operation(summary = "Listar opções de Tipo de Convênio")
@@ -117,7 +114,7 @@ public class FhirEnumsController {
                 .map(this::toMap).collect(Collectors.toList()));
     }
 
-    // ==================== BUSCA POR CÓDIGO ====================
+    
 
     @GetMapping("/estado-civil/{codigo}")
     @Operation(summary = "Buscar Estado Civil por código")
@@ -140,7 +137,7 @@ public class FhirEnumsController {
         return value != null ? ResponseEntity.ok(toMap(value)) : ResponseEntity.notFound().build();
     }
 
-    // ==================== HELPERS ====================
+    
 
     private Map<String, Object> toMap(EstadoCivilEnum e) {
         Map<String, Object> map = new HashMap<>();

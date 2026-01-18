@@ -17,7 +17,7 @@ import java.util.UUID;
 @AllArgsConstructor
 public class CnesSyncResultDTO {
     private UUID logId;
-    private String status; // SUCESSO, ERRO, PARCIAL
+    private String status; 
     private OffsetDateTime dataSincronizacao;
     private Integer registrosProcessados;
     private Integer leitosSincronizados;

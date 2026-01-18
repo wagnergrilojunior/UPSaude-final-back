@@ -9,9 +9,7 @@ import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.UUID;
 
-/**
- * Response DTO para profissional de saúde sincronizado do CNES.
- */
+
 @Data
 @Builder
 @NoArgsConstructor

@@ -29,7 +29,7 @@ public class ProntuarioRelacionamentosHandler {
         }
 
         if (request.getProfissionalCriador() != null) {
-            // Profissional será resolvido pelo mapper ou service
+            
         }
     }
 }

@@ -25,7 +25,7 @@ public class SiaPaSazonalidadeResponse {
     @NoArgsConstructor
     @AllArgsConstructor
     public static class ItemMes {
-        private String mes; // "01".."12"
+        private String mes; 
         private BigDecimal valorAprovadoMedio;
         private BigDecimal quantidadeProduzidaMedia;
     }

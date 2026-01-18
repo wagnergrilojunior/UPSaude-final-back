@@ -41,7 +41,7 @@ public class AplicacaoVacinaReacao {
     @JoinColumn(name = "aplicacao_id", nullable = false)
     private AplicacaoVacina aplicacao;
 
-    // === Dados da Reação ===
+    
     @Column(name = "codigo_reacao", length = 50)
     private String codigoReacao;
 
@@ -54,7 +54,7 @@ public class AplicacaoVacinaReacao {
     @Column(name = "descricao", columnDefinition = "TEXT")
     private String descricao;
 
-    // === Classificação ===
+    
     @Column(name = "criticidade", length = 50)
     private String criticidade;
 
@@ -64,7 +64,7 @@ public class AplicacaoVacinaReacao {
     @Column(name = "categoria_agente", length = 50)
     private String categoriaAgente;
 
-    // === Acompanhamento ===
+    
     @Column(name = "requer_tratamento")
     @Builder.Default
     private Boolean requerTratamento = false;
@@ -82,7 +82,7 @@ public class AplicacaoVacinaReacao {
     @Column(name = "data_resolucao")
     private OffsetDateTime dataResolucao;
 
-    // === Notificação ===
+    
     @Column(name = "notificada_anvisa")
     @Builder.Default
     private Boolean notificadaAnvisa = false;
@@ -93,7 +93,7 @@ public class AplicacaoVacinaReacao {
     @Column(name = "numero_notificacao", length = 100)
     private String numeroNotificacao;
 
-    // === Reportado ===
+    
     @Column(name = "reportado_por", length = 100)
     private String reportadoPor;
 
@@ -101,7 +101,7 @@ public class AplicacaoVacinaReacao {
     @JoinColumn(name = "profissional_registro_id")
     private ProfissionaisSaude profissionalRegistro;
 
-    // === Tenant ===
+    
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "tenant_id", nullable = false)
     private Tenant tenant;

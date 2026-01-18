@@ -47,7 +47,7 @@ public class EquipeCirurgicaCreator {
         entity.setTenant(Objects.requireNonNull(tenant, "tenant é obrigatório para criar equipe cirúrgica"));
         entity.setCirurgia(cirurgia);
 
-        // Processar profissionais
+        
         if (entity.getProfissionais() == null) {
             entity.setProfissionais(new ArrayList<>());
         } else {
@@ -68,7 +68,7 @@ public class EquipeCirurgicaCreator {
             }
         }
 
-        // Processar médicos
+        
         if (entity.getMedicos() == null) {
             entity.setMedicos(new ArrayList<>());
         } else {

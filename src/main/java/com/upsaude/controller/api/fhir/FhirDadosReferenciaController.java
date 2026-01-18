@@ -40,7 +40,7 @@ public class FhirDadosReferenciaController {
     private final EstadosRepository estadosRepository;
     private final CidadesRepository cidadesRepository;
 
-    // ==================== SINCRONIZAÇÃO ====================
+    
 
     @PostMapping("/geografia/sincronizar/estados")
     @Operation(summary = "[FHIR] Sincronizar estados com FHIR BRDivisaoGeografica")
@@ -69,7 +69,7 @@ public class FhirDadosReferenciaController {
         return ResponseEntity.ok(response);
     }
 
-    // ==================== CONSULTA DIRETA FHIR (LIVE) ====================
+    
 
     @GetMapping("/geografia/externo/divisoes")
     @Operation(summary = "Consultar divisões geográficas diretamente no FHIR (Live)", tags = "FHIR Dados de Referência")
@@ -77,7 +77,7 @@ public class FhirDadosReferenciaController {
         return ResponseEntity.ok(geografiaSyncService.consultarDivisoesGeograficasExternas());
     }
 
-    // ==================== CONSULTA LOCAL (SINCRONIZADO) ====================
+    
 
     @GetMapping("/geografia/estados")
     @Operation(summary = "Listar estados sincronizados")
@@ -133,7 +133,7 @@ public class FhirDadosReferenciaController {
         return ResponseEntity.ok(cidadesRepository.findByNomeContainingIgnoreCase(nome));
     }
 
-    // ==================== DADOS DEMOGRÁFICOS (ENUMS COM FHIR) ====================
+    
 
     @GetMapping("/demografico/raca-cor")
     @Operation(summary = "Listar opções de Raça/Cor (BRRacaCor)")
@@ -193,27 +193,27 @@ public class FhirDadosReferenciaController {
         return ResponseEntity.ok(enumToMap(sexo));
     }
 
-    // ==================== STATUS ====================
+    
 
     @GetMapping("/status")
     @Operation(summary = "Status dos dados de referência sincronizados")
     public ResponseEntity<Map<String, Object>> status() {
         Map<String, Object> response = new HashMap<>();
 
-        // Geografia
+        
         response.put("estados", estadosRepository.count());
         response.put("estadosSincronizadosFhir", estadosRepository.countByCodigoFhirIsNotNull());
         response.put("municipios", cidadesRepository.count());
         response.put("municipiosSincronizadosFhir", cidadesRepository.countByCodigoFhirIsNotNull());
 
-        // Demográficos (são enums, sempre completos)
+        
         response.put("racaCor", RacaCorEnum.values().length);
         response.put("sexo", SexoEnum.values().length);
 
         return ResponseEntity.ok(response);
     }
 
-    // ==================== HELPERS ====================
+    
 
     private Map<String, Object> buildSyncResponse(FhirSyncLog result) {
         Map<String, Object> response = new HashMap<>();

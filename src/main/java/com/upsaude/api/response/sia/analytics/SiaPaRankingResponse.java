@@ -26,8 +26,8 @@ public class SiaPaRankingResponse {
     @AllArgsConstructor
     public static class ItemRanking {
         private Integer posicao;
-        private String chave; // ex: CNES, procedimento, município
-        private String descricao; // ex: nome do estabelecimento/procedimento/cidade
+        private String chave; 
+        private String descricao; 
         private BigDecimal valorAprovadoTotal;
         private Long quantidadeProduzidaTotal;
     }

@@ -164,10 +164,10 @@ public class AnexoController {
             @PathVariable UUID id) {
         log.debug("REQUEST GET /v1/anexos/{}/download", id);
         try {
-            // Obter metadados do anexo primeiro
+            
             AnexoResponse anexo = anexoService.obterPorId(id);
             
-            // Fazer download do stream
+            
             InputStream inputStream = anexoService.downloadStream(id);
 
             org.springframework.core.io.InputStreamResource resource = 

@@ -81,7 +81,7 @@ public class AtendimentoServiceImpl implements AtendimentoService {
         UUID tenantId = tenantService.validarTenantAtual();
         Tenant tenant = tenantService.obterTenantDoUsuarioAutenticado();
         if (tenant == null) {
-            // Fallback para testes: buscar tenant do banco quando não houver autenticação
+            
             tenant = tenantRepository.findById(Objects.requireNonNull(tenantId)).orElse(null);
         }
 
@@ -280,7 +280,7 @@ public class AtendimentoServiceImpl implements AtendimentoService {
             }
             anamneseAtendimentoMapper.updateFromRequest(request.getAnamnese(), entity.getAnamnese());
 
-            // Processar Sinais Vitais estruturados
+            
             if (request.getAnamnese().getSinalVitalRecord() != null) {
                 SinalVital sinalVital = entity.getAnamnese().getSinalVitalRecord();
                 if (sinalVital == null) {
@@ -376,7 +376,7 @@ public class AtendimentoServiceImpl implements AtendimentoService {
 
         Atendimento saved = atendimentoRepository.save(entity);
 
-        // Consumir reserva ao realizar/encerrar atendimento (modelo híbrido)
+        
         financeiroIntegrationService.consumirReserva(saved.getId());
 
         log.info("Atendimento encerrado com sucesso. ID: {}", id);

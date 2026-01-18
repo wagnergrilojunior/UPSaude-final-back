@@ -66,29 +66,29 @@ public class DashboardServiceImpl implements DashboardService {
         OffsetDateTime inicio = dataInicio.atStartOfDay().atOffset(ZoneOffset.UTC);
         OffsetDateTime fim = dataFim.atTime(23, 59, 59).atOffset(ZoneOffset.UTC);
 
-        // KPIs principais
+        
         long totalAtendimentos = contarAtendimentos(tenantId, inicio, fim);
         long totalConsultas = contarConsultas(tenantId, inicio, fim);
         long totalAgendamentos = contarAgendamentos(tenantId, inicio, fim);
         long totalPacientes = contarPacientes(tenantId);
         long totalEstabelecimentos = contarEstabelecimentos(tenantId);
 
-        // Evolução temporal
+        
         List<DashboardTenantResponse.EvolucaoTemporal> evolucaoTemporal = calcularEvolucaoTemporal(tenantId, dataInicio, dataFim);
 
-        // Top procedimentos (via agendamentos com especialidade)
+        
         List<DashboardTenantResponse.ItemTopProcedimento> topProcedimentos = calcularTopProcedimentos(tenantId, inicio, fim, 10);
 
-        // Top CID
+        
         List<DashboardTenantResponse.ItemTopCid> topCids = calcularTopCids(tenantId, inicio, fim, 10);
 
-        // Top médicos
+        
         List<DashboardTenantResponse.ItemTopMedico> topMedicos = calcularTopMedicos(tenantId, inicio, fim, 10);
 
-        // Comparação com período anterior
+        
         DashboardTenantResponse.ComparacaoPeriodo comparacao = calcularComparacaoPeriodo(tenantId, dataInicio, dataFim);
 
-        // Indicadores
+        
         Map<String, BigDecimal> indicadores = calcularIndicadores(totalAtendimentos, totalConsultas, totalAgendamentos, totalPacientes, inicio, fim);
 
         return DashboardTenantResponse.builder()
@@ -130,29 +130,29 @@ public class DashboardServiceImpl implements DashboardService {
         OffsetDateTime inicio = dataInicio.atStartOfDay().atOffset(ZoneOffset.UTC);
         OffsetDateTime fim = dataFim.atTime(23, 59, 59).atOffset(ZoneOffset.UTC);
 
-        // KPIs principais
+        
         long totalAtendimentos = contarAtendimentosPorEstabelecimento(estabelecimentoId, tenantId, inicio, fim);
         long totalConsultas = contarConsultasPorEstabelecimento(estabelecimentoId, tenantId, inicio, fim);
         long totalAgendamentos = contarAgendamentosPorEstabelecimento(estabelecimentoId, tenantId, inicio, fim);
         long totalPacientes = contarPacientesPorEstabelecimento(estabelecimentoId, tenantId);
         long totalMedicos = contarMedicosPorEstabelecimento(estabelecimentoId, tenantId);
 
-        // Evolução temporal
+        
         List<DashboardTenantResponse.EvolucaoTemporal> evolucaoTemporal = calcularEvolucaoTemporalPorEstabelecimento(estabelecimentoId, tenantId, dataInicio, dataFim);
 
-        // Top procedimentos
+        
         List<DashboardTenantResponse.ItemTopProcedimento> topProcedimentos = calcularTopProcedimentosPorEstabelecimento(estabelecimentoId, tenantId, inicio, fim, 10);
 
-        // Top CID
+        
         List<DashboardTenantResponse.ItemTopCid> topCids = calcularTopCidsPorEstabelecimento(estabelecimentoId, tenantId, inicio, fim, 10);
 
-        // Top médicos
+        
         List<DashboardTenantResponse.ItemTopMedico> topMedicos = calcularTopMedicosPorEstabelecimento(estabelecimentoId, tenantId, inicio, fim, 10);
 
-        // Comparação com período anterior
+        
         DashboardTenantResponse.ComparacaoPeriodo comparacao = calcularComparacaoPeriodoPorEstabelecimento(estabelecimentoId, tenantId, dataInicio, dataFim);
 
-        // Indicadores
+        
         Map<String, BigDecimal> indicadores = calcularIndicadores(totalAtendimentos, totalConsultas, totalAgendamentos, totalPacientes, inicio, fim);
 
         String estabelecimentoNome = estabelecimento.getDadosIdentificacao() != null 
@@ -203,25 +203,25 @@ public class DashboardServiceImpl implements DashboardService {
         OffsetDateTime inicio = dataInicio.atStartOfDay().atOffset(ZoneOffset.UTC);
         OffsetDateTime fim = dataFim.atTime(23, 59, 59).atOffset(ZoneOffset.UTC);
 
-        // KPIs principais
+        
         long totalAtendimentos = contarAtendimentosPorMedico(medicoId, tenantId, inicio, fim);
         long totalConsultas = contarConsultasPorMedico(medicoId, tenantId, inicio, fim);
         long totalAgendamentos = contarAgendamentosPorMedico(medicoId, tenantId, inicio, fim);
         long totalPacientes = contarPacientesPorMedico(medicoId, tenantId);
 
-        // Evolução temporal
+        
         List<DashboardTenantResponse.EvolucaoTemporal> evolucaoTemporal = calcularEvolucaoTemporalPorMedico(medicoId, tenantId, dataInicio, dataFim);
 
-        // Top procedimentos
+        
         List<DashboardTenantResponse.ItemTopProcedimento> topProcedimentos = calcularTopProcedimentosPorMedico(medicoId, tenantId, inicio, fim, 10);
 
-        // Top CID
+        
         List<DashboardTenantResponse.ItemTopCid> topCids = calcularTopCidsPorMedico(medicoId, tenantId, inicio, fim, 10);
 
-        // Comparação com período anterior
+        
         DashboardTenantResponse.ComparacaoPeriodo comparacao = calcularComparacaoPeriodoPorMedico(medicoId, tenantId, dataInicio, dataFim);
 
-        // Indicadores
+        
         Map<String, BigDecimal> indicadores = calcularIndicadores(totalAtendimentos, totalConsultas, totalAgendamentos, totalPacientes, inicio, fim);
 
         String medicoNome = medico.getDadosPessoaisBasicos() != null 
@@ -249,7 +249,7 @@ public class DashboardServiceImpl implements DashboardService {
                 .build();
     }
 
-    // Métodos auxiliares para contagem
+    
     private long contarAtendimentos(UUID tenantId, OffsetDateTime inicio, OffsetDateTime fim) {
         return atendimentoRepository.findAllByTenant(tenantId, PageRequest.of(0, Integer.MAX_VALUE))
                 .getContent().stream()
@@ -286,7 +286,7 @@ public class DashboardServiceImpl implements DashboardService {
         return estabelecimentosRepository.findByTenant(tenant).size();
     }
 
-    // Métodos específicos por estabelecimento
+    
     private long contarAtendimentosPorEstabelecimento(UUID estabelecimentoId, UUID tenantId, OffsetDateTime inicio, OffsetDateTime fim) {
         return atendimentoRepository.findAllByTenant(tenantId, PageRequest.of(0, Integer.MAX_VALUE))
                 .getContent().stream()
@@ -335,10 +335,10 @@ public class DashboardServiceImpl implements DashboardService {
                 .count();
     }
 
-    // Métodos específicos por médico
+    
     private long contarAtendimentosPorMedico(UUID medicoId, UUID tenantId, OffsetDateTime inicio, OffsetDateTime fim) {
-        // Atendimentos não têm relação direta com médico, apenas com profissional
-        // Por enquanto retornamos 0, pode ser implementado quando houver relacionamento
+        
+        
         return 0L;
     }
 
@@ -369,7 +369,7 @@ public class DashboardServiceImpl implements DashboardService {
                 .count();
     }
 
-    // Métodos de cálculo de evolução temporal, tops e comparações
+    
     private List<DashboardTenantResponse.EvolucaoTemporal> calcularEvolucaoTemporal(UUID tenantId, LocalDate dataInicio, LocalDate dataFim) {
         List<DashboardTenantResponse.EvolucaoTemporal> evolucao = new ArrayList<>();
         LocalDate dataAtual = dataInicio;
@@ -446,7 +446,7 @@ public class DashboardServiceImpl implements DashboardService {
     }
 
     private List<DashboardTenantResponse.ItemTopProcedimento> calcularTopProcedimentos(UUID tenantId, OffsetDateTime inicio, OffsetDateTime fim, int limit) {
-        // Por enquanto retornamos lista vazia, pode ser implementado quando houver dados de procedimentos
+        
         return new ArrayList<>();
     }
 
@@ -522,7 +522,7 @@ public class DashboardServiceImpl implements DashboardService {
     }
 
     private List<DashboardTenantResponse.ItemTopCid> calcularTopCidsPorMedico(UUID medicoId, UUID tenantId, OffsetDateTime inicio, OffsetDateTime fim, int limit) {
-        // Por enquanto retornamos lista vazia, pode ser implementado quando houver relacionamento médico-atendimento
+        
         return new ArrayList<>();
     }
 
@@ -604,7 +604,7 @@ public class DashboardServiceImpl implements DashboardService {
         BigDecimal variacaoAtendimentos = calcularVariacao(atendimentosAnterior, atendimentosAtual);
         BigDecimal variacaoConsultas = calcularVariacao(consultasAnterior, consultasAtual);
         BigDecimal variacaoAgendamentos = calcularVariacao(agendamentosAnterior, agendamentosAtual);
-        BigDecimal variacaoPacientes = BigDecimal.ZERO; // Simplificado - pode ser implementado quando necessário
+        BigDecimal variacaoPacientes = BigDecimal.ZERO; 
         
         return DashboardTenantResponse.ComparacaoPeriodo.builder()
                 .variacaoAtendimentos(variacaoAtendimentos)

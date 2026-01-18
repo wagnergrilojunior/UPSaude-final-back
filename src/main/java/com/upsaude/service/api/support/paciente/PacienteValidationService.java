@@ -34,7 +34,7 @@ public class PacienteValidationService {
             throw new BadRequestException("Sexo é obrigatório");
         }
 
-        // Validar data do óbito apenas se o objeto óbito for fornecido
+        
         if (request.getObito() != null) {
             if (request.getObito().getDataObito() == null) {
                 throw new BadRequestException("Data de óbito é obrigatória quando informações de óbito são fornecidas");

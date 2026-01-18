@@ -70,7 +70,7 @@ public class AlergiaPacienteServiceImpl implements AlergiaPacienteService {
             entity.setActive(true);
             entity.setTenant(tenant);
 
-            // Set FHIR statuses from request or defaults
+            
             if (request.getClinicalStatus() != null)
                 entity.setClinicalStatus(request.getClinicalStatus());
             if (request.getVerificationStatus() != null)
@@ -216,7 +216,7 @@ public class AlergiaPacienteServiceImpl implements AlergiaPacienteService {
                 entity.setCategoriaAgente(null);
             }
 
-            // Explicitly set FHIR statuses during update if provided
+            
             if (request.getClinicalStatus() != null)
                 entity.setClinicalStatus(request.getClinicalStatus());
             if (request.getVerificationStatus() != null)

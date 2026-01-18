@@ -36,7 +36,7 @@ public class DocumentoFaturamentoRequest {
 
     @NotBlank(message = "Tipo é obrigatório")
     @Size(max = 50, message = "Tipo deve ter no máximo 50 caracteres")
-    private String tipo; // BPA | APAC | TISS | FATURA | GUIA_AMBULATORIAL | NOTA
+    private String tipo; 
 
     @NotBlank(message = "Número é obrigatório")
     @Size(max = 100, message = "Número deve ter no máximo 100 caracteres")
@@ -50,7 +50,7 @@ public class DocumentoFaturamentoRequest {
     private String status;
 
     @Size(max = 30, message = "Tipo do pagador deve ter no máximo 30 caracteres")
-    private String pagadorTipo; // SUS | CONVENIO | PARTICULAR
+    private String pagadorTipo; 
 
     private String payloadLayout;
 

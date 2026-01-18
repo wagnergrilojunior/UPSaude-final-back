@@ -59,7 +59,7 @@ public class AtendimentoUpdater {
         Atendimento saved = repository.save(Objects.requireNonNull(entity));
         eventoGenerator.gerarEventosParaAtendimento(saved);
 
-        // Integração financeira: consumir ao concluir; estornar ao cancelar/falta (quando aplicável)
+        
         if (statusNovo != null && statusAnterior != statusNovo) {
             if (statusNovo == com.upsaude.enums.StatusAtendimentoEnum.CONCLUIDO) {
                 financeiroIntegrationService.consumirReserva(saved.getId());

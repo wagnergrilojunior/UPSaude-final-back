@@ -33,12 +33,12 @@ public class SiaPaKpiResponse {
 
     private BigDecimal taxaAprovacaoValor;
 
-    // Quando possível (ex: derivado do município do tenant)
+    
     private BigDecimal producaoPerCapita;
     private Integer populacaoEstimada;
     private String municipioIbge;
 
-    // Dados do estabelecimento (quando disponível)
+    
     private EstabelecimentosResponse estabelecimento;
 }
 

@@ -47,12 +47,12 @@ public class DocumentoFaturamentoItem extends BaseEntity {
     private BigDecimal valorTotal;
 
     @Column(name = "origem_tipo", length = 50)
-    private String origemTipo; // ATENDIMENTO | AGENDAMENTO | GUIA | OUTRO
+    private String origemTipo; 
 
     @Column(name = "origem_id")
     private UUID origemId;
 
     @JdbcTypeCode(SqlTypes.JSON)
     @Column(name = "payload_layout_item", columnDefinition = "jsonb")
-    private String payloadLayoutItem; // Campos de layout relevantes quando necessário
+    private String payloadLayoutItem; 
 }

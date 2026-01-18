@@ -37,7 +37,7 @@ public class ConsultasRelacionamentosHandler {
         Medicos medico = medicoTenantEnforcer.validarAcesso(medicoId, tenantId);
         entity.setMedico(medico);
 
-        // Definir paciente a partir do atendimento
+        
         if (atendimento.getPaciente() != null) {
             entity.setPaciente(atendimento.getPaciente());
         } else {

@@ -103,15 +103,15 @@ public class RelatorioExportServiceImpl implements RelatorioExportService {
     }
 
     private void gerarPDF(RelatorioExportRequest request, Path arquivo) throws IOException {
-        // Por enquanto, gera CSV simples (PDF requer biblioteca como iText ou Apache PDFBox)
-        // TODO: Implementar geração de PDF com biblioteca adequada
+        
+        
         log.warn("Geração de PDF ainda não implementada. Gerando CSV temporariamente.");
         gerarCSV(request, arquivo);
     }
 
     private void gerarExcel(RelatorioExportRequest request, Path arquivo) throws IOException {
-        // Por enquanto, gera CSV simples (Excel requer Apache POI)
-        // TODO: Implementar geração de Excel com Apache POI
+        
+        
         log.warn("Geração de Excel ainda não implementada. Gerando CSV temporariamente.");
         gerarCSV(request, arquivo);
     }
@@ -256,7 +256,7 @@ public class RelatorioExportServiceImpl implements RelatorioExportService {
 
     private void gerarCSVSiaKpiGeral(RelatorioExportRequest request, FileWriter writer) throws IOException {
         String competencia = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyyMM"));
-        String uf = "MG"; // TODO: Obter do tenant
+        String uf = "MG"; 
 
         SiaPaKpiResponse response = siaPaKpiService.kpiGeral(competencia, uf);
 
@@ -271,12 +271,12 @@ public class RelatorioExportServiceImpl implements RelatorioExportService {
     }
 
     private void gerarCSVSiaKpiEstabelecimento(RelatorioExportRequest request, FileWriter writer) throws IOException {
-        // Similar ao KPI geral, mas específico para estabelecimento
+        
         gerarCSVSiaKpiGeral(request, writer);
     }
 
     private void gerarCSVSiaProducaoMensal(RelatorioExportRequest request, FileWriter writer) throws IOException {
-        String uf = "MG"; // TODO: Obter do tenant
+        String uf = "MG"; 
         String competenciaInicio = LocalDate.now().minusMonths(6).format(DateTimeFormatter.ofPattern("yyyyMM"));
         String competenciaFim = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyyMM"));
 
@@ -299,7 +299,7 @@ public class RelatorioExportServiceImpl implements RelatorioExportService {
     }
 
     private void gerarCSVSiaTopProcedimentos(RelatorioExportRequest request, FileWriter writer) throws IOException {
-        String uf = "MG"; // TODO: Obter do tenant
+        String uf = "MG"; 
         String competencia = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyyMM"));
 
         SiaPaRelatorioTopProcedimentosResponse response = siaPaRelatorioService.gerarTopProcedimentos(
@@ -320,7 +320,7 @@ public class RelatorioExportServiceImpl implements RelatorioExportService {
     }
 
     private void gerarCSVSiaTopCid(RelatorioExportRequest request, FileWriter writer) throws IOException {
-        String uf = "MG"; // TODO: Obter do tenant
+        String uf = "MG"; 
         String competencia = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyyMM"));
 
         SiaPaRelatorioTopCidResponse response = siaPaRelatorioService.gerarTopCid(

@@ -49,7 +49,7 @@ public class Cidades extends BaseEntityWithoutTenant {
     @Column(name = "data_ultima_sincronizacao_ibge")
     private java.time.OffsetDateTime dataUltimaSincronizacaoIbge;
 
-    // Campos FHIR - BRDivisaoGeografica
+    
     @Column(name = "codigo_fhir", length = 20)
     private String codigoFhir;
 

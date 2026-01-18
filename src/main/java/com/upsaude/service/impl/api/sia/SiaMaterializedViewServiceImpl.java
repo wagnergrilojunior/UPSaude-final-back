@@ -61,7 +61,7 @@ public class SiaMaterializedViewServiceImpl implements SiaMaterializedViewServic
         }
 
         try {
-            // Verifica se a view existe
+            
             Integer count = jdbcTemplate.queryForObject(
                     "SELECT COUNT(*) FROM pg_matviews WHERE matviewname = ?",
                     Integer.class,

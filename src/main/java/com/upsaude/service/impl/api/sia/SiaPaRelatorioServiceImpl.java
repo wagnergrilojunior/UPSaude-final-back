@@ -57,7 +57,7 @@ public class SiaPaRelatorioServiceImpl implements SiaPaRelatorioService {
                     .build();
         }
 
-        // Filtrar diretamente na tabela sia_pa pelos CNES do tenant
+        
         String placeholders = String.join(",", java.util.Collections.nCopies(cnesList.size(), "?"));
         Object[] params = new Object[3 + cnesList.size()];
         params[0] = Objects.requireNonNull(ufEfetiva, "UF não pode ser null");
@@ -67,7 +67,7 @@ public class SiaPaRelatorioServiceImpl implements SiaPaRelatorioService {
             params[3 + i] = Objects.requireNonNull(cnesList.get(i), "CNES não pode ser null");
         }
 
-        // Tenta usar view materializada primeiro (mais rápido), com fallback para tabela original
+        
         List<SiaPaRelatorioProducaoResponse.ItemProducaoMensal> itens;
         try {
             String querySql = String.format("""
@@ -101,7 +101,7 @@ public class SiaPaRelatorioServiceImpl implements SiaPaRelatorioService {
                 params
             );
         } catch (Exception e) {
-            // Fallback para tabela original se view não existir ou não estiver atualizada
+            
             log.debug("View materializada não disponível, usando tabela original: {}", e.getMessage());
             String querySql = String.format("""
                         SELECT
@@ -172,7 +172,7 @@ public class SiaPaRelatorioServiceImpl implements SiaPaRelatorioService {
                     .build();
         }
 
-        // Filtrar diretamente na tabela sia_pa pelos CNES do tenant
+        
         String placeholders = String.join(",", java.util.Collections.nCopies(cnesList.size(), "?"));
         Object[] params = new Object[3 + cnesList.size()];
         params[0] = Objects.requireNonNull(ufEfetiva, "UF não pode ser null");
@@ -182,16 +182,16 @@ public class SiaPaRelatorioServiceImpl implements SiaPaRelatorioService {
             params[3 + i] = Objects.requireNonNull(cnesList.get(i), "CNES não pode ser null");
         }
 
-        // Tenta usar view materializada primeiro, com fallback para tabela original
+        
         String querySql;
         try {
-            // Verifica se a view materializada existe
+            
             Integer viewExists = jdbcTemplate.queryForObject(
                 "SELECT COUNT(*) FROM pg_matviews WHERE matviewname = 'mv_sia_pa_top_procedimentos'",
                 Integer.class
             );
             if (viewExists != null && viewExists > 0) {
-                // Usa view materializada agregando por CNES do tenant
+                
                 querySql = String.format("""
                         SELECT
                             mv.procedimento_codigo,
@@ -211,7 +211,7 @@ public class SiaPaRelatorioServiceImpl implements SiaPaRelatorioService {
                 throw new Exception("View materializada não existe");
             }
         } catch (Exception e) {
-            // Fallback para tabela original
+            
             log.debug("View materializada não disponível, usando tabela original: {}", e.getMessage());
             querySql = String.format("""
                     SELECT
@@ -232,7 +232,7 @@ public class SiaPaRelatorioServiceImpl implements SiaPaRelatorioService {
             Objects.requireNonNull(querySql, "Query SQL não pode ser null"),
             (rs, rowNum) -> {
                 String procedimentoCodigo = rs.getString("procedimento_codigo");
-                // Enriquece com nome do procedimento usando o serviço
+                
                 String procedimentoNome = siaDataEnricher.enriquecerComProcedimento(procedimentoCodigo);
                 
                 return SiaPaRelatorioTopProcedimentosResponse.ItemTopProcedimento.builder()
@@ -284,7 +284,7 @@ public class SiaPaRelatorioServiceImpl implements SiaPaRelatorioService {
                     .build();
         }
 
-        // Filtrar diretamente na tabela sia_pa pelos CNES do tenant
+        
         String placeholders = String.join(",", java.util.Collections.nCopies(cnesList.size(), "?"));
         Object[] params = new Object[3 + cnesList.size()];
         params[0] = Objects.requireNonNull(ufEfetiva, "UF não pode ser null");
@@ -294,7 +294,7 @@ public class SiaPaRelatorioServiceImpl implements SiaPaRelatorioService {
             params[3 + i] = Objects.requireNonNull(cnesList.get(i), "CNES não pode ser null");
         }
 
-        // Tenta usar view materializada primeiro (mais rápido), com fallback para tabela original
+        
         List<SiaPaRelatorioTopCidResponse.ItemTopCid> itens;
         try {
             String querySql = String.format("""
@@ -334,7 +334,7 @@ public class SiaPaRelatorioServiceImpl implements SiaPaRelatorioService {
                 (rs, rowNum) -> {
                     String cidCodigo = rs.getString("cid_principal_codigo");
                     String cidDescricaoFromDb = rs.getString("cid_descricao");
-                    // Se não encontrou descrição no banco, tenta enriquecer usando o serviço
+                    
                     String cidDescricao = cidDescricaoFromDb != null && !cidDescricaoFromDb.isEmpty() 
                             ? cidDescricaoFromDb 
                             : siaDataEnricher.enriquecerComCid(cidCodigo);
@@ -353,7 +353,7 @@ public class SiaPaRelatorioServiceImpl implements SiaPaRelatorioService {
                 paramsView
             );
         } catch (Exception e) {
-            // Fallback para tabela original se view não existir ou não estiver atualizada
+            
             log.debug("View materializada não disponível, usando tabela original: {}", e.getMessage());
             String querySql = String.format("""
                         SELECT
@@ -379,7 +379,7 @@ public class SiaPaRelatorioServiceImpl implements SiaPaRelatorioService {
                 (rs, rowNum) -> {
                     String cidCodigo = rs.getString("cid_principal_codigo");
                     String cidDescricaoFromDb = rs.getString("cid_descricao");
-                    // Se não encontrou descrição no banco, tenta enriquecer usando o serviço
+                    
                     String cidDescricao = cidDescricaoFromDb != null && !cidDescricaoFromDb.isEmpty() 
                             ? cidDescricaoFromDb 
                             : siaDataEnricher.enriquecerComCid(cidCodigo);
@@ -399,7 +399,7 @@ public class SiaPaRelatorioServiceImpl implements SiaPaRelatorioService {
             );
         }
 
-        // Preenche os topos calculando diretamente da tabela sia_pa com filtro por CNES
+        
         String placeholdersTop = String.join(",", java.util.Collections.nCopies(cnesList.size(), "?"));
         for (SiaPaRelatorioTopCidResponse.ItemTopCid item : itens) {
             Object[] paramsTopProc = new Object[3 + cnesList.size()];

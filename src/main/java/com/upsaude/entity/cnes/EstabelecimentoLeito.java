@@ -17,8 +17,8 @@ import java.time.OffsetDateTime;
 @EqualsAndHashCode(onlyExplicitlyIncluded = true, callSuper = true)
 public class EstabelecimentoLeito extends BaseEntity {
 
-    // Campo 'estabelecimento' removido pois já existe em BaseEntity
-    // Campo 'ativo' removido pois já existe em BaseEntity (como 'active')
+    
+    
 
     @Column(name = "tipo_leito_codigo", nullable = false, length = 10)
     private String tipoLeitoCodigo;

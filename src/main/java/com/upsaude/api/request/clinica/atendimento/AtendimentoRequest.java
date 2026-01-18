@@ -61,7 +61,7 @@ public class AtendimentoRequest {
     @Size(max = 1000, message = "Observações internas deve ter no máximo 1000 caracteres")
     private String observacoesInternas;
 
-    // Campos financeiros
+    
     private UUID competenciaFinanceira;
 
     @Valid

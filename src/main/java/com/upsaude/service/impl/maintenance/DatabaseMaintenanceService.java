@@ -12,12 +12,7 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.List;
 
-/**
- * Serviço de manutenção de banco de dados.
- * Monitora dead tuples e performance de queries.
- * 
- * Para desabilitar: spring.database.maintenance.enabled=false
- */
+
 @Service
 @Slf4j
 @RequiredArgsConstructor
@@ -27,10 +22,7 @@ public class DatabaseMaintenanceService {
     @PersistenceContext
     private final EntityManager entityManager;
     
-    /**
-     * Monitora tabelas com alto volume de dead tuples.
-     * Executa todo dia às 2h da manhã.
-     */
+    
     @Scheduled(cron = "${spring.database.maintenance.monitor-cron:0 0 2 * * *}")
     public void monitorarDeadTuples() {
         log.info("Iniciando monitoramento de dead tuples...");
@@ -76,7 +68,7 @@ public class DatabaseMaintenanceService {
                     schema, tableName, deadTuples, ratio, liveTuples, size, lastVacuum, vacuumCount);
             });
             
-            // Verificar tabelas críticas especificamente
+            
             verificarTabelasCriticas();
             
         } catch (Exception e) {
@@ -84,10 +76,7 @@ public class DatabaseMaintenanceService {
         }
     }
     
-    /**
-     * Monitora queries lentas (>10 segundos).
-     * Executa a cada hora.
-     */
+    
     @Scheduled(cron = "${spring.database.maintenance.monitor-slow-queries-cron:0 0 * * * *}")
     public void monitorarQueriesLentas() {
         log.debug("Monitorando queries lentas...");
@@ -136,9 +125,7 @@ public class DatabaseMaintenanceService {
         }
     }
     
-    /**
-     * Verifica tabelas críticas específicas que historicamente tiveram problemas.
-     */
+    
     private void verificarTabelasCriticas() {
         String[] tabelasCriticas = {"sia_pa", "estados", "competencia_financeira"};
         
@@ -181,10 +168,7 @@ public class DatabaseMaintenanceService {
         }
     }
     
-    /**
-     * Fornece estatísticas gerais do banco de dados.
-     * Executa uma vez por dia às 6h.
-     */
+    
     @Scheduled(cron = "${spring.database.maintenance.stats-cron:0 0 6 * * *}")
     public void estatisticasBancoDados() {
         log.info("Gerando estatísticas do banco de dados...");

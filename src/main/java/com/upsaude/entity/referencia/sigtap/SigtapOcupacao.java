@@ -25,7 +25,7 @@ public class SigtapOcupacao extends BaseEntityWithoutTenant {
         @Column(name = "nome", length = 150)
         private String nome;
 
-        // Campos FHIR - Hierarquia CBO
+        
         @Column(name = "grande_grupo", length = 100)
         private String grandeGrupo;
 

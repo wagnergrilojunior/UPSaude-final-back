@@ -98,7 +98,7 @@ public class RelatoriosServiceImpl implements RelatoriosService {
     private long contarAtendimentos(RelatorioEstatisticasRequest request, UUID tenantId, OffsetDateTime inicio, OffsetDateTime fim) {
         log.debug("Contando atendimentos para tenant {} entre {} e {}", tenantId, inicio, fim);
         
-        // Validar filtros granulares se fornecidos
+        
         if (request.getEstabelecimentoId() != null) {
             if (!estabelecimentoFilterHelper.validarEstabelecimentoPertenceAoTenant(request.getEstabelecimentoId(), tenantId)) {
                 throw new com.upsaude.exception.BadRequestException("Estabelecimento não pertence ao tenant");
@@ -114,7 +114,7 @@ public class RelatoriosServiceImpl implements RelatoriosService {
         return atendimentoRepository.findAllByTenant(tenantId, PageRequest.of(0, Integer.MAX_VALUE))
                 .getContent().stream()
                 .filter(a -> {
-                    // Filtro por data
+                    
                     if (a.getInformacoes() == null || a.getInformacoes().getDataHora() == null) {
                         return false;
                     }
@@ -122,17 +122,17 @@ public class RelatoriosServiceImpl implements RelatoriosService {
                         return false;
                     }
                     
-                    // Filtro por estabelecimento
+                    
                     if (request.getEstabelecimentoId() != null) {
                         if (a.getEstabelecimento() == null || !request.getEstabelecimentoId().equals(a.getEstabelecimento().getId())) {
                             return false;
                         }
                     }
                     
-                    // Filtro por médico (via profissional)
+                    
                     if (request.getMedicoId() != null) {
-                        // TODO: Implementar quando houver relacionamento direto médico-atendimento
-                        // Por enquanto, filtrar via profissional se disponível
+                        
+                        
                     }
                     
                     return true;
@@ -161,7 +161,7 @@ public class RelatoriosServiceImpl implements RelatoriosService {
     private long contarAgendamentos(RelatorioEstatisticasRequest request, UUID tenantId, OffsetDateTime inicio, OffsetDateTime fim) {
         log.debug("Contando agendamentos para tenant {} entre {} e {}", tenantId, inicio, fim);
         
-        // Validar filtros granulares se fornecidos
+        
         if (request.getEstabelecimentoId() != null) {
             if (!estabelecimentoFilterHelper.validarEstabelecimentoPertenceAoTenant(request.getEstabelecimentoId(), tenantId)) {
                 throw new com.upsaude.exception.BadRequestException("Estabelecimento não pertence ao tenant");
@@ -174,7 +174,7 @@ public class RelatoriosServiceImpl implements RelatoriosService {
             }
         }
         
-        // Usar método específico do repository baseado nos filtros fornecidos
+        
         PageRequest pageRequest = PageRequest.of(0, Integer.MAX_VALUE);
         List<Agendamento> agendamentos;
         
@@ -201,13 +201,13 @@ public class RelatoriosServiceImpl implements RelatoriosService {
     private long contarPacientes(UUID tenantId, RelatorioEstatisticasRequest request) {
         log.debug("Contando pacientes para tenant {}", tenantId);
         
-        // Se houver filtro por estabelecimento, contar apenas pacientes que tiveram atendimentos/agendamentos no estabelecimento
+        
         if (request.getEstabelecimentoId() != null) {
             if (!estabelecimentoFilterHelper.validarEstabelecimentoPertenceAoTenant(request.getEstabelecimentoId(), tenantId)) {
                 throw new com.upsaude.exception.BadRequestException("Estabelecimento não pertence ao tenant");
             }
             
-            // Contar pacientes únicos que tiveram atendimentos ou agendamentos no estabelecimento
+            
             long pacientesAtendimentos = atendimentoRepository.findAllByTenant(tenantId, PageRequest.of(0, Integer.MAX_VALUE))
                     .getContent().stream()
                     .filter(a -> a.getEstabelecimento() != null && 
@@ -224,7 +224,7 @@ public class RelatoriosServiceImpl implements RelatoriosService {
                     .distinct()
                     .count();
             
-            // Retornar união dos dois conjuntos (aproximação)
+            
             return Math.max(pacientesAtendimentos, pacientesAgendamentos);
         }
         
@@ -238,7 +238,7 @@ public class RelatoriosServiceImpl implements RelatoriosService {
         atendimentoRepository.findAllByTenant(tenantId, PageRequest.of(0, Integer.MAX_VALUE))
                 .getContent().stream()
                 .filter(a -> {
-                    // Filtro por data
+                    
                     if (a.getInformacoes() == null || a.getInformacoes().getDataHora() == null) {
                         return false;
                     }
@@ -247,16 +247,16 @@ public class RelatoriosServiceImpl implements RelatoriosService {
                         return false;
                     }
                     
-                    // Filtro por estabelecimento
+                    
                     if (request.getEstabelecimentoId() != null) {
                         if (a.getEstabelecimento() == null || !request.getEstabelecimentoId().equals(a.getEstabelecimento().getId())) {
                             return false;
                         }
                     }
                     
-                    // Filtro por médico (via profissional)
+                    
                     if (request.getMedicoId() != null) {
-                        // TODO: Implementar quando houver relacionamento direto médico-atendimento
+                        
                     }
                     
                     return true;
@@ -275,7 +275,7 @@ public class RelatoriosServiceImpl implements RelatoriosService {
         PageRequest pageRequest = PageRequest.of(0, Integer.MAX_VALUE);
         List<Agendamento> agendamentos;
         
-        // Aplicar filtros granulares nos agendamentos
+        
         if (request.getEstabelecimentoId() != null && request.getMedicoId() != null) {
             agendamentos = agendamentoRepository.findByEstabelecimentoIdAndMedicoIdAndDataHoraBetweenAndTenantIdOrderByDataHoraAsc(
                     request.getEstabelecimentoId(), request.getMedicoId(), inicio, fim, tenantId, pageRequest).getContent();
@@ -293,7 +293,7 @@ public class RelatoriosServiceImpl implements RelatoriosService {
                     inicio, fim, tenantId, pageRequest).getContent();
         }
         
-        // Agregação por especialidade via agendamentos relacionados
+        
         agendamentos.stream()
                 .filter(a -> a.getEspecialidade() != null)
                 .forEach(a -> {
@@ -312,7 +312,7 @@ public class RelatoriosServiceImpl implements RelatoriosService {
         atendimentoRepository.findAllByTenant(tenantId, PageRequest.of(0, Integer.MAX_VALUE))
                 .getContent().stream()
                 .filter(a -> {
-                    // Filtro por data
+                    
                     if (a.getInformacoes() == null || a.getInformacoes().getDataHora() == null) {
                         return false;
                     }
@@ -321,16 +321,16 @@ public class RelatoriosServiceImpl implements RelatoriosService {
                         return false;
                     }
                     
-                    // Filtro por estabelecimento
+                    
                     if (request.getEstabelecimentoId() != null) {
                         if (a.getEstabelecimento() == null || !request.getEstabelecimentoId().equals(a.getEstabelecimento().getId())) {
                             return false;
                         }
                     }
                     
-                    // Filtro por médico (via profissional)
+                    
                     if (request.getMedicoId() != null) {
-                        // TODO: Implementar quando houver relacionamento direto médico-atendimento
+                        
                     }
                     
                     return a.getProfissional() != null;

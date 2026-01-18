@@ -79,7 +79,7 @@ public class ExamePacienteServiceImpl implements ExamePacienteService {
         mapper.updateFromRequest(request, entity);
         preencherEntidadesRelacionadas(entity, request, tenantId);
 
-        // Atualiza status se fornecido, senão mantém ou infere
+        
         if (request.getStatus() != null) {
             entity.setStatus(request.getStatus());
         } else if (entity.getDataResultado() != null && !"completed".equals(entity.getStatus())) {
@@ -119,36 +119,36 @@ public class ExamePacienteServiceImpl implements ExamePacienteService {
     }
 
     private void preencherEntidadesRelacionadas(ExamePaciente entity, ExamePacienteRequest request, UUID tenantId) {
-        // Prontuário
+        
         if (request.getProntuario() != null) {
             Prontuario prontuario = prontuarioRepository.findById(request.getProntuario())
                     .orElseThrow(() -> new NotFoundException("Prontuário não encontrado"));
             entity.setProntuario(prontuario);
         }
 
-        // Atendimento
+        
         if (request.getAtendimentoId() != null) {
             Atendimento atendimento = atendimentoRepository.findById(request.getAtendimentoId())
                     .orElseThrow(() -> new NotFoundException("Atendimento não encontrado"));
             entity.setAtendimento(atendimento);
         }
 
-        // Procedimento SIGTAP
+        
         if (request.getProcedimento() != null) {
             SigtapProcedimento procedimento = procedimentoRepository.findById(request.getProcedimento())
                     .orElseThrow(() -> new NotFoundException("Procedimento SIGTAP não encontrado"));
             entity.setProcedimento(procedimento);
 
-            // Auto-fill nome e categoria se vazios
+            
             if (entity.getNomeExame() == null) {
                 entity.setNomeExame(procedimento.getNome());
             }
             if (entity.getCategory() == null) {
-                entity.setCategory("laboratory"); // Default, poderia ser refinado baseado no grupo do procedimento
+                entity.setCategory("laboratory"); 
             }
         }
 
-        // Profissionais
+        
         if (request.getProfissionalSolicitante() != null) {
             ProfissionaisSaude prof = profissionalRepository.findById(request.getProfissionalSolicitante())
                     .orElseThrow(() -> new NotFoundException("Profissional solicitante não encontrado"));
@@ -161,21 +161,21 @@ public class ExamePacienteServiceImpl implements ExamePacienteService {
             entity.setProfissionalResponsavel(prof);
         }
 
-        // Diagnóstico
+        
         if (request.getDiagnosticoRelacionado() != null) {
             Cid10Subcategorias cid = cidRepository.findById(request.getDiagnosticoRelacionado())
                     .orElseThrow(() -> new NotFoundException("CID10 não encontrado"));
             entity.setDiagnosticoRelacionado(cid);
         }
 
-        // Catálogo de Exames Unificado
+        
         if (request.getCatalogoExameId() != null) {
             com.upsaude.entity.referencia.exame.CatalogoExame catalogo = catalogoExameRepository
                     .findById(request.getCatalogoExameId())
                     .orElseThrow(() -> new NotFoundException("Catálogo de exame não encontrado"));
             entity.setCatalogoExame(catalogo);
 
-            // Auto-fill nome se vazio
+            
             if (entity.getNomeExame() == null) {
                 entity.setNomeExame(catalogo.getNome());
             }
@@ -186,20 +186,20 @@ public class ExamePacienteServiceImpl implements ExamePacienteService {
         if (request.getStatus() != null) {
             entity.setStatus(request.getStatus());
         } else {
-            // Lógica de inferência de status
+            
             if (entity.getDataResultado() != null || entity.getResultados() != null) {
                 entity.setStatus("completed");
             } else if (entity.getDataExame() != null && entity.getDataExame().isBefore(OffsetDateTime.now())) {
-                entity.setStatus("active"); // Ou 'preliminary' se tiver resultado parcial
+                entity.setStatus("active"); 
             } else {
-                entity.setStatus("active"); // Pedido realizado
+                entity.setStatus("active"); 
             }
         }
 
         if (request.getIntent() != null) {
             entity.setIntent(request.getIntent());
         } else {
-            entity.setIntent("order"); // Default para exames solicitados em atendimento
+            entity.setIntent("order"); 
         }
 
         if (request.getPriority() == null) {

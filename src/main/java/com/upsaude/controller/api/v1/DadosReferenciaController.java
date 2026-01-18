@@ -32,7 +32,7 @@ public class DadosReferenciaController {
     private final EstadosRepository estadosRepository;
     private final CidadesRepository cidadesRepository;
 
-    // ==================== GEOGRAFIA ====================
+    
 
     @GetMapping("/geografia/estados")
     @Operation(summary = "Listar estados sincronizados")

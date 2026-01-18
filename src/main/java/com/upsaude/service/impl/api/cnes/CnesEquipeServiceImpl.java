@@ -88,9 +88,9 @@ public class CnesEquipeServiceImpl implements CnesEquipeService {
                                         return novo;
                                     });
                         } else {
-                            // Se não tem estabelecimento, tenta achar apenas pelo INE e Tenant (menos
-                            // preciso)
-                            // Para simplificar, vamos pular se não tem estabelecimento local
+                            
+                            
+                            
                             continue;
                         }
 
@@ -143,12 +143,12 @@ public class CnesEquipeServiceImpl implements CnesEquipeService {
                 throw new CnesSincronizacaoException("Equipe não encontrada no CNES: " + ine);
             }
 
-            // O detalharEquipe retorna dados básicos de profissionais, mas não os dados
-            // básicos da equipe em si no mesmo formato do PesquisarEquipe?
-            // De acordo com o WSDL lido anteriormente, ResponseDetalharEquipe tem
-            // codigoEquipe (String) e DadosBasicosProfissionaisType.
-            // Para pegar os dados da equipe, precisamos do PesquisarEquipe ou assumir que o
-            // INE é o que temos.
+            
+            
+            
+            
+            
+            
 
             int inseridos = 0;
             int atualizados = 0;
@@ -167,13 +167,13 @@ public class CnesEquipeServiceImpl implements CnesEquipeService {
                             novo.setTenant(tenant);
                             novo.setEstabelecimento(estab);
                             novo.setIne(ine);
-                            novo.setNomeReferencia("EQUIPE " + ine); // Fallback
+                            novo.setNomeReferencia("EQUIPE " + ine); 
                             return novo;
                         });
 
-                // Como detalharEquipe não retorna os mesmos campos de EquipeType, vamos apenas
-                // marcar a sincronização se ja existir.
-                // Na vdd, o ideal seria buscar no PesquisarEquipe e filtrar pelo INE.
+                
+                
+                
 
                 equipe.setDataUltimaSincronizacaoCnes(OffsetDateTime.now());
                 equipeRepository.save(equipe);

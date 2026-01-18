@@ -41,7 +41,7 @@ public class ReceitaCreator {
         Receita receita = receitaMapper.fromRequest(request);
         receita.setActive(true);
 
-        // Paciente não tem tenant_id (estende BaseEntityWithoutTenant)
+        
         Paciente paciente = pacienteRepository.findById(request.getPacienteId())
                 .orElseThrow(() -> {
                     log.warn("Paciente não encontrado com ID: {} para tenant: {}", request.getPacienteId(), tenantId);

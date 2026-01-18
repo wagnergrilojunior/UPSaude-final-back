@@ -52,5 +52,5 @@ private String hashLinha;
     private BigDecimal saldoApos;
 
     @Column(name = "status_conciliacao", nullable = false, length = 30)
-    private String statusConciliacao = "NAO_CONCILIADO"; // NAO_CONCILIADO | CONCILIADO | IGNORADO
+    private String statusConciliacao = "NAO_CONCILIADO"; 
 }

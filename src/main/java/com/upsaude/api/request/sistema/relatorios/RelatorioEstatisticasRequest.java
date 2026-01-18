@@ -25,7 +25,7 @@ public class RelatorioEstatisticasRequest {
     @Schema(description = "ID da especialidade para filtrar (opcional)")
     private UUID especialidadeId;
     
-    // Campos legados mantidos para compatibilidade
+    
     private Long totalAtendimentos;
     private Long totalConsultas;
     private Long totalExames;

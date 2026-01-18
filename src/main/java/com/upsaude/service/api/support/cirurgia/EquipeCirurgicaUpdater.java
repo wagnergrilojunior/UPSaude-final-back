@@ -53,13 +53,13 @@ public class EquipeCirurgicaUpdater {
         mapper.updateFromRequest(request, entity);
         entity.setTenant(Objects.requireNonNull(tenant, "tenant é obrigatório para atualizar equipe cirúrgica"));
 
-        // Processar profissionais - remover todos explicitamente do banco antes de adicionar novos
+        
         if (entity.getProfissionais() != null && !entity.getProfissionais().isEmpty()) {
             List<EquipeCirurgicaProfissional> profissionaisToRemove = new ArrayList<>(entity.getProfissionais());
             entity.getProfissionais().clear();
-            entityManager.flush(); // Garantir que o clear seja persistido
+            entityManager.flush(); 
             equipeCirurgicaProfissionalRepository.deleteAll(profissionaisToRemove);
-            entityManager.flush(); // Garantir que a deleção seja persistida
+            entityManager.flush(); 
         }
         if (entity.getProfissionais() == null) {
             entity.setProfissionais(new ArrayList<>());
@@ -79,13 +79,13 @@ public class EquipeCirurgicaUpdater {
             }
         }
 
-        // Processar médicos - remover todos explicitamente do banco antes de adicionar novos
+        
         if (entity.getMedicos() != null && !entity.getMedicos().isEmpty()) {
             List<EquipeCirurgicaMedico> medicosToRemove = new ArrayList<>(entity.getMedicos());
             entity.getMedicos().clear();
-            entityManager.flush(); // Garantir que o clear seja persistido
+            entityManager.flush(); 
             equipeCirurgicaMedicoRepository.deleteAll(medicosToRemove);
-            entityManager.flush(); // Garantir que a deleção seja persistida
+            entityManager.flush(); 
         }
         if (entity.getMedicos() == null) {
             entity.setMedicos(new ArrayList<>());

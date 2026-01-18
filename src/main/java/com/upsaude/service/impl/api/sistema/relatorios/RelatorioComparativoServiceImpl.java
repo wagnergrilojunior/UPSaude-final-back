@@ -52,7 +52,7 @@ public class RelatorioComparativoServiceImpl implements RelatorioComparativoServ
 
         UUID tenantId = tenantService.validarTenantAtual();
 
-        // Validar e calcular períodos
+        
         LocalDate periodoAtualInicio = request.getPeriodoAtualInicio();
         LocalDate periodoAtualFim = request.getPeriodoAtualFim();
         LocalDate periodoAnteriorInicio = request.getPeriodoAnteriorInicio();
@@ -66,7 +66,7 @@ public class RelatorioComparativoServiceImpl implements RelatorioComparativoServ
             throw new BadRequestException("Data de início do período atual deve ser anterior à data de fim");
         }
 
-        // Calcular período anterior se não fornecido
+        
         if (periodoAnteriorInicio == null || periodoAnteriorFim == null) {
             long diasPeriodo = java.time.temporal.ChronoUnit.DAYS.between(periodoAtualInicio, periodoAtualFim) + 1;
             periodoAnteriorFim = periodoAtualInicio.minusDays(1);
@@ -77,7 +77,7 @@ public class RelatorioComparativoServiceImpl implements RelatorioComparativoServ
             throw new BadRequestException("Data de início do período anterior deve ser anterior à data de fim");
         }
 
-        // Validar filtros granulares
+        
         if (request.getEstabelecimentoId() != null) {
             if (!estabelecimentoFilterHelper.validarEstabelecimentoPertenceAoTenant(request.getEstabelecimentoId(), tenantId)) {
                 throw new BadRequestException("Estabelecimento não encontrado ou não pertence ao tenant");
@@ -90,7 +90,7 @@ public class RelatorioComparativoServiceImpl implements RelatorioComparativoServ
             }
         }
 
-        // Coletar dados do período atual
+        
         RelatorioComparativoResponse.DadosPeriodo dadosAtual = coletarDadosPeriodo(
                 tenantId,
                 periodoAtualInicio,
@@ -100,7 +100,7 @@ public class RelatorioComparativoServiceImpl implements RelatorioComparativoServ
                 request.getEspecialidadeId()
         );
 
-        // Coletar dados do período anterior
+        
         RelatorioComparativoResponse.DadosPeriodo dadosAnterior = coletarDadosPeriodo(
                 tenantId,
                 periodoAnteriorInicio,
@@ -110,10 +110,10 @@ public class RelatorioComparativoServiceImpl implements RelatorioComparativoServ
                 request.getEspecialidadeId()
         );
 
-        // Calcular comparações
+        
         RelatorioComparativoResponse.Comparacoes comparacoes = calcularComparacoes(dadosAtual, dadosAnterior);
 
-        // Determinar tipo de comparação
+        
         RelatorioComparativoRequest.TipoComparacao tipoComparacao = request.getTipoComparacao();
         if (tipoComparacao == null) {
             if (request.getEstabelecimentoId() != null) {
@@ -153,18 +153,18 @@ public class RelatorioComparativoServiceImpl implements RelatorioComparativoServ
         OffsetDateTime inicio = dataInicio.atStartOfDay().atOffset(ZoneOffset.UTC);
         OffsetDateTime fim = dataFim.atTime(23, 59, 59).atOffset(ZoneOffset.UTC);
 
-        // Contar atendimentos
+        
         long totalAtendimentos = contarAtendimentos(tenantId, inicio, fim, estabelecimentoId, medicoId);
         long totalConsultas = contarConsultas(tenantId, inicio, fim, estabelecimentoId, medicoId);
         long totalAgendamentos = contarAgendamentos(tenantId, inicio, fim, estabelecimentoId, medicoId, especialidadeId);
         long totalPacientes = contarPacientes(tenantId, estabelecimentoId, medicoId);
         long totalProcedimentos = contarProcedimentos(tenantId, inicio, fim, estabelecimentoId, medicoId);
 
-        // Calcular indicadores
+        
         Map<String, BigDecimal> indicadores = calcularIndicadores(
                 totalAtendimentos, totalConsultas, totalAgendamentos, totalPacientes, inicio, fim);
 
-        // Agregar por tipo e especialidade
+        
         Map<String, Long> atendimentosPorTipo = calcularAtendimentosPorTipo(
                 tenantId, inicio, fim, estabelecimentoId, medicoId);
         Map<String, Long> atendimentosPorEspecialidade = calcularAtendimentosPorEspecialidade(
@@ -176,7 +176,7 @@ public class RelatorioComparativoServiceImpl implements RelatorioComparativoServ
                 .totalAgendamentos(totalAgendamentos)
                 .totalPacientes(totalPacientes)
                 .totalProcedimentos(totalProcedimentos)
-                .valorTotal(BigDecimal.ZERO) // TODO: Calcular valor total quando houver dados financeiros
+                .valorTotal(BigDecimal.ZERO) 
                 .atendimentosPorTipo(atendimentosPorTipo)
                 .atendimentosPorEspecialidade(atendimentosPorEspecialidade)
                 .indicadores(indicadores)
@@ -234,7 +234,7 @@ public class RelatorioComparativoServiceImpl implements RelatorioComparativoServ
     }
 
     private long contarPacientes(UUID tenantId, UUID estabelecimentoId, UUID medicoId) {
-        // Contar pacientes únicos baseado em atendimentos
+        
         return atendimentoRepository.findAllByTenant(tenantId, PageRequest.of(0, Integer.MAX_VALUE))
                 .getContent().stream()
                 .filter(a -> estabelecimentoId == null || (a.getEstabelecimento() != null && estabelecimentoId.equals(a.getEstabelecimento().getId())))
@@ -245,7 +245,7 @@ public class RelatorioComparativoServiceImpl implements RelatorioComparativoServ
     }
 
     private long contarProcedimentos(UUID tenantId, OffsetDateTime inicio, OffsetDateTime fim, UUID estabelecimentoId, UUID medicoId) {
-        // Contar procedimentos realizados (via atendimentos)
+        
         return atendimentoRepository.findAllByTenant(tenantId, PageRequest.of(0, Integer.MAX_VALUE))
                 .getContent().stream()
                 .filter(a -> {
@@ -339,7 +339,7 @@ public class RelatorioComparativoServiceImpl implements RelatorioComparativoServ
             RelatorioComparativoResponse.DadosPeriodo atual,
             RelatorioComparativoResponse.DadosPeriodo anterior) {
 
-        // Calcular variações percentuais
+        
         BigDecimal variacaoAtendimentos = calcularVariacao(atual.getTotalAtendimentos(), anterior.getTotalAtendimentos());
         BigDecimal variacaoConsultas = calcularVariacao(atual.getTotalConsultas(), anterior.getTotalConsultas());
         BigDecimal variacaoAgendamentos = calcularVariacao(atual.getTotalAgendamentos(), anterior.getTotalAgendamentos());
@@ -347,7 +347,7 @@ public class RelatorioComparativoServiceImpl implements RelatorioComparativoServ
         BigDecimal variacaoProcedimentos = calcularVariacao(atual.getTotalProcedimentos(), anterior.getTotalProcedimentos());
         BigDecimal variacaoValor = calcularVariacao(atual.getValorTotal(), anterior.getValorTotal());
 
-        // Calcular diferenças absolutas
+        
         long diferencaAtendimentos = atual.getTotalAtendimentos() - anterior.getTotalAtendimentos();
         long diferencaConsultas = atual.getTotalConsultas() - anterior.getTotalConsultas();
         long diferencaAgendamentos = atual.getTotalAgendamentos() - anterior.getTotalAgendamentos();
@@ -355,17 +355,17 @@ public class RelatorioComparativoServiceImpl implements RelatorioComparativoServ
         long diferencaProcedimentos = atual.getTotalProcedimentos() - anterior.getTotalProcedimentos();
         BigDecimal diferencaValor = atual.getValorTotal().subtract(anterior.getValorTotal());
 
-        // Determinar tendências
+        
         RelatorioComparativoResponse.Tendencia tendenciaAtendimentos = determinarTendencia(variacaoAtendimentos);
         RelatorioComparativoResponse.Tendencia tendenciaConsultas = determinarTendencia(variacaoConsultas);
         RelatorioComparativoResponse.Tendencia tendenciaAgendamentos = determinarTendencia(variacaoAgendamentos);
         RelatorioComparativoResponse.Tendencia tendenciaValor = determinarTendencia(variacaoValor);
 
-        // Comparações por tipo
+        
         List<RelatorioComparativoResponse.ComparacaoItem> comparacaoPorTipo = calcularComparacaoPorItem(
                 atual.getAtendimentosPorTipo(), anterior.getAtendimentosPorTipo());
 
-        // Comparações por especialidade
+        
         List<RelatorioComparativoResponse.ComparacaoItem> comparacaoPorEspecialidade = calcularComparacaoPorItem(
                 atual.getAtendimentosPorEspecialidade(), anterior.getAtendimentosPorEspecialidade());
 
@@ -418,7 +418,7 @@ public class RelatorioComparativoServiceImpl implements RelatorioComparativoServ
         if (variacao == null) {
             return RelatorioComparativoResponse.Tendencia.ESTABILIDADE;
         }
-        BigDecimal threshold = BigDecimal.valueOf(5); // 5% de variação para considerar significativa
+        BigDecimal threshold = BigDecimal.valueOf(5); 
         if (variacao.compareTo(threshold) > 0) {
             return RelatorioComparativoResponse.Tendencia.CRESCIMENTO;
         } else if (variacao.compareTo(threshold.negate()) < 0) {
@@ -433,7 +433,7 @@ public class RelatorioComparativoServiceImpl implements RelatorioComparativoServ
         
         List<RelatorioComparativoResponse.ComparacaoItem> items = new ArrayList<>();
         
-        // Coletar todas as chaves de ambos os períodos
+        
         java.util.Set<String> todasChaves = new java.util.HashSet<>();
         if (atual != null) todasChaves.addAll(atual.keySet());
         if (anterior != null) todasChaves.addAll(anterior.keySet());
@@ -454,7 +454,7 @@ public class RelatorioComparativoServiceImpl implements RelatorioComparativoServ
                     .build());
         }
         
-        // Ordenar por variação percentual (maior variação primeiro)
+        
         return items.stream()
                 .sorted((a, b) -> b.getVariacaoPercentual().compareTo(a.getVariacaoPercentual()))
                 .collect(Collectors.toList());

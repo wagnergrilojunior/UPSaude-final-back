@@ -30,9 +30,7 @@ public class NotificacaoDispatcherJob {
     private final BrevoConfig brevoConfig;
     private final ObjectMapper objectMapper;
 
-    /**
-     * Processa notificações pendentes a cada 30 segundos
-     */
+    
     @Scheduled(fixedDelayString = "${brevo.dispatcher.interval-seconds:30}000")
     @Transactional
     public void processarNotificacoesPendentes() {
@@ -87,7 +85,7 @@ public class NotificacaoDispatcherJob {
             String messageId = brevoEmailClient.sendTemplateEmail(
                     template.getBrevoTemplateId(),
                     notificacao.getDestinatario(),
-                    null, // nome pode vir dos params se necessário
+                    null, 
                     params,
                     senderType
             );
@@ -119,7 +117,7 @@ public class NotificacaoDispatcherJob {
             notificacao.setStatusEnvio("FALHA");
             log.warn("Notificação ID: {} atingiu máximo de tentativas ({})", notificacao.getId(), maxTentativas);
         } else {
-            // Aplicar backoff: próxima tentativa em 5min, 15min, 1h
+            
             long minutosBackoff = calcularBackoffMinutos(tentativas);
             OffsetDateTime novaDataEnvio = OffsetDateTime.now().plusMinutes(minutosBackoff);
             notificacao.setDataEnvioPrevista(novaDataEnvio);
@@ -132,11 +130,11 @@ public class NotificacaoDispatcherJob {
     private long calcularBackoffMinutos(int tentativa) {
         switch (tentativa) {
             case 1:
-                return 5; // 5 minutos
+                return 5; 
             case 2:
-                return 15; // 15 minutos
+                return 15; 
             default:
-                return 60; // 1 hora
+                return 60; 
         }
     }
 

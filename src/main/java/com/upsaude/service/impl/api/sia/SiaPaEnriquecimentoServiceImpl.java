@@ -93,7 +93,7 @@ public class SiaPaEnriquecimentoServiceImpl implements SiaPaEnriquecimentoServic
                         estabelecimentoCnpj = estab.getDadosIdentificacao().getCnpj();
                     }
                     if (StringUtils.hasText(estab.getDadosIdentificacao().getCnes())) {
-                        // nada (mesmo código)
+                        
                     }
                 }
                 if (StringUtils.hasText(estab.getCodigoIbgeMunicipio())) {

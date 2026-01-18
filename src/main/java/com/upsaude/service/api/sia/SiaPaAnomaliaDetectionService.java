@@ -8,10 +8,7 @@ import java.util.UUID;
 
 public interface SiaPaAnomaliaDetectionService {
 
-    /**
-     * Executa detecção para um recorte (competência/UF).
-     * Retorna o total de anomalias inseridas (aproximado).
-     */
+    
     int detectar(String competencia, String uf);
 
     Page<SiaPaAnomaliaResponse> listar(String competencia, String uf, Pageable pageable);

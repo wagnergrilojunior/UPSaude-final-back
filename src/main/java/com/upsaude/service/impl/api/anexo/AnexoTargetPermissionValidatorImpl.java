@@ -57,8 +57,8 @@ public class AnexoTargetPermissionValidatorImpl implements AnexoTargetPermission
                 break;
             case PRONTUARIO_EVENTO:
             case FINANCEIRO_FATURAMENTO:
-                // Para estes tipos, apenas validamos que o tenant existe
-                // Validações mais específicas podem ser adicionadas depois
+                
+                
                 log.debug("Validação de acesso para {} - apenas verificação de tenant", targetType);
                 break;
             default:
@@ -67,26 +67,26 @@ public class AnexoTargetPermissionValidatorImpl implements AnexoTargetPermission
     }
 
     private void validarPaciente(UUID pacienteId, UUID tenantId) {
-        // Paciente não tem tenant_id (estende BaseEntityWithoutTenant)
-        // Apenas verifica se o paciente existe
+        
+        
         pacienteRepository.findById(pacienteId)
                 .orElseThrow(() -> new NotFoundException("Paciente não encontrado: " + pacienteId));
     }
 
     private void validarAgendamento(UUID agendamentoId, UUID tenantId) {
-        // findByIdAndTenant já valida que o agendamento pertence ao tenant
+        
         agendamentoRepository.findByIdAndTenant(agendamentoId, tenantId)
                 .orElseThrow(() -> new NotFoundException("Agendamento não encontrado: " + agendamentoId));
     }
 
     private void validarAtendimento(UUID atendimentoId, UUID tenantId) {
-        // findByIdAndTenant já valida que o atendimento pertence ao tenant
+        
         atendimentoRepository.findByIdAndTenant(atendimentoId, tenantId)
                 .orElseThrow(() -> new NotFoundException("Atendimento não encontrado: " + atendimentoId));
     }
 
     private void validarConsulta(UUID consultaId, UUID tenantId) {
-        // findByIdAndTenant já valida que a consulta pertence ao tenant
+        
         consultasRepository.findByIdAndTenant(consultaId, tenantId)
                 .orElseThrow(() -> new NotFoundException("Consulta não encontrada: " + consultaId));
     }

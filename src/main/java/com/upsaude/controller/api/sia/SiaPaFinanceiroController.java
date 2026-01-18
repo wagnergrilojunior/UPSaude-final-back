@@ -59,7 +59,7 @@ public class SiaPaFinanceiroController {
             @Parameter(description = "Limite (default 50, máximo 200)", required = false)
             @RequestParam(value = "limit", required = false) Integer limit
     ) {
-        // Reutiliza conciliação e retorna apenas o recorte de não faturados
+        
         int lim = limit != null ? limit : 50;
         SiaPaFinanceiroIntegracaoResponse resp = service.conciliacao(competencia, uf, lim);
         return ResponseEntity.ok(resp.getProcedimentosNaoFaturados());

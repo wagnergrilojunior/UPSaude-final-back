@@ -43,7 +43,7 @@ public class DoencaPaciente extends BaseEntity {
     private Ciap2 ciap2;
 
     @Column(name = "tipo_catalogo", length = 10)
-    private String tipoCatalogo; // CID10, CIAP2, OUTRO
+    private String tipoCatalogo; 
 
     @Column(name = "codigo", length = 20)
     private String codigo;
@@ -55,7 +55,7 @@ public class DoencaPaciente extends BaseEntity {
     private LocalDate dataDiagnostico;
 
     @Column(name = "status", length = 20)
-    private String status; // ativo, resolvido, erro
+    private String status; 
 
     @Column(name = "cronico")
     private Boolean cronico = false;

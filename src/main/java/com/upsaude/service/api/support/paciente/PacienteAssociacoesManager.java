@@ -76,9 +76,9 @@ public class PacienteAssociacoesManager {
             });
         }
 
-        // 1. Processar primeiro o que vem de campos básicos (Documentos e Contatos)
-        // Isso garante que eles existam na entidade antes do processamento das listas
-        // detalhadas
+        
+        
+        
         processarDocumentosBasicos(paciente, request, tenant);
         processarContatoBasico(paciente, request, tenant);
         processarDadosDemograficosBasicos(paciente, request, tenant);
@@ -86,9 +86,9 @@ public class PacienteAssociacoesManager {
         processarIntegracaoGovBasica(paciente, request, tenant);
         processarEnderecoPrincipal(paciente, request, tenant);
 
-        // 2. Processar Listas Detalhadas (Identificadores)
+        
         if (request.getIdentificadores() != null) {
-            // Coletar chaves de documentos básicos para proteção contra remoção
+            
             java.util.Set<String> basicKeys = new java.util.HashSet<>();
             if (request.getDocumentosBasicos() != null) {
                 var d = request.getDocumentosBasicos();
@@ -104,7 +104,7 @@ public class PacienteAssociacoesManager {
                     .map(req -> req.getTipo() + "|" + req.getValor())
                     .collect(java.util.stream.Collectors.toSet());
 
-            // Remove se não estiver na lista E não for um documento básico enviado
+            
             paciente.getIdentificadores()
                     .removeIf(existing -> !keysToKeep.contains(existing.getTipo() + "|" + existing.getValor())
                             && !basicKeys.contains(existing.getTipo() + "|" + existing.getValor()));
@@ -131,9 +131,9 @@ public class PacienteAssociacoesManager {
             });
         }
 
-        // 3. Processar Listas Detalhadas (Contatos)
+        
         if (request.getContatos() != null) {
-            // Coletar chaves de contatos básicos para proteção
+            
             java.util.Set<String> basicKeys = new java.util.HashSet<>();
             if (request.getContato() != null) {
                 var c = request.getContato();
@@ -185,11 +185,11 @@ public class PacienteAssociacoesManager {
             });
         }
 
-        // Blocos de DadosSociodemograficos, DadosClinicosBasicos e
-        // DadosPessoaisComplementares
-        // movidos para o Creator para maior controle no 'modelo antigo'.
-        // No Manager, apenas garantimos que as listas e documentos complexos sejam
-        // processados.
+        
+        
+        
+        
+        
 
         if (request.getObito() != null) {
             boolean obitoVazio = request.getObito().getDataObito() == null
@@ -302,7 +302,7 @@ public class PacienteAssociacoesManager {
 
     private void adicionarOuAtualizarIdentificador(Paciente paciente, TipoIdentificadorEnum tipo, String valor,
             boolean principal, Tenant tenant) {
-        // Busca primeiro por um identificador do mesmo tipo que seja principal
+        
         var existingOpt = paciente.getIdentificadores().stream()
                 .filter(id -> id.getTipo() == tipo && Boolean.TRUE.equals(id.getPrincipal()))
                 .findFirst();
@@ -312,7 +312,7 @@ public class PacienteAssociacoesManager {
             existing.setValor(valor);
             existing.setPrincipal(principal);
         } else {
-            // Se não encontrou principal, busca por valor exato do mesmo tipo
+            
             var byValueOpt = paciente.getIdentificadores().stream()
                     .filter(id -> id.getTipo() == tipo && id.getValor().equals(valor))
                     .findFirst();
@@ -331,8 +331,8 @@ public class PacienteAssociacoesManager {
             }
         }
 
-        // Se este identificador foi definido como principal, garante que nenhum outro
-        // do mesmo tipo seja principal
+        
+        
         if (principal) {
             paciente.getIdentificadores().stream()
                     .filter(id -> id.getTipo() == tipo && !id.getValor().equals(valor))
@@ -436,14 +436,14 @@ public class PacienteAssociacoesManager {
 
         var responsavel = request.getResponsavelLegal();
 
-        // Se todos os campos do responsável estão vazios/null, trata como se não
-        // tivesse sido enviado
+        
+        
         boolean todosCamposVazios = (responsavel.getNome() == null || responsavel.getNome().trim().isEmpty())
                 && (responsavel.getCpf() == null || responsavel.getCpf().trim().isEmpty())
                 && (responsavel.getTelefone() == null || responsavel.getTelefone().trim().isEmpty());
 
         if (todosCamposVazios) {
-            // Se o paciente já tem um responsável, remove ele
+            
             if (paciente.getResponsavelLegal() != null) {
                 paciente.setResponsavelLegal(null);
             }

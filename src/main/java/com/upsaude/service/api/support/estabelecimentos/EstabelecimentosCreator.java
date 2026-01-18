@@ -30,7 +30,7 @@ public class EstabelecimentosCreator {
         entity.setActive(true);
         entity.setTenant(Objects.requireNonNull(tenant, "tenant é obrigatório para criar estabelecimento"));
         
-        // Garantir que prestadorServico não seja null
+        
         if (entity.getPrestadorServico() == null) {
             entity.setPrestadorServico(false);
         }

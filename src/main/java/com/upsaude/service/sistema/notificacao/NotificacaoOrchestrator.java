@@ -37,9 +37,7 @@ public class NotificacaoOrchestrator {
     private final TenantRepository tenantRepository;
     private final ObjectMapper objectMapper;
 
-    /**
-     * Cria uma notificação para envio futuro
-     */
+    
     @Transactional
     public Notificacao criarNotificacao(
             TipoNotificacaoEnum tipoNotificacao,
@@ -58,12 +56,12 @@ public class NotificacaoOrchestrator {
         UUID tenantId = Objects.requireNonNull(tenantService.validarTenantAtual(), "Tenant ID não pode ser null");
         Tenant tenant = tenantService.obterTenantDoUsuarioAutenticado();
         if (tenant == null) {
-            // Se não conseguir obter do contexto de autenticação, buscar pelo ID
+            
             tenant = tenantRepository.findById(tenantId)
                     .orElseThrow(() -> new IllegalStateException("Tenant não encontrado com ID: " + tenantId));
         }
 
-        // Buscar template se existir
+        
         Optional<TemplateNotificacao> templateOpt = Optional.empty();
         if (estabelecimentoId != null) {
             templateOpt = templateNotificacaoRepository
@@ -85,7 +83,7 @@ public class NotificacaoOrchestrator {
             }
         }
 
-        // Criar notificação diretamente sem usar NotificacaoRequest (que é para API)
+        
 
         Notificacao notificacao = new Notificacao();
         notificacao.setTenant(tenant);
@@ -131,9 +129,7 @@ public class NotificacaoOrchestrator {
         return saved;
     }
 
-    /**
-     * Notifica criação de novo usuário
-     */
+    
     @Transactional
     public void notificarUsuarioCriado(UsuariosSistema usuario, String email, String nome) {
         if (email == null || email.trim().isEmpty()) {
@@ -156,15 +152,13 @@ public class NotificacaoOrchestrator {
                 null,
                 null,
                 null,
-                null, // UsuariosSistema não tem estabelecimento direto, apenas vinculados
+                null, 
                 OffsetDateTime.now(),
                 params
         );
     }
 
-    /**
-     * Notifica alteração de senha
-     */
+    
     @Transactional
     public void notificarSenhaAlterada(String email, String nome) {
         if (email == null || email.trim().isEmpty()) {
@@ -193,9 +187,7 @@ public class NotificacaoOrchestrator {
         );
     }
 
-    /**
-     * Notifica atualização de dados pessoais
-     */
+    
     @Transactional
     public void notificarDadosPessoaisAtualizados(String email, String nome, UUID pacienteId, UUID estabelecimentoId) {
         if (email == null || email.trim().isEmpty()) {
@@ -224,9 +216,7 @@ public class NotificacaoOrchestrator {
         );
     }
 
-    /**
-     * Notifica confirmação de agendamento
-     */
+    
     @Transactional
     public void notificarAgendamentoConfirmado(Agendamento agendamento) {
         if (agendamento.getPaciente() == null) {
@@ -271,9 +261,7 @@ public class NotificacaoOrchestrator {
         );
     }
 
-    /**
-     * Notifica cancelamento de agendamento
-     */
+    
     @Transactional
     public void notificarAgendamentoCancelado(Agendamento agendamento) {
         if (agendamento.getPaciente() == null) {
@@ -312,9 +300,7 @@ public class NotificacaoOrchestrator {
         );
     }
 
-    /**
-     * Agenda lembretes de agendamento (24h e 1h antes)
-     */
+    
     @Transactional
     public void agendarLembretesAgendamento(Agendamento agendamento) {
         if (agendamento.getPaciente() == null || agendamento.getDataHora() == null) {
@@ -329,7 +315,7 @@ public class NotificacaoOrchestrator {
         OffsetDateTime agora = OffsetDateTime.now();
         OffsetDateTime dataHoraAgendamento = agendamento.getDataHora();
         
-        // Lembrete 24h antes
+        
         OffsetDateTime lembrete24h = dataHoraAgendamento.minusHours(24);
         if (lembrete24h.isAfter(agora)) {
             Map<String, Object> params24h = criarParamsAgendamento(agendamento);
@@ -349,7 +335,7 @@ public class NotificacaoOrchestrator {
             );
         }
 
-        // Lembrete 1h antes
+        
         OffsetDateTime lembrete1h = dataHoraAgendamento.minusHours(1);
         if (lembrete1h.isAfter(agora)) {
             Map<String, Object> params1h = criarParamsAgendamento(agendamento);

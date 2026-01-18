@@ -55,11 +55,11 @@ public class EnderecoServiceImpl implements EnderecoService {
         }
 
         try {
-            // Obter tenant do usuário autenticado (com fallback para testes)
+            
             UUID tenantId = tenantService.validarTenantAtual();
             com.upsaude.entity.sistema.multitenancy.Tenant tenant = tenantService.obterTenantDoUsuarioAutenticado();
             if (tenant == null) {
-                // Fallback para testes: buscar tenant do banco quando não houver autenticação
+                
                 tenant = tenantRepository.findById(tenantId).orElse(null);
             }
             if (tenant == null) {

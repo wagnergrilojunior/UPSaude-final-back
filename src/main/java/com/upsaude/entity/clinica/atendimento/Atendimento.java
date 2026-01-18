@@ -94,9 +94,9 @@ public class Atendimento extends BaseEntity {
     @Column(name = "observacoes_internas", columnDefinition = "TEXT")
     private String observacoesInternas;
 
-    // =================================================================================
-    // CAMPOS DE INTEGRAÇÃO SUS / RNDS (FHIR ENCOUNTER)
-    // =================================================================================
+    
+    
+    
 
     @Convert(converter = com.upsaude.util.converter.ClasseAtendimentoEnumConverter.class)
     @Column(name = "classe_atendimento", length = 50)

@@ -16,24 +16,19 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.*;
 
-/**
- * Controller para monitoramento e gerenciamento de saúde do banco de dados.
- * TEMPORÁRIO: Acesso liberado para testes (remover @PreAuthorize comentado quando em produção).
- */
+
 @Slf4j
 @RestController
 @RequestMapping("/v1/admin/database")
 @RequiredArgsConstructor
 @Tag(name = "Database Health", description = "Monitoramento e gerenciamento da saúde do banco de dados")
-// @PreAuthorize("hasRole('ADMIN_SISTEMA')") // TEMPORARIAMENTE DESABILITADO PARA TESTES
+
 public class DatabaseHealthController {
 
     @PersistenceContext
     private final EntityManager entityManager;
 
-    /**
-     * Lista todas as queries ativas e represadas no banco.
-     */
+    
     @GetMapping("/queries")
     @Operation(summary = "Listar queries ativas", description = "Lista todas as queries em execução, incluindo represadas")
     public ResponseEntity<Map<String, Object>> listarQueries(
@@ -105,9 +100,7 @@ public class DatabaseHealthController {
         }
     }
 
-    /**
-     * Mata uma query específica pelo PID.
-     */
+    
     @DeleteMapping("/queries/{pid}")
     @Operation(summary = "Matar query específica", description = "Encerra uma query pelo PID do processo")
     public ResponseEntity<Map<String, Object>> matarQuery(
@@ -150,9 +143,7 @@ public class DatabaseHealthController {
         }
     }
 
-    /**
-     * Mata TODAS as queries represadas (idle in transaction > 5 min ou ativas > 30 min).
-     */
+    
     @PostMapping("/queries/kill-all")
     @Operation(summary = "Matar todas queries represadas", description = "Encerra todas queries idle in transaction >5min ou ativas >30min")
     public ResponseEntity<Map<String, Object>> matarTodasQueriesRepresadas() {
@@ -223,9 +214,7 @@ public class DatabaseHealthController {
         }
     }
 
-    /**
-     * Retorna estatísticas de dead tuples (registros mortos).
-     */
+    
     @GetMapping("/health/dead-tuples")
     @Operation(summary = "Dead tuples por tabela", description = "Lista tabelas com dead tuples e percentual")
     public ResponseEntity<Map<String, Object>> deadTuples(
@@ -294,9 +283,7 @@ public class DatabaseHealthController {
         }
     }
 
-    /**
-     * Retorna estatísticas gerais do banco de dados.
-     */
+    
     @GetMapping("/health/stats")
     @Operation(summary = "Estatísticas gerais", description = "Retorna estatísticas gerais do banco de dados")
     public ResponseEntity<Map<String, Object>> estatisticasGerais() {
@@ -334,7 +321,7 @@ public class DatabaseHealthController {
                 stats.put("total_deletes", row[7]);
             }
             
-            // Adicionar info de conexões ativas
+            
             String queryConexoes = """
                 SELECT 
                     COUNT(*) as total,
@@ -373,9 +360,7 @@ public class DatabaseHealthController {
         }
     }
 
-    /**
-     * Retorna as maiores tabelas do banco.
-     */
+    
     @GetMapping("/health/largest-tables")
     @Operation(summary = "Maiores tabelas", description = "Lista as maiores tabelas por tamanho")
     public ResponseEntity<Map<String, Object>> maioresTabelas(
@@ -438,9 +423,7 @@ public class DatabaseHealthController {
         }
     }
 
-    /**
-     * Força VACUUM em uma tabela específica.
-     */
+    
     @PostMapping("/maintenance/vacuum/{schema}/{tabela}")
     @Operation(summary = "Executar VACUUM", description = "Executa VACUUM ANALYZE em uma tabela específica")
     public ResponseEntity<Map<String, Object>> executarVacuum(
@@ -453,7 +436,7 @@ public class DatabaseHealthController {
         
         log.warn("Executando VACUUM {} em {}.{}", full ? "FULL" : "", schema, tabela);
         
-        // Validação simples para evitar SQL injection
+        
         if (!schema.matches("^[a-zA-Z_][a-zA-Z0-9_]*$") || !tabela.matches("^[a-zA-Z_][a-zA-Z0-9_]*$")) {
             Map<String, Object> error = new HashMap<>();
             error.put("erro", "Nome de schema ou tabela inválido");
@@ -491,9 +474,7 @@ public class DatabaseHealthController {
         }
     }
 
-    /**
-     * Retorna informações sobre locks no banco.
-     */
+    
     @GetMapping("/locks")
     @Operation(summary = "Locks ativos", description = "Lista todos os locks ativos no banco de dados")
     public ResponseEntity<Map<String, Object>> listarLocks() {

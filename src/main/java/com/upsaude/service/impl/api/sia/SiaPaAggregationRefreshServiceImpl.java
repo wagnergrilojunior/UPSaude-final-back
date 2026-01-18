@@ -44,11 +44,7 @@ public class SiaPaAggregationRefreshServiceImpl implements SiaPaAggregationRefre
         refreshMatView("public.sia_pa_agregado_temporal");
     }
 
-    /**
-     * Refresh automático. Por padrão, roda diariamente às 02:00 (configurável via properties).
-     *
-     * Observação: usamos REFRESH sem CONCURRENTLY para evitar requisitos adicionais (índice único + sem transação).
-     */
+    
     @Scheduled(cron = "${sia.aggregation.refresh.cron:0 0 2 * * ?}")
     public void scheduledRefresh() {
         try {
@@ -56,7 +52,7 @@ public class SiaPaAggregationRefreshServiceImpl implements SiaPaAggregationRefre
             refreshAll();
             log.info("Refresh das views materializadas do SIA-PA concluído com sucesso");
         } catch (Exception e) {
-            // Não derrubar a aplicação por falha de refresh; registrar para observabilidade.
+            
             log.warn("Falha ao executar refresh das views materializadas do SIA-PA: {}", e.getMessage(), e);
         }
     }

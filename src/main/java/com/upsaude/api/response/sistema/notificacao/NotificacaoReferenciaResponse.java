@@ -7,9 +7,7 @@ import lombok.NoArgsConstructor;
 
 import java.util.UUID;
 
-/**
- * Classe auxiliar para referências simplificadas no NotificacaoResponse
- */
+
 public class NotificacaoReferenciaResponse {
 
     @Data

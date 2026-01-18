@@ -424,7 +424,7 @@ public class ProfissionaisSaudeServiceImpl implements ProfissionaisSaudeService 
     private Tenant obterTenantAutenticadoOrThrow(UUID tenantId) {
         Tenant tenant = tenantService.obterTenantDoUsuarioAutenticado();
         if (tenant == null || !tenant.getId().equals(tenantId)) {
-            // Fallback para testes: buscar tenant do banco quando não houver autenticação
+            
             tenant = tenantRepository.findById(tenantId).orElse(null);
             if (tenant != null && tenant.getId().equals(tenantId)) {
                 return tenant;
