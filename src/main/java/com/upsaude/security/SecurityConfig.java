@@ -45,6 +45,7 @@ public class SecurityConfig {
                         // Endpoints públicos - login e verificação de acesso
                         // Paths relativos ao context-path (/api)
                         .requestMatchers("/v1/auth/login").permitAll()
+                        .requestMatchers("/v1/auth/refresh").permitAll()
                         .requestMatchers("/v1/auth/verificar-acesso").permitAll()
 
                         .requestMatchers("/v1/alergias/**").permitAll()
@@ -55,13 +56,6 @@ public class SecurityConfig {
 
                         // Endpoints de integração IBGE - públicos para sincronização administrativa
                         .requestMatchers("/v1/integracoes/ibge/**").permitAll()
-
-                        // Endpoints do Actuator - públicos para monitoramento
-                        // IMPORTANTE: Em produção, considere proteger estes endpoints com autenticação
-                        // básica
-                        // Com context-path=/api, precisamos permitir ambas variações
-                        .requestMatchers("/actuator/**").permitAll()
-                        .requestMatchers("/api/actuator/**").permitAll()
 
                         // Endpoint /error usado pelo Spring Boot para tratamento de erros
                         // O Actuator usa /error como fallback quando ocorre exceção interna

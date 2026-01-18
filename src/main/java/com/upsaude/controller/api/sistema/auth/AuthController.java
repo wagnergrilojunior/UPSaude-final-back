@@ -1,4 +1,5 @@
 package com.upsaude.controller.api.sistema.auth;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -42,8 +43,7 @@ public class AuthController {
     @PostMapping("/login")
     @Operation(summary = "Realizar login", description = "Autentica um usuário usando email e senha através do Supabase Auth")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Login realizado com sucesso",
-                    content = @Content(schema = @Schema(implementation = LoginResponse.class))),
+            @ApiResponse(responseCode = "200", description = "Login realizado com sucesso", content = @Content(schema = @Schema(implementation = LoginResponse.class))),
             @ApiResponse(responseCode = "401", description = "Credenciais inválidas"),
             @ApiResponse(responseCode = "400", description = "Dados inválidos fornecidos")
     })
@@ -62,13 +62,39 @@ public class AuthController {
         }
     }
 
+    @PostMapping("/refresh")
+    @Operation(summary = "Renovar token", description = "Renova o access token usando o refresh token. Use quando o access token expirar para evitar que o usuário precise fazer login novamente.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Token renovado com sucesso", content = @Content(schema = @Schema(implementation = LoginResponse.class))),
+            @ApiResponse(responseCode = "401", description = "Refresh token inválido ou expirado"),
+            @ApiResponse(responseCode = "400", description = "Dados inválidos fornecidos")
+    })
+    public ResponseEntity<LoginResponse> refreshToken(@RequestBody Map<String, String> request) {
+        String refreshToken = request.get("refresh_token");
+        log.debug("REQUEST POST /v1/auth/refresh");
+
+        if (refreshToken == null || refreshToken.trim().isEmpty()) {
+            log.warn("Refresh token não fornecido");
+            throw new BadRequestException("Refresh token é obrigatório");
+        }
+
+        try {
+            LoginResponse response = authService.refreshToken(refreshToken);
+            log.info("Token renovado com sucesso");
+            return ResponseEntity.ok(response);
+        } catch (UnauthorizedException ex) {
+            log.warn("Falha ao renovar token — mensagem: {}", ex.getMessage());
+            throw ex;
+        } catch (Exception ex) {
+            log.error("Erro inesperado ao renovar token", ex);
+            throw ex;
+        }
+    }
+
     @GetMapping("/verificar-acesso")
-    @Operation(
-            summary = "Verificar se usuário tem acesso ao sistema",
-            description = "Verifica se um usuário autenticado tem acesso ao sistema (se existe UsuariosSistema criado). " +
-                         "Este endpoint requer autenticação e é usado pelo frontend para verificar se precisa criar o registro.",
-            security = @SecurityRequirement(name = "bearerAuth")
-    )
+    @Operation(summary = "Verificar se usuário tem acesso ao sistema", description = "Verifica se um usuário autenticado tem acesso ao sistema (se existe UsuariosSistema criado). "
+            +
+            "Este endpoint requer autenticação e é usado pelo frontend para verificar se precisa criar o registro.", security = @SecurityRequirement(name = "bearerAuth"))
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Verificação realizada com sucesso"),
             @ApiResponse(responseCode = "401", description = "Token inválido ou não fornecido")
@@ -121,11 +147,7 @@ public class AuthController {
     }
 
     @GetMapping("/me")
-    @Operation(
-            summary = "Obter informações do usuário autenticado",
-            description = "Retorna as informações do usuário autenticado baseado no token JWT",
-            security = @SecurityRequirement(name = "bearerAuth")
-    )
+    @Operation(summary = "Obter informações do usuário autenticado", description = "Retorna as informações do usuário autenticado baseado no token JWT", security = @SecurityRequirement(name = "bearerAuth"))
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Informações do usuário retornadas com sucesso"),
             @ApiResponse(responseCode = "401", description = "Token inválido ou não fornecido"),

@@ -19,6 +19,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import jakarta.persistence.EntityManager;
+import jakarta.persistence.FlushModeType;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.criteria.Predicate;
 import java.util.ArrayList;
@@ -158,14 +159,15 @@ public class UsuariosSistemaServiceImpl implements UsuariosSistemaService {
 
             // Notificar criação de usuário
             try {
-                String nomeUsuario = usuariosSistemaSalvo.getDadosExibicao() != null 
-                        ? usuariosSistemaSalvo.getDadosExibicao().getNomeExibicao() 
-                        : (usuariosSistemaSalvo.getDadosIdentificacao() != null 
-                                ? usuariosSistemaSalvo.getDadosIdentificacao().getUsername() 
+                String nomeUsuario = usuariosSistemaSalvo.getDadosExibicao() != null
+                        ? usuariosSistemaSalvo.getDadosExibicao().getNomeExibicao()
+                        : (usuariosSistemaSalvo.getDadosIdentificacao() != null
+                                ? usuariosSistemaSalvo.getDadosIdentificacao().getUsername()
                                 : null);
                 notificacaoOrchestrator.notificarUsuarioCriado(usuariosSistemaSalvo, user.getEmail(), nomeUsuario);
             } catch (Exception e) {
-                log.warn("Erro ao enviar notificação de usuário criado. Usuário ID: {}", usuariosSistemaSalvo.getId(), e);
+                log.warn("Erro ao enviar notificação de usuário criado. Usuário ID: {}", usuariosSistemaSalvo.getId(),
+                        e);
                 // Não propagar erro para não abortar criação do usuário
             }
 
@@ -323,35 +325,42 @@ public class UsuariosSistemaServiceImpl implements UsuariosSistemaService {
         UsuariosSistema usuariosSistemaAtualizado = usuariosSistemaRepository.save(usuariosSistemaExistente);
         log.info("UsuariosSistema atualizado com sucesso. ID: {}", usuariosSistemaAtualizado.getId());
 
+        // Atualizar vínculos se fornecidos
         if (request.getEstabelecimentos() != null && !request.getEstabelecimentos().isEmpty()) {
             atualizarVinculosComPapel(usuariosSistemaAtualizado, request.getEstabelecimentos());
         } else if (request.getEstabelecimentosIds() != null) {
-
             atualizarVinculosEstabelecimentos(usuariosSistemaAtualizado, request.getEstabelecimentosIds());
         }
+
+        // Recarregar a entidade após atualizar vínculos
+        UUID usuariosSistemaId = usuariosSistemaAtualizado.getId();
+        usuariosSistemaAtualizado = usuariosSistemaRepository.findById(usuariosSistemaId)
+                .orElseThrow(
+                        () -> new NotFoundException("UsuariosSistema não encontrado com ID: " + usuariosSistemaId));
 
         // Notificar alterações
         try {
             String email = userAtualizado != null ? userAtualizado.getEmail() : null;
-            String nomeUsuario = usuariosSistemaAtualizado.getDadosExibicao() != null 
-                    ? usuariosSistemaAtualizado.getDadosExibicao().getNomeExibicao() 
-                    : (usuariosSistemaAtualizado.getDadosIdentificacao() != null 
-                            ? usuariosSistemaAtualizado.getDadosIdentificacao().getUsername() 
+            String nomeUsuario = usuariosSistemaAtualizado.getDadosExibicao() != null
+                    ? usuariosSistemaAtualizado.getDadosExibicao().getNomeExibicao()
+                    : (usuariosSistemaAtualizado.getDadosIdentificacao() != null
+                            ? usuariosSistemaAtualizado.getDadosIdentificacao().getUsername()
                             : null);
-            
+
             if (senhaAlterada && email != null) {
                 notificacaoOrchestrator.notificarSenhaAlterada(email, nomeUsuario);
             }
-            
+
             // Notificar atualização de dados pessoais se houver alterações relevantes
             if (email != null && (request.getDadosIdentificacao() != null || request.getDadosExibicao() != null)) {
-                UUID pacienteId = usuariosSistemaAtualizado.getPaciente() != null 
-                        ? usuariosSistemaAtualizado.getPaciente().getId() 
+                UUID pacienteId = usuariosSistemaAtualizado.getPaciente() != null
+                        ? usuariosSistemaAtualizado.getPaciente().getId()
                         : null;
                 notificacaoOrchestrator.notificarDadosPessoaisAtualizados(email, nomeUsuario, pacienteId, null);
             }
         } catch (Exception e) {
-            log.warn("Erro ao enviar notificações de atualização. Usuário ID: {}", usuariosSistemaAtualizado.getId(), e);
+            log.warn("Erro ao enviar notificações de atualização. Usuário ID: {}", usuariosSistemaAtualizado.getId(),
+                    e);
             // Não propagar erro
         }
 
@@ -573,14 +582,29 @@ public class UsuariosSistemaServiceImpl implements UsuariosSistemaService {
 
     private void atualizarVinculosComPapel(UsuariosSistema usuario,
             List<UsuariosSistemaRequest.EstabelecimentoVinculoRequest> vinculos) {
+        UUID usuarioId = usuario.getId();
+        UUID userId = usuario.getUser() != null ? usuario.getUser().getId() : null;
 
+        if (userId == null) {
+            log.warn("Usuário não possui userId, não é possível atualizar vínculos");
+            return;
+        }
+
+        // Flush e detach para evitar erro "shared references to a collection"
+        // O flush persiste alterações pendentes e o detach remove a entidade do
+        // contexto
+        entityManager.flush();
+        entityManager.detach(usuario);
+
+        // Buscar vínculos existentes sem tocar na coleção da entidade usuario
         List<UsuarioEstabelecimento> vinculosExistentes = usuarioEstabelecimentoRepository
-                .findByUsuarioUserId(usuario.getUser() != null ? usuario.getUser().getId() : null);
+                .findByUsuarioUserId(userId);
 
         List<UUID> novosIds = vinculos.stream()
                 .map(UsuariosSistemaRequest.EstabelecimentoVinculoRequest::getEstabelecimentoId)
                 .collect(java.util.stream.Collectors.toList());
 
+        // Desativar vínculos que não estão mais na lista
         for (UsuarioEstabelecimento vinculo : vinculosExistentes) {
             if (Boolean.TRUE.equals(vinculo.getActive()) &&
                     !novosIds.contains(vinculo.getEstabelecimento().getId())) {
@@ -590,14 +614,14 @@ public class UsuariosSistemaServiceImpl implements UsuariosSistemaService {
             }
         }
 
+        // Atualizar ou criar vínculos
         for (UsuariosSistemaRequest.EstabelecimentoVinculoRequest vinculoRequest : vinculos) {
             usuarioEstabelecimentoRepository
                     .findByUsuarioUserIdAndEstabelecimentoId(
-                            usuario.getUser() != null ? usuario.getUser().getId() : null,
+                            userId,
                             vinculoRequest.getEstabelecimentoId())
                     .ifPresentOrElse(
                             vinculoExistente -> {
-
                                 vinculoExistente.setActive(true);
                                 vinculoExistente.setTipoUsuario(vinculoRequest.getTipoUsuario());
                                 usuarioEstabelecimentoRepository.save(vinculoExistente);
@@ -605,15 +629,19 @@ public class UsuariosSistemaServiceImpl implements UsuariosSistemaService {
                                         vinculoRequest.getTipoUsuario(), vinculoRequest.getEstabelecimentoId());
                             },
                             () -> {
+                                // Recarregar a entidade usuario para garantir que está no contexto
+                                UsuariosSistema usuarioGerenciado = usuariosSistemaRepository.findById(usuarioId)
+                                        .orElseThrow(() -> new NotFoundException(
+                                                "UsuariosSistema não encontrado com ID: " + usuarioId));
 
                                 Estabelecimentos estabelecimento = estabelecimentosRepository
                                         .findById(vinculoRequest.getEstabelecimentoId())
                                         .orElseThrow(() -> new NotFoundException("Estabelecimento não encontrado"));
 
                                 UsuarioEstabelecimento vinculo = new UsuarioEstabelecimento();
-                                vinculo.setUsuario(usuario);
+                                vinculo.setUsuario(usuarioGerenciado);
                                 vinculo.setEstabelecimento(estabelecimento);
-                                vinculo.setTenant(usuario.getTenant());
+                                vinculo.setTenant(usuarioGerenciado.getTenant());
                                 vinculo.setTipoUsuario(vinculoRequest.getTipoUsuario());
                                 vinculo.setActive(true);
 
@@ -626,30 +654,51 @@ public class UsuariosSistemaServiceImpl implements UsuariosSistemaService {
 
     @Deprecated
     private void atualizarVinculosEstabelecimentos(UsuariosSistema usuario, List<UUID> estabelecimentosIds) {
+        UUID usuarioId = usuario.getId();
+        UUID userId = usuario.getUser() != null ? usuario.getUser().getId() : null;
 
+        if (userId == null) {
+            log.warn("Usuário não possui userId, não é possível atualizar vínculos");
+            return;
+        }
+
+        // Flush e detach para evitar erro "shared references to a collection"
+        // O flush persiste alterações pendentes e o detach remove a entidade do
+        // contexto
+        entityManager.flush();
+        entityManager.detach(usuario);
+
+        // Buscar vínculos existentes sem tocar na coleção da entidade usuario
         List<UsuarioEstabelecimento> vinculosExistentes = usuarioEstabelecimentoRepository
-                .findByUsuarioUserId(usuario.getUser() != null ? usuario.getUser().getId() : null);
+                .findByUsuarioUserId(userId);
 
         List<UUID> idsExistentes = vinculosExistentes.stream()
                 .filter(v -> Boolean.TRUE.equals(v.getActive()))
                 .map(v -> v.getEstabelecimento().getId())
                 .collect(Collectors.toList());
 
+        // Desativar vínculos que não estão mais na lista
         for (UsuarioEstabelecimento vinculo : vinculosExistentes) {
             if (Boolean.TRUE.equals(vinculo.getActive()) &&
                     !estabelecimentosIds.contains(vinculo.getEstabelecimento().getId())) {
                 vinculo.setActive(false);
                 usuarioEstabelecimentoRepository.save(vinculo);
-                log.debug("Vínculo desativado para usuário {} e estabelecimento {}", usuario.getId(),
+                log.debug("Vínculo desativado para usuário {} e estabelecimento {}", usuarioId,
                         vinculo.getEstabelecimento().getId());
             }
         }
 
+        // Criar novos vínculos
         List<UUID> idsParaCriar = estabelecimentosIds.stream()
                 .filter(id -> !idsExistentes.contains(id))
                 .collect(Collectors.toList());
 
-        criarVinculosEstabelecimentos(usuario, idsParaCriar);
+        if (!idsParaCriar.isEmpty()) {
+            // Recarregar a entidade usuario para garantir que está no contexto
+            UsuariosSistema usuarioGerenciado = usuariosSistemaRepository.findById(usuarioId)
+                    .orElseThrow(() -> new NotFoundException("UsuariosSistema não encontrado com ID: " + usuarioId));
+            criarVinculosEstabelecimentos(usuarioGerenciado, idsParaCriar);
+        }
     }
 
     @Override
@@ -761,10 +810,10 @@ public class UsuariosSistemaServiceImpl implements UsuariosSistemaService {
 
         // Notificar alteração de senha
         try {
-            String nomeUsuario = usuario.getDadosExibicao() != null 
-                    ? usuario.getDadosExibicao().getNomeExibicao() 
-                    : (usuario.getDadosIdentificacao() != null 
-                            ? usuario.getDadosIdentificacao().getUsername() 
+            String nomeUsuario = usuario.getDadosExibicao() != null
+                    ? usuario.getDadosExibicao().getNomeExibicao()
+                    : (usuario.getDadosIdentificacao() != null
+                            ? usuario.getDadosIdentificacao().getUsername()
                             : null);
             notificacaoOrchestrator.notificarSenhaAlterada(email, nomeUsuario);
         } catch (Exception e) {
@@ -783,6 +832,12 @@ public class UsuariosSistemaServiceImpl implements UsuariosSistemaService {
         }
         if (usuario.getConfiguracao() != null) {
             org.hibernate.Hibernate.initialize(usuario.getConfiguracao());
+        }
+
+        // Garantir que a coleção estabelecimentosVinculados seja inicializada antes do
+        // mapper
+        if (usuario.getEstabelecimentosVinculados() != null) {
+            org.hibernate.Hibernate.initialize(usuario.getEstabelecimentosVinculados());
         }
 
         UsuariosSistemaResponse response = usuariosSistemaMapper.toResponse(usuario);
@@ -882,6 +937,10 @@ public class UsuariosSistemaServiceImpl implements UsuariosSistemaService {
                     .build());
         }
 
+        // Flush antes de buscar vínculos para evitar erro "shared references to a
+        // collection"
+        entityManager.flush();
+
         List<UsuarioEstabelecimento> vinculos = usuarioEstabelecimentoRepository
                 .findByUsuarioUserId(usuario.getUser() != null ? usuario.getUser().getId() : null);
         if (vinculos != null && !vinculos.isEmpty()) {
@@ -925,17 +984,17 @@ public class UsuariosSistemaServiceImpl implements UsuariosSistemaService {
     @Transactional
     public int sincronizarUsers() {
         log.info("Iniciando sincronização de users - deletando users órfãos que não estão em usuarios_sistema");
-        
+
         List<User> usersOrfaos = userRepository.findUsersNotInUsuariosSistema();
         int totalDeletados = 0;
-        
+
         if (usersOrfaos.isEmpty()) {
             log.info("Nenhum user órfão encontrado. Sincronização concluída.");
             return 0;
         }
-        
+
         log.info("Encontrados {} users órfãos para deletar", usersOrfaos.size());
-        
+
         for (User user : usersOrfaos) {
             try {
                 UUID userId = user.getId();
@@ -943,26 +1002,27 @@ public class UsuariosSistemaServiceImpl implements UsuariosSistemaService {
                     log.warn("User com ID nulo encontrado, pulando. Email: {}", user.getEmail());
                     continue;
                 }
-                
+
                 log.debug("Deletando user órfão - ID: {}, Email: {}", userId, user.getEmail());
-                
+
                 // Verifica se o user ainda existe no banco antes de tentar deletar
                 if (!userRepository.existsById(userId)) {
                     log.debug("User já não existe no banco de dados, pulando - ID: {}", userId);
                     continue;
                 }
-                
+
                 // Deleta do Supabase Auth primeiro
                 try {
                     supabaseAuthService.deleteUser(userId);
                     log.debug("User deletado do Supabase Auth - ID: {}", userId);
                 } catch (Exception e) {
-                    log.warn("Erro ao deletar user do Supabase Auth (pode não existir) - ID: {}, Erro: {}", 
+                    log.warn("Erro ao deletar user do Supabase Auth (pode não existir) - ID: {}, Erro: {}",
                             userId, e.getMessage());
                     // Continua mesmo se falhar no Supabase Auth, pois pode não existir mais lá
                 }
-                
-                // Deleta do banco de dados local usando deleteById e flush imediato para evitar problemas de batch
+
+                // Deleta do banco de dados local usando deleteById e flush imediato para evitar
+                // problemas de batch
                 try {
                     userRepository.deleteById(userId);
                     try {
@@ -985,7 +1045,8 @@ public class UsuariosSistemaServiceImpl implements UsuariosSistemaService {
                     totalDeletados++; // Conta como deletado mesmo que já tenha sido
                 } catch (ObjectOptimisticLockingFailureException e) {
                     // User já foi deletado (ObjectOptimisticLockingFailureException)
-                    log.debug("User já foi deletado (ObjectOptimisticLockingFailureException), continuando - ID: {}", userId);
+                    log.debug("User já foi deletado (ObjectOptimisticLockingFailureException), continuando - ID: {}",
+                            userId);
                     totalDeletados++; // Conta como deletado mesmo que já tenha sido
                 } catch (Exception e) {
                     // Se falhar por outro motivo, verifica se foi porque o user já não existe
@@ -997,14 +1058,14 @@ public class UsuariosSistemaServiceImpl implements UsuariosSistemaService {
                         // Não re-lança, apenas registra o erro e continua
                     }
                 }
-                
+
             } catch (Exception e) {
-                log.error("Erro ao deletar user órfão - ID: {}, Email: {}, Erro: {}", 
+                log.error("Erro ao deletar user órfão - ID: {}, Email: {}, Erro: {}",
                         user.getId(), user.getEmail(), e.getMessage(), e);
                 // Continua com os próximos users mesmo se um falhar
             }
         }
-        
+
         log.info("Sincronização concluída. Total de users deletados: {}", totalDeletados);
         return totalDeletados;
     }
