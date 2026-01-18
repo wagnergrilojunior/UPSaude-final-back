@@ -135,20 +135,21 @@ public class EstadosServiceImpl implements EstadosService {
         try {
             // OTIMIZAÇÃO: Verificar se dados realmente mudaram antes de fazer UPDATE
             Estados estadoExistente = estadosRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("Estado não encontrado com ID: " + id));
-            
+                    .orElseThrow(() -> new NotFoundException("Estado não encontrado com ID: " + id));
+
             if (!precisaAtualizar(estadoExistente, request)) {
                 log.debug("Dados do estado {} não mudaram. Skip UPDATE para evitar dead tuples.", id);
                 return responseBuilder.build(estadoExistente);
             }
-            
+
             Estados updated = updater.atualizar(id, request);
             return responseBuilder.build(updated);
         } catch (NotFoundException e) {
             log.warn("Tentativa de atualizar estado não existente. ID: {}", id);
             throw e;
         } catch (BadRequestException e) {
-            log.warn("Erro de validação ao atualizar estado. ID: {}, Request: {}. Erro: {}", id, request, e.getMessage());
+            log.warn("Erro de validação ao atualizar estado. ID: {}, Request: {}. Erro: {}", id, request,
+                    e.getMessage());
             throw e;
         } catch (DataAccessException e) {
             log.error("Erro de acesso a dados ao atualizar estado. ID: {}, Request: {}", id, request, e);
@@ -158,18 +159,16 @@ public class EstadosServiceImpl implements EstadosService {
             throw e;
         }
     }
-    
+
     /**
-     * Verifica se os dados do estado realmente mudaram para evitar UPDATE desnecessário.
+     * Verifica se os dados do estado realmente mudaram para evitar UPDATE
+     * desnecessário.
      * Isso reduz dead tuples no PostgreSQL e melhora performance.
      */
     private boolean precisaAtualizar(Estados existente, EstadosRequest request) {
         return !Objects.equals(existente.getSigla(), request.getSigla())
-            || !Objects.equals(existente.getNome(), request.getNome())
-            || !Objects.equals(existente.getCodigoIbge(), request.getCodigoIbge())
-            || !Objects.equals(existente.getNomeOficialIbge(), request.getNomeOficialIbge())
-            || !Objects.equals(existente.getSiglaIbge(), request.getSiglaIbge())
-            || !Objects.equals(existente.getRegiaoIbge(), request.getRegiaoIbge());
+                || !Objects.equals(existente.getNome(), request.getNome())
+                || !Objects.equals(existente.getCodigoIbge(), request.getCodigoIbge());
     }
 
     @Override
@@ -184,7 +183,7 @@ public class EstadosServiceImpl implements EstadosService {
             }
 
             Estados entity = estadosRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("Estado não encontrado com ID: " + id));
+                    .orElseThrow(() -> new NotFoundException("Estado não encontrado com ID: " + id));
 
             domainService.validarPodeDeletar(entity);
             estadosRepository.delete(Objects.requireNonNull(entity));
@@ -233,7 +232,7 @@ public class EstadosServiceImpl implements EstadosService {
         }
 
         Estados entity = estadosRepository.findById(id)
-            .orElseThrow(() -> new NotFoundException("Estado não encontrado com ID: " + id));
+                .orElseThrow(() -> new NotFoundException("Estado não encontrado com ID: " + id));
 
         domainService.validarPodeInativar(entity);
         entity.setActive(false);

@@ -8,6 +8,9 @@ import com.upsaude.api.response.sistema.auth.LoginResponse;
 public interface AuthService {
 
     LoginResponse login(LoginRequest request);
+
+    LoginResponse refreshToken(String refreshToken);
+
     boolean verificarAcessoAoSistema(UUID userId);
 
 }
