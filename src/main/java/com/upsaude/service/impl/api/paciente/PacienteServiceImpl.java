@@ -185,7 +185,7 @@ public class PacienteServiceImpl implements PacienteService {
             UUID tenantId = tenantService.validarTenantAtual();
             Paciente paciente = pacienteUpdater.atualizar(id, request, tenantId);
             
-            // Notificar atualização de dados pessoais
+            
             try {
                 String email = obterEmailPaciente(paciente);
                 if (email != null && !email.trim().isEmpty()) {
@@ -193,12 +193,12 @@ public class PacienteServiceImpl implements PacienteService {
                             email, 
                             paciente.getNomeCompleto(), 
                             paciente.getId(),
-                            null // estabelecimentoId pode ser obtido se necessário
+                            null 
                     );
                 }
             } catch (Exception e) {
                 log.warn("Erro ao enviar notificação de dados pessoais atualizados. Paciente ID: {}", id, e);
-                // Não propagar erro
+                
             }
             
             return responseBuilder.build(paciente);

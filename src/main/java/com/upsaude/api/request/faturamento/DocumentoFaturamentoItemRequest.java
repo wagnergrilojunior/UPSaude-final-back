@@ -33,7 +33,7 @@ public class DocumentoFaturamentoItemRequest {
     private BigDecimal valorUnitario;
     private BigDecimal valorTotal;
 
-    private String origemTipo; // ATENDIMENTO | AGENDAMENTO | GUIA | OUTRO
+    private String origemTipo; 
     private UUID origemId;
 
     private String payloadLayoutItem;

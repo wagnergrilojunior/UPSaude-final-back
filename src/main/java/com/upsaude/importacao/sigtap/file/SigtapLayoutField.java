@@ -12,5 +12,5 @@ public class SigtapLayoutField {
     private int tamanho;
     private int inicio;
     private int fim;
-    private String tipo; // VARCHAR2, NUMBER, CHAR
+    private String tipo; 
 }

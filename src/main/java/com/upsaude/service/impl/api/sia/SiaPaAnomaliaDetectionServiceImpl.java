@@ -60,11 +60,11 @@ public class SiaPaAnomaliaDetectionServiceImpl implements SiaPaAnomaliaDetection
             return repository.findByCompetenciaAndUf(competencia, uf.trim().toUpperCase(), pageable)
                     .map(this::toResponse);
         } catch (org.springframework.dao.InvalidDataAccessResourceUsageException e) {
-            // Se a tabela não existir, retorna página vazia
+            
             log.debug("Tabela sia_pa_anomalia não encontrada, retornando lista vazia");
             return new PageImpl<>(List.of(), pageable, 0);
         } catch (org.hibernate.exception.SQLGrammarException e) {
-            // Se a tabela não existir (via Hibernate), retorna página vazia
+            
             log.debug("Tabela sia_pa_anomalia não encontrada, retornando lista vazia");
             return new PageImpl<>(List.of(), pageable, 0);
         }
@@ -79,8 +79,8 @@ public class SiaPaAnomaliaDetectionServiceImpl implements SiaPaAnomaliaDetection
     }
 
     private int detectarDivergenciaValorSigtap(String competencia, String uf) {
-        // Compara valor aprovado médio do procedimento com valor SIGTAP ambulatorial
-        // Insere uma anomalia por procedimento quando diferença relativa >= thresholdValueDifference
+        
+        
         String sql = """
                 INSERT INTO public.sia_pa_anomalia (
                     competencia, uf, tipo_anomalia, severidade, chave, descricao,
@@ -149,7 +149,7 @@ public class SiaPaAnomaliaDetectionServiceImpl implements SiaPaAnomaliaDetection
     }
 
     private int detectarOutliersEstabelecimento(String competencia, String uf) {
-        // Outlier simples: valor aprovado total acima de média + N*desvio
+        
         Map<String, Object> stats = jdbcTemplate.queryForMap("""
                 SELECT
                     AVG(ae.valor_aprovado_total) AS media,

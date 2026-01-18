@@ -31,7 +31,7 @@ public class CnesController {
     private final CnesEquipamentoService equipamentoService;
     private final CnesLeitoService leitoService;
 
-    // ========== ESTABELECIMENTOS ==========
+    
 
     @PostMapping("/estabelecimentos/{codigoCnes}/sincronizar")
     @Operation(summary = "Sincronizar estabelecimento por CNES", description = "Sincroniza um estabelecimento específico do CNES pelo código CNES (7 dígitos). "
@@ -123,7 +123,7 @@ public class CnesController {
         }
     }
 
-    // ========== PROFISSIONAIS ==========
+    
 
     @PostMapping("/profissionais/cns/{numeroCns}/sincronizar")
     @Operation(summary = "Sincronizar profissional por CNS", description = "Sincroniza um profissional do CNES pelo CNS (15 dígitos)")
@@ -167,8 +167,8 @@ public class CnesController {
         }
     }
 
-    // ========== ENDPOINTS DE CONSULTA DE PROFISSIONAIS SINCRONIZADOS (BANCO LOCAL)
-    // ==========
+    
+    
 
     @GetMapping("/profissionais/local/cpf/{cpf}")
     @Operation(summary = "Buscar profissional sincronizado por CPF", description = "Busca um profissional já sincronizado no banco de dados local pelo CPF")
@@ -224,7 +224,7 @@ public class CnesController {
         }
     }
 
-    // ========== ENDPOINTS DE CONSULTA DIRETA NO CNES (SEM PERSISTIR) ==========
+    
 
     @GetMapping("/profissionais/cns/{numeroCns}")
     @Operation(summary = "Buscar profissional no CNES por CNS", description = "Busca um profissional no CNES sem sincronizar (apenas consulta)")
@@ -262,7 +262,7 @@ public class CnesController {
         }
     }
 
-    // ========== EQUIPES ==========
+    
 
     @PostMapping("/equipes/estabelecimento/{codigoCnes}/sincronizar")
     @Operation(summary = "Sincronizar equipes de um estabelecimento", description = "Sincroniza todas as equipes de um estabelecimento do CNES")
@@ -305,7 +305,7 @@ public class CnesController {
         }
     }
 
-    // ========== VINCULAÇÕES ==========
+    
 
     @PostMapping("/vinculacoes/profissional/{cpfOuCns}/sincronizar")
     @Operation(summary = "Sincronizar vinculações de um profissional", description = "Sincroniza todas as vinculações profissionais de um profissional do CNES")
@@ -347,7 +347,7 @@ public class CnesController {
         }
     }
 
-    // ========== EQUIPAMENTOS ==========
+    
 
     @PostMapping("/equipamentos/estabelecimento/{codigoCnes}/sincronizar")
     @Operation(summary = "Sincronizar equipamentos de um estabelecimento", description = "Sincroniza todos os equipamentos de um estabelecimento do CNES")
@@ -369,7 +369,7 @@ public class CnesController {
         }
     }
 
-    // ========== LEITOS ==========
+    
 
     @PostMapping("/leitos/estabelecimento/{codigoCnes}/sincronizar")
     @Operation(summary = "Sincronizar leitos de um estabelecimento", description = "Sincroniza todos os leitos de um estabelecimento do CNES")

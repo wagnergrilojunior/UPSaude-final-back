@@ -11,9 +11,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-/**
- * Response DTO para dashboard consolidado do tenant.
- */
+
 @Data
 @Builder
 @NoArgsConstructor
@@ -24,29 +22,29 @@ public class DashboardTenantResponse {
     private LocalDate dataInicio;
     private LocalDate dataFim;
 
-    // KPIs principais
+    
     private Long totalAtendimentos;
     private Long totalConsultas;
     private Long totalAgendamentos;
     private Long totalPacientes;
     private Long totalEstabelecimentos;
 
-    // Evolução temporal (série de dados por dia)
+    
     private List<EvolucaoTemporal> evolucaoTemporal;
 
-    // Top procedimentos realizados
+    
     private List<ItemTopProcedimento> topProcedimentos;
 
-    // Top CID diagnosticados
+    
     private List<ItemTopCid> topCids;
 
-    // Top médicos por produção
+    
     private List<ItemTopMedico> topMedicos;
 
-    // Comparação com período anterior
+    
     private ComparacaoPeriodo comparacaoPeriodoAnterior;
 
-    // Metas e indicadores
+    
     private Map<String, BigDecimal> indicadores;
 
     @Data

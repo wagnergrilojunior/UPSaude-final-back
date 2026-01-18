@@ -180,12 +180,7 @@ public class Cirurgia extends BaseEntity {
         }
     }
 
-    /**
-     * Calcula o valor total da cirurgia baseado nos procedimentos SIGTAP.
-     * Considera os valores dos procedimentos oficiais do SIGTAP.
-     * 
-     * @return BigDecimal com o valor total calculado ou null se não houver procedimentos
-     */
+    
     public BigDecimal calcularValorTotalProcedimentos() {
         if (procedimentos == null || procedimentos.isEmpty()) {
             return null;

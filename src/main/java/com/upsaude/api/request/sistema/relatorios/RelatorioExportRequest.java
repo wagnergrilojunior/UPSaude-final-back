@@ -10,9 +10,7 @@ import lombok.NoArgsConstructor;
 
 import java.util.UUID;
 
-/**
- * Request DTO para exportação de relatórios.
- */
+
 @Data
 @Builder
 @NoArgsConstructor

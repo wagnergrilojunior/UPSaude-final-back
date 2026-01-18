@@ -25,7 +25,7 @@ public class CnesIntegrationController {
 
     @GetMapping("/importar/{cnes}")
     @Operation(summary = "Importar dados do CNES (Preview)", description = "Busca dados no CNES e retorna um DTO para visualização, sem persistir.")
-    @PreAuthorize("hasAuthority('CNES_CONSULTAR')") // Assuming permission
+    @PreAuthorize("hasAuthority('CNES_CONSULTAR')") 
     public ResponseEntity<CnesEstabelecimentoDTO> importarDados(
             @Parameter(description = "Código CNES (7 dígitos)", required = true) @PathVariable String cnes) {
         log.info("Recebida requisição para importar dados CNES: {}", cnes);
@@ -35,7 +35,7 @@ public class CnesIntegrationController {
 
     @PostMapping("/sincronizar/{estabelecimentoId}")
     @Operation(summary = "Sincronização Completa de Estabelecimento", description = "Executa a sincronização oficial e completa (Estabelecimento, Leitos, Equipamentos, Histórico) para um estabelecimento já cadastrado.")
-    @PreAuthorize("hasAuthority('CNES_EDITAR')") // Assuming permission
+    @PreAuthorize("hasAuthority('CNES_EDITAR')") 
     public ResponseEntity<CnesSyncResultDTO> sincronizarCompleto(
             @Parameter(description = "ID do Estabelecimento", required = true) @PathVariable UUID estabelecimentoId) {
         log.info("Recebida requisição para sincronização completa do estabelecimento: {}", estabelecimentoId);
@@ -45,7 +45,7 @@ public class CnesIntegrationController {
 
     @PostMapping("/validar/{estabelecimentoId}")
     @Operation(summary = "Validar Estabelecimento com CNES", description = "Compara os dados locais com os dados do CNES e aponta divergências.")
-    @PreAuthorize("hasAuthority('CNES_CONSULTAR')") // Assuming permission
+    @PreAuthorize("hasAuthority('CNES_CONSULTAR')") 
     public ResponseEntity<CnesSyncResultDTO> validar(
             @Parameter(description = "ID do Estabelecimento", required = true) @PathVariable UUID estabelecimentoId) {
         log.info("Recebida requisição para validar estabelecimento: {}", estabelecimentoId);

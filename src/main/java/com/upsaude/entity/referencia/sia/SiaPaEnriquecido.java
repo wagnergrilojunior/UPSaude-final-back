@@ -10,11 +10,7 @@ import org.hibernate.annotations.Immutable;
 
 import java.math.BigDecimal;
 
-/**
- * Representa um registro do SIA-PA com campos enriquecidos via JOINs (SIGTAP/CID e dados descritivos).
- *
- * Fonte: VIEW `public.sia_pa_enriquecido_view` (não é persistida pela aplicação).
- */
+
 @Entity
 @Immutable
 @Table(name = "sia_pa_enriquecido_view", schema = "public")
@@ -22,7 +18,7 @@ import java.math.BigDecimal;
 @EqualsAndHashCode(callSuper = true)
 public class SiaPaEnriquecido extends BaseEntityWithoutTenant {
 
-    // Campos base (subset do sia_pa)
+    
     @Column(name = "competencia", length = 6, nullable = false)
     private String competencia;
 
@@ -68,7 +64,7 @@ public class SiaPaEnriquecido extends BaseEntityWithoutTenant {
     @Column(name = "valor_aprovado", precision = 14, scale = 2)
     private BigDecimal valorAprovado;
 
-    // Enriquecimento SIGTAP
+    
     @Column(name = "procedimento_nome")
     private String procedimentoNome;
 
@@ -96,11 +92,11 @@ public class SiaPaEnriquecido extends BaseEntityWithoutTenant {
     @Column(name = "procedimento_grupo_nome")
     private String procedimentoGrupoNome;
 
-    // Enriquecimento CID
+    
     @Column(name = "cid_principal_descricao")
     private String cidPrincipalDescricao;
 
-    // Enriquecimento Estabelecimento (descritivo)
+    
     @Column(name = "estabelecimento_nome")
     private String estabelecimentoNome;
 

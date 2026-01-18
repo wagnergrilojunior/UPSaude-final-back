@@ -133,7 +133,7 @@ public class EstadosServiceImpl implements EstadosService {
         }
 
         try {
-            // OTIMIZAÇÃO: Verificar se dados realmente mudaram antes de fazer UPDATE
+            
             Estados estadoExistente = estadosRepository.findById(id)
                     .orElseThrow(() -> new NotFoundException("Estado não encontrado com ID: " + id));
 
@@ -160,11 +160,7 @@ public class EstadosServiceImpl implements EstadosService {
         }
     }
 
-    /**
-     * Verifica se os dados do estado realmente mudaram para evitar UPDATE
-     * desnecessário.
-     * Isso reduz dead tuples no PostgreSQL e melhora performance.
-     */
+    
     private boolean precisaAtualizar(Estados existente, EstadosRequest request) {
         return !Objects.equals(existente.getSigla(), request.getSigla())
                 || !Objects.equals(existente.getNome(), request.getNome())

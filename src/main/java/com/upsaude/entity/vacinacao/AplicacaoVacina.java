@@ -49,7 +49,7 @@ public class AplicacaoVacina {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
-    // === Identificadores FHIR ===
+    
     @Column(name = "fhir_identifier", length = 255)
     private String fhirIdentifier;
 
@@ -64,17 +64,17 @@ public class AplicacaoVacina {
     @Column(name = "fhir_status_reason_descricao", length = 255)
     private String fhirStatusReasonDescricao;
 
-    // === Paciente ===
+    
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "paciente_id", nullable = false)
     private Paciente paciente;
 
-    // === Vacina ===
+    
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "imunobiologico_id", nullable = false)
     private Imunobiologico imunobiologico;
 
-    // === Lote e Fabricante ===
+    
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "lote_id")
     private LoteVacina lote;
@@ -89,7 +89,7 @@ public class AplicacaoVacina {
     @Column(name = "data_validade")
     private LocalDate dataValidade;
 
-    // === Dose ===
+    
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "tipo_dose_id")
     private TipoDose tipoDose;
@@ -103,7 +103,7 @@ public class AplicacaoVacina {
     @Column(name = "dose_unidade", length = 50)
     private String doseUnidade;
 
-    // === Local e Via ===
+    
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "local_aplicacao_id")
     private LocalAplicacao localAplicacao;
@@ -112,12 +112,12 @@ public class AplicacaoVacina {
     @JoinColumn(name = "via_administracao_id")
     private ViaAdministracao viaAdministracao;
 
-    // === Estratégia ===
+    
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "estrategia_id")
     private EstrategiaVacinacao estrategia;
 
-    // === Data e Hora ===
+    
     @Column(name = "data_aplicacao", nullable = false)
     private OffsetDateTime dataAplicacao;
 
@@ -125,7 +125,7 @@ public class AplicacaoVacina {
     @Builder.Default
     private OffsetDateTime dataRegistro = OffsetDateTime.now();
 
-    // === Profissional ===
+    
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "profissional_id")
     private ProfissionaisSaude profissional;
@@ -133,12 +133,12 @@ public class AplicacaoVacina {
     @Column(name = "profissional_funcao", length = 100)
     private String profissionalFuncao;
 
-    // === Estabelecimento ===
+    
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "estabelecimento_id")
     private Estabelecimentos estabelecimento;
 
-    // === Fonte e Origem ===
+    
     @Column(name = "fonte_primaria")
     @Builder.Default
     private Boolean fontePrimaria = true;
@@ -146,7 +146,7 @@ public class AplicacaoVacina {
     @Column(name = "origem_registro", length = 100)
     private String origemRegistro;
 
-    // === Subpotência ===
+    
     @Column(name = "dose_subpotente")
     @Builder.Default
     private Boolean doseSubpotente = false;
@@ -154,18 +154,18 @@ public class AplicacaoVacina {
     @Column(name = "motivo_subpotencia", columnDefinition = "TEXT")
     private String motivoSubpotencia;
 
-    // === Programa ===
+    
     @Column(name = "elegibilidade_programa", length = 50)
     private String elegibilidadePrograma;
 
     @Column(name = "fonte_financiamento", length = 100)
     private String fonteFinanciamento;
 
-    // === Observações ===
+    
     @Column(name = "observacoes", columnDefinition = "TEXT")
     private String observacoes;
 
-    // === Sincronização FHIR ===
+    
     @Column(name = "fhir_resource_id", length = 255)
     private String fhirResourceId;
 
@@ -176,7 +176,7 @@ public class AplicacaoVacina {
     @Column(name = "fhir_last_sync")
     private OffsetDateTime fhirLastSync;
 
-    // === Tenant ===
+    
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "tenant_id", nullable = false)
     private Tenant tenant;
@@ -185,7 +185,7 @@ public class AplicacaoVacina {
     @Builder.Default
     private Boolean ativo = true;
 
-    // === Auditoria ===
+    
     @Column(name = "criado_em", nullable = false, updatable = false)
     private OffsetDateTime criadoEm;
 
@@ -200,7 +200,7 @@ public class AplicacaoVacina {
     @JoinColumn(name = "atualizado_por")
     private UsuariosSistema atualizadoPor;
 
-    // === Relacionamentos ===
+    
     @OneToMany(mappedBy = "aplicacao", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
     private List<AplicacaoVacinaReacao> reacoes = new ArrayList<>();

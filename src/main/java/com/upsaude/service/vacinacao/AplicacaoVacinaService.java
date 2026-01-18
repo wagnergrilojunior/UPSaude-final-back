@@ -308,21 +308,21 @@ public class AplicacaoVacinaService {
                 .orElseThrow(() -> new NotFoundException("Imunobiológico não encontrado"));
 
         for (com.upsaude.entity.clinica.prontuario.AlergiaPaciente alergia : alergiasAtivas) {
-            // Validação 1: Se o alérgeno é o próprio imunobiológico
+            
             if (alergia.getAlergeno() != null && alergia.getAlergeno().getNome() != null &&
                     imunobiologico.getNome().toLowerCase().contains(alergia.getAlergeno().getNome().toLowerCase())) {
                 throw new BadRequestException("Contraindicação: Paciente possui alergia ativa registrada para "
                         + alergia.getAlergeno().getNome());
             }
 
-            // Validação 2: Se a categoria da alergia é "biologic" (biológico), emitir
-            // alerta mais genérico
+            
+            
             if (alergia.getCategoriaAgente() != null
                     && "biologic".equalsIgnoreCase(alergia.getCategoriaAgente().getCodigoFhir())) {
                 log.warn("Alerta: Paciente {} possui alergia ativa a agente biológico: {}", pacienteId,
                         alergia.getDescricao());
-                // Poderíamos bloquear aqui, mas por enquanto vamos deixar como aviso ou
-                // bloqueio se for o mesmo nome
+                
+                
             }
         }
     }

@@ -40,7 +40,7 @@ public class SiaPaDashboardServiceImpl implements SiaPaDashboardService {
 
         String ufEfetiva = uf.trim().toUpperCase();
 
-        // Defaults para tendência: últimos 12 meses até a competência atual, se não informado.
+        
         String inicio = competenciaInicio;
         String fim = competenciaFim;
         if (!StringUtils.hasText(inicio) || !StringUtils.hasText(fim)) {
@@ -84,7 +84,7 @@ public class SiaPaDashboardServiceImpl implements SiaPaDashboardService {
     }
 
     private String calcularCompetenciaMinusMeses(String competencia, int meses) {
-        // competencia = AAAAMM
+        
         if (competencia == null || competencia.length() < 6) return competencia;
         int ano = Integer.parseInt(competencia.substring(0, 4));
         int mes = Integer.parseInt(competencia.substring(4, 6));

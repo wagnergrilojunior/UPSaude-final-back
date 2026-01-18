@@ -52,16 +52,16 @@ public class TenantServiceImpl implements TenantService {
             throw new BadRequestException("Dados do tenant são obrigatórios");
         }
 
-        // Validar unicidade antes de criar
+        
         validarUnicidadeParaCriacao(request);
 
-        // Validar código IBGE se fornecido
+        
         validarCodigoIbge(request.getCodigoIbgeMunicipio());
 
         Tenant tenant = tenantMapper.fromRequest(request);
         tenant.setAtivo(true);
 
-        // Garantir que consorcio tenha valor padrão se não fornecido
+        
         if (tenant.getConsorcio() == null) {
             tenant.setConsorcio(false);
         }
@@ -161,25 +161,23 @@ public class TenantServiceImpl implements TenantService {
     }
 
     private void atualizarDadosTenant(Tenant tenant, TenantRequest request) {
-        // Validar unicidade antes de atualizar
+        
         validarUnicidadeParaAtualizacao(tenant.getId(), request);
 
-        // Validar código IBGE se fornecido
+        
         validarCodigoIbge(request.getCodigoIbgeMunicipio());
 
         tenantMapper.updateFromRequest(request, tenant);
 
-        // Garantir que consorcio tenha valor padrão se não fornecido na atualização
+        
         if (tenant.getConsorcio() == null) {
             tenant.setConsorcio(false);
         }
     }
 
-    /**
-     * Valida unicidade de email, CNPJ e slug antes de criar um novo tenant
-     */
+    
     private void validarUnicidadeParaCriacao(TenantRequest request) {
-        // Validar email
+        
         if (request.getContato() != null && request.getContato().getEmail() != null
                 && !request.getContato().getEmail().trim().isEmpty()) {
             String email = request.getContato().getEmail().trim();
@@ -188,7 +186,7 @@ public class TenantServiceImpl implements TenantService {
             });
         }
 
-        // Validar CNPJ
+        
         if (request.getDadosIdentificacao() != null && request.getDadosIdentificacao().getCnpj() != null
                 && !request.getDadosIdentificacao().getCnpj().trim().isEmpty()) {
             String cnpj = DocumentoUtil.somenteDigitos(request.getDadosIdentificacao().getCnpj());
@@ -198,7 +196,7 @@ public class TenantServiceImpl implements TenantService {
             });
         }
 
-        // Validar slug
+        
         if (request.getSlug() != null && !request.getSlug().trim().isEmpty()) {
             String slug = request.getSlug().trim();
             tenantRepository.findBySlug(slug).ifPresent(t -> {
@@ -207,11 +205,9 @@ public class TenantServiceImpl implements TenantService {
         }
     }
 
-    /**
-     * Valida unicidade de email, CNPJ e slug antes de atualizar um tenant existente
-     */
+    
     private void validarUnicidadeParaAtualizacao(UUID tenantId, TenantRequest request) {
-        // Validar email
+        
         if (request.getContato() != null && request.getContato().getEmail() != null
                 && !request.getContato().getEmail().trim().isEmpty()) {
             String email = request.getContato().getEmail().trim();
@@ -220,7 +216,7 @@ public class TenantServiceImpl implements TenantService {
             });
         }
 
-        // Validar CNPJ
+        
         if (request.getDadosIdentificacao() != null && request.getDadosIdentificacao().getCnpj() != null
                 && !request.getDadosIdentificacao().getCnpj().trim().isEmpty()) {
             String cnpj = DocumentoUtil.somenteDigitos(request.getDadosIdentificacao().getCnpj());
@@ -230,7 +226,7 @@ public class TenantServiceImpl implements TenantService {
             });
         }
 
-        // Validar slug
+        
         if (request.getSlug() != null && !request.getSlug().trim().isEmpty()) {
             String slug = request.getSlug().trim();
             tenantRepository.findBySlugExcludingId(slug, tenantId).ifPresent(t -> {
@@ -239,9 +235,7 @@ public class TenantServiceImpl implements TenantService {
         }
     }
 
-    /**
-     * Valida se o código IBGE do município existe na base de dados
-     */
+    
     private void validarCodigoIbge(String codigoIbge) {
         if (codigoIbge != null && !codigoIbge.trim().isEmpty()) {
             String codigo = codigoIbge.trim();

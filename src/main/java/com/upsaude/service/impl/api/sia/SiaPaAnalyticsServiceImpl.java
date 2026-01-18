@@ -34,7 +34,7 @@ public class SiaPaAnalyticsServiceImpl implements SiaPaAnalyticsService {
             throw new BadRequestException("competenciaInicio e competenciaFim são obrigatórias");
         }
 
-        // Usa a materialized view sia_pa_agregado_temporal
+        
         List<SiaPaTendenciaResponse.PontoTendencia> pontos = jdbcTemplate.query("""
                         SELECT
                             t.competencia,
@@ -78,7 +78,7 @@ public class SiaPaAnalyticsServiceImpl implements SiaPaAnalyticsService {
             throw new BadRequestException("competenciaInicio e competenciaFim são obrigatórias");
         }
 
-        // Usa a materialized view sia_pa_agregado_temporal
+        
         List<SiaPaSazonalidadeResponse.ItemMes> meses = jdbcTemplate.query("""
                         WITH base AS (
                             SELECT
@@ -122,7 +122,7 @@ public class SiaPaAnalyticsServiceImpl implements SiaPaAnalyticsService {
             throw new BadRequestException("competenciaBase e competenciaComparacao são obrigatórias");
         }
 
-        // Usa a materialized view sia_pa_agregado_temporal
+        
         Map<String, Object> base = jdbcTemplate.queryForMap("""
                 SELECT
                     COALESCE(SUM(valor_aprovado_total), 0) AS valor_aprovado_total,
@@ -179,7 +179,7 @@ public class SiaPaAnalyticsServiceImpl implements SiaPaAnalyticsService {
         if (!StringUtils.hasText(competencia)) throw new BadRequestException("competencia é obrigatória");
         int lim = limit != null && limit > 0 ? Math.min(limit, 200) : 20;
 
-        // Usa a materialized view sia_pa_agregado_estabelecimento
+        
         List<SiaPaRankingResponse.ItemRanking> itens = jdbcTemplate.query("""
                         SELECT
                             ae.codigo_cnes AS chave,

@@ -33,7 +33,7 @@ public class GlosaRequest {
 
     @NotBlank(message = "Tipo é obrigatório")
     @Size(max = 20, message = "Tipo deve ter no máximo 20 caracteres")
-    private String tipo; // TOTAL | PARCIAL
+    private String tipo; 
 
     @NotNull(message = "Valor glosado é obrigatório")
     @Positive(message = "Valor glosado deve ser maior que zero")
@@ -46,6 +46,6 @@ public class GlosaRequest {
 
     @NotBlank(message = "Status é obrigatório")
     @Size(max = 30, message = "Status deve ter no máximo 30 caracteres")
-    private String status; // ABERTA | CONTESTADA | ACEITA | REVERTIDA
+    private String status; 
 }
 

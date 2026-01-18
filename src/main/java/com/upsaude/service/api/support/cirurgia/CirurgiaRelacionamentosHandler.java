@@ -91,7 +91,7 @@ public class CirurgiaRelacionamentosHandler {
             return;
         }
 
-        // Limpar procedimentos existentes antes de adicionar novos
+        
         if (entity.getProcedimentos() == null) {
             entity.setProcedimentos(new ArrayList<>());
         } else {
@@ -131,15 +131,15 @@ public class CirurgiaRelacionamentosHandler {
             return;
         }
 
-        // Limpar equipes existentes antes de adicionar novas
+        
         if (entity.getEquipe() == null) {
             entity.setEquipe(new ArrayList<>());
         } else {
             entity.getEquipe().clear();
         }
 
-        // Criar uma única equipe para todos os profissionais listados na requisição
-        // simplificada
+        
+        
         EquipeCirurgica equipe = new EquipeCirurgica();
         equipe.setCirurgia(entity);
         equipe.setTenant(tenant);
@@ -149,7 +149,7 @@ public class CirurgiaRelacionamentosHandler {
         equipe.setMedicos(new ArrayList<>());
 
         for (UUID profId : request.getEquipe()) {
-            // Valida acesso e obtém o profissional
+            
             ProfissionaisSaude profissional = profissionaisSaudeTenantEnforcer.validarAcesso(profId, tenantId);
 
             EquipeCirurgicaProfissional equipeProfissional = new EquipeCirurgicaProfissional();

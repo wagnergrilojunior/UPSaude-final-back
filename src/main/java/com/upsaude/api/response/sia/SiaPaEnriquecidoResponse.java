@@ -15,7 +15,7 @@ import java.util.UUID;
 @AllArgsConstructor
 public class SiaPaEnriquecidoResponse {
 
-    // Base
+    
     private UUID id;
     private OffsetDateTime criadoEm;
     private OffsetDateTime atualizadoEm;
@@ -40,7 +40,7 @@ public class SiaPaEnriquecidoResponse {
     private BigDecimal valorProduzido;
     private BigDecimal valorAprovado;
 
-    // SIGTAP
+    
     private String procedimentoNome;
     private String procedimentoTipoComplexidade;
     private String procedimentoSexoPermitido;
@@ -51,10 +51,10 @@ public class SiaPaEnriquecidoResponse {
     private String procedimentoSubgrupoNome;
     private String procedimentoGrupoNome;
 
-    // CID
+    
     private String cidPrincipalDescricao;
 
-    // Estabelecimento
+    
     private String estabelecimentoNome;
     private String estabelecimentoCnpj;
     private String estabelecimentoCodigoIbgeMunicipio;

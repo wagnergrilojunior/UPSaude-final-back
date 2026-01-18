@@ -52,7 +52,7 @@ public class CnesEstabelecimentoServiceImpl implements CnesEstabelecimentoServic
             boolean persistir) {
         log.info("Iniciando sincronização de estabelecimento CNES: {}", codigoCnes);
 
-        // Validar formato
+        
         CnesValidator.validarCnes(codigoCnes);
         String competenciaNormalizada = competencia != null ? CnesValidator.normalizarCompetencia(competencia)
                 : calcularCompetenciaAtual();
@@ -62,7 +62,7 @@ public class CnesEstabelecimentoServiceImpl implements CnesEstabelecimentoServic
 
         Tenant tenant = tenantService.obterTenantDoUsuarioAutenticado();
 
-        // Criar registro de sincronização
+        
         CnesSincronizacao registro = sincronizacaoService.criarRegistroSincronizacao(
                 TipoEntidadeCnesEnum.ESTABELECIMENTO,
                 null,
@@ -71,10 +71,10 @@ public class CnesEstabelecimentoServiceImpl implements CnesEstabelecimentoServic
                 null);
 
         try {
-            // Marcar como processando
+            
             sincronizacaoService.marcarComoProcessando(registro.getId());
 
-            // Chamar SOAP Client
+            
             com.upsaude.integration.cnes.wsdl.cnesservice.ResponseConsultarEstabelecimentoSaude respostaCnes = soapClient
                     .consultarEstabelecimentoPorCnes(codigoCnes);
 
@@ -91,7 +91,7 @@ public class CnesEstabelecimentoServiceImpl implements CnesEstabelecimentoServic
                         "Dados gerais do estabelecimento não encontrados na resposta do CNES");
             }
 
-            // Buscar ou criar estabelecimento local
+            
             final boolean[] isNovo = { false };
             Estabelecimentos estabelecimento = estabelecimentosRepository.findByCodigoCnesAndTenant(codigoCnes, tenant)
                     .orElseGet(() -> {
@@ -103,16 +103,16 @@ public class CnesEstabelecimentoServiceImpl implements CnesEstabelecimentoServic
 
             if (persistir) {
                 cnesMapper.mapToEstabelecimento(dadosGerais, estabelecimento, competenciaNormalizada);
-                // Serializar resposta completa para histórico e para a entidade principal
+                
                 String dadosJson = cnesMapper.serializeToJson(resultado);
                 estabelecimento.setCnesDadosJson(dadosJson);
 
                 Estabelecimentos saved = estabelecimentosRepository.save(Objects.requireNonNull(estabelecimento));
 
-                // Salvar histórico
+                
                 salvarHistorico(saved, competenciaNormalizada, dadosJson);
 
-                // Atualizar registro de sincronização
+                
                 sincronizacaoService.finalizarComSucesso(
                         registro.getId(),
                         isNovo[0] ? 1 : 0,
@@ -166,7 +166,7 @@ public class CnesEstabelecimentoServiceImpl implements CnesEstabelecimentoServic
         try {
             sincronizacaoService.marcarComoProcessando(registroLote.getId());
 
-            // Chamar SOAP Client para listar estabelecimentos do município
+            
             ResponseConsultarEstabelecimentoSaudePorMunicipio resposta = soapClient
                     .consultarEstabelecimentosPorMunicipio(codigoMunicipio, competenciaNormalizada);
 
@@ -174,9 +174,9 @@ public class CnesEstabelecimentoServiceImpl implements CnesEstabelecimentoServic
                 List<ResultadoPesquisaCnesMunicipioType> resultadosMunicipio = resposta
                         .getResultadoPesquisaCnesMunicipio();
 
-                // Para cada resultado de município
+                
                 for (ResultadoPesquisaCnesMunicipioType resultado : resultadosMunicipio) {
-                    // Para cada estabelecimento retornado, chamar sincronizarEstabelecimentoPorCnes
+                    
                     if (resultado.getDadosBasicosEstabelecimento() != null) {
                         for (DadosBasicosEstabelecimentoType dadosBasicos : resultado
                                 .getDadosBasicosEstabelecimento()) {
@@ -235,7 +235,7 @@ public class CnesEstabelecimentoServiceImpl implements CnesEstabelecimentoServic
         try {
             sincronizacaoService.marcarComoProcessando(registro.getId());
 
-            // Chamar consultarDadosComplementares (retorna sumário)
+            
             ResponseConsultarDadosComplementaresEstabelecimentoSaude resposta = soapClient
                     .consultarDadosComplementares(codigoMunicipio, competenciaNormalizada);
 
@@ -244,14 +244,14 @@ public class CnesEstabelecimentoServiceImpl implements CnesEstabelecimentoServic
                 log.info("Dados complementares (sumário) recebidos para município: {}", codigoMunicipio);
 
                 if (persistir) {
-                    // Como o CNES retorna apenas sumários nesta operação, vamos atualizar
-                    // os estabelecimentos locais deste município buscando detalhes individuais
-                    // que conterão os dados complementares mapeados.
+                    
+                    
+                    
                     List<Estabelecimentos> locais = estabelecimentosRepository
                             .findByCodigoIbgeMunicipioAndTenant(codigoMunicipio, tenant);
                     for (Estabelecimentos estab : locais) {
                         try {
-                            // Sincronizar individualmente para pegar Dados Complementares detalhados
+                            
                             sincronizarEstabelecimentoPorCnes(estab.getDadosIdentificacao().getCnes(),
                                     competenciaNormalizada, true);
                             atualizados++;
@@ -284,7 +284,7 @@ public class CnesEstabelecimentoServiceImpl implements CnesEstabelecimentoServic
 
         CnesValidator.validarCnes(codigoCnes);
 
-        // Chamar SOAP Client apenas para buscar
+        
         com.upsaude.integration.cnes.wsdl.cnesservice.ResponseConsultarEstabelecimentoSaude resposta = soapClient
                 .consultarEstabelecimentoPorCnes(codigoCnes);
 
@@ -299,11 +299,11 @@ public class CnesEstabelecimentoServiceImpl implements CnesEstabelecimentoServic
             throw new NotFoundException("Dados do estabelecimento não encontrados no CNES: " + codigoCnes);
         }
 
-        // Criar estabelecimento temporário para mapear
+        
         Estabelecimentos estabelecimentoTemp = new Estabelecimentos();
         cnesMapper.mapToEstabelecimento(dadosGerais, estabelecimentoTemp, null);
 
-        // Converter para Response
+        
         return estabelecimentosMapper.toResponse(estabelecimentoTemp);
     }
 
@@ -311,7 +311,7 @@ public class CnesEstabelecimentoServiceImpl implements CnesEstabelecimentoServic
         Tenant tenant = tenantService.obterTenantDoUsuarioAutenticado();
         UUID tenantId = tenant.getId();
 
-        // Verificar se já existe histórico para esta competência
+        
         CnesHistoricoEstabelecimento historico = historicoRepository
                 .findByEstabelecimentoIdAndCompetenciaAndTenant(estabelecimento.getId(), competencia, tenantId)
                 .orElse(new CnesHistoricoEstabelecimento());
@@ -326,7 +326,7 @@ public class CnesEstabelecimentoServiceImpl implements CnesEstabelecimentoServic
     }
 
     private String calcularCompetenciaAtual() {
-        YearMonth current = YearMonth.now().minusMonths(1); // Mês anterior
+        YearMonth current = YearMonth.now().minusMonths(1); 
         return current.format(DateTimeFormatter.ofPattern("yyyyMM"));
     }
 }

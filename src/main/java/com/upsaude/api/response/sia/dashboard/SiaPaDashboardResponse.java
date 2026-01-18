@@ -29,7 +29,7 @@ public class SiaPaDashboardResponse {
 
     private List<SiaPaAnomaliaResponse> anomaliasRecentes;
 
-    // Opcional: conciliação com faturamento interno (depende de dados do tenant)
+    
     private SiaPaFinanceiroIntegracaoResponse conciliacaoFinanceira;
 }
 

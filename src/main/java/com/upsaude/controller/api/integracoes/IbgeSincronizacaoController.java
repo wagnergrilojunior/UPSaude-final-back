@@ -15,9 +15,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-/**
- * Controller para sincronização com a API IBGE
- */
+
 @RestController
 @RequestMapping("/v1/integracoes/ibge")
 @Tag(name = "Integração IBGE", description = "API para sincronização de dados geográficos com IBGE")

@@ -65,7 +65,7 @@ public class EstornoFinanceiroRelacionamentosHandler {
             entity.setGuiaAmbulatorial(null);
         }
 
-        // Paciente não tem tenant_id (estende BaseEntityWithoutTenant)
+        
         Paciente paciente = pacienteRepository.findById(request.getPaciente())
                 .orElseThrow(() -> new BadRequestException("Paciente não encontrado com ID: " + request.getPaciente()));
         entity.setPaciente(paciente);

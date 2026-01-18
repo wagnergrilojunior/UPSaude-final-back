@@ -45,7 +45,7 @@ public class AtendimentoProcedimento extends BaseEntity {
     @Column(name = "valor_total", precision = 14, scale = 2)
     private BigDecimal valorTotal;
 
-    // Snapshots de classificação (opcional, mas vendável)
+    
     @Column(name = "financiamento_id")
     private UUID financiamentoId;
 
@@ -55,7 +55,7 @@ public class AtendimentoProcedimento extends BaseEntity {
     @Column(name = "modalidade_financeira", length = 50)
     private String modalidadeFinanceira;
 
-    // Campos mínimos para layout (opcional)
+    
     @Column(name = "cbo_codigo", length = 6)
     private String cboCodigo;
 

@@ -47,7 +47,7 @@ public class DispensacaoCreator {
         Dispensacao dispensacao = dispensacaoMapper.fromRequest(request);
         dispensacao.setActive(true);
 
-        // Paciente não tem tenant_id (estende BaseEntityWithoutTenant)
+        
         Paciente paciente = pacienteRepository.findById(request.getPacienteId())
                 .orElseThrow(() -> {
                     log.warn("Paciente não encontrado com ID: {} para tenant: {}", request.getPacienteId(), tenantId);

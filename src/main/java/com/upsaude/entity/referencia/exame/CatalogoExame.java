@@ -15,12 +15,7 @@ import lombok.NoArgsConstructor;
 
 import java.time.OffsetDateTime;
 
-/**
- * Catálogo unificado de exames/procedimentos laboratoriais.
- * Suporta múltiplas origens: SIGTAP, LOINC, GAL, TUSS.
- * 
- * Estratégia: Modelo canônico único com campos de controle de origem.
- */
+
 @Entity
 @Table(name = "catalogo_exames", schema = "public", uniqueConstraints = {
         @UniqueConstraint(name = "uk_catalogo_exames_source_code", columnNames = { "source_system", "external_code" })
@@ -39,35 +34,35 @@ import java.time.OffsetDateTime;
 @AllArgsConstructor
 public class CatalogoExame extends BaseEntityWithoutTenant {
 
-    // ============== CAMPOS DE CONTROLE DE ORIGEM ==============
+    
 
     @Column(name = "source_system", nullable = false, length = 20)
-    private String sourceSystem; // SIGTAP, LOINC, GAL, TUSS, FHIR
+    private String sourceSystem; 
 
     @Column(name = "external_code", nullable = false, length = 50)
-    private String externalCode; // Código na origem
+    private String externalCode; 
 
     @Column(name = "external_version", length = 50)
-    private String externalVersion; // Versão do CodeSystem/tabela origem
+    private String externalVersion; 
 
     @Column(name = "last_sync_at")
     private OffsetDateTime lastSyncAt;
 
-    // ============== CÓDIGOS POR SISTEMA (Multi-fonte) ==============
+    
 
     @Column(name = "codigo_loinc", length = 20)
-    private String codigoLoinc; // Código LOINC se disponível
+    private String codigoLoinc; 
 
     @Column(name = "codigo_gal", length = 20)
-    private String codigoGal; // Código GAL se disponível
+    private String codigoGal; 
 
     @Column(name = "codigo_sigtap", length = 20)
-    private String codigoSigtap; // Código SIGTAP se disponível
+    private String codigoSigtap; 
 
     @Column(name = "codigo_tuss", length = 20)
-    private String codigoTuss; // Código TUSS se disponível
+    private String codigoTuss; 
 
-    // ============== DADOS DO EXAME ==============
+    
 
     @Column(name = "nome", nullable = false, length = 500)
     private String nome;
@@ -87,7 +82,7 @@ public class CatalogoExame extends BaseEntityWithoutTenant {
     @Column(name = "metodo", length = 200)
     private String metodo;
 
-    // ============== DADOS SIGTAP (quando aplicável) ==============
+    
 
     @Column(name = "sigtap_competencia_inicial", length = 6)
     private String sigtapCompetenciaInicial;
@@ -95,7 +90,7 @@ public class CatalogoExame extends BaseEntityWithoutTenant {
     @Column(name = "sigtap_competencia_final", length = 6)
     private String sigtapCompetenciaFinal;
 
-    // ============== DADOS FHIR (quando aplicável) ==============
+    
 
     @Column(name = "fhir_code_system", length = 200)
     private String fhirCodeSystem;

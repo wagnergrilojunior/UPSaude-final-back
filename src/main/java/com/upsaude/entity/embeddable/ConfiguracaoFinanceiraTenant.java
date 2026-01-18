@@ -25,8 +25,8 @@ public class ConfiguracaoFinanceiraTenant {
     private UUID planoContasPadraoId;
 
     @Column(name = "regra_competencia", length = 50)
-    private String regraCompetencia; // MENSAL | CUSTOM
+    private String regraCompetencia; 
 
     @Column(name = "politica_reserva_consumo", length = 50)
-    private String politicaReservaConsumo; // HIBRIDO | RESERVA_AGENDAMENTO | CONSUMO_ATENDIMENTO
+    private String politicaReservaConsumo; 
 }

@@ -9,9 +9,7 @@ import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * DTO de resposta para operações de sincronização com IBGE
- */
+
 @Data
 @Builder
 @NoArgsConstructor

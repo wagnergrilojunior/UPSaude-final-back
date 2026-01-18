@@ -11,9 +11,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-/**
- * Response DTO para relatórios comparativos.
- */
+
 @Data
 @Builder
 @NoArgsConstructor
@@ -26,16 +24,16 @@ public class RelatorioComparativoResponse {
     private LocalDate periodoAnteriorInicio;
     private LocalDate periodoAnteriorFim;
 
-    // Dados do período atual
+    
     private DadosPeriodo periodoAtual;
 
-    // Dados do período anterior
+    
     private DadosPeriodo periodoAnterior;
 
-    // Comparações calculadas
+    
     private Comparacoes comparacoes;
 
-    // Filtros aplicados (opcional)
+    
     private UUID estabelecimentoId;
     private UUID medicoId;
     private UUID especialidadeId;
@@ -61,7 +59,7 @@ public class RelatorioComparativoResponse {
     @NoArgsConstructor
     @AllArgsConstructor
     public static class Comparacoes {
-        // Variações percentuais
+        
         private BigDecimal variacaoAtendimentos;
         private BigDecimal variacaoConsultas;
         private BigDecimal variacaoAgendamentos;
@@ -69,7 +67,7 @@ public class RelatorioComparativoResponse {
         private BigDecimal variacaoProcedimentos;
         private BigDecimal variacaoValor;
 
-        // Diferenças absolutas
+        
         private Long diferencaAtendimentos;
         private Long diferencaConsultas;
         private Long diferencaAgendamentos;
@@ -77,13 +75,13 @@ public class RelatorioComparativoResponse {
         private Long diferencaProcedimentos;
         private BigDecimal diferencaValor;
 
-        // Tendências (crescimento, estabilidade, declínio)
+        
         private Tendencia tendenciaAtendimentos;
         private Tendencia tendenciaConsultas;
         private Tendencia tendenciaAgendamentos;
         private Tendencia tendenciaValor;
 
-        // Comparações por tipo/especialidade
+        
         private List<ComparacaoItem> comparacaoPorTipo;
         private List<ComparacaoItem> comparacaoPorEspecialidade;
     }

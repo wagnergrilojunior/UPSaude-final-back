@@ -33,13 +33,13 @@ public class PacienteCreator {
                 request.getDadosPessoaisBasicos() != null ? request.getDadosPessoaisBasicos().getNomeCompleto()
                         : "N/A");
 
-        // 1. Validações Iniciais Explícitas
+        
         validationService.validarObrigatorios(request);
         validationService.validarUnicidadeParaCriacao(request, pacienteRepository, identificadorRepository,
                 contatoRepository, tenantId);
         validationService.sanitizarFlags(request);
 
-        // 2. Mapeamento Manual da Entidade Principal (Modelo Antigo)
+        
         Paciente paciente = new Paciente();
         var dadosPessoais = request.getDadosPessoaisBasicos();
         paciente.setNomeCompleto(dadosPessoais.getNomeCompleto());
@@ -53,12 +53,12 @@ public class PacienteCreator {
         paciente.setTipoAtendimentoPreferencial(request.getTipoAtendimentoPreferencial());
         paciente.setActive(true);
 
-        // 3. Processamento das Associações de Forma Explícita
-        // Buscamos o Tenant de forma segura
+        
+        
         com.upsaude.entity.sistema.multitenancy.Tenant tenant = tenantRepository.findById(tenantId)
                 .orElseThrow(() -> new com.upsaude.exception.NotFoundException("Tenant não encontrado: " + tenantId));
 
-        // Dados Clínicos Básicos (Mapeamento Manual para evitar detached entity)
+        
         if (request.getDadosClinicosBasicos() != null) {
             var reqClinico = request.getDadosClinicosBasicos();
             var clinico = new com.upsaude.entity.paciente.DadosClinicosBasicos();
@@ -77,7 +77,7 @@ public class PacienteCreator {
             paciente.setDadosClinicosBasicos(clinico);
         }
 
-        // Dados Sociodemográficos (Mapeamento Manual)
+        
         if (request.getDadosSociodemograficos() != null || request.getDadosDemograficos() != null) {
             var sociodemograficos = new com.upsaude.entity.paciente.DadosSociodemograficos();
             sociodemograficos.setPaciente(paciente);
@@ -106,10 +106,10 @@ public class PacienteCreator {
             paciente.setDadosSociodemograficos(sociodemograficos);
         }
 
-        // Delegar apenas o que é complexo (Listas e Documentos) para o Manager
+        
         associacoesManager.processarTodas(paciente, request, tenantId);
 
-        // 4. Persistência Final
+        
         Paciente pacienteSalvo = pacienteRepository.save(paciente);
 
         log.info("Paciente criado com sucesso via modelo antigo. ID: {}", pacienteSalvo.getId());

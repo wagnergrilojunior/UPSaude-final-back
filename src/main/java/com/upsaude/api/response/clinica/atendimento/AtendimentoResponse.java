@@ -40,7 +40,7 @@ public class AtendimentoResponse {
     private String anotacoes;
     private String observacoesInternas;
 
-    // Campos de Integração SUS / RNDS
+    
     private com.upsaude.enums.ClasseAtendimentoEnum classeAtendimento;
     private String tipoAtendimentoDetalhado;
     private com.upsaude.enums.PrioridadeAtendimentoEnum prioridadeAtendimento;
@@ -50,12 +50,12 @@ public class AtendimentoResponse {
     private String periodoReal;
 
     private ConsultaResponse consulta;
-    // IDs de relacionamentos importantes
+    
     private UUID estabelecimentoId;
     private UUID tenantId;
     private UUID enderecoId;
 
-    // Campos financeiros
+    
     private CompetenciaFinanceiraResponse competenciaFinanceira;
 
     @Builder.Default

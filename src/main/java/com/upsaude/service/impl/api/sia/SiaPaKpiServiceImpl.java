@@ -56,13 +56,13 @@ public class SiaPaKpiServiceImpl implements SiaPaKpiService {
         }
 
         try {
-        // Criar placeholders para IN clause
+        
         String placeholders = String.join(",", cnesList.stream().map(c -> "?").toList());
         
-        // Tenta usar view materializada primeiro (mais rápido), com fallback para tabela original
+        
         Map<String, Object> row;
         try {
-            // Primeiro tenta usar a view materializada de produção mensal agregando por CNES do tenant
+            
             row = jdbcTemplate.queryForMap(String.format("""
                     SELECT
                         SUM(mv.total_registros) AS total_registros,
@@ -78,7 +78,7 @@ public class SiaPaKpiServiceImpl implements SiaPaKpiService {
                     """, placeholders), 
                     prepararParametros(competencia, ufEfetiva, cnesList));
         } catch (Exception e) {
-            // Fallback para tabela original se view não existir ou não estiver atualizada
+            
             log.debug("View materializada não disponível, usando tabela original: {}", e.getMessage());
             row = jdbcTemplate.queryForMap(String.format("""
                     SELECT
@@ -100,7 +100,7 @@ public class SiaPaKpiServiceImpl implements SiaPaKpiService {
         } catch (DataAccessResourceFailureException e) {
             log.error("Erro de conexão ao executar query KPI geral - competencia: {}, uf: {}", competencia, ufEfetiva, e);
             
-            // Verifica se a causa é um PSQLException com erro de I/O
+            
             Throwable cause = e.getCause();
             if (cause instanceof org.postgresql.util.PSQLException) {
                 org.postgresql.util.PSQLException psqlEx = (org.postgresql.util.PSQLException) cause;
@@ -138,7 +138,7 @@ public class SiaPaKpiServiceImpl implements SiaPaKpiService {
 
         UUID tenantId = tenantService.validarTenantAtual();
         
-        // Validar que o CNES pertence ao tenant
+        
         if (!tenantFilterHelper.validarCnesPertenceAoTenant(codigoCnes, tenantId)) {
             throw new BadRequestException("CNES não pertence ao tenant do usuário autenticado");
         }
@@ -160,14 +160,14 @@ public class SiaPaKpiServiceImpl implements SiaPaKpiService {
 
         SiaPaKpiResponse response = montarResposta(competencia, ufEfetiva, row, false);
         
-        // Buscar dados do estabelecimento no CNES
+        
         try {
             var estabelecimento = cnesEstabelecimentoService.buscarEstabelecimentoNoCnes(codigoCnes);
             response.setEstabelecimento(estabelecimento);
             log.debug("Dados do estabelecimento CNES {} incluídos na resposta KPI", codigoCnes);
         } catch (Exception e) {
             log.warn("Não foi possível buscar dados do estabelecimento CNES {}: {}", codigoCnes, e.getMessage());
-            // Continua sem os dados do estabelecimento, não falha a requisição
+            
         }
         
         return response;
@@ -219,7 +219,7 @@ public class SiaPaKpiServiceImpl implements SiaPaKpiService {
         }
 
         try {
-        // Criar placeholders para IN clause
+        
         String placeholders = String.join(",", java.util.Collections.nCopies(cnesList.size(), "?"));
         
         Map<String, Object> row = jdbcTemplate.queryForMap(String.format("""
@@ -339,7 +339,7 @@ public class SiaPaKpiServiceImpl implements SiaPaKpiService {
                 if (populacao != null && populacao > 0 && StringUtils.hasText(municipioIbge)) {
                     String municipioIbgeLocal = municipioIbge;
                     if (municipioIbgeLocal == null) {
-                        // Segurança defensiva para análise estática (não deve ocorrer por conta do hasText acima)
+                        
                         return SiaPaKpiResponse.builder()
                                 .competencia(competencia)
                                 .uf(uf)
@@ -359,7 +359,7 @@ public class SiaPaKpiServiceImpl implements SiaPaKpiService {
                                 .municipioIbge(municipioIbge)
                                 .build();
                     }
-                    // SIA usa frequentemente código de município com 6 dígitos; derivamos a versão 6.
+                    
                     String municipioSia6 = municipioIbgeLocal.length() >= 6 ? municipioIbgeLocal.substring(0, 6) : municipioIbgeLocal;
 
                     try {
@@ -375,7 +375,7 @@ public class SiaPaKpiServiceImpl implements SiaPaKpiService {
                     } catch (DataAccessResourceFailureException e) {
                         log.debug("Erro de conexão ao calcular produção per capita - competencia: {}, uf: {}, municipio: {} - {}", 
                                 competencia, uf, municipioSia6, e.getMessage());
-                        // Continua sem produção per capita em caso de erro de conexão
+                        
                     }
                 }
             } catch (Exception e) {
@@ -400,7 +400,7 @@ public class SiaPaKpiServiceImpl implements SiaPaKpiService {
                 .producaoPerCapita(producaoPerCapita)
                 .populacaoEstimada(populacao)
                 .municipioIbge(municipioIbge)
-                .estabelecimento(null) // Será preenchido no método kpiPorEstabelecimento se disponível
+                .estabelecimento(null) 
                 .build();
     }
 
@@ -475,7 +475,7 @@ public class SiaPaKpiServiceImpl implements SiaPaKpiService {
             unless = "#result == null"
     )
     public SiaPaKpiResponse kpiPorTenant(String competencia, String uf) {
-        // Este método é equivalente a kpiGeral, que já filtra por tenant
+        
         return kpiGeral(competencia, uf);
     }
 
@@ -491,7 +491,7 @@ public class SiaPaKpiServiceImpl implements SiaPaKpiService {
         
         UUID tenantId = tenantService.validarTenantAtual();
         
-        // Buscar CNES do estabelecimento
+        
         Estabelecimentos estabelecimento = estabelecimentosRepository.findByIdAndTenant(estabelecimentoId, tenantId)
                 .orElseThrow(() -> new BadRequestException("Estabelecimento não encontrado ou não pertence ao tenant"));
         
@@ -518,11 +518,11 @@ public class SiaPaKpiServiceImpl implements SiaPaKpiService {
         
         UUID tenantId = tenantService.validarTenantAtual();
         
-        // Buscar CNS do médico
+        
         Medicos medico = medicosRepository.findByIdAndTenant(medicoId, tenantId)
                 .orElseThrow(() -> new BadRequestException("Médico não encontrado ou não pertence ao tenant"));
         
-        // O CNS está no campo direto da entidade Medicos, não em documentosBasicos
+        
         String cns = medico.getCns();
         
         if (cns == null || cns.trim().isEmpty()) {
@@ -530,7 +530,7 @@ public class SiaPaKpiServiceImpl implements SiaPaKpiService {
             return montarRespostaVazia(competencia, ufEfetiva);
         }
         
-        // Filtrar dados SIA pelo CNS do profissional
+        
         List<String> cnesList = tenantFilterHelper.obterCnesDoTenant(tenantId);
         
         if (cnesList.isEmpty()) {

@@ -172,7 +172,7 @@ public class NotificacaoController {
                 request != null ? request.getEmail() : "não informado");
         
         try {
-            // Valores padrão se request for null ou vazio
+            
             String email = (request != null && request.getEmail() != null && !request.getEmail().trim().isEmpty())
                     ? request.getEmail()
                     : "wagner.grilo85@gmail.com";
@@ -181,22 +181,22 @@ public class NotificacaoController {
                     ? request.getNome() 
                     : "Teste UPSaude";
             
-            // Template ID fixo: 5
+            
             Integer templateId = 5;
             
-            // Parâmetros padrão ou do request
+            
             Map<String, Object> params = new HashMap<>();
             if (request != null && request.getParametros() != null) {
                 params.putAll(request.getParametros());
             } else {
-                // Parâmetros padrão para teste
+                
                 params.put("nome", nome);
                 params.put("email", email);
                 params.put("dataHora", OffsetDateTime.now().toString());
                 params.put("mensagem", "Este é um email de teste do sistema UPSaude via Brevo.");
             }
             
-            // Enviar email via Brevo usando template ID 5
+            
             String messageId = brevoEmailClient.sendTemplateEmail(
                     templateId,
                     email,
@@ -290,7 +290,7 @@ public class NotificacaoController {
             
             apiKey = apiKey.trim();
             
-            // Tentar fazer uma chamada simples ao Brevo para verificar a chave
+            
             String url = brevoConfig.getBaseUrl() + "/account";
             
             HttpHeaders headers = new HttpHeaders();

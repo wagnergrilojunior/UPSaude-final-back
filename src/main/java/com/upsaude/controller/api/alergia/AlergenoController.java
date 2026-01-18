@@ -81,9 +81,9 @@ public class AlergenoController {
             @PageableDefault(size = 20, sort = "nome") Pageable pageable) {
 
         Page<AlergenoResponse> response = alergenoRepository.findByAtivoTrue(pageable)
-                .map(AlergenoResponse::fromEntity); // Note: Should filter by category if needed
+                .map(AlergenoResponse::fromEntity); 
 
-        // Actually implementing the category filter properly
+        
         Page<AlergenoResponse> filtered = alergenoRepository.findByCategoriaAndAtivoTrue(categoria, pageable)
                 .map(AlergenoResponse::fromEntity);
 

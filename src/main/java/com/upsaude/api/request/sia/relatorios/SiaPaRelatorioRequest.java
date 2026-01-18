@@ -13,10 +13,10 @@ public class SiaPaRelatorioRequest {
 
     private String uf;
 
-    // Quando o relatório for de um único mês
+    
     private String competencia;
 
-    // Quando o relatório for por período
+    
     private String competenciaInicio;
     private String competenciaFim;
 

@@ -8,13 +8,7 @@ import org.springframework.cache.CacheManager;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
-/**
- * Scheduler para tarefas automáticas relacionadas a relatórios e KPIs.
- * 
- * Responsabilidades:
- * - Refresh automático de views materializadas
- * - Limpeza periódica de cache
- */
+
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -32,10 +26,7 @@ public class RelatoriosScheduler {
     @Value("${relatorios.scheduler.clear-cache-enabled:true}")
     private boolean clearCacheEnabled;
 
-    /**
-     * Atualiza todas as views materializadas do SIA.
-     * Executa diariamente às 01:00 AM.
-     */
+    
     @Scheduled(cron = "${relatorios.scheduler.refresh-views-cron:0 0 1 * * ?}")
     public void refreshMaterializedViews() {
         if (!schedulerEnabled || !refreshViewsEnabled) {
@@ -52,10 +43,7 @@ public class RelatoriosScheduler {
         }
     }
 
-    /**
-     * Limpa caches de relatórios e KPIs.
-     * Executa diariamente às 01:00 AM (após o refresh das views).
-     */
+    
     @Scheduled(cron = "${relatorios.scheduler.clear-cache-cron:0 0 1 * * ?}")
     public void clearRelatoriosCache() {
         if (!schedulerEnabled || !clearCacheEnabled) {
@@ -102,10 +90,7 @@ public class RelatoriosScheduler {
         }
     }
 
-    /**
-     * Limpa cache de dados de referência (SIGTAP, CID10).
-     * Executa diariamente às 01:00 AM.
-     */
+    
     @Scheduled(cron = "${relatorios.scheduler.clear-reference-cache-cron:0 0 1 * * ?}")
     public void clearReferenceDataCache() {
         if (!schedulerEnabled || !clearCacheEnabled) {

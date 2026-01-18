@@ -23,7 +23,7 @@ public class SiaPaAnomaliaDetectionJob {
     @Scheduled(cron = "${sia.anomaly.detection.cron:0 0 3 * * ?}")
     public void scheduledDetect() {
         try {
-            // Estratégia: processar a última competência disponível por UF.
+            
             List<Map<String, Object>> rows = jdbcTemplate.queryForList("""
                     SELECT uf, MAX(competencia) AS competencia
                     FROM public.sia_pa

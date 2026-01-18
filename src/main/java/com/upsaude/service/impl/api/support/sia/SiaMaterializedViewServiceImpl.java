@@ -34,7 +34,7 @@ public class SiaMaterializedViewServiceImpl implements SiaMaterializedViewServic
             log.debug("View materializada mv_sia_pa_producao_mensal atualizada com sucesso");
         } catch (Exception e) {
             log.error("Erro ao atualizar view materializada mv_sia_pa_producao_mensal: {}", e.getMessage(), e);
-            // Tenta sem CONCURRENTLY se falhar (requer índice único)
+            
             try {
                 jdbcTemplate.execute("REFRESH MATERIALIZED VIEW public.mv_sia_pa_producao_mensal");
                 log.debug("View materializada mv_sia_pa_producao_mensal atualizada sem CONCURRENTLY");

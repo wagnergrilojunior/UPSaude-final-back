@@ -35,7 +35,7 @@ public class Glosa extends BaseEntity {
     private DocumentoFaturamentoItem item;
 
     @Column(name = "tipo", nullable = false, length = 20)
-    private String tipo; // TOTAL | PARCIAL
+    private String tipo; 
 
     @Column(name = "valor_glosado", nullable = false, precision = 14, scale = 2)
     private BigDecimal valorGlosado;
@@ -47,5 +47,5 @@ public class Glosa extends BaseEntity {
     private String motivoDescricao;
 
     @Column(name = "status", nullable = false, length = 30)
-    private String status; // ABERTA | CONTESTADA | ACEITA | REVERTIDA
+    private String status; 
 }

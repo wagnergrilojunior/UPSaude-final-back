@@ -126,8 +126,8 @@ public class CnesLeitoServiceImpl implements CnesLeitoService {
 
         List<Leitos> leitos = leitosRepository.findByEstabelecimentoIdAndTenant(estab.getId(), tenant.getId());
 
-        // Mapeando para objeto simples para evitar problemas de lazy loading no
-        // controller (sem DTO específico)
+        
+        
         return leitos.stream().map(l -> {
             java.util.Map<String, Object> map = new java.util.HashMap<>();
             map.put("id", l.getId());

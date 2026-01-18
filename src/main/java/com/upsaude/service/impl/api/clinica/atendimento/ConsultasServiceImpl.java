@@ -92,7 +92,7 @@ public class ConsultasServiceImpl implements ConsultasService {
             UUID tenantId = tenantService.validarTenantAtual();
             Tenant tenant = tenantService.obterTenantDoUsuarioAutenticado();
             if (tenant == null) {
-                // Fallback para testes: buscar tenant do banco quando não houver autenticação
+                
                 tenant = tenantRepository.findById(tenantId).orElse(null);
             }
             validarTenantAutenticadoOrThrow(tenantId, tenant);
@@ -156,7 +156,7 @@ public class ConsultasServiceImpl implements ConsultasService {
             UUID tenantId = tenantService.validarTenantAtual();
             Tenant tenant = tenantService.obterTenantDoUsuarioAutenticado();
             if (tenant == null) {
-                // Fallback para testes: buscar tenant do banco quando não houver autenticação
+                
                 tenant = tenantRepository.findById(tenantId).orElse(null);
             }
             validarTenantAutenticadoOrThrow(tenantId, tenant);

@@ -20,7 +20,7 @@ public class CnesEstabelecimentoDTO {
     private String cnpj;
     private String nomeFantasia;
     private String razaoSocial;
-    private String status; // ATIVO/INATIVO
+    private String status; 
     private EnderecoResponse endereco;
     private String telefone;
     private String email;

@@ -28,7 +28,7 @@ public class IntegracaoEventoGenerator {
         }
 
         try {
-            // Criar um objeto simplificado para evitar referências circulares
+            
             java.util.Map<String, Object> payloadMap = new java.util.HashMap<>();
             payloadMap.put("id", agendamento.getId());
             payloadMap.put("pacienteId", agendamento.getPaciente() != null ? agendamento.getPaciente().getId() : null);
@@ -61,7 +61,7 @@ public class IntegracaoEventoGenerator {
             );
         } catch (Exception e) {
             log.error("Erro ao gerar eventos de integração para agendamento {}: {}", agendamento.getId(), e.getMessage(), e);
-            // Não propagar exceção para não abortar transação principal
+            
         }
     }
 
@@ -72,7 +72,7 @@ public class IntegracaoEventoGenerator {
         }
 
         try {
-            // Criar um objeto simplificado para evitar referências circulares
+            
             java.util.Map<String, Object> payloadMap = new java.util.HashMap<>();
             payloadMap.put("id", atendimento.getId());
             payloadMap.put("pacienteId", atendimento.getPaciente() != null ? atendimento.getPaciente().getId() : null);
@@ -105,7 +105,7 @@ public class IntegracaoEventoGenerator {
             );
         } catch (Exception e) {
             log.error("Erro ao gerar eventos de integração para atendimento {}: {}", atendimento.getId(), e.getMessage(), e);
-            // Não propagar exceção para não abortar transação principal
+            
         }
     }
 
@@ -116,7 +116,7 @@ public class IntegracaoEventoGenerator {
         }
 
         try {
-            // Criar um objeto simplificado para evitar referências circulares
+            
             java.util.Map<String, Object> payloadMap = new java.util.HashMap<>();
             payloadMap.put("id", consulta.getId());
             payloadMap.put("atendimentoId", consulta.getAtendimento() != null ? consulta.getAtendimento().getId() : null);
@@ -151,7 +151,7 @@ public class IntegracaoEventoGenerator {
             );
         } catch (Exception e) {
             log.error("Erro ao gerar eventos de integração para consulta {}: {}", consulta.getId(), e.getMessage(), e);
-            // Não propagar exceção para não abortar transação principal
+            
         }
     }
 }

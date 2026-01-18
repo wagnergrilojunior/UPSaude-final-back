@@ -107,7 +107,7 @@ public class ReceitaServiceImpl implements ReceitaService {
                                 () -> new NotFoundException("Medicamento não encontrado: " + item.getMedicamentoId()));
 
                 for (com.upsaude.entity.clinica.prontuario.AlergiaPaciente alergia : alergiasAtivas) {
-                    // Validação 1: Se o alérgeno é o próprio medicamento
+                    
                     if (alergia.getAlergeno() != null && alergia.getAlergeno().getNome() != null &&
                             medicamento.getNome().toLowerCase()
                                     .contains(alergia.getAlergeno().getNome().toLowerCase())) {
@@ -115,7 +115,7 @@ public class ReceitaServiceImpl implements ReceitaService {
                                 + alergia.getAlergeno().getNome());
                     }
 
-                    // Validação 2: Descrição da alergia (caso não tenha alergéno estruturado)
+                    
                     if (alergia.getDescricao() != null &&
                             medicamento.getNome().toLowerCase().contains(alergia.getDescricao().toLowerCase())) {
                         throw new BadRequestException("CONTRAINDICAÇÃO: Paciente possui histórico de alergia a: "

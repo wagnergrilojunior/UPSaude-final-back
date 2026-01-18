@@ -29,18 +29,15 @@ public class AgendamentoReminderScheduler {
     private final NotificacaoRepository notificacaoRepository;
     private final NotificacaoOrchestrator notificacaoOrchestrator;
 
-    /**
-     * Processa agendamentos futuros e cria lembretes (24h e 1h antes)
-     * Executa a cada 15 minutos
-     */
+    
     @Scheduled(fixedDelayString = "${brevo.reminder-scheduler.interval-minutes:15}00000")
     @Transactional
     public void processarLembretesAgendamento() {
         OffsetDateTime agora = OffsetDateTime.now();
-        OffsetDateTime limite24h = agora.plusHours(25); // Janela de 25h para capturar agendamentos que precisam de lembrete 24h
-        OffsetDateTime limite1h = agora.plusHours(2); // Janela de 2h para capturar agendamentos que precisam de lembrete 1h
+        OffsetDateTime limite24h = agora.plusHours(25); 
+        OffsetDateTime limite1h = agora.plusHours(2); 
 
-        // Buscar agendamentos confirmados que precisam de lembretes
+        
         List<Agendamento> agendamentos24h = buscarAgendamentosParaLembrete24h(agora, limite24h);
         List<Agendamento> agendamentos1h = buscarAgendamentosParaLembrete1h(agora, limite1h);
 
@@ -52,26 +49,26 @@ public class AgendamentoReminderScheduler {
     }
 
     private List<Agendamento> buscarAgendamentosParaLembrete24h(OffsetDateTime agora, OffsetDateTime limite) {
-        OffsetDateTime dataHoraMinima = agora.plusHours(23); // Pelo menos 23h no futuro
-        OffsetDateTime dataHoraMaxima = agora.plusHours(25); // Máximo 25h no futuro
+        OffsetDateTime dataHoraMinima = agora.plusHours(23); 
+        OffsetDateTime dataHoraMaxima = agora.plusHours(25); 
 
         List<Agendamento> agendamentos = agendamentoRepository.findAgendamentosParaLembrete24h(
                 StatusAgendamentoEnum.CONFIRMADO, dataHoraMinima, dataHoraMaxima);
 
-        // Filtrar apenas os que têm paciente (a query não filtra isso por performance)
+        
         return agendamentos.stream()
                 .filter(a -> a.getPaciente() != null)
                 .toList();
     }
 
     private List<Agendamento> buscarAgendamentosParaLembrete1h(OffsetDateTime agora, OffsetDateTime limite) {
-        OffsetDateTime dataHoraMinima = agora.plusMinutes(55); // Pelo menos 55min no futuro
-        OffsetDateTime dataHoraMaxima = agora.plusHours(2); // Máximo 2h no futuro
+        OffsetDateTime dataHoraMinima = agora.plusMinutes(55); 
+        OffsetDateTime dataHoraMaxima = agora.plusHours(2); 
 
         List<Agendamento> agendamentos = agendamentoRepository.findAgendamentosParaLembrete1h(
                 StatusAgendamentoEnum.CONFIRMADO, dataHoraMinima, dataHoraMaxima);
 
-        // Filtrar apenas os que têm paciente (a query não filtra isso por performance)
+        
         return agendamentos.stream()
                 .filter(a -> a.getPaciente() != null)
                 .toList();
@@ -80,7 +77,7 @@ public class AgendamentoReminderScheduler {
     private void processarLembretes24h(List<Agendamento> agendamentos, OffsetDateTime agora) {
         for (Agendamento agendamento : agendamentos) {
             try {
-                // Verificar configuração do estabelecimento
+                
                 if (agendamento.getEstabelecimento() != null) {
                     UUID estabelecimentoId = agendamento.getEstabelecimento().getId();
                     ConfiguracaoEstabelecimento config = configuracaoEstabelecimentoRepository
@@ -101,7 +98,7 @@ public class AgendamentoReminderScheduler {
                 OffsetDateTime dataHoraAgendamento = agendamento.getDataHora();
                 OffsetDateTime lembrete24h = dataHoraAgendamento.minusHours(24);
 
-                // Verificar se já existe notificação de lembrete 24h para este agendamento
+                
                 boolean jaExisteLembrete24h = notificacaoRepository
                         .findByAgendamentoIdOrderByDataEnvioDesc(agendamento.getId(), 
                                 org.springframework.data.domain.PageRequest.of(0, 10))
@@ -109,7 +106,7 @@ public class AgendamentoReminderScheduler {
                         .anyMatch(n -> com.upsaude.enums.TipoNotificacaoEnum.LEMBRETE_24H.equals(n.getTipoNotificacao())
                                 && n.getStatusEnvio() != null && !"FALHA".equals(n.getStatusEnvio()));
 
-                // Criar lembrete se ainda não existe e estamos dentro da janela de tempo
+                
                 if (!jaExisteLembrete24h && lembrete24h.isAfter(agora) && lembrete24h.isBefore(agora.plusHours(2))) {
                     String email = obterEmailPaciente(agendamento);
                     if (email != null && !email.trim().isEmpty()) {
@@ -142,7 +139,7 @@ public class AgendamentoReminderScheduler {
     private void processarLembretes1h(List<Agendamento> agendamentos, OffsetDateTime agora) {
         for (Agendamento agendamento : agendamentos) {
             try {
-                // Verificar configuração do estabelecimento
+                
                 if (agendamento.getEstabelecimento() != null) {
                     UUID estabelecimentoId = agendamento.getEstabelecimento().getId();
                     ConfiguracaoEstabelecimento config = configuracaoEstabelecimentoRepository
@@ -163,7 +160,7 @@ public class AgendamentoReminderScheduler {
                 OffsetDateTime dataHoraAgendamento = agendamento.getDataHora();
                 OffsetDateTime lembrete1h = dataHoraAgendamento.minusHours(1);
 
-                // Verificar se já existe notificação de lembrete 1h para este agendamento
+                
                 boolean jaExisteLembrete1h = notificacaoRepository
                         .findByAgendamentoIdOrderByDataEnvioDesc(agendamento.getId(), 
                                 org.springframework.data.domain.PageRequest.of(0, 10))
@@ -171,7 +168,7 @@ public class AgendamentoReminderScheduler {
                         .anyMatch(n -> com.upsaude.enums.TipoNotificacaoEnum.LEMBRETE_1H.equals(n.getTipoNotificacao())
                                 && n.getStatusEnvio() != null && !"FALHA".equals(n.getStatusEnvio()));
 
-                // Criar lembrete se ainda não existe e estamos dentro da janela de tempo
+                
                 if (!jaExisteLembrete1h && lembrete1h.isAfter(agora) && lembrete1h.isBefore(agora.plusMinutes(30))) {
                     String email = obterEmailPaciente(agendamento);
                     if (email != null && !email.trim().isEmpty()) {
